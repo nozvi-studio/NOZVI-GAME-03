@@ -1,0 +1,12 @@
+Name,Status,Unlock level,Shape,Warn (s),Lifetime (s),Fairness risk,Humor,Build cost,Notes
+Rotten-mango rock,Prototype,1,1 cell,0,Permanent,Low,Low,Done,Only if mango was reachable
+Falling rock,Prototype,1,1 cell / line / corner / block,1.5,6-10,Low,Low,Done,
+Fence,Prototype,3,Line / L / T / Z / F / U / plus,2,9-13,Low,Low,Done,Long lines get a gap
+Rising ground,Prototype,5,Wave strip / 4x4 checkerboard,0.9,18-24,Medium,Low,Done,Cycles every 3.4 s
+Hedge maze,Prototype,7,4 hand-made layouts,2.6,14-18,Medium,Low,Done,26 s cooldown
+Wriggling tail,Proposed,4,Cut snake segment,0,6,Low,High,Low,From Tail Snip
+Banana peel,Proposed,8,1 cell (not solid),0,10,Medium,High,Low,Slide 2 extra cells
+Rolling coconut,Idea,,1 cell moving,1.5,Until off-board,Medium,Medium,Medium,Needs path preview
+Sleepy cat,Idea,,3 cells,1.5,15,Low,High,Medium,Rolls over with a yawn warning
+Fake mango,Idea,,1 cell,0,8,High,High,Low,Only with a learnable tell
+Lawnmower,Idea,10,Row or column sweep,3,Instant,Low,High,Medium,Also clears rocks
