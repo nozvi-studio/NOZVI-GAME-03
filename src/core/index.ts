@@ -2,3 +2,5 @@
 export { parseBalance } from './balance';
 export type { Balance, Pair, RockShapeKey, FenceShapeKey, FenceKind, MazeLayout } from './balance';
 export type * from './types';
+export { createSim, restoreSim } from './sim';
+export { needFor, tickMsFor } from './level';
