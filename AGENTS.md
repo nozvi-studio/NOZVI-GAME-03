@@ -60,7 +60,8 @@ Rules: one source of truth per rule or number; the GDD links to specs instead of
 ## 6. Code rules
 - Gameplay logic lives in a pure core module with no engine/rendering imports, so it is unit-testable (path defined in ARCHITECTURE or `src/core/` by default).
 - No magic numbers; tuning values live in the balance config.
-- One task = one branch = one PR. Conventional Commits (`feat:`, `fix:`, `docs:`…).
+- One task = one branch. Conventional Commits (`feat:`, `fix:`, `docs:`…).
+- **Branching (owner 2026-11-04):** `master` ← `dev` ← `version/vX.Y` ← task branches (`feat/…`, `fix/…`, `docs/…`, `chore/…`). Create each task branch from the current version branch (see STATUS) and merge it back with `git merge --no-ff` — no PR needed — after tests + typecheck pass. Merge the version branch into `dev` at a phase exit, and `dev` into `master` on release. Never branch from or commit to `master`/`dev` directly; local `main` is the old Ant Trail project, never use it.
 - New dependency: one-line reason in the PR and in `docs/DECISIONS.md`.
 - **Secrets:** never commit credentials, API secret keys, private keys, signing files or tokens; use env vars / CI secrets. Public client IDs (e.g. ad unit IDs, analytics app IDs) may be committed in config after review, separated per environment.
 

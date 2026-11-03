@@ -83,7 +83,7 @@ Every task's requirements implicitly include this section. Values copied verbati
 
 - [ ] **Step 1: Create the branch**
 
-Run: `git switch master; git switch -c chore/p0-scaffold`
+Run: `git switch version/v0.1; git switch -c chore/p0-scaffold`
 
 - [ ] **Step 2: Write `package.json`**
 
@@ -372,7 +372,7 @@ git commit -m "chore: scaffold Vite + Phaser 3.90 + TypeScript strict + Vitest"
   - `key(cols, x, y)`, `inBounds(cols, rows, x, y)`, `nearHead(head, dir, x, y, d, lane)`, `reachable(cols, rows, head, isWall): Set<number>`.
   - `loadBalance(): Balance` in `tests/support/balance.ts`.
 
-- [ ] **Step 1: Branch** — `git switch master; git switch -c feat/p0-balance-rng-grid`
+- [ ] **Step 1: Branch** — `git switch version/v0.1; git switch -c feat/p0-balance-rng-grid`
 
 - [ ] **Step 2: Write `config/balance.json`** (every value from the prototype; L166–174 constants, L393–394 mango, L423–426 rock shapes, L427–438 rocks, L441–482 fences, L484–506 mazes, L508–530 terrain, L533–555 director, L753 swipe, L608/L683/L790 haptics, L856 fade-in, L879 flicker, L989 frame clamp, L694 death delay, L414 banner)
 
@@ -932,7 +932,7 @@ git commit -m "feat(core): balance config, parseBalance, seeded RNG, core types 
   - `tests/support/state.ts`: `buildState(b: Balance, o?: StateOpts): SimState`; `QUIET` (a `spawnInMs` that keeps the director silent).
   - `index.ts` adds: `createSim`, `restoreSim`, `needFor`, `tickMsFor`.
 
-- [ ] **Step 1: Branch** — `git switch master; git switch -c feat/p0-snake-level`
+- [ ] **Step 1: Branch** — `git switch version/v0.1; git switch -c feat/p0-snake-level`
 
 - [ ] **Step 2: Write the test helper `tests/support/state.ts`**
 
@@ -1267,7 +1267,7 @@ git commit -m "feat(core): snake turn queue and step, level progression, Sim she
 - Consumes: `cellReserved`, `cellBfsWall` (Task 3), `reachable`, `nearHead`, `key` (Task 2).
 - Produces: `rotMsFor(b: Balance, eaten: number, golden: boolean): number`; `placeMango(s: SimState, b: Balance, rng: Rng): boolean`; `rotMango(s: SimState, b: Balance, rng: Rng): void`; `endBoardFull(s: SimState): void`.
 
-- [ ] **Step 1: Branch** — `git switch master; git switch -c feat/p0-mango`
+- [ ] **Step 1: Branch** — `git switch version/v0.1; git switch -c feat/p0-mango`
 
 - [ ] **Step 2: Write the failing tests (key behaviors in full)**
 
@@ -1452,7 +1452,7 @@ git commit -m "feat(core): mango placement, golden roll, rot timer and rotten ro
   - `tests/support/fuzz.ts`: `fuzzSeed(b: Balance, seed: number, simMs: number): FuzzReport` (`{ violations: string[]; steps: number; maxLevel: number; spawned: Record<FamilyKey, number> }`); `snapHash(sim: Sim): string`.
   - `index.ts` adds: `FAMILIES`.
 
-- [ ] **Step 1: Branch** — `git switch master; git pull; git switch -c feat/p0-hazards`
+- [ ] **Step 1: Branch** — `git switch version/v0.1; git switch -c feat/p0-hazards`
 
 - [ ] **Step 2: Write the failing shape tests**
 
@@ -2117,7 +2117,7 @@ git commit -m "feat(core): hazard families, registry and director with fuzz and 
 **Interfaces:**
 - Produces: `interface KeyValueStore { get(k: string): string | null; set(k: string, v: string): void }`; `memoryStore(init?: Record<string, string>): KeyValueStore & { dump(): Record<string, string> }`; `SAVE_KEY = 'mango-snake.save'`; `SAVE_VERSION = 1`; `interface SaveData { bestScore: number; settings: { sound: boolean } }`; `defaultSave(): SaveData`; `type Migration = (data: unknown) => unknown`; `load(store: KeyValueStore, migrations?: Record<number, Migration>): SaveData`; `save(store: KeyValueStore, data: SaveData): boolean`.
 
-- [ ] **Step 1: Branch** — `git switch master; git pull; git switch -c feat/p0-save`
+- [ ] **Step 1: Branch** — `git switch version/v0.1; git switch -c feat/p0-save`
 
 - [ ] **Step 2: Write the failing tests**
 
@@ -2253,7 +2253,7 @@ git commit -m "feat(meta): versioned save envelope with migrations"
   - `layout.ts`: `WIDTH = 540`, `HEIGHT = 960`, `BOARD: { x: number; y: number; size: number }`, `HEADER`, `LEVEL_BAR`, `DPAD` rectangles.
   - `GameScene` public: `startRun(): void` (new seed, new Sim), `turn(dx, dy): void`, `flow: FlowState`, `snapshot(): SimSnapshot | null`, and Phaser event `'sim-events'` with `SimEvent[]` each frame (consumed by `HudScene` in Task 8).
 
-- [ ] **Step 1: Branch** — `git switch master; git pull; git switch -c feat/p0-board-input`
+- [ ] **Step 1: Branch** — `git switch version/v0.1; git switch -c feat/p0-board-input`
 
 - [ ] **Step 2: Write the failing pure tests**
 
@@ -2494,7 +2494,7 @@ git commit -m "feat(game): greybox board rendering, frame clock, run flow and ke
   - `localStore.ts`: `localStore(): KeyValueStore` (try/catch on every access).
   - `dpad.ts`: `createDpad(scene, rect, onTurn): { setHeading(d: Dir): void }`.
 
-- [ ] **Step 1: Branch** — `git switch master; git pull; git switch -c feat/p0-hud-flow`
+- [ ] **Step 1: Branch** — `git switch version/v0.1; git switch -c feat/p0-hud-flow`
 
 - [ ] **Step 2: Write the failing text tests**
 
@@ -2589,7 +2589,7 @@ git commit -m "feat(game): HUD, overlays, D-pad, synth audio and save wiring"
 - Modify: `prototype/mango-snake-hard.html` (one comment line only), `docs/README.md` (PLAYTEST row exists; set its "Created" state), `docs/CODEMAP.md` (prototype marked frozen), `docs/DECISIONS.md` (prototype frozen), `CHANGELOG.md`, `docs/STATUS.md`
 - Code fixes only through separate `fix/…` branches with a failing test first (`systematic-debugging`); this branch holds docs only.
 
-- [ ] **Step 1: Branch** — `git switch master; git pull; git switch -c docs/p0-parity`
+- [ ] **Step 1: Branch** — `git switch version/v0.1; git switch -c docs/p0-parity`
 
 - [ ] **Step 2: Automated gate** — `npm test` (< 10 s), `npm run test:fuzz`, `npm run typecheck`, `npm run build`: all PASS; record the numbers (tests, durations) for the entry.
 
@@ -2671,5 +2671,5 @@ git commit -m "docs: P0 parity check in PLAYTEST and freeze the prototype"
 - Haptics are not tied to the sound toggle (prototype `buzz` ignores `soundOn`, L264).
 
 **Lead decision needed:**
-- All tasks branch from `master` (the local branch `main` holds the old Ant Trail project and is never a base).
+- All tasks branch from `version/v0.1` and merge back into it directly (no PR); see AGENTS §6 branching rule. Local `main` holds the old Ant Trail project and is never a base.
 - Design §9 asks for a fuzz invariant "the mango is never on a reserved cell". `cellReserved` itself includes the mango cell, so the harness checks the mango against `cellReserved` with `mango: null` (snake, rotten rocks, hazard and terrain cells). This is the faithful reading of the prototype `reserved()` (L348–351); confirm.

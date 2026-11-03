@@ -97,3 +97,8 @@ Append-only. Format: `## YYYY-MM-DD — <decision>` then Context / Choice / Alte
 - Warn time rule 1 uses the L1 base tick `speed.startMs` (≥ 4 base ticks), not the current speed; mud and Slow-mo only add margin (P2-D5, MEC-004-R13).
 - Biomes 4–5 introduce 3 families each (still one new family per level) (P2-D9).
 - `fairness.terrainNearHeadDist` raised 3 → 4 from P2a so GDD rule 2's "3 cells in front" holds for terrain too; P0/P1 keep 3 for prototype parity.
+
+## 2026-11-04 — Branching model (owner)
+- Choice: `master` ← `dev` ← `version/vX.Y` ← task branches; task branches merge into the version branch directly (`--no-ff`, no PR) once tests + typecheck pass; version → `dev` at phase exit; `dev` → `master` on release. Rule lives in AGENTS §6.
+- Current version branch: `version/v0.1` (P0–P2a), started from `version/v0.1-design`.
+- Alternatives: PR per task into `master` (owner prefers fewer PRs; `gh` CLI not installed).
