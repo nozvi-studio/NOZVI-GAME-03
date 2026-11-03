@@ -22,7 +22,7 @@
     Steer to a mango (or an energy orb) → eat → bar fills / energy fills
     → obstacles warn and land, speed rises with level
     → spend energy on a skill to escape or to farm
-    → bar full = level up (snake shrinks back to start length) · crash = continue at checkpoint (if unlocked) or run over
+    → bar full = level up (snake shrinks back to start length) · crash = run over (next run can start at an unlocked checkpoint, §6.4)
 ### 2.2 Session loop (every 3–10 min)
     Home → pick 2 skills → run (levels 1…30) → results: score + marbles → marble machine → skins / coins → equip skin → next run
 - **Core verbs (max 2):** steer; fire a skill.
@@ -40,7 +40,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 | MEC-004 | Obstacle families + director + fairness rules (warn → solid → crumble, never on snake, always a path) | Escalating, readable danger | P0 (port), P2 (new families) | to write (template 03) | Partly implemented (rocks, fences, rising ground, mazes) |
 | MEC-006 | Energy orbs, energy bar, 4 skills with energy cost and side effects | Clever escapes and farming at a cost | P1 | to write | Proposed |
 | MEC-007 | Skill loadout: pick 2 of the unlocked skills before a run | Strategy before the run; uncluttered phone controls | P1 | to write | Proposed |
-| MEC-008 | Checkpoint continue: respawn at the checkpoint level after a death, speed ramp, carry-over | Long runs without full resets; makes early farming meaningful | P1 | to write | Proposed |
+| MEC-008 | Checkpoints: milestone levels unlock a later start level for new runs, speed ramp, partial energy carry-over | No full reset after a death; makes energy farming meaningful | P1 | to write | Proposed |
 | MEC-009 | Run results & marble reward formula | Every run pays out | P4 | to write | Proposed |
 | MEC-010 | Marble machine (pachinko): pegs, bumpers, prize slots, PUSH, public odds, pity | Juicy reward moment; collection driver | P4 | to write | Proposed |
 | MEC-011 | Skins, coins, duplicates, shop, equip | Long-term goal; self-expression | P4 | to write | Proposed |
@@ -62,7 +62,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 
 ## 4. Win / lose & session [REQUIRED]
 - **Fail (death):** head hits the board edge, the snake's own body, or any solid obstacle (unless a skill prevents it, §6.3).
-- **After a death:** if a checkpoint continue is available (MEC-008) the run continues at the checkpoint; otherwise the run is over.
+- **After a death:** the run is over (results + marbles). The next run starts at the highest unlocked checkpoint by default, or at L1 by choice (MEC-008, §6.4).
 - **Run win:** clear level 30. The full clear shows a celebration and a big marble bonus.
 - **Target session length:** typical run 3–8 min; full 30-level clear ~12–18 min (estimate, measure in playtests). **OPEN (owner)** confirm targets.
 - **Restart cost:** ≤ 1 tap, ≤ 1 s (plus the 1.5 s countdown).
@@ -74,7 +74,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 |---|---|---|---|---|
 | 1. Mango Orchard | 1–5 | green / mango yellow | Falling pebbles & rocks | L5 "Rock rain" |
 | 2. Rice Paddy | 6–10 | light green / straw | Simple fences (straight → L-shape), mud tiles | L10 "Fence field" |
-| 3. Frozen Pond | 11–15 (**checkpoint**) | ice blue / white | Rise-and-sink stone tiles, ice tiles, rotten mangoes turn into rocks | L15 "Thin ice" |
+| 3. Frozen Pond | 11–15 | ice blue / white | Rise-and-sink stone tiles, ice tiles, rotten mangoes turn into rocks | L15 "Thin ice" |
 | 4. Rocky Hills | 16–20 | sand / brown | Rolling coconuts, complex fences (U-traps, gates), spike traps | L20 "Avalanche" |
 | 5. Backyard | 21–25 | warm orange / brick | Patrolling cat & chicken, mango-thief bird, timed bombs | L25 "Pet chaos" |
 | 6. Storm Garden | 26–30 | dark violet / neon | Hedge mazes, shrinking board, mixes of all families | L30 "Final storm" |
@@ -122,8 +122,9 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 ### 6.1 Energy (MEC-006)
 - **Energy orbs** spawn scattered on free cells, separate from mangoes: one every 6 s, max 2 on the board, each disappears after 8 s (blinks the last 2 s). Eating an orb: +15 energy, does **not** grow the snake or fill the level bar.
 - Golden mango: +10 energy in addition to its normal reward.
+- **Start energy:** a run starts with the energy carried over from the previous run (§6.4), otherwise 0.
 - **Energy bar:** max 100. No passive regeneration (energy only comes from playing well).
-- Energy is **kept between levels** and carried into a checkpoint continue (§6.4).
+- Energy is **kept between levels** within a run; part of it carries into the next run (§6.4).
 
 ### 6.2 Skill rules
 - Skills cost energy; **no cooldowns** (owner decision, 2026-11-03). A skill can be fired whenever its cost is affordable and no other skill effect of the same skill is active.
@@ -140,14 +141,24 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 
 ASSUMPTION: the owner described the "many-food farming event" alongside the skills; v0.2 treats it as the 4th skill (Mango Rain). If it should instead be a random board event, move it to MEC-003 and remove it from the loadout.
 
-### 6.4 Checkpoint continue (MEC-008)
-Owner intent: once a player reaches a high enough level, a death does not send them back to level 1; they continue from about 30–40% of the total, at level-1 speed but with that level's obstacles, so farming in early levels pays off later.
-- **Checkpoint level:** L11 (start of biome 3, ≈ 33% of 30).
-- **Unlock within a run:** reaching L16 in the current run arms the checkpoint (HUD shows a flag icon).
-- **On death with an armed checkpoint:** short "Back to the Pond!" transition → the run continues at L11 with: score and marbles so far kept; current energy kept; same 2 skills; snake at start length; level bar empty; obstacles of L11. The checkpoint is then used up.
-- **Speed ramp:** the tick starts at L1 speed (140 ms) and moves linearly to the current level's normal tick over the first 5 mangoes eaten (owner decision b). Each later level-up after the continue uses normal speed.
-- **Continues per run:** 1. **OPEN (owner):** a second checkpoint (e.g. L21 armed at L26)?
-- ASSUMPTION: the checkpoint is a continue **within the same run**, which is what makes early energy farming matter. Alternative reading: once unlocked, every **new** run starts at L11. That would remove the early levels (and their farming) from most runs, so v0.2 does not use it. Confirm.
+### 6.4 Checkpoints (MEC-008)
+Owner intent (clarified 2026-11-03): once a player has reached a milestone level, a death no longer sends them back to level 1. The run ends normally, and the **next run** starts at a checkpoint at level-1 speed but with that level's obstacles, keeping part of their energy, so farming energy pays off later.
+- **Milestones (owner decision: fixed milestones, every 5 levels):**
+
+  | Reach (best ever) | Unlocks start at | ≈ |
+  |---|---|---|
+  | L10 | L4 | 40% |
+  | L15 | L6 | 40% |
+  | L20 | L8 | 40% |
+  | L25 | L10 | 40% |
+  | L30 (full clear) | L12 | 40% |
+- **Permanent:** a checkpoint stays unlocked once reached (saved with the best level). The HUD shows the next milestone ("Next checkpoint at L15").
+- **Start choice:** Home offers "Play from checkpoint L__" (default: highest unlocked) and "Play from L1" (for players who want to farm energy and marbles from the start).
+- **Energy carry-over:** 50% of the energy held at the moment of death, max 50, becomes the next run's start energy (whatever level it starts at). It is saved, so it survives closing the game.
+- **Speed ramp:** the tick starts at L1 speed (140 ms) and moves linearly to the start level's normal tick over the first 5 mangoes eaten (owner decision b). Later levels use their normal speed.
+- **Rewards:** marbles count only the levels cleared in this run (§8.1), so a checkpoint start does not pay for skipped levels.
+- **Skill unlocks** (§3b) depend on the best level ever reached, so a checkpoint start always has the skills the player has earned.
+- **Risk to test in P1:** a checkpoint start pairs slow speed with a later biome's obstacles (e.g. L8 = biome 2 fences). Playtest whether this feels fair or like being "dropped mid-fight".
 
 ## 7. Balance parameters [REQUIRED]
 Starting values; they move to `config/balance.json` in P0 and are tuned there.
@@ -164,7 +175,7 @@ Starting values; they move to `config/balance.json` in P0 and are tuned there.
 | Warn times | rock 1.5 s · fence 2 s · maze 2.6 s · ground 0.9 s · coconut lane 1.5 s · bomb 3 s | all ≥ 4 ticks |
 | Energy | orb +15 · every 6 s · max 2 · life 8 s · bar max 100 | |
 | Skill costs | Slow-mo 40 · Tail Snip 30 · Shield 50 · Mango Rain 80 | §6.3 |
-| Checkpoint | level 11 · armed at 16 · ramp over 5 mangoes · 1 per run | §6.4 |
+| Checkpoints | reach L10/15/20/25/30 → start at L4/6/8/10/12 · carry 50% energy (max 50) · ramp over 5 mangoes | §6.4 |
 | Marbles | `floor(mangoes / 2) + 2 × levels cleared + 10 × biomes cleared + 30 (full clear)` | §8.1 |
 
 ## 8. Progression & meta [P4]
@@ -191,7 +202,7 @@ All meta currency is earned by playing. **No real-money purchases** (owner decis
 - **Reason to come back tomorrow:** **OPEN (owner)** — candidates: daily seeded run with a marble bonus, daily free marbles, endless mode after L30, new skin sets per season.
 
 ### 8.4 Save data (local)
-Best level, best score, marbles, coins, owned skins, equipped skin, pity counter, unlocked skills, last loadout, settings (sound, haptics, D-pad, reduced motion). Versioned save format with migration.
+Best level, best score, unlocked checkpoints, carried energy, marbles, coins, owned skins, equipped skin, pity counter, unlocked skills, last loadout, settings (sound, haptics, D-pad, reduced motion). Versioned save format with migration.
 
 ## 9. Monetization [P5 — optional]
 - **No real money in the current plan.** Marbles, coins and skins are earned only by playing.
@@ -208,11 +219,11 @@ Best level, best score, marbles, coins, owned skins, equipped skin, pity counter
 - If AI image generation is used for assets: keep one style guide + palette, check license terms of the tool, and redraw/clean up for consistency.
 
 ### 10.2 Audio
-- Synth SFX as in the prototype (eat chirp, golden double chirp, level-up arpeggio, death drop) + new: energy pickup, skill cast (one per skill), checkpoint, marble peg ticks, slot win, skin unlock fanfare.
+- Synth SFX as in the prototype (eat chirp, golden double chirp, level-up arpeggio, death drop) + new: energy pickup, skill cast (one per skill), checkpoint unlocked, marble peg ticks, slot win, skin unlock fanfare.
 - Short cheeky death lines per cause (text first; voice optional, parking lot).
 
 ### 10.3 Screens
-Boot → Home (Play · Marble machine · Skins · Settings) → Loadout (pick 2 skills) → Game (HUD: level, biome, quota bar, energy bar, 2 skill buttons, pause, checkpoint flag) → Results → Marble machine → Home. Pause and countdown are overlays on the board.
+Boot → Home (Play from checkpoint · Play from L1 · Marble machine · Skins · Settings) → Loadout (pick 2 skills) → Game (HUD: level, biome, quota bar, energy bar, 2 skill buttons, pause, "next checkpoint at L__" hint) → Results → Marble machine → Home. Pause and countdown are overlays on the board.
 
 ### 10.4 Feedback & juice [REQUIRED for P3]
 | Event | Visual | Sound | Haptic |
@@ -222,7 +233,7 @@ Boot → Home (Play · Marble machine · Skins · Settings) → Loadout (pick 2 
 | Skill cast | skill-colored flash, icon pops from the button, effect overlay (blue tint for Slow-mo…) | per-skill sound | 20 ms |
 | Level up | snake shrink "pop", gold board glow, banner | 4-note arpeggio | 15-40-15 ms |
 | Biome change | palette sweep + biome name card | longer jingle | 30 ms |
-| Checkpoint continue | rewind swoosh, "Back to the Pond!" | rewind sound | 40 ms |
+| Checkpoint unlocked | flag plants on the level bar, "Next run starts at L6!" banner | fanfare | 40 ms |
 | Death | screen shake, red flash, X eyes, death line | sawtooth drop | 90 ms |
 | Marble machine | peg ticks, bumper glow, slot light-up, coin burst / skin reveal | ticks + win jingle | light per bump |
 
@@ -238,9 +249,9 @@ Big phases; each phase gets **one spec set + one plan** (Superpowers `brainstorm
 | **P5 Ship** | M4 | Performance, analytics events (§12), web build for portals (and optional app wrapper), store/portal assets | Ships on the chosen platform; no blocker bugs | new mechanics |
 
 ## 12. Success metrics & playtest [REQUIRED]
-- **Hypotheses:** (1) the escalating-board loop with length reset is fun for 5+ minutes; (2) skills add decisions, not just power; (3) the checkpoint makes players want to "farm energy before L16"; (4) the marble machine makes players start another run.
+- **Hypotheses:** (1) the escalating-board loop with length reset is fun for 5+ minutes; (2) skills add decisions, not just power; (3) checkpoints make a death feel like progress, and energy carry-over makes players farm energy on purpose; (4) the marble machine makes players start another run.
 - **Metrics:** first-session length, runs per session, level reached, death cause distribution (no cause > 40%), skill use per run, checkpoint usage, runs started from the results screen vs. from Home, D1 retention (when live).
-- **Analytics events (P5, local log from P1):** `run_start` (loadout), `level_up` (level, time), `skill_used` (skill, level, energy before), `checkpoint_used`, `run_end` (level, score, cause, duration, marbles), `marble_shot` (slot), `skin_unlocked` (skin, source).
+- **Analytics events (P5, local log from P1):** `run_start` (start level, start energy, loadout), `level_up` (level, time), `skill_used` (skill, level, energy before), `checkpoint_unlocked` (level), `run_end` (level, score, cause, duration, marbles), `marble_shot` (slot), `skin_unlocked` (skin, source).
 - Playtest log → `docs/PLAYTEST.md` (created at the first playtest).
 
 ## 13. Technical constraints [REQUIRED]
@@ -253,4 +264,4 @@ Big phases; each phase gets **one spec set + one plan** (Superpowers `brainstorm
 
 ## Parking lot (ideas not in scope)
 - Wrap zones (MEC-005), teleport portals, one-way arrow tiles, rival AI snake competing for mangoes, fake mango with a learnable tell, banana peel, lawnmower sweep.
-- Second checkpoint, endless mode after L30, daily seeded run, online leaderboard, seasonal skin sets, voiced death lines, Vietnamese localization.
+- Endless mode after L30, daily seeded run, online leaderboard, seasonal skin sets, voiced death lines, Vietnamese localization.
