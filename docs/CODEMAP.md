@@ -1,19 +1,22 @@
 # Code map
-Updated: 2026-11-03 · Keep under ~80 lines. One row per module, not per file.
-> The project is currently one single-file prototype. There is no `src/`, `config/` or test setup yet.
+Updated: 2026-11-04 · Keep under ~80 lines. One row per module, not per file.
+> Production code is being built in P0 (`src/`); the prototype stays as the behavior reference.
 
 ## Entry points
 | What | File |
 |---|---|
-| App bootstrap | `prototype/mango-snake-hard.html` (open in a browser) |
+| App bootstrap | `index.html` → `src/game/main.ts` (prototype: `prototype/mango-snake-hard.html`) |
 | Main game scene / loop | `prototype/mango-snake-hard.html` — `frame()` (rAF render + fixed-step `step()`) |
 | Balance config | `prototype/mango-snake-hard.html` — `// ---------- tuning ----------` block (moves to `config/balance.json` at the first gameplay task) |
-| Test setup | none yet |
+| Test setup | `vitest.config.ts`, `tests/` (`npm test`, `npm run test:fuzz`) |
 
 ## Modules
 | Module (folder) | Responsibility | Key files (max 3) | Depends on | Requirement IDs | Tests |
 |---|---|---|---|---|---|
 | `prototype/` | Whole playable prototype: tuning, state, hazards director, fairness (BFS), input, rendering, synth audio | `mango-snake-hard.html` | Google Fonts (network, optional) | MEC-001…MEC-004 | none |
+| `src/game/` | Phaser game layer (scenes, rendering, input, audio, flow) | main.ts | phaser, src/core, src/meta | — | build + manual |
+| `src/types/` | Ambient type shims for third-party types | phaser-shims.d.ts | — | — | typecheck |
+| `tests/` | Vitest tests and helpers | boundary.test.ts, support/boundary.ts | vitest | GDD-13 | — |
 
 Section markers inside the prototype (grep for them): `tuning`, `colors from CSS tokens`, `sizing`, `sound`, `effects`, `state`, `grid helpers`, `mangoes`, `obstacles`, `flow`, `input`, `simulation (fixed tick)`, `rendering`, `main loop`.
 

@@ -2,6 +2,8 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+### Chore
+- chore: Vite 8 + Phaser 3.90 + TypeScript strict + Vitest scaffold with boundary test and ARCHITECTURE.md (P0 PR 1).
 ### Added
 - Studio ruleset 0.3.1 setup files: `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`, `docs/GDD.md`, `docs/STATUS.md`, `docs/DECISIONS.md`, `docs/README.md`, `docs/CODEMAP.md`, `CHANGELOG.md`.
 - `docs/superpowers/specs/2026-11-03-p0-foundation-design.md`: P0 Foundation design (architecture, prototype port of MEC-001…004, test strategy, verified versions); 4 DECISIONS entries (Phaser 3.90.0 pin, prototype values in P0, 1 ms fixed-step core, Phaser-drawn HUD).

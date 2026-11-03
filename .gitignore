@@ -3,3 +3,4 @@ dist/
 .token-ledger/
 .DS_Store
 Thumbs.db
+coverage/
