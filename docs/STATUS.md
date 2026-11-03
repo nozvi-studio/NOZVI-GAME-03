@@ -2,29 +2,34 @@
 
 > AI: read at session start, rewrite at session end. Keep under ~60 lines; move history to CHANGELOG.
 
-**Updated:** 2026-11-03 by Claude Code **Milestone:** M1 — Phase P0 (Foundation) not started
+**Updated:** 2026-11-04 by Claude Code (lead) **Milestone:** M1 — design done for P0, P1, P2a; ready to execute P0
 
 ## Now (in progress)
-- [ ] Owner review of GDD v0.2 (`docs/GDD.md`): ASSUMPTION and OPEN items listed below.
+- [ ] Owner: approve committing the docs set on a `docs/` branch (all docs are uncommitted).
 
 ## Next (ordered, max 5)
-1. Owner answers the remaining OPEN items below (none blocks P0).
-2. In a session with Superpowers: `brainstorming` → `writing-plans` for **P0 Foundation** (GDD §11), then execute as small PRs.
-3. P0 creates `docs/ARCHITECTURE.md`, `config/balance.json`, `src/core/`, tests; update CODEMAP and docs map in the same PRs.
-4. Write MEC-001/003/006/007/008 specs before P1 starts.
-5. Optional in parallel with P1: art style tile (GDD §10.1).
+1. Commit docs (specs, designs, plans, GDD owner edits, DECISIONS, map) on `docs/p0-p2a-specs-plans` → PR to `master` (push needs owner approval).
+2. Execute P0 plan `docs/superpowers/plans/2026-11-03-p0-foundation.md` Task 1 (scaffold) — **owner approves `npm install`**; verify TS 7.0.2 (fallback 6.0.3), Phaser 3.90.0 + Vite 8 build.
+3. P0 Tasks 2–9, one PR each (subagent-driven-development + TDD); P0 exit = parity + phone check (owner 5-minute phone test).
+4. P1 plan (10 PRs) → P1 exit playtest: 5 testers (**owner recruits**).
+5. P2a plan (9 PRs) → at P2a exit write MEC-013…018 + P2b/P2c plans (P2-D1).
+
+## Phase gates (who checks)
+- P0 exit: tests/typecheck + Playwright QA + prototype parity; owner phone check.
+- P1 exit: `summarizeLog` + PLAYTEST gate (≥3/5 replay ≥3×, skills in ≥50% runs).
+- P2a exit: bot report L7–L15 (lead). P2 exit: all 30 levels, no cause > 40% (owner approves).
+- Before P3: owner approves art style tile (GDD §10.1). Before P4/P5: published drop odds, target web portals (§13).
 
 ## Blockers / open questions for human
-- OPEN: target web portals (before P5) §13; session-length targets §4; reason to come back tomorrow §8.3; extra reference games §1 (optional).
-- Superpowers is not installed in the cloud session; run spec/plan steps in a session that has it (AGENTS §4).
+- OPEN (not blocking P0–P2): target web portals (before P5) §13; session-length targets §4; reason to come back tomorrow §8.3.
 - `.claude/settings.json` permissions not yet verified in a live session.
 
 ## Known issues / tech debt
-- Prototype is a ~1000-line single file with global state and no tests; it is the reference for the P0 port.
-- Prototype numbers (10 levels, 4 ms/level) differ from GDD v0.2 (30 levels, 2 ms/level); GDD wins.
+- Prototype is a ~1000-line single file, reference for the P0 port; frozen at P0 Task 9.
+- P0/P1 keep prototype `terrainNearHeadDist` 3; raised to 4 in P2a Task 3 (re-baseline goldens).
 
 ## Last session summary
-- What was done: owner confirmed Mango Rain = 4th skill and web-first; AGENTS.md §1 updated to Phaser 3 + TS + Vite (owner-approved); checkpoint rules clarified by the owner (fixed milestones L10/15/20/25/30 → start L4/6/8/10/12, partial energy carry-over to the next run); earlier: design discussion with the owner (Vietnamese); wrote GDD v0.2 (30 levels / 6 biomes, length reset, energy skills, loadout, checkpoint, obstacle catalogue, marble machine + skins meta, hybrid art, P0–P5 roadmap); added 5 DECISIONS entries; CHANGELOG updated.
-- Last verified step (command + result): docs only, no code changed; no build/test to run.
-- Commands that failed / work left uncommitted (check `git status`): none.
-- What was learned / gotchas: marble machine must decide the outcome before animating so published odds stay exact; length reset is required or the board fills before L12.
+- What was done: reviewed aborted planning work; finished P0 plan (Tasks 5–9) and P1 plan (Tasks 9–10) via subagents; cross-doc conflict review (12 findings) and fixes (shared HazardFamily vocabulary, ARCHITECTURE owns step order, run log in src/session, `main`→`master` branch base); owner decided 3 GDD rule items (base-tick warn, 3 families in biomes 4–5, terrain near-head 4); docs map, DECISIONS, CHANGELOG updated.
+- Last verified step: grep shows no `HAZARD_ORDER`/`HazardKey`/`countsTowardCap`/`<!-- CONTINUE -->` left in docs. Docs only, no code.
+- Work left uncommitted: everything under `docs/`, `CHANGELOG.md`.
+- Gotchas: local `main` = old Ant Trail project; always branch from `master`. `phaser@latest` is 4.x; pin 3.90.0.

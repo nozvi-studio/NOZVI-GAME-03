@@ -48,3 +48,52 @@ Append-only. Format: `## YYYY-MM-DD — <decision>` then Context / Choice / Alte
 - Choice: fixed milestones every 5 levels — reaching L10/15/20/25/30 permanently unlocks a start at L4/6/8/10/12 (≈ 40%); 50% of energy at death (max 50) carries to the next run; speed ramps from L1 speed over 5 mangoes; player may still start at L1.
 - Alternatives: one continue inside the same run at L11; a start level computed as 40% of the best level (smoother but harder to read and to balance).
 - Consequence: MEC-008 spec follows GDD §6.4; marbles count only levels cleared in the run; P1 playtest checks whether slow speed + later-biome obstacles feels fair.
+
+## 2026-11-03 — Pin Phaser 3.90.0 although Phaser 4 is `latest`
+- Context: npm `phaser@latest` is 4.2.1; the last 3.x is 3.90.0 (2025-05-23). The approved stack says Phaser 3.
+- Choice: Phaser 3.90.0, pinned exactly (owner decision).
+- Alternatives: Phaser 4.2.1 (would change AGENTS §1 / GDD §13); a spike comparing both.
+- Consequence: the 3.x line gets no updates; a later move to Phaser 4 only touches `src/game/` because the core has no Phaser imports.
+
+## 2026-11-03 — P0 ports the prototype's rules and numbers; GDD v0.2 numbers arrive in P1
+- Context: P0 exit criterion is parity with the prototype, but GDD v0.2 changes several MEC-001…004 numbers (start length, tick curve, temporary rotten rocks, fairness distances, director).
+- Choice: `config/balance.json` starts with the prototype values; P1 changes config and rules together (owner decision).
+- Alternatives: GDD v0.2 values in P0 (parity not checkable); hybrid.
+- Consequence: the P0 design doc is the behavior spec for the port; MEC spec files are written in P1.
+
+## 2026-11-03 — Core time model: integer-millisecond fixed step
+- Context: the prototype mixes ms timers (hazards, rot, director) with a snake tick accumulator, driven by variable frame time.
+- Choice: `sim.advance(ms)` runs 1 ms steps in the prototype's update order; the game layer passes clamped integer frame time.
+- Alternatives: express everything in snake ticks (changes behavior); pass variable `dt` into the core (not deterministic).
+- Consequence: same seed + same timed inputs give the same state regardless of frame rate or chunking; tests and replays are simple.
+
+## 2026-11-03 — Greybox HUD, overlays and D-pad drawn in Phaser, not DOM
+- Context: the prototype uses DOM/CSS for HUD and controls.
+- Choice: everything is a Phaser game object in one portrait coordinate system (owner decision).
+- Alternatives: Phaser board + DOM HUD (faster port, two layout systems, P3 rework).
+- Consequence: accessibility (focus, labels) needs explicit work later; P3 art and the P4 marble machine reuse the same system.
+
+## 2026-11-03 — Lead approves specs and plans on the owner's behalf
+- Context: the owner delegated spec/plan approval to the lead agent and asked to be involved only in important decisions.
+- Choice: the lead approves MEC specs, phase designs and plans; the owner is asked only for changes to GDD gameplay rules, dependency installs, pushes, art direction and playtests.
+- Alternatives: owner reviews every document (slower, owner time-constrained).
+- Consequence: documents marked "Approved (lead, delegated by owner)"; GDD rule changes still need explicit owner approval.
+
+## 2026-11-04 — One HazardFamily vocabulary from P0 onward
+- Context: P0/P1 plans and the P2 design used different names (`HAZARD_ORDER`/`HazardKey`/`trySpawn`/`countsTowardCap` vs `FAMILIES`/`FamilyKey`/`spawn`/`capClass`).
+- Choice: P2 vocabulary everywhere: `FamilyKey`, ordered `FAMILIES`, `cause`, `capClass`, `maxActiveKey`, `spawn`, `onBreak`, `onLevelEnd`; `directorSpawned` dropped (`capClass 'none'`). P1's intro-level key type is `IntroKey`. P0/P1 keep per-family state lists; P2a Task 1 moves them to `SimState.families[key]` with golden tests unchanged. P1 names `rampActive`/`acc` are canonical.
+- Alternatives: rename at P2a (churn across already-written code).
+- Consequence: no rename refactor later; P2a Task 1 carries only a state-layout migration.
+
+## 2026-11-04 — Plan-level lead decisions (P0/P1)
+- All branches start from `master` (local `main` holds the old Ant Trail project).
+- Fuzz invariant "mango never on a reserved cell" checks reserved cells excluding the mango itself (prototype L348–351).
+- `Session` exposes thin `turn`/`useSkill` pass-throughs; scenes never touch the sim (P1-D1). Run-log records are written by `src/session` (MEC-003-R19 aligned).
+- Log "session" = runs separated by < `log.sessionGapMs` (600000); P1 gate "replays ≥ 3 times" = ≥ 4 runs in the first session.
+- First-orb tooltip uses the best level saved before the run starts. Log summary via `window.__summarize` under `?debug=1` (no new dependency).
+- `docs/ARCHITECTURE.md` "Sim step order" is the single source for step order (P2 design §6/§20 aligned).
+
+## 2026-11-04 — Owner: fairness and biome rule changes (GDD §5.1, §5.3)
+- Warn time rule 1 uses the L1 base tick `speed.startMs` (≥ 4 base ticks), not the current speed; mud and Slow-mo only add margin (P2-D5, MEC-004-R13).
+- Biomes 4–5 introduce 3 families each (still one new family per level) (P2-D9).
+- `fairness.terrainNearHeadDist` raised 3 → 4 from P2a so GDD rule 2's "3 cells in front" holds for terrain too; P0/P1 keep 3 for prototype parity.

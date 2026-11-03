@@ -1,5 +1,5 @@
 # Docs map (read this instead of scanning docs/)
-Updated: 2026-11-03
+Updated: 2026-11-04
 
 ## 1. Document index
 Only files listed here exist. Status: Draft / Approved / Deprecated.
@@ -10,6 +10,20 @@ Only files listed here exist. Status: Draft / Approved / Deprecated.
 | CODEMAP | `docs/CODEMAP.md` | Where code lives, module boundaries, entry points | — |
 | DEC | `docs/DECISIONS.md` | Technical/design trade-offs (ADR-lite) | — |
 | — | `CHANGELOG.md` | History | — |
+| P0-DESIGN | `docs/superpowers/specs/2026-11-03-p0-foundation-design.md` | P0 architecture, port behavior of MEC-001…004 (prototype rules), test strategy, pinned versions | Approved |
+| P0-PLAN | `docs/superpowers/plans/2026-11-03-p0-foundation.md` | P0 task-by-task implementation plan (9 PRs) | Approved |
+| P1-DESIGN | `docs/superpowers/specs/2026-11-03-p1-core-loop-design.md` | P1 new core loop design, delivery order, playtest protocol | Approved |
+| P1-PLAN | `docs/superpowers/plans/2026-11-03-p1-core-loop.md` | P1 implementation plan (10 PRs) | Approved |
+| P2-DESIGN | `docs/superpowers/specs/2026-11-03-p2-content-design.md` | P2 umbrella design (P2a/P2b/P2c), changes to P1 specs | Approved |
+| P2A-PLAN | `docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md` | P2a implementation plan (family framework, mud, ice) | Approved |
+| MEC-001 | `docs/specs/mechanics/MEC-001-snake.md` | Snake movement, growth, self-collision, length reset | Approved |
+| MEC-002 | `docs/specs/mechanics/MEC-002-mango.md` | Mango placement, golden, rot, rotten rock | Approved |
+| MEC-003 | `docs/specs/mechanics/MEC-003-levels-biomes.md` | 30 levels, quotas, speed, transition, run log | Approved |
+| MEC-004 | `docs/specs/mechanics/MEC-004-obstacles-director-fairness.md` | Obstacle family framework, director, fairness | Approved |
+| MEC-006 | `docs/specs/mechanics/MEC-006-energy-skills.md` | Energy orbs, energy bar, 4 skills | Approved |
+| MEC-007 | `docs/specs/mechanics/MEC-007-loadout.md` | Skill loadout | Approved |
+| MEC-008 | `docs/specs/mechanics/MEC-008-checkpoints.md` | Checkpoints, energy carry-over, save v2 | Approved |
+| MEC-012 | `docs/specs/mechanics/MEC-012-ground-tiles.md` | Mud and ice ground tiles | Approved |
 <!-- Add rows as specs are created, e.g.:
 | MEC-001 | `docs/specs/mechanics/MEC-001-jump.md` | Exact jump rules | Approved |
 | ARCH | `docs/ARCHITECTURE.md` | Module contracts, lifecycle | Draft |

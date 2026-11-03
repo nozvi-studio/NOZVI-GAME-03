@@ -4,6 +4,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 ## [Unreleased]
 ### Added
 - Studio ruleset 0.3.1 setup files: `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`, `docs/GDD.md`, `docs/STATUS.md`, `docs/DECISIONS.md`, `docs/README.md`, `docs/CODEMAP.md`, `CHANGELOG.md`.
+- `docs/superpowers/specs/2026-11-03-p0-foundation-design.md`: P0 Foundation design (architecture, prototype port of MEC-001…004, test strategy, verified versions); 4 DECISIONS entries (Phaser 3.90.0 pin, prototype values in P0, 1 ms fixed-step core, Phaser-drawn HUD).
+- Mechanic specs MEC-001/002/003/004/006/007/008/012 (Approved, lead-delegated); P1 and P2 designs; implementation plans for P0 (9 PRs), P1 (10 PRs) and P2a (9 PRs).
+- Cross-document consistency pass: one HazardFamily vocabulary, step order owned by ARCHITECTURE.md, run log in `src/session`; GDD §5.1/§5.3/§7 updated with owner decisions (base-tick warn rule, 3 families in biomes 4–5); DECISIONS entries for delegation, vocabulary, plan-level and owner decisions.
 ### Changed
 - `README.md` rewritten from the ruleset template.
 - `docs/GDD.md` v0.2: 30 levels / 6 biomes, length reset on level up, energy + 4 skills (no cooldowns), skill loadout, in-run checkpoint, obstacle catalogue, marble machine + skins + coins meta (no real money), hybrid art direction, 6-phase roadmap (P0–P5), Phaser 3 + TypeScript stack.

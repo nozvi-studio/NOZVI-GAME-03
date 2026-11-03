@@ -69,7 +69,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 
 ## 5. Run structure, levels & difficulty [REQUIRED]
 ### 5.1 Levels and biomes (MEC-003)
-30 levels in 6 biomes of 5 levels. Each biome introduces 1–2 obstacle families and has its own palette; its 5th level is a **challenge level** (denser director, mixes the biome's families). Only one big terrain event (maze or rising ground) is active at a time.
+30 levels in 6 biomes of 5 levels. Each biome introduces 1–3 obstacle families (biomes 4–5 have 3, one new family per level; owner 2026-11-04) and has its own palette; its 5th level is a **challenge level** (denser director, mixes the biome's families). Only one big terrain event (maze or rising ground) is active at a time.
 | Biome | Levels | Palette idea | New obstacle families (details §5.4) | Challenge level |
 |---|---|---|---|---|
 | 1. Mango Orchard | 1–5 | green / mango yellow | Falling pebbles & rocks | L5 "Rock rain" |
@@ -87,7 +87,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 - **Director:** spawn interval `max(1.6 s, 5 s − 0.12 s × n)`; small-hazard cap `min(10, 2 + floor(n / 3))`. Challenge levels: interval × 0.8, cap +2.
 
 ### 5.3 Fairness rules (apply to every obstacle family, MEC-004)
-1. Every obstacle shows a warning (color + blink + icon) before it becomes solid; warn time ≥ 0.9 s and ≥ 4 ticks at the current speed.
+1. Every obstacle shows a warning (color + blink + icon) before it becomes solid; warn time ≥ 0.9 s and ≥ 4 ticks at the base tick (`speed.startMs`; owner 2026-11-04 — slow effects such as mud or Slow-mo only add margin).
 2. Nothing ever lands on or appears inside the snake, or in the 3 cells in front of the head.
 3. After any spawn, the head must still be able to reach the current mango (BFS reachability); otherwise the spawn is rejected.
 4. Moving obstacles telegraph their whole path (lane highlight) before moving.
@@ -172,7 +172,7 @@ Starting values; they move to `config/balance.json` in P0 and are tuned there.
 | Mango rot time | `max(4 s, 8 s − 0.15 s × eaten in level)` | golden × 0.5; rotten → rock only from biome 3 |
 | Golden mango | 15% after 3 eaten in the run; +3 score, +2 bar, +10 energy | |
 | Spawn interval / small-hazard cap | `max(1.6 s, 5 − 0.12 n)` / `min(10, 2 + floor(n/3))` | challenge levels × 0.8 / +2 |
-| Warn times | rock 1.5 s · fence 2 s · maze 2.6 s · ground 0.9 s · coconut lane 1.5 s · bomb 3 s | all ≥ 4 ticks |
+| Warn times | rock 1.5 s · fence 2 s · maze 2.6 s · ground 0.9 s · coconut lane 1.5 s · bomb 3 s | all ≥ 4 base ticks |
 | Energy | orb +15 · every 6 s · max 2 · life 8 s · bar max 100 | |
 | Skill costs | Slow-mo 40 · Tail Snip 30 · Shield 50 · Mango Rain 80 | §6.3 |
 | Checkpoints | reach L10/15/20/25/30 → start at L4/6/8/10/12 · carry 50% energy (max 50) · ramp over 5 mangoes | §6.4 |
