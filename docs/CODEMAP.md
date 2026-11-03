@@ -16,7 +16,7 @@ Updated: 2026-11-04 · Keep under ~80 lines. One row per module, not per file.
 |---|---|---|---|---|---|
 | `prototype/` | Whole playable prototype: tuning, state, hazards director, fairness (BFS), input, rendering, synth audio | `mango-snake-hard.html` | Google Fonts (network, optional) | MEC-001…MEC-004 | none |
 | `src/game/` | Phaser game layer (scenes, rendering, input, audio, flow) | main.ts | phaser, src/core, src/meta | — | build + manual |
-| `src/core/` | Pure rules: balance, RNG, grid/BFS, cell queries, snake, levels and Sim snapshots | sim.ts, snake.ts, level.ts | — | MEC-001…004, GDD-7 | tests/core/ |
+| `src/core/` | Pure rules: balance, RNG, grid/BFS, cell queries, snake, levels, mango placement/rot (MEC-002) and Sim snapshots | sim.ts, snake.ts, mango.ts | — | MEC-001…004, GDD-7 | tests/core/ |
 | `src/types/` | Ambient type shims for third-party types | phaser-shims.d.ts | — | — | typecheck |
 | `tests/` | Vitest tests and helpers | boundary.test.ts, support/boundary.ts, support/balance.ts | vitest | GDD-13 | — |
 

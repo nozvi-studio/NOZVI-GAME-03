@@ -3,6 +3,7 @@ import type { Balance } from './balance';
 import { cellSolidCause } from './cells';
 import { inBounds } from './grid';
 import { addProgress, tickMsFor } from './level';
+import { endBoardFull, placeMango } from './mango';
 import type { Rng } from './rng';
 import type { CauseKey, Cell, MangoState, SimState, Step } from './types';
 
@@ -48,6 +49,5 @@ function eat(s: SimState, b: Balance, rng: Rng): void {          // L781–795
   addProgress(s, b, m.golden ? b.mango.progress.golden : b.mango.progress.normal);
   s.tickMs = tickMsFor(b, s.level);
   s.tailFrom = { ...(s.snake[s.snake.length - 1] as Cell) };
-  void rng;          // used by mango placement from Task 4
-  s.mango = null;    // Task 4 replaces this line with: if (!placeMango(s, b, rng)) endBoardFull(s);
+  if (!placeMango(s, b, rng)) endBoardFull(s);
 }
