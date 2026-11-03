@@ -1,5 +1,8 @@
 // src/core/sim.ts — Sim factory, 1 ms step and snapshot (design §4; prototype frame L996–1007, reset L626–644)
 import type { Balance, Pair } from './balance';
+import { snakeOn } from './cells';
+import { updateDirector } from './hazards/director';
+import { stepHazards } from './hazards/registry';
 import { needFor, tickMsFor } from './level';
 import { placeMango, rotMango } from './mango';
 import { rngFrom, seedRng, type Rng } from './rng';
@@ -20,9 +23,11 @@ export function initialState(b: Balance, seed: number): SimState {
   };
 }
 
-// One 1 ms step in prototype frame() order (L997–1004). Director/hazards are added in Task 5.
+// MEC-004 one 1 ms step in prototype frame() order (L997-1004).
 function stepMs(s: SimState, b: Balance, rng: Rng): void {
   s.acc += 1;
+  updateDirector(s, b, rng);
+  stepHazards(s, { balance: b, snakeOn: (x, y) => snakeOn(s, x, y), emit: e => { s.events.push(e); } });
   s.tickMs = tickMsFor(b, s.level);
   if (s.mango) { s.mango.leftMs -= 1; if (s.mango.leftMs <= 0) rotMango(s, b, rng); }
   if (s.status === 'playing' && s.acc >= s.tickMs) { s.acc -= s.tickMs; stepSnake(s, b, rng); }

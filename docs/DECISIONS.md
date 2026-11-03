@@ -114,3 +114,11 @@ Append-only. Format: `## YYYY-MM-DD — <decision>` then Context / Choice / Alte
 
 ## 2026-11-04 — Publish target: GitHub Pages
 **Decision (owner):** the first public web build ships on GitHub Pages (GDD §13). Consequence: the Vite `base` must match the repo path when deploy is set up (P5); no portal SDK for now.
+
+## 2026-11-04 - P0 Task 5 live determinism fixtures
+
+- Context: the plan clone and JSON round-trip fixtures advance an unsteered snake beyond its wall death at 1260 ms, before the first hazard spawn.
+- Decision: use the existing scripted steering helper through 3000 ms; assert the fixtures are playing, the clone changes after advancing, and the JSON fixture includes a hazard.
+- Evidence: the new live-state assertions failed against both original fixtures, then passed with steering. Production gameplay and tuning remain exactly as planned.
+- Task 5 test detail: director timer fixtures hold the tick accumulator to isolate spawn timing; unlock coverage probes weighted intervals with real family spawns rather than a spy.
+- Validation environment: a temporary NODE_OPTIONS preload treats the sandbox-blocked optional Vite net-use probe as unavailable and selects the Vitest thread pool; no dependency or repository configuration changes.
