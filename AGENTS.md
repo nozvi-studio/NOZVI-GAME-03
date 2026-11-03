@@ -7,9 +7,9 @@ Read this whole file first. Then read `docs/STATUS.md` and `docs/README.md` (doc
 All repository content you write is **English only**: docs, plans, code comments, commit messages, PR text, changelogs, status and review reports. The owner may talk to you in Vietnamese; still write files in English. Exceptions: player-facing localized strings and exact vendor identifiers.
 
 ## 1. Stack (filled at setup from the Game Brief; do not guess)
-- Engine / framework: None — vanilla HTML5 + Canvas 2D, single-file prototype (production stack not chosen yet; see `docs/STATUS.md`)
-- Language: JavaScript (browser, no build step, no modules)
-- Install: `none` · Run: `python3 -m http.server 8000` then open `http://localhost:8000/prototype/mango-snake-hard.html` (or open the file directly) · Test: `none yet — add with the first gameplay task` · Typecheck/lint: `none yet`
+- Engine / framework: Phaser 3 (web-first, portrait) + Vite; Matter.js (bundled with Phaser) for the marble machine. Exact versions are verified and pinned in Phase 0 (see `docs/DECISIONS.md`, 2026-11-03).
+- Language: TypeScript (strict). Pure game logic in `src/core/` and `src/meta/` (no Phaser imports); Phaser scenes in `src/game/`.
+- Install: `npm install` · Run: `npm run dev` · Test: `npm test` (Vitest) · Typecheck/lint: `npm run typecheck` — these scripts are created by the Phase 0 scaffold; until it lands, the only runnable code is the reference prototype: `python3 -m http.server 8000` then open `http://localhost:8000/prototype/mango-snake-hard.html`.
 If any value is `<...>`, ask the human before writing gameplay code.
 
 ## 2. Source of truth (authority order)
