@@ -1,0 +1,60 @@
+{
+  "board": { "cols": 17, "rows": 17 },
+  "snake": { "start": [[8, 8], [7, 8], [6, 8]], "startDir": [1, 0], "maxQueuedTurns": 3 },
+  "speed": { "startMs": 140, "minMs": 95, "msPerLevel": 4 },
+  "level": { "maxLevel": 10, "needBase": 4, "needPerLevel": 1, "unlock": { "fence": 2, "terrain": 4, "maze": 6 } },
+  "mango": {
+    "rotBaseMs": 8000, "rotPerEatenMs": 150, "rotMinMs": 4000, "goldenRotFactor": 0.5, "goldenChance": 0.15,
+    "goldenMinEaten": 3, "points": { "normal": 1, "golden": 3 }, "progress": { "normal": 1, "golden": 2 }, "nearHeadDist": 3
+  },
+  "fairness": { "nearHeadDist": 4, "frontLaneCells": 4, "terrainNearHeadDist": 3 },
+  "hazard": { "crumbleMs": 450 },
+  "rock": {
+    "warnMs": 1500, "lifeMs": 6000, "lifeRandMs": 4000, "tries": 40,
+    "shapePoolByLevel": [
+      { "minLevel": 0, "add": ["single"] }, { "minLevel": 2, "add": ["lineH", "lineV"] }, { "minLevel": 4, "add": ["corner", "block"] }
+    ],
+    "shapes": {
+      "single": [[0, 0]], "lineH": [[0, 0], [1, 0], [2, 0]], "lineV": [[0, 0], [0, 1], [0, 2]],
+      "corner": [[0, 0], [1, 0], [0, 1]], "block": [[0, 0], [1, 0], [0, 1], [1, 1]]
+    }
+  },
+  "fence": {
+    "warnMs": 2000, "lifeMs": 9000, "lifeRandMs": 4000, "tries": 60, "lineBase": 5, "lineExtraMax": 4, "gapMinLen": 7,
+    "mirrorChance": 0.5,
+    "poolAfterUnlock": [
+      { "offset": 0, "add": ["line", "L"] }, { "offset": 1, "add": ["T", "Z"] }, { "offset": 2, "add": ["F", "U", "plus"] }
+    ],
+    "shapes": {
+      "L": [[0, 0], [0, 1], [0, 2], [0, 3], [1, 3], [2, 3]],
+      "T": [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [2, 1], [2, 2], [2, 3]],
+      "Z": [[0, 0], [1, 0], [2, 0], [2, 1], [2, 2], [3, 2], [4, 2]],
+      "F": [[0, 0], [1, 0], [2, 0], [0, 1], [0, 2], [1, 2], [0, 3], [0, 4]],
+      "U": [[0, 0], [0, 1], [0, 2], [1, 2], [2, 2], [3, 2], [3, 1], [3, 0]],
+      "plus": [[2, 0], [2, 1], [0, 2], [1, 2], [2, 2], [3, 2], [4, 2], [2, 3], [2, 4]]
+    }
+  },
+  "maze": {
+    "warnMs": 2600, "lifeMs": 14000, "lifeRandMs": 4000, "minCells": 6, "cooldownMs": 26000,
+    "layouts": [
+      { "segments": [[4, 4, 6, 4], [10, 4, 12, 4], [4, 12, 6, 12], [10, 12, 12, 12], [4, 5, 4, 6], [4, 10, 4, 11], [12, 5, 12, 6], [12, 10, 12, 11]], "exclude": [] },
+      { "segments": [[4, 1, 4, 10], [8, 6, 8, 15], [12, 1, 12, 10]], "exclude": [] },
+      { "segments": [[2, 8, 6, 8], [10, 8, 14, 8], [8, 2, 8, 6], [8, 10, 8, 14]], "exclude": [] },
+      { "segments": [[0, 5, 4, 5], [7, 5, 16, 5], [0, 11, 9, 11], [12, 11, 16, 11]], "exclude": [[12, 5], [4, 11]] }
+    ]
+  },
+  "terrain": {
+    "periodMs": 3400, "upMs": 1400, "warnMs": 900, "startDelayMs": 600, "fadeOutMs": 500, "lifeMs": 18000, "lifeRandMs": 6000,
+    "tries": 40, "minCells": 6, "waveChance": 0.5, "horizChance": 0.5, "waveLenMin": 6, "waveLenRand": 3, "waveWidth": 2,
+    "waveDelayMs": 260, "checkerSize": 4, "maxActive": 1, "maxActiveLate": 2, "lateLevel": 8
+  },
+  "director": {
+    "firstSpawnMs": 2500, "intervalBaseMs": 5000, "intervalPerLevelMs": 300, "intervalMinMs": 2000,
+    "capBase": 2, "capPerLevels": 2, "capMax": 8, "weights": { "rock": 3, "fence": 2, "terrain": 2, "maze": 2 }
+  },
+  "flow": { "countdownMs": 1500, "countdownDigits": 3, "maxFrameDeltaMs": 100, "deathCardDelayMs": 550 },
+  "ui": {
+    "bannerMs": 1800, "swipeMinPx": 18, "swipeBoardFactor": 0.05,
+    "haptics": { "eatMs": 12, "level": [15, 40, 15], "deathMs": 90 }, "terrainFadeInMs": 600, "hazardFlickerMs": 1500
+  }
+}

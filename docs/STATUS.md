@@ -5,11 +5,12 @@
 **Updated:** 2026-11-04 by Claude Code (lead) **Milestone:** M1 — P0 execution · **Version branch:** `version/v0.1`
 
 ## Now (in progress)
-- [x] P0 Task 1 (scaffold) done, merged into `version/v0.1` (TS 7.0.2 kept; see DECISIONS 2026-11-04).
+- [x] P0 Task 1 (scaffold) merged into `version/v0.1`.
+- [x] P0 Task 2 (balance config, parseBalance, RNG, core types, grid/BFS) done on `feat/p0-balance-core`; awaiting lead review + `--no-ff` merge into `version/v0.1`.
 
 ## Next (ordered, max 5)
-1. P0 Task 2 (balance config, parseBalance, RNG, core types, grid/BFS) on `feat/p0-balance-core` from `version/v0.1` — plan `docs/superpowers/plans/2026-11-03-p0-foundation.md`.
-2. P0 Tasks 3–9, one branch each (subagent-driven-development + TDD), merge back with `--no-ff`.
+1. Merge `feat/p0-balance-core` into `version/v0.1` after review.
+2. P0 Task 3 (snake, levels, Sim shell), then Tasks 4–9, one branch each (subagent-driven-development + TDD), merge back with `--no-ff`.
 3. P0 exit = tests/typecheck + Playwright QA + prototype parity + owner 5-minute phone test.
 4. P1 plan (10 PRs) → P1 exit playtest: 5 testers (**owner recruits**).
 5. P2a plan (9 PRs) → at P2a exit write MEC-013…018 + P2b/P2c plans (P2-D1).
@@ -26,12 +27,13 @@
 - `.claude/settings.json` permissions not yet verified in a live session.
 
 ## Known issues / tech debt
+- QA process: agy = dedicated tester (writes tests/qa/ only, from MEC specs). QA-T2-34/35 only check grid BFS; tail/terrain wall exclusion must be QA-tested at Tasks 3/5. QA-T2-17 (MEC-004-R13) skipped until P2a.
 - Prototype is a ~1000-line single file, reference for the P0 port; frozen at P0 Task 9.
 - P0/P1 keep prototype `terrainNearHeadDist` 3; raised to 4 in P2a Task 3 (re-baseline goldens).
 - `vite.config.ts` / `vitest.config.ts` are not type-checked (need `@types/node`, not allowed in P0).
 - Task 1 browser console check (Step 12) only verified by build + HTTP 200 on preview; full console check falls to Playwright QA (agy) at P0 exit.
 
 ## Last session summary
-- What was done: P0 Task 1 scaffold (package.json pinned, tsconfig, Vite/Vitest config, index.html, hello scene, GDD-13 boundary scanner + 3 tests, ARCHITECTURE.md); fixed version-independent typecheck failures (owner-approved shim + config exclusion); recorded GitHub Pages as publish target.
-- Last verified step: `npm test` 3/3, `npm run typecheck` exit 0, `npm run build` exit 0.
+- What was done: P0 Task 2 — `config/balance.json` (prototype values), `parseBalance` with path-specific errors, mulberry32 RNG over plain `RngState`, core API types (`src/core/types.ts`), grid helpers (`key`, `inBounds`, `nearHead`, `reachable`), `tests/support/balance.ts`.
+- Last verified step: `npm test` 26/26, `npm run typecheck` exit 0, `npm run build` exit 0.
 - Gotchas: local `main` = old Ant Trail project; never branch from it (AGENTS §6). `phaser@latest` is 4.x; pin 3.90.0. Repo docs use CRLF: edit with tools that keep line endings. No Python on this machine; use Node for scripts.
