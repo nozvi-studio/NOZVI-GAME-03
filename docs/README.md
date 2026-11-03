@@ -1,47 +1,34 @@
-# Docs index
+# Docs map (read this instead of scanning docs/)
+Updated: 2026-11-03
 
-| Area | File | Purpose | Notion type |
+## 1. Document index
+Only files listed here exist. Status: Draft / Approved / Deprecated.
+| ID | File | Owns (source of truth for) | Status |
 |---|---|---|---|
-| Vision | `00-vision/one-pager.md` | Pitch, pillars, audience, hypotheses to validate | Page |
-| Design | `01-design/gdd.md` | Game Design Document: core loop, controls, systems map | Page |
-| Design | `01-design/stamina-skills.md` | Stamina economy + the 4 skills | Page |
-| Design | `01-design/wrap-zones.md` | Wall zones the snake can pass through | Page |
-| Design | `01-design/obstacles.md` | Obstacle catalog (existing + proposed) | Page + DB |
-| Design | `01-design/level-progression.md` | Difficulty curve and tuning numbers | Page |
-| Design | `01-design/humor-and-tone.md` | The "bựa" layer: rules and idea bank | Page |
-| Production | `02-production/roadmap.md` | Milestones with exit criteria | Page |
-| Production | `02-production/risks.md` | Risk register | Page |
-| Playtest | `03-playtest/playtest-plan.md` | How to test, what to measure | Page |
-| Playtest | `03-playtest/session-template.md` | Copy once per playtest session | Template |
-| Tech | `04-tech/prototype-architecture.md` | How the prototype works + tech debt | Page |
-| Decisions | `decision-log.md` | Decisions and their reasons | Page (or DB) |
-| Databases | `notion-databases/*.csv` | Backlog, obstacles, skills, playtest log | Database |
+| GDD | `docs/GDD.md` | Product intent, scope, milestones, mechanics index | Draft |
+| STATUS | `docs/STATUS.md` | Current state, next steps, blockers | — |
+| CODEMAP | `docs/CODEMAP.md` | Where code lives, module boundaries, entry points | — |
+| DEC | `docs/DECISIONS.md` | Technical/design trade-offs (ADR-lite) | — |
+| — | `CHANGELOG.md` | History | — |
+<!-- Add rows as specs are created, e.g.:
+| MEC-001 | `docs/specs/mechanics/MEC-001-jump.md` | Exact jump rules | Approved |
+| ARCH | `docs/ARCHITECTURE.md` | Module contracts, lifecycle | Draft |
+| INT-001 | `docs/integrations/INT-001-analytics.md` | Analytics events, consent | Draft |
+| PLAYTEST | `docs/PLAYTEST.md` | Playtest evidence | — |
+-->
 
-## Importing into Notion
+## 2. Routing: what to read per task
+Read the "First" column; open "Then" only if the task needs it. Never read every file.
+| Task | First | Then (only if needed) |
+|---|---|---|
+| New gameplay feature | GDD (relevant § only), STATUS | MEC spec, CODEMAP module row, related tests |
+| Gameplay bug | MEC spec (or GDD §) for that behavior | CODEMAP module row → that module's files + tests |
+| Balance / tuning | GDD §7, balance config | MEC spec §9 |
+| Refactor | CODEMAP, ARCHITECTURE | DECISIONS (grep topic), module tests |
+| UI / juice | GDD §6, §10 | CODEMAP ui row |
+| Analytics / ads / SDK | INT spec | GDD §9, §12; CODEMAP integrations row |
+| Playtest follow-up | PLAYTEST (latest entry only) | GDD §12 |
+| Release | STATUS, CHANGELOG [Unreleased] | Test results, INT specs |
 
-Notion can import Markdown and CSV directly:
-
-1. In Notion: **Settings → Import** (or `•••` on a page → **Import**).
-2. Choose **Text & Markdown** and select the `.md` files. Each becomes a page.
-   You can zip the whole `docs/` folder and import the zip to keep the folder structure.
-3. Choose **CSV** for each file in `notion-databases/`. Each becomes a database.
-   After import, change the column types (Select, Number, Status) — CSV imports everything as text.
-
-Suggested Notion structure:
-
-```
-Mango Snake (team space)
-├── 📌 One-pager
-├── 📘 Design            ← gdd, mechanics, obstacles, progression, humor
-├── 🗺️ Production        ← roadmap, risks, decision log
-├── 🧪 Playtests         ← plan + "Playtest log" database (one row per session, template body)
-├── ⚙️ Tech              ← prototype architecture
-└── 🗃️ Databases         ← Backlog, Obstacles, Skills
-```
-
-### Source of truth
-
-Pick one. Recommendation: **the repo is the source of truth for design numbers and specs**
-(they change together with code and have history), **Notion is the source of truth for tasks,
-playtest notes and discussion**. If you edit a spec in Notion, copy it back here in the same week,
-or the two will drift apart.
+## 3. Requirement IDs
+IDs (GDD-§n, MEC-xxx, INT-xxx) appear in specs, in test names and in a one-line comment at the main implementing function, so `grep -r "MEC-001"` finds spec, code and tests without scanning.
