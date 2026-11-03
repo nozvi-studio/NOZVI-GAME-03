@@ -2,15 +2,16 @@
 
 > AI: read at session start, rewrite at session end. Keep under ~60 lines; move history to CHANGELOG.
 
-**Updated:** 2026-11-04 by Claude Code (lead) **Milestone:** M1 — P0 execution · **Version branch:** `version/v0.1`
+**Updated:** 2026-11-04 by Codex **Milestone:** M1 — P0 execution · **Version branch:** `version/v0.1`
 
 ## Now (in progress)
-- [x] P0 Task 1 (scaffold) merged into `version/v0.1`.
-- [x] P0 Task 2 (balance config, parseBalance, RNG, core types, grid/BFS) done on `feat/p0-balance-core`; awaiting lead review + `--no-ff` merge into `version/v0.1`.
+- [x] P0 Tasks 1–2 merged into `version/v0.1` (owner context).
+- [x] P0 Task 3 (snake, levels, Sim shell) implemented on `feat/p0-snake-level`; left uncommitted for review as requested.
+- Task 3 includes the planned state helper, 23 new tests, cell queries, turn queue, collisions, growth, progression and snapshot API.
 
 ## Next (ordered, max 5)
-1. Merge `feat/p0-balance-core` into `version/v0.1` after review.
-2. P0 Task 3 (snake, levels, Sim shell), then Tasks 4–9, one branch each (subagent-driven-development + TDD), merge back with `--no-ff`.
+1. Lead review and commit Task 3, then merge `feat/p0-snake-level` into `version/v0.1` with `--no-ff`.
+2. P0 Task 4 (mangoes), then Tasks 5–9, one task branch each with TDD.
 3. P0 exit = tests/typecheck + Playwright QA + prototype parity + owner 5-minute phone test.
 4. P1 plan (10 PRs) → P1 exit playtest: 5 testers (**owner recruits**).
 5. P2a plan (9 PRs) → at P2a exit write MEC-013…018 + P2b/P2c plans (P2-D1).
@@ -22,18 +23,22 @@
 - Before P3: owner approves art style tile (GDD §10.1). Before P4/P5: published drop odds (§13).
 
 ## Blockers / open questions for human
+- No Task 3 blockers or plan-code deviations.
 - OPEN (not blocking P0–P2): session-length targets §4; reason to come back tomorrow §8.3.
 - Decided 2026-11-04: publish target = GitHub Pages (GDD §13); Vite `base` set at deploy time.
 - `.claude/settings.json` permissions not yet verified in a live session.
 
 ## Known issues / tech debt
-- QA process: agy = dedicated tester (writes tests/qa/ only, from MEC specs). QA-T2-34/35 only check grid BFS; tail/terrain wall exclusion must be QA-tested at Tasks 3/5. QA-T2-17 (MEC-004-R13) skipped until P2a.
-- Prototype is a ~1000-line single file, reference for the P0 port; frozen at P0 Task 9.
+- QA process: agy = dedicated tester (writes tests/qa/ only, from MEC specs). QA-T2-34/35 only check grid BFS; tail/terrain wall exclusion needs QA at Tasks 3/5. QA-T2-17 (MEC-004-R13) skipped until P2a.
+- Task 3 intentionally leaves mango replacement/rot to Task 4 and hazard registry/director integration to Task 5.
+- Prototype stays the P0 behavior reference and is frozen at Task 9.
 - P0/P1 keep prototype `terrainNearHeadDist` 3; raised to 4 in P2a Task 3 (re-baseline goldens).
 - `vite.config.ts` / `vitest.config.ts` are not type-checked (need `@types/node`, not allowed in P0).
-- Task 1 browser console check (Step 12) only verified by build + HTTP 200 on preview; full console check falls to Playwright QA (agy) at P0 exit.
+- Full browser console check falls to Playwright QA (agy) at P0 exit; Task 1 had build + HTTP 200 only.
 
 ## Last session summary
-- What was done: P0 Task 2 — `config/balance.json` (prototype values), `parseBalance` with path-specific errors, mulberry32 RNG over plain `RngState`, core API types (`src/core/types.ts`), grid helpers (`key`, `inBounds`, `nearHead`, `reachable`), `tests/support/balance.ts`.
-- Last verified step: `npm test` 26/26, `npm run typecheck` exit 0, `npm run build` exit 0.
-- Gotchas: local `main` = old Ant Trail project; never branch from it (AGENTS §6). `phaser@latest` is 4.x; pin 3.90.0. Repo docs use CRLF: edit with tools that keep line endings. No Python on this machine; use Node for scripts.
+- Task 3 tests written first; `npm test` failed on missing level/sim modules before implementation.
+- Plan implementations copied without corrections; CODEMAP, CHANGELOG and STATUS updated; tests/qa/ untouched.
+- Verified: `npm test` 83 passed, 1 existing skip; `npm run typecheck` exit 0; `npm run build` exit 0.
+- Environment: validation needs a PTY here; plain-pipe Vite startup fails with `spawn EPERM` on `net use`.
+- Gotchas: local `main` = old Ant Trail project; never use it. No Python; use Node. Preserve docs CRLF.
