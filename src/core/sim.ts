@@ -1,6 +1,7 @@
 // src/core/sim.ts — Sim factory, 1 ms step and snapshot (design §4; prototype frame L996–1007, reset L626–644)
 import type { Balance, Pair } from './balance';
 import { needFor, tickMsFor } from './level';
+import { placeMango, rotMango } from './mango';
 import { rngFrom, seedRng, type Rng } from './rng';
 import { queueTurn, stepSnake } from './snake';
 import type { Dir, Sim, SimSnapshot, SimState, Step } from './types';
@@ -19,10 +20,11 @@ export function initialState(b: Balance, seed: number): SimState {
   };
 }
 
-// One 1 ms step in prototype frame() order (L997–1004). Director/hazards are added in Task 5, rot in Task 4.
+// One 1 ms step in prototype frame() order (L997–1004). Director/hazards are added in Task 5.
 function stepMs(s: SimState, b: Balance, rng: Rng): void {
   s.acc += 1;
   s.tickMs = tickMsFor(b, s.level);
+  if (s.mango) { s.mango.leftMs -= 1; if (s.mango.leftMs <= 0) rotMango(s, b, rng); }
   if (s.status === 'playing' && s.acc >= s.tickMs) { s.acc -= s.tickMs; stepSnake(s, b, rng); }
 }
 
@@ -60,7 +62,11 @@ function wrap(b: Balance, s: SimState): Sim {
   return sim;
 }
 
-export function createSim(b: Balance, seed: number): Sim { return wrap(b, initialState(b, seed)); }
+export function createSim(b: Balance, seed: number): Sim {
+  const s = initialState(b, seed);
+  placeMango(s, b, rngFrom(s.rng));            // reset() places the first mango (L637)
+  return wrap(b, s);
+}
 /** Independent Sim from a state (deep copy). Used by clone(), tests and tools. */
 export function restoreSim(b: Balance, state: SimState): Sim { return wrap(b, structuredClone(state)); }
 /** Live state of a Sim. Tests and tools only; never mutate from the game layer. */
