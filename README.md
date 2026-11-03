@@ -1,38 +1,32 @@
-# NOZVI-GAME-03 — Mango Snake (working title)
+# Mango Snake (working title)
 
-A level-climbing remake of classic Snake. Eat mangoes to fill the level bar, survive obstacles that
-keep landing, rising and rotating in, and use a stamina-powered skill kit to get out of trouble.
-Tone: silly, a bit cheeky ("bựa"), never mean.
+> One-line pitch: Steer a growing snake to eat mangoes and climb levels while the board keeps dropping rocks, fences, rising ground and hedge mazes on you — and spend stamina on silly skills to escape.
 
-> Status: **prototype / pre-production.** The playable prototype is a single HTML file.
-> Everything under `docs/` is a proposal until it is validated by playtests.
+**Genre:** Casual · arcade **Platform:** web (prototype); release platform not decided yet **Status:** see [docs/STATUS.md](docs/STATUS.md)
 
-## Repository layout
-
-```
-prototype/
-  mango-snake-hard.html     # current playable prototype (open in any browser)
-docs/
-  README.md                 # doc index + how to import everything into Notion
-  00-vision/                # one-pager, pillars, target player, hypotheses
-  01-design/                # GDD, mechanics, obstacles, progression, humor
-  02-production/            # roadmap, milestones, risks
-  03-playtest/              # playtest plan + session template
-  04-tech/                  # prototype architecture, tech decisions
-  notion-databases/         # CSV files that import into Notion as databases
-  decision-log.md           # every important decision, with the reason
+## Quick start
+```bash
+# install: none (no dependencies, no build step)
+python3 -m http.server 8000   # then open http://localhost:8000/prototype/mango-snake-hard.html
+# test: none yet (added with the first gameplay task)
 ```
 
-## Run the prototype
+## Docs map
+| File | Purpose | Who updates |
+|---|---|---|
+| [AGENTS.md](AGENTS.md) | Rules for AI agents (read first) | Human |
+| [docs/GDD.md](docs/GDD.md) | Game design: product intent, scope, milestones | Human (AI may propose) |
+| [docs/STATUS.md](docs/STATUS.md) | Project memory: now, next, blockers | AI every session |
+| [CHANGELOG.md](CHANGELOG.md) | What changed, per version | AI with every change |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | Why we chose X over Y | AI / Human |
+| [docs/README.md](docs/README.md) | Docs map: index + what to read per task | AI when docs change |
+| [docs/CODEMAP.md](docs/CODEMAP.md) | Code map: where code lives | AI when structure changes |
+| `docs/specs/`, `docs/integrations/`, `docs/ARCHITECTURE.md` | Detailed specs, created only when needed | AI / Human |
 
-Open `prototype/mango-snake-hard.html` in a browser. No build step, no dependencies
-(only Google Fonts is loaded from the network).
-
-Controls: arrow keys / WASD, on-screen D-pad or swipe. `P`/`Space`/`Esc` pause, `M` mute.
-
-## Where to start reading
-
-1. `docs/00-vision/one-pager.md` — what the game is and why it might be worth making.
-2. `docs/01-design/gdd.md` — the core loop and how the systems fit together.
-3. `docs/01-design/stamina-skills.md` and `docs/01-design/wrap-zones.md` — the new mechanics.
-4. `docs/02-production/roadmap.md` — what to build first, and what to postpone.
+## AI setup (required)
+Built with an AI agent + Superpowers ([obra/superpowers](https://github.com/obra/superpowers), MIT). In Claude Code:
+```
+/plugin marketplace add obra/superpowers-marketplace
+/plugin install superpowers@superpowers-marketplace
+```
+Other agents (Codex, Cursor): install Superpowers for that harness. All repository content is written in English.

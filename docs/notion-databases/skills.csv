@@ -1,5 +1,0 @@
-Name,Nickname,Status,Cost,Duration (s),Effect,Side effect,Unlock level,Balance risk
-Slow-mo,Chill Pill,Proposed,30,3,Tick length x1.8 (hazards keep real time),Sleepy eyes; music drops,2,Low
-Tail Snip,Snip!,Proposed,50,0,Cut last 40% of body (min 3),Cut tail becomes a 6 s obstacle,4,Medium
-Headbutt,Bonk,Proposed,40,2,Next solid obstacle hit is destroyed,Dizzy: next 2 turns delayed 1 tick,6,Medium
-Mango Rain,Mango Rain,Proposed,60,5,3 extra fast-rotting mangoes,Rotten ones leave rocks; no stamina from them,8,High
