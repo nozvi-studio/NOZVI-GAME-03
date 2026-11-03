@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 ### Tests
 - test(qa): independent black-box QA suite for P0 Task 2 by the tester worker (34 cases; MEC-004-R13 warn bound skipped until P2a).
 ### Features
+- feat: Phaser greybox board rendering, frame clock, run flow state machine, keyboard and swipe input (P0 PR 7).
 - feat: versioned save skeleton with migrations and in-memory store (P0 PR 6).
 - feat: hazard registry with rocks, fences, mazes, rising ground and the director; invariant fuzz and determinism tests (P0 PR 5).
 - feat: mango placement with fairness BFS, golden mangoes, rot timer and rotten rocks (P0 PR 4).
@@ -25,6 +26,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - `AGENTS.md` §1 Stack: Phaser 3 + TypeScript + Vite + Vitest (owner-approved); `docs/GDD.md`: Mango Rain confirmed as the 4th skill, web-first platform confirmed.
 - `docs/DECISIONS.md`: stack, redesign v0.2, meta/odds, art direction and roadmap decisions.
 ### Fixed
+- fix: restore prototype particle burst counts, speeds, lifetimes and landing-dust color using named cosmetic presets (P0 Task 7).
 ### Removed
 - Pre-ruleset design docs and Notion CSV databases under `docs/` (content condensed into `docs/GDD.md`; originals remain in commit `9fe2bb0`).
 

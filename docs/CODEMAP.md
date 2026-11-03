@@ -7,7 +7,8 @@ Updated: 2026-11-04 · Keep under ~80 lines. One row per module, not per file.
 |---|---|
 | App bootstrap | `index.html` → `src/game/main.ts` (prototype: `prototype/mango-snake-hard.html`) |
 | Main game loop (core) | `src/core/sim.ts` — `stepMs` (1 ms fixed step) |
-| Main game scene / loop | `prototype/mango-snake-hard.html` — `frame()` (rAF render + fixed-step `step()`) |
+| Main game loop (game layer) | `src/game/scenes/GameScene.ts` - `GameScene.update` (frame clock, flow, Sim events and rendering) |
+| Input | `src/game/input/` - keyboard and CSS-pixel swipe adapters |
 | Balance config | `config/balance.json` (read via `parseBalance` in `src/core/balance.ts`; prototype values, D2) |
 | Save / load | `src/meta/save.ts` |
 | Test setup | `vitest.config.ts`, `tests/` (`npm test`, `npm run test:fuzz`) |
@@ -16,7 +17,7 @@ Updated: 2026-11-04 · Keep under ~80 lines. One row per module, not per file.
 | Module (folder) | Responsibility | Key files (max 3) | Depends on | Requirement IDs | Tests |
 |---|---|---|---|---|---|
 | `prototype/` | Whole playable prototype: tuning, state, hazards director, fairness (BFS), input, rendering, synth audio | `mango-snake-hard.html` | Google Fonts (network, optional) | MEC-001…MEC-004 | none |
-| `src/game/` | Phaser game layer (scenes, rendering, input, audio, flow) | main.ts | phaser, src/core, src/meta | — | build + manual |
+| `src/game/` | Phaser scenes, cached board/layer rendering, run flow, frame clock and keyboard/swipe input | main.ts, scenes/GameScene.ts, flow/runFlow.ts | phaser, src/core (public index) | GDD-13, MEC-001 through MEC-004 | tests/game/, boundary + build; visual QA pending |
 | `src/core/` | Pure rules: balance, RNG, grid/BFS, cell queries, snake, levels, mango placement/rot (MEC-002), hazards/ (registry, director, families; MEC-004) and Sim snapshots | sim.ts, snake.ts, mango.ts | — | MEC-001…004, GDD-7 | tests/core/ |
 | `src/meta/` | Versioned save envelope + KeyValueStore port | index.ts, save.ts | — | GDD-8.4 | tests/meta/ |
 | `src/types/` | Ambient type shims for third-party types | phaser-shims.d.ts | — | — | typecheck |
