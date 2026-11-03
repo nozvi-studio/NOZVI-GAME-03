@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 ### Tests
 - test(qa): independent black-box QA suite for P0 Task 2 by the tester worker (34 cases; MEC-004-R13 warn bound skipped until P2a).
 ### Features
+- feat: versioned save skeleton with migrations and in-memory store (P0 PR 6).
 - feat: mango placement with fairness BFS, golden mangoes, rot timer and rotten rocks (P0 PR 4).
 - feat: core snake (turn queue, collisions), 10-level progression and Sim shell with snapshot (P0 PR 3).
 - feat: balance config with parseBalance, seeded RNG, core API types and grid/BFS helpers (P0 PR 2).

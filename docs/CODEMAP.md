@@ -9,6 +9,7 @@ Updated: 2026-11-04 · Keep under ~80 lines. One row per module, not per file.
 | Main game loop (core) | `src/core/sim.ts` — `stepMs` (1 ms fixed step) |
 | Main game scene / loop | `prototype/mango-snake-hard.html` — `frame()` (rAF render + fixed-step `step()`) |
 | Balance config | `config/balance.json` (read via `parseBalance` in `src/core/balance.ts`; prototype values, D2) |
+| Save / load | `src/meta/save.ts` |
 | Test setup | `vitest.config.ts`, `tests/` (`npm test`, `npm run test:fuzz`) |
 
 ## Modules
@@ -17,6 +18,7 @@ Updated: 2026-11-04 · Keep under ~80 lines. One row per module, not per file.
 | `prototype/` | Whole playable prototype: tuning, state, hazards director, fairness (BFS), input, rendering, synth audio | `mango-snake-hard.html` | Google Fonts (network, optional) | MEC-001…MEC-004 | none |
 | `src/game/` | Phaser game layer (scenes, rendering, input, audio, flow) | main.ts | phaser, src/core, src/meta | — | build + manual |
 | `src/core/` | Pure rules: balance, RNG, grid/BFS, cell queries, snake, levels, mango placement/rot (MEC-002) and Sim snapshots | sim.ts, snake.ts, mango.ts | — | MEC-001…004, GDD-7 | tests/core/ |
+| `src/meta/` | Versioned save envelope + KeyValueStore port | index.ts, save.ts | — | GDD-8.4 | tests/meta/ |
 | `src/types/` | Ambient type shims for third-party types | phaser-shims.d.ts | — | — | typecheck |
 | `tests/` | Vitest tests and helpers | boundary.test.ts, support/boundary.ts, support/balance.ts | vitest | GDD-13 | — |
 
