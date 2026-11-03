@@ -27,6 +27,7 @@
 - `.claude/settings.json` permissions not yet verified in a live session.
 
 ## Known issues / tech debt
+- QA process: agy = dedicated tester (writes tests/qa/ only, from MEC specs). QA-T2-34/35 only check grid BFS; tail/terrain wall exclusion must be QA-tested at Tasks 3/5. QA-T2-17 (MEC-004-R13) skipped until P2a.
 - Prototype is a ~1000-line single file, reference for the P0 port; frozen at P0 Task 9.
 - P0/P1 keep prototype `terrainNearHeadDist` 3; raised to 4 in P2a Task 3 (re-baseline goldens).
 - `vite.config.ts` / `vitest.config.ts` are not type-checked (need `@types/node`, not allowed in P0).

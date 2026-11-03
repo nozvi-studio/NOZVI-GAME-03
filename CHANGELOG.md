@@ -2,6 +2,8 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+### Tests
+- test(qa): independent black-box QA suite for P0 Task 2 by the tester worker (34 cases; MEC-004-R13 warn bound skipped until P2a).
 ### Features
 - feat: balance config with parseBalance, seeded RNG, core API types and grid/BFS helpers (P0 PR 2).
 ### Chore
