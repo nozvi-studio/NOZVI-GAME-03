@@ -102,3 +102,15 @@ Append-only. Format: `## YYYY-MM-DD — <decision>` then Context / Choice / Alte
 - Choice: `master` ← `dev` ← `version/vX.Y` ← task branches; task branches merge into the version branch directly (`--no-ff`, no PR) once tests + typecheck pass; version → `dev` at phase exit; `dev` → `master` on release. Rule lives in AGENTS §6.
 - Current version branch: `version/v0.1` (P0–P2a), started from `version/v0.1-design`.
 - Alternatives: PR per task into `master` (owner prefers fewer PRs; `gh` CLI not installed).
+
+## 2026-11-04 — TypeScript version for P0: 7.0.2 passes
+**Context:** Design D5 prefers TypeScript 7.0.2 if it type-checks `phaser.d.ts` (Phaser 3.90.0) and the Vitest 5.1.0 types in strict mode with `skipLibCheck: false`.
+**Decision:** 7.0.2: `npm run typecheck` exit 0 on 2026-11-04, after the owner-approved fix below. The failures were version-independent (6.0.3 would not fix them).
+**Also checked:** Phaser 3.90.0 builds with Vite 8.3.5 (Rolldown) (`npm run build` exit 0, 1.2 MB chunk).
+
+## 2026-11-04 — Typecheck scope: config files excluded, ActiveXObject shim
+**Context:** With `skipLibCheck: false`, `vite.config.ts`/`vitest.config.ts` pull Vite/Vitest Node-side types that need `@types/node` (not allowed in P0), and `phaser.d.ts` references `ActiveXObject`, which current `lib.dom` no longer declares.
+**Decision (owner, 2026-11-04):** `tsconfig.json` `include` is `["src", "tests"]` (tool config files are not type-checked); `src/types/phaser-shims.d.ts` declares an empty `interface ActiveXObject {}`. `skipLibCheck` stays `false`; no new dependency.
+
+## 2026-11-04 — Publish target: GitHub Pages
+**Decision (owner):** the first public web build ships on GitHub Pages (GDD §13). Consequence: the Vite `base` must match the repo path when deploy is set up (P5); no portal SDK for now.

@@ -1,0 +1,24 @@
+import { describe, expect, it } from 'vitest';
+import { findViolations } from './support/boundary';
+
+// Vite raw glob: no @types/node needed. Extended with pure src/game files in Task 7.
+const pureSources = import.meta.glob(['../src/core/**/*.ts', '../src/meta/**/*.ts'], {
+  query: '?raw', import: 'default', eager: true,
+}) as Record<string, string>;
+
+describe('GDD-13 boundary', () => {
+  it('GDD-13 boundary: the scanner flags each forbidden API', () => {
+    const src = "import Phaser from 'phaser';\nconst r = Math.random();\nwindow.x = 1; document.title;\n"
+      + 'localStorage.x; performance.now(); Date.now();';
+    expect(findViolations({ 'a.ts': src })).toEqual([
+      'a.ts: phaser import', 'a.ts: window', 'a.ts: document', 'a.ts: localStorage',
+      'a.ts: Math.random', 'a.ts: performance', 'a.ts: Date',
+    ]);
+  });
+  it('GDD-13 boundary: comments are ignored', () => {
+    expect(findViolations({ 'b.ts': '// Date and window in prose\n/* performance */\nexport const x = 1;' })).toEqual([]);
+  });
+  it('GDD-13 boundary: src/core and src/meta use no engine or browser API', () => {
+    expect(findViolations(pureSources)).toEqual([]);
+  });
+});

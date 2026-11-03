@@ -257,7 +257,7 @@ Big phases; each phase gets **one spec set + one plan** (Superpowers `brainstorm
 ## 13. Technical constraints [REQUIRED]
 - **Stack (owner decision, 2026-11-03):** Phaser 3 + TypeScript + Vite; unit tests with Vitest; Matter.js (bundled with Phaser) for the marble machine. Exact versions are verified and pinned in P0 (do not assume from memory).
 - **Architecture:** `src/core/` pure simulation (tick-based, deterministic, seeded RNG, no Phaser) · `src/meta/` pure economy, odds and save logic · `src/game/` Phaser scenes for rendering, input and audio · `config/balance.json` for all tuning. Details go to `docs/ARCHITECTURE.md` in P0.
-- **Platform (owner decision, 2026-11-03): web-first**, portrait, modern mobile and desktop browsers; an app wrapper (e.g. Capacitor) is optional in P5. **OPEN (owner, before P5):** target portals (e.g. itch.io, Poki, CrazyGames) — each has its own SDK and size rules.
+- **Platform (owner decision, 2026-11-03): web-first**, portrait, modern mobile and desktop browsers; an app wrapper (e.g. Capacitor) is optional in P5. **Publish target (owner decision, 2026-11-04): GitHub Pages** for now (static Vite build; set Vite `base` to the repo path). Other portals (itch.io, Poki, CrazyGames) may be added later, each with its own SDK and size rules.
 - **Performance:** 60 fps; ≤ 3 s to first input on a mid-range phone; initial download budget ≤ 5 MB (proposal).
 - **Offline:** playable after first load; save data local (§8.4).
 - The current `prototype/mango-snake-hard.html` remains as a reference until P0 reaches parity, then it is frozen.
