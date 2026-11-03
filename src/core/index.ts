@@ -4,3 +4,4 @@ export type { Balance, Pair, RockShapeKey, FenceShapeKey, FenceKind, MazeLayout 
 export type * from './types';
 export { createSim, restoreSim } from './sim';
 export { needFor, tickMsFor } from './level';
+export { FAMILIES } from './hazards/registry';
