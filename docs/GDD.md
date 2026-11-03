@@ -139,7 +139,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 | **Shield (Headbutt)** | 50 | For 5 s, the first hit on a breakable obstacle destroys it and the snake survives | Does not protect from the board edge or the snake's own body; rubble blocks the cell behind the broken obstacle for 1.5 s |
 | **Mango Rain** | 80 | For 6 s, 6–10 mangoes rain onto safe cells | Each mango still grows the snake (long snake risk); Rain mangoes fill at most 50% of the level bar per cast; extra ones give score and marbles only |
 
-ASSUMPTION: the owner described the "many-food farming event" alongside the skills; v0.2 treats it as the 4th skill (Mango Rain). If it should instead be a random board event, move it to MEC-003 and remove it from the loadout.
+Owner decision (2026-11-03): the "many-food farming event" is the 4th skill (Mango Rain), not a random board event.
 
 ### 6.4 Checkpoints (MEC-008)
 Owner intent (clarified 2026-11-03): once a player has reached a milestone level, a death no longer sends them back to level 1. The run ends normally, and the **next run** starts at a checkpoint at level-1 speed but with that level's obstacles, keeping part of their energy, so farming energy pays off later.
@@ -257,7 +257,7 @@ Big phases; each phase gets **one spec set + one plan** (Superpowers `brainstorm
 ## 13. Technical constraints [REQUIRED]
 - **Stack (owner decision, 2026-11-03):** Phaser 3 + TypeScript + Vite; unit tests with Vitest; Matter.js (bundled with Phaser) for the marble machine. Exact versions are verified and pinned in P0 (do not assume from memory).
 - **Architecture:** `src/core/` pure simulation (tick-based, deterministic, seeded RNG, no Phaser) · `src/meta/` pure economy, odds and save logic · `src/game/` Phaser scenes for rendering, input and audio · `config/balance.json` for all tuning. Details go to `docs/ARCHITECTURE.md` in P0.
-- **Platform:** web-first, portrait, modern mobile and desktop browsers; an app wrapper (e.g. Capacitor) is optional in P5. **OPEN (owner):** confirm web-first and name target portals/stores.
+- **Platform (owner decision, 2026-11-03): web-first**, portrait, modern mobile and desktop browsers; an app wrapper (e.g. Capacitor) is optional in P5. **OPEN (owner, before P5):** target portals (e.g. itch.io, Poki, CrazyGames) — each has its own SDK and size rules.
 - **Performance:** 60 fps; ≤ 3 s to first input on a mid-range phone; initial download budget ≤ 5 MB (proposal).
 - **Offline:** playable after first load; save data local (§8.4).
 - The current `prototype/mango-snake-hard.html` remains as a reference until P0 reaches parity, then it is frozen.
