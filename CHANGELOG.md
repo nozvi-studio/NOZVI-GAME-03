@@ -34,6 +34,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - feat: core snake (turn queue, collisions), 10-level progression and Sim shell with snapshot (P0 PR 3).
 - feat: balance config with parseBalance, seeded RNG, core API types and grid/BFS helpers (P0 PR 2).
 ### Chore
+- chore(playtest): run log summary, debug export and P1 playtest protocol (P1 PR 10).
 - chore: Vite 8 + Phaser 3.90 + TypeScript strict + Vitest scaffold with boundary test and ARCHITECTURE.md (P0 PR 1).
 ### Added
 - Studio ruleset 0.3.1 setup files: `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`, `docs/GDD.md`, `docs/STATUS.md`, `docs/DECISIONS.md`, `docs/README.md`, `docs/CODEMAP.md`, `CHANGELOG.md`.

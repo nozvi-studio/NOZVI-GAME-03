@@ -29,3 +29,32 @@ it('MEC-003-R18 malformed log envelopes default safely', () => {
   for (const data of [null, [], { version: 2 }, { version: 1, nextRunId: 0, entries: [], deathCounts: {} }, { version: 1, nextRunId: 1, entries: [null], deathCounts: {} }])
     expect(loadLog(memoryStore({ [LOG_KEY]: JSON.stringify(data) }))).toEqual(emptyLog());
 });
+
+import { describe } from 'vitest';
+import { summarizeLog } from '../../src/meta';
+const sStart = (runId: number, t: number, entry: 'home' | 'results', startLevel = 1): LogRecord =>
+  ({ type: 'run_start', t, runId, startLevel, startEnergy: 0, loadout: [null, null], entry });
+const sEnd = (runId: number, t: number, cause: string, level = 2): LogRecord =>
+  ({ type: 'run_end', t, runId, level, score: 3, cause, durationMs: 1000, startLevel: 1, levelsCleared: 1, won: cause === 'clear' });
+const logOf = (recs: LogRecord[]) => recs.reduce((l, r) => appendRecord(l, r, 500), emptyLog());
+describe('summarizeLog', () => {
+  it('P1-PT summarizeLog counts runs, entry source, checkpoint starts, causes and skill runs', () => {
+    const log = logOf([sStart(1, 0, 'home'), sEnd(1, 10, 'rock'),
+      sStart(2, 20, 'results'), { type: 'skill_used', t: 25, runId: 2, skill: 'slowmo', level: 3, energyBefore: 40 }, sEnd(2, 30, 'quit'),
+      sStart(3, 40, 'home', 4), sEnd(3, 50, 'rock', 6)]);
+    expect(summarizeLog(log, 600000)).toMatchObject({ runs: 3, runsFromHome: 2, runsFromResults: 1, checkpointStarts: 1,
+      causes: { rock: 2, quit: 1 }, causeShare: { rock: 0.667, quit: 0.333 }, levelsReached: { 2: 2, 6: 1 },
+      runsWithSkill: 1, skillRunShare: 0.333, runsPerSession: [3] });
+  });
+  it('P1-PT summarizeLog splits sessions on a gap longer than sessionGapMs', () => {
+    const log = logOf([sStart(1, 0, 'home'), sEnd(1, 10, 'wall'), sStart(2, 700010, 'home'), sEnd(2, 700020, 'wall')]);
+    expect(summarizeLog(log, 600000).runsPerSession).toEqual([1, 1]);
+  });
+  it('P1-PT summarizeLog of an empty log is all zeros', () => {
+    expect(summarizeLog(emptyLog(), 600000)).toMatchObject({ runs: 0, skillRunShare: 0, runsPerSession: [] });
+  });
+  it('P1-PT summarizeLog counts a run without run_end in runs but not in ended-run shares', () => {
+    const s = summarizeLog(logOf([sStart(1, 0, 'home'), sEnd(1, 10, 'rock'), sStart(2, 20, 'home')]), 600000);
+    expect(s).toMatchObject({ runs: 2, causeShare: { rock: 1 }, runsPerSession: [2] });
+  });
+});

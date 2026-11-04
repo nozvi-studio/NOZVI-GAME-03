@@ -50,6 +50,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'tip.slotUnlocked': 'Second skill slot unlocked!',
   'home.playCheckpoint': 'Play from checkpoint L{level}', 'home.playL1': 'Play from L1', 'home.play': 'Play',
   'home.carry': 'Start energy: {e}',
+  'home.exportLog': 'Export log', 'home.exportDone': 'Log copied',
   'banner.checkpoint': 'Next run starts at L{level}!',
   'tip.checkpoint': 'Checkpoints are permanent. Your saved energy comes with you.',
   'hud.nextCheckpoint': 'Next checkpoint at L{level}', 'hud.nextCheckpointClear': 'Next checkpoint: clear L{level}',

@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
+import type { Balance } from '../../core';
+import { summarizeLog, type RunLog } from '../../meta';
 import type { Session } from '../../session';
 import { createSynth, type Synth } from '../audio/synth';
+import { isDebug } from '../flow/debugFlag';
 import { homeView, stepCheckpoint } from '../flow/homeModel';
 import { HEIGHT, WIDTH } from '../layout';
 import { currentPalette } from '../render/palette';
@@ -43,7 +46,31 @@ export class HomeScene extends Phaser.Scene {
       const on = !this.session.save().settings.sound;
       this.session.setSound(on); this.synth.setOn(on); if (on) this.synth.play('uiTap'); this.refresh();
     }, 20);
+    if (isDebug(window.location.search)) this.setupDebug();
     this.refresh();
+  }
+
+  // MEC-003-R21 debug-only log export and console summary helper (P1 design §11).
+  private setupDebug(): void {
+    const balance = this.registry.get('balance') as Balance;
+    (window as unknown as { __summarize?: (json: string) => unknown }).__summarize =
+      (json: string) => summarizeLog(JSON.parse(json) as RunLog, balance.log.sessionGapMs);
+    const done = label(this, WIDTH / 2, HEIGHT - 60, '', 16, 'home-export-done');
+    button(this, WIDTH / 2, HEIGHT - 190, 200, 48, t('home.exportLog'), 'home-export', () => {
+      const json = this.session.exportLog();
+      const fallback = () => this.showLogText(json);
+      try {
+        navigator.clipboard.writeText(json).then(() => done.setText(t('home.exportDone')), fallback);
+      } catch { fallback(); }
+    }, 18);
+  }
+  private showLogText(json: string): void {
+    const box = document.createElement('textarea');
+    box.value = json; box.readOnly = true;
+    box.style.cssText = 'position:fixed;inset:10%;width:80%;height:80%;z-index:10;font:12px monospace';
+    box.addEventListener('blur', () => box.remove());
+    document.body.appendChild(box); box.focus(); box.select();
+    this.events.once('shutdown', () => box.remove());
   }
 
   private homeView() { return homeView(this.session.homeModel(), this.selected); }

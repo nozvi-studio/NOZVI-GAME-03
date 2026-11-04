@@ -73,3 +73,9 @@ it('MEC-008 section 9 parseBalance validates checkpoints and carry', () => {
 it('MEC-003 section 9 parseBalance rejects a non-positive log size', () => {
   expect(() => loadBalance(j => j.log.maxEntries = 0)).toThrow();
 });
+it('P1-PT parseBalance rejects a non-positive or non-integer log.sessionGapMs', () => {
+  expect(() => loadBalance()).not.toThrow();
+  expect(() => loadBalance(j => j.log.sessionGapMs = 0)).toThrow();
+  expect(() => loadBalance(j => j.log.sessionGapMs = 1.5)).toThrow();
+  expect(() => loadBalance(j => { delete j.log.sessionGapMs; })).toThrow();
+});
