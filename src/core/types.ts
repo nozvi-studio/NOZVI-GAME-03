@@ -38,13 +38,15 @@ export interface Outcome { won: boolean; cause?: CauseKey }
 
 export type SimEvent =
   | { type: 'ate'; x: number; y: number; golden: boolean; points: number }
-  | { type: 'levelUp'; level: number; unlocked?: IntroKey }
+  | { type: 'shrunk'; from: number; to: number; removed: Cell[] }
+  | { type: 'levelUp'; level: number; biome: number; challenge: boolean; biomeChanged: boolean; unlocked?: IntroKey; clearedLevelTimeMs: number }
+  | { type: 'transitionEnd'; level: number }
+  | { type: 'runWon'; score: number; timeMs: number }
   | { type: 'landed'; hazardType: TimedKey }
   | { type: 'dust'; x: number; y: number }
   | { type: 'rotted'; x: number; y: number; leftRock: boolean }
   | { type: 'hazardIncoming'; family: UnlockKey }
-  | { type: 'died'; cause: CauseKey; x: number; y: number }
-  | { type: 'boardFull' };
+  | { type: 'died'; cause: CauseKey; x: number; y: number };
 
 /** All Sim state. Plain JSON data only: no closures, Map/Set or class instances. */
 export interface SimState {
@@ -65,6 +67,13 @@ export interface SimState {
   eaten: number;
   level: number;               // 1-based
   progress: number;
+  phase: 'playing' | 'transition';
+  transitionLeftMs: number;
+  levelTimeMs: number;
+  timeMs: number;
+  startLevel: number;
+  levelsCleared: number;
+  eatenInLevel: number;
   status: SimStatus;
   outcome: Outcome | null;
   events: SimEvent[];          // pending, emptied by drainEvents()
@@ -94,6 +103,16 @@ export interface SimSnapshot {
   progress: number;
   need: number;
   tickMs: number;
+  biome: number;
+  challenge: boolean;
+  phase: 'playing' | 'transition';
+  transitionLeftMs: number;
+  levelTimeMs: number;
+  timeMs: number;
+  startLevel: number;
+  levelsCleared: number;
+  length: number;
+  minLength: number;
   status: SimStatus;
   outcome: Outcome | null;
 }
@@ -130,7 +149,7 @@ export interface HazardFamily<S extends { family: FamilyKey }> {
   solidAt(state: S, x: number, y: number): boolean;    // collision
   bfsWallAt(state: S, x: number, y: number): boolean;  // reachability walls
   reservedAt(state: S, x: number, y: number): boolean; // placement reserved
-  onLevelEnd?(s: SimState): void;                      // MEC-003-R7; implemented in Task 3
+  onLevelEnd(s: SimState): void;                       // MEC-003-R7
   onBreak?(s: SimState, x: number, y: number): void;    // MEC-006-R25; implemented in Task 7
   breakable: boolean;                                  // false for all in P0 (Shield is P1)
 }

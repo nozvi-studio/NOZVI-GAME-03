@@ -3,10 +3,11 @@ import type { Balance, Pair } from './balance';
 import { snakeOn } from './cells';
 import { updateDirector } from './hazards/director';
 import { stepHazards } from './hazards/registry';
-import { needFor, tickMsFor } from './level';
+import { biome, isChallenge, needFor, tickMsFor } from './level';
 import { placeMango, rotMango } from './mango';
 import { rngFrom, seedRng, type Rng } from './rng';
 import { queueTurn, stepSnake } from './snake';
+import { levelStart } from './transition';
 import type { Dir, Sim, SimSnapshot, SimState, SimOptions, Step } from './types';
 
 const toDir = ([x, y]: Pair): Dir => ({ x: x as Step, y: y as Step });
@@ -22,18 +23,30 @@ export function initialState(b: Balance, seed: number, options: SimOptions = {})
     headFrom: { ...snake[0]! }, tailFrom: { ...snake[snake.length - 1]! },
     acc: 0, tickMs: tickMsFor(b, level), mango: null, rottenRocks: [], hazards: [], terrains: [],
     spawnInMs: b.director.firstSpawnMs, mazeCooldownMs: 0, score: 0, eaten: 0, level, progress: 0,
+    phase: 'playing', transitionLeftMs: 0, levelTimeMs: 0, timeMs: 0,
+    startLevel: level, levelsCleared: 0, eatenInLevel: 0,
     status: 'playing', outcome: null, events: [], rng: seedRng(seed),
   };
 }
 
 // MEC-004 one 1 ms step in prototype frame() order (L997-1004).
 function stepMs(s: SimState, b: Balance, rng: Rng): void {
-  s.acc += 1;
-  updateDirector(s, b, rng);
-  stepHazards(s, { balance: b, snakeOn: (x, y) => snakeOn(s, x, y), emit: e => { s.events.push(e); } });
+  s.timeMs += 1;
+  const ctx = { balance: b, snakeOn: (x: number, y: number) => snakeOn(s, x, y), emit: (e: SimState['events'][number]) => { s.events.push(e); } };
+  // MEC-003-R7/R9 only crumble/fade and run time advance during transition.
+  if (s.phase === 'transition') {
+    stepHazards(s, ctx);
+    s.transitionLeftMs -= 1;
+    if (s.transitionLeftMs === 0) levelStart(s, b);
+    return;
+  }
+  s.levelTimeMs += 1;
+  if (s.mango) updateDirector(s, b, rng);
+  stepHazards(s, ctx);
   s.tickMs = tickMsFor(b, s.level);
   if (s.mango) { s.mango.leftMs -= 1; if (s.mango.leftMs <= 0) rotMango(s, b, rng); }
-  if (s.status === 'playing' && s.acc >= s.tickMs) { s.acc -= s.tickMs; stepSnake(s, b, rng); }
+  s.acc += 1;
+  if (s.acc >= s.tickMs) { s.acc -= s.tickMs; stepSnake(s, b, rng); }
 }
 
 function snapshotOf(s: SimState, b: Balance): SimSnapshot {
@@ -50,6 +63,10 @@ function snapshotOf(s: SimState, b: Balance): SimSnapshot {
     })),
     terrains: c.terrains.map(t => ({ t: t.t, lifeMs: t.lifeMs, cells: t.cells.map(({ x, y, vis, delay }) => ({ x, y, vis, delay })) })),
     score: s.score, level: s.level, progress: s.progress, need: needFor(b, s.level), tickMs: s.tickMs,
+    biome: biome(b, s.level), challenge: isChallenge(b, s.level), phase: s.phase,
+    transitionLeftMs: s.transitionLeftMs, levelTimeMs: s.levelTimeMs, timeMs: s.timeMs,
+    startLevel: s.startLevel, levelsCleared: s.levelsCleared,
+    length: s.snake.length, minLength: b.skills.tailSnip.minLength,
     status: s.status, outcome: c.outcome,
   };
 }
@@ -78,8 +95,12 @@ export function createSim(b: Balance, seed: number, options?: SimOptions): Sim {
 /** Independent Sim from a state (deep copy). Used by clone(), tests and tools. */
 export function restoreSim(b: Balance, state: SimState): Sim { return wrap(b, structuredClone(state)); }
 /** Live state of a Sim. Tests and tools only; never mutate from the game layer. */
-export function stateOf(sim: Sim): SimState {
+export function stateOf(sim: Sim): Readonly<SimState> {
   const s = states.get(sim);
   if (!s) throw new Error('stateOf: not a core Sim');
   return s;
 }
+
+// MEC-003-R7 plain-data snapshots for deterministic test/tool round trips (internal).
+export function exportState(sim: Sim): SimState { return structuredClone(stateOf(sim)); }
+export function simFromState(b: Balance, s: SimState): Sim { return restoreSim(b, s); }

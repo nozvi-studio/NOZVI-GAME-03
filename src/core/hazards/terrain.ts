@@ -16,6 +16,13 @@ export function terrainWant(T: TerrainHazard, c: TerrainCell, b: Balance): Terra
 
 export const TERRAIN: HazardFamily<TerrainHazard> = {
   key: 'terrain', cause: 'ground', capClass: 'big', maxActiveKey: 'terrain.maxActive', breakable: false,
+  // MEC-003-R7/R8 force cells down and start a fresh fade-out, even if already fading.
+  onLevelEnd(s) {
+    for (const t of s.terrains) {
+      t.t = t.lifeMs;
+      for (const c of t.cells) { c.up = false; c.vis = 'down'; }
+    }
+  },
   spawn(ctx, rng) {
     const b = ctx.balance, tr = b.terrain, { cols, rows } = b.board;
     for (let i = 0; i < tr.tries; i++) {

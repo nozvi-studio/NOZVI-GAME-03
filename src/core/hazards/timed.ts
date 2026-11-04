@@ -1,6 +1,14 @@
 // src/core/hazards/timed.ts — shared warn → solid → crumble lifecycle of rock/fence/maze (L416–422, L557–576). MEC-004
 import type { FenceKind } from '../balance';
-import type { Cell, StepCtx, TimedHazard, TimedKey } from '../types';
+import type { Cell, SimState, StepCtx, TimedHazard, TimedKey } from '../types';
+
+// MEC-003-R7/R8 all timed instances become non-solid and restart their crumble timer.
+export function endTimedLevel(s: SimState, family: TimedKey): void {
+  for (const h of s.hazards) if (h.family === family) {
+    h.state = 'crumble'; h.t = 0;
+    for (const c of h.cells) c.on = false;
+  }
+}
 
 // MEC-004 create a warning hazard with independently tracked landing cells.
 export function makeTimed(family: TimedKey, cells: readonly Cell[], warnMs: number, lifeMs: number, kind?: FenceKind): TimedHazard {

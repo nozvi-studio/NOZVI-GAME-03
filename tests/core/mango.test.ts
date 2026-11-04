@@ -4,7 +4,7 @@ import { cellBfsWall, cellReserved } from '../../src/core/cells';
 import { key, reachable, nearHead } from '../../src/core/grid';
 import { placeMango, rotMango, rotMsFor } from '../../src/core/mango';
 import { rngFrom, seedRng, type Rng } from '../../src/core/rng';
-import { createSim, restoreSim, stateOf } from '../../src/core/sim';
+import { createSim, exportState, restoreSim } from '../../src/core/sim';
 import type { Cell } from '../../src/core/types';
 import { loadBalance } from '../support/balance';
 import { buildState, QUIET } from '../support/state';
@@ -69,7 +69,7 @@ describe('MEC-002 mango', () => {
 
   it('MEC-002 createSim places a non-golden mango on a good cell', () => {
     for (let seed = 1; seed <= 20; seed++) {
-      const s = stateOf(createSim(b, seed));
+      const s = exportState(createSim(b, seed));
       const m = s.mango!;
       expect(m).toMatchObject({ golden: false, totalMs: 8000 });
       const withoutMango = structuredClone(s); withoutMango.mango = null;
@@ -129,12 +129,12 @@ describe('MEC-002 mango', () => {
     return s;
   }
 
-  it('MEC-002 eating the last free cell fills the board', () => {
+  it('MEC-001-R10 eating the last free cell leaves an empty mango slot without winning', () => {
     const sim = restoreSim(b, lastCellBoard());
     sim.advance(140);
-    expect(sim.snapshot()).toMatchObject({ status: 'over', outcome: { won: true } });
+    expect(sim.snapshot()).toMatchObject({ status: 'playing', outcome: null, mango: null });
     expect(sim.drainEvents()).toEqual([
-      { type: 'ate', x: 9, y: 8, golden: false, points: 1 }, { type: 'boardFull' },
+      { type: 'ate', x: 9, y: 8, golden: false, points: 1 },
     ]);
   });
 
