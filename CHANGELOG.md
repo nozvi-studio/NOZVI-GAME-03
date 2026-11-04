@@ -8,6 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - fix(game): keyboard turns (arrows/WASD) are queued on the native keydown instead of waiting for Phaser's per-frame keyboard queue; pure key map in src/game/input/keyMap.ts (MEC-001).
 - fix(core): regular mango updates the speed ramp before the level-clear check, so rampEnded precedes levelUp (ARCHITECTURE step 12.4).
 ### Docs
+- docs: level-up flow B spec and plan updated with owner answers (rotten rock lifetime kept, banner uses ui.bannerMs).
 - docs: level-up flow B implementation plan.
 - docs: level-up flow B design spec (no freeze, obstacles stay, slowdown tiers).
 - docs: STATUS updated for owner feedback fixes and level-up option B brainstorming.
