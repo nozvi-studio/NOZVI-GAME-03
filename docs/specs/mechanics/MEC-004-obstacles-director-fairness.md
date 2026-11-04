@@ -7,7 +7,7 @@
 - Behavior of the P0 families (rock, fence, maze, terrain) is P0 design §5 "MEC-004" with the MEC-003-R14/R15 table; this spec does not repeat it.
 - GDD: §4 (death), §5.1 (one big terrain event), §5.2 (director), §5.3 (fairness), §5.4 (catalogue, "Never use"), §5.5 (death distribution), §6.3 (Shield, Slow-mo), §7.
 - Design: `docs/superpowers/specs/2026-11-03-p2-content-design.md` (P2-D1…D9); P0 design §3 `HazardFamily`, §4 time model, §5 MEC-004.
-- Related: MEC-001 (snake step), MEC-002 (mango, `reserved`, rotten rock), MEC-003 (levels, table, transition, director formulas), MEC-006 (skills); step order: `docs/ARCHITECTURE.md` "Sim step order", MEC-008 (speed ramp), MEC-012…018 (families).
+- Related: MEC-001 (snake step), MEC-002 (mango, `reserved`, rotten rock), MEC-003 (levels, table, level up, director formulas), MEC-006 (skills); step order: `docs/ARCHITECTURE.md` "Sim step order", MEC-008 (speed ramp), MEC-012…018 (families).
 
 ## 2. Player-facing summary
 - Obstacles always warn (blink + icon + shape) before they can hurt you, never appear on or right in front of you, and never cut you off from the mango.
@@ -36,7 +36,6 @@
   - `tileAt(s, x, y): TileKind | null`: ground tile kind of an **active** tile cell (`'mud' | 'ice'`).
   - `headHit(s, x, y): 'mover' | 'area' | null`: the cell holds a lethal non-solid object for a head moving in (`'mover'`: a mover's cell; `'area'`: an active blast cell).
   - `onBreak(s, x, y): void`: Shield removes the object at that cell (R6).
-  - `onLevelEnd(s): void`: switch every instance to its end state at a level up (R16).
   - Hits during `update` are not a member: the family calls the step-context callback `ctx.hitHead(family, x, y, kind, dir)` (R8), with `dir` = the mover's direction (any value for `'area'`).
 - **MEC-004-R3 Composite queries.** Only these functions ask families (all in registry order):
   - `solidCauseAt(s, x, y)`: the `cause` of the first family whose `solidAt` is true, else null.
@@ -80,7 +79,7 @@
 - **MEC-004-R13 Rule 1: warning time.** Every family that can become solid or lethal shows a warning of at least `max(fairness.minWarnMs, fairness.minWarnTicks × speed.startMs)` ms (900 with the config of §9). The tick is the L1 base tick `speed.startMs` (P2-D5, owner-approved 2026-11-04, GDD §5.3): Slow-mo and mud make the snake slower and do not lengthen warnings. `parseBalance` checks every family `warnMs`-type key listed in its MEC spec against this bound.
 - **MEC-004-R14 Rules 4, 5 and "Never use".** Movers show their whole path (snapshot + highlight) for at least their `warnMs` before the first move (rule 4). One new family per level with a tooltip: MEC-003-R16 and `banner.new.{family}` (rule 5). No family may: change the snake's direction or position (ice only blocks turning, as listed in GDD §5.4), reverse or remap controls, hide any board cell, or become solid/lethal without the R13 warning.
 - **MEC-004-R15 Death context.** `died` carries `context: 'ice' | 'mud'` when the head cell at the start of the fatal snake step (or at the hit, for R8) had `tileAt` = that kind; otherwise `context` is absent.
-- **MEC-004-R16 Level end.** At MEC-003-R7 step 1 every family's `onLevelEnd` runs in registry order: TimedCells → crumble; CycleCells → all down + fade-out; GroundTiles → fade; movers and blasts → removed without hitting; modifiers → cancelled. Nothing lethal or tile-active survives t = 0.
+- **MEC-004-R16 Level up.** No family hook runs at a level up (`onLevelEnd` was removed by level-up flow B). Every instance keeps its state and ends by its own lifecycle (MEC-003-R8).
 
 ### Verification
 - **MEC-004-R17 Layer 1, per-family fuzz.** For each director family F, two configurations: (solo) a test balance whose `level.table` has one row 1…30 with only F's weight (its normal value), run with `startLevel` = F's introduction level and = 30; (full) the shipped table, run with `startLevel` = F's introduction level and = 30. Random turns; `npm test` runs a smoke sample (solo at the introduction level, 3 seeds × 30 s per family, so the whole suite stays < 10 s as in P0 design §9); `npm run test:fuzz` runs every configuration with 200 seeds × 120 s. Checked every 1 ms step: (I1) no F cell becomes solid/active while a snake cell is on it; (I2) new F cells respect R11; (I3) every F cell warns ≥ R13 before solid/active (rotten rock exempt: the rotting mango is its warning); (I4) R12 holds after every spawn; (I5) no new cell was reserved at spawn; (I6) a death's cause matches a family that was solid/lethal at that cell; (I7) determinism under different `advance` chunking. Family specs add their own invariants.
@@ -108,7 +107,7 @@
 ## 6. Interactions with other mechanics
 - **MEC-001:** collision order extended at the solid-cell stage (R6); ice blocks dequeuing turns (MEC-012).
 - **MEC-002:** `reserved` and the "good" set use R3/R4; rotten rock is the `rottenRock` registry family (`capClass none`).
-- **MEC-003:** director formulas (R4), table and introduction rule (R14–R16), transition calls R16.
+- **MEC-003:** director formulas (R4), table and introduction rule (R14–R16), level-up rules R7-R11 and R22.
 - **MEC-006:** Shield uses `breakable`/`onBreak` (R6, R8); snip wall and rubble are `capClass none` families exempt from R11–R13; Slow-mo factor in R7; step order amended in `docs/ARCHITECTURE.md` "Sim step order" (MEC-006-R35 points there) with "families update in registry order".
 - **MEC-008:** the ramp gives `baseTickMs`; R13 uses `speed.startMs`, which bounds the ramp too.
 
@@ -125,7 +124,6 @@ interface HazardFamily {               // other P0 members unchanged (P0 design 
   tileAt?(s: SimState, x: number, y: number): TileKind | null;
   headHit?(s: SimState, x: number, y: number): 'mover' | 'area' | null;
   onBreak?(s: SimState, x: number, y: number): void;
-  onLevelEnd?(s: SimState): void;
 }
 ```
 - `died {cause, x, y, context?: TileKind}`.
@@ -165,7 +163,7 @@ Fuzz seed counts (50 / 200) and the bot settings are test/tool constants, not ba
 - `MEC-004-R12 spawns are not blocked when the mango was already unreachable`
 - `MEC-004-R13 parseBalance rejects a warnMs below 900`
 - `MEC-004-R15 died context is ice when the fatal step started on active ice`
-- `MEC-004-R16 level end leaves no solid, lethal or active tile cell`
+- `MEC-004-R16 a level up leaves every family instance untouched` (see MEC-003-R8 tests)
 - `MEC-004-R17 fuzz invariants I1-I7 hold for every director family`
 - `MEC-004-R18 escapeExists is false in a dead-end corridor and true in open board`
 - `MEC-004-R18 no director spawn removes the last escape`

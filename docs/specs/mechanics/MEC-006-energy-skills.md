@@ -5,7 +5,7 @@
 ## 1. Purpose & links
 - GDD: §2.1 (in-run loop), §3 (skill buttons, "nope"), §3b (staged unlocks), §4 (death unless a skill prevents it), §5.3 (fairness), §6.1–6.3 (energy, skill rules, skill list), §7 (balance), §10.4 (feedback, P3), §12 (`skill_used`).
 - Builds on the P0 core API (`docs/superpowers/specs/2026-11-03-p0-foundation-design.md` §4): 1 ms fixed step, seeded RNG, events, snapshot.
-- Related: MEC-001 (snake step, length reset), MEC-002 (mango placement, rot), MEC-003 (levels, level transition), MEC-004 (obstacles, `reserved`, `nearHead`, BFS), MEC-007 (loadout, slots, unlocks), MEC-008 (start energy, carry-over, speed ramp, save).
+- Related: MEC-001 (snake step, length reset), MEC-002 (mango placement, rot), MEC-003 (levels, level up), MEC-004 (obstacles, `reserved`, `nearHead`, BFS), MEC-007 (loadout, slots, unlocks), MEC-008 (start energy, carry-over, speed ramp, save).
 
 ## 2. Player-facing summary
 - From level 2, glowing energy orbs pop up on free cells; each lasts 8 s (blinks in its last 2 s). Eating one gives +15 energy and does not grow the snake.
@@ -29,25 +29,25 @@ Save fields: none owned here. Start energy and carry-over are MEC-008; unlocks a
 **Energy and orbs**
 - MEC-006-R1: `energy` starts at `options.startEnergy` (MEC-008). createSim throws a `RangeError` (MEC-003 §7) unless it is an integer in [0, `energy.max`].
 - MEC-006-R2: Every energy gain is clamped to `energy.max`; the part above the cap is lost. There is no passive regeneration and no energy loss over time.
-- MEC-006-R3: Energy is kept across level-ups and level transitions within a run (MEC-003 never resets it).
+- MEC-006-R3: Energy is kept across level-ups within a run (MEC-003 never resets it).
 - MEC-006-R4: Orbs exist only while the current level ≥ `energy.orbFromLevel` (2), in every run (not only the first). `orbSpawnMs` counts from 0 at the first step at which the level is ≥ 2 (so a checkpoint start at L4 sees its first orb 6 s in).
 - MEC-006-R5: When `orbSpawnMs` reaches `energy.orbSpawnIntervalMs` (6000), it resets to 0 and one spawn attempt is made. The attempt is skipped (no event) if `orbs.length ≥ energy.orbMax` (2) or no candidate cell exists. There is no catch-up spawn.
 - MEC-006-R6: Orb candidate cells = the MEC-002 "good" set: in bounds, not `reserved` (the single list in MEC-002-R2), BFS-reachable from the head (MEC-004 `reachable`), and not `nearHead(x, y, mango.nearHeadDist)`. Orbs never use the MEC-002 "any cell" fallback. The cell is chosen with `rng.pick` over candidates in row-major order. Emits `orbSpawned {x, y}`.
 - MEC-006-R7: An orb expires when `ageMs ≥ energy.orbLifeMs` (8000): removed, emits `orbExpired {x, y}`. The snapshot exposes `leftMs`; the game blinks it when `leftMs ≤ energy.orbBlinkMs` (2000).
 - MEC-006-R8: When the snake step puts the head on an orb cell, the orb is removed, `energy += energy.orbGain` (15, clamped), emits `orbEaten {x, y, gained}` and, if `gained > 0`, `energyChanged`. The snake does not grow (tail moves as in a normal step), and score, progress and mango counters do not change.
 - MEC-006-R9: Eating a golden mango adds `energy.goldenGain` (10, clamped by R2) on top of its MEC-002-R5 reward, at any level, including level 1; emits `energyChanged {source: 'golden'}` if the gain is > 0. Rain mangoes are never golden (R31).
-- MEC-006-R10: During a MEC-003 level transition, `orbSpawnMs` and orb `ageMs` do not advance (same as rot timers).
+- MEC-006-R10: `orbSpawnMs` and orb `ageMs` keep counting through a level up (MEC-003-R9).
 
 **Skill activation (all skills)**
 - MEC-006-R11: `sim.useSkill(slot)` is evaluated synchronously at the current sim time, before the next 1 ms step. It is not buffered: a rejected press is never retried, and presses do not touch the turn queue (MEC-001).
 - MEC-006-R12: If `status !== 'playing'` the call is a no-op with no event (same as `turn`).
-- MEC-006-R13: Checks in this order; the first failure emits `skillRejected {slot, skill, reason}` and spends nothing: `empty` (slot has no skill) → `busy` (MEC-003 level transition in progress) → `active` (an effect of the same skill is active, R14) → `energy` (`energy < cost`) → `noTarget` (skill precondition fails, R20).
+- MEC-006-R13: Checks in this order; the first failure emits `skillRejected {slot, skill, reason}` and spends nothing: `empty` (slot has no skill) → `active` (an effect of the same skill is active, R14) → `energy` (`energy < cost`) → `noTarget` (skill precondition fails, R20).
 - MEC-006-R14: "Active" means: Slow-mo while `slowmo` ≠ null; Shield while `shield` ≠ null; Tail Snip while a snip wall is in `solid` state; Mango Rain while `rain` ≠ null. Different skills may be active at the same time.
 - MEC-006-R15: On success: `energy -= cost`, emit `energyChanged {delta: -cost, source: 'skill'}` then `skillUsed {slot, skill, level, energyBefore, energyAfter}`, then apply the effect in the same call.
-- MEC-006-R16: Effect timers (`slowmo.leftMs`, `shield.leftMs`, each snip wall's and rubble cell's `leftMs`, `rain`, rain mango `ageMs`) count sim ms and do not advance during a MEC-003 level transition. When a timer reaches 0 the effect ends and emits `skillEnded {skill, reason: 'timeout'}` (Shield may also end with `'consumed'`).
+- MEC-006-R16: Effect timers (`slowmo.leftMs`, `shield.leftMs`, each snip wall's and rubble cell's `leftMs`, `rain`, rain mango `ageMs`) count sim ms and keep counting through a MEC-003 level up. When a timer reaches 0 the effect ends and emits `skillEnded {skill, reason: 'timeout'}` (Shield may also end with `'consumed'`).
 
 **Slow-mo**
-- MEC-006-R17: While Slow-mo is active, effective tick = `round(baseTickMs × skills.slowmo.tickFactor)` (1.6), where `baseTickMs` is the tick MEC-003/MEC-008 give for this step (level tick or speed-ramp tick). It is recomputed every step, so a level-up or ramp change during Slow-mo applies at once and is still multiplied. `snapshot.tickMs` shows the effective tick.
+- MEC-006-R17: Effective tick = `round(baseTickMs × max(slowmo ? skills.slowmo.tickFactor : 1, curFactor))` (tickFactor 1.6), where `curFactor` is the MEC-003-R22 level-up slowdown factor (1 when none); the two never stack, and `baseTickMs` is the tick MEC-003/MEC-008 give for this step (level tick or speed-ramp tick). It is recomputed every step, so a level-up or ramp change during Slow-mo applies at once. `snapshot.tickMs` shows the effective tick.
 - MEC-006-R18: Whenever the effective tick changes, the tick accumulator is clamped to `min(acc, effectiveTick)`, so ending Slow-mo causes at most one immediate snake step, never two in a row. `tickAlpha = clamp(acc / effectiveTick, 0, 1)`.
 - MEC-006-R19: Slow-mo changes nothing else: rot timers, hazard/terrain timers, the director, orb and rain timers keep running in sim time (the GDD side effect). Duration `skills.slowmo.durationMs` (4000).
 
@@ -70,10 +70,10 @@ Save fields: none owned here. Start energy and carry-over are MEC-008; unlocks a
 - MEC-006-R31: A rain mango is never golden and never rots into a rock. It lives `skills.mangoRain.mangoLifeMs` (8000), blinks in its last `mangoBlinkMs` (2000), then vanishes with `rainMangoExpired {x, y}` (no `rotted` event, no rock). Rain mangoes outlive the 6 s cast window.
 - MEC-006-R32: Eating a rain mango: the snake grows by 1 (MEC-001 eating step), score += `mango.points.normal`. Progress +1 only if its cast budget `left > 0` (then `left -= 1`); budget at cast = `floor(need(levelAtCast) × skills.mangoRain.barCapFraction)` (L1: 2, L30: 6). Emits `ate {x, y, golden: false, source: 'rain', points, progressGain}` (event shape: MEC-002 §7).
 - MEC-006-R33: Rain mangoes do not change the MEC-002-R3 counters (`eatenInLevel`, `eatenInRun`) and do not trigger a new regular mango. The regular mango keeps existing and rotting normally (MEC-002-R11).
-- MEC-006-R34: Rain progress may complete the level bar; level-up then follows MEC-003. The rain, its remaining drops, existing rain mangoes and the cast budget continue in the new level (timers paused during the transition).
+- MEC-006-R34: Rain progress may complete the level bar; level-up then follows MEC-003. The rain, its remaining drops, existing rain mangoes and the cast budget continue in the new level (timers keep running).
 
 **Step order (extends P0 §4)**
-- MEC-006-R35: The 1 ms step order (incl. where skill effects, orbs and rain run, and the transition branch) is defined once in `docs/ARCHITECTURE.md` "Sim step order" (until P1 PR 1 copies it there: P1 design §5). `useSkill` and `turn` run between steps (R11), never inside one.
+- MEC-006-R35: The 1 ms step order (incl. where skill effects, orbs and rain run) is defined once in `docs/ARCHITECTURE.md` "Sim step order". `useSkill` and `turn` run between steps (R11), never inside one.
 
 ## 5. Edge cases
 1. Energy is 100 and an orb is eaten: orb removed, `orbEaten {gained: 0}`, no `energyChanged`.
@@ -89,9 +89,9 @@ Save fields: none owned here. Start energy and carry-over are MEC-008; unlocks a
 11. Shield expires during the bonk pause (cannot happen: it was consumed by the break). Shield expires with no hit: `skillEnded {reason: 'timeout'}`.
 12. Slow-mo ends during the bonk pause: the negative accumulator is kept; R18 clamp does not raise it.
 13. Mango Rain on a nearly full board: some drops are skipped; energy is not refunded.
-14. Level-up during Slow-mo: the new level's tick × 1.6 applies at once; the remaining Slow-mo time is paused during the transition and continues after it.
-15. Level transition while a snip wall or rubble exists: MEC-003 crumbles temporary hazards, so both crumble at transition start; Tail Snip stops being active.
-16. A skill press during the level transition: `busy`, not buffered.
+14. Level-up during Slow-mo: the effective tick uses the larger of the Slow-mo and slowdown factors (R17), never their product; the Slow-mo timer keeps running.
+15. Level up while a snip wall or rubble exists: snip walls and rubble survive a level up and end by their own lifetime.
+16. A skill press right after a level up is accepted like any other press (no `busy` reason).
 17. Death with effects active: everything freezes with `status: 'over'`; `snapshot.energy` at death is what MEC-008 carries over.
 18. P1 has no permanent level layouts (MEC-003-R15), so orbs and rain mangoes are never displaced in P1. If P2 adds layouts, the P2 spec defines displacement.
 19. Two `useSkill` calls in the same ms: processed in call order; the second sees the first's spend.
@@ -99,7 +99,7 @@ Save fields: none owned here. Start energy and carry-over are MEC-008; unlocks a
 ## 6. Interactions with other mechanics
 - **MEC-001 snake:** eating a rain mango uses the normal grow step; an orb uses the normal move step. Tail Snip shortens without changing direction or queue. The length reset on level-up (MEC-001) also applies to a snake grown by rain.
 - **MEC-002 mango:** MEC-002-R2 is the single `reserved` list (it includes orbs, rain mangoes, snip walls and rubble). Golden mango gives +10 energy (R9). Rain mangoes are separate objects and do not affect rot time or golden gating (R33, MEC-002-R11).
-- **MEC-003 levels:** rain progress counts toward the quota. During the transition, orb/rain/effect timers pause, skill presses are `busy`, snip wall and rubble crumble. Energy is never reset by a level-up.
+- **MEC-003 levels:** rain progress counts toward the quota. Orb, rain and effect timers keep running through a level up, skill presses are accepted, snip wall and rubble survive. Energy is never reset by a level-up.
 - **MEC-004 obstacles:** hazard placement uses the MEC-002-R2 `reserved` list; BFS `reachable` adds snip walls and rubble (every state) as walls (orbs and rain mangoes are not walls). Fairness rule 3 still targets the regular mango only. New cause keys: `snipWall`, `rubble`.
 - **MEC-008 checkpoints:** provides `startEnergy`; reads `snapshot.energy` at death. Base tick (incl. speed ramp) comes from MEC-008 and is multiplied by Slow-mo. Whether rain mangoes advance the speed ramp is MEC-008's rule; the `ate` event carries `source` for it.
 - **MEC-007 loadout:** provides `loadout`; mid-run unlocks may fill an empty slot (MEC-007).
@@ -111,7 +111,7 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 ```
 - `createSim` and `SimOptions`: defined once in MEC-003 §7; this spec owns the `startEnergy` validation (R1) and the `SkillId` type.
 - `CauseKey` adds `snipWall | rubble`.
-- `SimEvent` adds: `energyChanged {energy, delta, source: 'orb' | 'golden' | 'skill'}`, `orbSpawned {x, y}`, `orbEaten {x, y, gained}`, `orbExpired {x, y}`, `skillUsed {slot, skill, level, energyBefore, energyAfter}`, `skillRejected {slot, skill: SkillId | null, reason: 'empty' | 'busy' | 'active' | 'energy' | 'noTarget'}`, `skillEnded {skill, reason: 'timeout' | 'consumed'}`, `tailSnipped {cut, cells}`, `shieldBroke {x, y, family, rubble: {x, y} | null}`, `rainDrop {x, y}`, `rainDropSkipped {}`, `rainMangoExpired {x, y}`. The `ate` event shape (incl. `source`) is defined in MEC-002 §7.
+- `SimEvent` adds: `energyChanged {energy, delta, source: 'orb' | 'golden' | 'skill'}`, `orbSpawned {x, y}`, `orbEaten {x, y, gained}`, `orbExpired {x, y}`, `skillUsed {slot, skill, level, energyBefore, energyAfter}`, `skillRejected {slot, skill: SkillId | null, reason: 'empty' | 'active' | 'energy' | 'noTarget'}`, `skillEnded {skill, reason: 'timeout' | 'consumed'}`, `tailSnipped {cut, cells}`, `shieldBroke {x, y, family, rubble: {x, y} | null}`, `rainDrop {x, y}`, `rainDropSkipped {}`, `rainMangoExpired {x, y}`. The `ate` event shape (incl. `source`) is defined in MEC-002 §7.
 - `SimSnapshot` adds: `energy`, `energyMax`, `orbs: {x, y, leftMs}[]`, `skills: {slot, id: SkillId | null, cost, affordable, active, leftMs}[2]` (`leftMs` of the active effect, else 0), `snipWall: {x, y, state: 'solid' | 'crumble', leftMs}[]` (cells of all snip walls), `rubble: {x, y, state: 'solid' | 'crumble', leftMs}[]`, `rainMangoes: {x, y, leftMs}[]`, `rain: {leftMs, dropsLeft} | null`, `slowmo: {leftMs} | null`, `shield: {leftMs} | null`.
 - Main functions carry `// MEC-006` comments (`src/core/energy.ts`, `src/core/skills.ts`).
 
@@ -119,9 +119,9 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 - Orb: cyan circle with outline; blinks (shape on/off, not color only) when `leftMs ≤ 2000`. Rain mango: normal mango shape with a small droplet mark; blinks the same way.
 - Energy bar in the HUD under the level bar, number `energy/100`. Skill buttons: icon letter + cost; glow when affordable; grey when not; ring of remaining time while active.
 - Snip wall: rock tile with a tail-stripe mark. Rubble: small dark grey tile. Slow-mo: blue board tint. Shield: outline ring on the head.
-- Text keys: `hud.energy`, `skill.slowmo.name`, `skill.tailSnip.name`, `skill.shield.name`, `skill.mangoRain.name`, `skill.reject.energy` ("Need {cost} energy"), `skill.reject.active` ("Already on!"), `skill.reject.noTarget` ("Too short to snip"), `skill.reject.busy`, `tip.orb.first` ("Energy orb! Fuel for skills"), `death.snipWall`, `death.rubble`.
+- Text keys: `hud.energy`, `skill.slowmo.name`, `skill.tailSnip.name`, `skill.shield.name`, `skill.mangoRain.name`, `skill.reject.energy` ("Need {cost} energy"), `skill.reject.active` ("Already on!"), `skill.reject.noTarget` ("Too short to snip"), `tip.orb.first` ("Energy orb! Fuel for skills"), `death.snipWall`, `death.rubble`.
 - Sounds (synth): `orb` soft zap; `skillSlowmo`, `skillSnip`, `skillShield`, `skillRain` one cast tone each; `shieldBreak` crack; `nope` short low buzz. Haptics: orb 8 ms, cast 20 ms (GDD §10.4).
-- "Nope": on `skillRejected` with reason `busy | active | energy | noTarget`, the button shakes 200 ms and plays `nope`; reason `empty` gives no feedback (no button is drawn for an empty slot). The orb tooltip shows once, on the first `orbSpawned` when the saved best level was < 2.
+- "Nope": on `skillRejected` with reason `active | energy | noTarget`, the button shakes 200 ms and plays `nope`; reason `empty` gives no feedback (no button is drawn for an empty slot). The orb tooltip shows once, on the first `orbSpawned` when the saved best level was < 2.
 
 ## 9. Tuning
 | Key | Value | Source |
@@ -153,11 +153,12 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 - MEC-006-R7 orb expires at 8000 ms; leftMs reported
 - MEC-006-R8 orb gives +15, no growth, no progress, no score
 - MEC-006-R9 golden mango gives +10 energy on level 1
-- MEC-006-R10 orb timers frozen during level transition
+- MEC-006-R10 orb timers keep running through a level up
 - MEC-006-R11 rejected press is not retried; turn queue unchanged by useSkill
-- MEC-006-R13 rejection reasons and their order (empty, busy, active, energy, noTarget)
+- MEC-006-R13 rejection reasons and their order (empty, active, energy, noTarget)
 - MEC-006-R15 success spends cost and emits energyChanged then skillUsed
-- MEC-006-R17 slow-mo tick = round(base × 1.6) incl. level-up and ramp during effect
+- MEC-006-R16 slow-mo timer keeps running through a level up
+- MEC-006-R17 slow-mo tick = round(base × 1.6) incl. ramp during effect; Slow-mo and the slowdown do not stack: the larger factor wins
 - MEC-006-R18 ending slow-mo causes at most one immediate step
 - MEC-006-R19 rot and hazard timers unchanged by slow-mo
 - MEC-006-R21 cut counts for lengths 3…10
@@ -172,7 +173,6 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 - MEC-006-R32 rain progress capped at floor(need × 0.5) per cast; extras give score only
 - MEC-006-R34 rain continues after a level-up with its budget
 - MEC-006-R35 determinism: same seed + same timed turn/useSkill calls → same snapshot hash, any advance chunking
-- MEC-006-R35 during transition only crumble, fade-out and transition timers advance
 
 ## 11. Lead decisions & escalations
 **(a) Lead decisions**
@@ -180,7 +180,7 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 - Orb attempts every 6 s are skipped when 2 orbs exist or no cell is fair; no catch-up (simple, predictable rate).
 - Orbs and rain drops use the MEC-002 "good" cell set with no fallback (never in pockets or at the head).
 - Orbs, rain mangoes, snip wall and rubble are `reserved` for all placement; snip wall and rubble are BFS walls (consistent with how rocks work).
-- Skill presses are evaluated at once, never buffered; presses during the level transition are rejected as `busy` (no hidden delayed spends).
+- Skill presses are evaluated at once, never buffered; a press right after a level up is evaluated like any other (no hidden delayed spends).
 - Tail Snip is "active" while its wall is solid (one wall at a time; matches the GDD "same skill active" rule).
 - Cut size = keep `max(3, ceil(L/2))` (back half rounded down, min length 3); length ≤ 3 is `noTarget` with no spend.
 - A cut cell in the head's next cell is not walled (prevents an unreactable death from the player's own skill).
@@ -190,7 +190,7 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 - Rain mangoes are never golden, never rot into rocks and vanish after 8 s (a paid skill should not create rocks).
 - Rain bar budget is per cast, fixed at cast time, may finish the level and carries over a level-up (simple, still ≤ 50% of any bar).
 - Rain mangoes do not change MEC-002 eaten counters (the regular mango's rot pace is not affected by a skill).
-- Effect timers pause during the level transition (the player does not lose paid time; matches rot pause).
+- Effect timers keep running through a level up (nothing is frozen, MEC-003-R9).
 - Effective tick is rounded to whole ms and the accumulator is clamped on change (determinism, no double steps).
 - Snip walls and rubble use the MEC-004 hazard state rules (reserved and BFS wall in every state, solid only in `solid`), and rubble is a list (a recast Shield can leave a second rubble cell).
 - (lead, 2026-11-03) **Snip wall and Shield rubble are exempt from GDD §5.3 fairness rules 1–3.** GDD §6.3 is the more specific rule: they are the skill's price. The 3-tick bonk pause (R27) stays as specified. Replaces the former owner escalation.

@@ -7,10 +7,10 @@
 - [x] fix/keyboard-input-lag merged (cd6684d): keyboard turns now applied on native keydown (was one Phaser frame late).
 - [x] chore/runlog-turns merged (394bc77): run_end records `turns` (accepted turns, MEC-003-R19).
 - [x] "Wall death at exactly 1260 ms" investigated: not a bug (no input for 9 steps x 140 ms from spawn). Owner keeps start as is (countdown, then the snake moves).
-- [ ] **RESUME HERE:** brainstorming level-up option B (architectural): remove the 1 s level-up freeze and the level-up crumble, the snake keeps moving, slowdown tiers 2-5 none / 6-15 x1.4 eased 1 s / 16-30 x1.6 eased 1.5 s, max with Slow-mo. Open question 1 to the owner: fate of old temporary obstacles (a: own lifetime, b: stay until slowdown ends then crumble [lead recommends], c: stay forever).
+- [x] Level-up flow B: code (Tasks 1-6) and specs/ARCHITECTURE/DECISIONS (Task 7) done on feat/levelup-flow-b; QA and merge (Task 8) pending.
 
 ## Next (ordered, max 5)
-1. Finish option B design -> spec in docs/superpowers/specs/ -> owner review -> writing-plans -> implement (affects MEC-003 R7-R11, MEC-002 EC4, MEC-006-R17/R35, about 19 files).
+1. Level-up flow B Task 8 (QA), then merge feat/levelup-flow-b into version/v0.1.
 2. Owner re-tests WASD on laptop + one more playtest log (2-tester gate); lead runs summarizeLog and writes the gate verdict.
 3. On gate pass: merge version/v0.1 -> dev; start P2a (docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md).
 4. Tech debt: full suite ~25-48 s (> 10 s target); tsconfig excludes two legacy Task 4 QA files.

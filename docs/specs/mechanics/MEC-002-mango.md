@@ -6,14 +6,14 @@
 - Defines where the regular mango appears, how it rots, what eating it gives, when a rotten mango leaves a temporary rock, and the single list of `reserved` cells used by all placement in P1.
 - GDD: §2.1 (in-run loop), §3b (first mango within reach, never next to the head), §5.2 (golden still grows +1), §5.4 row "Rotten mangoes → rocks", §6.1 (golden +10 energy), §7 rows "Mango rot time" and "Golden mango".
 - Base behavior: P0 design §5 "MEC-002 Mangoes" (prototype port). This spec keeps P0 behavior unless a rule below changes it.
-- Related: MEC-001 (eating step, growth, no board-full win), MEC-003 (level transition, family table `rottenRocks` column), MEC-004 (hazards, `nearHead`, BFS `reachable`, crumble state), MEC-006 (energy, orbs, Mango Rain, Shield, step order: ARCHITECTURE "Sim step order" via MEC-006-R35), MEC-008 (golden gating per run, speed ramp counts mangoes).
+- Related: MEC-001 (eating step, growth, no board-full win), MEC-003 (level up, family table `rottenRocks` column), MEC-004 (hazards, `nearHead`, BFS `reachable`, crumble state), MEC-006 (energy, orbs, Mango Rain, Shield, step order: ARCHITECTURE "Sim step order" via MEC-006-R35), MEC-008 (golden gating per run, speed ramp counts mangoes).
 
 ## 2. Player-facing summary
 - One mango is on the board at a time, always reachable and never right next to the head.
 - Each mango slowly rots (ring around it). Eat it in time: +1 score, +1 bar, +1 length.
 - Sometimes a golden mango appears: +3 score, +2 bar, +1 length, +10 energy, but it rots twice as fast.
 - From level 12, a mango that rots leaves a rock on its cell for 5 s, then the rock crumbles. Before level 12 a rotten mango just disappears and a new one appears.
-- During the 1 s level transition the rot ring stops.
+- The rot ring keeps running through a level up.
 - Mango Rain mangoes (a skill) are extra mangoes; they never rot into rocks and never affect the regular mango.
 
 ## 3. State & data
@@ -34,10 +34,10 @@ No save fields.
 - **MEC-002-R4 Rot time.** At placement: `totalMs = floor(max(mango.rotMinMs, mango.rotBaseMs − mango.rotPerEatenMs × eatenInLevel) × (golden ? mango.goldenRotFactor : 1))`; `ageMs = 0`. Changed from P0: the formula uses `eatenInLevel` (GDD §7 "eaten in level"), not the run count.
 - **MEC-002-R5 Golden.** At placement, the mango is golden with chance `mango.goldenChance` (0.15) only if `eatenInRun ≥ mango.goldenMinEaten` (3) (P0 gating, per run). Eating it gives score `mango.points.golden` (3), progress `mango.progress.golden` (2), growth +1 (MEC-001-R3) and energy `energy.goldenGain` (+10, MEC-006-R9). A normal mango gives `points.normal` (1), `progress.normal` (1), growth +1, no energy.
 - **MEC-002-R6 Rot expiry.** When `ageMs ≥ totalMs` (checked at the "mango" position of ARCHITECTURE "Sim step order", before the snake step): the mango is removed. If `familyRow(level).rottenRocks` (MEC-003-R14/R15, true from L12) **and** the cell is fair (P0: reachable and not `nearHead(x, y, mango.nearHeadDist)`), a rotten rock is created on that cell (R7). Emit `rotted {x, y, leftRock}`. Then place the next mango (R8); the new rock is already reserved for that placement.
-- **MEC-002-R7 Rotten rock.** Solid for `mango.rottenRockLifeMs` (5000), then `crumble` for `hazard.crumbleMs` (450, not solid), then removed. In both states it is `reserved` (R2) and a BFS wall (P0). Entering a solid one kills with cause `rotten` (P0 cause order) unless Shield breaks it (MEC-006-R24/R26). It does not count toward the director's small-hazard cap. It is never permanent in P1. Its timers run in sim time (Slow-mo does not slow them, MEC-006-R19); at a level transition it switches to `crumble` (MEC-003-R7/R8).
-- **MEC-002-R8 When a mango is placed.** (a) At run start, after the snake is created; (b) in the eating step after eating the regular mango, after the MEC-001-R5 chain (reset and level-up included), so cells freed by the reset are candidates; (c) after a rot (R6); (d) by the retry (R9). Eating a rain mango never places or replaces the regular mango, also when it causes the level up: the regular mango then stays with its timer (frozen during the transition, R10).
+- **MEC-002-R7 Rotten rock.** Solid for `mango.rottenRockLifeMs` (5000), then `crumble` for `hazard.crumbleMs` (450, not solid), then removed. In both states it is `reserved` (R2) and a BFS wall (P0). Entering a solid one kills with cause `rotten` (P0 cause order) unless Shield breaks it (MEC-006-R24/R26). It does not count toward the director's small-hazard cap. It is never permanent in P1. Its timers run in sim time (Slow-mo does not slow them, MEC-006-R19); a level up does not change it: it keeps this lifetime (MEC-003-R8).
+- **MEC-002-R8 When a mango is placed.** (a) At run start, after the snake is created; (b) in the eating step after eating the regular mango, after the MEC-001-R5 chain (reset and level-up included), so cells freed by the reset are candidates; (c) after a rot (R6); (d) by the retry (R9). Eating a rain mango never places or replaces the regular mango, also when it causes the level up: the regular mango then stays with its timer (its timer keeps running).
 - **MEC-002-R9 Deferred placement.** If a placement finds no candidate (good or any), `mango = null`, `retryMs = 0`, emit `mangoDeferred {}` (once per empty period). Every `mango.placeRetryMs` (250) of playing time a new attempt is made; the first success ends the period (no event; the snapshot shows the mango). The run does not end (MEC-001-R10); the director does not spawn meanwhile (MEC-003-R13). A failed attempt consumes no RNG.
-- **MEC-002-R10 Pause in transition.** During a MEC-003 level transition, `ageMs` and `retryMs` do not advance (MEC-003-R9). Slow-mo does not slow `ageMs` (MEC-006-R19).
+- **MEC-002-R10 No pause at level up.** `ageMs` and `retryMs` keep counting through a level up (MEC-003-R9). Slow-mo does not slow `ageMs` (MEC-006-R19).
 - **MEC-002-R11 Rain mangoes.** Rain mangoes (MEC-006-R29–R34) are separate objects: they are `reserved` for the regular mango and the regular mango is reserved for them (R2); they never rot into rocks, never are golden, and do not change R3 counters or R4 rot time. Each one eaten counts as a mango for the MEC-008 speed ramp (MEC-008-R8).
 - **MEC-002-R12 Orbs.** Orbs (MEC-006-R4–R8) and the regular mango never share a cell (R2). Orbs are not BFS walls, so they never make a mango unfair or unreachable.
 
@@ -45,9 +45,9 @@ No save fields.
 1. **Mango rots in the same ms the head would enter it:** R6 runs before the snake step. The cell is in the head's front lane, so it is not fair: no rock; the head enters an empty cell (P0 order kept).
 2. **Rot at L11 or lower:** `rotted {leftRock: false}`, new mango placed; no rock even if fair.
 3. **Checkpoint start at L12:** rotten rocks from the first rot; no introduction banner (MEC-003 EC7).
-4. **Level up from a rain mango:** the regular mango stays; its `totalMs` was computed with the old `eatenInLevel` and is not recomputed. The first regular mango placed in the new level uses `eatenInLevel = 0`.
+4. **Level up from a rain mango:** the regular mango stays; its `totalMs` was computed with the old `eatenInLevel` and is not recomputed. The first regular mango placed in the new level uses `eatenInLevel = 0`. The next mango is placed after the reset with the normal R2 reserved list.
 5. **Level up from the regular mango:** MEC-003-R7 resets `eatenInLevel` before R8(b), so the new level's first mango has the full 8000 ms (golden 4000).
-6. **Placement fails at the level-up step:** deferred (R9); the retry timer is frozen during the transition and the first retry happens 250 ms after the transition ends.
+6. **Placement fails at the level-up step:** deferred (R9); the retry timer keeps running and the first retry happens 250 ms later.
 7. **Snip wall makes the mango unreachable:** at rot time the cell is not fair, so no rock. (Placement of a new mango already requires reachability for the "good" set.)
 8. **Shield hits a rotten rock:** the rock is removed (MEC-006-R26); rubble follows MEC-006-R28.
 9. **Golden mango that fills the bar with overflow:** MEC-001 EC1 / MEC-003-R5; energy +10 is still added.
@@ -56,7 +56,7 @@ No save fields.
 
 ## 6. Interactions with other mechanics
 - **MEC-001 Snake:** eating detection, growth +1 for every mango, tail-inclusion rule (P0); placement order MEC-001-R5; no board-full win MEC-001-R10.
-- **MEC-003 Levels:** `rottenRocks` column enables R6 rocks; transition resets `eatenInLevel`, freezes rot and retry timers, crumbles rotten rocks; director paused while `mango = null`.
+- **MEC-003 Levels:** `rottenRocks` column enables R6 rocks; a level up resets `eatenInLevel`; rot and retry timers keep running and rotten rocks keep their lifetime (MEC-003-R8/R9); director paused while `mango = null`.
 - **MEC-004 Obstacles:** hazard placement uses R2; fairness rule 3 (BFS to the current mango) skips the check while `mango = null` (no target).
 - **MEC-006 Energy/skills:** golden +10 energy (MEC-006-R9); rain mangoes R11; orbs R12; Shield breaks rotten rocks; Slow-mo does not slow rot.
 - **MEC-007 Loadout:** none.
@@ -73,7 +73,7 @@ No save fields.
 - Main functions carry `// MEC-002` comments.
 
 ## 8. Feedback in P1 (greybox)
-- Rot ring and throb below 30% as in P0; frozen during the transition (it reads `ageMs`).
+- Rot ring and throb below 30% as in P0; keeps running through a level up (it reads `ageMs`).
 - Rotten rock: P0 rotten-rock greybox tile; in `crumble` it reuses the hazard crumble visual.
 - Rotten rock introduction banner: `banner.new.rottenRock` (MEC-003 §8).
 - `mangoDeferred`: no player-facing feedback (should not happen in normal play); logged to the console in dev builds only.
@@ -106,7 +106,7 @@ Referenced, owned elsewhere: `energy.goldenGain` (MEC-006 §9), `hazard.crumbleM
 - `MEC-002-R7 rotten rock kills with cause rotten only while solid`
 - `MEC-002-R8 level up from a rain mango keeps the regular mango and its timer`
 - `MEC-002-R9 no candidate defers the mango, emits mangoDeferred once, retries every 250 ms`
-- `MEC-002-R10 rot and retry timers do not advance during the transition; slow-mo does not slow rot`
+- `MEC-002-R10 slow-mo does not slow rot`; `MEC-003-R9 rot, director and levelTimeMs keep running after a level up`
 - `MEC-002-R11 rain mango never becomes a rotten rock`
 
 ## 11. Lead decisions & escalations

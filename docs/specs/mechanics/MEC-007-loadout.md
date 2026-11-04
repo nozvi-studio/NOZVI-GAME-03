@@ -68,7 +68,7 @@
 ## 6. Interactions with other mechanics
 - **MEC-001 snake:** none (skill presses never touch the turn queue).
 - **MEC-002 mango:** none.
-- **MEC-003 levels:** level-ups drive mid-run unlocks (R12); the level transition rejects skill presses as `busy` (MEC-006).
+- **MEC-003 levels:** level-ups drive mid-run unlocks (R12); skill presses are never rejected at a level up (MEC-003-R10).
 - **MEC-004 obstacles:** none.
 - **MEC-006 skills:** the loadout decides which skills `useSkill(slot)` fires; mid-run unlocks fill empty slots.
 - **MEC-008 checkpoints:** owns the save v2 envelope (this spec adds `lastLoadout`), the saved best level used for unlocks and slot count, the Home start choice and `startLevel`/`startEnergy`. `run_start` (GDD §12, local log) includes the loadout.

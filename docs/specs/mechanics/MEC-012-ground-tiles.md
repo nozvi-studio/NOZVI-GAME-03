@@ -6,7 +6,7 @@
 - Defines the two ground-tile families: **mud** (the snake moves at half speed while its head is on it) and **ice** (the snake cannot turn while its head is on it). Neither can kill.
 - GDD: §5.1 (biome 2 mud, biome 3 ice), §5.3 (fairness), §5.4 (catalogue rows "Mud tiles", "Ice tiles"; "Never use" list), §6.3 (Slow-mo), §7.
 - Framework: MEC-004 (registry, GroundTiles block R5, collision R6, speed R7, fairness R11–R14, death context R15, level end R16, verification R17–R18). Design: P2 design §5, §8, §9, §10, §11.
-- Related: MEC-001 (turn queue, step), MEC-002 (`reserved`, mango placement), MEC-003 (table, introduction, transition), MEC-006 (Slow-mo tick, Shield, step order), MEC-008 (speed ramp).
+- Related: MEC-001 (turn queue, step), MEC-002 (`reserved`, mango placement), MEC-003 (table, introduction, level up), MEC-006 (Slow-mo tick, Shield, step order), MEC-008 (speed ramp).
 
 ## 2. Player-facing summary
 - **Mud (from level 7):** brown patches warn, then turn to mud. While your head is in mud, the snake moves at half speed. Mud never kills.
@@ -26,9 +26,9 @@ Save fields: none.
 ## 4. Rules
 ### Spawn (both)
 - **MEC-012-R1 Shape and tries.** `<family>` below is the config group `mud` or `ice`. RNG order, as P0 fences: `kind = rng.pick(<family>.shapePool)` → `transform(<family>.shapes[kind])` (P0: `int(4)` quarter turns, `chance(0.5)` mirror, normalize) → up to `<family>.tries` origins `ox = int(COLS − w + 1)`, `oy = int(ROWS − h + 1)`. A candidate is valid per MEC-004-R10 (in bounds, not `reserved`, MEC-004-R11 with d = `fairness.nearHeadDist`, MEC-004-R12; ice cells count as new BFS walls) plus R7 for ice. On the first valid candidate: `lifeMs = <family>.lifeMs + rng.next() × <family>.lifeRandMs` (P0 hazard life formula), state `warn`, `t = 0`, all cells `on = false`; emit `hazardIncoming {family}`.
-- **MEC-012-R2 Lifecycle (GroundTiles, MEC-004-R5).** `warn` for `<family>.warnMs` (1500) → `active` for `lifeMs` → `fade` for `hazard.crumbleMs` (450) → removed. In `active`, a cell turns `on` at the first ms when no snake cell is on it; a cell that is never free stays off. In `fade` all cells are off. Patch timers run in sim time (Slow-mo does not slow them, MEC-006-R19) and freeze during the level transition except the fade (MEC-003-R7).
+- **MEC-012-R2 Lifecycle (GroundTiles, MEC-004-R5).** `warn` for `<family>.warnMs` (1500) → `active` for `lifeMs` → `fade` for `hazard.crumbleMs` (450) → removed. In `active`, a cell turns `on` at the first ms when no snake cell is on it; a cell that is never free stays off. In `fade` all cells are off. Patch timers run in sim time (Slow-mo does not slow them, MEC-006-R19) and keep running through a level up (MEC-003-R9).
 - **MEC-012-R3 Not lethal.** `solidAt` and `headHit` are always false/null; no death cause. Shield ignores tiles.
-- **MEC-012-R4 Level end.** `onLevelEnd`: every patch switches to `fade` (cells off) at t = 0 (MEC-004-R16).
+- **MEC-012-R4 Level up.** No level-end hook (MEC-004-R16): patches keep their lifecycle through a level up (MEC-003-R8).
 
 ### Mud
 - **MEC-012-R5 (mud) Reserved and BFS.** Mud cells are `reserved` in every state (no mango, orb, rain mango, rubble or other hazard on them). They are not BFS walls.
@@ -53,7 +53,7 @@ Save fields: none.
 6. **Mud with Slow-mo at base tick 128 (L7):** `round(128 × 1.6 × 2)` = 410 ms; without Slow-mo 256 ms.
 7. **Shield bonk on mud:** MEC-006-R27 uses the effective tick, so the bonk pause is longer on mud (3 × the slowed tick).
 8. **Checkpoint ramp on mud:** the ramp tick is the base tick and is multiplied by 2.
-9. **Level up with the head on mud or ice:** patches fade at t = 0; the first step after the transition uses the normal tick and dequeues.
+9. **Level up with the head on mud or ice:** patches stay and keep their own lifetime (MEC-003-R8); the snake keeps stepping with the patch effect.
 10. **Two ice patches:** each ring must avoid the other's cells and ring (reserved), so the rings never overlap and two patches always have at least 2 free cells between them; a mud patch can never touch an ice patch (its cells would be on the ring).
 11. **Ice candidate touching the board edge:** its ring is out of bounds, so it is rejected; ice never uses the outer ring of the board.
 12. **Mango unreachable except across ice:** MEC-004-R12 rejects that ice candidate.
@@ -62,7 +62,7 @@ Save fields: none.
 ## 6. Interactions with other mechanics
 - **MEC-001:** R9 changes the dequeue step only while on active ice; queue rules unchanged (P2 design §20 item 8).
 - **MEC-002:** tiles and ice rings are `reserved` (MEC-004-R3); ice cells are BFS walls for the "good" set and the fair-rock check.
-- **MEC-003:** table rows and introductions (R11); tiles fade at level up (R4); timers frozen in the transition.
+- **MEC-003:** table rows and introductions (R11); tiles survive a level up (R4); timers keep running.
 - **MEC-004:** GroundTiles block, small cap, `maxActive`, fairness rules, death context, verification layers.
 - **MEC-006:** Slow-mo × mud multiply (MEC-004-R7); Shield never interacts with tiles; orbs and rain drops never land on tiles or rings.
 - **MEC-008:** ramp tick × mud factor.
