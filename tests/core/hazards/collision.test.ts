@@ -44,6 +44,37 @@ describe('MEC-004 collision', () => {
     });
   });
 
+  it('MEC-004 edge case 4 shield breaks only the selected family cell', () => {
+    for (const [firstKey, secondKey, selectedIndex] of [
+      ['snipWall', 'rock', 0],
+      ['rock', 'rottenRock', 1],
+    ] as const) {
+      const s = buildBoard({ head: [4, 8], dir: [1, 0] });
+      s.shield = { leftMs: 5000 };
+      withFamilies(s, [firstKey, secondKey].map(key => ({
+        key, cause: key === 'rottenRock' ? 'rotten' : key,
+        solid: [[5, 8]] as [number, number][], breakable: true,
+      })), () => {
+        const selected = FAMILIES[selectedIndex]!;
+        const other = FAMILIES[selectedIndex === 0 ? 1 : 0]!;
+        expect(selected.solidAt(s, 5, 8)).toBe(true);
+        expect(other.solidAt(s, 5, 8)).toBe(true);
+
+        stepSnake(s, b, rngFrom(s.rng));
+
+        expect(s.status).toBe('playing');
+        expect(s.snake[0]).toEqual({ x: 5, y: 8 });
+        expect(selected.solidAt(s, 5, 8)).toBe(false);
+        expect(other.solidAt(s, 5, 8)).toBe(true);
+        expect(s.shield).toBeNull();
+        expect(s.events).toEqual([
+          { type: 'skillEnded', skill: 'shield', reason: 'consumed' },
+          { type: 'shieldBroke', x: 5, y: 8, family: selected.key, rubble: { x: 6, y: 8 } },
+        ]);
+      });
+    }
+  });
+
   it.each([
     { name: 'wall', head: [16, 8] as [number, number], body: undefined },
     { name: 'self', head: [4, 8] as [number, number], body: [[5, 8], [5, 9], [4, 9]] as [number, number][] },
