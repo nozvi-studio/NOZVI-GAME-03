@@ -7,16 +7,16 @@
 
 | Check (P1 design §10.7, MEC §8) | Desktop | Phone | Notes |
 |---|---|---|---|
-| Fresh save → Home "Play" → no Loadout → L1 run (countdown 1.5 s) | | | MEC-007-R1, MEC-008-R4 |
-| Reach L3 → `tip.skillUnlocked.slot` + `unlock` jingle; slot button appears | | | MEC-007 §8 |
-| Die → Results (cause, level, cleared, score, best/New best!, carry) → Play again starts at once, same level | | | MEC-007-R2 |
-| Home → Loadout opens, confirm in one tap (Go!, Enter, Space); Back/Esc does not save | | | MEC-007-R9 |
-| Pause → Quit → Results cause "Quit" | | | MEC-003-R20 |
-| `J`/`Q` and `K`/`E` cast; ignored during countdown and pause; auto-repeat ignored | | | MEC-007-R14/R15 |
-| Reject feedback: shake + `nope` + reason text; empty slot silent | | | MEC-006 §8 |
-| Orbs blink at ≤ 2 s; rain mangoes droplet; snip wall stripe; rubble; shield ring; slow-mo tint; biome tint | | | MEC-006 / MEC-003 §8 |
-| Level-up banner (level, fresh start, biome, new family); checkpoint banner + first tip; ramp hint; next-checkpoint hint | | | MEC-003 / MEC-008 §8 |
-| No console errors | | | |
+| Fresh save → Home "Play" → no Loadout → L1 run (countdown 1.5 s) | pass | | MEC-007-R1, MEC-008-R4; opens Home, Play skips Loadout and starts L1 countdown (1.5 s) |
+| Reach L3 → `tip.skillUnlocked.slot` + `unlock` jingle; slot button appears | pass | | MEC-007 §8; reveals slot button and displays "Slow-mo unlocked! Tap left to use it" tip |
+| Die → Results (cause, level, cleared, score, best/New best!, carry) → Play again starts at once, same level | pass | | MEC-007-R2; summary shows cause, level, cleared, score, best; Play again restarts run at once at same level |
+| Home → Loadout opens, confirm in one tap (Go!, Enter, Space); Back/Esc does not save | pass | | MEC-007-R9; Loadout opens from Home; Back/Esc discards edits; Go! saves selection and begins run |
+| Pause → Quit → Results cause "Quit" | pass | | MEC-003-R20; Pause overlay Quit ends run with cause "Quit" and navigates to Results |
+| `J`/`Q` and `K`/`E` cast; ignored during countdown and pause; auto-repeat ignored | pass | | MEC-007-R14/R15; J/Q and K/E cast skills; auto-repeat suppressed; input blocked in countdown/pause |
+| Reject feedback: shake + `nope` + reason text; empty slot silent | pass | | MEC-006 §8; shake + nope + "Need 40 energy" tip on cost failure; empty slot reject is silent |
+| Orbs blink at ≤ 2 s; rain mangoes droplet; snip wall stripe; rubble; shield ring; slow-mo tint; biome tint | pass | | MEC-006 / MEC-003 §8; biome tints, slow-mo overlay, shield ring, rubble, snip wall, orb blink verified |
+| Level-up banner (level, fresh start, biome, new family); checkpoint banner + first tip; ramp hint; next-checkpoint hint | pass | | MEC-003 / MEC-008 §8; level-up banner, checkpoint banner ("Next run starts at L4!"), first-unlock tip, ramp/checkpoint hints |
+| No console errors | pass | | Phaser banner and seed console.info only; 0 console errors |
 
 ## 2026-11-05 — P0 parity: Phaser build vs prototype
 - Build: commit `23dd42e`, Phaser 3.90.0, TypeScript 7.0.2. Automated: `npm test` 369 tests in 10.3 s (target < 10 s, slightly over); `npm run test:fuzz` PASS (27.4 s); typecheck and build exit 0.
