@@ -18,8 +18,4 @@ export const rottenRockFamily: HazardFamily<RottenRock> = {
   bfsWallAt: hasCell, reservedAt: hasCell,
   // MEC-006-R26 Shield removes the broken rock.
   onBreak(s, x, y) { s.rottenRocks = s.rottenRocks.filter(r => !hasCell(r, x, y)); },
-  // MEC-003-R7 transition cleanup restarts the crumble timer even for crumbling rocks.
-  onLevelEnd(s, ctx) {
-    for (const r of s.rottenRocks) { r.state = 'crumble'; r.leftMs = ctx.balance.hazard.crumbleMs; }
-  },
 };

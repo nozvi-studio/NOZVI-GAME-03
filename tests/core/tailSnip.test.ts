@@ -71,13 +71,13 @@ describe('MEC-006 Tail Snip', () => {
     sim.advance(140);
     expect(sim.drainEvents()).toEqual([{ type: 'died', cause: 'snipWall', x: 2, y: 0 }]);
   });
-  it('MEC-003-R8 level-up crumbles snip walls and clears them during transition', () => {
+  it('MEC-003-R8 snip walls survive a level up and end by their own lifetime', () => {
     const sim = simFromAscii(b, [...Array<string>(10).fill(''), '........M'], {
       snake: line(6), quiet: true, options, extraState: { progress: 3 },
     });
     sim.useSkill(1); sim.advance(140);
-    expect(sim.snapshot().snipWall.every(c => c.state === 'crumble' && c.leftMs === 450)).toBe(true);
-    sim.advance(449); expect(sim.snapshot().snipWall[0]?.leftMs).toBe(1);
-    sim.advance(1); expect(sim.snapshot().snipWall).toEqual([]);
+    expect(sim.snapshot().level).toBe(2);
+    expect(sim.snapshot().snipWall.length).toBeGreaterThan(0);
+    expect(sim.snapshot().snipWall.every(c => c.state === 'solid' && c.leftMs === b.skills.tailSnip.wallLifeMs - 140)).toBe(true);
   });
 });

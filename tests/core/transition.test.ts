@@ -12,7 +12,7 @@ const levelUpSim = (extra: Partial<SimState> = {}) => simFromAscii(b, ['.....M']
   extraState: { progress: 3, ...extra },
 });
 
-describe('MEC-003 transition', () => {
+describe('MEC-003 level up', () => {
   it('MEC-003-R7 no freeze: the snake steps one level-2 tick after the level up', () => {
     const sim = levelUpSim(); sim.advance(140);
     expect(types(sim)).toEqual(['ate', 'shrunk', 'levelUp']);
@@ -64,7 +64,7 @@ describe('MEC-003 transition', () => {
     expect(sim.snapshot().mango).toMatchObject({ y: 0 });
     expect(sim.snapshot().mango!.x).toBeGreaterThanOrEqual(0);
     expect(sim.snapshot().mango!.x).toBeLessThanOrEqual(12);
-    expect(sim.snapshot().hazards.every(h => h.state === 'crumble')).toBe(true);
+    expect(sim.snapshot().hazards.every(h => h.state === 'solid')).toBe(true);
   });
 
   it('MEC-001-R8 snake at length 3 grows and resets to 4 on next level up', () => {
@@ -103,25 +103,24 @@ describe('MEC-003 transition', () => {
     expect(sim.snapshot()).toMatchObject({ level: 2, progress: 1, need: 4 });
   });
 
-  it('MEC-003-R7 all hazards and rotten rocks are non-solid from t = 0 and gone by t = 500', () => {
-    const sim = simFromAscii(b, ['.....M', '#FwR'], {
+  it('MEC-003-R8 obstacles survive a level up, also families not enabled in the new level, and keep their own lifetimes', () => {
+    const sim = simFromAscii(b, ['.....M', '#FwRSu'], {
       snake: [[4, 0], [3, 0], [2, 0], [1, 0]], quiet: true, extraState: {
         progress: 3, terrains: [{ family: 'terrain', t: 1, lifeMs: 10000, cells: [{ x: 9, y: 9, delay: 0, up: true, vis: 'up' }] }],
       },
     });
+    const before = exportState(sim);
     sim.advance(140);
     const s = stateOf(sim);
-    expect(s.hazards).toHaveLength(3);
-    expect(s.hazards.every(h => h.state === 'crumble' && h.cells.every(c => !c.on))).toBe(true);
-    for (const [x, y] of [[0, 1], [1, 1], [2, 1], [3, 1], [9, 9]]) expect(cellSolidCause(s, x!, y!)).toBeNull();
-    expect(s.terrains[0]!.cells[0]).toMatchObject({ up: false, vis: 'down' });
-    expect(sim.snapshot().rottenRocks[0]).toMatchObject({ state: 'crumble', leftMs: 450 });
-    sim.advance(449); expect(sim.snapshot().hazards).toHaveLength(3);
-    expect(sim.snapshot().rottenRocks[0]).toMatchObject({ state: 'crumble', leftMs: 1 });
-    sim.advance(1); expect(sim.snapshot().hazards).toEqual([]);
-    expect(sim.snapshot().rottenRocks).toEqual([]);
-    sim.advance(49); expect(sim.snapshot().terrains).toHaveLength(1);
-    sim.advance(1); expect(sim.snapshot().terrains).toEqual([]);
+    expect(s.level).toBe(2);
+    expect(s.hazards.map(h => h.state)).toEqual(before.hazards.map(h => h.state));
+    expect(cellSolidCause(s, 0, 1)).not.toBeNull();
+    expect(cellSolidCause(s, 1, 1)).not.toBeNull();
+    expect(s.rottenRocks[0]).toMatchObject({ state: 'solid', leftMs: b.mango.rottenRockLifeMs - 140 });
+    expect(s.snipWalls[0]).toMatchObject({ state: 'solid', leftMs: b.skills.tailSnip.wallLifeMs - 140 });
+    expect(s.rubble[0]).toMatchObject({ state: 'solid', leftMs: b.skills.shield.rubbleLifeMs - 140 });
+    expect(s.terrains).toHaveLength(1);
+    expect(s.terrains[0]!.t).toBeLessThan(s.terrains[0]!.lifeMs);
   });
 
   it('MEC-003-R9 rot, director and levelTimeMs keep running after a level up', () => {

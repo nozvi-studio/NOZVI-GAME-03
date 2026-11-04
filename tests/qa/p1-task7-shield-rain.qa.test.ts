@@ -898,6 +898,8 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     expect(snap.progress).toBe(0);
     expect(snap.length).toBe(4); // length reset on level up
     expect(snap.rain).toEqual({ leftMs: 3000 - s.tickMs, dropsLeft: 2 });
+    sim.advance(10); // the rain timer keeps advancing after the level up
+    expect(sim.snapshot().rain!.leftMs).toBe(3000 - s.tickMs - 10);
 
   });
 

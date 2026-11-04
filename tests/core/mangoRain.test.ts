@@ -113,7 +113,8 @@ describe('MEC-006 Mango Rain', () => {
     sim.advance(140);
     expect(sim.drainEvents().some(e => e.type === 'levelUp')).toBe(true);
     expect(stateOf(sim).rainBudgets).toEqual([{ castId: 1, left: 2 }]);
-    sim.advance(1); expect(sim.snapshot().rain).not.toBeNull();
+    expect(sim.snapshot().rain).toMatchObject({ leftMs: 3000 - 140 });
+    sim.advance(10); expect(sim.snapshot().rain).toMatchObject({ leftMs: 3000 - 150 });
   });
   it('MEC-002-R8 level up from a rain mango keeps the regular mango and its timer', () => {
     const sim = levelUpRain({ mango: { x: 12, y: 12, golden: false, totalMs: 8000, leftMs: 8000 - 860 } });
@@ -126,13 +127,12 @@ describe('MEC-006 Mango Rain', () => {
     sim.advance(141);
     expect(sim.snapshot()).toMatchObject({ rampMangoesLeft: 4, tickMs: 136 });
   });
-  it('MEC-006-EC15 snip wall and rubble crumble at the level transition', () => {
+  it('MEC-006-EC15 snip wall and rubble survive a level up', () => {
     const sim = levelUpRain({ mango: { ...FAR },
       snipWalls: [{ family: 'snipWall', cells: [{ x: 9, y: 9 }], state: 'solid', leftMs: 3000 }],
       rubble: [{ family: 'rubble', x: 8, y: 8, state: 'solid', leftMs: 1500 }] });
     sim.advance(140);
     expect(sim.snapshot()).toMatchObject({
-      snipWall: [{ x: 9, y: 9, state: 'crumble', leftMs: 450 }], rubble: [{ x: 8, y: 8, state: 'crumble', leftMs: 450 }] });
-    expect(stateOf(sim).snipWalls.some(w => w.state === 'solid')).toBe(false);
+      snipWall: [{ x: 9, y: 9, state: 'solid', leftMs: 2860 }], rubble: [{ x: 8, y: 8, state: 'solid', leftMs: 1360 }] });
   });
 });

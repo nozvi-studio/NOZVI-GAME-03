@@ -83,7 +83,7 @@ describe('QA P1 Task 5: Energy, Orbs & Speed Ramp (MEC-006, MEC-008 Black-Box)',
   });
 
   it('QA-P1T5-05 MEC-006-R3 energy is retained across level up', () => {
-    // MEC-006-R3: "Energy is kept across level-ups and level transitions within a run"
+    // MEC-006-R3: "Energy is kept across level-ups within a run"
     const s = buildState(b, {
       level: 1,
       progress: 3,
@@ -93,12 +93,12 @@ describe('QA P1 Task 5: Energy, Orbs & Speed Ramp (MEC-006, MEC-008 Black-Box)',
     s.energy = 45;
     const sim = restoreSim(b, s);
 
-    sim.advance(140); // eats mango, triggers levelUp to L2 & transition
+    sim.advance(140); // eats mango, triggers levelUp to L2
     const snapTransition = sim.snapshot();
     expect(snapTransition.level).toBe(2);
     expect(snapTransition.energy).toBe(45);
 
-    sim.advance(1000); // completes transition
+    sim.advance(1000);
     const snapPlaying = sim.snapshot();
     expect(snapPlaying.energy).toBe(45);
   });

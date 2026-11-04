@@ -186,7 +186,6 @@ export function parseBalance(json: unknown): Balance {
     if (t.factor <= 1) fail(path + '.factor', 'must be > 1');
     prevTo = t.to;
   }
-  if (b.level.transitionMs < Math.max(b.hazard.crumbleMs, b.terrain.fadeOutMs)) fail('level.transitionMs', 'must cover crumble and fade-out');
   // MEC-003-R14/R16 rows cover every level once, with at most one first introduction.
   let nextLevel = 1;
   const seen = new Set<string>();

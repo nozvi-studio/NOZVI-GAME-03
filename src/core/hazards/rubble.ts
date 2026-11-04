@@ -17,8 +17,4 @@ export const rubbleFamily: HazardFamily<Rubble> = {
   },
   solidAt: (r, x, y) => r.state === 'solid' && hasCell(r, x, y),
   bfsWallAt: hasCell, reservedAt: hasCell,
-  // MEC-006-EC15 temporary rubble crumbles at level-up.
-  onLevelEnd(s, ctx) {
-    for (const r of s.rubble) { r.state = 'crumble'; r.leftMs = ctx.balance.hazard.crumbleMs; }
-  },
 };

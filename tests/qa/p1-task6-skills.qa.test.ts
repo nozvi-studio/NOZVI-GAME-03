@@ -314,11 +314,11 @@ describe('QA P1 Task 6: Skill Framework, Slow-mo, Tail Snip & Loadout (MEC-006, 
     sim.advance(1);
     expect(sim.snapshot().tickMs).toBe(224); // L1 slowmo
 
-    // Eat mango at t = 224 -> level 2, transition 1000ms
+    // Eat mango at t = 224 -> level 2 (no freeze)
     sim.advance(223);
     expect(sim.snapshot().level).toBe(2);
 
-    // After transition, effective tick is L2 slowmo = 221
+    // After the level up, effective tick is L2 slowmo = 221
     sim.advance(1001);
     expect(sim.snapshot().tickMs).toBe(221);
   });
@@ -610,33 +610,6 @@ describe('QA P1 Task 6: Skill Framework, Slow-mo, Tail Snip & Loadout (MEC-006, 
       expect.objectContaining({ type: 'skillUsed', slot: 0, skill: 'tailSnip', energyBefore: 70, energyAfter: 40 })
     );
     expect(sim.snapshot().length).toBe(3);
-  });
-
-  it('QA-P1T6-30 MEC-006-EC15 / MEC-003-R7 Level transition causes active snipWall to crumble immediately', () => {
-    const snakeCells: [number, number][] = [[6, 10], [5, 10], [4, 10], [3, 10], [2, 10], [1, 10]];
-    const s = buildState(b, {
-      level: 1,
-      progress: 3,
-      snake: snakeCells,
-      dir: [1, 0],
-      mango: [7, 10], // eaten at t=140
-      golden: false,
-      spawnInMs: QUIET,
-    });
-    s.loadout = ['tailSnip', null];
-    s.bestLevel = 6;
-    s.energy = 100;
-    const sim = restoreSim(b, s);
-
-    sim.useSkill(0); // cuts to length 3, creates snipWall
-    expect(sim.snapshot().snipWall.every(c => c.state === 'solid')).toBe(true);
-
-    sim.advance(140); // eats mango, completes level 1, enters transition
-    expect(sim.snapshot().snipWall.every(c => c.state === 'crumble' && c.leftMs === 450)).toBe(true);
-
-    // Wall disappears by end of crumble
-    sim.advance(450);
-    expect(sim.snapshot().snipWall).toEqual([]);
   });
 
   // --------------------------------------------------------------------------

@@ -200,7 +200,6 @@ export interface HazardFamily<S extends { family: FamilyKey }> {
   solidAt(state: S, x: number, y: number): boolean;    // collision
   bfsWallAt(state: S, x: number, y: number): boolean;  // reachability walls
   reservedAt(state: S, x: number, y: number): boolean; // placement reserved
-  onLevelEnd(s: SimState, ctx: StepCtx): void;         // MEC-003-R7; context supplies configured crumble time
   onBreak?(s: SimState, x: number, y: number): void;    // MEC-006-R26 removes one broken solid cell
   breakable: boolean;                                  // MEC-006-R24 Shield can break it; false only for rubble
 }

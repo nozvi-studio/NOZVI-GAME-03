@@ -1,5 +1,4 @@
 import type { Balance } from './balance';
-import { FAMILIES } from './hazards/registry';
 import { biome, introducedAt, isChallenge, quota } from './level';
 import { rampOnLevelUp } from './ramp';
 import { applyMidRunUnlocks } from './skills';
@@ -14,7 +13,6 @@ export function startLevelUp(s: SimState, b: Balance, ctx: StepCtx): void {
   const cleared = s.levelTimeMs, oldBiome = biome(b, s.level);
   s.progress -= quota(b, s.level); s.level += 1; s.levelsCleared += 1;
   s.eatenInLevel = 0; s.levelTimeMs = 0;
-  for (const f of FAMILIES) f.onLevelEnd(s, ctx);
   // MEC-003-R11 the director restarts with the new level's formulas; MEC-003-R22 slowdown (re)starts.
   s.spawnInMs = b.director.firstSpawnMs; s.mazeCooldownMs = 0;
   startLevelUpSlow(s, b);
