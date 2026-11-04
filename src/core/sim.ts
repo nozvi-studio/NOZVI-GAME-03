@@ -5,7 +5,7 @@ import { updateDirector } from './hazards/director';
 import { stepHazards } from './hazards/registry';
 import { biome, isChallenge, needFor, levelTickMs } from './level';
 import { orbTick } from './energy';
-import { baseTickMs } from './ramp';
+import { effectiveTick, SKILLS, skillTimers, slotCount, unlockedSkills, useSkill } from './skills';
 import { placeMango, mangoTick } from './mango';
 import { rngFrom, seedRng, type Rng } from './rng';
 import { queueTurn, stepSnake } from './snake';
@@ -15,18 +15,29 @@ import type { Dir, Sim, SimSnapshot, SimState, SimOptions, Step } from './types'
 const toDir = ([x, y]: Pair): Dir => ({ x: x as Step, y: y as Step });
 const states = new WeakMap<Sim, SimState>();
 
-// MEC-003 section 7 / MEC-006-R1 validate the run's start level and energy.
+// MEC-003 section 7 / MEC-006-R1 / MEC-007-R11 validate run options and copy the loadout.
 export function initialState(b: Balance, seed: number, options: SimOptions = {}): SimState {
   const level = options.startLevel ?? 1;
   if (!Number.isInteger(level) || level < 1 || level > b.level.maxLevel) throw new RangeError('startLevel must be an integer 1..' + b.level.maxLevel);
   const energy = options.startEnergy ?? 0;
   if (!Number.isInteger(energy) || energy < 0 || energy > b.energy.max) throw new RangeError('startEnergy must be an integer 0..' + b.energy.max);
+  const bestLevel = options.bestLevel === undefined ? 1 : options.bestLevel;
+  if (!Number.isInteger(bestLevel) || bestLevel < 1 || bestLevel > b.level.maxLevel) throw new RangeError('bestLevel must be an integer 1..' + b.level.maxLevel);
+  const loadout = options.loadout === undefined ? [null, null] as const : options.loadout;
+  const unlocked = unlockedSkills(b, bestLevel);
+  if (!Array.isArray(loadout) || loadout.length !== 2
+    || [loadout[0], loadout[1]].some(id => id !== null && !unlocked.includes(id))
+    || (loadout[0] !== null && loadout[0] === loadout[1])
+    || (slotCount(b, bestLevel) === 1 && loadout[1] !== null)) {
+    throw new RangeError('loadout must have two slots, unique unlocked skill ids or null, and an empty locked slot');
+  }
   const snake = b.snake.start.map(([x, y]) => ({ x, y }));
   return {
     snake, dir: toDir(b.snake.startDir), queue: [],
     headFrom: { ...snake[0]! }, tailFrom: { ...snake[snake.length - 1]! },
     acc: 0, tickMs: levelTickMs(b, 1), mango: null, rottenRocks: [], hazards: [], terrains: [],
     energy, orbs: [], orbSpawnMs: 0, rampActive: true, rampEaten: 0,
+    bestLevel, loadout: [loadout[0], loadout[1]], slowmo: null, snipWalls: [],
     spawnInMs: b.director.firstSpawnMs, mazeCooldownMs: 0, score: 0, eatenInRun: 0, retryMs: 0, level, progress: 0,
     phase: 'playing', transitionLeftMs: 0, levelTimeMs: 0, timeMs: 0,
     startLevel: level, levelsCleared: 0, eatenInLevel: 0,
@@ -48,7 +59,10 @@ function stepMs(s: SimState, b: Balance, rng: Rng): void {
   s.levelTimeMs += 1;
   updateDirector(s, b, rng);
   stepHazards(s, ctx);
-  s.tickMs = baseTickMs(s, b);
+  skillTimers(s, b, ctx);
+  // MEC-006-R18 preserve negative bonk pauses and permit at most one immediate move.
+  const eff = effectiveTick(s, b);
+  if (eff !== s.tickMs) { s.acc = Math.min(s.acc, eff); s.tickMs = eff; }
   mangoTick(s, b, ctx);
   orbTick(s, b, ctx);
   s.acc += 1;
@@ -58,12 +72,17 @@ function stepMs(s: SimState, b: Balance, rng: Rng): void {
 function snapshotOf(s: SimState, b: Balance): SimSnapshot {
   const c = structuredClone(s);
   return {
+    skills: c.loadout.map((id, slot) => ({ slot: slot as 0 | 1, id, cost: id === null ? 0 : b.skills[id].cost,
+      affordable: id !== null && s.energy >= b.skills[id].cost,
+      active: id !== null && (SKILLS[id]?.active(s) ?? false), leftMs: id === null ? 0 : SKILLS[id]?.leftMs(s) ?? 0 })),
+    slowmo: c.slowmo,
+    snipWall: c.snipWalls.flatMap(w => w.cells.map(c => ({ ...c, state: w.state, leftMs: w.leftMs }))),
     energy: s.energy, energyMax: b.energy.max,
     orbs: c.orbs.map(({ x, y, ageMs }) => ({ x, y, leftMs: b.energy.orbLifeMs - ageMs })),
     rampActive: s.rampActive, rampMangoesLeft: s.rampActive ? Math.max(0, b.checkpoints.rampMangoes - s.rampEaten) : 0,
     snake: c.snake, dir: c.dir, heading: c.queue.length ? c.queue[c.queue.length - 1]! : { ...c.dir },
     headFrom: c.headFrom, tailFrom: c.tailFrom,
-    tickAlpha: s.status === 'over' ? 1 : Math.min(1, s.acc / s.tickMs),
+    tickAlpha: s.status === 'over' ? 1 : Math.max(0, Math.min(1, s.acc / s.tickMs)),
     mango: c.mango && { ...c.mango, ageMs: c.mango.totalMs - c.mango.leftMs },
     rottenRocks: c.rottenRocks.map(({ x, y, state, leftMs }) => ({ x, y, state, leftMs })),
     eatenInLevel: s.eatenInLevel, eatenInRun: s.eatenInRun,
@@ -84,6 +103,7 @@ function snapshotOf(s: SimState, b: Balance): SimSnapshot {
 function wrap(b: Balance, s: SimState): Sim {
   const rng = rngFrom(s.rng);
   const sim: Sim = {
+    useSkill: slot => useSkill(s, b, { balance: b, snakeOn: (x, y) => snakeOn(s, x, y), emit: e => { s.events.push(e); } }, slot),
     turn: (dx, dy) => queueTurn(s, b, dx, dy),
     advance: ms => {
       if (!Number.isInteger(ms) || ms < 0) throw new RangeError(`advance(ms): non-negative integer expected, got ${ms}`);

@@ -31,13 +31,20 @@ export type TerrainVis = 'down' | 'warn' | 'up';
 export interface TerrainCell { x: number; y: number; delay: number; up: boolean; vis: TerrainVis }
 export interface TerrainHazard { family: 'terrain'; t: number; lifeMs: number; cells: TerrainCell[] }
 export interface RottenRock { family: 'rottenRock'; x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }
-export type HazardInstance = TimedHazard | TerrainHazard | RottenRock;
+export interface SnipWall { family: 'snipWall'; cells: Cell[]; state: 'solid' | 'crumble'; leftMs: number }
+export type HazardInstance = TimedHazard | TerrainHazard | RottenRock | SnipWall;
 
 export interface MangoState { x: number; y: number; golden: boolean; leftMs: number; totalMs: number }
 export type SimStatus = 'playing' | 'over';
 export interface Outcome { won: boolean; cause?: CauseKey }
 
 export type SimEvent =
+  | { type: 'skillUsed'; slot: 0 | 1; skill: SkillId; level: number; energyBefore: number; energyAfter: number }
+  | { type: 'skillRejected'; slot: 0 | 1; skill: SkillId | null; reason: 'empty' | 'busy' | 'active' | 'energy' | 'noTarget' }
+  | { type: 'skillEnded'; skill: SkillId; reason: 'timeout' | 'consumed' }
+  | { type: 'tailSnipped'; cut: number; cells: Cell[] }
+  | { type: 'skillUnlocked'; skill: SkillId; slot: 0 | 1 | null }
+  | { type: 'slotUnlocked'; slot: 1 }
   | { type: 'energyChanged'; energy: number; delta: number; source: 'orb' | 'golden' | 'skill' }
   | { type: 'orbSpawned'; x: number; y: number }
   | { type: 'orbEaten'; x: number; y: number; gained: number }
@@ -65,6 +72,10 @@ export interface SimState {
   acc: number;                 // ms accumulated toward the next snake step
   tickMs: number;
   energy: number;
+  loadout: [SkillId | null, SkillId | null];
+  bestLevel: number;
+  slowmo: { leftMs: number } | null;
+  snipWalls: SnipWall[];
   orbs: { x: number; y: number; ageMs: number }[];
   orbSpawnMs: number;
   rampActive: boolean;
@@ -101,6 +112,9 @@ export interface HazardView {
 export interface TerrainView { t: number; lifeMs: number; cells: readonly { x: number; y: number; vis: TerrainVis; delay: number }[] }
 
 export interface SimSnapshot {
+  skills: readonly { slot: 0 | 1; id: SkillId | null; cost: number; affordable: boolean; active: boolean; leftMs: number }[];
+  slowmo: { leftMs: number } | null;
+  snipWall: readonly { x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }[];
   energy: number;
   energyMax: number;
   orbs: readonly { x: number; y: number; leftMs: number }[];
@@ -138,6 +152,7 @@ export interface SimSnapshot {
 }
 
 export interface Sim {
+  useSkill(slot: 0 | 1): void;                    // synchronous, never buffered
   turn(dx: -1 | 0 | 1, dy: -1 | 0 | 1): void;  // ignored after the run is over
   advance(ms: number): void;                     // ms must be a non-negative integer; no-op after `over`
   drainEvents(): SimEvent[];                     // events since the last call, in order

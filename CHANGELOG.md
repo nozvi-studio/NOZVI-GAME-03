@@ -16,6 +16,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - test(qa): rewrite 23 superseded P0 QA cases for P1 Task 1 rules; QA files typecheck again.
 - test(qa): independent black-box QA suite for P0 Task 2 by the tester worker (34 cases; MEC-004-R13 warn bound skipped until P2a).
 ### Features
+- feat(core): skill framework, loadout validation, mid-run unlocks, Slow-mo and Tail Snip (P1 PR 6)
 - feat(core): energy bar, energy orbs from L2, golden +10 energy, start energy option, checkpoint speed ramp (P1 PR 5)
 - feat(core): mango counters, rot by level, temporary rotten rocks from L12, deferred placement (P1 PR 4)
 - feat(core): length reset, 1 s level transition, level-30 run win, simFromAscii test helper (P1 PR 3)

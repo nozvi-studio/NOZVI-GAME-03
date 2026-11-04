@@ -3,18 +3,16 @@
 **Updated:** 2026-11-04 by Codex **Milestone:** M1 - P1 Tasks 1 through 4 implemented. **Version branch:** `version/v0.1`
 
 ## Now (in progress)
-- [x] P1 Tasks 1-3 merged into `version/v0.1`.
-- [x] Task 4 committed on `feat/p1-mangoes` (version merged in); Task 5 committed on `feat/p1-energy` (worktree `../NOZVI-GAME-03-wt4`, node_modules junction).
-- [ ] **RESUME HERE (2026-11-04, both workers killed by low-memory reaper):**
-  - agy Task 4 QA on `feat/p1-mangoes` (main tree): partial uncommitted edits in 4 tests/qa files; resume brief = scratchpad agy-qa4 (11 obsolete IDs + QA-T4-20 code-vs-test verdict + new p1-task4-mangoes QA).
-  - Codex Task 6 on `feat/p1-skills-a` (worktree, from Task 5): not started, tree clean.
-  - Parallel mode (owner-approved) needs CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1; otherwise run one worker at a time.
+- [x] P1 Tasks 1-5 merged into `version/v0.1`.
+- [x] P1 Tasks 6-10 implemented + committed (chain in worktree `../NOZVI-GAME-03-wt4`, node_modules junction): `feat/p1-skills-a` 8e050d1 -> `feat/p1-skills-b` 5cca5c6 -> `feat/p1-session` 597ef28 -> `feat/p1-scenes` 156af03 -> `chore/p1-playtest` fdc819c. Each awaits agy QA, then --no-ff merge in order.
+- [ ] **RESUME HERE:** agy QA Task 6 on `feat/p1-skills-a` (main tree, version already merged in) was killed by the low-memory reaper; partial uncommitted: new tests/qa/p1-task6-skills.qa.test.ts + QA-P1T5-ORDER edit in p1-task5-energy. Resume and finish.
+- [ ] Suspected code bug: regular-mango path emits levelUp before rampEnded; ARCHITECTURE 'Sim step order' 12.4 requires ramp first (Mango Rain path is correct). Fix on `fix/p1-ramp-order` once QA-P1T5-ORDER confirms.
 
 ## Next (ordered, max 5)
-1. Merge Task 4, then agy QA Task 5 (merge version into feat/p1-energy first), merge.
-2. Tasks 6-10 per plan (branches: skills-a, skills-b, session, scenes, chore/p1-playtest).
-3. Tech debt: normal suite ~17 s (> 10 s target).
-4. P1 exit: owner recruits 5 testers; summarizeLog + PLAYTEST gate.
+1. agy QA Tasks 7, 8, 9 (incl. browser walk per PLAYTEST 'P1 scenes manual check'), 10; known obsolete QA to rewrite: QA-T7-22, QA-T8-31..34, QA-T6-18.
+2. Ramp-order fix; merge all into version/v0.1; version -> dev at P1 exit.
+3. Owner: browser check ?debug=1; recruit 5 testers; fill PLAYTEST P1 protocol.
+4. Tech debt: full suite ~20 s (> 10 s target).
 
 ## Workers and QA process
 - Feature code: Codex (`delegate-workers` codex-task.sh) or Claude subagent, chosen per task.
