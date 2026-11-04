@@ -25,7 +25,6 @@
 - Task 9 player-facing strings await owner review. OPEN GDD: §4 session length; §8.3 reason to come back.
 
 ## Known issues / tech debt
-- P2a plan and P2 design still plan HazardFamily.onLevelEnd, which was removed in flow B; update them before P2a starts.
 - Windows: Vitest needs --configLoader native --pool threads --maxWorkers 2.
 - 4 skipped QA (reasons in files). Single 1.28 MB JS chunk.
 - Phone run log showed a run_start without run_end (quit mid-run); confirm whether quit should log run_end.

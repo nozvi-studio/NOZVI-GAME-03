@@ -40,7 +40,7 @@ Dependencies: P2b needs the P2a pipeline hooks and harness; P2c needs every fami
 ## 4. Family framework
 - One registry (`src/core/hazards/registry.ts`) lists every family in a fixed order (§6). Each family is a stateless module whose state lives in `SimState.families[key]` (JSON data, so `sim.clone()` copies it).
 - P0 minimal members: `key`, `spawn`, `update`, `snapshot`, `solidAt`, `bfsWallAt`, `reservedAt`, `breakable`.
-- P2a adds (all optional, a missing member means "never"): `cause` (the `CauseKey` of its solid cells), `capClass` (`small | big | modifier | none`), `maxActiveKey`, `tileAt` (ground tile kind), `headHit` (`'mover' | 'area' | null` for a head moving into the cell), `onBreak` (Shield removes one cell), `onLevelEnd` (MEC-003-R7 end state). A mover entering the head cell or a blast activating on the head during `update` reports it through the step context callback `ctx.hitHead(family, x, y, kind, dir)`.
+- P2a adds (all optional, a missing member means "never"): `cause` (the `CauseKey` of its solid cells), `capClass` (`small | big | modifier | none`), `maxActiveKey`, `tileAt` (ground tile kind), `headHit` (`'mover' | 'area' | null` for a head moving into the cell), `onBreak` (Shield removes one cell), `onLevelEnd` (MEC-003-R7 end state; **amended by level-up flow B, 2026-11-04: `onLevelEnd` is not added; every instance keeps its own lifecycle across a level up, MEC-004-R16, MEC-012-R4**). A mover entering the head cell or a blast activating on the head during `update` reports it through the step context callback `ctx.hitHead(family, x, y, kind, dir)`.
 - Composite queries (`solidCauseAt`, `bfsWallAt`, `reservedAt`, `tileAt`) loop over the registry; nothing else in the core asks a family directly. Exact contract: MEC-004-R1…R4.
 
 ## 5. Building blocks
@@ -157,7 +157,7 @@ Art and juice beyond greybox (P3), meta (P4), bot skill use, any GDD Parking-lot
 ## 20. P2 changes to P1 specs (applied by the PR that implements them, with lead approval)
 1. **MEC-002-R2** reserved list: snake, regular mango, orbs, rain mangoes, plus every cell where a registered family's `reservedAt` is true (adds mud, ice + ring, and later families).
 2. **MEC-002 "good" set / MEC-006-R6:** BFS walls come from the registry `bfsWallAt` (adds ice cells, NPC cells, bomb cells, shrink ring).
-3. **MEC-003-R7/R8:** "every hazard and terrain" becomes "every registry family's `onLevelEnd`" (tiles fade, movers vanish, bombs defuse).
+3. **MEC-003-R7/R8:** "every hazard and terrain" becomes "every registry family's `onLevelEnd`" (tiles fade, movers vanish, bombs defuse). **Amended by level-up flow B (2026-11-04): void.** There is no level-up freeze or level-end crumble; tiles, movers and bombs end by their own lifecycle, and the director does not spawn during the MEC-003-R22 slowdown (MEC-003-R8/R11, `docs/superpowers/specs/2026-11-04-levelup-flow-b-design.md`). P2b/P2c families follow the same rule.
 4. **MEC-003-R14/R15:** weight keys for new families; rows from §11; challenge rows (P2c).
 5. **MEC-003-R4 / §9:** challenge factor 0.8 and bonus 2 (P2c config).
 6. **MEC-003 §8:** challenge banners and HUD marker on; `banner.new.{family}` for every new family.
