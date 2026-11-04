@@ -56,3 +56,42 @@ export function appendRecord(log: RunLog, rec: LogRecord, maxEntries: number): R
 export function flushLog(store: KeyValueStore, log: RunLog): boolean {
   try { store.set(LOG_KEY, JSON.stringify(log)); return true; } catch { return false; }
 }
+
+export interface LogSummary {
+  runs: number;
+  runsFromResults: number; runsFromHome: number;
+  checkpointStarts: number;
+  levelsReached: Record<number, number>;
+  causes: Record<string, number>;
+  causeShare: Record<string, number>;
+  runsWithSkill: number; skillRunShare: number;
+  runsPerSession: number[];
+}
+
+const share = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 1000) / 1000 : 0);
+const bump = <K extends string | number>(m: Record<K, number>, k: K) => { m[k] = (Object.hasOwn(m, k) ? m[k] : 0) + 1; };
+
+// P1 design §11 pure playtest summary of an exported run log.
+export function summarizeLog(log: RunLog, sessionGapMs: number): LogSummary {
+  const s: LogSummary = { runs: 0, runsFromResults: 0, runsFromHome: 0, checkpointStarts: 0, levelsReached: {}, causes: {},
+    causeShare: {}, runsWithSkill: 0, skillRunShare: 0, runsPerSession: [] };
+  const started = new Set<number>(), skilled = new Set<number>(), ended = new Set<number>();
+  let lastEnd: number | null = null;
+  for (const r of log.entries) {
+    if (r.type === 'run_start' && !started.has(r.runId)) {
+      started.add(r.runId); s.runs++;
+      if (r.entry === 'home') s.runsFromHome++; else s.runsFromResults++;
+      if (r.startLevel > 1) s.checkpointStarts++;
+      if (s.runsPerSession.length === 0 || (lastEnd !== null && r.t - lastEnd > sessionGapMs)) s.runsPerSession.push(1);
+      else s.runsPerSession[s.runsPerSession.length - 1]!++;
+    } else if (r.type === 'skill_used') skilled.add(r.runId);
+    else if (r.type === 'run_end' && !ended.has(r.runId)) {
+      ended.add(r.runId); lastEnd = r.t;
+      bump(s.levelsReached, r.level); bump(s.causes, r.cause);
+    }
+  }
+  for (const [cause, n] of Object.entries(s.causes)) s.causeShare[cause] = share(n, ended.size);
+  s.runsWithSkill = [...skilled].filter(id => started.has(id)).length;
+  s.skillRunShare = share([...skilled].filter(id => ended.has(id)).length, ended.size);
+  return s;
+}

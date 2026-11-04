@@ -48,7 +48,7 @@ export interface Balance {
   };
   loadout: { slots: number; secondSlotLevel: number; order: import('./types').SkillId[] };
   checkpoints: { milestones: { reach: number; start: number; requiresClear?: boolean }[]; carryRatio: number; carryMax: number; rampMangoes: number };
-  log: { maxEntries: number };
+  log: { maxEntries: number; sessionGapMs: number };
   flow: { countdownMs: number; countdownDigits: number; maxFrameDeltaMs: number; deathCardDelayMs: number };
   ui: {
     bannerMs: number; swipeMinPx: number; swipeBoardFactor: number;
@@ -141,7 +141,7 @@ const SPEC: Spec = {
     check(v, { reach: 'int+', start: 'int+' }, path);
     if (isObj(v) && v.requiresClear !== undefined) check(v.requiresClear, 'bool', path + '.requiresClear');
   }), carryRatio: 'prob', carryMax: 'int0', rampMangoes: 'int+' },
-  log: { maxEntries: 'int+' },
+  log: { maxEntries: 'int+', sessionGapMs: 'int+' },
   flow: { countdownMs: 'int+', countdownDigits: 'int+', maxFrameDeltaMs: 'int+', deathCardDelayMs: 'int0' },
   ui: {
     bannerMs: 'int+', swipeMinPx: 'num+', swipeBoardFactor: 'prob',

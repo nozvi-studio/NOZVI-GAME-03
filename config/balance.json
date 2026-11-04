@@ -64,5 +64,5 @@
     "mangoRain": { "cost": 80, "durationMs": 6000, "dropsMin": 6, "dropsMax": 10, "barCapFraction": 0.5, "mangoLifeMs": 8000, "mangoBlinkMs": 2000, "unlockLevel": 16 } },
   "loadout": { "slots": 2, "secondSlotLevel": 6, "order": ["slowmo","tailSnip","shield","mangoRain"] },
   "checkpoints": { "milestones": [ {"reach":10,"start":4}, {"reach":15,"start":6}, {"reach":20,"start":8}, {"reach":25,"start":10}, {"reach":30,"start":12,"requiresClear":true} ], "carryRatio": 0.5, "carryMax": 50, "rampMangoes": 5 },
-  "log": { "maxEntries": 500 }
+  "log": { "maxEntries": 500, "sessionGapMs": 600000 }
 }

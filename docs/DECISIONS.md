@@ -328,3 +328,9 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - Ruling: keys with no spec text got plain English strings (`loadout.back` "Back", `skill.reject.busy` "Not now!", `banner.freshStart` "Fresh start!" per GDD, `hud.energy` "Energy {energy}/{max}"); P0 `TEXT`/`CAUSE_TEXT` helpers stay for existing callers. `cause.clear` text is "You cleared level 30!".
 - Ruling: the orb first-time tip uses the save `bestLevel` captured when the HUD is created (after `startRun`); `startRun` only raises bestLevel to the start level, so `< 2` is equivalent to the pre-run check. Checkpoint banners compare `session.save().unlockedCheckpoints` length before/after each `levelUp`.
 - Ruling: HudScene is ~340 lines (over the ~300 guide) to keep the whole HUD event table in one file; split candidate for P2.
+
+## 2026-11-04 - P1 Task 10 playtest tooling rulings
+- Context: P1 Task 10 (playtest tooling). No gameplay rule changed.
+- Ruling: new balance key `log.sessionGapMs` = 600000 (10 min, positive integer) defines a playtest session for `summarizeLog.runsPerSession` (plan lead decision 3); the gate "replay ≥ 3 times" is read as first-session `runsPerSession[0] ≥ 4`.
+- Ruling: `summarizeLog` counts each runId once (first `run_start` / first `run_end`); a new session starts when a `run_start` comes more than `sessionGapMs` after the previous `run_end`. Runs without `run_end` count in `runs` but not in shares; `runsWithSkill` counts started runs with a `skill_used`, while `skillRunShare` uses ended runs only. Shares are rounded to 3 decimals.
+- Ruling: logs are summarized in the browser console through debug-only `window.__summarize` (plan lead decision 5, no new dependency). `HomeScene` imports `summarizeLog` from `src/meta` for this debug helper only. The clipboard failure fallback is a read-only DOM textarea (removed on blur or scene shutdown).

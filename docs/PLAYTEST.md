@@ -2,6 +2,32 @@
 
 > Newest entry first. AI: read the latest entry only (AGENTS §2b).
 
+## 2026-11-04 — P1 playtest protocol (pending owner)
+- Build: branch `chore/p1-playtest` (P1 Task 10). `npm run build` + `npx vite preview --host` on LAN (or a static host); testers open the game with `?debug=1`.
+- Session: 5 testers, fresh save each (clear site data first), up to 15 min of unprompted play; the observer only notes comments, never prompts.
+- Data: on Home tap **Export log** (copies the run log JSON; if the clipboard fails a selectable text box shows it). Paste each JSON into a collapsed block below. In the browser console (page opened with `?debug=1`) run `__summarize('<json>')` and fill the table.
+- Gate (P1 design §1 item 3): ≥ 3 of 5 testers replay ≥ 3 times unprompted, measured as first-session `runsPerSession[0] ≥ 4` (session gap = `log.sessionGapMs`); runs with ≥ 1 `skill_used` ≥ 50 % over all testers. Also record checkpoint-start fairness comments (GDD §6.4) and every cause > 40 % (P2 input). Verdict: pass / iterate P1.
+- Manual items of P1 design §10.7 still open from the Task 9 entry below (scene walk, phone run, no console errors) are checked in the same sessions.
+
+| Tester | Runs | From Results / Home | Levels reached | Causes (share) | Skill-run share | Checkpoint starts | runsPerSession | Replay ≥ 3 (first session ≥ 4 runs) |
+|---|---|---|---|---|---|---|---|---|
+| T1 | | | | | | | | |
+| T2 | | | | | | | | |
+| T3 | | | | | | | | |
+| T4 | | | | | | | | |
+| T5 | | | | | | | | |
+
+- Totals: testers passing replay: _ / 5 · skill-run share over all testers: _ % · causes > 40 %: _
+- Checkpoint fairness comments: _
+- Observer comments: _
+- Verdict: _ (pass / iterate P1)
+
+<details><summary>Exported logs (T1–T5)</summary>
+
+_pending_
+
+</details>
+
 ## 2026-11-04 — P1 scenes manual check (pending)
 - Build: branch `feat/p1-scenes` (P1 Task 9). Automated tests, typecheck and build pass; the browser walk below is **pending** (independent tester, then owner phone).
 

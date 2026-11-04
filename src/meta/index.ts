@@ -8,4 +8,5 @@ export type { Milestone, CheckpointsConfig, ProgressionConfig } from './progress
 export { sanitizeLoadout } from './loadout';
 export type { UnlockTable } from './loadout';
 export { emptyLog, loadLog, nextRun, appendRecord, flushLog, LOG_KEY } from './runLog';
-export type { LogRecord, RunLog } from './runLog';
+export { summarizeLog } from './runLog';
+export type { LogRecord, RunLog, LogSummary } from './runLog';
