@@ -171,8 +171,8 @@ describe('QA Task 4: Mango Rot Lifecycle & Full Board (Black-Box)', () => {
     expect(snap.mango).toMatchObject({ x: 9, y: 8 });
   });
 
-  it('QA-T4-20 eating mango when board has zero free cells triggers boardFull win', () => {
-    // Spec: design §5 MEC-001: "If no mango can be placed: status 'over', outcome 'won', emit boardFull."
+  it('QA-T4-20 eating mango when board has zero free cells does not end run', () => {
+    // updated for P1 MEC-001-R10
     const s = buildState(b, {
       snake: [[8, 8], [7, 8], [6, 8]],
       dir: [1, 0],
@@ -191,12 +191,12 @@ describe('QA Task 4: Mango Rot Lifecycle & Full Board (Black-Box)', () => {
     sim.advance(140);
     const snap = sim.snapshot();
 
-    expect(snap.status).toBe('over');
-    expect(snap.outcome).toEqual({ won: true });
-    expect(sim.drainEvents()).toEqual([
-      { type: 'ate', x: 9, y: 8, golden: false, points: 1 },
-      { type: 'boardFull' },
-    ]);
+    expect(snap.status).toBe('playing');
+    expect(snap.outcome).toBeNull();
+    expect(snap.mango).toBeNull();
+    const events = sim.drainEvents();
+    expect(events).toContainEqual({ type: 'ate', x: 9, y: 8, golden: false, points: 1 });
+    expect(events.some(e => (e as any).type === 'boardFull')).toBe(false);
   });
 
   it.todo(
