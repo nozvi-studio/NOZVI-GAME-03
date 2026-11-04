@@ -1,0 +1,12 @@
+// The only public entry of src/meta.
+export { memoryStore } from './storage';
+export type { KeyValueStore } from './storage';
+export { defaultSave, load, save, SAVE_KEY, SAVE_VERSION, MIGRATIONS } from './save';
+export type { Migration, SaveData, SaveDataV2, SaveRules } from './save';
+export { applyLevelReached, applyRunWon, carryEnergy, nextMilestone } from './progression';
+export type { Milestone, CheckpointsConfig, ProgressionConfig } from './progression';
+export { sanitizeLoadout } from './loadout';
+export type { UnlockTable } from './loadout';
+export { emptyLog, loadLog, nextRun, appendRecord, flushLog, LOG_KEY } from './runLog';
+export { summarizeLog } from './runLog';
+export type { LogRecord, RunLog, LogSummary } from './runLog';

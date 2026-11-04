@@ -34,13 +34,13 @@
 Each row gets its own spec before its phase is implemented. Status: Implemented (prototype) / Proposed / Parked.
 | ID | Mechanic | Player-facing purpose | Phase | Spec | Status |
 |---|---|---|---|---|---|
-| MEC-001 | Snake movement, growth, self-collision, **length reset on level up** | Core steering challenge | P0 (port), P1 (reset) | to write | Implemented (prototype, without reset) |
-| MEC-002 | Mangoes: rot timer, golden mango, rotten mango → temporary obstacle | Time pressure, risk/reward | P0, P2 | to write | Implemented (prototype) |
-| MEC-003 | Level & biome progression: 30 levels, 6 biomes × 5 levels, quotas, speed curve, level transition | Short-term goal, escalation, sense of travel | P1 | to write | Proposed (prototype has 10 levels) |
+| MEC-001 | Snake movement, growth, self-collision, **length reset on level up** | Core steering challenge | P0 (port), P1 (reset) | `docs/specs/mechanics/MEC-001-snake.md` | Implemented (P1) |
+| MEC-002 | Mangoes: rot timer, golden mango, rotten mango → temporary obstacle | Time pressure, risk/reward | P0, P1, P2 | `docs/specs/mechanics/MEC-002-mango.md` | Implemented (P1) |
+| MEC-003 | Level & biome progression: 30 levels, 6 biomes × 5 levels, quotas, speed curve, level up | Short-term goal, escalation, sense of travel | P1 | `docs/specs/mechanics/MEC-003-levels-biomes.md` | Implemented (P1) |
 | MEC-004 | Obstacle families + director + fairness rules (warn → solid → crumble, never on snake, always a path) | Escalating, readable danger | P0 (port), P2 (new families) | to write (template 03) | Partly implemented (rocks, fences, rising ground, mazes) |
-| MEC-006 | Energy orbs, energy bar, 4 skills with energy cost and side effects | Clever escapes and farming at a cost | P1 | to write | Proposed |
-| MEC-007 | Skill loadout: pick 2 of the unlocked skills before a run | Strategy before the run; uncluttered phone controls | P1 | to write | Proposed |
-| MEC-008 | Checkpoints: milestone levels unlock a later start level for new runs, speed ramp, partial energy carry-over | No full reset after a death; makes energy farming meaningful | P1 | to write | Proposed |
+| MEC-006 | Energy orbs, energy bar, 4 skills with energy cost and side effects | Clever escapes and farming at a cost | P1 | `docs/specs/mechanics/MEC-006-energy-skills.md` | Implemented (P1) |
+| MEC-007 | Skill loadout: pick 2 of the unlocked skills before a run | Strategy before the run; uncluttered phone controls | P1 | `docs/specs/mechanics/MEC-007-loadout.md` | Implemented (P1) |
+| MEC-008 | Checkpoints: milestone levels unlock a later start level for new runs, speed ramp, partial energy carry-over | No full reset after a death; makes energy farming meaningful | P1 | `docs/specs/mechanics/MEC-008-checkpoints.md` | Implemented (P1) |
 | MEC-009 | Run results & marble reward formula | Every run pays out | P4 | to write | Proposed |
 | MEC-010 | Marble machine (pachinko): pegs, bumpers, prize slots, PUSH, public odds, pity | Juicy reward moment; collection driver | P4 | to write | Proposed |
 | MEC-011 | Skins, coins, duplicates, shop, equip | Long-term goal; self-expression | P4 | to write | Proposed |
@@ -69,7 +69,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 
 ## 5. Run structure, levels & difficulty [REQUIRED]
 ### 5.1 Levels and biomes (MEC-003)
-30 levels in 6 biomes of 5 levels. Each biome introduces 1–2 obstacle families and has its own palette; its 5th level is a **challenge level** (denser director, mixes the biome's families). Only one big terrain event (maze or rising ground) is active at a time.
+30 levels in 6 biomes of 5 levels. Each biome introduces 1–3 obstacle families (biomes 4–5 have 3, one new family per level; owner 2026-11-04) and has its own palette; its 5th level is a **challenge level** (denser director, mixes the biome's families). Only one big terrain event (maze or rising ground) is active at a time.
 | Biome | Levels | Palette idea | New obstacle families (details §5.4) | Challenge level |
 |---|---|---|---|---|
 | 1. Mango Orchard | 1–5 | green / mango yellow | Falling pebbles & rocks | L5 "Rock rain" |
@@ -83,11 +83,11 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 - **Quota:** mangoes needed to clear level *n* (1-based) = `4 + floor((n − 1) / 3)` → L1 = 4, L30 = 13; 255 mangoes for a full clear.
 - **Speed:** tick = `140 ms − 2 ms × (n − 1)` → L1 = 140 ms, L30 = 82 ms. (Replaces the prototype's 10-level curve whose minimum was never reached.)
 - **Length reset on level up (owner decision A):** when the bar fills, the snake shrinks to its start length (4 segments) keeping head position and direction; growth restarts from there. Golden mangoes still grow +1.
-- **Level transition (≈1 s, no input lost):** temporary hazards crumble, the new level's permanent layout (if any) fades in with warnings, rot timers pause. Exact sequence → MEC-003 spec.
+- **Level up (no freeze):** the snake keeps moving and existing obstacles stay until they end by their own lifetime; from the higher levels a short slowdown eases back to the new speed (owner 2026-11-04). Exact rules → MEC-003-R7..R9 and R22.
 - **Director:** spawn interval `max(1.6 s, 5 s − 0.12 s × n)`; small-hazard cap `min(10, 2 + floor(n / 3))`. Challenge levels: interval × 0.8, cap +2.
 
 ### 5.3 Fairness rules (apply to every obstacle family, MEC-004)
-1. Every obstacle shows a warning (color + blink + icon) before it becomes solid; warn time ≥ 0.9 s and ≥ 4 ticks at the current speed.
+1. Every obstacle shows a warning (color + blink + icon) before it becomes solid; warn time ≥ 0.9 s and ≥ 4 ticks at the base tick (`speed.startMs`; owner 2026-11-04 — slow effects such as mud or Slow-mo only add margin).
 2. Nothing ever lands on or appears inside the snake, or in the 3 cells in front of the head.
 3. After any spawn, the head must still be able to reach the current mango (BFS reachability); otherwise the spawn is rejected.
 4. Moving obstacles telegraph their whole path (lane highlight) before moving.
@@ -172,7 +172,7 @@ Starting values; they move to `config/balance.json` in P0 and are tuned there.
 | Mango rot time | `max(4 s, 8 s − 0.15 s × eaten in level)` | golden × 0.5; rotten → rock only from biome 3 |
 | Golden mango | 15% after 3 eaten in the run; +3 score, +2 bar, +10 energy | |
 | Spawn interval / small-hazard cap | `max(1.6 s, 5 − 0.12 n)` / `min(10, 2 + floor(n/3))` | challenge levels × 0.8 / +2 |
-| Warn times | rock 1.5 s · fence 2 s · maze 2.6 s · ground 0.9 s · coconut lane 1.5 s · bomb 3 s | all ≥ 4 ticks |
+| Warn times | rock 1.5 s · fence 2 s · maze 2.6 s · ground 0.9 s · coconut lane 1.5 s · bomb 3 s | all ≥ 4 base ticks |
 | Energy | orb +15 · every 6 s · max 2 · life 8 s · bar max 100 | |
 | Skill costs | Slow-mo 40 · Tail Snip 30 · Shield 50 · Mango Rain 80 | §6.3 |
 | Checkpoints | reach L10/15/20/25/30 → start at L4/6/8/10/12 · carry 50% energy (max 50) · ramp over 5 mangoes | §6.4 |
@@ -257,7 +257,7 @@ Big phases; each phase gets **one spec set + one plan** (Superpowers `brainstorm
 ## 13. Technical constraints [REQUIRED]
 - **Stack (owner decision, 2026-11-03):** Phaser 3 + TypeScript + Vite; unit tests with Vitest; Matter.js (bundled with Phaser) for the marble machine. Exact versions are verified and pinned in P0 (do not assume from memory).
 - **Architecture:** `src/core/` pure simulation (tick-based, deterministic, seeded RNG, no Phaser) · `src/meta/` pure economy, odds and save logic · `src/game/` Phaser scenes for rendering, input and audio · `config/balance.json` for all tuning. Details go to `docs/ARCHITECTURE.md` in P0.
-- **Platform (owner decision, 2026-11-03): web-first**, portrait, modern mobile and desktop browsers; an app wrapper (e.g. Capacitor) is optional in P5. **OPEN (owner, before P5):** target portals (e.g. itch.io, Poki, CrazyGames) — each has its own SDK and size rules.
+- **Platform (owner decision, 2026-11-03): web-first**, portrait, modern mobile and desktop browsers; an app wrapper (e.g. Capacitor) is optional in P5. **Publish target (owner decision, 2026-11-04): GitHub Pages** for now (static Vite build; set Vite `base` to the repo path). Other portals (itch.io, Poki, CrazyGames) may be added later, each with its own SDK and size rules.
 - **Performance:** 60 fps; ≤ 3 s to first input on a mid-range phone; initial download budget ≤ 5 MB (proposal).
 - **Offline:** playable after first load; save data local (§8.4).
 - The current `prototype/mango-snake-hard.html` remains as a reference until P0 reaches parity, then it is frozen.

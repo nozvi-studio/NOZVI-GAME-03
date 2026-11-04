@@ -1,30 +1,31 @@
-# STATUS — project memory
+# STATUS - project memory
 
-> AI: read at session start, rewrite at session end. Keep under ~60 lines; move history to CHANGELOG.
-
-**Updated:** 2026-11-03 by Claude Code **Milestone:** M1 — Phase P0 (Foundation) not started
+**Updated:** 2026-11-04 by Claude (lead) **Milestone:** M1 - P1 gate PASSED (PLAYTEST 2026-11-04); P2 content starting. **Version branch:** `version/v0.2`
 
 ## Now (in progress)
-- [ ] Owner review of GDD v0.2 (`docs/GDD.md`): ASSUMPTION and OPEN items listed below.
+- [x] P1 closed: flow B + WASD fix + run_end.turns merged; agy browser QA 11/11 PASS; version/v0.1 -> dev.
+- [x] P2 plans ready: P2a (revised for flow B) `docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md`; P2b `2026-11-04-p2b-movers-cycles-blasts.md`; P2c `2026-11-04-p2c-shrink-challenge-tuning.md`.
+- [ ] **RESUME HERE:** execute P2a with subagent-driven development on `feat/p2a-...` branches from `version/v0.2`.
 
 ## Next (ordered, max 5)
-1. Owner answers the remaining OPEN items below (none blocks P0).
-2. In a session with Superpowers: `brainstorming` → `writing-plans` for **P0 Foundation** (GDD §11), then execute as small PRs.
-3. P0 creates `docs/ARCHITECTURE.md`, `config/balance.json`, `src/core/`, tests; update CODEMAP and docs map in the same PRs.
-4. Write MEC-001/003/006/007/008 specs before P1 starts.
-5. Optional in parallel with P1: art style tile (GDD §10.1).
+1. P2a (framework + ground tiles), then P2b (movers, cycles, blasts, bird), then P2c (shrink, challenge levels, tuning, P2 exit).
+2. P2b/P2c Task 1 write MEC-013..018 specs before code.
+3. P2 exit: fuzz + fairness per family, bot report L1-30, agy QA, owner playtest (deathCauseReport over40 empty).
+4. Tech debt: suite ~25-48 s; small cleanups (snapTransition rename in 2 QA tests; MEC-003 R11 "(2500)" repeat).
 
-## Blockers / open questions for human
-- OPEN: target web portals (before P5) §13; session-length targets §4; reason to come back tomorrow §8.3; extra reference games §1 (optional).
-- Superpowers is not installed in the cloud session; run spec/plan steps in a session that has it (AGENTS §4).
-- `.claude/settings.json` permissions not yet verified in a live session.
+## Workers and QA process
+- Owner 2026-11-04: lead decides all technical matters and picks workers/models (Claude subagents, Codex, agy); ask the owner only GDD-level questions. Low-RAM kill: wait, retry up to 3 times, then stop and report.
+- agy = tester only. Lead verifies every merge with full test + typecheck.
+
+## Owner questions batched for the END of P2 (provisional defaults in use)
+- Task 9 player-facing strings ("Back", "Not now!", "Fresh start!", Results/Sound labels); GDD §4 session length; §8.3 reason to come back.
+- P2b OQ-B1..B6 and P2c OQ-C1..C5 (listed at the top of each plan): gate/spike rhythms, NPC speeds, stolen-mango cost, bird shadow, P2b strings, shrink frequency, challenge feedback/effect, P2 exit playtest size, tuning authority.
 
 ## Known issues / tech debt
-- Prototype is a ~1000-line single file with global state and no tests; it is the reference for the P0 port.
-- Prototype numbers (10 levels, 4 ms/level) differ from GDD v0.2 (30 levels, 2 ms/level); GDD wins.
+- Windows: Vitest needs --configLoader native --pool threads --maxWorkers 2.
+- 4 skipped QA (reasons in files). Single 1.28 MB JS chunk.
+- Quitting mid-run does not log run_end (seen in phone log); decide in P2c log work.
+- Checkpoints only reach L12; debug-only jump to later levels would help QA of L16+.
 
 ## Last session summary
-- What was done: owner confirmed Mango Rain = 4th skill and web-first; AGENTS.md §1 updated to Phaser 3 + TS + Vite (owner-approved); checkpoint rules clarified by the owner (fixed milestones L10/15/20/25/30 → start L4/6/8/10/12, partial energy carry-over to the next run); earlier: design discussion with the owner (Vietnamese); wrote GDD v0.2 (30 levels / 6 biomes, length reset, energy skills, loadout, checkpoint, obstacle catalogue, marble machine + skins meta, hybrid art, P0–P5 roadmap); added 5 DECISIONS entries; CHANGELOG updated.
-- Last verified step (command + result): docs only, no code changed; no build/test to run.
-- Commands that failed / work left uncommitted (check `git status`): none.
-- What was learned / gotchas: marble machine must decide the outcome before animating so published odds stay exact; length reset is required or the board fills before L12.
+- Owner playtest feedback round: WASD fix, run_end.turns, level-up flow B (8-task SDD, reviews per task, final review ready), P1 gate verdict PASS, P2 plans written/revised. Pushed version/v0.1.
