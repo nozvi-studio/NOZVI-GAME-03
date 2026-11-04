@@ -8,6 +8,7 @@ type P = [number, number];
 export interface StateOpts {
   seed?: number; snake?: P[]; dir?: P; mango?: P | null; golden?: boolean; mangoLeftMs?: number;
   rottenRocks?: P[]; level?: number; progress?: number; eaten?: number; score?: number; spawnInMs?: number;
+  eatenInRun?: number; eatenInLevel?: number;
 }
 const toDir = ([x, y]: P): Dir => ({ x: x as Step, y: y as Step });
 
@@ -22,9 +23,12 @@ export function buildState(b: Balance, o: StateOpts = {}): SimState {
     const left = o.mangoLeftMs ?? b.mango.rotBaseMs;
     s.mango = { x: o.mango[0], y: o.mango[1], golden: o.golden ?? false, leftMs: left, totalMs: left };
   }
-  if (o.rottenRocks) s.rottenRocks = o.rottenRocks.map(([x, y]) => ({ x, y }));
+  if (o.rottenRocks) s.rottenRocks = o.rottenRocks.map(([x, y]) => ({ family: 'rottenRock', x, y, state: 'solid', leftMs: b.mango.rottenRockLifeMs }));
   if (o.level !== undefined) { s.level = o.level; s.tickMs = tickMsFor(b, o.level); }
-  s.progress = o.progress ?? s.progress; s.eaten = o.eaten ?? s.eaten; s.score = o.score ?? s.score;
+  s.progress = o.progress ?? s.progress; s.score = o.score ?? s.score;
+  // MEC-002-R3 legacy fixture option seeds both counters; new fixtures can set them independently.
+  s.eatenInRun = o.eatenInRun ?? o.eaten ?? s.eatenInRun;
+  s.eatenInLevel = o.eatenInLevel ?? o.eaten ?? s.eatenInLevel;
   s.spawnInMs = o.spawnInMs ?? s.spawnInMs;
   return s;
 }

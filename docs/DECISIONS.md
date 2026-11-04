@@ -238,3 +238,39 @@ Append-only. Format: `## YYYY-MM-DD — <decision>` then Context / Choice / Alte
 - Independent read-only reviewer: no Critical or Important findings; no deferred minor findings. The function-only snake/transition cycle follows the plan and is safe; level.ts stays independent.
 - Final verification: native-loader filtered npm test: 464 passed, 8 skipped (seven obsolete QA plus existing QA-T2-17), 5 todo, 9.46 s; filtered test:fuzz: all 200 heavy seeds and the suite pass (54.57 s). Typecheck, native-loader build and diff whitespace checks exit 0.
 - No mechanic spec changes, QA edits, dependency changes, branch changes, commits, merges or pushes. The owner requested keeping the existing branch uncommitted.
+
+## 2026-11-04 - P1 Task 4 execution rulings
+- Retained the real P0 RNG argument for `placeMango`, as recorded in the P1 plan name mapping. `mangoTick` accepts StepCtx and obtains its transient RNG from plain state. `rotTimeMs` implements the floored MEC-002-R4 formula; `rotMsFor` remains a compatibility alias.
+- Retained P0 `MangoState.leftMs`; snapshots derive `ageMs`. The plan's age-based internal fixtures use `leftMs = totalMs - ageMs` instead. No timer behavior changes.
+- Passed the existing StepCtx into `HazardFamily.onLevelEnd(s, ctx)` because a rotten rock must reset `leftMs` from the active `hazard.crumbleMs` configuration. Existing families ignore the added argument; no config or closures enter state.
+- Preserved the eaten mango until replacement (or cleared it on the final win), so `placeMango` can detect entry into an empty period and emit `mangoDeferred` once. Clearing it before calling placement would suppress the planned event.
+- Reserved initial snake cells with warnings in the deferred-placement test: the plan's non-snake-only warning picture frees tail cells before t=390, contradicting its expected failed retry. The corrected picture verifies t=140 deferral, t=390 failure without RNG, and t=640 success at (16,16). The 3000 ms no-mango director check invokes the real director directly so warning lifecycle and eventual snake death do not obscure the spawn gate.
+- Updated owned core tests and state fixtures for the extended ate event, renamed counter, registry entry and R legend; independent QA sources are unchanged. The legacy fixture `eaten` option seeds both new counters; explicit P1 options seed them independently.
+- Excluded only `tests/qa/task4-mango-placement.qa.test.ts` and `tests/qa/task4-mango-rot-lifecycle.qa.test.ts` from static checking: they construct permanent cell-only rocks or read removed `eaten`. All compatible cases in these files still run in Vitest. Keeping the production types strict avoids reintroducing removed P0 state.
+- Used native config loading for Vitest/Vite, threads and maxWorkers 2, sequential verification, no dependency changes. The full filtered suite takes 14.68 s on this Windows host, above the plan's <10 s target; isolated worker startup is reported by Vitest. No unrelated runner/mocking refactor is included.
+
+### P1 Task 4 obsolete independent QA cases (sources unchanged)
+| QA test ID | Superseding approved plan/spec rule |
+|---|---|
+| QA-T3-10 | Task 4; MEC-002 section 7 adds progressGain/source to ate; the old exact payload is obsolete. |
+| QA-T3-11 | Task 4; MEC-002 section 7 adds progressGain/source to golden ate too. |
+| QA-T4-08 | Task 4; MEC-002-R3 renames eaten to eatenInRun and adds eatenInLevel; section 7 extends ate. |
+| QA-T4-09 | Task 4; MEC-002-R3 renames eaten to eatenInRun; section 7 extends golden ate. |
+| QA-T4-12 | Task 4; MEC-002-R6 enables rocks only from L12, and R7 makes them temporary with state/leftMs. This test expects a permanent rock at L1. |
+| QA-T4-18 | Task 4; MEC-002-R6/R7 creates a timed rock only on enabled levels; this test expects a cell-only rock at L1. |
+| QA-T4-22 | Task 4; MEC-002 section 7 requires progressGain/source, superseding the P0 exact event keys. |
+| QA-T5-16 | Task 4; MEC-003-R13 returns before advancing the director when mango is null; its direct fixtures omit the mango. |
+| QA-T5-18 | Task 4; MEC-003-R13 forbids the expected spawn from the fixture's null mango slot. |
+| QA-T5-21 | Task 4; MEC-003-R13 forbids the expected maze spawn from the fixture's null mango slot. |
+
+The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-23, QA-T4-20, QA-T5-14, QA-T5-23. Those cases are being rewritten separately. No mechanic spec was changed.
+
+### P1 Task 4 final review
+- Independent read-only review found no Critical/Important issues. Deferred minor: the 14.68 s normal suite exceeds the plan's <10 s target on this host with the required two isolated threads; task handoff is permitted by the owner's exit-code completion gate. Future runner optimization must preserve game-test mock isolation.
+- Review scope rulings: coordinator owns actual sequential test/typecheck/build/fuzz evidence (reviewer ran no tests); browser/phone and later UI feedback are outside this core task; energy/skills/orbs/rain remain Tasks 5/7; the 17 superseded QA cases remain untouched and filtered. Workflow scratch artifacts are removed before handoff, preserving the durable rulings here.
+
+## 2026-11-04 - GitNexus code graph and test scope (owner)
+- GitNexus 1.6.9 indexes the repo into `.gitnexus/` (excluded via `.git/info/exclude`, not committed). Agents check `status` and use `query`/`context`/`impact` at task start, and refresh the index asynchronously at task end. Reason: cheaper, more accurate code location than file scanning (AGENTS.md §2b).
+- Always `--index-only`: keeps GitNexus from rewriting AGENTS.md/CLAUDE.md and `.claude/` (protected files, §8). `--workers 2` because the host's low-memory reaper kills heavy processes.
+- Test scope: minimal targeted tests during work; full `npm test` + `npm run typecheck` only before commit or merge. Reason: the full suite takes ~15-17 s and was being run after every edit.
+- Rules live in AGENTS.md §2c and §6b (ruleset 0.3.2).

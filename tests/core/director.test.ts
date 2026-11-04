@@ -10,7 +10,7 @@ import { fixed } from '../support/rngStub';
 import { buildState } from '../support/state';
 
 const b = loadBalance();
-function due(level: number): SimState { return buildState(b, { level, spawnInMs: 1 }); }
+function due(level: number): SimState { return buildState(b, { level, spawnInMs: 1, mango: [9, 8] }); }
 function terrain(): TerrainHazard {
   return { family: 'terrain', t: 0, lifeMs: 18000, cells: [{ x: 16, y: 16, delay: 0, up: false, vis: 'down' }] };
 }
@@ -84,7 +84,7 @@ describe('MEC-004 director', () => {
   it('MEC-004 a failed option is removed and the pick is redone with a new next()', () => {
     const s = due(7);
     for (let x = 0; x < 17; x++) for (let y = 0; y < 17; y++)
-      if (x !== 9 || y !== 8) s.rottenRocks.push({ x, y });
+      if (x !== 9 || y !== 8) s.rottenRocks.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: b.mango.rottenRockLifeMs });
     const a = fixed([]); updateDirector(s, b, a.rng);
     expect(s.hazards).toEqual([]); expect(a.calls.filter(c => c === 'next')).toHaveLength(2);
     expect(a.calls.filter(c => c.startsWith('pick'))).toEqual(['pick(5)', 'pick(2)']);

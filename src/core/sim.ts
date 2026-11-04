@@ -4,7 +4,7 @@ import { snakeOn } from './cells';
 import { updateDirector } from './hazards/director';
 import { stepHazards } from './hazards/registry';
 import { biome, isChallenge, needFor, tickMsFor } from './level';
-import { placeMango, rotMango } from './mango';
+import { placeMango, mangoTick } from './mango';
 import { rngFrom, seedRng, type Rng } from './rng';
 import { queueTurn, stepSnake } from './snake';
 import { levelStart } from './transition';
@@ -22,7 +22,7 @@ export function initialState(b: Balance, seed: number, options: SimOptions = {})
     snake, dir: toDir(b.snake.startDir), queue: [],
     headFrom: { ...snake[0]! }, tailFrom: { ...snake[snake.length - 1]! },
     acc: 0, tickMs: tickMsFor(b, level), mango: null, rottenRocks: [], hazards: [], terrains: [],
-    spawnInMs: b.director.firstSpawnMs, mazeCooldownMs: 0, score: 0, eaten: 0, level, progress: 0,
+    spawnInMs: b.director.firstSpawnMs, mazeCooldownMs: 0, score: 0, eatenInRun: 0, retryMs: 0, level, progress: 0,
     phase: 'playing', transitionLeftMs: 0, levelTimeMs: 0, timeMs: 0,
     startLevel: level, levelsCleared: 0, eatenInLevel: 0,
     status: 'playing', outcome: null, events: [], rng: seedRng(seed),
@@ -41,10 +41,10 @@ function stepMs(s: SimState, b: Balance, rng: Rng): void {
     return;
   }
   s.levelTimeMs += 1;
-  if (s.mango) updateDirector(s, b, rng);
+  updateDirector(s, b, rng);
   stepHazards(s, ctx);
   s.tickMs = tickMsFor(b, s.level);
-  if (s.mango) { s.mango.leftMs -= 1; if (s.mango.leftMs <= 0) rotMango(s, b, rng); }
+  mangoTick(s, b, ctx);
   s.acc += 1;
   if (s.acc >= s.tickMs) { s.acc -= s.tickMs; stepSnake(s, b, rng); }
 }
@@ -56,7 +56,8 @@ function snapshotOf(s: SimState, b: Balance): SimSnapshot {
     headFrom: c.headFrom, tailFrom: c.tailFrom,
     tickAlpha: s.status === 'over' ? 1 : Math.min(1, s.acc / s.tickMs),
     mango: c.mango && { ...c.mango, ageMs: c.mango.totalMs - c.mango.leftMs },
-    rottenRocks: c.rottenRocks,
+    rottenRocks: c.rottenRocks.map(({ x, y, state, leftMs }) => ({ x, y, state, leftMs })),
+    eatenInLevel: s.eatenInLevel, eatenInRun: s.eatenInRun,
     hazards: c.hazards.map(h => ({
       type: h.family, state: h.state, t: h.t, warnMs: h.warnMs, lifeMs: h.lifeMs, cells: h.cells,
       ...(h.kind ? { kind: h.kind } : {}),

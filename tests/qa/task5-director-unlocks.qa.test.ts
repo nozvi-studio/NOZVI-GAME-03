@@ -87,17 +87,18 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     sim.advance(1);
     expect(sim.snapshot().hazards.length + sim.snapshot().terrains.length).toBeGreaterThan(0);
 
+    // updated for P1 MEC-003-R1/R4 / MEC-003-R13
     // Test director interval formula across levels: max(1600, 5000 - 120 * n)
-    const s1 = buildState(b, { level: 1, spawnInMs: 0 });
+    const s1 = buildState(b, { level: 1, spawnInMs: 0, mango: [2, 2] });
     const rng = rngFrom(seedRng(1));
     updateDirector(s1, b, rng);
     expect(s1.spawnInMs).toBe(4880);
 
-    const s5 = buildState(b, { level: 5, spawnInMs: 0 });
+    const s5 = buildState(b, { level: 5, spawnInMs: 0, mango: [2, 2] });
     updateDirector(s5, b, rng);
     expect(s5.spawnInMs).toBe(4400);
 
-    const s30 = buildState(b, { level: 30, spawnInMs: 0 });
+    const s30 = buildState(b, { level: 30, spawnInMs: 0, mango: [2, 2] });
     updateDirector(s30, b, rng);
     expect(s30.spawnInMs).toBe(1600);
   });
@@ -117,8 +118,8 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
   });
 
   it('QA-T5-18 MEC-004 small hazard cap ignores maze and terrain', () => {
-    // updated for P1 MEC-003-R1
-    const s = buildState(b, { level: 1, spawnInMs: 0 });
+    // updated for P1 MEC-003-R1 / MEC-003-R13
+    const s = buildState(b, { level: 1, spawnInMs: 0, mango: [2, 2] });
     s.hazards.push({
       family: 'maze', state: 'solid', t: 5000, warnMs: 2600, lifeMs: 14000, landed: true,
       cells: [{ x: 1, y: 1, on: true, ageMs: 5000 }],
@@ -181,9 +182,9 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
   });
 
   it('QA-T5-21 MEC-004 maze cooldown sets to 26000 ms and blocks maze respawn', () => {
-    // updated for P1 MEC-003-R15
+    // updated for P1 MEC-003-R15 / MEC-003-R13
     const cap = smallHazardCap(b, 26);
-    const s = buildState(b, { level: 26, spawnInMs: 0 });
+    const s = buildState(b, { level: 26, spawnInMs: 0, mango: [2, 2] });
     s.mazeCooldownMs = 0;
     for (let i = 0; i < cap; i++) {
       s.hazards.push({
@@ -204,7 +205,7 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     }
     expect(spawnedMaze).toBe(true);
 
-    const sCooldown = buildState(b, { level: 26, spawnInMs: 0 });
+    const sCooldown = buildState(b, { level: 26, spawnInMs: 0, mango: [2, 2] });
     sCooldown.mazeCooldownMs = 15000;
     for (let i = 0; i < cap; i++) {
       sCooldown.hazards.push({

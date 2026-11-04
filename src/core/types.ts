@@ -30,14 +30,16 @@ export interface TimedHazard {
 export type TerrainVis = 'down' | 'warn' | 'up';
 export interface TerrainCell { x: number; y: number; delay: number; up: boolean; vis: TerrainVis }
 export interface TerrainHazard { family: 'terrain'; t: number; lifeMs: number; cells: TerrainCell[] }
-export type HazardInstance = TimedHazard | TerrainHazard;
+export interface RottenRock { family: 'rottenRock'; x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }
+export type HazardInstance = TimedHazard | TerrainHazard | RottenRock;
 
 export interface MangoState { x: number; y: number; golden: boolean; leftMs: number; totalMs: number }
 export type SimStatus = 'playing' | 'over';
 export interface Outcome { won: boolean; cause?: CauseKey }
 
 export type SimEvent =
-  | { type: 'ate'; x: number; y: number; golden: boolean; points: number }
+  | { type: 'ate'; x: number; y: number; golden: boolean; points: number; progressGain: number; source: 'mango' | 'rain' }
+  | { type: 'mangoDeferred' }
   | { type: 'shrunk'; from: number; to: number; removed: Cell[] }
   | { type: 'levelUp'; level: number; biome: number; challenge: boolean; biomeChanged: boolean; unlocked?: IntroKey; clearedLevelTimeMs: number }
   | { type: 'transitionEnd'; level: number }
@@ -58,13 +60,14 @@ export interface SimState {
   acc: number;                 // ms accumulated toward the next snake step
   tickMs: number;
   mango: MangoState | null;
-  rottenRocks: Cell[];
+  rottenRocks: RottenRock[];
   hazards: TimedHazard[];      // rock/fence/maze in spawn order (prototype `hazards`)
   terrains: TerrainHazard[];   // prototype `terrains`
   spawnInMs: number;
   mazeCooldownMs: number;
   score: number;
-  eaten: number;
+  eatenInRun: number;
+  retryMs: number;
   level: number;               // 1-based
   progress: number;
   phase: 'playing' | 'transition';
@@ -95,7 +98,9 @@ export interface SimSnapshot {
   tailFrom: Cell;
   tickAlpha: number;           // status === 'over' ? 1 : min(1, acc / tickMs)  (L1007)
   mango: MangoView | null;
-  rottenRocks: readonly Cell[];
+  rottenRocks: readonly Omit<RottenRock, 'family'>[];
+  eatenInLevel: number;
+  eatenInRun: number;
   hazards: readonly HazardView[];
   terrains: readonly TerrainView[];
   score: number;
@@ -149,7 +154,7 @@ export interface HazardFamily<S extends { family: FamilyKey }> {
   solidAt(state: S, x: number, y: number): boolean;    // collision
   bfsWallAt(state: S, x: number, y: number): boolean;  // reachability walls
   reservedAt(state: S, x: number, y: number): boolean; // placement reserved
-  onLevelEnd(s: SimState): void;                       // MEC-003-R7
+  onLevelEnd(s: SimState, ctx: StepCtx): void;         // MEC-003-R7; context supplies configured crumble time
   onBreak?(s: SimState, x: number, y: number): void;    // MEC-006-R25; implemented in Task 7
   breakable: boolean;                                  // false for all in P0 (Shield is P1)
 }

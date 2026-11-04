@@ -13,7 +13,7 @@ export function startLevelUp(s: SimState, b: Balance, ctx: StepCtx, fromRegularM
   const cleared = s.levelTimeMs, oldBiome = biome(b, s.level);
   s.progress -= quota(b, s.level); s.level += 1; s.levelsCleared += 1;
   s.eatenInLevel = 0; s.levelTimeMs = 0;
-  for (const f of FAMILIES) f.onLevelEnd(s);
+  for (const f of FAMILIES) f.onLevelEnd(s, ctx);
   if (fromRegularMango) placeMango(s, b, rngFrom(s.rng));
   s.phase = 'transition'; s.transitionLeftMs = b.level.transitionMs; s.acc = 0;
   s.tickMs = tickMsFor(b, s.level);

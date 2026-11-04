@@ -1,22 +1,25 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-04 by Codex **Milestone:** M1 - P1 Tasks 1, 2 and 3 implemented. **Version branch:** `version/v0.1`
+**Updated:** 2026-11-04 by Codex **Milestone:** M1 - P1 Tasks 1 through 4 implemented. **Version branch:** `version/v0.1`
 
 ## Now (in progress)
-- [x] P0 complete incl. owner phone run (PLAYTEST).
-- [x] P1 Tasks 1 and 2 integrated; independent QA updated for their P1 rules.
-- [x] P1 Task 3 implemented on `feat/p1-reset-transition`, uncommitted; verified and ready for agy QA.
+- [x] P1 Tasks 1-3 merged into `version/v0.1`.
+- [x] Task 4 committed on `feat/p1-mangoes` (version merged in); Task 5 committed on `feat/p1-energy` (worktree `../NOZVI-GAME-03-wt4`, node_modules junction).
+- [ ] **RESUME HERE (2026-11-04, both workers killed by low-memory reaper):**
+  - agy Task 4 QA on `feat/p1-mangoes` (main tree): partial uncommitted edits in 4 tests/qa files; resume brief = scratchpad agy-qa4 (11 obsolete IDs + QA-T4-20 code-vs-test verdict + new p1-task4-mangoes QA).
+  - Codex Task 6 on `feat/p1-skills-a` (worktree, from Task 5): not started, tree clean.
+  - Parallel mode (owner-approved) needs CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1; otherwise run one worker at a time.
 
 ## Next (ordered, max 5)
-1. agy QA for P1 Task 3; owner handles commit/integration.
-2. Remaining P1 tasks per plan, one branch each; Task 4 next.
-3. P1 exit: owner recruits 5 testers; summarizeLog + PLAYTEST gate.
+1. Merge Task 4, then agy QA Task 5 (merge version into feat/p1-energy first), merge.
+2. Tasks 6-10 per plan (branches: skills-a, skills-b, session, scenes, chore/p1-playtest).
+3. Tech debt: normal suite ~17 s (> 10 s target).
+4. P1 exit: owner recruits 5 testers; summarizeLog + PLAYTEST gate.
 
 ## Workers and QA process
 - Feature code: Codex (`delegate-workers` codex-task.sh) or Claude subagent, chosen per task.
 - agy = dedicated tester only: derives black-box cases from MEC specs, writes `tests/qa/` + browser checks; never feature code.
 - Lead triages QA failures: code bug → implementer; test error → agy; spec gap → owner. See DECISIONS 2026-11-05.
-
 
 ## Blockers / open questions for human
 - Owner phone run for P0 (see PLAYTEST 2026-11-05).
@@ -24,16 +27,17 @@
 - OPEN: session-length targets §4; reason to come back tomorrow §8.3.
 
 ## Known issues / tech debt
-- Seven obsolete QA cases remain unchanged and are filtered at runtime; IDs and superseding rules are in DECISIONS (P1 Task 3).
+- Seventeen obsolete QA cases are runtime-filtered: seven known Task 3 cases plus ten from Task 4; IDs/rules in DECISIONS.
+- Two legacy Task 4 QA files are excluded from typecheck for removed P0 fields; compatible cases still run in Vitest. QA sources unchanged.
+- Windows native config loading + Vitest threads/maxWorkers 2 required; verification commands run sequentially. Filtered npm test takes 14.68 s (>10 s plan target).
 - P1 callers must pass SaveRules to load; deprecated P0 overload defaults P1 fields. Boot supplies balance rules.
-- Windows sandbox requires native config loading and Vitest threads; run verification commands sequentially.
 - QA-T2-17 remains skipped until P2a; five existing todo cases remain.
-- Task 4 owns mango retries, per-level rot counting and timed rotten-rock transition cleanup; later tasks own energy/skills.
+- Tasks 5/7 own energy/orbs/skills and their additions to the single reserved list.
 
 ## Last session summary
-- Executed only Task 3: length reset/cutTail, 1 s transition, L30 win, internal JSON state/ASCII/circle/context helpers.
-- TDD: missing functionality failed first; hazard import-cycle regression and final eaten-mango cleanup verified RED -> GREEN.
-- Verified: filtered npm test 464 passed / 8 skipped / 5 todo (9.46 s); 200-seed heavy fuzz, typecheck and build exit 0.
-- Independent read-only review: no Critical/Important findings; no browser or phone checks in this core-only task.
-- Updated CODEMAP, GDD index, CHANGELOG and DECISIONS; mechanic specs unchanged; docs retain CRLF.
-- Kept branch and all changes uncommitted. No merges, pushes, installs or protected-file edits.
+- Executed only Task 4: mango counters, per-level rot, timed rottenRock family, deferred placement and single reserved list.
+- TDD: new behavior failed first; targeted mango/reserved/transition tests then passed 43/43.
+- Verified: filtered npm test 469 passed / 18 skipped / 5 todo; typecheck and native Vite build exit 0.
+- Full fuzz suite: 469 passed / 18 skipped / 5 todo, incl. 200 seeds x 120 s (22.17 s). Read-only final review: no Critical/Important findings; core-only task, no browser/phone check.
+- Plan adaptations, QA IDs and runtime limitation recorded in DECISIONS; no mechanic spec changes; docs retain CRLF.
+- Kept branch and changes uncommitted. No merges, pushes, installs or protected-file edits.

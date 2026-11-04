@@ -97,7 +97,7 @@ describe('MEC-003 transition', () => {
       snake: [[1, 1], [1, 0], [0, 0], [0, 1]], dir: [0, 1], quiet: true,
     });
     sim.advance(140);
-    expect(types(sim)).toEqual(['ate']);
+    expect(types(sim)).toEqual(['ate', 'mangoDeferred']);
     expect(sim.snapshot()).toMatchObject({ status: 'playing', outcome: null, mango: null });
     sim.turn(1, 0); sim.advance(140);
     expect(sim.snapshot()).toMatchObject({ status: 'playing', mango: null });
@@ -116,8 +116,8 @@ describe('MEC-003 transition', () => {
     expect(sim.snapshot()).toMatchObject({ level: 2, progress: 1, need: 4 });
   });
 
-  it('MEC-003-R7 all hazards are non-solid from t = 0 and gone by t = 500', () => {
-    const sim = simFromAscii(b, ['.....M', '#Fw'], {
+  it('MEC-003-R7 all hazards and rotten rocks are non-solid from t = 0 and gone by t = 500', () => {
+    const sim = simFromAscii(b, ['.....M', '#FwR'], {
       snake: [[4, 0], [3, 0], [2, 0], [1, 0]], quiet: true, extraState: {
         progress: 3, terrains: [{ family: 'terrain', t: 1, lifeMs: 10000, cells: [{ x: 9, y: 9, delay: 0, up: true, vis: 'up' }] }],
       },
@@ -126,10 +126,13 @@ describe('MEC-003 transition', () => {
     const s = stateOf(sim);
     expect(s.hazards).toHaveLength(3);
     expect(s.hazards.every(h => h.state === 'crumble' && h.cells.every(c => !c.on))).toBe(true);
-    for (const [x, y] of [[0, 1], [1, 1], [2, 1], [9, 9]]) expect(cellSolidCause(s, x!, y!)).toBeNull();
+    for (const [x, y] of [[0, 1], [1, 1], [2, 1], [3, 1], [9, 9]]) expect(cellSolidCause(s, x!, y!)).toBeNull();
     expect(s.terrains[0]!.cells[0]).toMatchObject({ up: false, vis: 'down' });
+    expect(sim.snapshot().rottenRocks[0]).toMatchObject({ state: 'crumble', leftMs: 450 });
     sim.advance(449); expect(sim.snapshot().hazards).toHaveLength(3);
+    expect(sim.snapshot().rottenRocks[0]).toMatchObject({ state: 'crumble', leftMs: 1 });
     sim.advance(1); expect(sim.snapshot().hazards).toEqual([]);
+    expect(sim.snapshot().rottenRocks).toEqual([]);
     sim.advance(49); expect(sim.snapshot().terrains).toHaveLength(1);
     sim.advance(1); expect(sim.snapshot().terrains).toEqual([]);
   });

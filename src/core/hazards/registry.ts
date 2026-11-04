@@ -1,22 +1,29 @@
 // src/core/hazards/registry.ts — hazard family registry (design §4.1). MEC-004
-import type { HazardFamily, HazardInstance, TableFamily, SimState, StepCtx, TerrainHazard, TimedHazard } from '../types';
+import type { HazardFamily, HazardInstance, TableFamily, SimState, StepCtx, TerrainHazard, TimedHazard, RottenRock } from '../types';
 import { FENCE } from './fence';
 import { MAZE } from './maze';
 import { ROCK } from './rock';
 import { TERRAIN } from './terrain';
+import { rottenRockFamily } from './rottenRock';
+
+type RegisteredKey = TableFamily | 'rottenRock';
 
 export const FAMILY: { rock: HazardFamily<TimedHazard>; fence: HazardFamily<TimedHazard>;
-  maze: HazardFamily<TimedHazard>; terrain: HazardFamily<TerrainHazard> } = { rock: ROCK, fence: FENCE, maze: MAZE, terrain: TERRAIN };
-// MEC-004 ordered registry: rock, fence, maze, terrain
-export const FAMILIES = [ROCK, FENCE, MAZE, TERRAIN] as unknown as readonly (HazardFamily<HazardInstance> & { key: TableFamily })[];
+  maze: HazardFamily<TimedHazard>; terrain: HazardFamily<TerrainHazard>; rottenRock: HazardFamily<RottenRock> } = {
+  rock: ROCK, fence: FENCE, maze: MAZE, terrain: TERRAIN, rottenRock: rottenRockFamily,
+};
+// MEC-004/MEC-002-R7 ordered registry; skill families follow in Task 7.
+export const FAMILIES = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily] as unknown as readonly (HazardFamily<HazardInstance> & { key: RegisteredKey })[];
 
 const fam = (k: TableFamily) => FAMILY[k] as unknown as HazardFamily<HazardInstance>;
-export const instancesOf = (s: SimState, k: TableFamily): HazardInstance[] =>
-  k === 'terrain' ? s.terrains : s.hazards.filter(h => h.family === k);
+export const instancesOf = (s: SimState, k: RegisteredKey): HazardInstance[] =>
+  k === 'rottenRock' ? s.rottenRocks : k === 'terrain' ? s.terrains : s.hazards.filter(h => h.family === k);
 
 // MEC-004 first family (in FAMILIES order) with an instance answering the query at (x, y)
-export function familyAt(s: SimState, x: number, y: number, q: 'solidAt' | 'bfsWallAt' | 'reservedAt'): TableFamily | null {
-  for (const f of FAMILIES) for (const h of instancesOf(s, f.key)) if (f[q](h, x, y)) return f.key as TableFamily;
+export function familyAt(s: SimState, x: number, y: number, q: 'solidAt' | 'bfsWallAt' | 'reservedAt'): RegisteredKey | null {
+  // MEC-001-R2/MEC-002-R7 retain P0 collision priority even for overlapping test fixtures.
+  if (q === 'solidAt' && s.rottenRocks.some(r => rottenRockFamily.solidAt(r, x, y))) return 'rottenRock';
+  for (const f of FAMILIES) for (const h of instancesOf(s, f.key)) if (f[q](h, x, y)) return f.key;
   return null;
 }
 
@@ -28,4 +35,6 @@ export function stepHazards(s: SimState, ctx: StepCtx): void {
   gone.clear();
   for (const T of s.terrains) if (FAMILY.terrain.update(T, ctx) === 'remove') gone.add(T);
   if (gone.size) s.terrains = s.terrains.filter(T => !gone.has(T));
+  // MEC-002-R7 rotten rocks tick before mango rot, so a new rock retains its full lifetime.
+  s.rottenRocks = s.rottenRocks.filter(r => rottenRockFamily.update(r, ctx) !== 'remove');
 }
