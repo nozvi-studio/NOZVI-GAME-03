@@ -89,6 +89,7 @@ function createTestHud(initialBest = 10, soundEnabled = true) {
     ...h,
     hud,
     game,
+    browser,
     store,
     rules,
     session,
@@ -141,11 +142,11 @@ describe('QA Task 8: Save Wiring & Best Score (Black-Box)', () => {
     const env = createTestHud(10, true);
     bindKeyboard(env.game);
 
-    env.game.input.keyboard!.emit('keydown', { code: 'KeyM', preventDefault() {} });
+    env.browser.emit('keydown', { code: 'KeyM', preventDefault() {} });
     expect(env.session.save().settings.sound).toBe(false);
     expect(load(env.store, env.rules).settings.sound).toBe(false);
 
-    env.game.input.keyboard!.emit('keydown', { code: 'KeyM', preventDefault() {} });
+    env.browser.emit('keydown', { code: 'KeyM', preventDefault() {} });
     expect(env.session.save().settings.sound).toBe(true);
     expect(load(env.store, env.rules).settings.sound).toBe(true);
   });

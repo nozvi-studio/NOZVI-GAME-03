@@ -64,6 +64,7 @@ export function sceneHarness() {
     add: { graphics: () => make(), text: (x: number, y: number, text: string) => make(x, y).setText(text),
       zone: (x: number, y: number, w: number, h: number) => { const o = make(x, y); o.width = w; o.height = h; return o; },
       container: (x: number, y: number, children: DrawObject[] = []) => make(x, y).add(children) },
+    sys: { isActive: () => true },
     events: new Signals(), input: Object.assign(new Signals(), { keyboard: new Signals(), setGlobalTopOnly: (_v: boolean) => {} }),
     time: { delayedCall: (delay: number, fn: () => void) => { const t = { fn, removed: false, delay }; delayed.push(t); return { remove: () => { t.removed = true; } }; } },
     tweens: { add: (_v: unknown) => {}, killTweensOf: (_v: unknown) => {} },
