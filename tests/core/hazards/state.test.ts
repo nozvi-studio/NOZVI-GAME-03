@@ -2,10 +2,16 @@ import { expect, it } from 'vitest';
 import { initialState, restoreSim, exportState } from '../../../src/core/sim';
 import { loadBalance } from '../../support/balance';
 import { ROCK } from '../../../src/core/hazards/rock';
-import { makeTimed, addTimedHazards } from '../../../src/core/hazards/timed';
+import { makeTimed, addTimedHazards, timedHazards } from '../../../src/core/hazards/timed';
 import { testCtx } from '../../../src/core/testing';
 import { buildBoard } from '../../support/board';
 import { hitCtx } from '../../support/fakeFamily';
+
+it('MEC-004-R2 timed hazards reject a missing spawn sequence even for one instance', () => {
+  const s = buildBoard({});
+  s.families.rock.push(makeTimed('rock', [{ x: 1, y: 1 }], 1, 1000));
+  expect(() => timedHazards(s)).toThrow('Missing spawnSeq');
+});
 
 it('MEC-004-R2 family state is plain data and survives clone and restore', () => {
   const b = loadBalance(), s = initialState(b, 1);

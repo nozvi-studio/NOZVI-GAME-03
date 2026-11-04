@@ -4,8 +4,9 @@ import type { Cell, SimState, StepCtx, TimedHazard, TimedKey } from '../types';
 
 // MEC-004-R2 preserve the P1 cross-family spawn order in updates and snapshots.
 export function timedHazards(s: SimState): TimedHazard[] {
-  return [...s.families.rock, ...s.families.fence, ...s.families.maze]
-    .sort((a, b) => (a.spawnSeq ?? 0) - (b.spawnSeq ?? 0));
+  const hazards = [...s.families.rock, ...s.families.fence, ...s.families.maze];
+  for (const h of hazards) if (h.spawnSeq === undefined) throw new Error('Missing spawnSeq on timed hazard; insert with addTimedHazards');
+  return hazards.sort((a, b) => a.spawnSeq! - b.spawnSeq!);
 }
 
 export function addTimedHazards(s: SimState, ...hazards: TimedHazard[]): void {

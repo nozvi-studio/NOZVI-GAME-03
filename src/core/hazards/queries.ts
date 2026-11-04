@@ -7,6 +7,13 @@ export function solidFamilyAt(s: SimState, x: number, y: number, fams: readonly 
   return null;
 }
 
+// MEC-002-R7 collision boundaries prefer solid rotten rocks, then registry order; no reordered arrays.
+export function solidFamilyWithPriority(s: SimState, x: number, y: number): HazardFamily | null {
+  const rotten = FAMILIES.find(f => f.key === 'rottenRock');
+  if (rotten?.solidAt(s, x, y)) return rotten;
+  return solidFamilyAt(s, x, y);
+}
+
 export function solidCauseAt(s: SimState, x: number, y: number, fams: readonly HazardFamily[] = FAMILIES): CauseKey | null {
   return solidFamilyAt(s, x, y, fams)?.cause ?? null;
 }

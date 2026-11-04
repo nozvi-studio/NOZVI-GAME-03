@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { solidCauseAt, solidFamilyAt, reservedByFamilies, bfsWall, tileAt, headHitAt } from '../../../src/core/hazards/queries';
+import { solidCauseAt, solidFamilyAt, solidFamilyWithPriority, reservedByFamilies, bfsWall, tileAt, headHitAt } from '../../../src/core/hazards/queries';
 import { FAMILIES } from '../../../src/core/hazards/registry';
 import { cellBfsWall } from '../../../src/core/cells';
 import { key, reachable } from '../../../src/core/grid';
@@ -7,6 +7,16 @@ import { buildBoard } from '../../support/board';
 import { fakeFamily, withFamilies } from '../../support/fakeFamily';
 
 describe('MEC-004 queries', () => {
+  it('MEC-002-R7 collision priority prefers solid rotten rocks without changing registry-order queries', () => {
+    const s = buildBoard({ walls: [[3, 3], [4, 4]] });
+    s.families.rottenRock.push({ family: 'rottenRock', x: 3, y: 3, state: 'solid', leftMs: 5000 });
+    expect(solidFamilyWithPriority(s, 3, 3)?.key).toBe('rottenRock');
+    expect(solidFamilyAt(s, 3, 3)?.key).toBe('rock');
+    expect(solidFamilyWithPriority(s, 4, 4)?.key).toBe('rock');
+    expect(solidFamilyWithPriority(s, 5, 5)).toBeNull();
+    s.families.rottenRock[0]!.state = 'crumble';
+    expect(solidFamilyWithPriority(s, 3, 3)?.key).toBe('rock');
+  });
   it('MEC-004-R1 registry order is rock fence maze terrain rottenRock snipWall rubble', () => {
     expect(FAMILIES.map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'rubble']);
   });

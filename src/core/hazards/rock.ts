@@ -1,5 +1,5 @@
-import { defineFamily } from './family';
 // src/core/hazards/rock.ts — MEC-004 falling rocks (spawnRock L427–439)
+import { defineFamily } from './family';
 import type { InstanceRules, TimedHazard } from '../types';
 import { rockPool } from './shapes';
 import { breakTimed, makeTimed, timedHasCell, timedSolidAt, updateTimed } from './timed';

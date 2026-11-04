@@ -1,6 +1,6 @@
+// tests/qa/task5-lifecycle.qa.test.ts — black-box QA tests for Task 5 hazard lifecycle & passability
 import { instanceFamily } from '../support/instanceFamily';
 import { addTimedHazards } from '../../src/core/hazards/timed';
-// tests/qa/task5-lifecycle.qa.test.ts — black-box QA tests for Task 5 hazard lifecycle & passability
 import { describe, it, expect } from 'vitest';
 import { loadBalance } from '../support/balance';
 import { buildState, QUIET } from '../support/state';

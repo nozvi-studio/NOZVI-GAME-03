@@ -1,7 +1,6 @@
 // src/core/cells.ts — cell queries for collision, placement and BFS (L318–351, L365–373). MEC-004
 import type { CauseKey, Cell, SimState } from './types';
-import { FAMILIES, familyAt } from './hazards/registry';
-import { bfsWall, solidCauseAt } from './hazards/queries';
+import { bfsWall, solidFamilyWithPriority } from './hazards/queries';
 import { isReserved } from './reserved';
 
 const at = (c: Cell, x: number, y: number): boolean => c.x === x && c.y === y;
@@ -9,8 +8,7 @@ export const snakeOn = (s: SimState, x: number, y: number): boolean => s.snake.s
 
 // MEC-004 solid right now: rotten rock, then hazard families (L341–346)
 export function cellSolidCause(s: SimState, x: number, y: number): CauseKey | null {
-  const k = familyAt(s, x, y, 'solidAt');
-  return solidCauseAt(s, x, y, k === 'rottenRock' ? [...FAMILIES.filter(f => f.key === k), ...FAMILIES.filter(f => f.key !== k)] : FAMILIES);
+  return solidFamilyWithPriority(s, x, y)?.cause ?? null;
 }
 // MEC-002-R2 all placement queries use the single reserved list.
 export function cellReserved(s: SimState, x: number, y: number): boolean {

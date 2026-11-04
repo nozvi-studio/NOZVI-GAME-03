@@ -1,5 +1,5 @@
-import { defineFamily } from './family';
 // src/core/hazards/maze.ts — MEC-004 hedge mazes (spawnMaze L498–506); the director sets the cooldown
+import { defineFamily } from './family';
 import type { InstanceRules, TimedHazard } from '../types';
 import { mazeCells } from './shapes';
 import { breakTimed, makeTimed, timedHasCell, timedSolidAt, updateTimed } from './timed';

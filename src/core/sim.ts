@@ -1,5 +1,5 @@
-import { timedHazards } from './hazards/timed';
 // src/core/sim.ts — Sim factory, 1 ms step and snapshot (design §4; prototype frame L996–1007, reset L626–644)
+import { timedHazards } from './hazards/timed';
 import type { Balance, Pair } from './balance';
 import { snakeOn } from './cells';
 import { updateDirector } from './hazards/director';

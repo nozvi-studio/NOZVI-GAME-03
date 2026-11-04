@@ -1,7 +1,6 @@
 // src/core/snake.ts — MEC-001 (prototype turn L698–706, step L769–799)
 import type { Balance } from './balance';
-import { familyAt, FAMILIES } from './hazards/registry';
-import { solidFamilyAt } from './hazards/queries';
+import { solidFamilyWithPriority } from './hazards/queries';
 import { shieldHit } from './skills/shield';
 import { eatRain } from './skills/mangoRain';
 import { inBounds } from './grid';
@@ -34,8 +33,7 @@ export function stepSnake(s: SimState, b: Balance, rng: Rng): void {
   const nx = head.x + s.dir.x, ny = head.y + s.dir.y;
   const eating = s.mango !== null && s.mango.x === nx && s.mango.y === ny;
   const body = eating ? s.snake : s.snake.slice(0, -1);
-  const priority = familyAt(s, nx, ny, 'solidAt');
-  const solid = solidFamilyAt(s, nx, ny, priority === 'rottenRock' ? [...FAMILIES.filter(f => f.key === priority), ...FAMILIES.filter(f => f.key !== priority)] : FAMILIES);
+  const solid = solidFamilyWithPriority(s, nx, ny);
   const cause: CauseKey | null = !inBounds(b.board.cols, b.board.rows, nx, ny) ? 'wall'
     : body.some(c => c.x === nx && c.y === ny) ? 'self'
     : solid === null || shieldHit(s, b, ctx, nx, ny) ? null : solid.cause;

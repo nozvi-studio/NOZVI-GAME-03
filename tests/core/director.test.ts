@@ -9,6 +9,7 @@ import type { FamilyKey, SimState, TerrainHazard } from '../../src/core/types';
 import { loadBalance } from '../support/balance';
 import { fixed } from '../support/rngStub';
 import { buildState } from '../support/state';
+import { withFamilies } from '../support/fakeFamily';
 
 const b = loadBalance();
 function due(level: number): SimState { return buildState(b, { level, spawnInMs: 1, mango: [9, 8] }); }
@@ -25,6 +26,14 @@ function selected(level: number, roll: number): FamilyKey | undefined {
 }
 
 describe('MEC-004 director', () => {
+  it('MEC-004-R9 small cap counts every family with capClass small', () => {
+    const s = due(1), rng = fixed([]);
+    withFamilies(s, [{ key: 'terrain', capClass: 'small', count: 2 }], () => {
+      updateDirector(s, b, rng.rng);
+    });
+    expect(rng.calls).toEqual([]);
+    expect(s.families.rock).toEqual([]);
+  });
   it('MEC-004 pickWeighted follows the prototype loop (L550–551)', () => {
     expect(pickWeighted([3, 2], fixed([], [], [0]).rng)).toBe(0);
     expect(pickWeighted([3, 2], fixed([], [], [0.6]).rng)).toBe(0);

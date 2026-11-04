@@ -1,5 +1,5 @@
-import { addTimedHazards, replaceTimedHazards } from './hazards/timed';
 // P1-D6 test-only ASCII fixtures; intentionally absent from the public core index.
+import { addTimedHazards, replaceTimedHazards } from './hazards/timed';
 import type { Balance } from './balance';
 import { snakeOn } from './cells';
 import { makeTimed } from './hazards/timed';

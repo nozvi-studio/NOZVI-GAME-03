@@ -1,5 +1,5 @@
-import { defineFamily } from './family';
 // src/core/hazards/rubble.ts — Shield rubble (MEC-006-R28)
+import { defineFamily } from './family';
 import type { InstanceRules, Rubble } from '../types';
 
 const hasCell = (r: Rubble, x: number, y: number): boolean => r.x === x && r.y === y;

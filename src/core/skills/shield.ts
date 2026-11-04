@@ -1,7 +1,6 @@
 import type { Balance } from '../balance';
 import { inBounds } from '../grid';
-import { FAMILIES, familyAt } from '../hazards/registry';
-import { solidFamilyAt } from '../hazards/queries';
+import { solidFamilyWithPriority } from '../hazards/queries';
 import { isReserved } from '../reserved';
 import type { SkillDef } from '../skills';
 import type { SimState, StepCtx } from '../types';
@@ -15,15 +14,13 @@ export const shieldSkill: SkillDef = {
 
 // MEC-006-R25..R28 break the solid cell at (x, y) before the head moves; true = survived.
 export function shieldHit(s: SimState, b: Balance, ctx: StepCtx, x: number, y: number): boolean {
-  const priority = familyAt(s, x, y, 'solidAt');
-  const families = priority === 'rottenRock' ? [...FAMILIES.filter(f => f.key === priority), ...FAMILIES.filter(f => f.key !== priority)] : FAMILIES;
-  const family = solidFamilyAt(s, x, y, families);
+  const family = solidFamilyWithPriority(s, x, y);
   if (!s.shield || family === null || !family.breakable) return false;
   const key = family.key;
   // MEC-006-R26 remove that one cell (from every breakable family solid there; overlaps are not expected).
   for (let f = family; f.breakable && f.onBreak;) {
     f.onBreak(s, x, y);
-    const next = solidFamilyAt(s, x, y, families);
+    const next = solidFamilyWithPriority(s, x, y);
     if (!next) break;
     f = next;
   }

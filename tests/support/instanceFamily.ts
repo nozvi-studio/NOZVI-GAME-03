@@ -4,6 +4,8 @@ import { buildState } from './state';
 import { loadBalance } from './balance';
 
 // MEC-004-R2 run the P0 instance-level assertions against the new state-level API.
+// Each call isolates one instance; spawn assumes one successful call creates exactly one instance.
+// Use normal SimState fixtures for interactions between multiple instances or families.
 export function instanceFamily<K extends FamilyKey>(family: HazardFamily & { readonly key: K }) {
   type Instance = SimState['families'][K][number];
   const state = (instance: Instance, ctx: { balance: SpawnCtx['balance'] }): SimState => {

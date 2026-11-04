@@ -1,5 +1,5 @@
-import { timedHazards } from '../../src/core/hazards/timed';
 // tests/support/fuzz.ts — seeded invariant fuzz (design §9 item 2). No new dependency.
+import { timedHazards } from '../../src/core/hazards/timed';
 import type { Balance } from '../../src/core/balance';
 import { cellReserved, snakeOn } from '../../src/core/cells';
 import { nearHead } from '../../src/core/grid';

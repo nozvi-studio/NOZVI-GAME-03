@@ -36,6 +36,7 @@ describe('MEC-006 Shield', () => {
   });
   it('MEC-006-R24 shield breaks fence, terrain up cell, maze hedge, rotten rock and snip wall; never rubble', () => {
     const maze = makeTimed('maze', [{ x: 3, y: 0 }], 1, 600000);
+    maze.spawnSeq = 0; // This fixture supplies the only timed instance directly through extraState.
     maze.state = 'solid'; maze.landed = true; maze.cells[0]!.on = true;
     const tr = b.terrain, upAt = tr.startDelayMs + tr.periodMs - tr.upMs;
     const terrain = { family: 'terrain' as const, t: upAt, lifeMs: 600000, cells: [{ x: 3, y: 0, delay: 0, up: true, vis: 'up' as const }] };

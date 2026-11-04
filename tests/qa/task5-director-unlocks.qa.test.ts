@@ -1,5 +1,5 @@
-import { addTimedHazards, timedHazards } from '../../src/core/hazards/timed';
 // tests/qa/task5-director-unlocks.qa.test.ts — black-box QA tests for Task 5 director & unlock mechanics
+import { addTimedHazards, timedHazards } from '../../src/core/hazards/timed';
 import { describe, it, expect } from 'vitest';
 import { loadBalance } from '../support/balance';
 import { buildState, QUIET } from '../support/state';

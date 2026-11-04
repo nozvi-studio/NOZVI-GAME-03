@@ -1,5 +1,5 @@
-import { timedHazards } from '../../src/core/hazards/timed';
 // tests/support/p1fuzz.ts — P1 skill fuzz (P1 design §10.3). Inputs come from a seeded RNG separate from the Sim's.
+import { timedHazards } from '../../src/core/hazards/timed';
 import type { Balance } from '../../src/core/balance';
 import { cellReserved, cellSolidCause, snakeOn } from '../../src/core/cells';
 import { goodCells } from '../../src/core/energy';

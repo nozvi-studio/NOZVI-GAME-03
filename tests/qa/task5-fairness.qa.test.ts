@@ -1,6 +1,6 @@
+// tests/qa/task5-fairness.qa.test.ts — black-box QA tests for Task 5 placement constraints & BFS fairness
 import { instanceFamily } from '../support/instanceFamily';
 import { addTimedHazards } from '../../src/core/hazards/timed';
-// tests/qa/task5-fairness.qa.test.ts — black-box QA tests for Task 5 placement constraints & BFS fairness
 import { describe, it, expect } from 'vitest';
 import { loadBalance } from '../support/balance';
 import { buildState } from '../support/state';

@@ -1,7 +1,7 @@
+// tests/core/mango.test.ts
 import { replaceTimedHazards, timedHazards } from '../../src/core/hazards/timed';
 import { simFromAscii, circle, SQUARE } from '../../src/core/testing';
 import { updateDirector } from '../../src/core/hazards/director';
-// tests/core/mango.test.ts
 import { describe, expect, it } from 'vitest';
 import { cellBfsWall, cellReserved } from '../../src/core/cells';
 import { key, reachable, nearHead } from '../../src/core/grid';

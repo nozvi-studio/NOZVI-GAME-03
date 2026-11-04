@@ -5,7 +5,7 @@ import { inBounds, nearHead } from '../grid';
 import { directorIntervalMs, enabledFamilies, familyRow, smallHazardCap } from '../level';
 import type { Rng } from '../rng';
 import type { TableFamily, SimState, SpawnCtx } from '../types';
-import { FAMILY } from './registry';
+import { FAMILIES, FAMILY } from './registry';
 
 // MEC-004 prototype weighted pick: r = next() * total; walk while r > w[i]
 export function pickWeighted(weights: readonly number[], rng: Rng): number {
@@ -35,7 +35,8 @@ export function updateDirector(s: SimState, b: Balance, rng: Rng): void {
   if (s.spawnInMs > 0) return;
   s.spawnInMs = directorIntervalMs(b, s.level);
   const cap = smallHazardCap(b, s.level);
-  const smallCount = s.families.rock.length + s.families.fence.length;
+  let smallCount = 0;
+  for (const f of FAMILIES) if (f.capClass === 'small') smallCount += f.count?.(s) ?? s.families[f.key].length;
   const mazeActive = s.families.maze.length > 0;
   const options: TableFamily[] = enabledFamilies(b, s.level).filter(k => {
     if (k === 'rock' || k === 'fence') return smallCount < cap;

@@ -1,5 +1,5 @@
-import { timedHazards } from '../../src/core/hazards/timed';
 // tests/core/determinism.test.ts
+import { timedHazards } from '../../src/core/hazards/timed';
 import { describe, expect, it } from 'vitest';
 import { createSim, stateOf } from '../../src/core/sim';
 import type { Sim } from '../../src/core/types';

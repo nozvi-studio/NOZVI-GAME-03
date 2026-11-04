@@ -1,5 +1,5 @@
-import { defineFamily } from './family';
 // src/core/hazards/terrain.ts — MEC-004 rising ground (spawnTerrain L508–530, updateTerrains L578–597)
+import { defineFamily } from './family';
 import type { Balance } from '../balance';
 import type { InstanceRules, TerrainCell, TerrainHazard, TerrainVis } from '../types';
 

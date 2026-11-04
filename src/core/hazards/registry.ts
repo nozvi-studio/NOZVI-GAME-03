@@ -8,6 +8,7 @@ import { rottenRockFamily } from './rottenRock';
 import { snipWallFamily } from './snipWall';
 import { rubbleFamily } from './rubble';
 import { timedHazards, updateTimed } from './timed';
+import { solidFamilyWithPriority } from './queries';
 
 const DEFAULT_FAMILIES: readonly HazardFamily[] = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily, rubbleFamily];
 export let FAMILIES: readonly HazardFamily[] = DEFAULT_FAMILIES;
@@ -18,9 +19,9 @@ export const FAMILY: Record<FamilyKey, HazardFamily> = {
 /** Test-only global seam. Always restore with null in a finally block. */
 export function __setFamiliesForTest(f: readonly HazardFamily[] | null): void { FAMILIES = f ?? DEFAULT_FAMILIES; }
 
-// MEC-002-R7 preserve rotten-rock collision priority at the P1 collision boundary.
+// MEC-004 family-key compatibility query for existing callers.
 export function familyAt(s: SimState, x: number, y: number, q: 'solidAt' | 'bfsWallAt' | 'reservedAt'): FamilyKey | null {
-  if (q === 'solidAt' && FAMILIES.includes(rottenRockFamily) && rottenRockFamily.solidAt(s, x, y)) return 'rottenRock';
+  if (q === 'solidAt') return solidFamilyWithPriority(s, x, y)?.key ?? null;
   return FAMILIES.find(f => f[q](s, x, y))?.key ?? null;
 }
 

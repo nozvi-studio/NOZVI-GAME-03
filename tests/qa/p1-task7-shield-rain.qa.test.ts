@@ -1,5 +1,5 @@
-import { addTimedHazards } from '../../src/core/hazards/timed';
 // tests/qa/p1-task7-shield-rain.qa.test.ts — Black-box QA tests for P1 Task 7 Shield, Rubble & Mango Rain (MEC-006)
+import { addTimedHazards } from '../../src/core/hazards/timed';
 import { describe, expect, it } from 'vitest';
 import {
   createSim,
