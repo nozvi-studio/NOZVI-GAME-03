@@ -69,7 +69,7 @@ describe('GDD-13 HUD flow, audio and save wiring', () => {
       { type: 'levelUp', level: 2, unlocked: 'fence' }, { type: 'landed', hazardType: 'rock' }, { type: 'rotted', x: 1, y: 1, leftRock: true }]);
     expect(sound.play.mock.calls.map(c => c[0])).toEqual(['golden', 'level', 'land', 'rot']);
     expect(sound.buzz.mock.calls.map(c => c[0])).toEqual([12, [15, 40, 15]]);
-    expect(h.find('banner').text).toBe('Level 3: fences unlocked');
+    expect(h.find('banner').text).toBe('Level 2: fences unlocked');
     h.game.events.emit('sim-events', [{ type: 'hazardIncoming', family: 'terrain' }]);
     expect(h.find('banner').text).toBe('The ground is shaking');
     expect(h.delayed.filter(t => !t.removed).map(t => t.delay)).toEqual([1800]);
@@ -84,7 +84,7 @@ describe('GDD-13 HUD flow, audio and save wiring', () => {
     expect(h.find('overlay').visible).toBe(false); expect(h.delayed.at(-1)?.delay).toBe(550);
     expect(sound.play).toHaveBeenCalledWith('die'); expect(sound.buzz).toHaveBeenCalledWith(90);
     h.flush(); expect(h.find('overlay-title').text).toBe('Game over');
-    expect(h.find('overlay-text').text).toBe('You ran into a fence. Score 12, level 4.');
+    expect(h.find('overlay-text').text).toBe('You ran into a fence. Score 12, level 3.');
     expect(h.find('overlay-best').text).toBe('New best score!');
   });
   it('GDD-13 reduced-motion wins use zero delay and no death feedback; restarting cancels stale cards', () => {

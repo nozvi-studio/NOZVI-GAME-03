@@ -6,10 +6,19 @@ export type Step = -1 | 0 | 1;
 export interface Dir { x: Step; y: Step }
 export interface Cell { x: number; y: number }
 
-export type CauseKey = 'wall' | 'self' | 'rotten' | 'rock' | 'fence' | 'maze' | 'ground';   // prototype CAUSES L336
-export type FamilyKey = 'rock' | 'fence' | 'maze' | 'terrain';
+export type SkillId = 'slowmo' | 'tailSnip' | 'shield' | 'mangoRain';
+export type Loadout = readonly [SkillId | null, SkillId | null];
+export interface SimOptions { startLevel?: number; startEnergy?: number; loadout?: Loadout; bestLevel?: number }
+export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze';
+export type IntroKey = TableFamily | 'rottenRock';
+export interface LevelRow {
+  from: number; to: number; weights: Partial<Record<TableFamily, number>>;
+  rockShapes: string[]; fenceShapes: string[]; rottenRocks: boolean;
+}
+export type CauseKey = 'wall' | 'self' | 'rotten' | 'rock' | 'fence' | 'maze' | 'ground' | 'snipWall' | 'rubble';   // prototype CAUSES L336
+export type FamilyKey = TableFamily | 'rottenRock' | 'snipWall' | 'rubble';
 export type CapClass = 'small' | 'big' | 'modifier' | 'none';
-export type TimedKey = Exclude<FamilyKey, 'terrain'>;
+export type TimedKey = 'rock' | 'fence' | 'maze';
 export type UnlockKey = 'fence' | 'terrain' | 'maze';
 
 export type TimedPhase = 'warn' | 'solid' | 'crumble';
@@ -29,7 +38,7 @@ export interface Outcome { won: boolean; cause?: CauseKey }
 
 export type SimEvent =
   | { type: 'ate'; x: number; y: number; golden: boolean; points: number }
-  | { type: 'levelUp'; level: number; unlocked?: UnlockKey }
+  | { type: 'levelUp'; level: number; unlocked?: IntroKey }
   | { type: 'landed'; hazardType: TimedKey }
   | { type: 'dust'; x: number; y: number }
   | { type: 'rotted'; x: number; y: number; leftRock: boolean }
@@ -54,7 +63,7 @@ export interface SimState {
   mazeCooldownMs: number;
   score: number;
   eaten: number;
-  level: number;               // 0-based
+  level: number;               // 1-based
   progress: number;
   status: SimStatus;
   outcome: Outcome | null;
@@ -121,5 +130,7 @@ export interface HazardFamily<S extends { family: FamilyKey }> {
   solidAt(state: S, x: number, y: number): boolean;    // collision
   bfsWallAt(state: S, x: number, y: number): boolean;  // reachability walls
   reservedAt(state: S, x: number, y: number): boolean; // placement reserved
+  onLevelEnd?(s: SimState): void;                      // MEC-003-R7; implemented in Task 3
+  onBreak?(s: SimState, x: number, y: number): void;    // MEC-006-R25; implemented in Task 7
   breakable: boolean;                                  // false for all in P0 (Shield is P1)
 }

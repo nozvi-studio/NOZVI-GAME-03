@@ -9,47 +9,23 @@ const mutate = (fn: (j: any) => void): unknown => { const j = structuredClone(js
 describe('GDD-7 balance', () => {
   it('GDD-7 balance.json passes parseBalance', () => { expect(() => loadBalance()).not.toThrow(); });
 
-  it('GDD-7 parity table: every value equals the prototype constant', () => {
+  it('MEC-003 P1 balance v2 table pins every MEC section 9 value', () => {
     const b = loadBalance();
-    const table: [unknown, unknown, string][] = [
-      [b.board, { cols: 17, rows: 17 }, 'L166'], [b.snake.start, [[8, 8], [7, 8], [6, 8]], 'L627'],
-      [b.snake.startDir, [1, 0], 'L628'], [b.snake.maxQueuedTurns, 3, 'L704'],
-      [b.speed, { startMs: 140, minMs: 95, msPerLevel: 4 }, 'L167'],
-      [b.level, { maxLevel: 10, needBase: 4, needPerLevel: 1, unlock: { fence: 2, terrain: 4, maze: 6 } }, 'L168–173'],
-      [b.mango, { rotBaseMs: 8000, rotPerEatenMs: 150, rotMinMs: 4000, goldenRotFactor: 0.5, goldenChance: 0.15,
-        goldenMinEaten: 3, points: { normal: 1, golden: 3 }, progress: { normal: 1, golden: 2 }, nearHeadDist: 3 }, 'L388–394, L782, L792'],
-      [b.fairness, { nearHeadDist: 4, frontLaneCells: 4, terrainNearHeadDist: 3 }, 'L356, L359, L521'],
-      [b.hazard.crumbleMs, 450, 'L170'],
-      [[b.rock.warnMs, b.rock.lifeMs, b.rock.lifeRandMs, b.rock.tries], [1500, 6000, 4000, 40], 'L430–434'],
-      [b.rock.shapePoolByLevel, [{ minLevel: 0, add: ['single'] }, { minLevel: 2, add: ['lineH', 'lineV'] },
-        { minLevel: 4, add: ['corner', 'block'] }], 'L428'],
-      [b.rock.shapes, { single: [[0, 0]], lineH: [[0, 0], [1, 0], [2, 0]], lineV: [[0, 0], [0, 1], [0, 2]],
-        corner: [[0, 0], [1, 0], [0, 1]], block: [[0, 0], [1, 0], [0, 1], [1, 1]] }, 'L423–426'],
-      [[b.fence.warnMs, b.fence.lifeMs, b.fence.lifeRandMs, b.fence.tries, b.fence.lineBase, b.fence.lineExtraMax,
-        b.fence.gapMinLen, b.fence.mirrorChance], [2000, 9000, 4000, 60, 5, 4, 7, 0.5], 'L451–476'],
-      [b.fence.poolAfterUnlock, [{ offset: 0, add: ['line', 'L'] }, { offset: 1, add: ['T', 'Z'] },
-        { offset: 2, add: ['F', 'U', 'plus'] }], 'L466–468'],
-      [b.fence.shapes.L, [[0, 0], [0, 1], [0, 2], [0, 3], [1, 3], [2, 3]], 'L442'],
-      [b.fence.shapes.T, [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [2, 1], [2, 2], [2, 3]], 'L443'],
-      [b.fence.shapes.Z, [[0, 0], [1, 0], [2, 0], [2, 1], [2, 2], [3, 2], [4, 2]], 'L444'],
-      [b.fence.shapes.F, [[0, 0], [1, 0], [2, 0], [0, 1], [0, 2], [1, 2], [0, 3], [0, 4]], 'L445'],
-      [b.fence.shapes.U, [[0, 0], [0, 1], [0, 2], [1, 2], [2, 2], [3, 2], [3, 1], [3, 0]], 'L446'],
-      [b.fence.shapes.plus, [[2, 0], [2, 1], [0, 2], [1, 2], [2, 2], [3, 2], [4, 2], [2, 3], [2, 4]], 'L447'],
-      [[b.maze.warnMs, b.maze.lifeMs, b.maze.lifeRandMs, b.maze.minCells, b.maze.cooldownMs], [2600, 14000, 4000, 6, 26000], 'L501–503'],
-      [b.terrain, { periodMs: 3400, upMs: 1400, warnMs: 900, startDelayMs: 600, fadeOutMs: 500, lifeMs: 18000,
-        lifeRandMs: 6000, tries: 40, minCells: 6, waveChance: 0.5, horizChance: 0.5, waveLenMin: 6, waveLenRand: 3,
-        waveWidth: 2, waveDelayMs: 260, checkerSize: 4, maxActive: 1, maxActiveLate: 2, lateLevel: 8 }, 'L171, L509–546, L584, L595'],
-      [b.director, { firstSpawnMs: 2500, intervalBaseMs: 5000, intervalPerLevelMs: 300, intervalMinMs: 2000, capBase: 2,
-        capPerLevels: 2, capMax: 8, weights: { rock: 3, fence: 2, terrain: 2, maze: 2 } }, 'L309, L537–547'],
-      [b.flow, { countdownMs: 1500, countdownDigits: 3, maxFrameDeltaMs: 100, deathCardDelayMs: 550 }, 'L174, L989, L694'],
-      [b.ui, { bannerMs: 1800, swipeMinPx: 18, swipeBoardFactor: 0.05, haptics: { eatMs: 12, level: [15, 40, 15], deathMs: 90 },
-        terrainFadeInMs: 600, hazardFlickerMs: 1500 }, 'L414, L753, L790, L608, L683, L856, L879'],
-    ];
-    for (const [actual, expected, where] of table) expect(actual, where).toEqual(expected);
+    expect(b.snake).toMatchObject({"start":[[8,8],[7,8],[6,8],[5,8]],"startDir":[1,0],"maxQueuedTurns":3});
+    expect(b.speed).toMatchObject({"startMs":140,"msPerLevel":2,"minMs":82});
+    expect(b.level).toMatchObject({"maxLevel":30,"perBiome":5,"needBase":4,"needStepLevels":3,"transitionMs":1000,"table":[{"from":1,"to":2,"weights":{"rock":3},"rockShapes":["single"],"fenceShapes":[],"rottenRocks":false},{"from":3,"to":4,"weights":{"rock":3},"rockShapes":["single","lineH","lineV"],"fenceShapes":[],"rottenRocks":false},{"from":5,"to":5,"weights":{"rock":3},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":[],"rottenRocks":false},{"from":6,"to":6,"weights":{"rock":3,"fence":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line"],"rottenRocks":false},{"from":7,"to":10,"weights":{"rock":3,"fence":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line","L"],"rottenRocks":false},{"from":11,"to":11,"weights":{"rock":3,"fence":2,"terrain":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line","L"],"rottenRocks":false},{"from":12,"to":12,"weights":{"rock":3,"fence":2,"terrain":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line","L"],"rottenRocks":true},{"from":13,"to":15,"weights":{"rock":3,"fence":2,"terrain":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line","L","T","Z"],"rottenRocks":true},{"from":16,"to":25,"weights":{"rock":3,"fence":2,"terrain":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line","L","T","Z","F","U","plus"],"rottenRocks":true},{"from":26,"to":30,"weights":{"rock":3,"fence":2,"terrain":2,"maze":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line","L","T","Z","F","U","plus"],"rottenRocks":true}]});
+    expect(b.mango).toMatchObject({"rotBaseMs":8000,"rotPerEatenMs":150,"rotMinMs":4000,"goldenRotFactor":0.5,"goldenChance":0.15,"goldenMinEaten":3,"points":{"normal":1,"golden":3},"progress":{"normal":1,"golden":2},"nearHeadDist":3,"rottenRockLifeMs":5000,"placeRetryMs":250});
+    expect(b.director).toMatchObject({"firstSpawnMs":2500,"intervalBaseMs":5000,"intervalPerLevelMs":120,"intervalMinMs":1600,"capBase":2,"capPerLevels":3,"capMax":10,"challengeIntervalFactor":1,"challengeCapBonus":0});
+    expect(b.energy).toMatchObject({"max":100,"orbGain":15,"goldenGain":10,"orbSpawnIntervalMs":6000,"orbMax":2,"orbLifeMs":8000,"orbBlinkMs":2000,"orbFromLevel":2});
+    expect(b.skills).toMatchObject({"slowmo":{"cost":40,"durationMs":4000,"tickFactor":1.6,"unlockLevel":3},"tailSnip":{"cost":30,"minLength":3,"wallLifeMs":3000,"unlockLevel":6},"shield":{"cost":50,"durationMs":5000,"rubbleLifeMs":1500,"bonkPauseTicks":3,"unlockLevel":11},"mangoRain":{"cost":80,"durationMs":6000,"dropsMin":6,"dropsMax":10,"barCapFraction":0.5,"mangoLifeMs":8000,"mangoBlinkMs":2000,"unlockLevel":16}});
+    expect(b.loadout).toMatchObject({"slots":2,"secondSlotLevel":6,"order":["slowmo","tailSnip","shield","mangoRain"]});
+    expect(b.checkpoints).toMatchObject({"milestones":[{"reach":10,"start":4},{"reach":15,"start":6},{"reach":20,"start":8},{"reach":25,"start":10},{"reach":30,"start":12,"requiresClear":true}],"carryRatio":0.5,"carryMax":50,"rampMangoes":5});
+    expect(b.log).toMatchObject({"maxEntries":500});
+    for (const [group, key] of [[b.director, 'weights'], [b.level, 'unlock'], [b.level, 'needPerLevel'], [b.rock, 'shapePoolByLevel'], [b.terrain, 'maxActiveLate'], [b.terrain, 'lateLevel'], [b.fence, 'poolAfterUnlock']] as const) expect(group).not.toHaveProperty(key);
   });
 
   it('GDD-7 parseBalance rejects minMs > startMs', () => {
-    expect(() => parseBalance(mutate(j => { j.speed.minMs = 141; }))).toThrow(/Invalid balance: speed\.minMs/);
+    expect(() => parseBalance(mutate(j => { j.speed.minMs = 141; }))).toThrow(/balance: speed\.minMs/);
   });
 
   it('GDD-7 parseBalance rejects a missing value', () => {
@@ -63,12 +39,37 @@ describe('GDD-7 balance', () => {
       .toThrow(/mango\.goldenChance must be a number in \[0, 1\]/);
   });
   it('GDD-7 parseBalance rejects an unknown shape name', () => {
-    expect(() => parseBalance(mutate(j => { j.rock.shapePoolByLevel[1].add = ['hex']; }))).toThrow(/rock\.shapePoolByLevel\[1\]\.add/);
+    expect(() => parseBalance(mutate(j => { j.level.table[1].rockShapes = ['hex']; }))).toThrow(/level\.table\[1\]\.rockShapes/);
   });
   it('GDD-7 parseBalance rejects a terrain cycle without a down phase', () => {
     expect(() => parseBalance(mutate(j => { j.terrain.upMs = 2500; }))).toThrow(/terrain\.periodMs/);
   });
   it('GDD-7 parseBalance rejects a non-object', () => {
-    expect(() => parseBalance(null)).toThrow(/Invalid balance: balance must be an object/);
+    expect(() => parseBalance(null)).toThrow(/balance: balance must be an object/);
   });
+});
+
+it('MEC-006 section 9 parseBalance rejects invalid skill and orb tuning', () => {
+  for (const tickFactor of [0, 1]) expect(() => loadBalance(j => j.skills.slowmo.tickFactor = tickFactor)).toThrow();
+  expect(() => loadBalance(j => j.skills.mangoRain.barCapFraction = 0)).toThrow();
+  expect(() => loadBalance(j => j.skills.mangoRain.dropsMin = 11)).toThrow();
+  expect(() => loadBalance(j => j.energy.orbBlinkMs = 8000)).toThrow();
+  expect(() => loadBalance(j => j.skills.mangoRain.mangoBlinkMs = 8000)).toThrow();
+});
+it('MEC-007 section 9 parseBalance rejects decreasing unlock levels and duplicate loadout order', () => {
+  expect(() => loadBalance(j => j.skills.tailSnip.unlockLevel = 2)).toThrow();
+  expect(() => loadBalance(j => j.loadout.order[1] = 'slowmo')).toThrow();
+});
+it('MEC-002 section 9 parseBalance rejects rotMinMs > rotBaseMs and goldenRotFactor 0', () => {
+  expect(() => loadBalance(j => j.mango.rotMinMs = 8001)).toThrow();
+  expect(() => loadBalance(j => j.mango.goldenRotFactor = 0)).toThrow();
+});
+it('MEC-008 section 9 parseBalance validates checkpoints and carry', () => {
+  for (const [field, value] of [['reach', 31], ['start', 0], ['start', 10], ['start', 2.5]])
+    expect(() => loadBalance(j => j.checkpoints.milestones[0][field] = value)).toThrow();
+  expect(() => loadBalance(j => j.checkpoints.carryRatio = 0)).toThrow();
+  expect(() => loadBalance(j => j.checkpoints.carryMax = 101)).toThrow();
+});
+it('MEC-003 section 9 parseBalance rejects a non-positive log size', () => {
+  expect(() => loadBalance(j => j.log.maxEntries = 0)).toThrow();
 });

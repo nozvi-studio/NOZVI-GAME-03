@@ -7,18 +7,21 @@ import { needFor, tickMsFor } from './level';
 import { placeMango, rotMango } from './mango';
 import { rngFrom, seedRng, type Rng } from './rng';
 import { queueTurn, stepSnake } from './snake';
-import type { Dir, Sim, SimSnapshot, SimState, Step } from './types';
+import type { Dir, Sim, SimSnapshot, SimState, SimOptions, Step } from './types';
 
 const toDir = ([x, y]: Pair): Dir => ({ x: x as Step, y: y as Step });
 const states = new WeakMap<Sim, SimState>();
 
-export function initialState(b: Balance, seed: number): SimState {
+// MEC-003 section 7 validates the 1-based start level; other options arrive in later tasks.
+export function initialState(b: Balance, seed: number, options: SimOptions = {}): SimState {
+  const level = options.startLevel ?? 1;
+  if (!Number.isInteger(level) || level < 1 || level > b.level.maxLevel) throw new RangeError('startLevel must be an integer 1..' + b.level.maxLevel);
   const snake = b.snake.start.map(([x, y]) => ({ x, y }));
   return {
     snake, dir: toDir(b.snake.startDir), queue: [],
     headFrom: { ...snake[0]! }, tailFrom: { ...snake[snake.length - 1]! },
-    acc: 0, tickMs: tickMsFor(b, 0), mango: null, rottenRocks: [], hazards: [], terrains: [],
-    spawnInMs: b.director.firstSpawnMs, mazeCooldownMs: 0, score: 0, eaten: 0, level: 0, progress: 0,
+    acc: 0, tickMs: tickMsFor(b, level), mango: null, rottenRocks: [], hazards: [], terrains: [],
+    spawnInMs: b.director.firstSpawnMs, mazeCooldownMs: 0, score: 0, eaten: 0, level, progress: 0,
     status: 'playing', outcome: null, events: [], rng: seedRng(seed),
   };
 }
@@ -67,8 +70,8 @@ function wrap(b: Balance, s: SimState): Sim {
   return sim;
 }
 
-export function createSim(b: Balance, seed: number): Sim {
-  const s = initialState(b, seed);
+export function createSim(b: Balance, seed: number, options?: SimOptions): Sim {
+  const s = initialState(b, seed, options);
   placeMango(s, b, rngFrom(s.rng));            // reset() places the first mango (L637)
   return wrap(b, s);
 }

@@ -1,17 +1,20 @@
 // src/core/hazards/shapes.ts — rock/fence pools, line fence, transform, maze cells (L423–506). MEC-004
 import type { Balance, FenceKind, MazeLayout, Pair, RockShapeKey } from '../balance';
+import { familyRow, fenceFirstLevel } from '../level';
 import type { Rng } from '../rng';
 import type { Cell } from '../types';
 
+// MEC-003-R15 rock shapes come from the level table.
 export const rockPool = (b: Balance, level: number): RockShapeKey[] =>
-  b.rock.shapePoolByLevel.filter(p => level >= p.minLevel).flatMap(p => p.add);
+  familyRow(b, level).rockShapes as RockShapeKey[];
+// MEC-003-R15 fence shapes come from the level table.
 export const fencePool = (b: Balance, level: number): FenceKind[] =>
-  b.fence.poolAfterUnlock.filter(p => level >= b.level.unlock.fence + p.offset).flatMap(p => p.add);
+  familyRow(b, level).fenceShapes as FenceKind[];
 
-// MEC-004 straight fence; length ≥ gapMinLen gets one gap (L449–455)
+// MEC-003-R15 straight fence; length ≥ gapMinLen gets one gap (L449–455)
 export function lineFence(b: Balance, level: number, rng: Rng): Pair[] {
   const f = b.fence;
-  const len = f.lineBase + rng.int(1 + Math.min(f.lineExtraMax, level - b.level.unlock.fence));
+  const len = f.lineBase + rng.int(1 + Math.min(f.lineExtraMax, level - fenceFirstLevel(b)));
   const gapAt = len >= f.gapMinLen ? 1 + rng.int(len - 2) : -1;
   const out: Pair[] = [];
   for (let i = 0; i < len; i++) if (i !== gapAt) out.push([i, 0]);

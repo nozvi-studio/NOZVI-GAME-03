@@ -5,10 +5,10 @@ import { nearHead } from '../../src/core/grid';
 import { placeMango } from '../../src/core/mango';
 import { rngFrom, seedRng } from '../../src/core/rng';
 import { restoreSim, stateOf } from '../../src/core/sim';
-import type { FamilyKey, Sim, SimState, Step } from '../../src/core/types';
+import type { TableFamily, Sim, SimState, Step } from '../../src/core/types';
 import { buildState } from './state';
 
-export interface FuzzReport { violations: string[]; steps: number; maxLevel: number; spawned: Record<FamilyKey, number> }
+export interface FuzzReport { violations: string[]; steps: number; maxLevel: number; spawned: Record<TableFamily, number> }
 const DIRS: [Step, Step][] = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
 export function snapHash(sim: Sim): string {          // FNV-1a over the snapshot JSON
@@ -25,7 +25,7 @@ export function fuzzSeed(b: Balance, seed: number, simMs: number): FuzzReport {
   const seen = new WeakSet<object>();
   let played = 0, run = 0;
   while (played < simMs) {
-    const s0 = buildState(b, { seed: seed * 1000 + run, level: input.int(b.level.maxLevel + 1), spawnInMs: b.director.firstSpawnMs });
+    const s0 = buildState(b, { seed: seed * 1000 + run, level: 1 + input.int(b.level.maxLevel), spawnInMs: b.director.firstSpawnMs });
     placeMango(s0, b, rngFrom(s0.rng));
     const sim = restoreSim(b, s0), s = stateOf(sim);
     run++;

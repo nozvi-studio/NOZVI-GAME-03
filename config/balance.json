@@ -1,19 +1,24 @@
 {
   "board": { "cols": 17, "rows": 17 },
-  "snake": { "start": [[8, 8], [7, 8], [6, 8]], "startDir": [1, 0], "maxQueuedTurns": 3 },
-  "speed": { "startMs": 140, "minMs": 95, "msPerLevel": 4 },
-  "level": { "maxLevel": 10, "needBase": 4, "needPerLevel": 1, "unlock": { "fence": 2, "terrain": 4, "maze": 6 } },
-  "mango": {
-    "rotBaseMs": 8000, "rotPerEatenMs": 150, "rotMinMs": 4000, "goldenRotFactor": 0.5, "goldenChance": 0.15,
-    "goldenMinEaten": 3, "points": { "normal": 1, "golden": 3 }, "progress": { "normal": 1, "golden": 2 }, "nearHeadDist": 3
-  },
+  "snake": { "start": [[8,8],[7,8],[6,8],[5,8]], "startDir": [1,0], "maxQueuedTurns": 3 },
+  "speed": { "startMs": 140, "msPerLevel": 2, "minMs": 82 },
+  "level": { "maxLevel": 30, "perBiome": 5, "needBase": 4, "needStepLevels": 3, "transitionMs": 1000, "table": [
+    { "from": 1,  "to": 2,  "weights": { "rock": 3 }, "rockShapes": ["single"], "fenceShapes": [], "rottenRocks": false },
+    { "from": 3,  "to": 4,  "weights": { "rock": 3 }, "rockShapes": ["single","lineH","lineV"], "fenceShapes": [], "rottenRocks": false },
+    { "from": 5,  "to": 5,  "weights": { "rock": 3 }, "rockShapes": ["single","lineH","lineV","corner","block"], "fenceShapes": [], "rottenRocks": false },
+    { "from": 6,  "to": 6,  "weights": { "rock": 3, "fence": 2 }, "rockShapes": ["single","lineH","lineV","corner","block"], "fenceShapes": ["line"], "rottenRocks": false },
+    { "from": 7,  "to": 10, "weights": { "rock": 3, "fence": 2 }, "rockShapes": ["single","lineH","lineV","corner","block"], "fenceShapes": ["line","L"], "rottenRocks": false },
+    { "from": 11, "to": 11, "weights": { "rock": 3, "fence": 2, "terrain": 2 }, "rockShapes": ["single","lineH","lineV","corner","block"], "fenceShapes": ["line","L"], "rottenRocks": false },
+    { "from": 12, "to": 12, "weights": { "rock": 3, "fence": 2, "terrain": 2 }, "rockShapes": ["single","lineH","lineV","corner","block"], "fenceShapes": ["line","L"], "rottenRocks": true },
+    { "from": 13, "to": 15, "weights": { "rock": 3, "fence": 2, "terrain": 2 }, "rockShapes": ["single","lineH","lineV","corner","block"], "fenceShapes": ["line","L","T","Z"], "rottenRocks": true },
+    { "from": 16, "to": 25, "weights": { "rock": 3, "fence": 2, "terrain": 2 }, "rockShapes": ["single","lineH","lineV","corner","block"], "fenceShapes": ["line","L","T","Z","F","U","plus"], "rottenRocks": true },
+    { "from": 26, "to": 30, "weights": { "rock": 3, "fence": 2, "terrain": 2, "maze": 2 }, "rockShapes": ["single","lineH","lineV","corner","block"], "fenceShapes": ["line","L","T","Z","F","U","plus"], "rottenRocks": true } ] },
+  "mango": { "rotBaseMs": 8000, "rotPerEatenMs": 150, "rotMinMs": 4000, "goldenRotFactor": 0.5, "goldenChance": 0.15, "goldenMinEaten": 3,
+    "points": { "normal": 1, "golden": 3 }, "progress": { "normal": 1, "golden": 2 }, "nearHeadDist": 3, "rottenRockLifeMs": 5000, "placeRetryMs": 250 },
   "fairness": { "nearHeadDist": 4, "frontLaneCells": 4, "terrainNearHeadDist": 3 },
   "hazard": { "crumbleMs": 450 },
   "rock": {
     "warnMs": 1500, "lifeMs": 6000, "lifeRandMs": 4000, "tries": 40,
-    "shapePoolByLevel": [
-      { "minLevel": 0, "add": ["single"] }, { "minLevel": 2, "add": ["lineH", "lineV"] }, { "minLevel": 4, "add": ["corner", "block"] }
-    ],
     "shapes": {
       "single": [[0, 0]], "lineH": [[0, 0], [1, 0], [2, 0]], "lineV": [[0, 0], [0, 1], [0, 2]],
       "corner": [[0, 0], [1, 0], [0, 1]], "block": [[0, 0], [1, 0], [0, 1], [1, 1]]
@@ -22,9 +27,6 @@
   "fence": {
     "warnMs": 2000, "lifeMs": 9000, "lifeRandMs": 4000, "tries": 60, "lineBase": 5, "lineExtraMax": 4, "gapMinLen": 7,
     "mirrorChance": 0.5,
-    "poolAfterUnlock": [
-      { "offset": 0, "add": ["line", "L"] }, { "offset": 1, "add": ["T", "Z"] }, { "offset": 2, "add": ["F", "U", "plus"] }
-    ],
     "shapes": {
       "L": [[0, 0], [0, 1], [0, 2], [0, 3], [1, 3], [2, 3]],
       "T": [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [2, 1], [2, 2], [2, 3]],
@@ -46,15 +48,21 @@
   "terrain": {
     "periodMs": 3400, "upMs": 1400, "warnMs": 900, "startDelayMs": 600, "fadeOutMs": 500, "lifeMs": 18000, "lifeRandMs": 6000,
     "tries": 40, "minCells": 6, "waveChance": 0.5, "horizChance": 0.5, "waveLenMin": 6, "waveLenRand": 3, "waveWidth": 2,
-    "waveDelayMs": 260, "checkerSize": 4, "maxActive": 1, "maxActiveLate": 2, "lateLevel": 8
+    "waveDelayMs": 260, "checkerSize": 4, "maxActive": 1
   },
-  "director": {
-    "firstSpawnMs": 2500, "intervalBaseMs": 5000, "intervalPerLevelMs": 300, "intervalMinMs": 2000,
-    "capBase": 2, "capPerLevels": 2, "capMax": 8, "weights": { "rock": 3, "fence": 2, "terrain": 2, "maze": 2 }
-  },
+  "director": { "firstSpawnMs": 2500, "intervalBaseMs": 5000, "intervalPerLevelMs": 120, "intervalMinMs": 1600, "capBase": 2, "capPerLevels": 3, "capMax": 10, "challengeIntervalFactor": 1, "challengeCapBonus": 0 },
   "flow": { "countdownMs": 1500, "countdownDigits": 3, "maxFrameDeltaMs": 100, "deathCardDelayMs": 550 },
   "ui": {
     "bannerMs": 1800, "swipeMinPx": 18, "swipeBoardFactor": 0.05,
     "haptics": { "eatMs": 12, "level": [15, 40, 15], "deathMs": 90 }, "terrainFadeInMs": 600, "hazardFlickerMs": 1500
-  }
+  },
+  "energy": { "max": 100, "orbGain": 15, "goldenGain": 10, "orbSpawnIntervalMs": 6000, "orbMax": 2, "orbLifeMs": 8000, "orbBlinkMs": 2000, "orbFromLevel": 2 },
+  "skills": {
+    "slowmo": { "cost": 40, "durationMs": 4000, "tickFactor": 1.6, "unlockLevel": 3 },
+    "tailSnip": { "cost": 30, "minLength": 3, "wallLifeMs": 3000, "unlockLevel": 6 },
+    "shield": { "cost": 50, "durationMs": 5000, "rubbleLifeMs": 1500, "bonkPauseTicks": 3, "unlockLevel": 11 },
+    "mangoRain": { "cost": 80, "durationMs": 6000, "dropsMin": 6, "dropsMax": 10, "barCapFraction": 0.5, "mangoLifeMs": 8000, "mangoBlinkMs": 2000, "unlockLevel": 16 } },
+  "loadout": { "slots": 2, "secondSlotLevel": 6, "order": ["slowmo","tailSnip","shield","mangoRain"] },
+  "checkpoints": { "milestones": [ {"reach":10,"start":4}, {"reach":15,"start":6}, {"reach":20,"start":8}, {"reach":25,"start":10}, {"reach":30,"start":12,"requiresClear":true} ], "carryRatio": 0.5, "carryMax": 50, "rampMangoes": 5 },
+  "log": { "maxEntries": 500 }
 }

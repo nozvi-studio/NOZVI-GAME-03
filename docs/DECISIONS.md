@@ -134,3 +134,45 @@ Append-only. Format: `## YYYY-MM-DD — <decision>` then Context / Choice / Alte
 
 ## 2026-11-05 — QA process: independent tester
 **Decision (owner, 2026-11-04):** feature code is written by Codex or Claude; agy is the dedicated tester and never writes feature code. After each task agy derives black-box cases from the MEC specs (public API only), writes them under `tests/qa/` and runs browser checks; the lead triages failures (code bug → implementer, test error → agy, spec gap → owner).
+
+## 2026-11-04 - P1 plan name mapping
+- Context: P1 Task 1 verifies the assumed P0 surface against the merged implementation; later tasks use these real names.
+- SimState: assumed snake.cells/dir/queue maps to top-level snake (Cell[]), dir and queue; director.timerMs/mazeCooldownMs maps to top-level spawnInMs/mazeCooldownMs; need is derived in snapshot(), not stored. acc, tickMs, status, outcome, score, level, progress, mango, eaten, rottenRocks, hazards, terrains, rng and events retain their real P0 names.
+- Level helpers: P0 needFor/tickMsFor remain aliases of quota/levelTickMs, with 1-based arguments. unlockedAt aliases introducedAt; isUnlocked reads the table. SkillId, Loadout, SimOptions, TableFamily, IntroKey, LevelRow and the new helpers are public exports.
+- Shapes: rockPool/fencePool/lineFence live in src/core/hazards/shapes.ts, so Task 1 updates that existing helper instead of duplicating it in rock.ts/fence.ts. Shape selection and RNG order stay at their existing call sites.
+- Registry: HazardFamily is declared in types.ts; registry.ts owns FAMILY/FAMILIES. Only the four implemented P0 families have registry entries. TimedKey still identifies the existing rock/fence/maze instances; new FamilyKey members reserve later implementations. UnlockKey retains the three P0 incoming-banner families; levelUp.unlocked uses IntroKey.
+- RNG: seedRng(seed) creates the plain rng state and rngFrom(state) supplies next/int/pick/chance. placeMango(s, b, rng) returns boolean and appends events to s.events; SpawnCtx has balance/level/cellFree (no emit); StepCtx has emit. No context or closures are stored in state.
+- Meta: storage.ts exports KeyValueStore/get/set and memoryStore; save.ts exports load/save and MIGRATIONS (uppercase). The public meta index exposes the supported functions. runFlow.ts and clock.ts retain the planned paths.
+- Test helper: tests/support/balance.ts already existed; loadBalance now accepts an optional patch of a deep copy before parseBalance. buildState uses initialState and explicit 1-based fixture levels.
+- Minimal integration deviations: src/game/text.ts handles the extended cause/introduction types and consumes 1-based labels to prevent off-by-one display. Two obsolete QA files reference deleted JSON/type members, so tsconfig excludes tests/qa/task2.qa.test.ts and tests/qa/task5-director-unlocks.qa.test.ts from static checking; all their non-obsolete cases still run in Vitest. Independent QA sources are unchanged.
+- Environment: sandboxed Windows child-process spawning fails with EPERM. Verification uses existing --configLoader native and --pool threads flags (one worker for heavy fuzz, three for the normal suite), with no dependency or npm script changes. Runtime filtering names only superseded QA cases; see STATUS and the task report.
+- Test runtime: default fuzz uses 5 smoke seeds (120 s each); test:fuzz retains 200 heavy seeds. This applies the P1 global constraint that heavy fuzz stays outside npm test; verification keeps per-file isolation because the existing game mocks leak when --no-isolate is used.
+
+### P1 Task 1 obsolete independent QA cases (sources unchanged)
+| Test ID | Superseding approved rule |
+|---|---|
+| QA-T2-10 | Task 1 Step 3; MEC-003-R3: min tick is 82 ms. |
+| QA-T2-15 | MEC-003-R14 removes level.unlock; mutations now target level.table. |
+| QA-T2-18 | MEC-003-R14 removes director.weights; weights belong to level.table. |
+| QA-T3-01 | Task 1 Step 3; MEC-001-R2: four start cells. |
+| QA-T3-17 | MEC-003-R1/R2: 1-based quota 4 + floor((n-1)/3). |
+| QA-T3-18 | MEC-003-R1/R3: 1-based tick 140 - 2*(n-1), minimum 82. |
+| QA-T3-20 | MEC-003-R1/R2/R3: level zero fixture and old quota/tick are obsolete. |
+| QA-T3-21 | MEC-003-R1/R2: level zero fixture and old quota are obsolete. |
+| QA-T3-22 | MEC-003-R15/R16: introductions move to L6/L11/L12/L26. |
+| QA-T3-23 | Task 1 Step 6; MEC-003-R1: last level is 30. |
+| QA-T5-13 | MEC-003-R14/R15: family table replaces P0 unlock levels. |
+| QA-T5-14 | MEC-003-R1/R15/R16: 1-based start and fence introduction at L6. |
+| QA-T5-15 | MEC-003-R15: table-driven rock/fence shape tiers. |
+| QA-T5-16 | MEC-003-R1/R4: 1-based director interval max(1600, 5000-120*n). |
+| QA-T5-17 | MEC-003-R1/R4: invalid level-zero fixture; cap min(10, 2+floor(n/3)). |
+| QA-T5-18 | MEC-003-R1: invalid level-zero fixture; equivalent cap exclusion remains covered by core tests. |
+| QA-T5-21 | MEC-003-R15: maze begins at L26; L6 fixture cannot spawn it. |
+| QA-T5-22 | MEC-003-R15: terrain begins at L11 and maxActive remains 1. |
+| QA-T5-23 | MEC-003-R1/R15: invalid level-zero fixture and fence now begins at L6. |
+| QA-T8-03 | MEC-003-R1 and Task 1 Step 6: labels consume 1-based levels. |
+| QA-T8-05 | MEC-003-R1/R15/R16: banners consume 1-based levels and new introductions. |
+| QA-T8-07 | MEC-003-R1: results text consumes 1-based levels. |
+| QA-T8-08 | MEC-003-R1: results text consumes 1-based levels. |
+- Replacement coverage: core balance, level, shapes, director, snake and game text/HUD suites assert P1 values without editing independent QA sources. QA-T2-17 remains its existing P2a skip; two existing todo cases remain.
+- Final evidence: filtered normal suite 364 passed / 24 skipped / 2 todo in 7.65 s with three isolated thread workers; filtered heavy fuzz (200 seeds) has the same totals and exits 0. Typecheck and native-loader production build exit 0. A read-only review found no Critical/Important issues. The copied historical "To be copied" note is retained as a minor documentation artifact to honor the verbatim-copy requirement.

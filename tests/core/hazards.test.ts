@@ -60,22 +60,22 @@ describe('MEC-004 timed hazards', () => {
 
   it('MEC-004 hazard life is drawn after a successful placement', () => {
     const a = fixed([0, 1, 2], [], [0.5]);
-    expect(ROCK.spawn({ balance: b, level: 0, cellFree: () => true }, a.rng)?.lifeMs).toBe(8000);
+    expect(ROCK.spawn({ balance: b, level: 1, cellFree: () => true }, a.rng)?.lifeMs).toBe(8000);
     expect(a.calls).toEqual(['pick(1)', 'int(17)', 'int(17)', 'next']);
     const fail = fixed([]);
-    expect(ROCK.spawn({ balance: b, level: 0, cellFree: () => false }, fail.rng)).toBeNull();
+    expect(ROCK.spawn({ balance: b, level: 1, cellFree: () => false }, fail.rng)).toBeNull();
     expect(fail.calls).not.toContain('next');
   });
 
   it('MEC-004 rock picks the shape once, then 40 tries with origin int(17), int(17)', () => {
     const a = fixed([]);
-    expect(ROCK.spawn({ balance: b, level: 0, cellFree: () => false }, a.rng)).toBeNull();
+    expect(ROCK.spawn({ balance: b, level: 1, cellFree: () => false }, a.rng)).toBeNull();
     expect(a.calls).toEqual(['pick(1)', ...Array<string>(80).fill('int(17)')]);
   });
 
   it('MEC-004 fence RNG order', () => {
     const a = fixed([0, 3, 2, 0, 1, 2], [false], [0.5]);
-    const h = FENCE.spawn({ balance: b, level: 6, cellFree: () => true }, a.rng);
+    const h = FENCE.spawn({ balance: b, level: 16, cellFree: () => true }, a.rng);
     expect(a.calls).toEqual(['pick(7)', 'int(5)', 'int(6)', 'int(4)', 'chance(0.5)', 'int(10)', 'int(17)', 'next']);
     expect(h?.kind).toBe('line'); expect(h?.warnMs).toBe(2000); expect(h?.lifeMs).toBe(11000);
     expect(h?.cells).toHaveLength(7);

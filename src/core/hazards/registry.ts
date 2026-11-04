@@ -1,5 +1,5 @@
 // src/core/hazards/registry.ts — hazard family registry (design §4.1). MEC-004
-import type { HazardFamily, HazardInstance, FamilyKey, SimState, StepCtx, TerrainHazard, TimedHazard } from '../types';
+import type { HazardFamily, HazardInstance, TableFamily, SimState, StepCtx, TerrainHazard, TimedHazard } from '../types';
 import { FENCE } from './fence';
 import { MAZE } from './maze';
 import { ROCK } from './rock';
@@ -8,15 +8,15 @@ import { TERRAIN } from './terrain';
 export const FAMILY: { rock: HazardFamily<TimedHazard>; fence: HazardFamily<TimedHazard>;
   maze: HazardFamily<TimedHazard>; terrain: HazardFamily<TerrainHazard> } = { rock: ROCK, fence: FENCE, maze: MAZE, terrain: TERRAIN };
 // MEC-004 ordered registry: rock, fence, maze, terrain
-export const FAMILIES = [ROCK, FENCE, MAZE, TERRAIN] as unknown as readonly HazardFamily<HazardInstance>[];
+export const FAMILIES = [ROCK, FENCE, MAZE, TERRAIN] as unknown as readonly (HazardFamily<HazardInstance> & { key: TableFamily })[];
 
-const fam = (k: FamilyKey) => FAMILY[k] as unknown as HazardFamily<HazardInstance>;
-export const instancesOf = (s: SimState, k: FamilyKey): HazardInstance[] =>
+const fam = (k: TableFamily) => FAMILY[k] as unknown as HazardFamily<HazardInstance>;
+export const instancesOf = (s: SimState, k: TableFamily): HazardInstance[] =>
   k === 'terrain' ? s.terrains : s.hazards.filter(h => h.family === k);
 
 // MEC-004 first family (in FAMILIES order) with an instance answering the query at (x, y)
-export function familyAt(s: SimState, x: number, y: number, q: 'solidAt' | 'bfsWallAt' | 'reservedAt'): FamilyKey | null {
-  for (const f of FAMILIES) for (const h of instancesOf(s, f.key)) if (f[q](h, x, y)) return f.key;
+export function familyAt(s: SimState, x: number, y: number, q: 'solidAt' | 'bfsWallAt' | 'reservedAt'): TableFamily | null {
+  for (const f of FAMILIES) for (const h of instancesOf(s, f.key)) if (f[q](h, x, y)) return f.key as TableFamily;
   return null;
 }
 

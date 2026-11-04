@@ -84,7 +84,7 @@ describe('MEC-002 mango', () => {
     let pool: readonly Cell[] = [];
     const pick = scripted(p => { pool = p; return p[0]!; });
     expect(placeMango(s, b, pick.rng)).toBe(true);
-    expect(pool).toHaveLength(274);
+    expect(pool).toHaveLength(273);
     const withoutMango = structuredClone(s); withoutMango.mango = null;
     for (const c of pool) {
       expect(cellReserved(withoutMango, c.x, c.y)).toBe(false);

@@ -3,5 +3,5 @@ export { parseBalance } from './balance';
 export type { Balance, Pair, RockShapeKey, FenceShapeKey, FenceKind, MazeLayout } from './balance';
 export type * from './types';
 export { createSim, restoreSim } from './sim';
-export { needFor, tickMsFor } from './level';
+export { biome, isChallenge, quota, levelTickMs, directorIntervalMs, smallHazardCap, familyRow, enabledFamilies, introducedAt, fenceFirstLevel, needFor, tickMsFor } from './level';
 export { FAMILIES } from './hazards/registry';
