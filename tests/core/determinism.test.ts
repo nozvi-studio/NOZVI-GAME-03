@@ -1,3 +1,4 @@
+import { timedHazards } from '../../src/core/hazards/timed';
 // tests/core/determinism.test.ts
 import { describe, expect, it } from 'vitest';
 import { createSim, stateOf } from '../../src/core/sim';
@@ -41,7 +42,7 @@ describe('MEC-004 determinism', () => {
     const a = createSim(b, 5); play(a, [16], 3000);
     const s = stateOf(a);
     expect(s.status).toBe('playing');
-    expect(s.hazards.length).toBeGreaterThan(0);
+    expect(timedHazards(s).length).toBeGreaterThan(0);
     expect(JSON.parse(JSON.stringify(s))).toEqual(s);
   });
 });

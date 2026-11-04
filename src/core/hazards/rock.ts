@@ -1,9 +1,10 @@
+import { defineFamily } from './family';
 // src/core/hazards/rock.ts — MEC-004 falling rocks (spawnRock L427–439)
-import type { HazardFamily, TimedHazard } from '../types';
+import type { InstanceRules, TimedHazard } from '../types';
 import { rockPool } from './shapes';
 import { breakTimed, makeTimed, timedHasCell, timedSolidAt, updateTimed } from './timed';
 
-export const ROCK: HazardFamily<TimedHazard> = {
+const rules: InstanceRules<TimedHazard> = {
   key: 'rock', cause: 'rock', capClass: 'small', maxActiveKey: null, breakable: true,
   onBreak: (s, x, y) => breakTimed(s, 'rock', x, y),
   spawn(ctx, rng) {
@@ -18,3 +19,6 @@ export const ROCK: HazardFamily<TimedHazard> = {
   },
   update: updateTimed, solidAt: timedSolidAt, bfsWallAt: timedHasCell, reservedAt: timedHasCell,
 };
+
+// MEC-004-R2 compose state queries and updates over this family's own instances.
+export const ROCK = defineFamily('rock', rules, s => s.families.rock, (s, instances) => { s.families.rock = instances; });

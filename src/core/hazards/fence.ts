@@ -1,9 +1,10 @@
+import { defineFamily } from './family';
 // src/core/hazards/fence.ts — MEC-004 fences (spawnFence L464–477)
-import type { HazardFamily, TimedHazard } from '../types';
+import type { InstanceRules, TimedHazard } from '../types';
 import { fencePool, lineFence, transform } from './shapes';
 import { breakTimed, makeTimed, timedHasCell, timedSolidAt, updateTimed } from './timed';
 
-export const FENCE: HazardFamily<TimedHazard> = {
+const rules: InstanceRules<TimedHazard> = {
   key: 'fence', cause: 'fence', capClass: 'small', maxActiveKey: null, breakable: true,
   onBreak: (s, x, y) => breakTimed(s, 'fence', x, y),
   spawn(ctx, rng) {
@@ -20,3 +21,6 @@ export const FENCE: HazardFamily<TimedHazard> = {
   },
   update: updateTimed, solidAt: timedSolidAt, bfsWallAt: timedHasCell, reservedAt: timedHasCell,
 };
+
+// MEC-004-R2 compose state queries and updates over this family's own instances.
+export const FENCE = defineFamily('fence', rules, s => s.families.fence, (s, instances) => { s.families.fence = instances; });

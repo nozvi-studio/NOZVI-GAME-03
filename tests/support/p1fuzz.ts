@@ -1,3 +1,4 @@
+import { timedHazards } from '../../src/core/hazards/timed';
 // tests/support/p1fuzz.ts — P1 skill fuzz (P1 design §10.3). Inputs come from a seeded RNG separate from the Sim's.
 import type { Balance } from '../../src/core/balance';
 import { cellReserved, cellSolidCause, snakeOn } from '../../src/core/cells';
@@ -47,7 +48,8 @@ function steer(sim: Sim, s: SimState, b: Balance, input: Rng): void {
 // Shallow copy of everything isReserved/goodCells read; enough because placements only add new objects.
 function shallow(s: SimState): SimState {
   return { ...s, snake: s.snake.map(c => ({ ...c })), dir: { ...s.dir }, orbs: [...s.orbs], rainMangoes: [...s.rainMangoes],
-    hazards: [...s.hazards], terrains: [...s.terrains], rottenRocks: [...s.rottenRocks], snipWalls: [...s.snipWalls], rubble: [...s.rubble] };
+    families: { rock: [...s.families.rock], fence: [...s.families.fence], maze: [...s.families.maze],
+      terrain: [...s.families.terrain], rottenRock: [...s.families.rottenRock], snipWall: [...s.families.snipWall], rubble: [...s.families.rubble] } };
 }
 
 export function p1FuzzSeed(b: Balance, seed: number, simMs: number): P1Report {
@@ -113,13 +115,13 @@ export function p1FuzzSeed(b: Balance, seed: number, simMs: number): P1Report {
 // MEC-002-R2 / MEC-006-R6 new placements never use a reserved cell; orbs and rain drops are fair.
 function checkPlacements(b: Balance, before: SimState, s: SimState, mango: SimState['mango'], t: number, bad: (m: string) => void): void {
   const fresh = <T>(now: T[], old: T[]) => now.filter(x => !old.includes(x));
-  for (const h of fresh(s.hazards, before.hazards)) for (const c of h.cells)
+  for (const h of fresh(timedHazards(s), timedHazards(before))) for (const c of h.cells)
     if (isReserved(before, c.x, c.y)) bad(`t=${t}: ${h.family} on reserved (${c.x},${c.y})`);
-  for (const T of fresh(s.terrains, before.terrains)) for (const c of T.cells)
+  for (const T of fresh(s.families.terrain, before.families.terrain)) for (const c of T.cells)
     if (isReserved(before, c.x, c.y)) bad(`t=${t}: terrain on reserved (${c.x},${c.y})`);
-  const newRubble = fresh(s.rubble, before.rubble);
+  const newRubble = fresh(s.families.rubble, before.families.rubble);
   // State at placement time: the snake has not moved yet; later placements of this step are excluded.
-  const mid = (): SimState => ({ ...shallow(s), snake: before.snake, dir: before.dir, rubble: s.rubble.filter(r => !newRubble.includes(r)) });
+  const mid = (): SimState => ({ ...shallow(s), snake: before.snake, dir: before.dir, families: { ...s.families, rubble: s.families.rubble.filter(r => !newRubble.includes(r)) } });
   for (const o of fresh(s.orbs, before.orbs)) {
     const m = mid(); m.orbs = m.orbs.filter(x => x !== o);
     if (isReserved(m, o.x, o.y) || !goodCells(m, b).some(c => c.x === o.x && c.y === o.y)) bad(`t=${t}: unfair orb (${o.x},${o.y})`);
@@ -129,7 +131,7 @@ function checkPlacements(b: Balance, before: SimState, s: SimState, mango: SimSt
     if (isReserved(m, r.x, r.y) || !goodCells(m, b).some(c => c.x === r.x && c.y === r.y)) bad(`t=${t}: unfair rain mango (${r.x},${r.y})`);
   }
   for (const r of newRubble) {
-    const m = { ...mid(), rubble: before.rubble };
+    const m = { ...mid(), families: { ...s.families, rubble: before.families.rubble } };
     if (isReserved(m, r.x, r.y)) bad(`t=${t}: rubble on reserved (${r.x},${r.y})`);
   }
   if (s.mango && s.mango !== mango && isReserved({ ...s, mango: null }, s.mango.x, s.mango.y)) bad(`t=${t}: mango on reserved`);

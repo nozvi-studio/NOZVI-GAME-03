@@ -1,9 +1,10 @@
-import type { HazardFamily, RottenRock } from '../types';
+import { defineFamily } from './family';
+import type { InstanceRules, RottenRock } from '../types';
 
 const hasCell = (r: RottenRock, x: number, y: number): boolean => r.x === x && r.y === y;
 
 // MEC-002-R7 temporary rotten rocks have no warning phase and never enter the director cap.
-export const rottenRockFamily: HazardFamily<RottenRock> = {
+const rules: InstanceRules<RottenRock> = {
   key: 'rottenRock', cause: 'rotten', capClass: 'none', maxActiveKey: null, breakable: true,
   spawn: () => null,
   update(r, ctx) {
@@ -17,5 +18,8 @@ export const rottenRockFamily: HazardFamily<RottenRock> = {
   solidAt: (r, x, y) => r.state === 'solid' && hasCell(r, x, y),
   bfsWallAt: hasCell, reservedAt: hasCell,
   // MEC-006-R26 Shield removes the broken rock.
-  onBreak(s, x, y) { s.rottenRocks = s.rottenRocks.filter(r => !hasCell(r, x, y)); },
+  onBreak(s, x, y) { s.families.rottenRock = s.families.rottenRock.filter(r => !hasCell(r, x, y)); },
 };
+
+// MEC-004-R2 compose state queries and updates over this family's own instances.
+export const rottenRockFamily = defineFamily('rottenRock', rules, s => s.families.rottenRock, (s, instances) => { s.families.rottenRock = instances; });

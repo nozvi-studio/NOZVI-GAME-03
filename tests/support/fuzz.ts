@@ -1,3 +1,4 @@
+import { timedHazards } from '../../src/core/hazards/timed';
 // tests/support/fuzz.ts — seeded invariant fuzz (design §9 item 2). No new dependency.
 import type { Balance } from '../../src/core/balance';
 import { cellReserved, snakeOn } from '../../src/core/cells';
@@ -62,7 +63,7 @@ function steer(sim: Sim, s: SimState, b: Balance, input: ReturnType<typeof rngFr
 }
 
 function checkSpawns(s: SimState, b: Balance, head: { x: number; y: number }, dir: SimState['dir'], seen: WeakSet<object>, rep: FuzzReport): void {
-  for (const h of [...s.hazards, ...s.terrains]) {
+  for (const h of [...timedHazards(s), ...s.families.terrain]) {
     if (seen.has(h)) continue;
     seen.add(h); rep.spawned[h.family]++;
     const d = h.family === 'terrain' ? b.fairness.terrainNearHeadDist : b.fairness.nearHeadDist;
@@ -75,8 +76,8 @@ function checkState(s: SimState, rep: FuzzReport, t: number): void {
   const m = s.mango;
   if (m && cellReserved({ ...s, mango: null }, m.x, m.y)) rep.violations.push(`t=${t}: mango on a reserved cell (${m.x},${m.y})`);
   for (const c of s.snake) {
-    if (s.hazards.some(h => h.cells.some(k => k.on && k.x === c.x && k.y === c.y))
-      || s.terrains.some(T => T.cells.some(k => k.up && k.x === c.x && k.y === c.y)))
+    if (timedHazards(s).some(h => h.cells.some(k => k.on && k.x === c.x && k.y === c.y))
+      || s.families.terrain.some(T => T.cells.some(k => k.up && k.x === c.x && k.y === c.y)))
       rep.violations.push(`t=${t}: solid cell under the snake at (${c.x},${c.y})`);
   }
 }

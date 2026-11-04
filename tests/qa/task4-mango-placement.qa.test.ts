@@ -85,7 +85,7 @@ describe('QA Task 4: Mango Placement & Golden Chance (Black-Box)', () => {
       for (let x = 0; x < b.board.cols; x++) {
         const isSnake = s.snake.some((c) => c.x === x && c.y === y);
         if (!isSnake && !nearHead(head, s.dir, x, y, b.mango.nearHeadDist, b.fairness.frontLaneCells)) {
-          s.rottenRocks.push({ x, y });
+          s.families.rottenRock.push({ x, y });
         }
       }
     }
@@ -118,7 +118,7 @@ describe('QA Task 4: Mango Placement & Golden Chance (Black-Box)', () => {
         const isSnake = s.snake.some((c) => c.x === x && c.y === y);
         const isOldMango = x === 10 && y === 8;
         if (!isSnake && !isOldMango && !nearHead(head, s.dir, x, y, b.mango.nearHeadDist, b.fairness.frontLaneCells)) {
-          s.rottenRocks.push({ x, y });
+          s.families.rottenRock.push({ x, y });
         }
       }
     }

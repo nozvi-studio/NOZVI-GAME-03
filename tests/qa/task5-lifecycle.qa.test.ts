@@ -1,3 +1,5 @@
+import { instanceFamily } from '../support/instanceFamily';
+import { addTimedHazards } from '../../src/core/hazards/timed';
 // tests/qa/task5-lifecycle.qa.test.ts — black-box QA tests for Task 5 hazard lifecycle & passability
 import { describe, it, expect } from 'vitest';
 import { loadBalance } from '../support/balance';
@@ -158,7 +160,7 @@ describe('QA Task 5: Hazard Lifecycle, Passability & Death Causes', () => {
       family: 'rock', state: 'warn', t: 500, warnMs: 1500, lifeMs: 6000, landed: false,
       cells: [{ x: 9, y: 8, on: false, ageMs: 500 }],
     };
-    s.hazards.push(warnRock);
+    addTimedHazards(s, warnRock);
 
     const sim = restoreSim(b, s);
     // Snake advances one step into (9, 8)
@@ -173,7 +175,7 @@ describe('QA Task 5: Hazard Lifecycle, Passability & Death Causes', () => {
       family: 'rock', state: 'crumble', t: 7600, warnMs: 1500, lifeMs: 6000, landed: true,
       cells: [{ x: 9, y: 8, on: false, ageMs: 7600 }],
     };
-    s2.hazards.push(crumbleRock);
+    addTimedHazards(s2, crumbleRock);
     const sim2 = restoreSim(b, s2);
     sim2.advance(s2.tickMs);
     expect(sim2.snapshot().status).toBe('playing');
@@ -229,7 +231,7 @@ describe('QA Task 5: Hazard Lifecycle, Passability & Death Causes', () => {
       emit: () => {},
     };
 
-    TERRAIN.update(terrain, ctx);
+    instanceFamily(TERRAIN).update(terrain, ctx);
     // Even though terrainWant is 'up' at t=2600, cell must remain 'warn' and not 'up'
     expect(terrain.cells[0]?.vis).toBe('warn');
     expect(terrain.cells[0]?.up).toBe(false);
@@ -238,7 +240,7 @@ describe('QA Task 5: Hazard Lifecycle, Passability & Death Causes', () => {
   it('QA-T5-10 MEC-004 terrain down and warn states are passable', () => {
     // Design §5 MEC-001: "a terrain cell only when up (down and warn are passable)"
     const s = buildState(b, { snake: [[8, 8], [7, 8], [6, 8]], dir: [1, 0], spawnInMs: QUIET });
-    s.terrains.push({
+    s.families.terrain.push({
       family: 'terrain', t: 1800, lifeMs: 18000,
       cells: [{ x: 9, y: 8, delay: 0, up: false, vis: 'warn' }],
     });
@@ -258,16 +260,16 @@ describe('QA Task 5: Hazard Lifecycle, Passability & Death Causes', () => {
     const ctx: StepCtx = { balance: b, snakeOn: () => false, emit: () => {} };
 
     // At lifeMs, all cells must go down
-    const keep1 = TERRAIN.update(terrain, ctx);
+    const keep1 = instanceFamily(TERRAIN).update(terrain, ctx);
     expect(keep1).toBe('keep');
     expect(terrain.cells[0]?.vis).toBe('down');
     expect(terrain.cells[0]?.up).toBe(false);
 
     // After 500 ms (b.terrain.fadeOutMs), it is removed
     for (let i = 0; i < 498; i++) {
-      expect(TERRAIN.update(terrain, ctx)).toBe('keep');
+      expect(instanceFamily(TERRAIN).update(terrain, ctx)).toBe('keep');
     }
-    expect(TERRAIN.update(terrain, ctx)).toBe('remove');
+    expect(instanceFamily(TERRAIN).update(terrain, ctx)).toBe('remove');
   });
 
   it('QA-T5-12 MEC-004 death cause per family: rock, fence, maze, ground', () => {
@@ -280,7 +282,7 @@ describe('QA Task 5: Hazard Lifecycle, Passability & Death Causes', () => {
 
     for (const { family, cause } of families) {
       const s = buildState(b, { snake: [[8, 8], [7, 8], [6, 8]], dir: [1, 0], spawnInMs: QUIET });
-      s.hazards.push({
+      addTimedHazards(s, {
         family, state: 'solid', t: 2000, warnMs: 1000, lifeMs: 5000, landed: true,
         cells: [{ x: 9, y: 8, on: true, ageMs: 1000 }],
       });
@@ -295,7 +297,7 @@ describe('QA Task 5: Hazard Lifecycle, Passability & Death Causes', () => {
 
     // Terrain ground death
     const sTerr = buildState(b, { snake: [[8, 8], [7, 8], [6, 8]], dir: [1, 0], spawnInMs: QUIET });
-    sTerr.terrains.push({
+    sTerr.families.terrain.push({
       family: 'terrain', t: 3000, lifeMs: 18000,
       cells: [{ x: 9, y: 8, delay: 0, up: true, vis: 'up' }],
     });

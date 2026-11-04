@@ -1,3 +1,4 @@
+import { addTimedHazards, timedHazards } from '../../src/core/hazards/timed';
 // tests/qa/task5-director-unlocks.qa.test.ts — black-box QA tests for Task 5 director & unlock mechanics
 import { describe, it, expect } from 'vitest';
 import { loadBalance } from '../support/balance';
@@ -109,31 +110,31 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     // updated for P1 MEC-003-R1/R4
     // At level 1, cap = min(10, 2 + floor(1/3)) = 2.
     const s = buildState(b, { level: 1, spawnInMs: 0 });
-    s.hazards.push(
+    addTimedHazards(s,
       { family: 'rock', state: 'warn', t: 0, warnMs: 1500, lifeMs: 6000, landed: false, cells: [{ x: 1, y: 1, on: false, ageMs: 0 }] },
       { family: 'fence', state: 'crumble', t: 11000, warnMs: 2000, lifeMs: 9000, landed: true, cells: [{ x: 2, y: 2, on: false, ageMs: 11000 }] },
     );
     const rng = rngFrom(seedRng(999));
-    const prevCount = s.hazards.length;
+    const prevCount = timedHazards(s).length;
     updateDirector(s, b, rng);
-    expect(s.hazards.length).toBe(prevCount);
+    expect(timedHazards(s).length).toBe(prevCount);
   });
 
   it('QA-T5-18 MEC-004 small hazard cap ignores maze and terrain', () => {
     // updated for P1 MEC-003-R1 / MEC-003-R13
     const s = buildState(b, { level: 1, spawnInMs: 0, mango: [2, 2] });
-    s.hazards.push({
+    addTimedHazards(s, {
       family: 'maze', state: 'solid', t: 5000, warnMs: 2600, lifeMs: 14000, landed: true,
       cells: [{ x: 1, y: 1, on: true, ageMs: 5000 }],
     });
-    s.terrains.push({
+    s.families.terrain.push({
       family: 'terrain', t: 1000, lifeMs: 18000,
       cells: [{ x: 2, y: 2, delay: 0, up: false, vis: 'down' }],
     });
 
     const rng = rngFrom(seedRng(123));
     updateDirector(s, b, rng);
-    const rocks = s.hazards.filter(h => h.family === 'rock');
+    const rocks = timedHazards(s).filter(h => h.family === 'rock');
     expect(rocks.length).toBe(1);
   });
 
@@ -144,13 +145,13 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     s.mazeCooldownMs = 0;
     // Fill small hazards cap to block rock and fence: cap at lvl 6 = min(8, 2+3) = 5
     for (let i = 0; i < 5; i++) {
-      s.hazards.push({
+      addTimedHazards(s, {
         family: 'rock', state: 'solid', t: 2000, warnMs: 1500, lifeMs: 6000, landed: true,
         cells: [{ x: i, y: 0, on: true, ageMs: 2000 }],
       });
     }
     // Add active terrain
-    s.terrains.push({
+    s.families.terrain.push({
       family: 'terrain', t: 1000, lifeMs: 18000,
       cells: [{ x: 10, y: 10, delay: 0, up: false, vis: 'down' }],
     });
@@ -158,7 +159,7 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     const rng = rngFrom(seedRng(42));
     updateDirector(s, b, rng);
     // Maze must NOT have spawned!
-    expect(s.hazards.some(h => h.family === 'maze')).toBe(false);
+    expect(timedHazards(s).some(h => h.family === 'maze')).toBe(false);
   });
 
   it('QA-T5-20 MEC-004 terrain cannot spawn while maze is active', () => {
@@ -166,13 +167,13 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     const s = buildState(b, { level: 6, spawnInMs: 0 });
     // Fill small hazards to block rock and fence
     for (let i = 0; i < 5; i++) {
-      s.hazards.push({
+      addTimedHazards(s, {
         family: 'rock', state: 'solid', t: 2000, warnMs: 1500, lifeMs: 6000, landed: true,
         cells: [{ x: i, y: 0, on: true, ageMs: 2000 }],
       });
     }
     // Add active maze
-    s.hazards.push({
+    addTimedHazards(s, {
       family: 'maze', state: 'solid', t: 3000, warnMs: 2600, lifeMs: 14000, landed: true,
       cells: [{ x: 10, y: 10, on: true, ageMs: 3000 }],
     });
@@ -180,7 +181,7 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     const rng = rngFrom(seedRng(42));
     updateDirector(s, b, rng);
     // Terrain must NOT have spawned!
-    expect(s.terrains.length).toBe(0);
+    expect(s.families.terrain.length).toBe(0);
   });
 
   it('QA-T5-21 MEC-004 maze cooldown sets to 26000 ms and blocks maze respawn', () => {
@@ -189,7 +190,7 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     const s = buildState(b, { level: 26, spawnInMs: 0, mango: [2, 2] });
     s.mazeCooldownMs = 0;
     for (let i = 0; i < cap; i++) {
-      s.hazards.push({
+      addTimedHazards(s, {
         family: 'rock', state: 'solid', t: 2000, warnMs: 1500, lifeMs: 6000, landed: true,
         cells: [{ x: i, y: 0, on: true, ageMs: 2000 }],
       });
@@ -198,7 +199,7 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     for (let seed = 1; seed < 50; seed++) {
       const trial = structuredClone(s);
       updateDirector(trial, b, rngFrom(seedRng(seed)));
-      if (trial.hazards.some(h => h.family === 'maze')) {
+      if (timedHazards(trial).some(h => h.family === 'maze')) {
         expect(trial.mazeCooldownMs).toBe(b.maze.cooldownMs);
         expect(trial.mazeCooldownMs).toBe(26000);
         spawnedMaze = true;
@@ -210,13 +211,13 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     const sCooldown = buildState(b, { level: 26, spawnInMs: 0, mango: [2, 2] });
     sCooldown.mazeCooldownMs = 15000;
     for (let i = 0; i < cap; i++) {
-      sCooldown.hazards.push({
+      addTimedHazards(sCooldown, {
         family: 'rock', state: 'solid', t: 2000, warnMs: 1500, lifeMs: 6000, landed: true,
         cells: [{ x: i, y: 0, on: true, ageMs: 2000 }],
       });
     }
     updateDirector(sCooldown, b, rngFrom(seedRng(1)));
-    expect(sCooldown.hazards.some(h => h.family === 'maze')).toBe(false);
+    expect(timedHazards(sCooldown).some(h => h.family === 'maze')).toBe(false);
   });
 
   it('QA-T5-22 MEC-004 terrain maxActive limits: 1 below level 8, 2 at level 8+', () => {
@@ -224,19 +225,19 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     const cap = smallHazardCap(b, 11);
     const sLvl11 = buildState(b, { level: 11, spawnInMs: 0 });
     for (let i = 0; i < cap; i++) {
-      sLvl11.hazards.push({
+      addTimedHazards(sLvl11, {
         family: 'rock', state: 'solid', t: 2000, warnMs: 1500, lifeMs: 6000, landed: true,
         cells: [{ x: i, y: 0, on: true, ageMs: 2000 }],
       });
     }
-    sLvl11.terrains.push({
+    sLvl11.families.terrain.push({
       family: 'terrain', t: 1000, lifeMs: 18000,
       cells: [{ x: 10, y: 10, delay: 0, up: false, vis: 'down' }],
     });
     for (let seed = 1; seed < 50; seed++) {
       const trial = structuredClone(sLvl11);
       updateDirector(trial, b, rngFrom(seedRng(seed)));
-      expect(trial.terrains.length).toBe(1);
+      expect(trial.families.terrain.length).toBe(1);
     }
   });
 

@@ -62,7 +62,7 @@ describe('MEC-006 Tail Snip', () => {
     circle(sim, 3000); sim.drainEvents(); sim.useSkill(1);
     expect(sim.drainEvents()).toContainEqual({ type: 'skillUsed', slot: 1, skill: 'tailSnip', level: 1, energyBefore: 70, energyAfter: 40 });
     expect(sim.snapshot().length).toBe(3);
-    expect(exportState(sim).snipWalls[0]?.state).toBe('crumble');
+    expect(exportState(sim).families.snipWall[0]?.state).toBe('crumble');
   });
   it('MEC-006-R23 entering snip wall kills with cause snipWall; wall blocks BFS and placement', () => {
     const sim = simFromAscii(b, ['...S'], { snake: [[2, 0], [1, 0], [0, 0]], quiet: true });

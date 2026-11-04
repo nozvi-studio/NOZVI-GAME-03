@@ -1,6 +1,7 @@
+import { defineFamily } from './family';
 // src/core/hazards/terrain.ts — MEC-004 rising ground (spawnTerrain L508–530, updateTerrains L578–597)
 import type { Balance } from '../balance';
-import type { HazardFamily, TerrainCell, TerrainHazard, TerrainVis } from '../types';
+import type { InstanceRules, TerrainCell, TerrainHazard, TerrainVis } from '../types';
 
 type Raw = { x: number; y: number; delay: number };
 
@@ -14,11 +15,11 @@ export function terrainWant(T: TerrainHazard, c: TerrainCell, b: Balance): Terra
   return l < downMs ? 'down' : l < downMs + tr.warnMs ? 'warn' : 'up';
 }
 
-export const TERRAIN: HazardFamily<TerrainHazard> = {
+const rules: InstanceRules<TerrainHazard> = {
   key: 'terrain', cause: 'ground', capClass: 'big', maxActiveKey: 'terrain.maxActive', breakable: true,
   // MEC-006-R26 the broken cell leaves this terrain for the rest of its life.
   onBreak(s, x, y) {
-    for (const T of s.terrains) if (T.cells.some(c => c.up && c.x === x && c.y === y)) T.cells = T.cells.filter(c => c.x !== x || c.y !== y);
+    for (const T of s.families.terrain) if (T.cells.some(c => c.up && c.x === x && c.y === y)) T.cells = T.cells.filter(c => c.x !== x || c.y !== y);
   },
   spawn(ctx, rng) {
     const b = ctx.balance, tr = b.terrain, { cols, rows } = b.board;
@@ -56,3 +57,6 @@ export const TERRAIN: HazardFamily<TerrainHazard> = {
   bfsWallAt: () => false,                                             // L373: terrain is not a BFS wall
   reservedAt: (T, x, y) => T.cells.some(c => c.x === x && c.y === y),
 };
+
+// MEC-004-R2 compose state queries and updates over this family's own instances.
+export const TERRAIN = defineFamily('terrain', rules, s => s.families.terrain, (s, instances) => { s.families.terrain = instances; });

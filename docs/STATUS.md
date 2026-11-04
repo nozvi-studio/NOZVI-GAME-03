@@ -1,31 +1,25 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-04 by Claude (lead) **Milestone:** M1 - P1 gate PASSED (PLAYTEST 2026-11-04); P2 content starting. **Version branch:** `version/v0.2`
+**Updated:** 2026-11-05 by Codex **Milestone:** M1 - P1 gate PASSED; P2 content starting. **Version branch:** `version/v0.2`
 
-## Now (in progress)
-- [x] P1 closed: flow B + WASD fix + run_end.turns merged; agy browser QA 11/11 PASS; version/v0.1 -> dev.
-- [x] P2 plans ready: P2a (revised for flow B) `docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md`; P2b `2026-11-04-p2b-movers-cycles-blasts.md`; P2c `2026-11-04-p2c-shrink-challenge-tuning.md`.
-- [ ] **RESUME HERE:** execute P2a with subagent-driven development on `feat/p2a-...` branches from `version/v0.2`.
+## Now
+- P2a Task 1 implemented on `feat/p2a-ground-tiles` in the supplied `p2a` worktree; all changes intentionally uncommitted.
+- Per-family lists now live in `SimState.families`; serialized timed spawn order preserves P1 events and snapshot fields.
+- State-level registry descriptors and solid/BFS/reserved/tile/head-hit composites are implemented; Shield and existing fixture readers migrated.
+- README already has Approved P2-DESIGN, MEC-004 and MEC-012 rows. CODEMAP, ARCHITECTURE, CHANGELOG and DECISIONS updated.
 
-## Next (ordered, max 5)
-1. P2a (framework + ground tiles), then P2b (movers, cycles, blasts, bird), then P2c (shrink, challenge levels, tuning, P2 exit).
-2. P2b/P2c Task 1 write MEC-013..018 specs before code.
-3. P2 exit: fuzz + fairness per family, bot report L1-30, agy QA, owner playtest (deathCauseReport over40 empty).
-4. Tech debt: suite ~25-48 s; small cleanups (snapTransition rename in 2 QA tests; MEC-003 R11 "(2500)" repeat).
+## Next
+1. Lead reviews the uncommitted Task 1 diff and its adaptations in DECISIONS; commit/integrate separately when authorized.
+2. Execute P2a Task 2 collision pipeline, including update-time HitCtx dispatch; then remaining P2a tasks.
+3. Continue P2b/P2c and their phase-exit checks as recorded in the approved plans.
 
-## Workers and QA process
-- Owner 2026-11-04: lead decides all technical matters and picks workers/models (Claude subagents, Codex, agy); ask the owner only GDD-level questions. Low-RAM kill: wait, retry up to 3 times, then stop and report.
-- agy = tester only. Lead verifies every merge with full test + typecheck.
+## Blockers
+- No Task 1 implementation blockers. Local GitNexus runner is missing; installed analyze fallback fails with spawn EPERM. Connected index supplied impact evidence.
+- GDD MEC-012 row awaits the lead approval required by the brief; GDD is untouched.
+- Existing 4 skipped tests and 12 todo tests remain unchanged. Windows Vitest requires native config loader and two thread workers.
 
-## Owner questions batched for the END of P2 (provisional defaults in use)
-- Task 9 player-facing strings ("Back", "Not now!", "Fresh start!", Results/Sound labels); GDD §4 session length; §8.3 reason to come back.
-- P2b OQ-B1..B6 and P2c OQ-C1..C5 (listed at the top of each plan): gate/spike rhythms, NPC speeds, stolen-mango cost, bird shadow, P2b strings, shrink frequency, challenge feedback/effect, P2 exit playtest size, tuning authority.
-
-## Known issues / tech debt
-- Windows: Vitest needs --configLoader native --pool threads --maxWorkers 2.
-- 4 skipped QA (reasons in files). Single 1.28 MB JS chunk.
-- Quitting mid-run does not log run_end (seen in phone log); decide in P2c log work.
-- Checkpoints only reach L12; debug-only jump to later levels would help QA of L16+.
-
-## Last session summary
-- Owner playtest feedback round: WASD fix, run_end.turns, level-up flow B (8-task SDD, reviews per task, final review ready), P1 gate verdict PASS, P2 plans written/revised. Pushed version/v0.1.
+## Last session
+- TDD: state-layout test failed before migration; requested query suite failed on the missing module before implementation.
+- Step 0 full suite: 804 passed. Final Task 1 suite: 815 passed, 4 skipped, 12 todo across 77 files; typecheck passed.
+- Read-only independent review found no Critical/Important issues; its one Minor tautological assertion was replaced with a descriptor count check.
+- No installs, commits, merges, pushes, dependency changes or protected-file edits. No browser visual QA or phase-exit fuzz requested/run.

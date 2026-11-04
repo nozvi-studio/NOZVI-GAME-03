@@ -521,7 +521,7 @@ describe('QA P1 Task 6: Skill Framework, Slow-mo, Tail Snip & Loadout (MEC-006, 
     });
     s.loadout = ['slowmo', null];
     s.bestLevel = 6;
-    (s as any).snipWalls = [{
+    s.families.snipWall = [{
       family: 'snipWall',
       cells: [{ x: 3, y: 10 }],
       state: 'solid',
