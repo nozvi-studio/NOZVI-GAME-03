@@ -43,9 +43,10 @@ describe('QA Task 8: Text and String Table (Black-Box)', () => {
   });
 
   it('QA-T8-03 P0-Design §7.5 levelLabel formats 0-indexed levels correctly', () => {
-    expect(levelLabel(0)).toBe('Level 1');
-    expect(levelLabel(1)).toBe('Level 2');
-    expect(levelLabel(9)).toBe('Level 10');
+    // updated for P1 MEC-003-R1
+    expect(levelLabel(1)).toBe('Level 1');
+    expect(levelLabel(2)).toBe('Level 2');
+    expect(levelLabel(10)).toBe('Level 10');
   });
 
   it('QA-T8-04 P0-Design §7.5 progressLabel formats normal and max level', () => {
@@ -57,11 +58,13 @@ describe('QA Task 8: Text and String Table (Black-Box)', () => {
   });
 
   it('QA-T8-05 P0-Design §7.5 levelBanner handles unlocked families and default speed up', () => {
-    expect(levelBanner(2, 'fence')).toBe('Level 3: fences unlocked');
-    expect(levelBanner(4, 'terrain')).toBe('Level 5: rising ground unlocked');
-    expect(levelBanner(6, 'maze')).toBe('Level 7: hedge mazes unlocked');
-    expect(levelBanner(1)).toBe('Level 2: a bit faster');
-    expect(levelBanner(3, undefined)).toBe('Level 4: a bit faster');
+    // updated for P1 MEC-003-R1/R15/R16
+    expect(levelBanner(6, 'fence')).toBe('Level 6: fences unlocked');
+    expect(levelBanner(11, 'terrain')).toBe('Level 11: rising ground unlocked');
+    expect(levelBanner(12, 'rottenRock')).toBe('Level 12: rotten rocks unlocked');
+    expect(levelBanner(26, 'maze')).toBe('Level 26: hedge mazes unlocked');
+    expect(levelBanner(2)).toBe('Level 2: a bit faster');
+    expect(levelBanner(4, undefined)).toBe('Level 4: a bit faster');
   });
 
   it('QA-T8-06 P0-Design §7.5 incomingBanner formats hazard warnings', () => {
@@ -71,14 +74,16 @@ describe('QA Task 8: Text and String Table (Black-Box)', () => {
   });
 
   it('QA-T8-07 P0-Design §7.5 deathMessage formats won run text', () => {
-    expect(deathMessage(true, undefined, 42, 6)).toBe('No room left for mangoes. Score 42, level 7.');
+    // updated for P1 MEC-003-R1
+    expect(deathMessage(true, undefined, 42, 7)).toBe('No room left for mangoes. Score 42, level 7.');
   });
 
   it('QA-T8-08 P0-Design §7.5 deathMessage formats loss causes and 1-based level', () => {
-    expect(deathMessage(false, 'wall', 0, 0)).toBe('You hit the edge of the board. Score 0, level 1.');
-    expect(deathMessage(false, 'fence', 15, 2)).toBe('You ran into a fence. Score 15, level 3.');
-    expect(deathMessage(false, 'maze', 30, 6)).toBe('You ran into a hedge. Score 30, level 7.');
-    expect(deathMessage(false, 'ground', 22, 4)).toBe('The ground rose in front of you. Score 22, level 5.');
+    // updated for P1 MEC-003-R1
+    expect(deathMessage(false, 'wall', 0, 1)).toBe('You hit the edge of the board. Score 0, level 1.');
+    expect(deathMessage(false, 'fence', 15, 3)).toBe('You ran into a fence. Score 15, level 3.');
+    expect(deathMessage(false, 'maze', 30, 7)).toBe('You ran into a hedge. Score 30, level 7.');
+    expect(deathMessage(false, 'ground', 22, 5)).toBe('The ground rose in front of you. Score 22, level 5.');
   });
 
   it('QA-T8-09 P0-Design §7.1, §7.5 bestLine on start card reflects best score', () => {

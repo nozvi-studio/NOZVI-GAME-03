@@ -107,7 +107,8 @@ describe('QA Task 2: parseBalance (Black-Box)', () => {
     expect(b.board.cols).toBe(17);
     expect(b.board.rows).toBe(17);
     expect(b.speed.startMs).toBe(140);
-    expect(b.speed.minMs).toBe(95);
+    // updated for P1 MEC-003-R3
+    expect(b.speed.minMs).toBe(82);
 
     const loaded = loadBalance();
     expect(loaded.board.cols).toBe(17);
@@ -152,9 +153,10 @@ describe('QA Task 2: parseBalance (Black-Box)', () => {
   });
 
   it('QA-T2-15 P0-Design §6 rejects invalid field types', () => {
+    // updated for P1 MEC-003-R14
     const mutations = [
       (c: any) => { c.board.cols = '17'; },
-      (c: any) => { c.level.unlock.fence = true; },
+      (c: any) => { c.level.table = 'invalid'; },
       (c: any) => { c.snake.start = '8,8'; },
     ];
     for (const mutate of mutations) {
@@ -187,8 +189,9 @@ describe('QA Task 2: parseBalance (Black-Box)', () => {
   });
 
   it('QA-T2-18 P0-Design §6 rejects negative director weights', () => {
+    // updated for P1 MEC-003-R14
     const c1 = structuredClone(rawBalance);
-    c1.director.weights.rock = -1;
+    (c1 as any).level.table[0].weights.rock = -1;
     expect(() => parseBalance(c1)).toThrow();
   });
 

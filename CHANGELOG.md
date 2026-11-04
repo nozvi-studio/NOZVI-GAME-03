@@ -3,8 +3,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Docs
+- docs: owner phone run passes P0 parity.
 - docs: P0 parity check on desktop recorded in PLAYTEST (phone run pending owner); prototype frozen (P0 PR 9).
 ### Tests
+- test(qa): rewrite 23 superseded P0 QA cases for P1 Task 1 rules; QA files typecheck again.
 - test(qa): independent black-box QA suite for P0 Task 2 by the tester worker (34 cases; MEC-004-R13 warn bound skipped until P2a).
 ### Features
 - feat(core): balance v2, 1-based levels, per-level family table (P1 PR 1).

@@ -13,6 +13,5 @@
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "tests"],
-  "exclude": ["tests/qa/task2.qa.test.ts", "tests/qa/task5-director-unlocks.qa.test.ts"]
+  "include": ["src", "tests"]
 }
