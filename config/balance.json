@@ -13,6 +13,7 @@
     { "from": 13, "to": 15, "weights": { "rock": 3, "fence": 2, "terrain": 2 }, "rockShapes": ["single","lineH","lineV","corner","block"], "fenceShapes": ["line","L","T","Z"], "rottenRocks": true },
     { "from": 16, "to": 25, "weights": { "rock": 3, "fence": 2, "terrain": 2 }, "rockShapes": ["single","lineH","lineV","corner","block"], "fenceShapes": ["line","L","T","Z","F","U","plus"], "rottenRocks": true },
     { "from": 26, "to": 30, "weights": { "rock": 3, "fence": 2, "terrain": 2, "maze": 2 }, "rockShapes": ["single","lineH","lineV","corner","block"], "fenceShapes": ["line","L","T","Z","F","U","plus"], "rottenRocks": true } ] },
+  "levelUpSlowdown": { "tiers": [ { "from": 6, "to": 15, "factor": 1.4, "easeMs": 1000 }, { "from": 16, "to": 30, "factor": 1.6, "easeMs": 1500 } ] },
   "mango": { "rotBaseMs": 8000, "rotPerEatenMs": 150, "rotMinMs": 4000, "goldenRotFactor": 0.5, "goldenChance": 0.15, "goldenMinEaten": 3,
     "points": { "normal": 1, "golden": 3 }, "progress": { "normal": 1, "golden": 2 }, "nearHeadDist": 3, "rottenRockLifeMs": 5000, "placeRetryMs": 250 },
   "fairness": { "nearHeadDist": 4, "frontLaneCells": 4, "terrainNearHeadDist": 3 },

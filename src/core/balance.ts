@@ -7,11 +7,15 @@ export type FenceShapeKey = 'L' | 'T' | 'Z' | 'F' | 'U' | 'plus';
 export type FenceKind = 'line' | FenceShapeKey;
 export interface MazeLayout { segments: [number, number, number, number][]; exclude: Pair[] }
 
+/** MEC-003-R22 one slowdown tier, by the level just reached. */
+export interface SlowdownTier { from: number; to: number; factor: number; easeMs: number }
+
 export interface Balance {
   board: { cols: number; rows: number };
   snake: { start: Pair[]; startDir: Pair; maxQueuedTurns: number };
   speed: { startMs: number; minMs: number; msPerLevel: number };
   level: { maxLevel: number; perBiome: number; needBase: number; needStepLevels: number; transitionMs: number; table: LevelRow[] };
+  levelUpSlowdown: { tiers: SlowdownTier[] };
   mango: {
     rotBaseMs: number; rotPerEatenMs: number; rotMinMs: number; goldenRotFactor: number; goldenChance: number;
     goldenMinEaten: number; points: { normal: number; golden: number }; progress: { normal: number; golden: number };
@@ -83,8 +87,8 @@ const RULES: Record<Rule, [(v: unknown) => boolean, string]> = {
   quad: [v => Array.isArray(v) && v.length === 4 && v.every(n => isInt(n) && n >= 0), 'must be [x1, y1, x2, y2] with non-negative integers'],
 };
 
-const listOf = (item: Check) => (v: unknown, path: string): void => {
-  if (!Array.isArray(v) || v.length === 0) fail(path, 'must be a non-empty list');
+const listOf = (item: Check, allowEmpty = false) => (v: unknown, path: string): void => {
+  if (!Array.isArray(v) || (!allowEmpty && v.length === 0)) fail(path, 'must be a non-empty list');
   v.forEach((x, i) => check(x, item, `${path}[${i}]`));
 };
 const namesOf = (allowed: readonly string[], allowEmpty = false) => (v: unknown, path: string): void => {
@@ -107,6 +111,7 @@ const SPEC: Spec = {
       }
     }, rockShapes: namesOf(ROCK_KEYS, true), fenceShapes: namesOf(FENCE_KINDS, true), rottenRocks: 'bool',
   }) },
+  levelUpSlowdown: { tiers: listOf({ from: 'int+', to: 'int+', factor: 'num+', easeMs: 'int+' }, true) },
   mango: {
     rotBaseMs: 'int+', rotPerEatenMs: 'int0', rotMinMs: 'int+', goldenRotFactor: 'prob', goldenChance: 'prob',
     goldenMinEaten: 'int0', points: { normal: 'int+', golden: 'int+' }, progress: { normal: 'int+', golden: 'int+' },
@@ -173,6 +178,14 @@ export function parseBalance(json: unknown): Balance {
   if (b.snake.start.length > b.skills.tailSnip.minLength + 1) fail('snake.start', 'must be <= skills.tailSnip.minLength + 1');
   // MEC-002 section 9; MEC-003-R12.
   if (b.mango.goldenRotFactor <= 0) fail('mango.goldenRotFactor', 'must be > 0');
+  // MEC-003-R22 slowdown tiers are sorted, disjoint, inside 2..maxLevel and actually slow down.
+  let prevTo = 1;
+  for (const [i, t] of b.levelUpSlowdown.tiers.entries()) {
+    const path = 'levelUpSlowdown.tiers[' + i + ']';
+    if (t.from <= prevTo || t.to < t.from || t.to > b.level.maxLevel) fail(path, 'must be sorted, disjoint and inside 2..maxLevel');
+    if (t.factor <= 1) fail(path + '.factor', 'must be > 1');
+    prevTo = t.to;
+  }
   if (b.level.transitionMs < Math.max(b.hazard.crumbleMs, b.terrain.fadeOutMs)) fail('level.transitionMs', 'must cover crumble and fade-out');
   // MEC-003-R14/R16 rows cover every level once, with at most one first introduction.
   let nextLevel = 1;
