@@ -41,3 +41,9 @@ export function updateTimed(h: TimedHazard, ctx: StepCtx): 'keep' | 'remove' {
 
 export const timedSolidAt = (h: TimedHazard, x: number, y: number): boolean => h.cells.some(c => c.on && c.x === x && c.y === y);
 export const timedHasCell = (h: TimedHazard, x: number, y: number): boolean => h.cells.some(c => c.x === x && c.y === y);
+
+// MEC-006-R26 Shield removes one solid cell; a hazard with no cells left is dropped.
+export function breakTimed(s: SimState, family: TimedKey, x: number, y: number): void {
+  for (const h of s.hazards) if (h.family === family && timedSolidAt(h, x, y)) h.cells = h.cells.filter(c => c.x !== x || c.y !== y);
+  s.hazards = s.hazards.filter(h => h.cells.length > 0);
+}

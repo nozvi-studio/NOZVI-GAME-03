@@ -7,6 +7,7 @@ import { biome, isChallenge, needFor, levelTickMs } from './level';
 import { orbTick } from './energy';
 import { effectiveTick, SKILLS, skillTimers, slotCount, unlockedSkills, useSkill } from './skills';
 import { placeMango, mangoTick } from './mango';
+import { rainTick } from './skills/mangoRain';
 import { rngFrom, seedRng, type Rng } from './rng';
 import { queueTurn, stepSnake } from './snake';
 import { levelStart } from './transition';
@@ -38,6 +39,7 @@ export function initialState(b: Balance, seed: number, options: SimOptions = {})
     acc: 0, tickMs: levelTickMs(b, 1), mango: null, rottenRocks: [], hazards: [], terrains: [],
     energy, orbs: [], orbSpawnMs: 0, rampActive: true, rampEaten: 0,
     bestLevel, loadout: [loadout[0], loadout[1]], slowmo: null, snipWalls: [],
+    shield: null, rubble: [], rain: null, rainMangoes: [], rainBudgets: [], nextCastId: 1,
     spawnInMs: b.director.firstSpawnMs, mazeCooldownMs: 0, score: 0, eatenInRun: 0, retryMs: 0, level, progress: 0,
     phase: 'playing', transitionLeftMs: 0, levelTimeMs: 0, timeMs: 0,
     startLevel: level, levelsCleared: 0, eatenInLevel: 0,
@@ -65,6 +67,7 @@ function stepMs(s: SimState, b: Balance, rng: Rng): void {
   if (eff !== s.tickMs) { s.acc = Math.min(s.acc, eff); s.tickMs = eff; }
   mangoTick(s, b, ctx);
   orbTick(s, b, ctx);
+  rainTick(s, b, ctx);
   s.acc += 1;
   if (s.acc >= s.tickMs) { s.acc -= s.tickMs; stepSnake(s, b, rng); }
 }
@@ -74,8 +77,11 @@ function snapshotOf(s: SimState, b: Balance): SimSnapshot {
   return {
     skills: c.loadout.map((id, slot) => ({ slot: slot as 0 | 1, id, cost: id === null ? 0 : b.skills[id].cost,
       affordable: id !== null && s.energy >= b.skills[id].cost,
-      active: id !== null && (SKILLS[id]?.active(s) ?? false), leftMs: id === null ? 0 : SKILLS[id]?.leftMs(s) ?? 0 })),
-    slowmo: c.slowmo,
+      active: id !== null && SKILLS[id].active(s), leftMs: id === null ? 0 : SKILLS[id].leftMs(s) })),
+    slowmo: c.slowmo, shield: c.shield,
+    rubble: c.rubble.map(({ x, y, state, leftMs }) => ({ x, y, state, leftMs })),
+    rain: c.rain && { leftMs: c.rain.leftMs, dropsLeft: c.rain.drops - c.rain.dropped },
+    rainMangoes: c.rainMangoes.map(({ x, y, ageMs }) => ({ x, y, leftMs: b.skills.mangoRain.mangoLifeMs - ageMs })),
     snipWall: c.snipWalls.flatMap(w => w.cells.map(c => ({ ...c, state: w.state, leftMs: w.leftMs }))),
     energy: s.energy, energyMax: b.energy.max,
     orbs: c.orbs.map(({ x, y, ageMs }) => ({ x, y, leftMs: b.energy.orbLifeMs - ageMs })),

@@ -17,6 +17,11 @@ export const snipWallFamily: HazardFamily<SnipWall> = {
   },
   solidAt: (w, x, y) => w.state === 'solid' && hasCell(w, x, y),
   bfsWallAt: hasCell, reservedAt: hasCell,
+  // MEC-006-R26 Shield removes one wall cell; an empty wall is dropped.
+  onBreak(s, x, y) {
+    for (const w of s.snipWalls) if (w.state === 'solid') w.cells = w.cells.filter(c => c.x !== x || c.y !== y);
+    s.snipWalls = s.snipWalls.filter(w => w.cells.length > 0);
+  },
   // MEC-003-R8 temporary walls crumble at level-up, then disappear during transition.
   onLevelEnd(s, ctx) {
     for (const w of s.snipWalls) { w.state = 'crumble'; w.leftMs = ctx.balance.hazard.crumbleMs; }

@@ -15,13 +15,17 @@ export function terrainWant(T: TerrainHazard, c: TerrainCell, b: Balance): Terra
 }
 
 export const TERRAIN: HazardFamily<TerrainHazard> = {
-  key: 'terrain', cause: 'ground', capClass: 'big', maxActiveKey: 'terrain.maxActive', breakable: false,
+  key: 'terrain', cause: 'ground', capClass: 'big', maxActiveKey: 'terrain.maxActive', breakable: true,
   // MEC-003-R7/R8 force cells down and start a fresh fade-out, even if already fading.
   onLevelEnd(s) {
     for (const t of s.terrains) {
       t.t = t.lifeMs;
       for (const c of t.cells) { c.up = false; c.vis = 'down'; }
     }
+  },
+  // MEC-006-R26 the broken cell leaves this terrain for the rest of its life.
+  onBreak(s, x, y) {
+    for (const T of s.terrains) if (T.cells.some(c => c.up && c.x === x && c.y === y)) T.cells = T.cells.filter(c => c.x !== x || c.y !== y);
   },
   spawn(ctx, rng) {
     const b = ctx.balance, tr = b.terrain, { cols, rows } = b.board;

@@ -89,11 +89,14 @@ describe('MEC-006 skill activation', () => {
     expect(sim.snapshot()).toMatchObject({ status: 'playing', timeMs: 4000, slowmo: null, snipWall: [] });
     expect(exportState(chunked)).toEqual(exportState(sim));
   });
-  it('MEC-006-R11 missing Task 7 implementations throw explicitly without spending', () => {
+  it('MEC-006-R14 shield and mangoRain activate and report active with their leftMs', () => {
     for (const id of ['shield', 'mangoRain'] as const) {
       const sim = createSim(b, 1, { bestLevel: 16, startEnergy: 100, loadout: [id, null] });
-      expect(() => sim.useSkill(0)).toThrow(`skill ${id} lands in P1 PR 7`);
-      expect(sim.snapshot().energy).toBe(100); expect(sim.drainEvents()).toEqual([]);
+      sim.useSkill(0);
+      expect(sim.snapshot().energy).toBe(100 - b.skills[id].cost);
+      expect(sim.snapshot().skills[0]).toMatchObject({ id, active: true, leftMs: b.skills[id].durationMs });
+      sim.useSkill(0);
+      expect(sim.drainEvents().at(-1)).toEqual({ type: 'skillRejected', slot: 0, skill: id, reason: 'active' });
     }
   });
 });

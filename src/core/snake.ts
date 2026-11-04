@@ -1,14 +1,15 @@
 // src/core/snake.ts — MEC-001 (prototype turn L698–706, step L769–799)
 import type { Balance } from './balance';
-import { cellSolidCause } from './cells';
+import { familyAt, FAMILY } from './hazards/registry';
+import { shieldHit } from './skills/shield';
+import { eatRain } from './skills/mangoRain';
 import { inBounds } from './grid';
-import { quota } from './level';
 import { placeMango, goldenEnergy } from './mango';
 import { eatOrb } from './energy';
 import { rampOnMangoEaten } from './ramp';
 import type { Rng } from './rng';
-import type { CauseKey, Cell, MangoState, SimState, Step } from './types';
-import { startLevelUp } from './transition';
+import type { CauseKey, Cell, MangoState, SimState, Step, StepCtx } from './types';
+import { checkLevelClear } from './transition';
 
 // MEC-001 queue a turn: compare with the last queued (else current) dir; no reverse, no repeat, max maxQueuedTurns
 export function queueTurn(s: SimState, b: Balance, dx: Step, dy: Step): void {
@@ -20,17 +21,19 @@ export function queueTurn(s: SimState, b: Balance, dx: Step, dy: Step): void {
   if (s.queue.length < b.snake.maxQueuedTurns) s.queue.push({ x: dx, y: dy });
 }
 
-// MEC-001 one step: take a queued turn; cause order wall → self → solid cell; move; eat
+// MEC-001 one step: take a queued turn; cause order wall → self → solid cell (Shield, MEC-006-R25); move; eat
 export function stepSnake(s: SimState, b: Balance, rng: Rng): void {
+  const ctx: StepCtx = { balance: b, snakeOn: (x, y) => s.snake.some(c => c.x === x && c.y === y), emit: e => { s.events.push(e); } };
   const turn = s.queue.shift();
   if (turn) s.dir = turn;
   const head = s.snake[0]!;
   const nx = head.x + s.dir.x, ny = head.y + s.dir.y;
   const eating = s.mango !== null && s.mango.x === nx && s.mango.y === ny;
   const body = eating ? s.snake : s.snake.slice(0, -1);
+  const solid = familyAt(s, nx, ny, 'solidAt');
   const cause: CauseKey | null = !inBounds(b.board.cols, b.board.rows, nx, ny) ? 'wall'
     : body.some(c => c.x === nx && c.y === ny) ? 'self'
-    : cellSolidCause(s, nx, ny);
+    : solid === null || shieldHit(s, b, ctx, nx, ny) ? null : FAMILY[solid].cause;
   if (cause) {
     s.status = 'over';
     s.outcome = { won: false, cause };
@@ -40,9 +43,11 @@ export function stepSnake(s: SimState, b: Balance, rng: Rng): void {
   s.headFrom = { ...head };
   s.tailFrom = { ...s.snake[s.snake.length - 1]! };
   s.snake.unshift({ x: nx, y: ny });
-  if (eating) eat(s, b, rng); else {
+  if (eating) eat(s, b, rng);
+  else if (s.rainMangoes.some(r => r.x === nx && r.y === ny)) eatRain(s, b, ctx, nx, ny);   // MEC-006-R32
+  else {
     s.snake.pop();
-    eatOrb(s, b, { balance: b, snakeOn: (x, y) => s.snake.some(c => c.x === x && c.y === y), emit: e => { s.events.push(e); } }, nx, ny);
+    eatOrb(s, b, ctx, nx, ny);
   }
 }
 
@@ -59,13 +64,7 @@ function eat(s: SimState, b: Balance, rng: Rng): void {
   if (m.golden) goldenEnergy(s, b, ctx);
   // MEC-003-R5/R6 the final clear wins; earlier clears reset length and start transition.
   s.progress += progressGain;
-  if (s.progress >= quota(b, s.level)) {
-    if (s.level === b.level.maxLevel) {
-      s.mango = null;
-      s.levelsCleared = b.level.maxLevel; s.status = 'over'; s.outcome = { won: true };
-      s.events.push({ type: 'runWon', score: s.score, timeMs: s.timeMs });
-    } else startLevelUp(s, b, ctx, true);
-  }
+  checkLevelClear(s, b, ctx, true);
   rampOnMangoEaten(s, b, ctx);
   s.tailFrom = { ...(s.snake[s.snake.length - 1] as Cell) };
   if (s.status === 'playing' && s.phase === 'playing') placeMango(s, b, rng);

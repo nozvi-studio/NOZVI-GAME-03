@@ -2,6 +2,8 @@ import type { Balance } from './balance';
 import { baseTickMs } from './ramp';
 import { slowmoSkill } from './skills/slowmo';
 import { tailSnipSkill } from './skills/tailSnip';
+import { shieldSkill } from './skills/shield';
+import { mangoRainSkill } from './skills/mangoRain';
 import type { SimState, SkillId, StepCtx } from './types';
 
 export interface SkillDef {
@@ -12,7 +14,8 @@ export interface SkillDef {
   leftMs(s: SimState): number;
 }
 
-export const SKILLS: Partial<Record<SkillId, SkillDef>> = { slowmo: slowmoSkill, tailSnip: tailSnipSkill };
+// MEC-006 section 4 every skill id has a definition.
+export const SKILLS: Record<SkillId, SkillDef> = { slowmo: slowmoSkill, tailSnip: tailSnipSkill, shield: shieldSkill, mangoRain: mangoRainSkill };
 
 // MEC-007 section 3 derives unlocks from balance and the saved best level.
 export function unlockedSkills(b: Balance, bestLevel: number): SkillId[] {
@@ -39,7 +42,6 @@ export function useSkill(s: SimState, b: Balance, ctx: StepCtx, slot: 0 | 1): vo
   const reject = (reason: 'empty' | 'busy' | 'active' | 'energy' | 'noTarget') => ctx.emit({ type: 'skillRejected', slot, skill: id, reason });
   if (id === null) return reject('empty');
   const def = SKILLS[id];
-  if (!def) throw new Error(`skill ${id} lands in P1 PR 7`);
   if (s.phase === 'transition') return reject('busy');
   if (def.active(s)) return reject('active');
   const cost = b.skills[id].cost;
@@ -51,11 +53,15 @@ export function useSkill(s: SimState, b: Balance, ctx: StepCtx, slot: 0 | 1): vo
   def.apply(s, b, ctx);
 }
 
-// MEC-006-R16 step 7 runs only during playing time; walls tick through their family.
+// MEC-006-R16 step 7 runs only during playing time; walls and rubble tick through their family.
 export function skillTimers(s: SimState, _b: Balance, ctx: StepCtx): void {
   if (s.slowmo && --s.slowmo.leftMs <= 0) {
     s.slowmo = null;
     ctx.emit({ type: 'skillEnded', skill: 'slowmo', reason: 'timeout' });
+  }
+  if (s.shield && --s.shield.leftMs <= 0) {
+    s.shield = null;
+    ctx.emit({ type: 'skillEnded', skill: 'shield', reason: 'timeout' });
   }
 }
 
