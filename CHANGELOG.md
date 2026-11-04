@@ -15,6 +15,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - fix(game): keyboard turns (arrows/WASD) are queued on the native keydown instead of waiting for Phaser's per-frame keyboard queue; pure key map in src/game/input/keyMap.ts (MEC-001).
 - fix(core): regular mango updates the speed ramp before the level-clear check, so rampEnded precedes levelUp (ARCHITECTURE step 12.4).
 ### Docs
+- docs: P2b (movers, cycles, blasts, bird) and P2c (shrink, challenge levels, tuning, P2 exit) implementation plans.
 - docs: STATUS after merging level-up flow B.
 - docs: fix level-up flow B contradictions (MEC-003 R9/R12/R22, MEC-004 EC8, GDD level up).
 - docs(spec): level-up flow B rules in MEC-001/002/003/004/006/007/012 and ARCHITECTURE step order (MEC-003-R22).

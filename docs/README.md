@@ -18,6 +18,8 @@ Only files listed here exist. Status: Draft / Approved / Deprecated.
 | P1-PLAN | `docs/superpowers/plans/2026-11-03-p1-core-loop.md` | P1 implementation plan (10 PRs) | Approved |
 | P2-DESIGN | `docs/superpowers/specs/2026-11-03-p2-content-design.md` | P2 umbrella design (P2a/P2b/P2c), changes to P1 specs | Approved |
 | P2A-PLAN | `docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md` | P2a implementation plan (family framework, mud, ice) | Approved |
+| P2B-PLAN | `docs/superpowers/plans/2026-11-04-p2b-movers-cycles-blasts.md` | P2b implementation plan (mover, cycle and area-blast blocks; coconut, gate, spike, npc, bird, bomb; 11 tasks) | Draft |
+| P2C-PLAN | `docs/superpowers/plans/2026-11-04-p2c-shrink-challenge-tuning.md` | P2c implementation plan (shrinking board, challenge levels, biome tuning, board-size check, P2 exit with 40% metric; 8 tasks) | Draft |
 | ARCH | `docs/ARCHITECTURE.md` | Module boundaries, time model, Sim step order | Draft |
 | PLAYTEST | `docs/PLAYTEST.md` | Playtest evidence | — |
 | MEC-001 | `docs/specs/mechanics/MEC-001-snake.md` | Snake movement, growth, self-collision, length reset | Approved |
