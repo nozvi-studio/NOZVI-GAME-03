@@ -135,7 +135,7 @@ describe('QA Task 3: Snake Movement & Turn Queue (Black-Box)', () => {
   });
 
   it('QA-T3-10 snake grows and scores on normal mango eat', () => {
-    // Spec: design §5 MEC-001: "score += 1 (golden 3), eaten += 1, progress += 1 (golden 2)... no tail pop"
+    // updated for P1 MEC-002 §7
     const sim = restoreSim(b, buildState(b, {
       snake: [[8, 8], [7, 8], [6, 8]],
       dir: [1, 0],
@@ -158,11 +158,13 @@ describe('QA Task 3: Snake Movement & Turn Queue (Black-Box)', () => {
       y: 8,
       golden: false,
       points: 1,
+      progressGain: 1,
+      source: 'mango',
     });
   });
 
   it('QA-T3-11 snake grows and scores on golden mango eat', () => {
-    // Spec: design §5 MEC-001: golden score 3, progress 2
+    // updated for P1 MEC-002 §7
     const sim = restoreSim(b, buildState(b, {
       snake: [[8, 8], [7, 8], [6, 8]],
       dir: [1, 0],
@@ -183,6 +185,8 @@ describe('QA Task 3: Snake Movement & Turn Queue (Black-Box)', () => {
       y: 8,
       golden: true,
       points: 3,
+      progressGain: 2,
+      source: 'mango',
     });
   });
 

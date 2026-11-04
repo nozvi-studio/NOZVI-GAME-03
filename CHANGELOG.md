@@ -2,10 +2,17 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+### Fixed
+- fix(core): regular mango updates the speed ramp before the level-clear check, so rampEnded precedes levelUp (ARCHITECTURE step 12.4).
 ### Docs
+- docs(spec): MEC-006-R27 skills may be used during the Shield bonk pause (owner decision).
+- docs: AGENTS.md 0.3.2 adds GitNexus workflow (status at task start, async analyze at task end) and minimal-vs-full test scope rule.
 - docs: owner phone run passes P0 parity.
 - docs: P0 parity check on desktop recorded in PLAYTEST (phone run pending owner); prototype frozen (P0 PR 9).
 ### Tests
+- test(qa): P1 Task 5 energy QA; level fixtures set rampActive false for mid-run states.
+- test(qa): P1 Task 4 mango QA; superseded ate/rot/director QA updated.
+- test(qa): P1 Task 3 transition QA; superseded level/board/director QA updated.
 - test(qa): P1 Task 2 meta black-box QA; save QA updated for MEC-008-R12.
 - test(qa): rewrite 23 superseded P0 QA cases for P1 Task 1 rules; QA files typecheck again.
 - test(qa): independent black-box QA suite for P0 Task 2 by the tester worker (34 cases; MEC-004-R13 warn bound skipped until P2a).

@@ -1,11 +1,12 @@
-// tests/qa/task8-save-wiring.qa.test.ts — black-box QA tests for save wiring and best score logic
+﻿// tests/qa/task8-save-wiring.qa.test.ts — black-box QA tests for save wiring and best score logic
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createSim } from '../../src/core';
-import { defaultSave, load, memoryStore } from '../../src/meta';
+import { loadBalance } from '../support/balance';
+import { defaultSave, load, memoryStore, SAVE_KEY } from '../../src/meta';
+import { createSession } from '../../src/session';
+import { createFlow } from '../../src/game/flow/runFlow';
 import { GameScene } from '../../src/game/scenes/GameScene';
 import { HudScene } from '../../src/game/scenes/HudScene';
 import { bindKeyboard } from '../../src/game/input/keyboard';
-import { loadBalance } from '../support/balance';
 import { sceneHarness, Signals } from '../support/scene';
 
 vi.mock('phaser', () => ({
@@ -41,12 +42,23 @@ function createTestHud(initialBest = 10, soundEnabled = true) {
   vi.stubGlobal('window', {
     addEventListener: browser.on.bind(browser),
     removeEventListener: browser.off.bind(browser),
-    matchMedia: (q: string) => ({
+    matchMedia: () => ({
       matches: false,
       addEventListener: media.on.bind(media),
       removeEventListener: media.off.bind(media),
     }),
   });
+
+  const b = loadBalance();
+  const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax };
+  const store = memoryStore();
+  const data = defaultSave();
+  data.bestScore = initialBest;
+  data.settings.sound = soundEnabled;
+  store.set(SAVE_KEY, JSON.stringify({ version: 2, data }));
+
+  const session = createSession({ balance: b, store, newSeed: () => 7, now: () => 0 });
+  session.startRun(1);
 
   const h = sceneHarness();
   const g = sceneHarness();
@@ -54,20 +66,23 @@ function createTestHud(initialBest = 10, soundEnabled = true) {
   const hud = new HudScene();
 
   Object.assign(game, g.scene);
-  game.balance = loadBalance();
-  const sim = createSim(game.balance, 42);
-  vi.spyOn(game, 'snapshot').mockImplementation(() => sim.snapshot());
+  game.balance = b;
+  game.session = session;
+  game.flow = createFlow();
   vi.spyOn(game, 'startRun').mockImplementation(() => {});
 
-  const store = memoryStore();
-  const data = defaultSave();
-  data.bestScore = initialBest;
-  data.settings.sound = soundEnabled;
+  const started: string[] = [];
+  const stopped: string[] = [];
+  h.registry.set('session', session);
+  h.registry.set('balance', b);
 
-  h.registry.set('store', store);
-  h.registry.set('save', data);
-
-  Object.assign(hud, h.scene, { scene: { get: () => game } });
+  Object.assign(hud, h.scene, {
+    scene: {
+      get: () => game,
+      start: (k: string) => started.push(k),
+      stop: (k: string) => stopped.push(k),
+    },
+  });
   hud.create();
 
   return {
@@ -75,95 +90,63 @@ function createTestHud(initialBest = 10, soundEnabled = true) {
     hud,
     game,
     store,
-    data,
-    sim,
+    rules,
+    session,
+    started,
+    stopped,
     click: (name: string) => {
       const target = h.find(name);
       target.emit('pointerdown');
       target.emit('pointerup');
     },
-    triggerGameOver: (score: number, level = 0, cause: any = 'wall') => {
-      game.flow.status = 'over';
-      game.events.emit('run-over', {
-        ...sim.snapshot(),
-        score,
-        level,
-        outcome: { won: false, cause },
-      });
-    },
   };
 }
 
 describe('QA Task 8: Save Wiring & Best Score (Black-Box)', () => {
-  it('QA-T6-18 GDD-8.4 best score only updated when higher (lower or equal score does not overwrite best)', () => {
-    const env = createTestHud(50);
-    expect(env.find('best').text).toBe('50');
+  // updated for P1 DECISIONS P1-D1: session owns best score; HUD reads 'session' from the registry
+  it.skip(
+    'QA-T6-18 GDD-8.4 best score only updated when higher (superseded by P1 DECISIONS P1-D1: session owns best score; P0 HUD harness cannot express Results overlay-best; covered by QA-P1T8-21/22)',
+    () => {},
+  );
 
-    // Case 1: Run ends with lower score (30 < 50) -> best score remains 50
-    env.triggerGameOver(30);
-    expect(load(env.store).bestScore).toBe(0); // store not written when lower
-    expect(env.data.bestScore).toBe(50);
-    expect(env.find('best').text).toBe('50');
-    env.flush();
-    expect(env.find('overlay-best').text).toBe('Best score 50');
+  // updated for P1: P0 Play card replaced by Results scene
+  it.skip(
+    'QA-T8-31 P0-Design §7.1, §8 start card shows best score only when best > 0 (superseded by P1: P0 Play card replaced by Results scene; see MEC-007-R2 / DECISIONS P1 Task 9)',
+    () => {},
+  );
 
-    // Case 2: Run ends with equal score (50 == 50) -> best score remains 50, not marked as new best
-    env.triggerGameOver(50);
-    expect(load(env.store).bestScore).toBe(0); // store not written when equal
-    expect(env.data.bestScore).toBe(50);
-    expect(env.find('best').text).toBe('50');
-    env.flush();
-    expect(env.find('overlay-best').text).toBe('Best score 50');
+  // updated for P1: P0 death card replaced by Results scene
+  it.skip(
+    'QA-T8-32 P0-Design §7.1, §8 death card with score 0 and best 0 shows empty best line (superseded by P1: P0 death card replaced by Results scene; see MEC-007-R2 / DECISIONS P1 Task 9)',
+    () => {},
+  );
 
-    // Case 3: Run ends with higher score (75 > 50) -> best score updated to 75 and persisted
-    env.triggerGameOver(75);
-    expect(load(env.store).bestScore).toBe(75);
-    expect(env.data.bestScore).toBe(75);
-    expect(env.find('best').text).toBe('75');
-    env.flush();
-    expect(env.find('overlay-best').text).toBe('New best score!');
-  });
-
-  it('QA-T8-31 P0-Design §7.1, §8 start card shows best score only when best > 0', () => {
-    const zeroEnv = createTestHud(0);
-    expect(zeroEnv.find('overlay-best').text).toBe('');
-
-    const hasBestEnv = createTestHud(42);
-    expect(hasBestEnv.find('overlay-best').text).toBe('Best score 42');
-  });
-
-  it('QA-T8-32 P0-Design §7.1, §8 death card with score 0 and best 0 shows empty best line', () => {
-    const env = createTestHud(0);
-    env.triggerGameOver(0);
-    env.flush();
-    expect(env.find('overlay-best').text).toBe('');
-    expect(load(env.store).bestScore).toBe(0);
-  });
-
+  // updated for P1 DECISIONS P1-D1: session owns sound saves; HUD reads 'session' from the registry
   it('QA-T8-33 P0-Design §7.1, §8 sound button persists toggle state to store', () => {
     const env = createTestHud(10, true);
-    expect(env.data.settings.sound).toBe(true);
+    expect(env.session.save().settings.sound).toBe(true);
 
     env.click('sound-button');
-    expect(env.data.settings.sound).toBe(false);
-    expect(load(env.store).settings.sound).toBe(false);
+    expect(env.session.save().settings.sound).toBe(false);
+    expect(load(env.store, env.rules).settings.sound).toBe(false);
 
     env.click('sound-button');
-    expect(env.data.settings.sound).toBe(true);
-    expect(load(env.store).settings.sound).toBe(true);
+    expect(env.session.save().settings.sound).toBe(true);
+    expect(load(env.store, env.rules).settings.sound).toBe(true);
     expect(mockSound.play).toHaveBeenCalledWith('eat');
   });
 
+  // updated for P1 DECISIONS P1-D1: session owns sound saves; HUD reads 'session' from the registry
   it('QA-T8-34 P0-Design §7.1, §8 KeyM shortcut toggles and persists sound setting', () => {
     const env = createTestHud(10, true);
     bindKeyboard(env.game);
 
     env.game.input.keyboard!.emit('keydown', { code: 'KeyM', preventDefault() {} });
-    expect(env.data.settings.sound).toBe(false);
-    expect(load(env.store).settings.sound).toBe(false);
+    expect(env.session.save().settings.sound).toBe(false);
+    expect(load(env.store, env.rules).settings.sound).toBe(false);
 
     env.game.input.keyboard!.emit('keydown', { code: 'KeyM', preventDefault() {} });
-    expect(env.data.settings.sound).toBe(true);
-    expect(load(env.store).settings.sound).toBe(true);
+    expect(env.session.save().settings.sound).toBe(true);
+    expect(load(env.store, env.rules).settings.sound).toBe(true);
   });
 });
