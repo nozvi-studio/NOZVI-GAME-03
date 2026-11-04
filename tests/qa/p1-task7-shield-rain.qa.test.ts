@@ -1078,5 +1078,49 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     }
   });
 
-  it.todo('QA-P1T7-35 MEC-006: Behavior of useSkill during bonk pause when accumulator is negative');
+  it('QA-P1T7-35 MEC-006-R27 skills may be used during the Shield bonk pause under normal useSkill rules', () => {
+    // MEC-006-R27: "Skills may also be used during the bonk, under the normal useSkill rules (owner, 2026-11-04)."
+    const s = buildState(b, {
+      snake: [[2, 8], [1, 8], [0, 8]],
+      dir: [1, 0],
+      spawnInMs: QUIET,
+      mango: [15, 15],
+    });
+    s.loadout = ['shield', 'slowmo'];
+    s.bestLevel = 16;
+    s.energy = 90; // 50 for shield, 40 for slowmo
+    s.hazards.push({
+      family: 'rock',
+      state: 'solid',
+      t: 2000,
+      warnMs: 1500,
+      lifeMs: 60000,
+      landed: true,
+      cells: [{ x: 3, y: 8, on: true, ageMs: 2000 }],
+    } as any);
+
+    const sim = restoreSim(b, s);
+    sim.useSkill(0); // Activate shield (energy 90 -> 40)
+    sim.advance(s.tickMs); // Break rock at (3, 8), bonk pause begins: acc = -3 * tickMs
+    expect(sim.drainEvents().some(e => e.type === 'shieldBroke')).toBe(true);
+
+    // During bonk pause (advance 1 tick; accumulator is still negative)
+    sim.advance(s.tickMs);
+
+    // 1. Using available skill under normal useSkill rules succeeds
+    sim.useSkill(1); // Cast slowmo (cost 40, energy 40 -> 0)
+    const events = sim.drainEvents();
+    expect(events).toContainEqual(
+      expect.objectContaining({ type: 'skillUsed', slot: 1, skill: 'slowmo' }),
+    );
+    expect(sim.snapshot().slowmo).not.toBeNull();
+    expect(sim.snapshot().energy).toBe(0);
+
+    // 2. Using skill with insufficient energy rejects with 'energy'
+    sim.useSkill(0);
+    const rejectEnergy = sim.drainEvents();
+    expect(rejectEnergy).toContainEqual(
+      expect.objectContaining({ type: 'skillRejected', slot: 0, reason: 'energy' }),
+    );
+  });
 });
