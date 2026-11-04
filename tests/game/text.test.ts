@@ -3,18 +3,18 @@ import { bestLine, CAUSE_TEXT, deathMessage, incomingBanner, levelBanner, levelL
 
 describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
   it('GDD-13 level banners (L605)', () => {
-    expect(levelBanner(2, 'fence')).toBe('Level 3: fences unlocked');
-    expect(levelBanner(4, 'terrain')).toBe('Level 5: rising ground unlocked');
-    expect(levelBanner(6, 'maze')).toBe('Level 7: hedge mazes unlocked');
-    expect(levelBanner(1)).toBe('Level 2: a bit faster');
+    expect(levelBanner(6, 'fence')).toBe('Level 6: fences unlocked');
+    expect(levelBanner(11, 'terrain')).toBe('Level 11: rising ground unlocked');
+    expect(levelBanner(26, 'maze')).toBe('Level 26: hedge mazes unlocked');
+    expect(levelBanner(2)).toBe('Level 2: a bit faster');
   });
   it('GDD-13 hazard banners', () => {
     expect([incomingBanner('fence'), incomingBanner('maze'), incomingBanner('terrain')])
       .toEqual(['Fence incoming', 'Maze incoming', 'The ground is shaking']);
   });
   it('GDD-13 death message and best lines (L689–694, L1017)', () => {
-    expect(deathMessage(false, 'fence', 12, 3)).toBe('You ran into a fence. Score 12, level 4.');
-    expect(deathMessage(true, undefined, 280, 10)).toBe('No room left for mangoes. Score 280, level 11.');
+    expect(deathMessage(false, 'fence', 12, 3)).toBe('You ran into a fence. Score 12, level 3.');
+    expect(deathMessage(true, undefined, 280, 10)).toBe('No room left for mangoes. Score 280, level 10.');
     expect(bestLine('over', 12, true, 12)).toBe('New best score!');
     expect(bestLine('over', 0, true, 0)).toBe('');
     expect(bestLine('over', 30, false, 12)).toBe('Best score 30');
@@ -26,12 +26,13 @@ describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
       wall: 'You hit the edge of the board.', self: 'You bit your own tail.',
       rotten: 'You hit a rock left by a rotten mango.', rock: 'A falling rock got you.',
       fence: 'You ran into a fence.', maze: 'You ran into a hedge.', ground: 'The ground rose in front of you.',
+      snipWall: 'You hit your discarded tail.', rubble: 'You hit the rubble.',
     });
   });
   it('GDD-13 level bar labels', () => {
     expect(progressLabel(3, 6, 2, 10)).toBe('3/6 mangoes');
     expect(progressLabel(3, 6, 10, 10)).toBe('Max level');
-    expect(levelLabel(0)).toBe('Level 1');
+    expect(levelLabel(1)).toBe('Level 1');
   });
   it('GDD-13 fixed texts', () => {
     expect(TEXT).toEqual({

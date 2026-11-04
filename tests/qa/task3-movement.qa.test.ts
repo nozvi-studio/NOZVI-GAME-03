@@ -8,15 +8,15 @@ describe('QA Task 3: Snake Movement & Turn Queue (Black-Box)', () => {
   const b = loadBalance();
 
   it('QA-T3-01 initial snake state & heading', () => {
-    // Spec: design §5 MEC-001, balance.json
+    // updated for P1 MEC-001-R2
     const sim = createSim(b, 42);
     const snap = sim.snapshot();
 
-    expect(snap.snake).toEqual([{ x: 8, y: 8 }, { x: 7, y: 8 }, { x: 6, y: 8 }]);
+    expect(snap.snake).toEqual([{ x: 8, y: 8 }, { x: 7, y: 8 }, { x: 6, y: 8 }, { x: 5, y: 8 }]);
     expect(snap.dir).toEqual({ x: 1, y: 0 });
     expect(snap.heading).toEqual({ x: 1, y: 0 });
     expect(snap.headFrom).toEqual({ x: 8, y: 8 });
-    expect(snap.tailFrom).toEqual({ x: 6, y: 8 });
+    expect(snap.tailFrom).toEqual({ x: 5, y: 8 });
     expect(snap.status).toBe('playing');
     expect(snap.outcome).toBeNull();
   });

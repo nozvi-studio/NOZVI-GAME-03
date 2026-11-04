@@ -2,9 +2,9 @@
 import type { Balance } from '../balance';
 import { cellReserved } from '../cells';
 import { inBounds, nearHead } from '../grid';
-import { isUnlocked } from '../level';
+import { directorIntervalMs, enabledFamilies, familyRow, smallHazardCap } from '../level';
 import type { Rng } from '../rng';
-import type { FamilyKey, SimState, SpawnCtx, TerrainHazard, TimedHazard } from '../types';
+import type { TableFamily, SimState, SpawnCtx, TerrainHazard, TimedHazard } from '../types';
 import { FAMILY } from './registry';
 
 // MEC-004 prototype weighted pick: r = next() * total; walk while r > w[i]
@@ -24,26 +24,24 @@ export function spawnCtx(s: SimState, b: Balance): SpawnCtx {
   };
 }
 
-// MEC-004 one 1 ms step of the director
+// MEC-003-R4/R14 table-driven director; preserves P0 weighted-pick and retry RNG order
 export function updateDirector(s: SimState, b: Balance, rng: Rng): void {
-  const d = b.director;
   s.mazeCooldownMs -= 1;
   s.spawnInMs -= 1;
   if (s.spawnInMs > 0) return;
-  s.spawnInMs = Math.max(d.intervalMinMs, d.intervalBaseMs - s.level * d.intervalPerLevelMs);
-  const cap = Math.min(d.capMax, d.capBase + Math.floor(s.level / d.capPerLevels));
-  const options: FamilyKey[] = [];
-  if (s.hazards.filter(h => FAMILY[h.family].capClass === 'small').length < cap) {
-    options.push('rock');
-    if (isUnlocked(b, s.level, 'fence')) options.push('fence');
-  }
+  s.spawnInMs = directorIntervalMs(b, s.level);
+  const cap = smallHazardCap(b, s.level);
+  const smallCount = s.hazards.filter(h => FAMILY[h.family].capClass === 'small').length;
   const mazeActive = s.hazards.some(h => h.family === 'maze');
-  const maxTerrains = s.level >= b.terrain.lateLevel ? b.terrain.maxActiveLate : b.terrain.maxActive;
-  if (isUnlocked(b, s.level, 'terrain') && !mazeActive && s.terrains.length < maxTerrains) options.push('terrain');
-  if (isUnlocked(b, s.level, 'maze') && s.mazeCooldownMs <= 0 && !mazeActive && !s.terrains.length) options.push('maze');
+  const options: TableFamily[] = enabledFamilies(b, s.level).filter(k => {
+    if (k === 'rock' || k === 'fence') return smallCount < cap;
+    if (k === 'terrain') return !mazeActive && s.terrains.length < b.terrain.maxActive;
+    return s.mazeCooldownMs <= 0 && !mazeActive && !s.terrains.length;
+  });
+  const weights = familyRow(b, s.level).weights;
   const ctx = spawnCtx(s, b);
   while (options.length) {
-    const i = pickWeighted(options.map(k => d.weights[k]), rng);
+    const i = pickWeighted(options.map(k => weights[k]!), rng);
     const k = options[i]!;
     const inst = FAMILY[k].spawn(ctx, rng);
     if (inst) {

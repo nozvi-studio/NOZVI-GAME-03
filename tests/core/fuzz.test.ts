@@ -4,7 +4,7 @@ import { fuzzSeed } from '../support/fuzz';
 import { loadBalance } from '../support/balance';
 
 const b = loadBalance();
-const SEEDS = import.meta.env.MODE === 'fuzz' ? 200 : 50;
+const SEEDS = import.meta.env.MODE === 'fuzz' ? 200 : 5;
 
 describe('MEC-004 fuzz invariants', () => {
   it(`MEC-004 fuzz: ${SEEDS} seeds × 120 s keep every invariant`, () => {

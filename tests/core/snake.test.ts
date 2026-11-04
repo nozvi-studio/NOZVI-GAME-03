@@ -33,22 +33,22 @@ describe('MEC-001 snake', () => {
     const sim = simOf({ mango: [9, 8] });
     sim.advance(140);
     const s = stateOf(sim);
-    expect(s.snake.map(c => [c.x, c.y])).toEqual([[9, 8], [8, 8], [7, 8], [6, 8]]);
+    expect(s.snake.map(c => [c.x, c.y])).toEqual([[9, 8], [8, 8], [7, 8], [6, 8], [5, 8]]);
     expect([s.score, s.eaten, s.progress]).toEqual([1, 1, 1]);
     expect(sim.drainEvents()).toEqual([{ type: 'ate', x: 9, y: 8, golden: false, points: 1 }]);
-    expect(s.tailFrom).toEqual({ x: 6, y: 8 });
+    expect(s.tailFrom).toEqual({ x: 5, y: 8 });
   });
 
   it('MEC-001 start state', () => {
     const snap = createSim(b, 1).snapshot();
-    expect(snap.snake).toEqual([{ x: 8, y: 8 }, { x: 7, y: 8 }, { x: 6, y: 8 }]);
+    expect(snap.snake).toEqual([{ x: 8, y: 8 }, { x: 7, y: 8 }, { x: 6, y: 8 }, { x: 5, y: 8 }]);
     expect(snap.dir).toEqual({ x: 1, y: 0 });
     expect(snap.heading).toEqual(snap.dir);
     expect(snap.tickMs).toBe(140);
     expect(snap.status).toBe('playing');
     expect(snap.outcome).toBeNull();
     expect(snap.headFrom).toEqual({ x: 8, y: 8 });
-    expect(snap.tailFrom).toEqual({ x: 6, y: 8 });
+    expect(snap.tailFrom).toEqual({ x: 5, y: 8 });
   });
 
   it('MEC-001 a queued turn is applied at the next step', () => {
@@ -99,14 +99,14 @@ describe('MEC-001 snake', () => {
     sim.advance(140 * 9);
     expect(sim.snapshot().status).toBe('over');
     expect(sim.snapshot().headFrom).toEqual({ x: 15, y: 8 });
-    expect(sim.snapshot().tailFrom).toEqual({ x: 13, y: 8 });
+    expect(sim.snapshot().tailFrom).toEqual({ x: 12, y: 8 });
   });
 
   it('MEC-001 headFrom/tailFrom follow the last move', () => {
     const sim = simOf();
     sim.advance(140);
     expect(sim.snapshot().headFrom).toEqual({ x: 8, y: 8 });
-    expect(sim.snapshot().tailFrom).toEqual({ x: 6, y: 8 });
+    expect(sim.snapshot().tailFrom).toEqual({ x: 5, y: 8 });
   });
 
   it('MEC-001 tickAlpha is acc / tickMs and 1 when over', () => {

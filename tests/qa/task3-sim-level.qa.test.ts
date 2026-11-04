@@ -8,22 +8,21 @@ describe('QA Task 3: Levels, Sim Shell & Determinism (Black-Box)', () => {
   const b = loadBalance();
 
   it('QA-T3-17 level quota calculation needFor', () => {
-    // Spec: design §5 MEC-003: "needFor(level) = 4 + level"
-    const expected = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-    for (let lvl = 0; lvl <= 10; lvl++) {
-      expect(needFor(b, lvl)).toBe(expected[lvl]);
+    // updated for P1 MEC-003-R1/R2
+    for (let lvl = 1; lvl <= 30; lvl++) {
+      expect(needFor(b, lvl)).toBe(4 + Math.floor((lvl - 1) / 3));
     }
   });
 
   it('QA-T3-18 tick speed calculation tickMsFor', () => {
-    // Spec: design §5 MEC-003: "tickMs = max(95, 140 − 4 × level)"
-    expect(tickMsFor(b, 0)).toBe(140);
-    expect(tickMsFor(b, 1)).toBe(136);
-    expect(tickMsFor(b, 2)).toBe(132);
-    expect(tickMsFor(b, 5)).toBe(120);
-    expect(tickMsFor(b, 10)).toBe(100);
-    expect(tickMsFor(b, 11)).toBe(96);
-    expect(tickMsFor(b, 12)).toBe(95); // clamped to minMs = 95
+    // updated for P1 MEC-003-R1/R3
+    expect(tickMsFor(b, 1)).toBe(140);
+    expect(tickMsFor(b, 2)).toBe(138);
+    expect(tickMsFor(b, 3)).toBe(136);
+    expect(tickMsFor(b, 5)).toBe(132);
+    expect(tickMsFor(b, 10)).toBe(122);
+    expect(tickMsFor(b, 30)).toBe(82);
+    expect(tickMsFor(b, 31)).toBe(82); // clamped to minMs = 82
   });
 
   it('QA-T3-19 snake tick timing runs at tickMs intervals', () => {
@@ -37,9 +36,9 @@ describe('QA Task 3: Levels, Sim Shell & Determinism (Black-Box)', () => {
   });
 
   it('QA-T3-20 level up transitions at exact quota', () => {
-    // Spec: design §5 MEC-003: progress overflow carries into the next level
+    // updated for P1 MEC-003-R1/R2/R3
     const sim = restoreSim(b, buildState(b, {
-      level: 0,
+      level: 1,
       progress: 3,
       mango: [9, 8],
       golden: false,
@@ -47,22 +46,22 @@ describe('QA Task 3: Levels, Sim Shell & Determinism (Black-Box)', () => {
     sim.advance(140);
     const snap = sim.snapshot();
 
-    expect(snap.level).toBe(1);
+    expect(snap.level).toBe(2);
     expect(snap.progress).toBe(0);
-    expect(snap.need).toBe(5);
-    expect(snap.tickMs).toBe(136);
+    expect(snap.need).toBe(4);
+    expect(snap.tickMs).toBe(138);
 
     const events = sim.drainEvents();
     expect(events).toContainEqual({
       type: 'levelUp',
-      level: 1,
+      level: 2,
     });
   });
 
   it('QA-T3-21 golden mango progress overflow carries over', () => {
-    // Spec: design §5 MEC-003: golden gives +2 progress, carries overflow
+    // updated for P1 MEC-003-R1/R2
     const sim = restoreSim(b, buildState(b, {
-      level: 0,
+      level: 1,
       progress: 3,
       mango: [9, 8],
       golden: true,
@@ -70,23 +69,24 @@ describe('QA Task 3: Levels, Sim Shell & Determinism (Black-Box)', () => {
     sim.advance(140);
     const snap = sim.snapshot();
 
-    expect(snap.level).toBe(1);
+    expect(snap.level).toBe(2);
     expect(snap.progress).toBe(1); // 3 + 2 - 4 = 1
-    expect(snap.need).toBe(5);
+    expect(snap.need).toBe(4);
 
     const events = sim.drainEvents();
     expect(events).toContainEqual({
       type: 'levelUp',
-      level: 1,
+      level: 2,
     });
   });
 
   it('QA-T3-22 unlock events emitted on milestone levels', () => {
-    // Spec: design §5 MEC-003: unlocks fence 2, terrain 4, maze 6
+    // updated for P1 MEC-003-R15/R16
     const levelsToTest: Array<{ lvl: number; unlocked?: string }> = [
-      { lvl: 2, unlocked: 'fence' },
-      { lvl: 4, unlocked: 'terrain' },
-      { lvl: 6, unlocked: 'maze' },
+      { lvl: 6, unlocked: 'fence' },
+      { lvl: 11, unlocked: 'terrain' },
+      { lvl: 12, unlocked: 'rottenRock' },
+      { lvl: 26, unlocked: 'maze' },
     ];
 
     for (const { lvl, unlocked } of levelsToTest) {
@@ -108,17 +108,17 @@ describe('QA Task 3: Levels, Sim Shell & Determinism (Black-Box)', () => {
   });
 
   it('QA-T3-23 max level caps at level 10', () => {
-    // Spec: design §5 MEC-003: "Max level index 10... progress stays 0"
+    // updated for P1 MEC-003-R1
     const sim = restoreSim(b, buildState(b, {
-      level: 10,
-      progress: needFor(b, 10) - 1,
+      level: 30,
+      progress: needFor(b, 30) - 1,
       mango: [9, 8],
       golden: false,
     }));
-    sim.advance(tickMsFor(b, 10));
+    sim.advance(tickMsFor(b, 30));
     const snap = sim.snapshot();
 
-    expect(snap.level).toBe(10);
+    expect(snap.level).toBe(30);
     expect(snap.progress).toBe(0);
   });
 

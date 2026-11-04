@@ -1,25 +1,45 @@
-// src/core/level.ts — MEC-003 levels, 10-level prototype version (needFor L169, addProgress L601–612, updateSpeed L620–623)
+// MEC-003 1-based levels and the per-level family table.
 import type { Balance } from './balance';
-import type { SimState, UnlockKey } from './types';
+import type { IntroKey, LevelRow, SimState, TableFamily } from './types';
 
-const UNLOCK_ORDER: readonly UnlockKey[] = ['fence', 'terrain', 'maze'];
+const TABLE_ORDER: readonly TableFamily[] = ['rock', 'fence', 'terrain', 'maze'];
+export const biome = (b: Balance, n: number): number => Math.floor((n - 1) / b.level.perBiome) + 1; // MEC-003-R1
+export const isChallenge = (b: Balance, n: number): boolean => n % b.level.perBiome === 0; // MEC-003-R1
+export const quota = (b: Balance, n: number): number => b.level.needBase + Math.floor((n - 1) / b.level.needStepLevels); // MEC-003-R2
+export const levelTickMs = (b: Balance, n: number): number => Math.max(b.speed.minMs, b.speed.startMs - b.speed.msPerLevel * (n - 1)); // MEC-003-R3
+export function directorIntervalMs(b: Balance, n: number): number { // MEC-003-R4
+  const d = b.director, base = Math.max(d.intervalMinMs, d.intervalBaseMs - d.intervalPerLevelMs * n);
+  return isChallenge(b, n) ? Math.floor(base * d.challengeIntervalFactor) : base;
+}
+export function smallHazardCap(b: Balance, n: number): number { // MEC-003-R4
+  const d = b.director, base = Math.min(d.capMax, d.capBase + Math.floor(n / d.capPerLevels));
+  return isChallenge(b, n) ? base + d.challengeCapBonus : base;
+}
+export const familyRow = (b: Balance, n: number): LevelRow => b.level.table.find(r => r.from <= n && n <= r.to)!; // MEC-003-R14
+export const enabledFamilies = (b: Balance, n: number): TableFamily[] => // MEC-003-R14
+  TABLE_ORDER.filter(k => (familyRow(b, n).weights[k] ?? 0) > 0);
+export function introducedAt(b: Balance, n: number): IntroKey | undefined { // MEC-003-R16 first enable, even after a disabled row
+  const row = familyRow(b, n);
+  const current: IntroKey[] = [...enabledFamilies(b, n), ...(row.rottenRocks ? ['rottenRock' as const] : [])];
+  return current.find(k => !b.level.table.some(r => r.to < n && (k === 'rottenRock' ? r.rottenRocks : (r.weights[k] ?? 0) > 0)) && n === row.from);
+}
+export const fenceFirstLevel = (b: Balance): number => b.level.table.find(r => (r.weights.fence ?? 0) > 0)?.from ?? Infinity; // MEC-003-R15
 
-export const needFor = (b: Balance, level: number): number => b.level.needBase + b.level.needPerLevel * level;
-export const tickMsFor = (b: Balance, level: number): number =>
-  Math.max(b.speed.minMs, b.speed.startMs - b.speed.msPerLevel * level);
-export const unlockedAt = (b: Balance, level: number): UnlockKey | undefined =>
-  UNLOCK_ORDER.find(k => b.level.unlock[k] === level);
-export const isUnlocked = (b: Balance, level: number, k: UnlockKey): boolean => level >= b.level.unlock[k];
+// P0 public names retained for its existing consumers; all now take 1-based levels.
+export const needFor = quota;
+export const tickMsFor = levelTickMs;
+export const unlockedAt = introducedAt;
+export const isUnlocked = (b: Balance, n: number, k: IntroKey): boolean =>
+  k === 'rottenRock' ? familyRow(b, n).rottenRocks : enabledFamilies(b, n).includes(k);
 
-// MEC-003 add progress; overflow carries; one levelUp per level gained; progress stays 0 at max level
+// MEC-003-R2 P0 overflow loop retained until Task 3 adds transitions and the run win.
 export function addProgress(s: SimState, b: Balance, n: number): void {
-  const max = b.level.maxLevel;
-  if (s.level < max) s.progress += n;
-  while (s.level < max && s.progress >= needFor(b, s.level)) {
-    s.progress -= needFor(b, s.level);
+  if (s.level < b.level.maxLevel) s.progress += n;
+  while (s.level < b.level.maxLevel && s.progress >= quota(b, s.level)) {
+    s.progress -= quota(b, s.level);
     s.level += 1;
-    const unlocked = unlockedAt(b, s.level);
+    const unlocked = introducedAt(b, s.level);
     s.events.push(unlocked ? { type: 'levelUp', level: s.level, unlocked } : { type: 'levelUp', level: s.level });
   }
-  if (s.level >= max) s.progress = 0;
+  if (s.level >= b.level.maxLevel) s.progress = 0;
 }
