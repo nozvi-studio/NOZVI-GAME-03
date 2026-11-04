@@ -28,12 +28,13 @@ describe('QA Task 4: Mango Rot Lifecycle & Full Board (Black-Box)', () => {
   const b = loadBalance();
 
   it('QA-T4-12 fair rot leaves a permanent rotten rock and emits rotted event', () => {
-    // Spec: design §5 MEC-002: "Fair → a permanent rotten rock on that cell ... Always emit rotted and place a new mango"
+    // updated for P1 MEC-002-R6/R7
     const sim = restoreSim(b, buildState(b, {
       snake: [[8, 8], [7, 8], [6, 8]],
       dir: [1, 0],
       mango: [2, 2],
       mangoLeftMs: 5,
+      level: 12,
       spawnInMs: QUIET,
     }));
     sim.advance(4);
@@ -43,7 +44,7 @@ describe('QA Task 4: Mango Rot Lifecycle & Full Board (Black-Box)', () => {
     const snap = sim.snapshot();
 
     expect(sim.drainEvents()).toEqual([{ type: 'rotted', x: 2, y: 2, leftRock: true }]);
-    expect(snap.rottenRocks).toContainEqual({ x: 2, y: 2 });
+    expect(snap.rottenRocks).toContainEqual(expect.objectContaining({ x: 2, y: 2, state: 'solid' }));
     expect(snap.mango).not.toBeNull();
     expect(snap.mango!.x !== 2 || snap.mango!.y !== 2).toBe(true);
   });
@@ -137,11 +138,11 @@ describe('QA Task 4: Mango Rot Lifecycle & Full Board (Black-Box)', () => {
   });
 
   it('QA-T4-18 new mango after fair rot does not spawn on the new rotten rock', () => {
-    // Spec: design §5 MEC-002: "added before the new placement, so it reserves the cell"
-    const s = buildState(b, { mango: [2, 2] });
+    // updated for P1 MEC-002-R6/R7
+    const s = buildState(b, { level: 12, mango: [2, 2] });
     rotMango(s, b, rngFrom(seedRng(5)));
 
-    expect(s.rottenRocks).toContainEqual({ x: 2, y: 2 });
+    expect(s.rottenRocks).toContainEqual(expect.objectContaining({ x: 2, y: 2 }));
     expect(s.mango).not.toMatchObject({ x: 2, y: 2 });
     expect(s.events).toContainEqual({ type: 'rotted', x: 2, y: 2, leftRock: true });
   });
@@ -172,7 +173,7 @@ describe('QA Task 4: Mango Rot Lifecycle & Full Board (Black-Box)', () => {
   });
 
   it('QA-T4-20 eating mango when board has zero free cells does not end run', () => {
-    // updated for P1 MEC-001-R10
+    // updated for P1 MEC-001-R10 / MEC-002-R8/R9
     const s = buildState(b, {
       snake: [[8, 8], [7, 8], [6, 8]],
       dir: [1, 0],
@@ -195,7 +196,16 @@ describe('QA Task 4: Mango Rot Lifecycle & Full Board (Black-Box)', () => {
     expect(snap.outcome).toBeNull();
     expect(snap.mango).toBeNull();
     const events = sim.drainEvents();
-    expect(events).toContainEqual({ type: 'ate', x: 9, y: 8, golden: false, points: 1 });
+    expect(events).toContainEqual({
+      type: 'ate',
+      x: 9,
+      y: 8,
+      golden: false,
+      points: 1,
+      progressGain: 1,
+      source: 'mango',
+    });
+    expect(events).toContainEqual({ type: 'mangoDeferred' });
     expect(events.some(e => (e as any).type === 'boardFull')).toBe(false);
   });
 
@@ -206,7 +216,7 @@ describe('QA Task 4: Mango Rot Lifecycle & Full Board (Black-Box)', () => {
   );
 
   it('QA-T4-22 event payloads match exact specification schema', () => {
-    // Spec: design §4 SimEvent definitions
+    // updated for P1 MEC-002 §7
     const sim = restoreSim(b, buildState(b, {
       snake: [[8, 8], [7, 8], [6, 8]],
       dir: [1, 0],
@@ -223,8 +233,10 @@ describe('QA Task 4: Mango Rot Lifecycle & Full Board (Black-Box)', () => {
       y: 8,
       golden: false,
       points: 1,
+      progressGain: 1,
+      source: 'mango',
     });
-    expect(Object.keys(ateEvent!)).toEqual(['type', 'x', 'y', 'golden', 'points']);
+    expect(Object.keys(ateEvent!).sort()).toEqual(['golden', 'points', 'progressGain', 'source', 'type', 'x', 'y']);
   });
 
   it('QA-T4-23 determinism identical seed produces identical mango sequence', () => {

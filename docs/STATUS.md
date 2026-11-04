@@ -3,15 +3,18 @@
 **Updated:** 2026-11-04 by Codex **Milestone:** M1 - P1 Tasks 1 through 4 implemented. **Version branch:** `version/v0.1`
 
 ## Now (in progress)
-- [x] P0 complete incl. owner phone run (PLAYTEST).
-- [x] P1 Tasks 1 and 2 integrated; independent QA updated for their P1 rules.
-- [x] P1 Task 3 implemented; its seven obsolete QA cases are being rewritten separately.
-- [x] P1 Task 4 implemented on `feat/p1-mangoes`, uncommitted; verified and ready for agy QA.
+- [x] P1 Tasks 1-3 merged into `version/v0.1`.
+- [x] Task 4 committed on `feat/p1-mangoes` (version merged in); Task 5 committed on `feat/p1-energy` (worktree `../NOZVI-GAME-03-wt4`, node_modules junction).
+- [ ] **RESUME HERE (2026-11-04, both workers killed by low-memory reaper):**
+  - agy Task 4 QA on `feat/p1-mangoes` (main tree): partial uncommitted edits in 4 tests/qa files; resume brief = scratchpad agy-qa4 (11 obsolete IDs + QA-T4-20 code-vs-test verdict + new p1-task4-mangoes QA).
+  - Codex Task 6 on `feat/p1-skills-a` (worktree, from Task 5): not started, tree clean.
+  - Parallel mode (owner-approved) needs CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1; otherwise run one worker at a time.
 
 ## Next (ordered, max 5)
-1. agy QA for Task 4; owner handles commit/integration.
-2. Remaining P1 tasks per plan, one branch each; Task 5 next.
-3. P1 exit: owner recruits 5 testers; summarizeLog + PLAYTEST gate.
+1. Merge Task 4, then agy QA Task 5 (merge version into feat/p1-energy first), merge.
+2. Tasks 6-10 per plan (branches: skills-a, skills-b, session, scenes, chore/p1-playtest).
+3. Tech debt: normal suite ~17 s (> 10 s target).
+4. P1 exit: owner recruits 5 testers; summarizeLog + PLAYTEST gate.
 
 ## Workers and QA process
 - Feature code: Codex (`delegate-workers` codex-task.sh) or Claude subagent, chosen per task.
