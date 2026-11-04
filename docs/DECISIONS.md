@@ -339,3 +339,7 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - Always `--index-only`: keeps GitNexus from rewriting AGENTS.md/CLAUDE.md and `.claude/` (protected files, §8). `--workers 2` because the host's low-memory reaper kills heavy processes.
 - Test scope: minimal targeted tests during work; full `npm test` + `npm run typecheck` only before commit or merge. Reason: the full suite takes ~15-17 s and was being run after every edit.
 - Rules live in AGENTS.md §2c and §6b (ruleset 0.3.2).
+## 2026-11-04 - P1 owner playtest feedback (owner)
+- P1 exit gate sample reduced from 5 testers to 2 (owner: tester availability is limited). Data so far: 1 desktop log (13 runs) + 1 phone log (3 runs); owner re-tests after the fixes below.
+- Level-up slowdown (approved rule change, MEC-003/MEC-008 to be updated): on level up the snake keeps moving, existing obstacles stay, the level banner shows as today. The tick is immediately multiplied by a tier factor and eases back to the new level's normal tick. Tiers by level reached: 2-5 none; 6-15 x1.4 eased over 1 s; 16-30 x1.6 eased over 1.5 s. While Slow-mo is active the slower factor wins (no stacking). All values in `config/balance.json`.
+- Bugs from the playtest, fixed on their own branches: 4/13 desktop runs died at the wall after exactly 1260 ms on level 1; WASD felt delayed.

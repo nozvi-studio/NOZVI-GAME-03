@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 ### Fixed
 - fix(core): regular mango updates the speed ramp before the level-clear check, so rampEnded precedes levelUp (ARCHITECTURE step 12.4).
 ### Docs
+- docs: record P1 owner feedback (2-tester gate, level-up slowdown tiers, playtest bugs) in DECISIONS.
 - docs: STATUS for P1 code complete; owner playtest gate pending.
 - docs(spec): MEC-006-R27 skills may be used during the Shield bonk pause (owner decision).
 - docs: AGENTS.md 0.3.2 adds GitNexus workflow (status at task start, async analyze at task end) and minimal-vs-full test scope rule.
