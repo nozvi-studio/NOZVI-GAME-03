@@ -287,3 +287,8 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - Final input-contract ruling: malformed manually restored states (injected L1 orbs, invalid ramp counters), untyped null options and invalid direct helper arguments remain outside the initialized/typed-state contract; no extra guards were added. Cost: tools that bypass the normal initializer must supply valid state and typed inputs.
 - Final ordering ruling: retained the existing victory chain under altered tuning; no additional runWon-versus-rampEnded order is specified. Ramp count, termination and event uniqueness are preserved. Cost: consumers must not infer an unspecified ordering in custom low-quota configurations.
 - Final evidence ruling: coordinator ran tests/typecheck/build/fuzz sequentially; reviewer ran no tests. Cost: no independent second execution. All requested command gates passed; no spec, QA, dependency or protected-file changes, commits or integration actions.
+## 2026-11-04 - GitNexus code graph and test scope (owner)
+- GitNexus 1.6.9 indexes the repo into `.gitnexus/` (excluded via `.git/info/exclude`, not committed). Agents check `status` and use `query`/`context`/`impact` at task start, and refresh the index asynchronously at task end. Reason: cheaper, more accurate code location than file scanning (AGENTS.md §2b).
+- Always `--index-only`: keeps GitNexus from rewriting AGENTS.md/CLAUDE.md and `.claude/` (protected files, §8). `--workers 2` because the host's low-memory reaper kills heavy processes.
+- Test scope: minimal targeted tests during work; full `npm test` + `npm run typecheck` only before commit or merge. Reason: the full suite takes ~15-17 s and was being run after every edit.
+- Rules live in AGENTS.md §2c and §6b (ruleset 0.3.2).

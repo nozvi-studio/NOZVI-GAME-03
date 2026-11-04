@@ -36,7 +36,7 @@ describe('QA Task 3: Levels, Sim Shell & Determinism (Black-Box)', () => {
   });
 
   it('QA-T3-20 level up transitions at exact quota', () => {
-    // updated for P1 MEC-003-R1/R2/R3
+    // updated for P1 MEC-003-R7
     const sim = restoreSim(b, buildState(b, {
       level: 1,
       progress: 3,
@@ -50,16 +50,22 @@ describe('QA Task 3: Levels, Sim Shell & Determinism (Black-Box)', () => {
     expect(snap.progress).toBe(0);
     expect(snap.need).toBe(4);
     expect(snap.tickMs).toBe(138);
+    expect(snap.phase).toBe('transition');
+    expect(snap.transitionLeftMs).toBe(1000);
 
     const events = sim.drainEvents();
     expect(events).toContainEqual({
       type: 'levelUp',
       level: 2,
+      biome: 1,
+      challenge: false,
+      biomeChanged: false,
+      clearedLevelTimeMs: 140,
     });
   });
 
   it('QA-T3-21 golden mango progress overflow carries over', () => {
-    // updated for P1 MEC-003-R1/R2
+    // updated for P1 MEC-003-R7
     const sim = restoreSim(b, buildState(b, {
       level: 1,
       progress: 3,
@@ -72,16 +78,21 @@ describe('QA Task 3: Levels, Sim Shell & Determinism (Black-Box)', () => {
     expect(snap.level).toBe(2);
     expect(snap.progress).toBe(1); // 3 + 2 - 4 = 1
     expect(snap.need).toBe(4);
+    expect(snap.phase).toBe('transition');
 
     const events = sim.drainEvents();
     expect(events).toContainEqual({
       type: 'levelUp',
       level: 2,
+      biome: 1,
+      challenge: false,
+      biomeChanged: false,
+      clearedLevelTimeMs: 140,
     });
   });
 
   it('QA-T3-22 unlock events emitted on milestone levels', () => {
-    // updated for P1 MEC-003-R15/R16
+    // updated for P1 MEC-003-R7
     const levelsToTest: Array<{ lvl: number; unlocked?: string }> = [
       { lvl: 6, unlocked: 'fence' },
       { lvl: 11, unlocked: 'terrain' },
@@ -99,16 +110,16 @@ describe('QA Task 3: Levels, Sim Shell & Determinism (Black-Box)', () => {
       sim.advance(tickMsFor(b, lvl - 1));
       const events = sim.drainEvents();
 
-      expect(events).toContainEqual({
+      expect(events).toContainEqual(expect.objectContaining({
         type: 'levelUp',
         level: lvl,
         unlocked,
-      });
+      }));
     }
   });
 
-  it('QA-T3-23 max level caps at level 10', () => {
-    // updated for P1 MEC-003-R1
+  it('QA-T3-23 run win at level 30 quota clear', () => {
+    // updated for P1 MEC-003-R6
     const sim = restoreSim(b, buildState(b, {
       level: 30,
       progress: needFor(b, 30) - 1,
@@ -119,7 +130,16 @@ describe('QA Task 3: Levels, Sim Shell & Determinism (Black-Box)', () => {
     const snap = sim.snapshot();
 
     expect(snap.level).toBe(30);
-    expect(snap.progress).toBe(0);
+    expect(snap.status).toBe('over');
+    expect(snap.outcome).toEqual({ won: true });
+    expect(snap.levelsCleared).toBe(30);
+    expect(snap.phase).toBe('playing');
+
+    const events = sim.drainEvents();
+    expect(events).toContainEqual(expect.objectContaining({
+      type: 'runWon',
+    }));
+    expect(events.some(e => e.type === 'levelUp')).toBe(false);
   });
 
   it('QA-T3-24 determinism under different advance chunking', () => {

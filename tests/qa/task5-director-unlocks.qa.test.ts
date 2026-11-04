@@ -25,7 +25,7 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
   });
 
   it('QA-T5-14 MEC-004 levelUp events carry unlocked hazard family', () => {
-    // updated for P1 MEC-003-R1/R15/R16
+    // updated for P1 MEC-003-R7
     const sim = createSim(b, 100);
     expect(sim.snapshot().level).toBe(1);
 
@@ -36,7 +36,15 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     expect(testSim.snapshot().level).toBe(6);
     const events = testSim.drainEvents();
     const lvl6 = events.find(e => e.type === 'levelUp');
-    expect(lvl6).toEqual({ type: 'levelUp', level: 6, unlocked: 'fence' });
+    expect(lvl6).toEqual({
+      type: 'levelUp',
+      level: 6,
+      biome: 2,
+      challenge: false,
+      biomeChanged: true,
+      clearedLevelTimeMs: s.tickMs,
+      unlocked: 'fence',
+    });
   });
 
   it('QA-T5-15 MEC-004 rock and fence shape pools expand by level', () => {
@@ -79,17 +87,18 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     sim.advance(1);
     expect(sim.snapshot().hazards.length + sim.snapshot().terrains.length).toBeGreaterThan(0);
 
+    // updated for P1 MEC-003-R1/R4 / MEC-003-R13
     // Test director interval formula across levels: max(1600, 5000 - 120 * n)
-    const s1 = buildState(b, { level: 1, spawnInMs: 0 });
+    const s1 = buildState(b, { level: 1, spawnInMs: 0, mango: [2, 2] });
     const rng = rngFrom(seedRng(1));
     updateDirector(s1, b, rng);
     expect(s1.spawnInMs).toBe(4880);
 
-    const s5 = buildState(b, { level: 5, spawnInMs: 0 });
+    const s5 = buildState(b, { level: 5, spawnInMs: 0, mango: [2, 2] });
     updateDirector(s5, b, rng);
     expect(s5.spawnInMs).toBe(4400);
 
-    const s30 = buildState(b, { level: 30, spawnInMs: 0 });
+    const s30 = buildState(b, { level: 30, spawnInMs: 0, mango: [2, 2] });
     updateDirector(s30, b, rng);
     expect(s30.spawnInMs).toBe(1600);
   });
@@ -109,8 +118,8 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
   });
 
   it('QA-T5-18 MEC-004 small hazard cap ignores maze and terrain', () => {
-    // updated for P1 MEC-003-R1
-    const s = buildState(b, { level: 1, spawnInMs: 0 });
+    // updated for P1 MEC-003-R1 / MEC-003-R13
+    const s = buildState(b, { level: 1, spawnInMs: 0, mango: [2, 2] });
     s.hazards.push({
       family: 'maze', state: 'solid', t: 5000, warnMs: 2600, lifeMs: 14000, landed: true,
       cells: [{ x: 1, y: 1, on: true, ageMs: 5000 }],
@@ -173,9 +182,9 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
   });
 
   it('QA-T5-21 MEC-004 maze cooldown sets to 26000 ms and blocks maze respawn', () => {
-    // updated for P1 MEC-003-R15
+    // updated for P1 MEC-003-R15 / MEC-003-R13
     const cap = smallHazardCap(b, 26);
-    const s = buildState(b, { level: 26, spawnInMs: 0 });
+    const s = buildState(b, { level: 26, spawnInMs: 0, mango: [2, 2] });
     s.mazeCooldownMs = 0;
     for (let i = 0; i < cap; i++) {
       s.hazards.push({
@@ -196,7 +205,7 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     }
     expect(spawnedMaze).toBe(true);
 
-    const sCooldown = buildState(b, { level: 26, spawnInMs: 0 });
+    const sCooldown = buildState(b, { level: 26, spawnInMs: 0, mango: [2, 2] });
     sCooldown.mazeCooldownMs = 15000;
     for (let i = 0; i < cap; i++) {
       sCooldown.hazards.push({
@@ -230,17 +239,25 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
   });
 
   it('QA-T5-23 MEC-004 hazardIncoming event emitted for fence, terrain, and maze but not rock', () => {
-    // updated for P1 MEC-003-R1/R15
-    const s = buildState(b, { level: 1, spawnInMs: 0 });
+    // updated for P1 MEC-003-R13
+    // Under MEC-003-R13 and ARCHITECTURE step 5, director is skipped while mango is null
+    const noMangoState = buildState(b, { seed: 1, level: 6, spawnInMs: 0 });
+    noMangoState.mango = null;
+    const noMangoSim = restoreSim(b, noMangoState);
+    noMangoSim.advance(1);
+    expect(noMangoSim.drainEvents().some(e => e.type === 'hazardIncoming')).toBe(false);
+
+    // With mango present at level 1, rock spawns without hazardIncoming
+    const s = buildState(b, { level: 1, spawnInMs: 0, mango: [0, 0] });
     const sim = restoreSim(b, s);
     sim.advance(1); // triggers director
     const rockIncoming = sim.drainEvents().find(e => e.type === 'hazardIncoming');
     expect(rockIncoming).toBeUndefined();
 
-    // At level 6 (fence available)
+    // At level 6 (fence available) with mango present, hazardIncoming is emitted for fence
     let fenceIncoming = false;
     for (let seed = 1; seed < 50; seed++) {
-      const s2 = buildState(b, { seed, level: 6, spawnInMs: 0 });
+      const s2 = buildState(b, { seed, level: 6, spawnInMs: 0, mango: [0, 0] });
       const testSim = restoreSim(b, s2);
       testSim.advance(1);
       const ev = testSim.drainEvents().find(e => e.type === 'hazardIncoming');

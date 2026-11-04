@@ -1,5 +1,5 @@
 # AGENTS.md — rules for AI agents
-Ruleset version: 0.3.1
+Ruleset version: 0.3.2
 
 Read this whole file first. Then read `docs/STATUS.md` and `docs/README.md` (docs map + routing). Read other docs only as the routing table says. Do not rely on chat memory.
 
@@ -34,6 +34,13 @@ Rules: one source of truth per rule or number; the GDD links to specs instead of
 7. Keep memory small: STATUS.md ≤ 60 lines; CHANGELOG: read only `[Unreleased]`; DECISIONS: grep by topic, do not read top to bottom; PLAYTEST: latest entry only.
 8. Put the requirement ID in test names and a one-line comment at the main implementing function, so grep finds spec, code and tests together.
 
+## 2c. GitNexus code graph (owner 2026-11-04)
+The repo is indexed by GitNexus (local index in `.gitnexus/`, git-excluded; MCP tools `mcp__gitnexus__*` or CLI `node .gitnexus/run.cjs`).
+1. **Task start:** run `node .gitnexus/run.cjs status`; if stale, run analyze (below) and wait. Before editing a symbol, use GitNexus (`query` / `context` / `impact`) to locate code and check blast radius instead of scanning files.
+2. **Task end (after commit/merge):** refresh the index **in the background** (do not block on it): `node .gitnexus/run.cjs analyze --index-only --workers 2`.
+3. Always pass `--index-only`: GitNexus must not inject text into AGENTS.md / CLAUDE.md or install skills into `.claude/`. Do not commit `.gitnexus/`.
+4. If GitNexus is missing (`Cannot find module`), run `npx gitnexus analyze --index-only` (or `gitnexus analyze --index-only` if installed globally).
+
 ## 3. Session protocol (memory)
 1. **End of every session (even if unfinished):** rewrite `docs/STATUS.md` (Now / Next / Blockers / Last session).
 2. **Every change you commit:** add a line under `## [Unreleased]` in `CHANGELOG.md` in the same PR.
@@ -64,6 +71,10 @@ Rules: one source of truth per rule or number; the GDD links to specs instead of
 - **Branching (owner 2026-11-04):** `master` ← `dev` ← `version/vX.Y` ← task branches (`feat/…`, `fix/…`, `docs/…`, `chore/…`). Create each task branch from the current version branch (see STATUS) and merge it back with `git merge --no-ff` — no PR needed — after tests + typecheck pass. Merge the version branch into `dev` at a phase exit, and `dev` into `master` on release. Never branch from or commit to `master`/`dev` directly; local `main` is the old Ant Trail project, never use it.
 - New dependency: one-line reason in the PR and in `docs/DECISIONS.md`.
 - **Secrets:** never commit credentials, API secret keys, private keys, signing files or tokens; use env vars / CI secrets. Public client IDs (e.g. ad unit IDs, analytics app IDs) may be committed in config after review, separated per environment.
+
+## 6b. Test scope (owner 2026-11-04)
+- **While working:** run only the minimal tests for what you touched, e.g. `npx vitest run <path-or-pattern>` or `-t "MEC-002"`, plus `npm run typecheck` when types changed. Do not run the full suite after every edit.
+- **Before a commit or a merge:** run the full suite `npm test` and `npm run typecheck` (sequentially); both must pass. `npm run test:fuzz` only where the plan or a phase exit requires it.
 
 ## 7. Definition of done
 - [ ] §1 test and typecheck commands pass; game starts with no console errors
