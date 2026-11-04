@@ -1,6 +1,6 @@
 // tests/qa/task8-platform.qa.test.ts — black-box QA tests for localStore save adapter
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { defaultSave, load, save, SAVE_KEY, type SaveData } from '../../src/meta';
+import { defaultSave, load, save, SAVE_KEY, type SaveData, type SaveDataV2, type SaveRules } from '../../src/meta';
 import { localStore } from '../../src/game/platform/localStore';
 
 afterEach(() => {
@@ -58,7 +58,8 @@ describe('QA Task 8: Platform LocalStore Adapter (Black-Box)', () => {
     expect(() => store.set('key', 'val')).not.toThrow();
   });
 
-  it('QA-T8-15 P0-Design §8 round-trip save and load via localStore', () => {
+  // updated for P1 MEC-008-R12
+  it('QA-T8-15 MEC-008-R12 round-trip save and load via localStore', () => {
     const map = new Map<string, string>();
     vi.stubGlobal('window', {
       localStorage: {
@@ -68,11 +69,24 @@ describe('QA Task 8: Platform LocalStore Adapter (Black-Box)', () => {
     });
 
     const store = localStore();
-    const data: SaveData = { bestScore: 99, settings: { sound: false } };
+    const rules: SaveRules = {
+      skillIds: ['slowmo', 'tailSnip', 'shield', 'mangoRain'],
+      maxLevel: 30,
+      carryMax: 50,
+    };
+    const data: SaveDataV2 = {
+      bestScore: 99,
+      settings: { sound: false },
+      bestLevel: 10,
+      fullClear: false,
+      unlockedCheckpoints: [4],
+      carriedEnergy: 30,
+      lastLoadout: ['slowmo', null],
+    };
     const ok = save(store, data);
     expect(ok).toBe(true);
 
-    const loaded = load(store);
+    const loaded = load(store, rules);
     expect(loaded).toEqual(data);
     expect(map.has(SAVE_KEY)).toBe(true);
   });

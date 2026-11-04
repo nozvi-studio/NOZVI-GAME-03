@@ -10,6 +10,8 @@ import {
   type KeyValueStore,
   type Migration,
   type SaveData,
+  type SaveDataV2,
+  type SaveRules,
 } from '../../src/meta';
 import { findViolations } from '../support/boundary';
 
@@ -20,45 +22,83 @@ const metaSources = import.meta.glob(['../../src/meta/**/*.ts'], {
 }) as Record<string, string>;
 
 describe('QA Task 6: Save Skeleton (Black-Box)', () => {
-  it('QA-T6-01 P0-Design §8, GDD-8.4 defaultSave returns valid baseline data', () => {
+  // updated for P1 MEC-008-R12
+  it('QA-T6-01 MEC-008-R12 defaultSave returns valid baseline data', () => {
     const def = defaultSave();
-    expect(def).toEqual({ bestScore: 0, settings: { sound: true } });
+    expect(def).toEqual({
+      bestScore: 0,
+      settings: { sound: true },
+      bestLevel: 0,
+      fullClear: false,
+      unlockedCheckpoints: [],
+      carriedEnergy: 0,
+      lastLoadout: [null, null],
+    });
   });
 
-  it('QA-T6-02 P0-Design §8, GDD-8.4 load on empty store returns defaultSave', () => {
+  // updated for P1 MEC-008-R12
+  it('QA-T6-02 MEC-008-R12 load on empty store returns defaultSave', () => {
     const store = memoryStore();
-    expect(load(store)).toEqual({ bestScore: 0, settings: { sound: true } });
+    expect(load(store)).toEqual(defaultSave());
   });
 
-  it('QA-T6-03 P0-Design §8, GDD-8.4 load returns fresh copy not shared reference', () => {
+  // updated for P1 MEC-008-R12
+  it('QA-T6-03 MEC-008-R12 load returns fresh copy not shared reference', () => {
     const store = memoryStore();
     const s1 = load(store);
     s1.bestScore = 999;
     s1.settings.sound = false;
+    s1.bestLevel = 15;
+    s1.fullClear = true;
+    (s1.unlockedCheckpoints as number[]).push(4, 6);
+    s1.carriedEnergy = 25;
+    (s1.lastLoadout as unknown as (string | null)[])[0] = 'slowmo';
     const s2 = load(store);
-    expect(s2).toEqual({ bestScore: 0, settings: { sound: true } });
+    expect(s2).toEqual(defaultSave());
+    expect(s2.settings).not.toBe(s1.settings);
+    expect(s2.unlockedCheckpoints).not.toBe(s1.unlockedCheckpoints);
+    expect(s2.lastLoadout).not.toBe(s1.lastLoadout);
   });
 
-  it('QA-T6-04 P0-Design §8, GDD-8.4 round trip save and load preserves state', () => {
+  // updated for P1 MEC-008-R12
+  it('QA-T6-04 MEC-008-R12 round trip save and load preserves state', () => {
     const store = memoryStore();
-    const data: SaveData = { bestScore: 42, settings: { sound: false } };
+    const rules: SaveRules = {
+      skillIds: ['slowmo', 'tailSnip', 'shield', 'mangoRain'],
+      maxLevel: 30,
+      carryMax: 50,
+    };
+    const data: SaveDataV2 = {
+      bestScore: 42,
+      settings: { sound: false },
+      bestLevel: 15,
+      fullClear: false,
+      unlockedCheckpoints: [4, 6],
+      carriedEnergy: 25,
+      lastLoadout: ['slowmo', 'tailSnip'],
+    };
     const ok = save(store, data);
     expect(ok).toBe(true);
-    expect(load(store)).toEqual(data);
+    expect(load(store, rules)).toEqual(data);
   });
 
-  it('QA-T6-05 P0-Design §8, GDD-8.4 save writes expected key and envelope format', () => {
+  // updated for P1 MEC-008-R12
+  it('QA-T6-05 MEC-008-R12 save writes expected key and envelope format', () => {
     const store = memoryStore();
-    const data: SaveData = { bestScore: 100, settings: { sound: true } };
+    const data: SaveDataV2 = {
+      ...defaultSave(),
+      bestScore: 100,
+      settings: { sound: true },
+    };
     save(store, data);
     expect(SAVE_KEY).toBe('mango-snake.save');
-    expect(SAVE_VERSION).toBe(1);
+    expect(SAVE_VERSION).toBe(2);
     const raw = store.get(SAVE_KEY);
     expect(raw).not.toBeNull();
     const parsed = JSON.parse(raw!);
     expect(parsed).toEqual({
-      version: 1,
-      data: { bestScore: 100, settings: { sound: true } },
+      version: 2,
+      data,
     });
   });
 
@@ -84,7 +124,8 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
     }
   });
 
-  it('QA-T6-08 P0-Design §8, GDD-8.4 migrations run sequentially from older version', () => {
+  // updated for P1 MEC-008-R12
+  it('QA-T6-08 MEC-008-R12 migrations run sequentially from older version', () => {
     const store = memoryStore({
       [SAVE_KEY]: JSON.stringify({
         version: 0,
@@ -97,7 +138,11 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
         return { bestScore: legacy.legacyScore, settings: { sound: true } };
       },
     };
-    expect(load(store, migrations)).toEqual({ bestScore: 55, settings: { sound: true } });
+    expect(load(store, migrations)).toEqual({
+      ...defaultSave(),
+      bestScore: 55,
+      settings: { sound: true },
+    });
   });
 
   it('QA-T6-09 P0-Design §8, GDD-8.4 migration throwing or returning invalid shape falls back to defaultSave', () => {
@@ -160,25 +205,69 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
     }
   });
 
-  it('QA-T6-14 P0-Design §8, §9 wrong data shape falls back to defaultSave', () => {
-    const badDataShapes = [
-      { bestScore: '100', settings: { sound: true } },
-      { bestScore: -5, settings: { sound: true } },
-      { bestScore: 12.34, settings: { sound: true } },
-      { bestScore: NaN, settings: { sound: true } },
-      { bestScore: 10, settings: null },
-      { bestScore: 10, settings: {} },
-      { bestScore: 10, settings: { sound: 'true' } },
-      { bestScore: 10, settings: { sound: 1 } },
-      { bestScore: 10, settings: { sound: null } },
-      { settings: { sound: true } },
-    ];
-    for (const bad of badDataShapes) {
+  // updated for P1 MEC-008-R12
+  it('QA-T6-14 MEC-008-R12 per-field validation resets invalid fields while preserving valid fields', () => {
+    const rules: SaveRules = {
+      skillIds: ['slowmo', 'tailSnip', 'shield', 'mangoRain'],
+      maxLevel: 30,
+      carryMax: 50,
+    };
+    // Invalid bestScore resets to default 0 while valid settings are preserved
+    const invalidScores = ['100', -5, 12.34, NaN, undefined];
+    for (const score of invalidScores) {
       const store = memoryStore({
-        [SAVE_KEY]: JSON.stringify({ version: 1, data: bad }),
+        [SAVE_KEY]: JSON.stringify({
+          version: 2,
+          data: { ...defaultSave(), bestScore: score, settings: { sound: false } },
+        }),
       });
-      expect(load(store)).toEqual(defaultSave());
+      expect(load(store, rules)).toEqual({
+        ...defaultSave(),
+        bestScore: 0,
+        settings: { sound: false },
+      });
     }
+
+    // Invalid settings resets to { sound: true } while valid bestScore is preserved
+    const invalidSettings = [null, {}, { sound: 'true' }, { sound: 1 }, { sound: null }, undefined];
+    for (const settings of invalidSettings) {
+      const store = memoryStore({
+        [SAVE_KEY]: JSON.stringify({
+          version: 2,
+          data: { ...defaultSave(), bestScore: 42, settings },
+        }),
+      });
+      expect(load(store, rules)).toEqual({
+        ...defaultSave(),
+        bestScore: 42,
+        settings: { sound: true },
+      });
+    }
+
+    // Invalid progression fields clamp or reset while preserving valid fields
+    const storeCorrupt = memoryStore({
+      [SAVE_KEY]: JSON.stringify({
+        version: 2,
+        data: {
+          bestScore: 88,
+          settings: { sound: false },
+          bestLevel: 14.9,
+          fullClear: 'not-bool',
+          carriedEnergy: 999,
+          unlockedCheckpoints: [10, 4, 4, 99, -1, 'bad'],
+          lastLoadout: ['unknownSkill', 'slowmo'],
+        },
+      }),
+    });
+    expect(load(storeCorrupt, rules)).toEqual({
+      bestScore: 88,
+      settings: { sound: false },
+      bestLevel: 14,
+      fullClear: false,
+      carriedEnergy: 50,
+      unlockedCheckpoints: [4, 10],
+      lastLoadout: [null, null],
+    });
   });
 
   it('QA-T6-15 P0-Design §8 store get throwing error falls back to defaultSave', () => {

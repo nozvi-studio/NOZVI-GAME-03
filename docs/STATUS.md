@@ -20,7 +20,7 @@
 
 ## Blockers / open questions for human
 - Owner phone run for P0 (see PLAYTEST 2026-11-05).
-- Spec ambiguities from QA (not blocking): `pick([])`, `chance(p)` outside [0,1], `reachable()` when target is a wall, `parseBalance` unknown keys, `nearHead` front lane past the board edge.
+- Spec ambiguities from QA (not blocking): P1T2 todos — applyLevelReached clamp above maxLevel?, carryEnergy clamp below 0?; `pick([])`, `chance(p)` outside [0,1], `reachable()` when target is a wall, `parseBalance` unknown keys, `nearHead` front lane past the board edge.
 - OPEN: session-length targets §4; reason to come back tomorrow §8.3.
 
 
