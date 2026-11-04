@@ -26,6 +26,16 @@ export function startLevelUp(s: SimState, b: Balance, ctx: StepCtx, fromRegularM
   applyMidRunUnlocks(s, b, ctx);
 }
 
+// MEC-003-R5/R6 after any mango: the final clear wins; earlier clears start the level-up chain.
+export function checkLevelClear(s: SimState, b: Balance, ctx: StepCtx, fromRegularMango: boolean): void {
+  if (s.progress < quota(b, s.level)) return;
+  if (s.level === b.level.maxLevel) {
+    s.mango = null;
+    s.levelsCleared = b.level.maxLevel; s.status = 'over'; s.outcome = { won: true };
+    ctx.emit({ type: 'runWon', score: s.score, timeMs: s.timeMs });
+  } else startLevelUp(s, b, ctx, fromRegularMango);
+}
+
 // MEC-003-R7/R11 step 3: restart the snake accumulator and director at transition end.
 export function levelStart(s: SimState, b: Balance): void {
   s.phase = 'playing'; s.transitionLeftMs = 0; s.acc = 0;

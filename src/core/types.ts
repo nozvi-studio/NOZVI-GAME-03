@@ -32,7 +32,10 @@ export interface TerrainCell { x: number; y: number; delay: number; up: boolean;
 export interface TerrainHazard { family: 'terrain'; t: number; lifeMs: number; cells: TerrainCell[] }
 export interface RottenRock { family: 'rottenRock'; x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }
 export interface SnipWall { family: 'snipWall'; cells: Cell[]; state: 'solid' | 'crumble'; leftMs: number }
-export type HazardInstance = TimedHazard | TerrainHazard | RottenRock | SnipWall;
+export interface Rubble { family: 'rubble'; x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }
+export type HazardInstance = TimedHazard | TerrainHazard | RottenRock | SnipWall | Rubble;
+export interface RainState { castId: number; leftMs: number; elapsedMs: number; drops: number; dropped: number }
+export interface RainMango { x: number; y: number; ageMs: number; castId: number }
 
 export interface MangoState { x: number; y: number; golden: boolean; leftMs: number; totalMs: number }
 export type SimStatus = 'playing' | 'over';
@@ -43,6 +46,10 @@ export type SimEvent =
   | { type: 'skillRejected'; slot: 0 | 1; skill: SkillId | null; reason: 'empty' | 'busy' | 'active' | 'energy' | 'noTarget' }
   | { type: 'skillEnded'; skill: SkillId; reason: 'timeout' | 'consumed' }
   | { type: 'tailSnipped'; cut: number; cells: Cell[] }
+  | { type: 'shieldBroke'; x: number; y: number; family: FamilyKey; rubble: Cell | null }
+  | { type: 'rainDrop'; x: number; y: number }
+  | { type: 'rainDropSkipped' }
+  | { type: 'rainMangoExpired'; x: number; y: number }
   | { type: 'skillUnlocked'; skill: SkillId; slot: 0 | 1 | null }
   | { type: 'slotUnlocked'; slot: 1 }
   | { type: 'energyChanged'; energy: number; delta: number; source: 'orb' | 'golden' | 'skill' }
@@ -76,6 +83,12 @@ export interface SimState {
   bestLevel: number;
   slowmo: { leftMs: number } | null;
   snipWalls: SnipWall[];
+  shield: { leftMs: number } | null;
+  rubble: Rubble[];
+  rain: RainState | null;
+  rainMangoes: RainMango[];
+  rainBudgets: { castId: number; left: number }[];
+  nextCastId: number;
   orbs: { x: number; y: number; ageMs: number }[];
   orbSpawnMs: number;
   rampActive: boolean;
@@ -115,6 +128,10 @@ export interface SimSnapshot {
   skills: readonly { slot: 0 | 1; id: SkillId | null; cost: number; affordable: boolean; active: boolean; leftMs: number }[];
   slowmo: { leftMs: number } | null;
   snipWall: readonly { x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }[];
+  shield: { leftMs: number } | null;
+  rubble: readonly Omit<Rubble, 'family'>[];
+  rain: { leftMs: number; dropsLeft: number } | null;
+  rainMangoes: readonly { x: number; y: number; leftMs: number }[];
   energy: number;
   energyMax: number;
   orbs: readonly { x: number; y: number; leftMs: number }[];
@@ -185,6 +202,6 @@ export interface HazardFamily<S extends { family: FamilyKey }> {
   bfsWallAt(state: S, x: number, y: number): boolean;  // reachability walls
   reservedAt(state: S, x: number, y: number): boolean; // placement reserved
   onLevelEnd(s: SimState, ctx: StepCtx): void;         // MEC-003-R7; context supplies configured crumble time
-  onBreak?(s: SimState, x: number, y: number): void;    // MEC-006-R25; implemented in Task 7
-  breakable: boolean;                                  // false for all in P0 (Shield is P1)
+  onBreak?(s: SimState, x: number, y: number): void;    // MEC-006-R26 removes one broken solid cell
+  breakable: boolean;                                  // MEC-006-R24 Shield can break it; false only for rubble
 }

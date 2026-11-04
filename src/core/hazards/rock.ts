@@ -1,11 +1,12 @@
 // src/core/hazards/rock.ts — MEC-004 falling rocks (spawnRock L427–439)
 import type { HazardFamily, TimedHazard } from '../types';
 import { rockPool } from './shapes';
-import { endTimedLevel, makeTimed, timedHasCell, timedSolidAt, updateTimed } from './timed';
+import { breakTimed, endTimedLevel, makeTimed, timedHasCell, timedSolidAt, updateTimed } from './timed';
 
 export const ROCK: HazardFamily<TimedHazard> = {
-  key: 'rock', cause: 'rock', capClass: 'small', maxActiveKey: null, breakable: false,
+  key: 'rock', cause: 'rock', capClass: 'small', maxActiveKey: null, breakable: true,
   onLevelEnd: s => endTimedLevel(s, 'rock'),
+  onBreak: (s, x, y) => breakTimed(s, 'rock', x, y),
   spawn(ctx, rng) {
     const b = ctx.balance, r = b.rock;
     const shape = r.shapes[rng.pick(rockPool(b, ctx.level))];       // picked once, before the tries (L429)
