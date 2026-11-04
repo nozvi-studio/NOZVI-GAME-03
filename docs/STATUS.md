@@ -25,7 +25,7 @@
 - D2 board uses pastel obstacles; contrast not yet checked on a real phone (GDD §10.1).
 
 ## Last session summary
-- What was done: GDD v0.3 from the D2 design audit (style, Mango-cat default, mango-only food, coin economy, Wheel bonus, no aiming); canvas fixed to match; 14 missing screens added on the canvas (in another chat, from a brief written here) and audited; 11 mismatches fixed on the canvas (skill costs/durations, Loadout copy and L6 slot unlock, start length 4, checkpoint hints L10/L20, Results checkpoint state L10 → start L4, full clear ≥ 255 mangoes, missing Lilita One font on 3 artboards, biome board frame height, pity copy, bomb blast shape, Equip → Home).
+- What was done: snake made the main character on the canvas (new PlayerHead part, blue "Mango" snake with a mango leaf; skins eat their own food); GDD v0.3 from the D2 design audit (style, Mango-cat default, mango-only food, coin economy, Wheel bonus, no aiming); canvas fixed to match; 14 missing screens added on the canvas (in another chat, from a brief written here) and audited; 11 mismatches fixed on the canvas (skill costs/durations, Loadout copy and L6 slot unlock, start length 4, checkpoint hints L10/L20, Results checkpoint state L10 → start L4, full clear ≥ 255 mangoes, missing Lilita One font on 3 artboards, biome board frame height, pity copy, bomb blast shape, Equip → Home).
 - Last verified step (command + result): docs only, no code changed; canvas edits published, not visually checked.
 - Commands that failed / work left uncommitted (check `git status`): none.
 - What was learned / gotchas: canvas artboards copy numbers by hand, so every new screen needs a check against GDD §6–§8 numbers.

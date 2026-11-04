@@ -55,7 +55,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 - **Accessibility:** reduced-motion setting disables shake and big flashes; warnings never rely on color alone (blink + icon + shape).
 
 ## 3b. First-time user experience (first 60 s) [REQUIRED]
-- **Second 0–5:** Home shows the mascot snake (default skin: Mango-cat) and one big Play button. First run skips the loadout screen (skills are locked).
+- **Second 0–5:** Home shows the mascot, Mango the snake (default skin), and one big Play button. First run skips the loadout screen (skills are locked).
 - **Teaching steering:** Level 1 = rocks only, quota 4 mangoes; the first mango spawns within reach and never next to the head.
 - **First success:** first mango within ~5 s; level 1 cleared within ~30 s; the level-up shrink is shown with a "Fresh start!" banner.
 - **First failure and retry:** crash → shake + death line naming the cause → results screen (marbles earned) → "Play again" (1 tap). The first results screen points to the marble machine with an arrow.
@@ -203,8 +203,8 @@ All meta currency is earned by playing. **No real-money purchases** (owner decis
 - **Economy check (estimate, tune in P4):** ≈ 3.5 coins per marble → a 35-marble run ≈ 120 coins → Common ≈ 2–3 runs, Rare ≈ 7, Epic ≈ 17 runs, on top of Mystery drops.
 
 ### 8.3 Skins & coins (MEC-011)
-- **Skin = chibi head icon + body made of same-colored blocks** that grows like the snake (cheap to produce: one head drawing per skin + a color). Launch set proposal: **Mango-cat "Ginger" (default and mascot, owner decision 2026-11-04)**, Tuxedo cat, Cream cat (fur recolors), Snake, Dog, Capybara, + more (e.g. Duck, Frog, Panda, Fox, Pig, Axolotl, Hamster). Whether a cat mascot beats a snake in store/portal thumbnails is a **market hypothesis**; test it with thumbnail/icon variants in P5.
-- **The food is always the mango**, for every skin (golden and rotten mangoes are gameplay signals). Skin personality goes into the eat effect and reactions, never into the food item.
+- **Skin = chibi head icon + body made of same-colored blocks** that grows like the snake (cheap to produce: one head drawing per skin + a color). **Default skin and mascot: "Mango", a blue chibi snake with a mango leaf on its head (owner decision 2026-11-04)**; blue reads well on the green boards and contrasts with the orange mango. Launch set proposal: Mango (snake), Ginger cat, Tuxedo cat, Dog, Capybara, + more (e.g. Duck, Frog, Panda, Fox, Pig, Axolotl, Hamster).
+- **Signature food per skin (owner decision 2026-11-04, cosmetic only):** the snake eats mangoes; other skins swap the food *art* for their own (cat → fish, dog → bone, capybara → watermelon…). Rules never change: in rules and specs "mango" means the food item, whatever it looks like. **Golden and rotten are universal overlays** on any food (golden: gold ring + sparkle; rotten: grey-brown tint + flies), so the gameplay signals read the same for every skin. Each new skin needs one food icon, checked for contrast on all 6 biome grounds.
 - Rarity shows in presentation, not power (skins never change gameplay): Common = head + color · Rare = + eat effect / trail particles · Epic = + animated head, custom death reaction and sound. Trails are part of a skin, not a separate item.
 - **Coins** buy any skin directly in the shop (Common 300, Rare 800, Epic 2000), so the player always has a deterministic path to the skin they want. Prices are shown in coins; the Skins screen shows the coin balance.
 - Equip from the Skins screen (one "Characters" list, no extra tabs at launch); the equipped skin is shown on Home.
@@ -218,7 +218,7 @@ Best level, best score, unlocked checkpoints, carried energy, marbles, coins, ow
 - If monetization is ever added (e.g. opt-in rewarded ads for extra marbles), it requires a DECISIONS entry approved by the owner and a fresh legal check: buying marbles with real money would make the marble machine a loot box (banned or regulated in some countries; app stores require disclosed odds).
 
 ## 10. Art, audio & UI direction [REQUIRED]
-### 10.1 Style (owner decision, 2026-11-04: "D2 cozy puzzle-cat", replaces the 2026-11-03 chunky-cartoon UI)
+### 10.1 Style (owner decision, 2026-11-04: "D2 cozy", replaces the 2026-11-03 chunky-cartoon UI)
 - **Reference:** the D2 design canvas linked at the top of this file (screens, shared parts, colour palette).
 - **UI, characters, marble machine:** soft pastel cozy style — cream ground, pastel accents, soft drop shadows, pill-shaped buttons, big readable numbers. Fonts: **Lilita One** (titles, outlined letters) + **Nunito** (UI text). Both are SIL OFL fonts; **self-host them** in the build (offline play, §13), and keep their license files.
 - **Game board:** flat and low-detail so play stays readable. Plain ground with a subtle checker. **Obstacles must stay high-contrast against the pastel ground** (dark outline or strong value difference); warnings use color + blink + icon. Check this on a real 5" phone for every biome palette, especially Frozen Pond and Storm Garden.
@@ -275,4 +275,4 @@ Big phases; each phase gets **one spec set + one plan** (Superpowers `brainstorm
 ## Parking lot (ideas not in scope)
 - Wrap zones (MEC-005), teleport portals, one-way arrow tiles, rival AI snake competing for mangoes, fake mango with a learnable tell, banana peel, lawnmower sweep.
 - Endless mode after L30, daily seeded run, online leaderboard, seasonal skin sets, voiced death lines, Vietnamese localization.
-- Separate cosmetic categories (Trails and Frames tabs from the D2 design); per-skin food items (fish, bone, melon parts in the D2 design).
+- Separate cosmetic categories (Trails and Frames tabs from the D2 design).

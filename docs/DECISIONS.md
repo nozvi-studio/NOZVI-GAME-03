@@ -60,3 +60,9 @@ Append-only. Format: `## YYYY-MM-DD — <decision>` then Context / Choice / Alte
 - Choice: slots 2 coins 30% · Wheel 15% · Mystery 5% · 5 coins 20% · 2 coins 30%; Wheel pays 5 coins × (×1/×2/×3/×5), built last in P4; the machine never pays marbles; no aiming anywhere (outcome decided first, animations are triggers only); Mystery always gives a skin (the basket drop is a reveal); duplicates → 15/40/100 coins; skins priced in coins (300/800/2000); one Characters list, Trails/Frames parked.
 - Alternatives: drop the Wheel entirely (simplest); skill-based aiming (odds cannot be published exactly, good aimers break the economy); keep 10/25-coin slots (skins too cheap).
 - Consequence: GDD v0.3 §7, §8.2, §8.3, Parking lot; ≈ 3.5 coins per marble is a starting estimate to tune in P4; MEC-010/011 specs follow these numbers.
+
+## 2026-11-04 — The snake is the main character; signature food per skin (supersedes the Mango-cat default and "mango for every skin" in "UI style D2")
+- Context: The game is called Mango Snake but the D2 design used a cat as the player; the owner wants the snake as the hero and animal skins that eat their own signature food.
+- Choice: default skin and mascot "Mango", a blue chibi snake with a mango leaf; skins (cat, dog, capybara, …) swap only the food art (fish, bone, watermelon, …); golden and rotten are universal overlays on any food; rules and specs keep calling the food "mango".
+- Alternatives: cat as mascot with a renamed game (owner declined); one food for every skin (better readability, less personality); green or orange snake (low contrast on green grounds or with the orange mango).
+- Consequence: GDD §3b, §8.3 updated; each new skin needs a food icon with contrast checks on all biome grounds; MEC-002 spec must define the golden/rotten overlays independent of food art.
