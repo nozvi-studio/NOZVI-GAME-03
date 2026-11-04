@@ -12,13 +12,16 @@ import type { CauseKey, Cell, MangoState, SimState, Step, StepCtx } from './type
 import { checkLevelClear } from './transition';
 
 // MEC-001 queue a turn: compare with the last queued (else current) dir; no reverse, no repeat, max maxQueuedTurns
-export function queueTurn(s: SimState, b: Balance, dx: Step, dy: Step): void {
-  if (s.status !== 'playing') return;
-  if (Math.abs(dx) + Math.abs(dy) !== 1) return;               // not a unit step; no prototype input produces one
+// Returns true only when the turn was queued (MEC-003-R19 run_end.turns counts these).
+export function queueTurn(s: SimState, b: Balance, dx: Step, dy: Step): boolean {
+  if (s.status !== 'playing') return false;
+  if (Math.abs(dx) + Math.abs(dy) !== 1) return false;         // not a unit step; no prototype input produces one
   const last = s.queue.length ? s.queue[s.queue.length - 1]! : s.dir;
-  if (dx === -last.x && dy === -last.y) return;
-  if (dx === last.x && dy === last.y) return;
-  if (s.queue.length < b.snake.maxQueuedTurns) s.queue.push({ x: dx, y: dy });
+  if (dx === -last.x && dy === -last.y) return false;
+  if (dx === last.x && dy === last.y) return false;
+  if (s.queue.length >= b.snake.maxQueuedTurns) return false;
+  s.queue.push({ x: dx, y: dy });
+  return true;
 }
 
 // MEC-001 one step: take a queued turn; cause order wall → self → solid cell (Shield, MEC-006-R25); move; eat

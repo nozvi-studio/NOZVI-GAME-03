@@ -36,7 +36,7 @@ export interface Session {
 
 interface RunState {
   sim: Sim; runId: number; startLevel: number; startEnergy: number; loadout: Loadout;
-  over: boolean; summary: RunSummary | null;
+  over: boolean; summary: RunSummary | null; turns: number;
 }
 
 type RecordBody = LogRecord extends infer R ? R extends LogRecord ? Omit<R, 't' | 'runId'> : never : never;
@@ -83,7 +83,7 @@ export function createSession(deps: SessionDeps): Session {
     const newBest = snap.score > data.bestScore;
     persist({ ...data, carriedEnergy: carried, bestScore: Math.max(data.bestScore, snap.score) });
     record({ type: 'run_end', level: snap.level, score: snap.score, cause, durationMs: snap.timeMs,
-      startLevel: snap.startLevel, levelsCleared: snap.levelsCleared, won });
+      startLevel: snap.startLevel, levelsCleared: snap.levelsCleared, won, turns: run.turns });
     flushLog(deps.store, log);
     run.over = true;
     run.summary = { won, cause, level: snap.level, startLevel: snap.startLevel, levelsCleared: snap.levelsCleared,
@@ -139,7 +139,7 @@ export function createSession(deps: SessionDeps): Session {
       persist({ ...data, carriedEnergy: 0 });
       const sim = createSim(b, deps.newSeed(), { startLevel, startEnergy, loadout, bestLevel: best });
       const n = nextRun(log); log = n.log;
-      run = { sim, runId: n.runId, startLevel, startEnergy, loadout, over: false, summary: null };
+      run = { sim, runId: n.runId, startLevel, startEnergy, loadout, over: false, summary: null, turns: 0 };
       lastStart = startLevel;
       reached(startLevel);
       record({ type: 'run_start', startLevel, startEnergy, loadout: [loadout[0], loadout[1]], entry });
@@ -152,7 +152,7 @@ export function createSession(deps: SessionDeps): Session {
       handle(events);
       return events;
     },
-    turn(dx, dy) { if (run && !run.over) run.sim.turn(dx, dy); },
+    turn(dx, dy) { if (run && !run.over && run.sim.turn(dx, dy)) run.turns++; }, // MEC-003-R19 turns
     useSkill(slot) { if (run && !run.over) run.sim.useSkill(slot); }, // MEC-007-R14
     snapshot() {
       if (!run) throw new Error('snapshot: no run');
