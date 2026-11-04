@@ -5,7 +5,7 @@
 ## Now (in progress)
 - [x] P1 closed: flow B + WASD fix + run_end.turns merged; agy browser QA 11/11 PASS; version/v0.1 -> dev.
 - [x] P2 plans ready: P2a (revised for flow B) `docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md`; P2b `2026-11-04-p2b-movers-cycles-blasts.md`; P2c `2026-11-04-p2c-shrink-challenge-tuning.md`.
-- [ ] **RESUME HERE:** P2a Task 1 is done (commit `040ab19`); Task 2 is next.
+- [ ] **RESUME HERE:** P2a Task 2 collision pipeline is implemented and uncommitted; full suite passes (839 passed, 4 skipped, 12 todo) and typecheck is clean. Lead review is next; then Task 3.
 
 ## Next (ordered, max 5)
 1. P2a (framework + ground tiles), then P2b (movers, cycles, blasts, bird), then P2c (shrink, challenge levels, tuning, P2 exit).

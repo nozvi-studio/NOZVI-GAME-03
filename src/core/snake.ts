@@ -1,7 +1,6 @@
 // src/core/snake.ts — MEC-001 (prototype turn L698–706, step L769–799)
 import type { Balance } from './balance';
-import { solidFamilyWithPriority } from './hazards/queries';
-import { shieldHit } from './skills/shield';
+import { deathContext, resolveHeadCell } from './hazards/collision';
 import { eatRain } from './skills/mangoRain';
 import { inBounds } from './grid';
 import { placeMango, goldenEnergy } from './mango';
@@ -27,20 +26,25 @@ export function queueTurn(s: SimState, b: Balance, dx: Step, dy: Step): boolean 
 // MEC-001 one step: take a queued turn; cause order wall → self → solid cell (Shield, MEC-006-R25); move; eat
 export function stepSnake(s: SimState, b: Balance, rng: Rng): void {
   const ctx: StepCtx = { balance: b, snakeOn: (x, y) => s.snake.some(c => c.x === x && c.y === y), emit: e => { s.events.push(e); } };
+  const head = s.snake[0]!;
+  const context = deathContext(s, head);
   const turn = s.queue.shift();
   if (turn) s.dir = turn;
-  const head = s.snake[0]!;
   const nx = head.x + s.dir.x, ny = head.y + s.dir.y;
   const eating = s.mango !== null && s.mango.x === nx && s.mango.y === ny;
   const body = eating ? s.snake : s.snake.slice(0, -1);
-  const solid = solidFamilyWithPriority(s, nx, ny);
-  const cause: CauseKey | null = !inBounds(b.board.cols, b.board.rows, nx, ny) ? 'wall'
+  let cause: CauseKey | null = !inBounds(b.board.cols, b.board.rows, nx, ny) ? 'wall'
     : body.some(c => c.x === nx && c.y === ny) ? 'self'
-    : solid === null || shieldHit(s, b, ctx, nx, ny) ? null : solid.cause;
+    : null;
+  // MEC-004-R6 only reach the solid/head-hit stage after wall and self checks.
+  if (cause === null) {
+    const result = resolveHeadCell(s, nx, ny, ctx);
+    if (result.kind === 'death') cause = result.cause;
+  }
   if (cause) {
     s.status = 'over';
     s.outcome = { won: false, cause };
-    s.events.push({ type: 'died', cause, x: head.x, y: head.y });
+    s.events.push({ type: 'died', cause, x: head.x, y: head.y, ...(context ? { context } : {}) });
     return;
   }
   s.headFrom = { ...head };

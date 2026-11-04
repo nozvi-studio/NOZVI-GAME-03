@@ -4,6 +4,7 @@ import type { Balance, Pair } from './balance';
 import { snakeOn } from './cells';
 import { updateDirector } from './hazards/director';
 import { stepHazards } from './hazards/registry';
+import { applyHeadHit } from './hazards/collision';
 import { biome, isChallenge, needFor, levelTickMs } from './level';
 import { orbTick } from './energy';
 import { effectiveTick, SKILLS, skillTimers, slotCount, unlockedSkills, useSkill } from './skills';
@@ -12,7 +13,7 @@ import { levelUpSlowTick } from './slowdown';
 import { rainTick } from './skills/mangoRain';
 import { rngFrom, seedRng, type Rng } from './rng';
 import { queueTurn, stepSnake } from './snake';
-import type { Dir, Sim, SimSnapshot, SimState, SimOptions, Step } from './types';
+import type { Dir, HitCtx, Sim, SimSnapshot, SimState, SimOptions, Step, StepCtx } from './types';
 
 const toDir = ([x, y]: Pair): Dir => ({ x: x as Step, y: y as Step });
 const states = new WeakMap<Sim, SimState>();
@@ -52,10 +53,13 @@ export function initialState(b: Balance, seed: number, options: SimOptions = {})
 // MEC-004 one 1 ms step in prototype frame() order (L997-1004).
 function stepMs(s: SimState, b: Balance, rng: Rng): void {
   s.timeMs += 1;
-  const ctx = { balance: b, snakeOn: (x: number, y: number) => snakeOn(s, x, y), emit: (e: SimState['events'][number]) => { s.events.push(e); } };
+  const ctx: StepCtx & HitCtx = { balance: b, snakeOn: (x, y) => snakeOn(s, x, y), emit: e => { s.events.push(e); },
+    hitHead: (f, x, y, kind, dir) => applyHeadHit(s, ctx, f, x, y, kind, dir),
+  };
   s.levelTimeMs += 1;
   updateDirector(s, b, rng);
   stepHazards(s, ctx);
+  if (s.status === 'over') return; // MEC-004-R8 death ends this millisecond before timers and movement.
   skillTimers(s, b, ctx);
   // MEC-003-R22 step 7a: the slowdown eases before the speed is computed.
   levelUpSlowTick(s);

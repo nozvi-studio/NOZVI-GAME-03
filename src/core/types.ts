@@ -72,7 +72,7 @@ export type SimEvent =
   | { type: 'dust'; x: number; y: number }
   | { type: 'rotted'; x: number; y: number; leftRock: boolean }
   | { type: 'hazardIncoming'; family: UnlockKey }
-  | { type: 'died'; cause: CauseKey; x: number; y: number };
+  | { type: 'died'; cause: CauseKey; x: number; y: number; context?: TileKind };
 
 /** All Sim state. Plain JSON data only: no closures, Map/Set or class instances. */
 export interface SimState {

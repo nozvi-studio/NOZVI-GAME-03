@@ -27,13 +27,19 @@ export function familyAt(s: SimState, x: number, y: number, q: 'solidAt' | 'bfsW
 
 // MEC-004-R2 preserve the P1 interleaved timed-family event order, then registry order.
 export function stepHazards(s: SimState, ctx: StepCtx & Partial<HitCtx>): void {
-  // Existing families never hit during update; Task 2 supplies the collision dispatcher.
+  // Legacy direct callers can omit hitHead; the Sim always supplies the dispatcher.
   const familyCtx: StepCtx & HitCtx = { ...ctx, hitHead: ctx.hitHead ?? (() => { throw new Error('Update-time hits require the MEC-004-R8 collision pipeline'); }) };
   if (FAMILIES === DEFAULT_FAMILIES) {
     const gone = new Set(timedHazards(s).filter(h => updateTimed(h, ctx) === 'remove'));
     if (gone.size) for (const key of ['rock', 'fence', 'maze'] as const) s.families[key] = s.families[key].filter(h => !gone.has(h));
-    for (const f of FAMILIES.slice(3)) f.update(s, familyCtx);
+    for (const f of FAMILIES.slice(3)) {
+      if (s.status === 'over') break; // MEC-004-R8 later families do not update after a fatal hit.
+      f.update(s, familyCtx);
+    }
   } else {
-    for (const f of FAMILIES) f.update(s, familyCtx);
+    for (const f of FAMILIES) {
+      if (s.status === 'over') break;
+      f.update(s, familyCtx);
+    }
   }
 }
