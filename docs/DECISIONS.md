@@ -268,3 +268,9 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 ### P1 Task 4 final review
 - Independent read-only review found no Critical/Important issues. Deferred minor: the 14.68 s normal suite exceeds the plan's <10 s target on this host with the required two isolated threads; task handoff is permitted by the owner's exit-code completion gate. Future runner optimization must preserve game-test mock isolation.
 - Review scope rulings: coordinator owns actual sequential test/typecheck/build/fuzz evidence (reviewer ran no tests); browser/phone and later UI feedback are outside this core task; energy/skills/orbs/rain remain Tasks 5/7; the 17 superseded QA cases remain untouched and filtered. Workflow scratch artifacts are removed before handoff, preserving the durable rulings here.
+
+## 2026-11-04 - GitNexus code graph and test scope (owner)
+- GitNexus 1.6.9 indexes the repo into `.gitnexus/` (excluded via `.git/info/exclude`, not committed). Agents check `status` and use `query`/`context`/`impact` at task start, and refresh the index asynchronously at task end. Reason: cheaper, more accurate code location than file scanning (AGENTS.md §2b).
+- Always `--index-only`: keeps GitNexus from rewriting AGENTS.md/CLAUDE.md and `.claude/` (protected files, §8). `--workers 2` because the host's low-memory reaper kills heavy processes.
+- Test scope: minimal targeted tests during work; full `npm test` + `npm run typecheck` only before commit or merge. Reason: the full suite takes ~15-17 s and was being run after every edit.
+- Rules live in AGENTS.md §2c and §6b (ruleset 0.3.2).

@@ -3,6 +3,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Docs
+- docs: AGENTS.md 0.3.2 adds GitNexus workflow (status at task start, async analyze at task end) and minimal-vs-full test scope rule.
 - docs: owner phone run passes P0 parity.
 - docs: P0 parity check on desktop recorded in PLAYTEST (phone run pending owner); prototype frozen (P0 PR 9).
 ### Tests
