@@ -7,12 +7,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - docs: owner phone run passes P0 parity.
 - docs: P0 parity check on desktop recorded in PLAYTEST (phone run pending owner); prototype frozen (P0 PR 9).
 ### Tests
+- test(qa): P1 Task 5 energy QA; level fixtures set rampActive false for mid-run states.
 - test(qa): P1 Task 4 mango QA; superseded ate/rot/director QA updated.
 - test(qa): P1 Task 3 transition QA; superseded level/board/director QA updated.
 - test(qa): P1 Task 2 meta black-box QA; save QA updated for MEC-008-R12.
 - test(qa): rewrite 23 superseded P0 QA cases for P1 Task 1 rules; QA files typecheck again.
 - test(qa): independent black-box QA suite for P0 Task 2 by the tester worker (34 cases; MEC-004-R13 warn bound skipped until P2a).
 ### Features
+- feat(core): energy bar, energy orbs from L2, golden +10 energy, start energy option, checkpoint speed ramp (P1 PR 5)
 - feat(core): mango counters, rot by level, temporary rotten rocks from L12, deferred placement (P1 PR 4)
 - feat(core): length reset, 1 s level transition, level-30 run win, simFromAscii test helper (P1 PR 3)
 - feat(meta): save v2 with migration, checkpoint progression, loadout sanitizing, local run log (P1 PR 2)

@@ -356,6 +356,7 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
   });
 
   it('QA-P1T4-13 MEC-002-R7 rotten rock lifecycle: solid 5000 ms, crumble 450 ms, then removed', () => {
+    // updated for P1 MEC-008-R8 speed ramp: level 12 reached after level up has rampActive: false
     // MEC-002-R7: "Solid for mango.rottenRockLifeMs (5000), then crumble for hazard.crumbleMs (450, not solid), then removed."
     const tick = tickMsFor(b, 12);
     const s = buildState(b, {
@@ -364,6 +365,7 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
       dir: [0, 1],
       spawnInMs: QUIET,
     });
+    s.rampActive = false;
     s.rottenRocks = [{ family: 'rottenRock', x: 2, y: 2, state: 'solid', leftMs: 5000 }];
     const sim = restoreSim(b, s);
 
@@ -618,6 +620,7 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
   });
 
   it('QA-P1T4-21 MEC-002-EC1 rot in the same ms head enters resolves before step without death', () => {
+    // updated for P1 MEC-008-R8 speed ramp: level 12 reached after level up has rampActive: false
     // MEC-002 Edge Case 1: "Mango rots in the same ms the head would enter it: R6 runs before the snake step.
     // The cell is in the head's front lane, so it is not fair: no rock; the head enters an empty cell"
     const tick = tickMsFor(b, 12);
@@ -631,6 +634,7 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
       mangoLeftMs: 118,
       spawnInMs: QUIET,
     });
+    s.rampActive = false;
     const sim = restoreSim(b, s);
     sim.advance(118);
     const snap = sim.snapshot();

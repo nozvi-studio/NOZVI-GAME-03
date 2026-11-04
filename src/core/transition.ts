@@ -1,6 +1,7 @@
 import type { Balance } from './balance';
 import { FAMILIES } from './hazards/registry';
-import { biome, introducedAt, isChallenge, quota, tickMsFor } from './level';
+import { biome, introducedAt, isChallenge, quota } from './level';
+import { rampOnLevelUp } from './ramp';
 import { placeMango } from './mango';
 import { rngFrom } from './rng';
 import { resetLength } from './snake';
@@ -16,11 +17,11 @@ export function startLevelUp(s: SimState, b: Balance, ctx: StepCtx, fromRegularM
   for (const f of FAMILIES) f.onLevelEnd(s, ctx);
   if (fromRegularMango) placeMango(s, b, rngFrom(s.rng));
   s.phase = 'transition'; s.transitionLeftMs = b.level.transitionMs; s.acc = 0;
-  s.tickMs = tickMsFor(b, s.level);
   ctx.emit({ type: 'shrunk', from, to: s.snake.length, removed });
   const unlocked = introducedAt(b, s.level);
   ctx.emit({ type: 'levelUp', level: s.level, biome: biome(b, s.level), challenge: isChallenge(b, s.level),
     biomeChanged: biome(b, s.level) !== oldBiome, ...(unlocked ? { unlocked } : {}), clearedLevelTimeMs: cleared });
+  rampOnLevelUp(s, ctx);
 }
 
 // MEC-003-R7/R11 step 3: restart the snake accumulator and director at transition end.

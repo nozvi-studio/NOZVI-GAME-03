@@ -31,6 +31,8 @@ export function simFromAscii(b: Balance, rows: string[], o: AsciiOpts): Sim {
       const golden = c === 'G';
       const totalMs = Math.floor(Math.max(b.mango.rotMinMs, b.mango.rotBaseMs - b.mango.rotPerEatenMs * s.eatenInLevel) * (golden ? b.mango.goldenRotFactor : 1));
       s.mango = { x, y, golden, totalMs, leftMs: totalMs };
+    } else if (c === 'o') {
+      s.orbs.push({ x, y, ageMs: 0 });
     } else if (c === 'R') {
       s.rottenRocks.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: b.mango.rottenRockLifeMs });
     } else if (c === '#' || c === 'w' || c === 'F') {

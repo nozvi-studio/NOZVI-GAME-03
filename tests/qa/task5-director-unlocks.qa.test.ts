@@ -29,7 +29,9 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     const sim = createSim(b, 100);
     expect(sim.snapshot().level).toBe(1);
 
+    // updated for P1 MEC-008-R8: mid-run level states above L1 have rampActive: false
     const s = buildState(b, { level: 5, progress: 4, spawnInMs: QUIET });
+    s.rampActive = false;
     s.mango = { x: 9, y: 8, golden: false, leftMs: 5000, totalMs: 5000 };
     const testSim = restoreSim(b, s);
     testSim.advance(s.tickMs);

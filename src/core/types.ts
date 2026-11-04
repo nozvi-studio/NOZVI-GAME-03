@@ -38,6 +38,11 @@ export type SimStatus = 'playing' | 'over';
 export interface Outcome { won: boolean; cause?: CauseKey }
 
 export type SimEvent =
+  | { type: 'energyChanged'; energy: number; delta: number; source: 'orb' | 'golden' | 'skill' }
+  | { type: 'orbSpawned'; x: number; y: number }
+  | { type: 'orbEaten'; x: number; y: number; gained: number }
+  | { type: 'orbExpired'; x: number; y: number }
+  | { type: 'rampEnded'; level: number }
   | { type: 'ate'; x: number; y: number; golden: boolean; points: number; progressGain: number; source: 'mango' | 'rain' }
   | { type: 'mangoDeferred' }
   | { type: 'shrunk'; from: number; to: number; removed: Cell[] }
@@ -59,6 +64,11 @@ export interface SimState {
   tailFrom: Cell;
   acc: number;                 // ms accumulated toward the next snake step
   tickMs: number;
+  energy: number;
+  orbs: { x: number; y: number; ageMs: number }[];
+  orbSpawnMs: number;
+  rampActive: boolean;
+  rampEaten: number;
   mango: MangoState | null;
   rottenRocks: RottenRock[];
   hazards: TimedHazard[];      // rock/fence/maze in spawn order (prototype `hazards`)
@@ -91,6 +101,11 @@ export interface HazardView {
 export interface TerrainView { t: number; lifeMs: number; cells: readonly { x: number; y: number; vis: TerrainVis; delay: number }[] }
 
 export interface SimSnapshot {
+  energy: number;
+  energyMax: number;
+  orbs: readonly { x: number; y: number; leftMs: number }[];
+  rampActive: boolean;
+  rampMangoesLeft: number;
   snake: readonly Cell[];
   dir: Dir;
   heading: Dir;                // last queued direction, else dir (D-pad)
