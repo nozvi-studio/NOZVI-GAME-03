@@ -211,3 +211,30 @@ Append-only. Format: `## YYYY-MM-DD — <decision>` then Context / Choice / Alte
 - Final: Ruling: unchanged code beyond HUD persistence and boundaries was excluded from review to honor the task's scope. Cost: unrelated defects are not assessed.
 - Final: Ruling: malformed developer config, invalid typed gameplay inputs, unsupported cause keys and impractical counter overflow are outside the specified helpers' input contract; disk save/log data is validated, and core parseBalance owns config validation. Cost: direct callers violating typed/config contracts have no extra guarantees.
 - Final: Ruling: frozen prototype and environment files were not read, honoring explicit restrictions. Cost: no prototype comparison; mechanic specs remain authoritative.
+
+## 2026-11-04 - P1 Task 3 execution rulings
+- Task 3: Ruling: use the Task 1 real-name mapping: top-level snake/dir/queue, derived quota (no stored need), spawnInMs/mazeCooldownMs. The ASCII quiet fixture uses spawnInMs = 1e9 because P0 counts down, whereas the plan's -1e9 describes an elapsed timer. Cost if wrong: fixtures could unexpectedly spawn hazards; helper and transition tests check the countdown.
+- Task 3: Ruling: register required onLevelEnd callbacks in rock.ts/fence.ts/maze.ts, where the existing family objects are owned, using shared endTimedLevel; terrain owns its fade callback. Reuse the existing registry.ts FAMILIES/instancesOf/stepHazards unchanged. Cost if wrong: an instance could survive transition; boundary tests check non-solid cells and removal at 450/500 ms.
+- Task 3: Ruling: retire the internal P0 addProgress helper in level.ts and resolve progress in snake.ts eating before calling transition.ts. The first implementation routed level.ts through transition.ts and created a registry-initialization cycle through family shapes; existing hazard tests reproduced undefined family entries. Keeping level.ts formula-only fixes that RED -> GREEN without changing public exports. Cost if wrong: existing internal callers would break; typecheck and the complete suite cover consumers.
+- Task 3: Ruling: correct the plan's L5 event fixture to progress 4 before the final normal mango (quota 5), and levelTimeMs 6868 before its 132 ms step to assert a cleared duration of 7000. Drop the synthetic L30 need field because quota is derived. Cost if wrong: event boundary coverage would test the wrong step; literal payload and timing assertions pin it.
+- Task 3: Ruling: update owned P0 level/mango tests for transition events, L30 win and no board-full win; supply a mango to the owned director fixture because ARCHITECTURE step 5 skips spawning with an empty slot (MEC-003-R13). The existing owned mango test now uses exportState for a mutable copy, retaining stateOf's required Readonly return. Independent QA sources remain unchanged. Cost if wrong: stale tests could hide regressions; replacement tests assert the approved rules directly.
+- Task 3: Ruling: preserve the mapped P0 eaten counter and defer eatenInLevel counting, placement retries, timed rotten rocks and orbs to their planned tasks. Task 3 introduces/reset eatenInLevel, while its ASCII M/G formula already follows MEC-002-R4; no absent future-state arrays are fabricated. No mechanic spec changes. Cost if wrong: expecting later P1 mechanics before their tasks would fail; this task is deliberately scoped to Task 3.
+- Task 3: Ruling: consume the regular mango before resolving level progress so a final-clear snapshot does not retain it on the head; no replacement is placed after runWon. A new L30 assertion reproduced the overlap RED -> GREEN. Cost if wrong: terminal board rendering would show an eaten mango; final snapshot assertions cover it.
+- Task 3: Ruling: execute on the owner's existing feat/p1-reset-transition branch, leaving every change uncommitted and unmerged. Use native config loading for Vitest/Vite, threads (three normal workers, one heavy-fuzz worker), and sequential verification. No dependencies or protected-file edits.
+
+### P1 Task 3 obsolete independent QA cases (sources unchanged)
+| QA test ID | Superseding plan/spec rule |
+|---|---|
+| QA-T3-20 | Task 3 event interface; MEC-003-R7 adds biome/challenge/biomeChanged/clearedLevelTimeMs to levelUp and emits shrunk first. Exact P0 event equality is obsolete. |
+| QA-T3-21 | Task 3 event interface; MEC-003-R7 extends levelUp. Golden overflow remains covered by MEC-001-EC1/MEC-003-R5 tests. |
+| QA-T3-22 | Task 3 event interface; MEC-003-R7 extends the payload while MEC-003-R16 retains unlocked. Exact P0 event equality is obsolete. |
+| QA-T3-23 | Task 3 run win; MEC-003-R6 ends the run on the L30 quota instead of discarding its progress. |
+| QA-T4-20 | Task 3 removal of boardFull; MEC-001-R10 leaves mango null and keeps playing; MEC-003-R6 defines the only win. |
+| QA-T5-14 | Task 3 event interface; MEC-003-R7 extends levelUp; the unlocked field remains present. |
+| QA-T5-23 | Task 3 ARCHITECTURE step 5; MEC-003-R13 skips director spawning while mango is null. This fixture has no mango. |
+- Runtime filtering excludes only these seven IDs; the existing QA-T2-17 skip and five existing todo cases remain. Previous Task 1/2 obsolete cases were updated by the independent tester before this branch and pass without filtering.
+
+### Task 3 final review and verification
+- Independent read-only reviewer: no Critical or Important findings; no deferred minor findings. The function-only snake/transition cycle follows the plan and is safe; level.ts stays independent.
+- Final verification: native-loader filtered npm test: 464 passed, 8 skipped (seven obsolete QA plus existing QA-T2-17), 5 todo, 9.46 s; filtered test:fuzz: all 200 heavy seeds and the suite pass (54.57 s). Typecheck, native-loader build and diff whitespace checks exit 0.
+- No mechanic spec changes, QA edits, dependency changes, branch changes, commits, merges or pushes. The owner requested keeping the existing branch uncommitted.

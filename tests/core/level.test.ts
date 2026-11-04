@@ -1,4 +1,3 @@
-import { addProgress } from '../../src/core/level';
 import { restoreSim, stateOf } from '../../src/core/sim';
 import { buildState, QUIET } from '../support/state';
 import { describe, it, expect } from 'vitest';
@@ -67,29 +66,27 @@ it('MEC-003 section 7 createSim validates startLevel', () => {
   expect(createSim(b, 1, {startLevel: 12}).snapshot()).toMatchObject({level: 12, need: 7, tickMs: 118});
 });
 it('MEC-003-R15 fenceFirstLevel follows the family table', () => { expect(fenceFirstLevel(b)).toBe(6); });
-  it('MEC-003 progress overflow carries into the next levels', () => {
-    const s = buildState(b);
-    addProgress(s, b, 9);
-    expect([s.level, s.progress]).toEqual([3, 1]);
-    expect(s.events).toEqual([{ type: 'levelUp', level: 2 }, { type: 'levelUp', level: 3 }]);
+  it('MEC-003-R5 golden progress overflow carries into the next level', () => {
+    const sim = restoreSim(b, buildState(b, { progress: 3, golden: true, mango: [9, 8], spawnInMs: QUIET }));
+    sim.advance(140);
+    expect(sim.snapshot()).toMatchObject({ level: 2, progress: 1, phase: 'transition' });
   });
 
-  it('MEC-003 max level pins progress to 0', () => {
-    const s = buildState(b, { level: 29, progress: 12 });
-    addProgress(s, b, 1);
-    expect([s.level, s.progress]).toEqual([30, 0]);
-    expect(s.events.splice(0)).toEqual([{ type: 'levelUp', level: 30 }]);
-    addProgress(s, b, 2);
-    expect([s.level, s.progress]).toEqual([30, 0]);
-    expect(s.events).toEqual([]);
+  it('MEC-003-R6 max level wins when its quota is cleared', () => {
+    const sim = restoreSim(b, buildState(b, { level: 30, progress: 12, mango: [9, 8], spawnInMs: QUIET }));
+    sim.advance(82);
+    expect(sim.snapshot()).toMatchObject({ level: 30, progress: 13, status: 'over', outcome: { won: true } });
+    expect(sim.drainEvents()).toEqual([{ type: 'ate', x: 9, y: 8, golden: false, points: 1 }, { type: 'runWon', score: 1, timeMs: 82 }]);
   });
 
-  it('MEC-003 eating applies the new speed at once', () => {
+  it('MEC-003-R7 eating selects the next level speed for after the transition', () => {
     const sim = restoreSim(b, buildState(b, { progress: 3, mango: [9, 8], spawnInMs: QUIET }));
     sim.advance(140);
     expect(stateOf(sim).level).toBe(2);
     expect(stateOf(sim).tickMs).toBe(138);
     expect(sim.drainEvents()).toEqual([
-      { type: 'ate', x: 9, y: 8, golden: false, points: 1 }, { type: 'levelUp', level: 2 },
+      { type: 'ate', x: 9, y: 8, golden: false, points: 1 },
+      { type: 'shrunk', from: 5, to: 4, removed: [{ x: 5, y: 8 }] },
+      { type: 'levelUp', level: 2, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 140 },
     ]);
   });

@@ -1,10 +1,11 @@
 // src/core/hazards/fence.ts — MEC-004 fences (spawnFence L464–477)
 import type { HazardFamily, TimedHazard } from '../types';
 import { fencePool, lineFence, transform } from './shapes';
-import { makeTimed, timedHasCell, timedSolidAt, updateTimed } from './timed';
+import { endTimedLevel, makeTimed, timedHasCell, timedSolidAt, updateTimed } from './timed';
 
 export const FENCE: HazardFamily<TimedHazard> = {
   key: 'fence', cause: 'fence', capClass: 'small', maxActiveKey: null, breakable: false,
+  onLevelEnd: s => endTimedLevel(s, 'fence'),
   spawn(ctx, rng) {
     const b = ctx.balance, f = b.fence;
     const kind = rng.pick(fencePool(b, ctx.level));

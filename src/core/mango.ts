@@ -32,17 +32,11 @@ export function placeMango(s: SimState, b: Balance, rng: Rng): boolean {
   return true;
 }
 
-export function endBoardFull(s: SimState): void {
-  s.status = 'over';
-  s.outcome = { won: true };
-  s.events.push({ type: 'boardFull' });
-}
-
 // MEC-002 rot: a fair mango (reachable, not near the head) leaves a permanent rotten rock; always re-place
 export function rotMango(s: SimState, b: Balance, rng: Rng): void {
   const m = s.mango as MangoState;
   const fair = reachSet(s, b).has(key(b.board.cols, m.x, m.y)) && !nearForMango(s, b, m.x, m.y);
   if (fair) s.rottenRocks.push({ x: m.x, y: m.y });
   s.events.push({ type: 'rotted', x: m.x, y: m.y, leftRock: fair });
-  if (!placeMango(s, b, rng)) endBoardFull(s);
+  placeMango(s, b, rng); // MEC-001-R10 an empty mango slot never wins the run.
 }

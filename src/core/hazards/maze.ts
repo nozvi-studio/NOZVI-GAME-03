@@ -1,10 +1,11 @@
 // src/core/hazards/maze.ts — MEC-004 hedge mazes (spawnMaze L498–506); the director sets the cooldown
 import type { HazardFamily, TimedHazard } from '../types';
 import { mazeCells } from './shapes';
-import { makeTimed, timedHasCell, timedSolidAt, updateTimed } from './timed';
+import { endTimedLevel, makeTimed, timedHasCell, timedSolidAt, updateTimed } from './timed';
 
 export const MAZE: HazardFamily<TimedHazard> = {
   key: 'maze', cause: 'maze', capClass: 'big', maxActiveKey: null, breakable: false,
+  onLevelEnd: s => endTimedLevel(s, 'maze'),
   spawn(ctx, rng) {
     const m = ctx.balance.maze;
     const cells = mazeCells(rng.pick(m.layouts)).filter(c => ctx.cellFree(c.x, c.y));

@@ -1,6 +1,6 @@
 // MEC-003 1-based levels and the per-level family table.
 import type { Balance } from './balance';
-import type { IntroKey, LevelRow, SimState, TableFamily } from './types';
+import type { IntroKey, LevelRow, TableFamily } from './types';
 
 const TABLE_ORDER: readonly TableFamily[] = ['rock', 'fence', 'terrain', 'maze'];
 export const biome = (b: Balance, n: number): number => Math.floor((n - 1) / b.level.perBiome) + 1; // MEC-003-R1
@@ -31,15 +31,3 @@ export const tickMsFor = levelTickMs;
 export const unlockedAt = introducedAt;
 export const isUnlocked = (b: Balance, n: number, k: IntroKey): boolean =>
   k === 'rottenRock' ? familyRow(b, n).rottenRocks : enabledFamilies(b, n).includes(k);
-
-// MEC-003-R2 P0 overflow loop retained until Task 3 adds transitions and the run win.
-export function addProgress(s: SimState, b: Balance, n: number): void {
-  if (s.level < b.level.maxLevel) s.progress += n;
-  while (s.level < b.level.maxLevel && s.progress >= quota(b, s.level)) {
-    s.progress -= quota(b, s.level);
-    s.level += 1;
-    const unlocked = introducedAt(b, s.level);
-    s.events.push(unlocked ? { type: 'levelUp', level: s.level, unlocked } : { type: 'levelUp', level: s.level });
-  }
-  if (s.level >= b.level.maxLevel) s.progress = 0;
-}

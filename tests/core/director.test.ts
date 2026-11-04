@@ -30,7 +30,7 @@ describe('MEC-004 director', () => {
     expect(pickWeighted([3, 2], fixed([], [], [0.61]).rng)).toBe(1);
   });
   it('MEC-004 first spawn after 2500 ms, then max(1600, 5000 - 120 * level)', () => {
-    const s0 = buildState(b, { spawnInMs: 2500 });
+    const s0 = buildState(b, { spawnInMs: 2500, mango: [0, 0] });
     // Hold the snake tick accumulator so the fixture survives until the director fires.
     s0.acc = -20000;
     const sim = restoreSim(b, s0), s = stateOf(sim);

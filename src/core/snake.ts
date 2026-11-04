@@ -2,10 +2,11 @@
 import type { Balance } from './balance';
 import { cellSolidCause } from './cells';
 import { inBounds } from './grid';
-import { addProgress, tickMsFor } from './level';
-import { endBoardFull, placeMango } from './mango';
+import { quota, tickMsFor } from './level';
+import { placeMango } from './mango';
 import type { Rng } from './rng';
 import type { CauseKey, Cell, MangoState, SimState, Step } from './types';
+import { startLevelUp } from './transition';
 
 // MEC-001 queue a turn: compare with the last queued (else current) dir; no reverse, no repeat, max maxQueuedTurns
 export function queueTurn(s: SimState, b: Balance, dx: Step, dy: Step): void {
@@ -45,9 +46,30 @@ function eat(s: SimState, b: Balance, rng: Rng): void {          // L781–795
   const points = m.golden ? b.mango.points.golden : b.mango.points.normal;
   s.score += points;
   s.eaten += 1;
+  s.mango = null;
   s.events.push({ type: 'ate', x: m.x, y: m.y, golden: m.golden, points });
-  addProgress(s, b, m.golden ? b.mango.progress.golden : b.mango.progress.normal);
+  // MEC-003-R5/R6 the final clear wins; earlier clears reset length and start transition.
+  s.progress += m.golden ? b.mango.progress.golden : b.mango.progress.normal;
+  if (s.progress >= quota(b, s.level)) {
+    if (s.level === b.level.maxLevel) {
+      s.levelsCleared = b.level.maxLevel; s.status = 'over'; s.outcome = { won: true };
+      s.events.push({ type: 'runWon', score: s.score, timeMs: s.timeMs });
+    } else startLevelUp(s, b, {
+      balance: b, snakeOn: (x, y) => s.snake.some(c => c.x === x && c.y === y),
+      emit: e => { s.events.push(e); },
+    }, true);
+  }
   s.tickMs = tickMsFor(b, s.level);
   s.tailFrom = { ...(s.snake[s.snake.length - 1] as Cell) };
-  if (!placeMango(s, b, rng)) endBoardFull(s);
+  if (s.status === 'playing' && s.phase === 'playing') placeMango(s, b, rng);
+}
+
+// MEC-001-R4 keep the head and followers in order; a reset never grows the snake.
+export function resetLength(s: SimState, keep: number): Cell[] {
+  return s.snake.splice(keep);
+}
+
+// MEC-001-R7 drop tail-end first without crossing the minimum length.
+export function cutTail(s: SimState, keep: number, minLength: number): Cell[] {
+  return s.snake.splice(Math.max(minLength, keep)).reverse();
 }

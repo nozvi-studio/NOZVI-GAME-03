@@ -34,9 +34,9 @@
 Each row gets its own spec before its phase is implemented. Status: Implemented (prototype) / Proposed / Parked.
 | ID | Mechanic | Player-facing purpose | Phase | Spec | Status |
 |---|---|---|---|---|---|
-| MEC-001 | Snake movement, growth, self-collision, **length reset on level up** | Core steering challenge | P0 (port), P1 (reset) | to write | Implemented (prototype, without reset) |
+| MEC-001 | Snake movement, growth, self-collision, **length reset on level up** | Core steering challenge | P0 (port), P1 (reset) | `docs/specs/mechanics/MEC-001-snake.md` | Implemented (P1) |
 | MEC-002 | Mangoes: rot timer, golden mango, rotten mango → temporary obstacle | Time pressure, risk/reward | P0, P2 | to write | Implemented (prototype) |
-| MEC-003 | Level & biome progression: 30 levels, 6 biomes × 5 levels, quotas, speed curve, level transition | Short-term goal, escalation, sense of travel | P1 | to write | Proposed (prototype has 10 levels) |
+| MEC-003 | Level & biome progression: 30 levels, 6 biomes × 5 levels, quotas, speed curve, level transition | Short-term goal, escalation, sense of travel | P1 | `docs/specs/mechanics/MEC-003-levels-biomes.md` | Implemented (P1, run log in PR 2) |
 | MEC-004 | Obstacle families + director + fairness rules (warn → solid → crumble, never on snake, always a path) | Escalating, readable danger | P0 (port), P2 (new families) | to write (template 03) | Partly implemented (rocks, fences, rising ground, mazes) |
 | MEC-006 | Energy orbs, energy bar, 4 skills with energy cost and side effects | Clever escapes and farming at a cost | P1 | to write | Proposed |
 | MEC-007 | Skill loadout: pick 2 of the unlocked skills before a run | Strategy before the run; uncluttered phone controls | P1 | to write | Proposed |

@@ -2,12 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { createSim, restoreSim, stateOf } from '../../src/core/sim';
 import { loadBalance } from '../support/balance';
 import { buildState, QUIET } from '../support/state';
+import { cutTail } from '../../src/core/snake';
 
 const b = loadBalance();
 const simOf = (o: Parameters<typeof buildState>[1] = {}) => restoreSim(b, buildState(b, { spawnInMs: QUIET, ...o }));
 
 describe('MEC-001 snake', () => {
-  it('MEC-001 turn ignores reverse and same direction and queues at most 3 turns', () => {
+  it('MEC-001-R1 turn queue keeps P0 rules (max 3, no reverse, no repeat)', () => {
     const sim = simOf();
     sim.turn(-1, 0); sim.turn(1, 0);
     expect(stateOf(sim).queue).toEqual([]);
@@ -39,7 +40,7 @@ describe('MEC-001 snake', () => {
     expect(s.tailFrom).toEqual({ x: 5, y: 8 });
   });
 
-  it('MEC-001 start state', () => {
+  it('MEC-001-R2 every run starts with 4 cells at (8,8)..(5,8) facing right', () => {
     const snap = createSim(b, 1).snapshot();
     expect(snap.snake).toEqual([{ x: 8, y: 8 }, { x: 7, y: 8 }, { x: 6, y: 8 }, { x: 5, y: 8 }]);
     expect(snap.dir).toEqual({ x: 1, y: 0 });
@@ -118,7 +119,7 @@ describe('MEC-001 snake', () => {
     expect(sim.snapshot().tickAlpha).toBe(1);
   });
 
-  it('MEC-001 advance after over is a no-op', () => {
+  it('MEC-001-R11 snake never moves after died', () => {
     const sim = simOf();
     sim.advance(140 * 9);
     sim.drainEvents();
@@ -139,5 +140,29 @@ describe('MEC-001 snake', () => {
     const sim = simOf();
     expect(() => sim.advance(-1)).toThrow(RangeError);
     expect(() => sim.advance(1.5)).toThrow(RangeError);
+  });
+
+  it('MEC-001-R2 checkpoint start at L12 uses the same 4 start cells', () => {
+    const sim = createSim(b, 1, { startLevel: 12 });
+    expect(sim.snapshot()).toMatchObject({ snake: [{ x: 8, y: 8 }, { x: 7, y: 8 }, { x: 6, y: 8 }, { x: 5, y: 8 }], dir: { x: 1, y: 0 }, level: 12, levelsCleared: 0, startLevel: 12 });
+    expect(sim.drainEvents()).toEqual([]);
+  });
+
+  it('MEC-001-R3 golden mango grows exactly 1 segment', () => {
+    const sim = simOf({ mango: [9, 8], golden: true });
+    sim.advance(140);
+    expect(sim.snapshot()).toMatchObject({ length: 5, score: 3, progress: 2 });
+  });
+
+  it('MEC-001-R7 cutTail never leaves fewer than 3 cells', () => {
+    const s = buildState(b, { snake: Array.from({ length: 10 }, (_, i) => [10 - i, 8] as [number, number]) });
+    expect(cutTail(s, 1, 3)).toEqual([{ x: 1, y: 8 }, { x: 2, y: 8 }, { x: 3, y: 8 }, { x: 4, y: 8 }, { x: 5, y: 8 }, { x: 6, y: 8 }, { x: 7, y: 8 }]);
+    expect(s.snake).toEqual([{ x: 10, y: 8 }, { x: 9, y: 8 }, { x: 8, y: 8 }]);
+  });
+
+  it('MEC-001-R7 cutTail at length 3 returns an empty array', () => {
+    const s = buildState(b, { snake: [[8, 8], [7, 8], [6, 8]] });
+    expect(cutTail(s, 1, 3)).toEqual([]);
+    expect(s.snake).toHaveLength(3);
   });
 });
