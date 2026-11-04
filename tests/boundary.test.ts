@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { findViolations } from './support/boundary';
 
-// Vite raw glob: no @types/node needed. Extended with pure src/game files in Task 7.
-const pureSources = import.meta.glob(['../src/core/**/*.ts', '../src/meta/**/*.ts', '../src/game/flow/**/*.ts', '../src/game/input/swipeMath.ts'], {
+// Vite raw glob: no @types/node needed. Includes pure game flow, input math and strings.
+const pureSources = import.meta.glob(['../src/core/**/*.ts', '../src/meta/**/*.ts', '../src/game/flow/**/*.ts', '../src/game/input/swipeMath.ts', '../src/game/text.ts'], {
   query: '?raw', import: 'default', eager: true,
 }) as Record<string, string>;
 

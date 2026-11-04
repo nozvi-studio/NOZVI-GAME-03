@@ -122,3 +122,9 @@ Append-only. Format: `## YYYY-MM-DD — <decision>` then Context / Choice / Alte
 - Evidence: the new live-state assertions failed against both original fixtures, then passed with steering. Production gameplay and tuning remain exactly as planned.
 - Task 5 test detail: director timer fixtures hold the tick accumulator to isolate spawn timing; unlock coverage probes weighted intervals with real family spawns rather than a spy.
 - Validation environment: a temporary NODE_OPTIONS preload treats the sandbox-blocked optional Vite net-use probe as unavailable and selects the Vitest thread pool; no dependency or repository configuration changes.
+
+## 2026-11-04 - P0 Task 8 cross-scene release and board outline parity
+- Context: the parallel HUD captures Phaser pointer-up events over its buttons; board swipes must still end. The prototype also clips content inside rounded board corners while its ink outline sits outside.
+- Choice: retain HUD scene capture for button-down exclusion; clear active board swipes on native window mouse-up and matching touch-end/cancel, with listeners removed on shutdown. Clip the root board container to its inner 18px rounded boundary and draw the 4px external outline as a separate scene object that follows shake.
+- Alternatives: forward release events from every HUD control; include the outline in the content mask. The latter lets late-added floating scores cover the ink and differs from prototype CSS L72-73.
+- Consequence: no core rules, balance or dependencies change. Focused tests cover captured releases, touch identity and floating-score containment; real device input and clipping during shake still need visual verification.

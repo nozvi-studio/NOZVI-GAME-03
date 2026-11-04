@@ -5,7 +5,7 @@ import { clockStep, createClock } from '../flow/clock';
 import { createFlow, flowKey, flowOver, flowPause, flowTick, flowTurn, type FlowEffect, type FlowState } from '../flow/runFlow';
 import { bindKeyboard } from '../input/keyboard';
 import { bindSwipe } from '../input/swipe';
-import { buildBoardTexture } from '../render/board';
+import { BOARD_RADIUS, buildBoardTexture, drawBoardBorder } from '../render/board';
 import { Effects, PARTICLE_BURSTS } from '../render/effects';
 import { drawHazards, drawTerrains } from '../render/hazards';
 import { drawMango } from '../render/mango';
@@ -21,6 +21,8 @@ export class GameScene extends Phaser.Scene {
   private reduced = false;
   private mangoBornAt = 0;
   private board!: Phaser.GameObjects.Container;
+  private border!: Phaser.GameObjects.Graphics;
+  private boardClip!: Phaser.GameObjects.Graphics;
   private layers!: Record<'terrain' | 'hazards' | 'mango' | 'snake' | 'effects', Phaser.GameObjects.Graphics>;
   private effects!: Effects;
 
@@ -33,12 +35,17 @@ export class GameScene extends Phaser.Scene {
     this.reduced = reduceMotion();
     this.cameras.main.setBackgroundColor(this.palette.bg);
     const image = this.add.image(0, 0, buildBoardTexture(this, this.balance, this.palette)).setOrigin(0);
-    this.board = this.add.container(BOARD.x, BOARD.y, [image]);
+    this.board = this.add.container(BOARD.x, BOARD.y, [image]).setName('board');
     this.layers = {
       terrain: this.add.graphics(), hazards: this.add.graphics(), mango: this.add.graphics(),
       snake: this.add.graphics(), effects: this.add.graphics(),
     };
     this.board.add(Object.values(this.layers));
+    this.border = this.add.graphics().setName('board-border').setPosition(BOARD.x, BOARD.y);
+    drawBoardBorder(this.border, this.palette);
+    this.boardClip = this.add.graphics().setName('board-clip').setPosition(BOARD.x, BOARD.y).setVisible(false);
+    this.boardClip.fillStyle(0xffffff).fillRoundedRect(0, 0, BOARD.size, BOARD.size, BOARD_RADIUS);
+    this.board.setMask(this.boardClip.createGeometryMask());
     this.effects = new Effects(this, this.board, cellPx(this.balance), this.reduced);
     this.flow = createFlow();
     this.startRun(); // ready screen still shows the initial snake and mango.
@@ -52,6 +59,7 @@ export class GameScene extends Phaser.Scene {
     const recolor = (): void => {
       this.palette = currentPalette();
       buildBoardTexture(this, this.balance, this.palette);
+      drawBoardBorder(this.border.clear(), this.palette);
       this.cameras.main.setBackgroundColor(this.palette.bg);
     };
     theme.addEventListener('change', recolor);
@@ -60,6 +68,7 @@ export class GameScene extends Phaser.Scene {
       this.game.events.off(Phaser.Core.Events.HIDDEN, pause);
       theme.removeEventListener('change', recolor);
       this.effects.reset();
+      this.board.clearMask(true);
       this.sim = null;
     });
   }
@@ -85,10 +94,11 @@ export class GameScene extends Phaser.Scene {
 
   flowKey(code: 'Space' | 'KeyP' | 'Escape'): void { this.apply(flowKey(this.flow, this.balance, code)); }
 
-  private apply(effects: FlowEffect[]): void {
+  // GDD-13 HUD, keyboard and turn input all apply the same flow effects.
+  apply(effects: FlowEffect[]): void {
     for (const effect of effects) {
       if (effect.type === 'newRun') this.startRun();
-      else this.events.emit('flow', effect);
+      this.events.emit('flow', effect);
     }
   }
 
@@ -151,6 +161,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   private draw(snapshot: SimSnapshot, time: number): void {
+    this.boardClip.setPosition(this.board.x, this.board.y);
+    this.border.setPosition(this.board.x, this.board.y);
     const cell = cellPx(this.balance), p = this.palette;
     for (const layer of Object.values(this.layers)) layer.clear();
     drawTerrains(this.layers.terrain, snapshot.terrains, cell, p, this.balance, this.reduced);
