@@ -14,6 +14,7 @@ export function bindKeyboard(scene: GameScene): void {
   const onKey = (event: KeyboardEvent): void => {
     const dir = KEYS[event.code];
     if (dir) { event.preventDefault(); scene.turn(...dir); return; }
+    if (event.code === 'KeyM') { event.preventDefault(); scene.events.emit('toggle-sound'); return; }
     if (event.code === 'Space' || event.code === 'KeyP' || event.code === 'Escape') {
       event.preventDefault();
       scene.flowKey(event.code);

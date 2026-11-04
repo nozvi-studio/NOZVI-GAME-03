@@ -3,6 +3,17 @@ import type { Balance } from '../../core';
 import { BOARD, cellPx } from '../layout';
 import type { Palette } from './palette';
 
+// Prototype CSS L72–73: 18px board corners, 4px external ink outline.
+export const BOARD_RADIUS = 18;
+export const BOARD_OUTLINE = 4;
+
+// GDD-13 center the outline outside the board, matching the CSS box-shadow spread.
+export function drawBoardBorder(g: Phaser.GameObjects.Graphics, p: Palette): void {
+  const half = BOARD_OUTLINE / 2;
+  g.lineStyle(BOARD_OUTLINE, p.ink).strokeRoundedRect(-half, -half,
+    BOARD.size + BOARD_OUTLINE, BOARD.size + BOARD_OUTLINE, BOARD_RADIUS + half);
+}
+
 // GDD-13 cache the checkerboard, rebuilding only when its palette changes.
 export function buildBoardTexture(scene: Phaser.Scene, b: Balance, p: Palette): string {
   let cache = scene.children.getByName('board-cache') as Phaser.GameObjects.RenderTexture | null;
