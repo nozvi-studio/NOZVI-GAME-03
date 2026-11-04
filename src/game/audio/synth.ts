@@ -1,4 +1,5 @@
-export type SfxName = 'eat' | 'golden' | 'level' | 'land' | 'rot' | 'tick' | 'go' | 'die';
+export type SfxName = 'eat' | 'golden' | 'level' | 'land' | 'rot' | 'tick' | 'go' | 'die'
+  | 'orb' | 'skillSlowmo' | 'skillSnip' | 'skillShield' | 'skillRain' | 'shieldBreak' | 'nope' | 'uiTap' | 'uiGo' | 'unlock';
 export interface Synth {
   unlock(): void;
   setOn(on: boolean): void;
@@ -13,6 +14,13 @@ const SFX: Record<SfxName, Tone[]> = {
   level: [523, 659, 784, 1046].map((f, i) => [f, .14, 'square', .05, 0, i * .08]),
   land: [[150, .14, 'sine', .12, 60]], rot: [[240, .2, 'triangle', .06, 120]],
   tick: [[700, .06, 'square', .04]], go: [[1050, .12, 'square', .05]], die: [[320, .45, 'sawtooth', .08, 50]],
+  // MEC-006 §8 / MEC-007 §8 P1 synth tones.
+  orb: [[880, .08, 'sine', .08, 1320]], skillSlowmo: [[600, .3, 'triangle', .1, 300]],
+  skillSnip: [[900, .06, 'square', .05, 400], [500, .06, 'square', .05, 250, .06]],
+  skillShield: [[440, .2, 'triangle', .1, 880]], skillRain: [[700, .1, 'sine', .08, 1000], [1000, .1, 'sine', .08, 1400, .08]],
+  shieldBreak: [[200, .18, 'sawtooth', .08, 80]], nope: [[140, .12, 'square', .05]],
+  uiTap: [[800, .04, 'triangle', .06]], uiGo: [[660, .1, 'triangle', .08, 1100]],
+  unlock: [659, 784, 988, 1318].map((f, i) => [f, .12, 'triangle', .07, 0, i * .07]),
 };
 
 // GDD-13 tiny synth and independent haptics, ported from prototype L238–264.

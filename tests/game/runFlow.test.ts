@@ -18,9 +18,14 @@ describe('GDD-13 run flow (L651–700, L721–729, L988–994)', () => {
     expect(flowTick(f, b, 484)).toEqual([{ type: 'go' }]);
     expect(f.status).toBe('playing');
   });
-  it('GDD-13 a turn in ready starts a run and is forwarded; in paused it is dropped', () => {
+  it('P1 runFlow: a turn in ready no longer starts a countdown', () => {
     const f = createFlow();
-    expect(flowTurn(f, b)).toEqual({ forward: true, effects: [{ type: 'newRun' }, { type: 'hideOverlay' }] });
+    expect(flowTurn(f, b)).toEqual({ forward: false, effects: [] });
+    expect(f.status).toBe('ready');
+  });
+  it('GDD-13 a turn in countdown is forwarded; in paused it is dropped', () => {
+    const f = createFlow(); flowStart(f, b);
+    expect(flowTurn(f, b)).toEqual({ forward: true, effects: [] });
     flowPause(f);
     expect(flowTurn(f, b)).toEqual({ forward: false, effects: [] });
   });
@@ -47,9 +52,9 @@ describe('GDD-13 run flow (L651–700, L721–729, L988–994)', () => {
     flowPause(f); expect(flowTick(f, b, 100)).toEqual([]);
     flowOver(f); expect(flowTick(f, b, 100)).toEqual([]);
   });
-  it('GDD-13 a turn in over starts a new run', () => {
+  it('P1 runFlow: a turn in over is dropped (Results starts the next run)', () => {
     const f = createFlow(); flowOver(f);
-    expect(flowTurn(f, b)).toEqual({ forward: true, effects: [{ type: 'newRun' }, { type: 'hideOverlay' }] });
-    expect(f.status).toBe('countdown');
+    expect(flowTurn(f, b)).toEqual({ forward: false, effects: [] });
+    expect(f.status).toBe('over');
   });
 });

@@ -5,7 +5,8 @@ import type { Palette } from './palette';
 
 // MEC-002 prototype mango, leaf, ripeness arc and persistent rotten rocks.
 export function drawMango(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: number, p: Palette, time: number, reduced: boolean, bornAt: number): void {
-  for (const r of s.rottenRocks) drawRock(g, { x: (r.x + 0.5) * cell, y: (r.y + 0.5) * cell }, cell, p);
+  // MEC-002 crumbling rotten rocks fade (greybox).
+  for (const r of s.rottenRocks) drawRock(g, { x: (r.x + 0.5) * cell, y: (r.y + 0.5) * cell }, cell, p, r.state === 'crumble' ? 0.45 : 1);
   const food = s.mango;
   if (!food) return;
   const grow = reduced ? 1 : Math.min(1, Math.max(0, time - bornAt) / 220);

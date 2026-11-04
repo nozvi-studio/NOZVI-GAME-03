@@ -164,4 +164,19 @@ describe('session', () => {
     expect(s.save().settings.sound).toBe(false);
     expect(JSON.parse(s.exportLog())).toMatchObject({ version: 1 });
   });
+  it('MEC-007-R14 session.useSkill forwards to the sim; no-op without a run', () => {
+    const { s } = setup({ bestLevel: 3, carriedEnergy: 50 });
+    s.startRun(1); s.useSkill(0);
+    expect(s.frame(1)).toContainEqual(expect.objectContaining({ type: 'skillUsed', skill: 'slowmo' }));
+    const fresh = setup().s;
+    expect(() => fresh.useSkill(0)).not.toThrow();
+    expect(fresh.frame(1)).toEqual([]);
+  });
+  it('P1 session.turn after over is ignored', () => {
+    const { s } = setup();
+    s.startRun(1); s.frame(WALL_DEATH_MS);
+    expect(s.summary()).not.toBeNull();
+    expect(() => s.turn(0, 1)).not.toThrow();
+    expect(s.frame(100)).toEqual([]);
+  });
 });

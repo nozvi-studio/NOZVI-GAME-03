@@ -19,3 +19,9 @@ export const DARK: Palette = {
 // GDD-13 follow the prototype's system theme and accessibility preferences.
 export const currentPalette = (): Palette => window.matchMedia('(prefers-color-scheme: dark)').matches ? DARK : LIGHT;
 export const reduceMotion = (): boolean => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// MEC-003 §8 greybox ground tint per biome (1..6); game-layer colors, not config.
+export const BIOME_GROUND: readonly number[] = [0x8fd16a, 0xd9e58a, 0xbfe3f2, 0xd2a86b, 0xe8915a, 0x6b4fa3];
+// MEC-006 §8 greybox colors for orbs, skills, slow-mo and shield.
+export const P1_COLORS = { orb: 0x29d3e6, orbLine: 0x0b6b78, slowmo: 0x3d6dff, shield: 0x29d3e6, rubble: 0x4a4a4a,
+  snipStripe: 0x2b3a8f, droplet: 0x3d9bff, skillOff: 0x9a9a9a } as const;

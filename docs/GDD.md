@@ -36,11 +36,11 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 |---|---|---|---|---|---|
 | MEC-001 | Snake movement, growth, self-collision, **length reset on level up** | Core steering challenge | P0 (port), P1 (reset) | `docs/specs/mechanics/MEC-001-snake.md` | Implemented (P1) |
 | MEC-002 | Mangoes: rot timer, golden mango, rotten mango → temporary obstacle | Time pressure, risk/reward | P0, P1, P2 | `docs/specs/mechanics/MEC-002-mango.md` | Implemented (P1) |
-| MEC-003 | Level & biome progression: 30 levels, 6 biomes × 5 levels, quotas, speed curve, level transition | Short-term goal, escalation, sense of travel | P1 | `docs/specs/mechanics/MEC-003-levels-biomes.md` | Implemented (P1, run log in PR 2) |
+| MEC-003 | Level & biome progression: 30 levels, 6 biomes × 5 levels, quotas, speed curve, level transition | Short-term goal, escalation, sense of travel | P1 | `docs/specs/mechanics/MEC-003-levels-biomes.md` | Implemented (P1) |
 | MEC-004 | Obstacle families + director + fairness rules (warn → solid → crumble, never on snake, always a path) | Escalating, readable danger | P0 (port), P2 (new families) | to write (template 03) | Partly implemented (rocks, fences, rising ground, mazes) |
 | MEC-006 | Energy orbs, energy bar, 4 skills with energy cost and side effects | Clever escapes and farming at a cost | P1 | `docs/specs/mechanics/MEC-006-energy-skills.md` | Implemented (P1) |
-| MEC-007 | Skill loadout: pick 2 of the unlocked skills before a run | Strategy before the run; uncluttered phone controls | P1 | `docs/specs/mechanics/MEC-007-loadout.md` | Implemented (P1, screens in PR 9) |
-| MEC-008 | Checkpoints: milestone levels unlock a later start level for new runs, speed ramp, partial energy carry-over | No full reset after a death; makes energy farming meaningful | P1 | `docs/specs/mechanics/MEC-008-checkpoints.md` | Implemented (P1, screens in PR 9) |
+| MEC-007 | Skill loadout: pick 2 of the unlocked skills before a run | Strategy before the run; uncluttered phone controls | P1 | `docs/specs/mechanics/MEC-007-loadout.md` | Implemented (P1) |
+| MEC-008 | Checkpoints: milestone levels unlock a later start level for new runs, speed ramp, partial energy carry-over | No full reset after a death; makes energy farming meaningful | P1 | `docs/specs/mechanics/MEC-008-checkpoints.md` | Implemented (P1) |
 | MEC-009 | Run results & marble reward formula | Every run pays out | P4 | to write | Proposed |
 | MEC-010 | Marble machine (pachinko): pegs, bumpers, prize slots, PUSH, public odds, pity | Juicy reward moment; collection driver | P4 | to write | Proposed |
 | MEC-011 | Skins, coins, duplicates, shop, equip | Long-term goal; self-expression | P4 | to write | Proposed |

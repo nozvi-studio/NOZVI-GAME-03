@@ -24,6 +24,8 @@ export interface Session {
   startRun(startLevel: number, entry?: 'home' | 'results'): void;
   lastStartLevel(): number | null;
   frame(ms: number): SimEvent[];
+  turn(dx: -1 | 0 | 1, dy: -1 | 0 | 1): void;
+  useSkill(slot: 0 | 1): void;
   snapshot(): Readonly<SimSnapshot>;
   pause(): void; hidden(): void; quit(): void;
   summary(): RunSummary | null;
@@ -150,6 +152,8 @@ export function createSession(deps: SessionDeps): Session {
       handle(events);
       return events;
     },
+    turn(dx, dy) { if (run && !run.over) run.sim.turn(dx, dy); },
+    useSkill(slot) { if (run && !run.over) run.sim.useSkill(slot); }, // MEC-007-R14
     snapshot() {
       if (!run) throw new Error('snapshot: no run');
       return run.sim.snapshot();

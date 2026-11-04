@@ -163,11 +163,15 @@ describe('QA Task 7: Run Flow State Machine (Black-Box)', () => {
     expect(f.status).toBe('countdown');
   });
 
-  it('QA-T7-22 P0-Design §7.1 flowTurn starts run and forwards in ready and over; drops in paused', () => {
+  // updated for P1 runFlow: a turn in ready/over no longer starts a run; runs start only from Home/Loadout/Results
+  it('QA-T7-22 P0-Design §7.1 flowTurn forwards only in playing/countdown; drops in ready, over, paused', () => {
     const fReady = createFlow();
     const turnReady = flowTurn(fReady, b);
-    expect(turnReady.forward).toBe(true);
-    expect(turnReady.effects).toEqual([{ type: 'newRun' }, { type: 'hideOverlay' }]);
+    expect(turnReady.forward).toBe(false);
+    expect(turnReady.effects).toEqual([]);
+    expect(fReady.status).toBe('ready');
+
+    flowStart(fReady, b);
     expect(fReady.status).toBe('countdown');
 
     const turnCountdown = flowTurn(fReady, b);
@@ -189,9 +193,9 @@ describe('QA Task 7: Run Flow State Machine (Black-Box)', () => {
     const fOver = createFlow();
     flowOver(fOver);
     const turnOver = flowTurn(fOver, b);
-    expect(turnOver.forward).toBe(true);
-    expect(turnOver.effects).toEqual([{ type: 'newRun' }, { type: 'hideOverlay' }]);
-    expect(fOver.status).toBe('countdown');
+    expect(turnOver.forward).toBe(false);
+    expect(turnOver.effects).toEqual([]);
+    expect(fOver.status).toBe('over');
   });
 
   it('QA-T7-23 P0-Design §7.1 flowTick emits 3, 2, 1 then go on completion', () => {
