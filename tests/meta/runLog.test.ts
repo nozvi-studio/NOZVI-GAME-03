@@ -53,6 +53,15 @@ describe('summarizeLog', () => {
   it('P1-PT summarizeLog of an empty log is all zeros', () => {
     expect(summarizeLog(emptyLog(), 600000)).toMatchObject({ runs: 0, skillRunShare: 0, runsPerSession: [] });
   });
+  it('MEC-003-R19 loadLog keeps old run_end records without turns and rejects a non-numeric turns', () => {
+    const store = memoryStore();
+    const old = end(1);
+    store.set(LOG_KEY, JSON.stringify({ version: 1, nextRunId: 3, entries: [old, { ...end(2), turns: 4 }], deathCounts: {} }));
+    expect(loadLog(store).entries).toHaveLength(2);
+    expect(summarizeLog(loadLog(store), 1000).causes).toEqual({ rock: 2 });
+    store.set(LOG_KEY, JSON.stringify({ version: 1, nextRunId: 2, entries: [{ ...old, turns: 'x' }], deathCounts: {} }));
+    expect(loadLog(store).entries).toHaveLength(0);
+  });
   it('P1-PT summarizeLog counts a run without run_end in runs but not in ended-run shares', () => {
     const s = summarizeLog(logOf([sStart(1, 0, 'home'), sEnd(1, 10, 'rock'), sStart(2, 20, 'home')]), 600000);
     expect(s).toMatchObject({ runs: 2, causeShare: { rock: 1 }, runsPerSession: [2] });

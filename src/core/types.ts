@@ -170,7 +170,7 @@ export interface SimSnapshot {
 
 export interface Sim {
   useSkill(slot: 0 | 1): void;                    // synchronous, never buffered
-  turn(dx: -1 | 0 | 1, dy: -1 | 0 | 1): void;  // ignored after the run is over
+  turn(dx: -1 | 0 | 1, dy: -1 | 0 | 1): boolean;  // true if queued; ignored (false) after the run is over
   advance(ms: number): void;                     // ms must be a non-negative integer; no-op after `over`
   drainEvents(): SimEvent[];                     // events since the last call, in order
   snapshot(): Readonly<SimSnapshot>;             // read-only view for rendering

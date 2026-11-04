@@ -2,6 +2,8 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+### Changed
+- chore(log): `run_end` records `turns`, the count of turns accepted by the MEC-001 queue; old logs without it still load (MEC-003-R19).
 ### Fixed
 - fix(game): keyboard turns (arrows/WASD) are queued on the native keydown instead of waiting for Phaser's per-frame keyboard queue; pure key map in src/game/input/keyMap.ts (MEC-001).
 - fix(core): regular mango updates the speed ramp before the level-clear check, so rampEnded precedes levelUp (ARCHITECTURE step 12.4).

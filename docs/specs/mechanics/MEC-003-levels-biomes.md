@@ -70,7 +70,7 @@ Save fields: none here (best level, checkpoints: MEC-008). Local run log: separa
 ### Local run log
 - **MEC-003-R18 Log store.** `src/meta/runLog.ts` (pure) keeps `{version: 1, nextRunId, entries[], deathCounts}` under its own key `mango-snake.log` (separate from the save, so log errors never touch progress). `entries` is a ring buffer of the last `log.maxEntries` (500) records; `deathCounts` is cumulative per cause and never trimmed. Load/save follow the P0 save rules (never throws, storage errors swallowed).
 - **MEC-003-R19 Records (P1 subset of GDD §12).** The session layer (`src/session`) appends, with `t` = wall-clock ms supplied by the game layer and `runId`:
-  `run_start {startLevel, startEnergy, loadout, entry ('home' | 'results')}` · `level_up {level (new level), levelTimeMs (= levelUp.clearedLevelTimeMs)}` · `skill_used {skill, level, energyBefore}` (from MEC-006's event) · `checkpoint_unlocked {level (start level unlocked), reachedLevel}` (MEC-008) · `run_end {level, score, cause, durationMs (= sim timeMs), startLevel, levelsCleared, won}`. `marble_shot`, `skin_unlocked` and the `marbles` field of `run_end` start in P4.
+  `run_start {startLevel, startEnergy, loadout, entry ('home' | 'results')}` · `level_up {level (new level), levelTimeMs (= levelUp.clearedLevelTimeMs)}` · `skill_used {skill, level, energyBefore}` (from MEC-006's event) · `checkpoint_unlocked {level (start level unlocked), reachedLevel}` (MEC-008) · `run_end {level, score, cause, durationMs (= sim timeMs), startLevel, levelsCleared, won, turns}`; `turns` is the number of turns the MEC-001 queue accepted during the run (dropped same-direction, reverse or queue-full inputs are not counted), so a log tells "no input" from "input lost". Records written before this field existed have no `turns` and stay valid; readers treat it as optional. `marble_shot`, `skin_unlocked` and the `marbles` field of `run_end` start in P4.
 - **MEC-003-R20 Causes.** `run_end.cause` is the death `CauseKey` (P0 list plus any key MEC-006 adds), `clear` for a run win, `quit` when the player quits from the pause overlay. `deathCounts` increments only for death causes.
 - **MEC-003-R21 Export.** With the URL flag `?debug=1`, Home shows an "Export log" button that copies the log JSON to the clipboard (for `docs/PLAYTEST.md`). No network.
 
@@ -156,6 +156,7 @@ Read, owned elsewhere: `mango.rottenRockLifeMs` (5000, MEC-002 §9); `fairness.*
 - `MEC-003-R17 familyRow enables rottenRocks from L12 only` (rock behavior tests: MEC-002 §10)
 - `MEC-003-R18 run log keeps the last 500 entries and cumulative deathCounts`
 - `MEC-003-R19 run_end record has level score cause durationMs startLevel levelsCleared won`
+- `MEC-003-R19 run_end turns counts only turns accepted by the MEC-001 queue`
 - `MEC-003-R20 quit and clear do not increment deathCounts`
 - Determinism (P0 fuzz) extended: 200 seeds × random turns, start levels 1, 4, 12, 26.
 

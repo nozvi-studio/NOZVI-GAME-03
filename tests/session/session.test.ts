@@ -121,8 +121,18 @@ describe('session', () => {
     const { s, store } = setup();
     s.startRun(1); s.frame(WALL_DEATH_MS);
     expect(loadLog(store).entries.at(-1)).toEqual({ type: 'run_end', t: expect.any(Number), runId: 1, level: 1,
-      score: s.snapshot().score, cause: 'wall', durationMs: WALL_DEATH_MS, startLevel: 1, levelsCleared: 0, won: false });
+      score: s.snapshot().score, cause: 'wall', durationMs: WALL_DEATH_MS, startLevel: 1, levelsCleared: 0, won: false, turns: 0 });
     expect(s.summary()).toMatchObject({ won: false, cause: 'wall', score: s.snapshot().score });
+  });
+  it('MEC-003-R19 run_end turns counts only turns accepted by the MEC-001 queue', () => {
+    const { s, store } = setup();
+    s.startRun(1);
+    s.turn(1, 0);  // same as start direction: dropped
+    s.turn(-1, 0); // reverse: dropped
+    s.turn(0, 1);  // perpendicular: accepted
+    s.turn(0, 1);  // repeat of the queued turn: dropped
+    s.quit();
+    expect(loadLog(store).entries.at(-1)).toMatchObject({ type: 'run_end', turns: 1 });
   });
   it('MEC-003-R19 skill_used and level_up records carry the MEC fields', () => {
     const { s, store } = setup({ bestLevel: 12 });
