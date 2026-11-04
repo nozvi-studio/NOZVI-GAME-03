@@ -680,6 +680,38 @@ describe('QA P1 Task 5: Energy, Orbs & Speed Ramp (MEC-006, MEC-008 Black-Box)',
     expect(rampIdx).toBeGreaterThan(energyIdx);
   });
 
+  it('QA-P1T5-ORDER ARCH Sim step order step 12.4: 5th ramp mango completing level quota emits ate -> rampEnded -> levelUp', () => {
+    // ARCHITECTURE.md line 42 & 44:
+    // "After eating any mango: ramp counter (MEC-008-R8); then, if progress >= need: ... the level-up chain"
+    // "Event order inside one snake step: ate -> energyChanged -> rampEnded (if this was the 5th ramp mango) -> then either runWon, or shrunk -> levelUp"
+    const s = buildState(b, {
+      level: 4,
+      snake: [[8, 8], [7, 8], [6, 8]],
+      dir: [1, 0],
+      mango: [9, 8],
+      golden: false,
+      progress: 4, // quota(4) = 5; eating 1 normal mango completes the level quota
+      spawnInMs: QUIET,
+    });
+    s.startLevel = 4;
+    s.rampActive = true;
+    s.rampEaten = 4; // 5th ramp mango
+    s.tickMs = 135;
+    s.energy = 50;
+    const sim = restoreSim(b, s);
+
+    sim.advance(135);
+    const events = sim.drainEvents();
+
+    const ateIdx = events.findIndex(e => e.type === 'ate');
+    const rampIdx = events.findIndex(e => e.type === 'rampEnded');
+    const levelUpIdx = events.findIndex(e => e.type === 'levelUp');
+
+    expect(ateIdx).toBeGreaterThanOrEqual(0);
+    expect(rampIdx).toBeGreaterThan(ateIdx);
+    expect(levelUpIdx).toBeGreaterThan(rampIdx);
+  });
+
   // --------------------------------------------------------------------------
   // Spec Ambiguity Todos
   // --------------------------------------------------------------------------
