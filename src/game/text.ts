@@ -29,3 +29,44 @@ export const deathMessage = (won: boolean, cause: CauseKey | undefined, score: n
   `${won ? TEXT.wonWhy : cause ? CAUSE_TEXT[cause] : ''} Score ${score}, level ${level}.`;
 export const bestLine = (kind: 'start' | 'over', best: number, newBest = false, score = 0): string =>
   kind === 'over' && newBest && score > 0 ? 'New best score!' : best > 0 ? `Best score ${best}` : '';
+
+// P1 keyed strings: MEC-003/006/007/008 §8 plus cause.* (MEC-003-R20 quit, clear).
+const KEYED: Readonly<Record<string, string>> = {
+  'banner.levelUp': 'Level {n}', 'banner.freshStart': 'Fresh start!',
+  'banner.biome.1': 'Mango Orchard', 'banner.biome.2': 'Rice Paddy', 'banner.biome.3': 'Frozen Pond',
+  'banner.biome.4': 'Rocky Hills', 'banner.biome.5': 'Backyard', 'banner.biome.6': 'Storm Garden',
+  'banner.new.rock': 'Rocks unlocked', 'banner.new.rottenRock': 'Rotten mangoes turn to rock!',
+  'banner.new.fence': 'Fences unlocked', 'banner.new.terrain': 'Rising ground unlocked', 'banner.new.maze': 'Hedge mazes unlocked',
+  'hud.level': 'L{n} · Biome {b}', 'hud.energy': 'Energy {energy}/{max}',
+  'skill.slowmo.name': 'Slow-mo', 'skill.tailSnip.name': 'Tail Snip', 'skill.shield.name': 'Shield', 'skill.mangoRain.name': 'Mango Rain',
+  'skill.reject.energy': 'Need {cost} energy', 'skill.reject.active': 'Already on!',
+  'skill.reject.noTarget': 'Too short to snip', 'skill.reject.busy': 'Not now!',
+  'tip.orb.first': 'Energy orb! Fuel for skills',
+  'death.snipWall': CAUSE_TEXT.snipWall, 'death.rubble': CAUSE_TEXT.rubble,
+  'loadout.title': 'Pick your skills', 'loadout.go': 'Go!', 'loadout.back': 'Back',
+  'loadout.slot1': 'Slot 1', 'loadout.slot2': 'Slot 2', 'loadout.locked': 'Reach L{level}',
+  'tip.skillUnlocked.slot': '{skill} unlocked! Tap {side} to use it',
+  'tip.skillUnlocked.next': '{skill} unlocked! Pick it before your next run',
+  'tip.slotUnlocked': 'Second skill slot unlocked!',
+  'home.playCheckpoint': 'Play from checkpoint L{level}', 'home.playL1': 'Play from L1', 'home.play': 'Play',
+  'home.carry': 'Start energy: {e}',
+  'banner.checkpoint': 'Next run starts at L{level}!',
+  'tip.checkpoint': 'Checkpoints are permanent. Your saved energy comes with you.',
+  'hud.nextCheckpoint': 'Next checkpoint at L{level}', 'hud.nextCheckpointClear': 'Next checkpoint: clear L{level}',
+  'hud.ramp': 'Warming up {n}',
+  'side.left': 'left', 'side.right': 'right',
+  'results.level': 'Level {level}', 'results.cleared': 'Levels cleared: {n}', 'results.score': 'Score {score}',
+  'results.best': 'Best {best}', 'results.newBest': 'New best!', 'results.carry': 'Energy saved: {e}',
+  'results.won': 'You cleared every level!', 'results.home': 'Home', 'pause.quit': 'Quit',
+  'playAgain': TEXT.playAgain, 'resume': TEXT.resume, 'paused': TEXT.paused, 'pausedText': TEXT.pausedText,
+  'home.soundOn': 'Sound: on', 'home.soundOff': 'Sound: off', 'skill.ready': 'Ready', 'loadout.picked': 'Slot {n}',
+  ...Object.fromEntries(Object.entries(CAUSE_TEXT).map(([k, v]) => [`cause.${k}`, v])),
+  'cause.quit': 'Quit', 'cause.clear': 'You cleared level 30!',
+};
+
+/** Keyed text lookup with `{var}` substitution; an unknown key returns the key itself. */
+export function t(key: string, vars?: Record<string, string | number>): string {
+  const s = KEYED[key];
+  if (s === undefined) return key;
+  return vars ? s.replace(/\{(\w+)\}/g, (m, v: string) => (v in vars ? String(vars[v]) : m)) : s;
+}

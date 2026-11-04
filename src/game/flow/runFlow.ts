@@ -33,8 +33,9 @@ export function flowKey(f: FlowState, b: Balance, code: 'Space' | 'KeyP' | 'Esca
   return code === 'Space' ? flowStart(f, b) : [];
 }
 export function flowTurn(f: FlowState, b: Balance): { forward: boolean; effects: FlowEffect[] } {
-  const effects = f.status === 'ready' || f.status === 'over' ? flowStart(f, b) : [];
-  return { forward: f.status === 'playing' || f.status === 'countdown', effects };
+  // P1: run start comes from Home/Loadout/Results (explicit flowStart), never from a turn.
+  void b;
+  return { forward: f.status === 'playing' || f.status === 'countdown', effects: [] };
 }
 export function flowTick(f: FlowState, b: Balance, dtMs: number): FlowEffect[] {
   if (f.status !== 'countdown') return [];

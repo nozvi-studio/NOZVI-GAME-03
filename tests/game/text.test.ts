@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bestLine, CAUSE_TEXT, deathMessage, incomingBanner, levelBanner, levelLabel, progressLabel, TEXT } from '../../src/game/text';
+import { bestLine, CAUSE_TEXT, deathMessage, incomingBanner, levelBanner, levelLabel, progressLabel, t, TEXT } from '../../src/game/text';
 
 describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
   it('GDD-13 level banners (L605)', () => {
@@ -43,5 +43,29 @@ describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
       landsSoon: 'Lands soon', groundRising: 'Ground rising', mangoRotting: 'Mango rotting',
       over: 'Game over', won: 'You filled the board!', wonWhy: 'No room left for mangoes.',
     });
+  });
+});
+
+describe('P1 text keys (MEC-003/006/007/008 §8)', () => {
+  const keys = [
+    'banner.levelUp', 'banner.freshStart', ...[1, 2, 3, 4, 5, 6].map(b => `banner.biome.${b}`),
+    ...['rock', 'rottenRock', 'fence', 'terrain', 'maze'].map(f => `banner.new.${f}`), 'hud.level',
+    'hud.energy', 'skill.slowmo.name', 'skill.tailSnip.name', 'skill.shield.name', 'skill.mangoRain.name',
+    'skill.reject.energy', 'skill.reject.active', 'skill.reject.noTarget', 'skill.reject.busy', 'tip.orb.first',
+    'death.snipWall', 'death.rubble',
+    'loadout.title', 'loadout.go', 'loadout.back', 'loadout.slot1', 'loadout.slot2', 'loadout.locked',
+    'tip.skillUnlocked.slot', 'tip.skillUnlocked.next', 'tip.slotUnlocked',
+    'home.playCheckpoint', 'home.playL1', 'home.play', 'home.carry', 'banner.checkpoint', 'tip.checkpoint',
+    'hud.nextCheckpoint', 'hud.nextCheckpointClear', 'hud.ramp',
+    ...['wall', 'self', 'rotten', 'rock', 'fence', 'maze', 'ground', 'snipWall', 'rubble', 'quit', 'clear'].map(c => `cause.${c}`),
+  ];
+  it('P1 text: every MEC §8 key, every CauseKey and quit/clear resolve to a string', () => {
+    for (const k of keys) expect(t(k), k).not.toBe(k);
+    expect(t('skill.reject.energy', { cost: 40 })).toBe('Need 40 energy');
+    expect(t('loadout.locked', { level: 6 })).toBe('Reach L6');
+    expect(t('hud.ramp', { n: 3 })).toBe('Warming up 3');
+    expect(t('home.playCheckpoint', { level: 8 })).toBe('Play from checkpoint L8');
+    expect(t('banner.biome.6')).toBe('Storm Garden');
+    expect(t('no.such.key')).toBe('no.such.key');
   });
 });

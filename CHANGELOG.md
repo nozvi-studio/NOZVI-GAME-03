@@ -10,6 +10,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - test(qa): rewrite 23 superseded P0 QA cases for P1 Task 1 rules; QA files typecheck again.
 - test(qa): independent black-box QA suite for P0 Task 2 by the tester worker (34 cases; MEC-004-R13 warn bound skipped until P2a).
 ### Features
+- feat(game): greybox Home, Loadout and Results scenes, P1 HUD and skill input (P1 PR 9)
 - feat(session): pure session module for runs, save and run log (P1 PR 8)
 - feat(core): Shield with rubble, Mango Rain, skill fuzz invariants (P1 PR 7)
 - feat(core): skill framework, loadout validation, mid-run unlocks, Slow-mo and Tail Snip (P1 PR 6)
