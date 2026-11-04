@@ -69,7 +69,7 @@ it('MEC-003-R15 fenceFirstLevel follows the family table', () => { expect(fenceF
   it('MEC-003-R5 golden progress overflow carries into the next level', () => {
     const sim = restoreSim(b, buildState(b, { progress: 3, golden: true, mango: [9, 8], spawnInMs: QUIET }));
     sim.advance(140);
-    expect(sim.snapshot()).toMatchObject({ level: 2, progress: 1, phase: 'transition' });
+    expect(sim.snapshot()).toMatchObject({ level: 2, progress: 1 });
   });
 
   it('MEC-003-R6 max level wins when its quota is cleared', () => {
@@ -79,7 +79,7 @@ it('MEC-003-R15 fenceFirstLevel follows the family table', () => { expect(fenceF
     expect(sim.drainEvents()).toEqual([{ type: 'ate', x: 9, y: 8, golden: false, points: 1, progressGain: 1, source: 'mango' }, { type: 'runWon', score: 1, timeMs: 82 }]);
   });
 
-  it('MEC-003-R7 eating selects the next level speed for after the transition', () => {
+  it('MEC-003-R7 eating selects the next level speed from the next step', () => {
     const sim = restoreSim(b, buildState(b, { progress: 3, mango: [9, 8], spawnInMs: QUIET }));
     sim.advance(140);
     expect(stateOf(sim).level).toBe(2);
@@ -89,6 +89,6 @@ it('MEC-003-R15 fenceFirstLevel follows the family table', () => { expect(fenceF
       { type: 'shrunk', from: 5, to: 4, removed: [{ x: 5, y: 8 }] },
       { type: 'levelUp', level: 2, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 140 },
     ]);
-    sim.advance(1001);
+    sim.advance(1);
     expect(stateOf(sim).tickMs).toBe(138);
   });

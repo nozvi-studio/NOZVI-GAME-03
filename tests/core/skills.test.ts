@@ -20,13 +20,11 @@ describe('MEC-006 skill activation', () => {
   it('MEC-006-R11 exposes synchronous skill input', () => {
     expect(createSim(b, 1)).toHaveProperty('useSkill', expect.any(Function));
   });
-  it('MEC-006-R13 rejection reasons and their order (empty, busy, active, energy, noTarget)', () => {
+  it('MEC-006-R13 rejection reasons and their order (empty, active, energy, noTarget)', () => {
     const one = simFromAscii(b, [], { snake: line(4), quiet: true,
       options: { startLevel: 3, bestLevel: 3, startEnergy: 100, loadout: ['slowmo', null] } });
     expect(reason(one, 1)).toBe('empty');
     expect(reason(one, 0)).toBeUndefined();
-    expect(reason(mk(100, { phase: 'transition', transitionLeftMs: 500 }), 0)).toBe('busy');
-    expect(reason(mk(0, { phase: 'transition', transitionLeftMs: 500, slowmo: { leftMs: 100 } }), 0)).toBe('busy');
     const act = mk(79); act.useSkill(0); act.drainEvents();
     expect(reason(act, 0)).toBe('active');
     expect(reason(mk(39), 0)).toBe('energy');

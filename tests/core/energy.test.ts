@@ -57,16 +57,14 @@ describe('MEC-006 energy and orbs', () => {
     expect(sim.snapshot()).toMatchObject({ energy: 100, orbs: [] });
   });
 
-  it('MEC-006-R3 energy is kept across a level up and the transition', () => {
+  it('MEC-006-R3 energy is kept across a level up', () => {
     const sim = simFromAscii(b, ['...M'], {
       snake: [[2, 0], [1, 0], [0, 0], [0, 1]], quiet: true,
       options: { startEnergy: 50 }, extraState: { progress: 3 },
     });
     expect(sim.snapshot().energy).toBe(50);
-    sim.advance(140); expect(sim.snapshot()).toMatchObject({ energy: 50, phase: 'transition' });
-    sim.drainEvents(); sim.advance(1000);
-    expect(sim.drainEvents()).toEqual([{ type: 'transitionEnd', level: 2 }]);
-    expect(sim.snapshot()).toMatchObject({ energy: 50, phase: 'playing' });
+    sim.advance(140); expect(sim.snapshot()).toMatchObject({ energy: 50, level: 2 });
+    sim.drainEvents();
     circle(sim, 5999); expect(types(sim.drainEvents())).not.toContain('orbSpawned');
     circle(sim, 1); expect(types(sim.drainEvents())).toContain('orbSpawned');
   });
@@ -176,12 +174,12 @@ describe('MEC-006 energy and orbs', () => {
     }
   });
 
-  it('MEC-006-R10 orb timers frozen during level transition', () => {
+  it('MEC-006-R10 orb timers keep running through a level up', () => {
     const sim = simFromAscii(b, ['...M'], { snake: [[2, 0], [1, 0], [0, 0], [0, 1]], quiet: true,
       options: { startLevel: 4 }, extraState: { progress: 4, orbs: [{ x: 14, y: 14, ageMs: 0 }] } });
     sim.advance(141); const before = exportState(sim);
-    expect(before.phase).toBe('transition');
-    sim.advance(998);
-    expect(exportState(sim)).toMatchObject({ orbSpawnMs: before.orbSpawnMs, orbs: before.orbs, transitionLeftMs: 1 });
+    expect(before.level).toBe(5);
+    sim.advance(100);
+    expect(exportState(sim)).toMatchObject({ orbSpawnMs: before.orbSpawnMs + 100, orbs: [{ x: 14, y: 14, ageMs: before.orbs[0]!.ageMs + 100 }] });
   });
 });

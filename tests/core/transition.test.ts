@@ -13,19 +13,12 @@ const levelUpSim = (extra: Partial<SimState> = {}) => simFromAscii(b, ['.....M']
 });
 
 describe('MEC-003 transition', () => {
-  it('MEC-003-R7 transition lasts 1000 ms and first snake step is at 1000 + tick', () => {
-    const sim = levelUpSim();
-    sim.advance(140);
+  it('MEC-003-R7 no freeze: the snake steps one level-2 tick after the level up', () => {
+    const sim = levelUpSim(); sim.advance(140);
     expect(types(sim)).toEqual(['ate', 'shrunk', 'levelUp']);
-    expect(sim.snapshot()).toMatchObject({ phase: 'transition', level: 2, progress: 0, length: 4 });
-    sim.advance(999);
-    expect(sim.snapshot().phase).toBe('transition');
-    sim.advance(1);
-    expect(types(sim)).toEqual(['transitionEnd']);
-    sim.advance(137);
-    expect(sim.snapshot().snake[0]).toEqual({ x: 5, y: 0 });
-    sim.advance(1);
-    expect(sim.snapshot().snake[0]).toEqual({ x: 6, y: 0 });
+    expect(sim.snapshot()).toMatchObject({ level: 2, progress: 0, length: 4, levelUpSlow: null });
+    sim.advance(137); expect(sim.snapshot().snake[0]).toEqual({ x: 5, y: 0 });
+    sim.advance(1); expect(sim.snapshot().snake[0]).toEqual({ x: 6, y: 0 });
   });
 
   it('MEC-001-R4 length 9 before level up becomes 4 after', () => {
@@ -81,15 +74,9 @@ describe('MEC-003 transition', () => {
     expect(sim.snapshot().length).toBe(4);
   });
 
-  it('MEC-001-R9 snake does not step during transition and queued turns apply after it', () => {
-    const sim = levelUpSim(); sim.advance(140); sim.advance(200);
-    sim.turn(0, 1);
-    const head = sim.snapshot().snake[0];
-    sim.advance(937);
-    expect(sim.snapshot().snake[0]).toEqual(head);
-    expect(stateOf(sim).acc).toBe(137);
-    sim.advance(1);
-    expect(sim.snapshot().snake[0]).toEqual({ x: 5, y: 1 });
+  it('MEC-001-R9 the snake keeps stepping through a level up and applies a queued turn on its next step', () => {
+    const sim = levelUpSim(); sim.advance(140); sim.turn(0, 1);
+    sim.advance(138); expect(sim.snapshot().snake[0]).toEqual({ x: 5, y: 1 });
   });
 
   it('MEC-001-R10 boardFull event and won outcome never occur before the L30 clear', () => {
@@ -137,32 +124,20 @@ describe('MEC-003 transition', () => {
     sim.advance(1); expect(sim.snapshot().terrains).toEqual([]);
   });
 
-  it('MEC-003-R9 rot timer, director timer and levelTimeMs do not advance during transition', () => {
-    const sim = levelUpSim(); sim.advance(141);
-    const before = exportState(sim), age = sim.snapshot().mango!.ageMs;
-    sim.advance(998);
-    expect(sim.snapshot().mango!.ageMs).toBe(age);
-    expect(stateOf(sim)).toMatchObject({ spawnInMs: before.spawnInMs, mazeCooldownMs: before.mazeCooldownMs, levelTimeMs: before.levelTimeMs, timeMs: before.timeMs + 998, acc: 0 });
-  });
-
-  it('MEC-003-R10 turns queued during transition are applied afterwards', () => {
+  it('MEC-003-R9 rot, director and levelTimeMs keep running after a level up', () => {
     const sim = levelUpSim(); sim.advance(140);
-    sim.turn(0, 1); sim.turn(1, 0);
-    sim.advance(1000 + 138);
-    expect(sim.snapshot().snake[0]).toEqual({ x: 5, y: 1 });
-    sim.advance(138);
-    expect(sim.snapshot().snake[0]).toEqual({ x: 6, y: 1 });
+    const before = exportState(sim), age = sim.snapshot().mango!.ageMs;
+    sim.advance(100);
+    expect(sim.snapshot().mango!.ageMs).toBe(age + 100);
+    expect(stateOf(sim)).toMatchObject({ spawnInMs: before.spawnInMs - 100, levelTimeMs: before.levelTimeMs + 100, timeMs: before.timeMs + 100 });
   });
 
-  it('MEC-003-R11 first spawn of each level is 2500 ms after transition end', () => {
+  it('MEC-003-R11 without a slowdown the first spawn is firstSpawnMs after the level up', () => {
     const sim = simFromAscii(b, ['.....M'], { snake: [[4, 0], [3, 0], [2, 0], [1, 0]], extraState: { progress: 3 } });
-    sim.advance(1140);
-    expect(exportState(sim)).toMatchObject({ spawnInMs: 2500, mazeCooldownMs: 0 });
-    circle(sim, 2499);
-    expect(sim.snapshot().hazards).toEqual([]);
-    expect(exportState(sim).spawnInMs).toBe(1);
-    circle(sim, 1);
-    expect(sim.snapshot().hazards.length).toBeGreaterThan(0);
+    sim.advance(140);
+    expect(exportState(sim)).toMatchObject({ spawnInMs: b.director.firstSpawnMs, mazeCooldownMs: 0 });
+    circle(sim, b.director.firstSpawnMs - 1); expect(exportState(sim).spawnInMs).toBe(1);
+    circle(sim, 1); expect(sim.snapshot().hazards.length).toBeGreaterThan(0);
   });
 
   it('MEC-003-R7 levelUp carries biome, challenge, biomeChanged, unlocked and clearedLevelTimeMs', () => {

@@ -112,18 +112,13 @@ describe('MEC-006 Mango Rain', () => {
     const sim = levelUpRain({ mango: { ...FAR } });
     sim.advance(140);
     expect(sim.drainEvents().some(e => e.type === 'levelUp')).toBe(true);
-    expect(sim.snapshot().phase).toBe('transition');
     expect(stateOf(sim).rainBudgets).toEqual([{ castId: 1, left: 2 }]);
-    sim.advance(1); const r1 = sim.snapshot().rain;
-    sim.advance(998); const r2 = sim.snapshot().rain;
-    expect(r1).not.toBeNull(); expect(r2).toEqual(r1);
+    sim.advance(1); expect(sim.snapshot().rain).not.toBeNull();
   });
   it('MEC-002-R8 level up from a rain mango keeps the regular mango and its timer', () => {
     const sim = levelUpRain({ mango: { x: 12, y: 12, golden: false, totalMs: 8000, leftMs: 8000 - 860 } });
-    sim.advance(140);
-    expect(sim.snapshot()).toMatchObject({ phase: 'transition', mango: { x: 12, y: 12, ageMs: 1000 } });
-    sim.advance(1); expect(sim.snapshot().mango).toMatchObject({ x: 12, y: 12, ageMs: 1000 });
-    sim.advance(998); expect(sim.snapshot().mango).toMatchObject({ x: 12, y: 12, ageMs: 1000 });
+    sim.advance(140); expect(sim.snapshot().mango).toMatchObject({ x: 12, y: 12, ageMs: 1000 });
+    sim.advance(100); expect(sim.snapshot().mango).toMatchObject({ x: 12, y: 12, ageMs: 1100 });
   });
   it('MEC-008-R8 rain mangoes advance the ramp', () => {
     const sim = simFromAscii(b, ['...m'], { snake: SNAKE, quiet: true,
@@ -136,35 +131,8 @@ describe('MEC-006 Mango Rain', () => {
       snipWalls: [{ family: 'snipWall', cells: [{ x: 9, y: 9 }], state: 'solid', leftMs: 3000 }],
       rubble: [{ family: 'rubble', x: 8, y: 8, state: 'solid', leftMs: 1500 }] });
     sim.advance(140);
-    expect(sim.snapshot()).toMatchObject({ phase: 'transition',
+    expect(sim.snapshot()).toMatchObject({
       snipWall: [{ x: 9, y: 9, state: 'crumble', leftMs: 450 }], rubble: [{ x: 8, y: 8, state: 'crumble', leftMs: 450 }] });
     expect(stateOf(sim).snipWalls.some(w => w.state === 'solid')).toBe(false);
   });
-  it('MEC-006-R35 during transition only crumble, fade-out and transition timers advance', () => {
-    const sim = levelUpRain({ mango: { x: 12, y: 12, golden: false, totalMs: 8000, leftMs: 7000 },
-      orbs: [{ x: 14, y: 14, ageMs: 100 }], slowmo: { leftMs: 2000 }, shield: { leftMs: 3000 },
-      rainMangoes: [{ x: 3, y: 0, ageMs: 0, castId: 1 }, { x: 10, y: 2, ageMs: 50, castId: 1 }],
-      snipWalls: [{ family: 'snipWall', cells: [{ x: 9, y: 9 }], state: 'solid', leftMs: 3000 }],
-      rubble: [{ family: 'rubble', x: 8, y: 8, state: 'solid', leftMs: 1500 }],
-      rottenRocks: [{ family: 'rottenRock', x: 7, y: 7, state: 'solid', leftMs: 5000 }],
-      terrains: [{ family: 'terrain', t: 100, lifeMs: 600000, cells: [{ x: 15, y: 3, delay: 0, up: false, vis: 'down' }] }],
-      spawnInMs: 3, mazeCooldownMs: 7, orbSpawnMs: 11 });
-    const live = sim;
-    while (live.snapshot().phase === 'playing' && live.snapshot().timeMs < 1000) live.advance(1);   // slow-mo: 224 ms tick
-    live.drainEvents();
-    expect(live.snapshot().phase).toBe('transition');
-    // Crumble is 450 ms, so compare inside the crumble window (crumbling items disappear before 999).
-    live.advance(1); const a = norm(exportState(live));
-    live.advance(448); const z = norm(exportState(live));
-    expect(z).toEqual(a);
-  });
 });
-
-function norm(s: SimState): SimState {
-  const c = structuredClone(s);
-  c.timeMs = 0; c.transitionLeftMs = 0; c.events = [];
-  for (const x of [...c.rubble, ...c.snipWalls, ...c.rottenRocks]) x.leftMs = 0;
-  for (const h of c.hazards) h.t = 0;
-  for (const T of c.terrains) T.t = 0;
-  return c;
-}

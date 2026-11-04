@@ -11,7 +11,6 @@ import { levelUpSlowTick } from './slowdown';
 import { rainTick } from './skills/mangoRain';
 import { rngFrom, seedRng, type Rng } from './rng';
 import { queueTurn, stepSnake } from './snake';
-import { levelStart } from './transition';
 import type { Dir, Sim, SimSnapshot, SimState, SimOptions, Step } from './types';
 
 const toDir = ([x, y]: Pair): Dir => ({ x: x as Step, y: y as Step });
@@ -42,7 +41,7 @@ export function initialState(b: Balance, seed: number, options: SimOptions = {})
     bestLevel, loadout: [loadout[0], loadout[1]], slowmo: null, levelUpSlow: null, snipWalls: [],
     shield: null, rubble: [], rain: null, rainMangoes: [], rainBudgets: [], nextCastId: 1,
     spawnInMs: b.director.firstSpawnMs, mazeCooldownMs: 0, score: 0, eatenInRun: 0, retryMs: 0, level, progress: 0,
-    phase: 'playing', transitionLeftMs: 0, levelTimeMs: 0, timeMs: 0,
+    levelTimeMs: 0, timeMs: 0,
     startLevel: level, levelsCleared: 0, eatenInLevel: 0,
     status: 'playing', outcome: null, events: [], rng: seedRng(seed),
   };
@@ -52,13 +51,6 @@ export function initialState(b: Balance, seed: number, options: SimOptions = {})
 function stepMs(s: SimState, b: Balance, rng: Rng): void {
   s.timeMs += 1;
   const ctx = { balance: b, snakeOn: (x: number, y: number) => snakeOn(s, x, y), emit: (e: SimState['events'][number]) => { s.events.push(e); } };
-  // MEC-003-R7/R9 only crumble/fade and run time advance during transition.
-  if (s.phase === 'transition') {
-    stepHazards(s, ctx);
-    s.transitionLeftMs -= 1;
-    if (s.transitionLeftMs === 0) levelStart(s, b);
-    return;
-  }
   s.levelTimeMs += 1;
   updateDirector(s, b, rng);
   stepHazards(s, ctx);
@@ -101,8 +93,8 @@ function snapshotOf(s: SimState, b: Balance): SimSnapshot {
     })),
     terrains: c.terrains.map(t => ({ t: t.t, lifeMs: t.lifeMs, cells: t.cells.map(({ x, y, vis, delay }) => ({ x, y, vis, delay })) })),
     score: s.score, level: s.level, progress: s.progress, need: needFor(b, s.level), tickMs: s.tickMs,
-    biome: biome(b, s.level), challenge: isChallenge(b, s.level), phase: s.phase,
-    transitionLeftMs: s.transitionLeftMs, levelTimeMs: s.levelTimeMs, timeMs: s.timeMs,
+    biome: biome(b, s.level), challenge: isChallenge(b, s.level),
+    levelTimeMs: s.levelTimeMs, timeMs: s.timeMs,
     startLevel: s.startLevel, levelsCleared: s.levelsCleared,
     length: s.snake.length, minLength: b.skills.tailSnip.minLength,
     status: s.status, outcome: c.outcome,

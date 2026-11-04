@@ -18,21 +18,16 @@ describe('MEC-006 Slow-mo', () => {
     circle(sim, 1); expect(sim.snapshot().slowmo).toBeNull();
     expect(sim.drainEvents()).toEqual([{ type: 'skillEnded', skill: 'slowmo', reason: 'timeout' }]);
   });
-  it('MEC-006-R16 slow-mo timer is frozen in the transition and ends at 5000 ms', () => {
+  it('MEC-006-R16 slow-mo timer keeps running through a level up', () => {
     const sim = mk({ progress: 3 }, ['...M']); sim.useSkill(0); sim.drainEvents();
-    sim.advance(224); expect(sim.snapshot().phase).toBe('transition');
-    expect(sim.snapshot().slowmo).toEqual({ leftMs: 3776 }); sim.drainEvents();
-    sim.advance(1000); expect(sim.snapshot().slowmo).toEqual({ leftMs: 3776 }); sim.drainEvents();
-    circle(sim, 3775); expect(sim.snapshot().slowmo).toEqual({ leftMs: 1 }); sim.drainEvents();
-    circle(sim, 1);
-    expect(sim.snapshot().timeMs).toBe(5000);
-    expect(sim.drainEvents()).toContainEqual({ type: 'skillEnded', skill: 'slowmo', reason: 'timeout' });
+    sim.advance(224); expect(sim.snapshot()).toMatchObject({ level: 2, slowmo: { leftMs: 3776 } });
+    sim.advance(1000); expect(sim.snapshot().slowmo).toEqual({ leftMs: 2776 });
   });
   it('MEC-006-R17 slow-mo tick = round(base x 1.6) including level-up', () => {
     const sim = mk({ progress: 3 }, ['...M']); sim.useSkill(0);
     sim.advance(1); expect(sim.snapshot().tickMs).toBe(224);
     sim.advance(223); expect(sim.snapshot().level).toBe(2);
-    sim.advance(1001); expect(sim.snapshot().tickMs).toBe(221);
+    sim.advance(1); expect(sim.snapshot().tickMs).toBe(221);
   });
   it('MEC-006-R17 slow-mo multiplies a changing checkpoint ramp', () => {
     const sim = mk({}, ['...M'], 4); sim.useSkill(0);

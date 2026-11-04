@@ -76,7 +76,6 @@ describe('MEC-006 Tail Snip', () => {
       snake: line(6), quiet: true, options, extraState: { progress: 3 },
     });
     sim.useSkill(1); sim.advance(140);
-    expect(sim.snapshot().phase).toBe('transition');
     expect(sim.snapshot().snipWall.every(c => c.state === 'crumble' && c.leftMs === 450)).toBe(true);
     sim.advance(449); expect(sim.snapshot().snipWall[0]?.leftMs).toBe(1);
     sim.advance(1); expect(sim.snapshot().snipWall).toEqual([]);

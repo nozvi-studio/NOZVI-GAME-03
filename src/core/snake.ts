@@ -67,11 +67,12 @@ function eat(s: SimState, b: Balance, rng: Rng): void {
   if (m.golden) goldenEnergy(s, b, ctx);
   // MEC-008-R8 ramp counter runs before the level-clear check (ARCHITECTURE step 12.4).
   rampOnMangoEaten(s, b, ctx);
-  // MEC-003-R5/R6 the final clear wins; earlier clears reset length and start transition.
+  // MEC-003-R5/R6 the final clear wins; earlier clears reset length and level up without stopping.
   s.progress += progressGain;
-  checkLevelClear(s, b, ctx, true);
+  checkLevelClear(s, b, ctx);
   s.tailFrom = { ...(s.snake[s.snake.length - 1] as Cell) };
-  if (s.status === 'playing' && s.phase === 'playing') placeMango(s, b, rng);
+  // MEC-002-R8(b) the next regular mango is placed after the chain, so cells freed by the reset are candidates.
+  if (s.status === 'playing') placeMango(s, b, rng);
 }
 
 // MEC-001-R4 keep the head and followers in order; a reset never grows the snake.

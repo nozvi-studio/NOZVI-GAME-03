@@ -60,20 +60,8 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     expect(snap.shield).toEqual({ leftMs: 5000 });
   });
 
-  it('QA-P1T7-02 MEC-006-R13 shield rejection order and conditions (busy, active, energy)', () => {
-    // MEC-006-R13 rejection check order: empty -> busy -> active -> energy -> noTarget
-    // 1. Busy during transition
-    const sBusy = buildState(b, { snake: SQUARE_SNAKE, dir: [0, 1], spawnInMs: QUIET });
-    sBusy.loadout = ['shield', 'mangoRain'];
-    sBusy.bestLevel = 16;
-    sBusy.energy = 100;
-    sBusy.phase = 'transition';
-    sBusy.transitionLeftMs = 500;
-    const simBusy = restoreSim(b, sBusy);
-    simBusy.useSkill(0);
-    expect(simBusy.drainEvents()).toEqual([
-      { type: 'skillRejected', slot: 0, skill: 'shield', reason: 'busy' },
-    ]);
+  it('QA-P1T7-02 MEC-006-R13 shield rejection order and conditions (active, energy)', () => {
+    // MEC-006-R13 rejection check order: empty -> active -> energy -> noTarget
 
     // 2. Active precedence over energy (EC3: active wins over energy)
     const sActive = buildState(b, { snake: SQUARE_SNAKE, dir: [0, 1], spawnInMs: QUIET });
@@ -119,36 +107,6 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     expect(sim.drainEvents()).toEqual([
       { type: 'skillEnded', skill: 'shield', reason: 'timeout' },
     ]);
-  });
-
-  it('QA-P1T7-04 MEC-006-R10/R35 shield timer freezes during level transition', () => {
-    // Sim step order step 3: during transition, skill effect timers are frozen
-    const s = buildState(b, {
-      level: 1,
-      progress: 3,
-      snake: SQUARE_SNAKE,
-      dir: [0, 1],
-      mango: [8, 9], // eaten on step 1
-      golden: false,
-      spawnInMs: QUIET,
-    });
-    s.loadout = ['shield', 'mangoRain'];
-    s.bestLevel = 16;
-    s.energy = 100;
-    const sim = restoreSim(b, s);
-
-    sim.useSkill(0);
-    sim.drainEvents();
-    // At t = 140, mango is eaten -> level up & transition starts
-    sim.advance(140);
-    expect(sim.snapshot().phase).toBe('transition');
-    const remainingShield = sim.snapshot().shield?.leftMs;
-    expect(remainingShield).toBe(5000 - 140);
-
-    // Advance through the entire 1000 ms transition
-    sim.advance(1000);
-    expect(sim.snapshot().phase).toBe('playing');
-    expect(sim.snapshot().shield?.leftMs).toBe(remainingShield);
   });
 
   // --------------------------------------------------------------------------
@@ -686,45 +644,6 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     expect(sim.snapshot().mango).toMatchObject({ x: 4, y: 8 });
   });
 
-  it('QA-P1T7-21 MEC-006-EC15 rubble and snip wall crumble immediately on level transition start', () => {
-    // EC15: both crumble at transition start (t = 0 of transition)
-    const s = buildState(b, {
-      level: 1,
-      progress: 3,
-      snake: SQUARE_SNAKE,
-      dir: [0, 1],
-      mango: [8, 9],
-      golden: false,
-      spawnInMs: QUIET,
-    });
-    s.loadout = ['shield', 'mangoRain'];
-    s.bestLevel = 16;
-    s.energy = 100;
-    s.rubble.push({
-      family: 'rubble',
-      x: 12,
-      y: 12,
-      state: 'solid',
-      leftMs: 1500,
-    });
-    s.snipWalls.push({
-      family: 'snipWall',
-      cells: [{ x: 13, y: 13 }],
-      state: 'solid',
-      leftMs: 3000,
-    } as any);
-
-    const sim = restoreSim(b, s);
-    sim.advance(140); // eats mango, level up to 2
-    expect(sim.snapshot().phase).toBe('transition');
-    expect(sim.snapshot().rubble).toEqual([
-      { x: 12, y: 12, state: 'crumble', leftMs: 450 },
-    ]);
-    expect(sim.snapshot().snipWall).toEqual([
-      { x: 13, y: 13, state: 'crumble', leftMs: 450 },
-    ]);
-  });
-
   // --------------------------------------------------------------------------
   // Group 6: Mango Rain Activation & Drop Schedule (MEC-006-R29, R30)
   // --------------------------------------------------------------------------
@@ -951,7 +870,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     expect(snap.length).toBe(6); // 3 original + 3 grown
   });
 
-  it('QA-P1T7-30 MEC-006-R34 rain mango can complete level quota; rain and budget continue across transition', () => {
+  it('QA-P1T7-30 MEC-006-R34 rain mango can complete level quota; rain and budget continue across a level up', () => {
     // MEC-006-R34: progress completes quota -> level up; rain, remaining drops & budget continue
     const need = quota(b, 16);
     const s = buildState(b, {
@@ -975,15 +894,11 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     sim.advance(s.tickMs);
 
     const snap = sim.snapshot();
-    expect(snap.phase).toBe('transition');
     expect(snap.level).toBe(17);
     expect(snap.progress).toBe(0);
     expect(snap.length).toBe(4); // length reset on level up
     expect(snap.rain).toEqual({ leftMs: 3000 - s.tickMs, dropsLeft: 2 });
 
-    // Transition advances: rain timer remains frozen
-    sim.advance(999);
-    expect(sim.snapshot().rain).toEqual({ leftMs: 3000 - s.tickMs, dropsLeft: 2 });
   });
 
   it('QA-P1T7-31 ARCHITECTURE sim step order 12.4 event order when rain mango clears level', () => {

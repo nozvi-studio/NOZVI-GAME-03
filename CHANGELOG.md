@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - feat(core): level-up slowdown state and Slow-mo max rule in effectiveTick (MEC-003-R22, MEC-006-R17).
 - feat(core): levelUpSlowdown tiers in balance config with validation (MEC-003-R22).
 ### Changed
+- feat(core): level up no longer freezes the sim; skills castable and timers running during level up; slowdown starts at level up (MEC-003-R7..R11/R22, MEC-006-R13).
 - chore(log): `run_end` records `turns`, the count of turns accepted by the MEC-001 queue; old logs without it still load (MEC-003-R19).
 ### Fixed
 - fix(game): keyboard turns (arrows/WASD) are queued on the native keydown instead of waiting for Phaser's per-frame keyboard queue; pure key map in src/game/input/keyMap.ts (MEC-001).

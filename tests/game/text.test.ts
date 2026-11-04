@@ -51,7 +51,7 @@ describe('P1 text keys (MEC-003/006/007/008 §8)', () => {
     'banner.levelUp', 'banner.freshStart', ...[1, 2, 3, 4, 5, 6].map(b => `banner.biome.${b}`),
     ...['rock', 'rottenRock', 'fence', 'terrain', 'maze'].map(f => `banner.new.${f}`), 'hud.level',
     'hud.energy', 'skill.slowmo.name', 'skill.tailSnip.name', 'skill.shield.name', 'skill.mangoRain.name',
-    'skill.reject.energy', 'skill.reject.active', 'skill.reject.noTarget', 'skill.reject.busy', 'tip.orb.first',
+    'skill.reject.energy', 'skill.reject.active', 'skill.reject.noTarget', 'tip.orb.first',
     'death.snipWall', 'death.rubble',
     'loadout.title', 'loadout.go', 'loadout.back', 'loadout.slot1', 'loadout.slot2', 'loadout.locked',
     'tip.skillUnlocked.slot', 'tip.skillUnlocked.next', 'tip.slotUnlocked',

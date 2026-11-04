@@ -35,36 +35,6 @@ describe('QA Task 3: Levels, Sim Shell & Determinism (Black-Box)', () => {
     expect(sim.snapshot().snake[0]).toEqual({ x: 9, y: 8 }); // stepped at 140 ms
   });
 
-  it('QA-T3-20 level up transitions at exact quota', () => {
-    // updated for P1 MEC-003-R7
-    const sim = restoreSim(b, buildState(b, {
-      level: 1,
-      progress: 3,
-      mango: [9, 8],
-      golden: false,
-    }));
-    sim.advance(140);
-    const snap = sim.snapshot();
-
-    expect(snap.level).toBe(2);
-    expect(snap.progress).toBe(0);
-    expect(snap.need).toBe(4);
-    // updated for P1 MEC-008-R9 / ARCH Sim step order: during transition tickMs remains 140
-    expect(snap.tickMs).toBe(140);
-    expect(snap.phase).toBe('transition');
-    expect(snap.transitionLeftMs).toBe(1000);
-
-    const events = sim.drainEvents();
-    expect(events).toContainEqual({
-      type: 'levelUp',
-      level: 2,
-      biome: 1,
-      challenge: false,
-      biomeChanged: false,
-      clearedLevelTimeMs: 140,
-    });
-  });
-
   it('QA-T3-21 golden mango progress overflow carries over', () => {
     // updated for P1 MEC-003-R7
     const sim = restoreSim(b, buildState(b, {
@@ -79,7 +49,6 @@ describe('QA Task 3: Levels, Sim Shell & Determinism (Black-Box)', () => {
     expect(snap.level).toBe(2);
     expect(snap.progress).toBe(1); // 3 + 2 - 4 = 1
     expect(snap.need).toBe(4);
-    expect(snap.phase).toBe('transition');
 
     const events = sim.drainEvents();
     expect(events).toContainEqual({
@@ -139,7 +108,6 @@ describe('QA Task 3: Levels, Sim Shell & Determinism (Black-Box)', () => {
     expect(snap.status).toBe('over');
     expect(snap.outcome).toEqual({ won: true });
     expect(snap.levelsCleared).toBe(30);
-    expect(snap.phase).toBe('playing');
 
     const events = sim.drainEvents();
     expect(events).toContainEqual(expect.objectContaining({

@@ -45,7 +45,7 @@ export interface Outcome { won: boolean; cause?: CauseKey }
 
 export type SimEvent =
   | { type: 'skillUsed'; slot: 0 | 1; skill: SkillId; level: number; energyBefore: number; energyAfter: number }
-  | { type: 'skillRejected'; slot: 0 | 1; skill: SkillId | null; reason: 'empty' | 'busy' | 'active' | 'energy' | 'noTarget' }
+  | { type: 'skillRejected'; slot: 0 | 1; skill: SkillId | null; reason: 'empty' | 'active' | 'energy' | 'noTarget' }
   | { type: 'skillEnded'; skill: SkillId; reason: 'timeout' | 'consumed' }
   | { type: 'tailSnipped'; cut: number; cells: Cell[] }
   | { type: 'shieldBroke'; x: number; y: number; family: FamilyKey; rubble: Cell | null }
@@ -63,7 +63,6 @@ export type SimEvent =
   | { type: 'mangoDeferred' }
   | { type: 'shrunk'; from: number; to: number; removed: Cell[] }
   | { type: 'levelUp'; level: number; biome: number; challenge: boolean; biomeChanged: boolean; unlocked?: IntroKey; clearedLevelTimeMs: number }
-  | { type: 'transitionEnd'; level: number }
   | { type: 'runWon'; score: number; timeMs: number }
   | { type: 'landed'; hazardType: TimedKey }
   | { type: 'dust'; x: number; y: number }
@@ -107,8 +106,6 @@ export interface SimState {
   retryMs: number;
   level: number;               // 1-based
   progress: number;
-  phase: 'playing' | 'transition';
-  transitionLeftMs: number;
   levelTimeMs: number;
   timeMs: number;
   startLevel: number;
@@ -160,8 +157,6 @@ export interface SimSnapshot {
   tickMs: number;
   biome: number;
   challenge: boolean;
-  phase: 'playing' | 'transition';
-  transitionLeftMs: number;
   levelTimeMs: number;
   timeMs: number;
   startLevel: number;

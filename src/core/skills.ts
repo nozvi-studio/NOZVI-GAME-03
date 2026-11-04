@@ -40,10 +40,9 @@ export function unlockTable(b: Balance): { order: readonly SkillId[]; unlockLeve
 export function useSkill(s: SimState, b: Balance, ctx: StepCtx, slot: 0 | 1): void {
   if (s.status !== 'playing') return;
   const id = s.loadout[slot];
-  const reject = (reason: 'empty' | 'busy' | 'active' | 'energy' | 'noTarget') => ctx.emit({ type: 'skillRejected', slot, skill: id, reason });
+  const reject = (reason: 'empty' | 'active' | 'energy' | 'noTarget') => ctx.emit({ type: 'skillRejected', slot, skill: id, reason });
   if (id === null) return reject('empty');
   const def = SKILLS[id];
-  if (s.phase === 'transition') return reject('busy');
   if (def.active(s)) return reject('active');
   const cost = b.skills[id].cost;
   if (s.energy < cost) return reject('energy');
