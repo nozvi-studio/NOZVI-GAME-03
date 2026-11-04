@@ -6,6 +6,7 @@ Updated: 2026-11-04 · Source: `docs/superpowers/specs/2026-11-03-p0-foundation-
 |---|---|---|---|
 | `src/core/` | Pure game rules (MEC-001…004), `Sim`, hazard registry | itself only | `phaser`, `window`, `document`, `localStorage`, `Math.random`, `performance`, `Date`, `src/meta`, `src/game` |
 | `src/meta/` | Save envelope, `KeyValueStore` | itself only | same list as core; `src/core` internals, `src/game` |
+| `src/session/` | Pure run session: save, `Sim` and run log wiring (P1-D1) | `src/core/index.ts`, `src/meta/index.ts` only | same list as core; core/meta internals, `src/game` |
 | `src/game/` | Phaser scenes, rendering, input, audio, flow, platform adapters | `phaser`, `src/core/index.ts`, `src/meta/index.ts` | core/meta internals |
 | `config/balance.json` | Every tuning value | — | — |
 
