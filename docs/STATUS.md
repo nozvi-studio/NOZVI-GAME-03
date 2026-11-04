@@ -5,14 +5,14 @@
 **Updated:** 2026-11-04 by Claude Code **Milestone:** M1 — Phase P0 (Foundation) not started
 
 ## Now (in progress)
-- [ ] Missing screens on the D2 design canvas (https://claude.ai/artifact/9zVMtmVhjWzeHeyWwjQ9JX), see list below.
+- [ ] Owner visual review of the D2 canvas (https://claude.ai/artifact/9zVMtmVhjWzeHeyWwjQ9JX): all screens from GDD v0.3 §10.3 are drawn (P1 core loop, P3 settings/biomes, P4 meta) and audited against the GDD.
 
 ## Next (ordered, max 5)
-1. Draw P1 screens on the canvas (greybox-level is enough): Loadout (pick 2 skills), Pause overlay, 3-2-1 countdown, in-run banners (level up, biome card, checkpoint unlocked, skill unlocked, new obstacle tooltip), death moment, active-skill states.
+1. Check obstacle contrast of the biome boards on a real 5" phone (GDD §10.1).
 2. In a session with Superpowers: `brainstorming` → `writing-plans` for **P0 Foundation** (GDD §11), then execute as small PRs.
 3. P0 creates `docs/ARCHITECTURE.md`, `config/balance.json`, `src/core/`, tests; update CODEMAP and docs map in the same PRs.
 4. Write MEC-001/003/006/007/008 specs before P1 starts.
-5. Later screens: P3 Settings, D-pad layout, 6 biome board palettes, boot; P4 odds panel ("i"), coin shop / buy flow, duplicate → coins reveal, full-clear celebration, Results states (new best, checkpoint unlocked, first-time arrow), first-time Home.
+5. Self-host Lilita One + Nunito (SIL OFL) when the UI is built (P3).
 
 ## Blockers / open questions for human
 - OPEN: target web portals (before P5) §13; session-length targets §4; reason to come back tomorrow §8.3; extra reference games §1 (optional).
@@ -25,7 +25,7 @@
 - D2 board uses pastel obstacles; contrast not yet checked on a real phone (GDD §10.1).
 
 ## Last session summary
-- What was done: audited GDD v0.2 against the D2 design canvas; owner approved recommendations A–G; GDD v0.3 (D2 style, Mango-cat default, mango-only food, machine slots 2/5 coins + Wheel (coins) + Mystery, no aiming, duplicates 15/40/100 coins, Back → Pause, Trails/Frames parked); 2 DECISIONS entries; canvas updated to match (fixed broken Home/Results links, removed Game Back button, mango food, coin prices and balance on Skins, no tabs, machine slot values, Wheel = tap to spin paying coins with odds shown, Skin drop = rarity reveal 70/25/5).
+- What was done: GDD v0.3 from the D2 design audit (style, Mango-cat default, mango-only food, coin economy, Wheel bonus, no aiming); canvas fixed to match; 14 missing screens added on the canvas (in another chat, from a brief written here) and audited; 11 mismatches fixed on the canvas (skill costs/durations, Loadout copy and L6 slot unlock, start length 4, checkpoint hints L10/L20, Results checkpoint state L10 → start L4, full clear ≥ 255 mangoes, missing Lilita One font on 3 artboards, biome board frame height, pity copy, bomb blast shape, Equip → Home).
 - Last verified step (command + result): docs only, no code changed; canvas edits published, not visually checked.
 - Commands that failed / work left uncommitted (check `git status`): none.
-- What was learned / gotchas: the wheel has four ×1 segments, so its expected multiplier is ≈ ×1.72; GDD v0.2 coin values made skins far too cheap (≈ 516 coins per run).
+- What was learned / gotchas: canvas artboards copy numbers by hand, so every new screen needs a check against GDD §6–§8 numbers.

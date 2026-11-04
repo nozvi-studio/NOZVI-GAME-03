@@ -11,6 +11,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - `AGENTS.md` §1 Stack: Phaser 3 + TypeScript + Vite + Vitest (owner-approved); `docs/GDD.md`: Mango Rain confirmed as the 4th skill, web-first platform confirmed.
 - `docs/DECISIONS.md`: stack, redesign v0.2, meta/odds, art direction and roadmap decisions.
 - `docs/GDD.md` v0.3 (owner-approved audit of the D2 design canvas): D2 pastel UI style with Lilita One + Nunito; Mango-cat default skin; mango food for every skin; marble machine slots 2/5 coins + Wheel bonus (coins) + Mystery, no aiming, duplicates 15/40/100 coins; Back in game opens Pause; Trails/Frames parked. Two `docs/DECISIONS.md` entries.
+- `docs/STATUS.md`: all GDD screens drawn on the D2 canvas and audited; next steps updated.
 ### Fixed
 ### Removed
 - Pre-ruleset design docs and Notion CSV databases under `docs/` (content condensed into `docs/GDD.md`; originals remain in commit `9fe2bb0`).
