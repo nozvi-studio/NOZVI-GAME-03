@@ -1,5 +1,6 @@
 import type { Balance } from './balance';
 import { baseTickMs } from './ramp';
+import { levelUpSlowFactor } from './slowdown';
 import { slowmoSkill } from './skills/slowmo';
 import { tailSnipSkill } from './skills/tailSnip';
 import { shieldSkill } from './skills/shield';
@@ -39,10 +40,9 @@ export function unlockTable(b: Balance): { order: readonly SkillId[]; unlockLeve
 export function useSkill(s: SimState, b: Balance, ctx: StepCtx, slot: 0 | 1): void {
   if (s.status !== 'playing') return;
   const id = s.loadout[slot];
-  const reject = (reason: 'empty' | 'busy' | 'active' | 'energy' | 'noTarget') => ctx.emit({ type: 'skillRejected', slot, skill: id, reason });
+  const reject = (reason: 'empty' | 'active' | 'energy' | 'noTarget') => ctx.emit({ type: 'skillRejected', slot, skill: id, reason });
   if (id === null) return reject('empty');
   const def = SKILLS[id];
-  if (s.phase === 'transition') return reject('busy');
   if (def.active(s)) return reject('active');
   const cost = b.skills[id].cost;
   if (s.energy < cost) return reject('energy');
@@ -65,10 +65,11 @@ export function skillTimers(s: SimState, _b: Balance, ctx: StepCtx): void {
   }
 }
 
-// MEC-006-R17 apply Slow-mo to the live level/checkpoint-ramp speed.
+// MEC-006-R17 / MEC-003-R22 max(Slow-mo, level-up slowdown) on the live level/ramp tick; never stacked.
 export function effectiveTick(s: SimState, b: Balance): number {
   const base = baseTickMs(s, b);
-  return s.slowmo ? Math.round(base * b.skills.slowmo.tickFactor) : base;
+  const f = Math.max(s.slowmo ? b.skills.slowmo.tickFactor : 1, levelUpSlowFactor(s));
+  return f === 1 ? base : Math.round(base * f);
 }
 
 // MEC-007-R12 bestLevel stays the saved options value throughout the run.

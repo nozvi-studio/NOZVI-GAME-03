@@ -68,7 +68,7 @@ export function eatRain(s: SimState, b: Balance, ctx: StepCtx, x: number, y: num
   s.score += points; s.progress += progressGain;
   ctx.emit({ type: 'ate', x, y, golden: false, points, progressGain, source: 'rain' });
   rampOnMangoEaten(s, b, ctx);                                   // MEC-008-R8
-  checkLevelClear(s, b, ctx, false);                             // MEC-006-R34 / MEC-002-R8
+  checkLevelClear(s, b, ctx);                                    // MEC-006-R34 / MEC-002-R8
   s.tailFrom = { ...s.snake[s.snake.length - 1]! };
   pruneBudgets(s);
 }

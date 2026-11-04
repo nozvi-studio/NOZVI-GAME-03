@@ -153,36 +153,6 @@ describe('QA P1 Task 6: Skill Framework, Slow-mo, Tail Snip & Loadout (MEC-006, 
     expect(sim.snapshot().energy).toBe(50);
   });
 
-  it('QA-P1T6-08 MEC-006-R13 useSkill during transition phase emits skillRejected busy and does not buffer', () => {
-    const s = buildState(b, {
-      level: 1,
-      progress: 3,
-      mango: [9, 8],
-      spawnInMs: QUIET,
-    });
-    s.loadout = ['slowmo', null];
-    s.bestLevel = 3;
-    s.energy = 100;
-    const sim = restoreSim(b, s);
-
-    sim.advance(140); // level up to L2, phase becomes transition
-    expect(sim.snapshot().phase).toBe('transition');
-
-    sim.useSkill(0);
-    const rejectEvents = sim.drainEvents().filter(e => e.type === 'skillRejected');
-    expect(rejectEvents).toEqual([
-      { type: 'skillRejected', slot: 0, skill: 'slowmo', reason: 'busy' },
-    ]);
-    expect(sim.snapshot().energy).toBe(100);
-
-    // Completing transition: skill was not buffered
-    sim.advance(1000);
-    expect(sim.snapshot().phase).toBe('playing');
-    const usedEvents = sim.drainEvents().filter(e => e.type === 'skillUsed');
-    expect(usedEvents).toEqual([]);
-    expect(sim.snapshot().slowmo).toBeNull();
-  });
-
   it('QA-P1T6-09 MEC-006-R13 useSkill with insufficient energy emits skillRejected energy', () => {
     const sim = createSim(b, 1, { bestLevel: 6, startEnergy: 39, loadout: ['slowmo', 'tailSnip'] });
     sim.useSkill(0); // slowmo costs 40
@@ -213,32 +183,7 @@ describe('QA P1 Task 6: Skill Framework, Slow-mo, Tail Snip & Loadout (MEC-006, 
     expect(sim.snapshot().energy).toBe(100);
   });
 
-  it('QA-P1T6-11 MEC-006-R13 rejection priority order: empty > busy > active > energy > noTarget', () => {
-    // 1. empty beats busy
-    const sBusy = buildState(b, { spawnInMs: QUIET });
-    sBusy.phase = 'transition';
-    sBusy.transitionLeftMs = 500;
-    sBusy.loadout = [null, null];
-    sBusy.bestLevel = 3;
-    const simBusy = restoreSim(b, sBusy);
-    simBusy.useSkill(0);
-    expect(simBusy.drainEvents()).toContainEqual(
-      expect.objectContaining({ type: 'skillRejected', reason: 'empty' })
-    );
-
-    // 2. busy beats energy
-    const sBusyEnergy = buildState(b, { spawnInMs: QUIET });
-    sBusyEnergy.phase = 'transition';
-    sBusyEnergy.transitionLeftMs = 500;
-    sBusyEnergy.loadout = ['slowmo', null];
-    sBusyEnergy.bestLevel = 3;
-    sBusyEnergy.energy = 0;
-    const simBusyEnergy = restoreSim(b, sBusyEnergy);
-    simBusyEnergy.useSkill(0);
-    expect(simBusyEnergy.drainEvents()).toContainEqual(
-      expect.objectContaining({ type: 'skillRejected', reason: 'busy' })
-    );
-
+  it('QA-P1T6-11 MEC-006-R13 rejection priority order: empty > active > energy > noTarget', () => {
     // 3. active beats energy (MEC-006 Edge Case 3)
     const simActive = createSim(b, 1, { bestLevel: 6, startEnergy: 79, loadout: ['slowmo', null] });
     simActive.useSkill(0); // spends 40, 39 left, slowmo active
@@ -369,14 +314,12 @@ describe('QA P1 Task 6: Skill Framework, Slow-mo, Tail Snip & Loadout (MEC-006, 
     sim.advance(1);
     expect(sim.snapshot().tickMs).toBe(224); // L1 slowmo
 
-    // Eat mango at t = 224 -> level 2, transition 1000ms
+    // Eat mango at t = 224 -> level 2 (no freeze)
     sim.advance(223);
     expect(sim.snapshot().level).toBe(2);
-    expect(sim.snapshot().phase).toBe('transition');
 
-    // After transition, effective tick is L2 slowmo = 221
+    // After the level up, effective tick is L2 slowmo = 221
     sim.advance(1001);
-    expect(sim.snapshot().phase).toBe('playing');
     expect(sim.snapshot().tickMs).toBe(221);
   });
 
@@ -423,39 +366,6 @@ describe('QA P1 Task 6: Skill Framework, Slow-mo, Tail Snip & Loadout (MEC-006, 
     expect(sim.snapshot().slowmo).toBeNull();
     expect(sim.snapshot().tickAlpha).toBe(0);
     expect(sim.snapshot().snake[0]).toEqual({ x: 2, y: 0 });
-  });
-
-  it('QA-P1T6-20 MEC-006-R16/R10 Slow-mo duration freezes during level transition', () => {
-    const s = buildState(b, {
-      level: 1,
-      progress: 3,
-      snake: SQUARE_SNAKE,
-      dir: [0, 1],
-      mango: [8, 9],
-      golden: false,
-      spawnInMs: QUIET,
-    });
-    s.loadout = ['slowmo', null];
-    s.bestLevel = 3;
-    s.energy = 100;
-    const sim = restoreSim(b, s);
-
-    sim.useSkill(0);
-    sim.advance(224); // eats mango, triggers level up & transition
-    expect(sim.snapshot().phase).toBe('transition');
-    expect(sim.snapshot().slowmo).toEqual({ leftMs: 3776 });
-
-    // Transition advances 1000ms: slowmo leftMs must NOT decrease
-    sim.advance(1000);
-    expect(sim.snapshot().phase).toBe('playing');
-    expect(sim.snapshot().slowmo).toEqual({ leftMs: 3776 });
-
-    // Circle remaining 3775ms
-    circleSim(sim, 3775, 221);
-    expect(sim.snapshot().slowmo).toEqual({ leftMs: 1 });
-    circleSim(sim, 1, 221);
-    expect(sim.snapshot().slowmo).toBeNull();
-    expect(sim.snapshot().timeMs).toBe(5000); // 4000ms active + 1000ms transition
   });
 
   it('QA-P1T6-21 MEC-006-R19 Slow-mo does not alter non-snake sim timers (mango rot, hazard timeline)', () => {
@@ -700,34 +610,6 @@ describe('QA P1 Task 6: Skill Framework, Slow-mo, Tail Snip & Loadout (MEC-006, 
       expect.objectContaining({ type: 'skillUsed', slot: 0, skill: 'tailSnip', energyBefore: 70, energyAfter: 40 })
     );
     expect(sim.snapshot().length).toBe(3);
-  });
-
-  it('QA-P1T6-30 MEC-006-EC15 / MEC-003-R7 Level transition causes active snipWall to crumble immediately', () => {
-    const snakeCells: [number, number][] = [[6, 10], [5, 10], [4, 10], [3, 10], [2, 10], [1, 10]];
-    const s = buildState(b, {
-      level: 1,
-      progress: 3,
-      snake: snakeCells,
-      dir: [1, 0],
-      mango: [7, 10], // eaten at t=140
-      golden: false,
-      spawnInMs: QUIET,
-    });
-    s.loadout = ['tailSnip', null];
-    s.bestLevel = 6;
-    s.energy = 100;
-    const sim = restoreSim(b, s);
-
-    sim.useSkill(0); // cuts to length 3, creates snipWall
-    expect(sim.snapshot().snipWall.every(c => c.state === 'solid')).toBe(true);
-
-    sim.advance(140); // eats mango, completes level 1, enters transition
-    expect(sim.snapshot().phase).toBe('transition');
-    expect(sim.snapshot().snipWall.every(c => c.state === 'crumble' && c.leftMs === 450)).toBe(true);
-
-    // Wall disappears by end of crumble
-    sim.advance(450);
-    expect(sim.snapshot().snipWall).toEqual([]);
   });
 
   // --------------------------------------------------------------------------

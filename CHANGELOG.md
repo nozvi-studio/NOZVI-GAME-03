@@ -2,12 +2,22 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+### Added
+- feat(core): level-up slowdown state and Slow-mo max rule in effectiveTick (MEC-003-R22, MEC-006-R17).
+- feat(core): levelUpSlowdown tiers in balance config with validation (MEC-003-R22).
 ### Changed
+- chore(core): remove level.transitionMs; level-up banner uses ui.bannerMs (MEC-003-R7).
+- feat(core): director first spawn starts when the level-up slowdown ends (MEC-003-R11).
+- feat(core): level up no longer freezes the sim; skills castable and timers running during level up; slowdown starts at level up (MEC-003-R7..R11/R22, MEC-006-R13).
+- feat(core): obstacles, rotten rocks, terrain, snip walls and rubble survive a level up; no level-up crumble (MEC-003-R8, MEC-006-EC15).
 - chore(log): `run_end` records `turns`, the count of turns accepted by the MEC-001 queue; old logs without it still load (MEC-003-R19).
 ### Fixed
 - fix(game): keyboard turns (arrows/WASD) are queued on the native keydown instead of waiting for Phaser's per-frame keyboard queue; pure key map in src/game/input/keyMap.ts (MEC-001).
 - fix(core): regular mango updates the speed ramp before the level-clear check, so rampEnded precedes levelUp (ARCHITECTURE step 12.4).
 ### Docs
+- docs: STATUS after merging level-up flow B.
+- docs: fix level-up flow B contradictions (MEC-003 R9/R12/R22, MEC-004 EC8, GDD level up).
+- docs(spec): level-up flow B rules in MEC-001/002/003/004/006/007/012 and ARCHITECTURE step order (MEC-003-R22).
 - docs: level-up flow B spec and plan updated with owner answers (rotten rock lifetime kept, banner uses ui.bannerMs).
 - docs: level-up flow B implementation plan.
 - docs: level-up flow B design spec (no freeze, obstacles stay, slowdown tiers).

@@ -1,16 +1,16 @@
-# MEC-003 — Levels & biomes: 30 levels, quotas, speed, transition, director, run log
+# MEC-003 — Levels & biomes: 30 levels, quotas, speed, level up, director, run log
 
 > Status: Approved (lead, delegated by owner 2026-11-03) · Phase: P1 · Date: 2026-11-03
 
 ## 1. Purpose & links
-- Replaces P0's 10-level progression (P0 design §5 "MEC-003") with 30 levels in 6 biomes, the GDD v0.2 quota/speed/director formulas, an exact level transition, a data-driven per-level obstacle family table, the level-30 run win, and the local run log.
+- Replaces P0's 10-level progression (P0 design §5 "MEC-003") with 30 levels in 6 biomes, the GDD v0.2 quota/speed/director formulas, an exact level-up sequence and slowdown, a data-driven per-level obstacle family table, the level-30 run win, and the local run log.
 - GDD: §4 (run win), §5.1 (biomes), §5.2 (per-level rules), §5.3 rule 5 (one new family per level), §5.4 (rotten mango → rock), §7, §11 row P1 ("existing obstacle families only", "death causes logged locally"), §12 (analytics events).
-- Related: MEC-001 (length reset, freeze), MEC-002 (mango, rot timer), MEC-004 (families, director, fairness), MEC-006 (energy, skills), MEC-007 (loadout), MEC-008 (start level, speed ramp).
+- Related: MEC-001 (length reset), MEC-002 (mango, rot timer), MEC-004 (families, director, fairness), MEC-006 (energy, skills), MEC-007 (loadout), MEC-008 (start level, speed ramp).
 
 ## 2. Player-facing summary
 - Clear 30 levels; every 5 levels you enter a new biome. (Every 5th level becomes a harder challenge level in P2; in P1 it plays like a normal level.)
 - Each level needs a few more mangoes (4 at L1 → 13 at L30) and the snake gets faster (140 ms → 82 ms per step).
-- On level up the board clears: obstacles crumble, the snake pops back to 4, and play resumes after about 1 second. Turns pressed meanwhile are kept.
+- On level up the snake pops back to 4 and keeps moving; obstacles stay until they end by their own lifetime. From level 6 the snake is briefly slower and eases back to the new speed (R22).
 - New obstacle types appear one at a time, with a banner the first time.
 - Clearing level 30 wins the run.
 
@@ -21,9 +21,8 @@ Core state (`src/core/level.ts`, `src/core/sim.ts`):
 | `level` | 1…30 | current level, **1-based** in P1 (lead decision L1) |
 | `progress`, `need` | number | bar progress and `quota(level)` (P0 names) |
 | `eatenInLevel` | number | defined by MEC-002-R3; reset to 0 by R7 step 1 |
-| `phase` | `'playing' \| 'transition'` | transition state (R7) |
-| `transitionLeftMs` | number | ms left in the transition, 0 while playing |
-| `levelTimeMs`, `timeMs` | number | sim ms in the current level (excluding transition) / since run start |
+| `levelUpSlow` | `{factor, easeMs, leftMs} \| null` | level-up slowdown, null when none (R22) |
+| `levelTimeMs`, `timeMs` | number | sim ms in the current level / since run start |
 | `startLevel`, `levelsCleared` | number | from `createSim` options / levels cleared in this run |
 Derived (pure functions, not stored): `biome(n)`, `isChallenge(n)`, `quota(n)`, `levelTickMs(n)`, `directorIntervalMs(n)`, `smallHazardCap(n)`, `familyRow(n)`.
 Save fields: none here (best level, checkpoints: MEC-008). Local run log: separate storage key (R17).
@@ -32,21 +31,19 @@ Save fields: none here (best level, checkpoints: MEC-008). Local run log: separa
 ### Structure and formulas (n = level, 1-based)
 - **MEC-003-R1 Biomes.** `biome(n) = floor((n − 1) / 5) + 1` (1…6). `isChallenge(n) = (n mod 5 = 0)` → L5, 10, 15, 20, 25, 30.
 - **MEC-003-R2 Quota.** `quota(n) = 4 + floor((n − 1) / 3)`. L1 = 4, L30 = 13, sum L1…L30 = 255.
-- **MEC-003-R3 Speed.** `levelTickMs(n) = 140 − 2 × (n − 1)`. L1 = 140, L30 = 82. The live tick is `levelTickMs(level)` except during the MEC-008 ramp; MEC-006 Slow-mo multiplies the live tick.
+- **MEC-003-R3 Speed.** `levelTickMs(n) = 140 − 2 × (n − 1)`. L1 = 140, L30 = 82. The live tick is `levelTickMs(level)` except during the MEC-008 ramp; the effective tick also applies the level-up slowdown (R22) and Slow-mo by the MEC-006-R17 max rule.
 - **MEC-003-R4 Director.** `directorIntervalMs(n) = max(1600, 5000 − 120 × n)`; `smallHazardCap(n) = min(10, 2 + floor(n / 3))`. On challenge levels: interval = `floor(directorIntervalMs(n) × director.challengeIntervalFactor)`, cap = `smallHazardCap(n) + director.challengeCapBonus`, both applied after the min/max clamps. The cap counts non-maze hazards (P0). **P1 config is neutral** (factor 1, bonus 0, lead decision L9), so challenge levels play like normal levels in P1 (L30: 1600 ms, cap 10); P2 sets the GDD §5.2 values (0.8 / +2 → L30: 1280 ms, cap 12) in config only.
 ### Progress, level up, run win
 - **MEC-003-R5 Progress.** Eating adds progress (normal 1, golden 2; MEC-002). While `progress ≥ need` and level < 30: `progress −= need`, level += 1 (P0 overflow loop). At most one level up per step in practice (max overflow 1).
-- **MEC-003-R6 Run win.** When `progress ≥ need` at level 30: `levelsCleared = 30`, status `over`, outcome `{won: true}`, emit `runWon`. No length reset, no transition. This is the only run win (MEC-001-R10).
-### Level transition (all times in sim ms, t = 0 is the level-up step)
-- **MEC-003-R7 Sequence.**
-  1. t = 0, inside the eating step, in this order: eat resolves (MEC-001-R5) → length reset (MEC-001-R4) → `level += 1`, `levelsCleared += 1`, `progress` = overflow, `eatenInLevel = 0`, `levelTimeMs = 0` → every hazard in any state (warn, solid) and every rotten rock switches to `crumble` (cells off, not solid), every terrain sends all cells down and starts its fade-out → if the level up came from the regular mango, MEC-002-R8(b) places the next one (crumbling cells still count as reserved, MEC-002-R2; a level up from a rain mango keeps the regular mango) → `phase = 'transition'`, `transitionLeftMs = 1000` → emit `shrunk`, then `levelUp`.
-  2. 0 < t < 1000: only `timeMs`, the transition timer, crumble timers (`hazard.crumbleMs`, 450 ms: hazards, rotten rocks, MEC-006 snip wall and rubble) and terrain fade-out (500 ms) advance. Removed objects disappear at t = 450 / 500. (Position in the 1 ms step: ARCHITECTURE "Sim step order", see MEC-006-R35.)
-  3. t = 1000: `phase = 'playing'`, emit `transitionEnd`. The tick accumulator restarts at 0, so the first snake step happens at t = 1000 + live tick.
-- **MEC-003-R8 What crumbles.** All MEC-004 hazards, rotten rocks and any MEC-006 temporary walls/rubble. Nothing temporary survives a level up.
-- **MEC-003-R9 What is frozen** during the transition: snake (MEC-001-R9), mango rot timer and placement-retry timer (MEC-002-R10), director timer, maze cooldown, `levelTimeMs`, and every MEC-006 timer (orb spawn, orb life, active skill durations, rain mango life). `timeMs` keeps counting.
-- **MEC-003-R10 Input during transition.** `turn()` is queued (no steering input lost). Skill casts are rejected by the sim without spending energy and are not buffered (MEC-006-R13 reason `busy`, event and feedback owned by MEC-006).
-- **MEC-003-R11 Level start.** At transition end (and at run start for `startLevel`) the director timer is set to `director.firstSpawnMs` (2500) and the maze cooldown to 0.
-- **MEC-003-R12 Transition length guard.** `parseBalance` requires `level.transitionMs ≥ max(hazard.crumbleMs, terrain.fadeOutMs)`.
+- **MEC-003-R6 Run win.** When `progress ≥ need` at level 30: `levelsCleared = 30`, status `over`, outcome `{won: true}`, emit `runWon`. No length reset, no level up. This is the only run win (MEC-001-R10).
+### Level up (all times in sim ms, t = 0 is the level-up step)
+- **MEC-003-R7 Sequence (no freeze).** Inside the eating step: eat resolves (MEC-001-R5) → length reset (MEC-001-R4) → `level += 1`, `levelsCleared += 1`, `progress` = overflow, `eatenInLevel = 0`, `levelTimeMs = 0` → director timer `director.firstSpawnMs`, maze cooldown 0 (R11) → slowdown starts (R22) → emit `shrunk`, `levelUp` → ramp end (MEC-008-R8) → unlocks (MEC-007-R12) → if the regular mango was eaten, MEC-002-R8(b) places the next one. The sim keeps stepping; the HUD shows "Level N" for `ui.bannerMs` as a non-blocking overlay. The tick accumulator is kept (not reset).
+- **MEC-003-R7.1** retired (a warning maze keeps its own lifecycle).
+- **MEC-003-R8 What stays.** Every hazard, rotten rock, terrain piece, snip wall and rubble keeps its state and ends by its own lifetime rules (MEC-002-R7, MEC-004, MEC-006-R22/R28). Hazards of a family not enabled in the new level keep working until they end.
+- **MEC-003-R9 Nothing is frozen.** Mango rot and retry, director (except while a slowdown is active, R11), maze cooldown, `levelTimeMs`, orbs, skills and rain timers keep counting through a level up.
+- **MEC-003-R10 Input.** `turn()` and skill casts are accepted at all times; there is no `busy` rejection.
+- **MEC-003-R11 Level start.** At a level up the director timer is set to `director.firstSpawnMs` (2500) and the maze cooldown to 0; the director does not count while a slowdown (R22) is active, so the first spawn comes `firstSpawnMs` after the slowdown ends (counted at once for levels without a slowdown). At run start for `startLevel` the timer is `firstSpawnMs` and there is no slowdown.
+- **MEC-003-R12 Banner length.** The level-up banner lasts `ui.bannerMs` (value in §9). `level.transitionMs` was removed together with the level-up freeze, so there is no transition length guard.
 - **MEC-003-R13 Empty mango slot.** While no mango is on the board (MEC-001-R10), the director does not spawn.
 ### Obstacle families per level (P1 = existing families only)
 - **MEC-003-R14 Family table.** `level.table` is an ordered list of rows `{from, to, weights, rockShapes, fenceShapes, rottenRocks}`. Rows cover 1…30 exactly once (validated). A family is enabled on level n iff it has a weight > 0 in `familyRow(n).weights`. The director (MEC-004) uses those weights instead of P0's unlock levels; `rock.shapePoolByLevel` and the P0 fence tiers are replaced by `rockShapes` / `fenceShapes`. Unknown family keys or shape names fail `parseBalance`. P2 adds families by adding weight keys, shape lists and family parameter groups (data), plus the family's code.
@@ -73,24 +70,25 @@ Save fields: none here (best level, checkpoints: MEC-008). Local run log: separa
   `run_start {startLevel, startEnergy, loadout, entry ('home' | 'results')}` · `level_up {level (new level), levelTimeMs (= levelUp.clearedLevelTimeMs)}` · `skill_used {skill, level, energyBefore}` (from MEC-006's event) · `checkpoint_unlocked {level (start level unlocked), reachedLevel}` (MEC-008) · `run_end {level, score, cause, durationMs (= sim timeMs), startLevel, levelsCleared, won, turns}`; `turns` is the number of turns the MEC-001 queue accepted during the run (dropped same-direction, reverse or queue-full inputs are not counted), so a log tells "no input" from "input lost". Records written before this field existed have no `turns` and stay valid; readers treat it as optional. `marble_shot`, `skin_unlocked` and the `marbles` field of `run_end` start in P4.
 - **MEC-003-R20 Causes.** `run_end.cause` is the death `CauseKey` (P0 list plus any key MEC-006 adds), `clear` for a run win, `quit` when the player quits from the pause overlay. `deathCounts` increments only for death causes.
 - **MEC-003-R21 Export.** With the URL flag `?debug=1`, Home shows an "Export log" button that copies the log JSON to the clipboard (for `docs/PLAYTEST.md`). No network.
+- **MEC-003-R22 Level-up slowdown.** Tiers by the level just reached, `levelUpSlowdown.tiers` (tier values in §9). `curFactor = 1 + (factor − 1) × leftMs / easeMs`, `leftMs` falls by 1 per sim ms and the slowdown ends at 0. A level up during a slowdown restarts it with the new tier. The effective tick is MEC-006-R17's `max` rule over the MEC-008 base tick. Implementation: `src/core/slowdown.ts`.
 
 ## 5. Edge cases
 1. **Golden mango at `need − 1`:** level up with progress 1 in the new level (R5).
-2. **Level up while a maze is warning:** it switches to crumble without ever landing (R7.1).
-3. **Snake standing on a warning terrain cell at level up:** the cell goes down; no death possible during the transition (no solid cells, snake frozen).
-4. **Mango at level up:** if the level up came from eating the regular mango, the next one is placed at t = 0 and its rot timer starts at t = 1000. If it came from a Mango Rain mango, the regular mango stays with its frozen timer (MEC-002-R8, EC4).
-5. **Pause during the transition:** the game layer stops calling `advance`; the transition resumes where it stopped.
-6. **Player quits during the transition:** logged as `quit` with the new level as `level`.
-7. **Start at a checkpoint level (MEC-008):** no `levelUp` and no introduction banner for that level; R11 applies; `levelsCleared` starts at 0.
+2. **Level up while a maze is warning:** it keeps warning and lands by its own lifecycle (R8).
+3. **Snake standing on a warning terrain cell at level up:** the terrain is not cleared at a level up and keeps its own lifecycle (R8); the cell follows the terrain rules (MEC-004).
+4. **Mango at level up:** if the level up came from eating the regular mango, the next one is placed at t = 0 and its rot timer starts at once. If it came from a Mango Rain mango, the regular mango stays and its timer keeps running (MEC-002-R8, EC4).
+5. **Pause during a level up:** the game layer stops calling `advance`; the slowdown and banner resume where they stopped.
+6. **Player quits during a level up:** logged as `quit` with the new level as `level`.
+7. **Start at a checkpoint level (MEC-008):** no `levelUp` and no introduction banner for that level; R11 applies and there is no slowdown; `levelsCleared` starts at 0.
 8. **Rotten rock rotting near the head:** P0 fairness: unfair → no rock (MEC-002-R6).
 9. **Challenge interval rounding (P2 values):** `5000 − 120n` is a multiple of 40, so × 0.8 is an integer; `floor` is kept for safety. With the P1 factor 1 the interval is unchanged.
 10. **Director wants a maze while a terrain is active (L26+):** P0 exclusion; it picks among the remaining options.
 
 ## 6. Interactions with other mechanics
-- **MEC-001:** R7 calls the length reset; transition freeze MEC-001-R9; board full no longer wins.
-- **MEC-002:** `eatenInLevel` resets each level (GDD §7 rot formula "eaten in level"); rot timer frozen in transitions; the family table enables rotten rocks (R17), MEC-002 owns their behavior and lifetime.
-- **MEC-004:** director reads R4 interval/cap and the R14 table; hazards crumble on level up; fairness rules unchanged.
-- **MEC-006:** energy and orbs persist across levels (GDD §6.1); its timers freeze in transitions; casts rejected in transitions; temporary walls crumble.
+- **MEC-001:** R7 calls the length reset; the snake keeps stepping (MEC-001-R9); board full no longer wins.
+- **MEC-002:** `eatenInLevel` resets each level (GDD §7 rot formula "eaten in level"); rot timer keeps running through a level up; the family table enables rotten rocks (R17), MEC-002 owns their behavior and lifetime.
+- **MEC-004:** director reads R4 interval/cap and the R14 table; hazards survive a level up and the director skips while the slowdown is active (R11); fairness rules unchanged.
+- **MEC-006:** energy and orbs persist across levels (GDD §6.1); its timers keep running through a level up; casts are accepted; temporary walls survive.
 - **MEC-007:** the loadout is fixed for the whole run; logged in `run_start`.
 - **MEC-008:** provides `startLevel` and the speed ramp; consumes `levelUp`/`runWon` for best level and checkpoint unlocks.
 
@@ -107,8 +105,8 @@ Save fields: none here (best level, checkpoints: MEC-008). Local run log: separa
   createSim(balance: Balance, seed: number, options?: SimOptions): Sim;
   ```
   Omitted options take these defaults, so the P0 call `createSim(balance, seed)` stays valid (a fresh L1 run). Every validation failure throws a `RangeError` with a readable message (one error type for all options).
-- `SimSnapshot` adds: `biome`, `challenge`, `phase`, `transitionLeftMs`, `levelTimeMs`, `timeMs`, `startLevel`, `levelsCleared`. `level` becomes 1-based.
-- `SimEvent` changes: `levelUp {level, biome, challenge, biomeChanged, unlocked?: FamilyKey, clearedLevelTimeMs}` (extends P0 `levelUp`); new `transitionEnd {level}`, `runWon {score, timeMs}`. `FamilyKey = 'rock' | 'fence' | 'terrain' | 'maze' | 'rottenRock'` (P2 extends).
+- `SimSnapshot` adds: `biome`, `challenge`, `levelUpSlow`, `levelTimeMs`, `timeMs`, `startLevel`, `levelsCleared`. `level` becomes 1-based.
+- `SimEvent` changes: `levelUp {level, biome, challenge, biomeChanged, unlocked?: FamilyKey, clearedLevelTimeMs}` (extends P0 `levelUp`); new `runWon {score, timeMs}`. `FamilyKey = 'rock' | 'fence' | 'terrain' | 'maze' | 'rottenRock'` (P2 extends).
 - Pure exports from `src/core/index.ts`: `quota`, `levelTickMs`, `biome`, `isChallenge` (for HUD and tests).
 
 ## 8. Feedback in P1 (greybox)
@@ -123,7 +121,8 @@ Save fields: none here (best level, checkpoints: MEC-008). Local run log: separa
 |---|---|---|
 | `level.maxLevel` / `level.perBiome` | 30 / 5 (P0 key `maxLevel` kept, now 1-based last level) | GDD §5.1 |
 | `level.needBase` / `level.needStepLevels` | 4 / 3 | GDD §5.2 |
-| `level.transitionMs` | 1000 | GDD §5.2 "≈1 s" |
+| `ui.bannerMs` | 1800 | level-up banner length (R12); `level.transitionMs` was removed |
+| `levelUpSlowdown.tiers` | 6-15: x1.4 / 1000 ms; 16-30: x1.6 / 1500 ms | owner 2026-11-04 (R22) |
 | `level.table` | R15 rows | GDD §5.1/§5.4 + lead decisions L4–L6 |
 | `speed.startMs` / `speed.msPerLevel` / `speed.minMs` | 140 / 2 / 82 | GDD §5.2 (minMs = L30 value, safety clamp) |
 | `director.intervalBaseMs` / `intervalPerLevelMs` / `intervalMinMs` | 5000 / 120 / 1600 | GDD §5.2 |
@@ -143,12 +142,15 @@ Read, owned elsewhere: `mango.rottenRockLifeMs` (5000, MEC-002 §9); `fairness.*
 - `MEC-003-R4 with factor 0.8 and bonus 2 (test balance) challenge L30 is 1280 ms and cap 12, L29 unchanged`
 - `MEC-003-R5 overflow progress carries into the next level`
 - `MEC-003-R6 clearing L30 ends the run with won true and emits runWon without levelUp`
-- `MEC-003-R7 transition lasts 1000 ms and first snake step is at 1000 + tick`
-- `MEC-003-R7 all hazards and rotten rocks are non-solid from t = 0 and gone by t = 500`
-- `MEC-003-R9 rot timer, director timer and levelTimeMs do not advance during transition`
-- `MEC-003-R10 turns queued during transition are applied afterwards`
-- `MEC-003-R11 first spawn of each level is 2500 ms after transition end`
-- `MEC-003-R12 parseBalance rejects transitionMs below crumble or fade-out time`
+- `MEC-003-R7 no freeze: the snake steps one level-2 tick after the level up`
+- `MEC-003-R7 balance has no level.transitionMs (no level-up freeze; banner uses ui.bannerMs)` (R12)
+- `MEC-003-R8 obstacles survive a level up, also families not enabled in the new level, and keep their own lifetimes`
+- `MEC-003-R8 snip walls survive a level up and end by their own lifetime`
+- `MEC-003-R9 rot, director and levelTimeMs keep running after a level up`
+- `MEC-006-R13 a skill cast right after a level up is accepted (no busy rejection)` (R10)
+- `MEC-003-R11 without a slowdown the first spawn is firstSpawnMs after the level up`
+- `MEC-003-R11 the first-spawn timer starts when the slowdown ends`
+- R22: all names in `tests/core/slowdown.test.ts` (config and validation, no slowdown for levels 2-5, tier factors, linear ease and exact end, restart on a level up during a slowdown, ramp interaction, Slow-mo max rule)
 - `MEC-003-R13 director does not spawn while no mango is on the board`
 - `MEC-003-R14 table rows must cover 1..30 without gaps or overlaps`
 - `MEC-003-R15 L1 spawns only single rocks; maze never spawns before L26`
@@ -163,8 +165,8 @@ Read, owned elsewhere: `mango.rottenRockLifeMs` (5000, MEC-002 §9); `fairness.*
 ## 11. Lead decisions & escalations
 ### Lead decisions
 - **L1** Core `level` becomes 1-based: every GDD formula, checkpoint and log field is 1-based; P0's 10-level functions are rewritten in P1 anyway, so this avoids a permanent off-by-one layer.
-- **L2** Director restarts at 2500 ms each level and maze cooldown resets: the board was just cleared, so each level opens with a short calm that shows the shrink and new banner.
-- **L3** Snake frozen for the whole 1000 ms transition, turns queued, skill casts rejected: freezing makes "no input lost" exact and stops deaths on a board that is changing.
+- **L2** Director restarts at 2500 ms each level and maze cooldown resets: the board was just cleared, so each level opens with a short calm. Flow B (2026-11-04): the calm is counted from the end of the level-up slowdown (R11).
+- **L3** (superseded 2026-11-04 by level-up flow B) The 1000 ms freeze and crumble were removed: the snake keeps moving with a slowdown (R22) and nothing is rejected.
 - **L4** Biome 4–5 reuse biome-3 families plus the existing complex fence shapes (T, Z, F, U, plus) from L13/L16: GDD puts "complex fences" in biome 4; biome 5 gets new families only in P2.
 - **L5** Rotten rocks start at L12 (not L11) and last 5000 ms: L11 already introduces rising ground (GDD §5.3 rule 5); 5000 ms is shorter than a small rock's 6000–10000 ms, matching "for a short time".
 - **L6** Terrain max active = 1 on every level: GDD §5.1 allows only one big terrain event; P0's 2-terrain late rule was prototype behavior.
@@ -172,6 +174,6 @@ Read, owned elsewhere: `mango.rottenRockLifeMs` (5000, MEC-002 §9); `fairness.*
 - **L8** Challenge multipliers apply after the clamps: keeps challenge levels denser even at the floor (L25, L30) once P2 enables them.
 - **L9** (lead, 2026-11-03) Challenge levels are P2 scope (GDD §11): P1 ships the code path and config keys with neutral values (`challengeIntervalFactor = 1`, `challengeCapBonus = 0`) and the challenge banner/HUD marker OFF. `isChallenge` and `levelUp.challenge` exist from P1 so P2 is a config + text change. Replaces former escalation E1.
 - **L10** (lead, 2026-11-03) Fairness distances stay at P0 values in P1 (near-head 4, front lane 4 cells). 4 is stricter than GDD §5.3 rule 2's 3 cells, so it complies; any change belongs to the P2 MEC-004 spec.
-- Lead review 2026-11-03: L1–L8 accepted (1-based levels, 1000 ms transition, rotten rocks from L12 with 5000 ms life, rising ground max 1, run log key `mango-snake.log`).
+- Lead review 2026-11-03: L1–L8 accepted (1-based levels, level-up freeze (removed later by flow B), rotten rocks from L12 with 5000 ms life, rising ground max 1, run log key `mango-snake.log`).
 ### Escalate to owner
 - None.

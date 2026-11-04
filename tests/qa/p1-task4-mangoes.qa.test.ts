@@ -429,33 +429,6 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
     expect(snapCrumble.snake[0]).toEqual({ x: 9, y: 8 });
   });
 
-  it('QA-P1T4-15 MEC-002-R7 / MEC-003-R7 rotten rocks crumble immediately at level transition', () => {
-    // MEC-002-R7 & MEC-003-R7: "every rotten rock switches to crumble (cells off, not solid)... Nothing temporary survives a level up"
-    const s = buildState(b, {
-      level: 12,
-      progress: 6, // need at L12 is 7
-      snake: [[8, 8], [7, 8], [6, 8]],
-      dir: [1, 0],
-      mango: [9, 8],
-      spawnInMs: QUIET,
-    });
-    s.rottenRocks = [{ family: 'rottenRock', x: 2, y: 2, state: 'solid', leftMs: 4000 }];
-
-    const sim = restoreSim(b, s);
-    sim.advance(140); // eats mango -> progress 7 reaches quota -> level up to L13
-    const snap = sim.snapshot();
-
-    expect(snap.phase).toBe('transition');
-    const rock = snap.rottenRocks.find(r => r.x === 2 && r.y === 2);
-    expect(rock).toBeDefined();
-    expect(rock!.state).toBe('crumble');
-
-    // Complete transition (1000 ms; crumble lasts 450 ms)
-    sim.advance(1000);
-    expect(sim.snapshot().phase).toBe('playing');
-    expect(sim.snapshot().rottenRocks).toHaveLength(0);
-  });
-
   it('QA-P1T4-16 MEC-002-R8 next mango placed after eat does not occupy snake cells', () => {
     // MEC-002-R8: "in the eating step after eating the regular mango... place next mango"
     for (let seed = 1; seed <= 10; seed++) {
@@ -586,37 +559,6 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
     expect(snap.mango).toBeNull();
     expect(snap.hazards).toHaveLength(0);
     expect(snap.terrains).toHaveLength(0);
-  });
-
-  it('QA-P1T4-20 MEC-002-R10 rot and retry timers freeze during level transition', () => {
-    // MEC-002-R10: "During a MEC-003 level transition, ageMs and retryMs do not advance (MEC-003-R9)."
-    const s = buildState(b, {
-      level: 1,
-      progress: 3,
-      snake: [[8, 8], [7, 8], [6, 8]],
-      dir: [1, 0],
-      mango: [9, 8],
-      spawnInMs: QUIET,
-    });
-    const sim = restoreSim(b, s);
-    sim.advance(140); // level up to L2, starts transition
-
-    const snapStart = sim.snapshot();
-    expect(snapStart.phase).toBe('transition');
-    expect(snapStart.mango).not.toBeNull();
-    expect(snapStart.mango!.ageMs).toBe(0);
-
-    // Advance 500 ms inside transition
-    sim.advance(500);
-    const snapMid = sim.snapshot();
-    expect(snapMid.phase).toBe('transition');
-    expect(snapMid.mango!.ageMs).toBe(0);
-
-    // Finish remaining 500 ms of transition
-    sim.advance(500);
-    expect(sim.snapshot().phase).toBe('playing');
-    sim.advance(10);
-    expect(sim.snapshot().mango!.ageMs).toBe(10);
   });
 
   it('QA-P1T4-21 MEC-002-EC1 rot in the same ms head enters resolves before step without death', () => {

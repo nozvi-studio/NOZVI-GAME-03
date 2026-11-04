@@ -95,8 +95,8 @@ export function p1FuzzSeed(b: Balance, seed: number, simMs: number): P1Report {
       if (s.snake.length < b.skills.tailSnip.minLength) bad(`t=${t}: length ${s.snake.length}`);
       const h0 = before.snake[0]!, h1 = s.snake[0]!, moved = h0.x !== h1.x || h0.y !== h1.y;
       if (moved) rep.steps++;
-      // MEC-001-R9
-      if (before.phase === 'transition' && (moved || s.status !== 'playing')) bad(`t=${t}: step or death during transition`);
+      // MEC-003-R22 an active slowdown always sits inside its ease window
+      if (s.levelUpSlow && (s.levelUpSlow.leftMs < 1 || s.levelUpSlow.leftMs > s.levelUpSlow.easeMs)) bad(`t=${t}: slowdown leftMs ${s.levelUpSlow.leftMs}`);
       // P0: at most one snake step per 1 ms step
       if (Math.abs(h0.x - h1.x) + Math.abs(h0.y - h1.y) > 1) bad(`t=${t}: head jumped`);
       checkPlacements(b, before, s, mango, t, bad);

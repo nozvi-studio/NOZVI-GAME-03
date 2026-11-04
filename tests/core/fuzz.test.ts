@@ -33,7 +33,7 @@ describe('P1 skill fuzz', () => {
   const only = (re: RegExp) => all.filter(v => re.test(v));
   it('MEC-006-R2 fuzz: energy stays in [0, energy.max]', () => { expect(only(/energy/)).toEqual([]); });
   it('MEC-001-R7 fuzz: snake length never below minLength', () => { expect(only(/length/)).toEqual([]); });
-  it('MEC-001-R9 fuzz: no snake step and no death during the transition', () => { expect(only(/transition/)).toEqual([]); });
+  it('MEC-003-R22 fuzz: level-up slowdown stays inside its ease window', () => { expect(only(/slowdown/)).toEqual([]); });
   it('P0 fuzz: at most one snake step per 1 ms step', () => { expect(only(/jumped/)).toEqual([]); });
   it('MEC-002-R2 no placement ever uses a reserved cell', () => { expect(only(/reserved/)).toEqual([]); });
   it(`MEC-006-R6 fuzz: orbs never on reserved, unreachable or near-head cells (${P1_SEEDS} seeds)`, () => {

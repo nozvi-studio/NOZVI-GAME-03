@@ -23,8 +23,8 @@ describe('MEC-008 speed ramp', () => {
     const events = sim.drainEvents();
     expect(types(events).slice(-3)).toEqual(['shrunk', 'levelUp', 'rampEnded']);
     expect(events.at(-1)).toEqual({ type: 'rampEnded', level: 5 });
-    expect(sim.snapshot()).toMatchObject({ phase: 'transition', rampActive: false, rampMangoesLeft: 0 });
-    sim.advance(1000 + 131); expect(sim.snapshot().snake[0]).toEqual({ x: 3, y: 0 });
+    expect(sim.snapshot()).toMatchObject({ rampActive: false, rampMangoesLeft: 0 });
+    sim.advance(131); expect(sim.snapshot().snake[0]).toEqual({ x: 3, y: 0 });
     expect(sim.snapshot().tickMs).toBe(132);
     sim.advance(1); expect(sim.snapshot().snake[0]).toEqual({ x: 4, y: 0 });
     expect(types(sim.drainEvents())).not.toContain('rampEnded');

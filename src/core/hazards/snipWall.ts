@@ -22,8 +22,4 @@ export const snipWallFamily: HazardFamily<SnipWall> = {
     for (const w of s.snipWalls) if (w.state === 'solid') w.cells = w.cells.filter(c => c.x !== x || c.y !== y);
     s.snipWalls = s.snipWalls.filter(w => w.cells.length > 0);
   },
-  // MEC-003-R8 temporary walls crumble at level-up, then disappear during transition.
-  onLevelEnd(s, ctx) {
-    for (const w of s.snipWalls) { w.state = 'crumble'; w.leftMs = ctx.balance.hazard.crumbleMs; }
-  },
 };

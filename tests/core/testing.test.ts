@@ -39,8 +39,8 @@ it('P1-D6 testCtx emits events and queries the real snake', () => {
   expect(ctx.balance).toBe(b);
   expect(ctx.snakeOn(1, 1)).toBe(true);
   expect(ctx.snakeOn(8, 8)).toBe(false);
-  ctx.emit({ type: 'transitionEnd', level: 2 });
-  expect(ctx.events).toEqual([{ type: 'transitionEnd', level: 2 }]);
+  ctx.emit({ type: 'rampEnded', level: 2 });
+  expect(ctx.events).toEqual([{ type: 'rampEnded', level: 2 }]);
 });
 it('P1-D6 circle keeps a SQUARE snake alive for 60 s', () => {
   const sim = simFromAscii(b, [], { snake: SQUARE, dir: [0, 1], quiet: true });

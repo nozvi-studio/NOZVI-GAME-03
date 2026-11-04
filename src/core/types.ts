@@ -30,6 +30,8 @@ export interface TimedHazard {
 export type TerrainVis = 'down' | 'warn' | 'up';
 export interface TerrainCell { x: number; y: number; delay: number; up: boolean; vis: TerrainVis }
 export interface TerrainHazard { family: 'terrain'; t: number; lifeMs: number; cells: TerrainCell[] }
+/** MEC-003-R22 active level-up slowdown; leftMs counts sim ms down to 0. */
+export interface LevelUpSlow { factor: number; easeMs: number; leftMs: number }
 export interface RottenRock { family: 'rottenRock'; x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }
 export interface SnipWall { family: 'snipWall'; cells: Cell[]; state: 'solid' | 'crumble'; leftMs: number }
 export interface Rubble { family: 'rubble'; x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }
@@ -43,7 +45,7 @@ export interface Outcome { won: boolean; cause?: CauseKey }
 
 export type SimEvent =
   | { type: 'skillUsed'; slot: 0 | 1; skill: SkillId; level: number; energyBefore: number; energyAfter: number }
-  | { type: 'skillRejected'; slot: 0 | 1; skill: SkillId | null; reason: 'empty' | 'busy' | 'active' | 'energy' | 'noTarget' }
+  | { type: 'skillRejected'; slot: 0 | 1; skill: SkillId | null; reason: 'empty' | 'active' | 'energy' | 'noTarget' }
   | { type: 'skillEnded'; skill: SkillId; reason: 'timeout' | 'consumed' }
   | { type: 'tailSnipped'; cut: number; cells: Cell[] }
   | { type: 'shieldBroke'; x: number; y: number; family: FamilyKey; rubble: Cell | null }
@@ -61,7 +63,6 @@ export type SimEvent =
   | { type: 'mangoDeferred' }
   | { type: 'shrunk'; from: number; to: number; removed: Cell[] }
   | { type: 'levelUp'; level: number; biome: number; challenge: boolean; biomeChanged: boolean; unlocked?: IntroKey; clearedLevelTimeMs: number }
-  | { type: 'transitionEnd'; level: number }
   | { type: 'runWon'; score: number; timeMs: number }
   | { type: 'landed'; hazardType: TimedKey }
   | { type: 'dust'; x: number; y: number }
@@ -82,6 +83,7 @@ export interface SimState {
   loadout: [SkillId | null, SkillId | null];
   bestLevel: number;
   slowmo: { leftMs: number } | null;
+  levelUpSlow: LevelUpSlow | null;
   snipWalls: SnipWall[];
   shield: { leftMs: number } | null;
   rubble: Rubble[];
@@ -104,8 +106,6 @@ export interface SimState {
   retryMs: number;
   level: number;               // 1-based
   progress: number;
-  phase: 'playing' | 'transition';
-  transitionLeftMs: number;
   levelTimeMs: number;
   timeMs: number;
   startLevel: number;
@@ -127,6 +127,7 @@ export interface TerrainView { t: number; lifeMs: number; cells: readonly { x: n
 export interface SimSnapshot {
   skills: readonly { slot: 0 | 1; id: SkillId | null; cost: number; affordable: boolean; active: boolean; leftMs: number }[];
   slowmo: { leftMs: number } | null;
+  levelUpSlow: LevelUpSlow | null;
   snipWall: readonly { x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }[];
   shield: { leftMs: number } | null;
   rubble: readonly Omit<Rubble, 'family'>[];
@@ -156,8 +157,6 @@ export interface SimSnapshot {
   tickMs: number;
   biome: number;
   challenge: boolean;
-  phase: 'playing' | 'transition';
-  transitionLeftMs: number;
   levelTimeMs: number;
   timeMs: number;
   startLevel: number;
@@ -201,7 +200,6 @@ export interface HazardFamily<S extends { family: FamilyKey }> {
   solidAt(state: S, x: number, y: number): boolean;    // collision
   bfsWallAt(state: S, x: number, y: number): boolean;  // reachability walls
   reservedAt(state: S, x: number, y: number): boolean; // placement reserved
-  onLevelEnd(s: SimState, ctx: StepCtx): void;         // MEC-003-R7; context supplies configured crumble time
   onBreak?(s: SimState, x: number, y: number): void;    // MEC-006-R26 removes one broken solid cell
   breakable: boolean;                                  // MEC-006-R24 Shield can break it; false only for rubble
 }

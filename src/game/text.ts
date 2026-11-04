@@ -40,7 +40,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'hud.level': 'L{n} · Biome {b}', 'hud.energy': 'Energy {energy}/{max}',
   'skill.slowmo.name': 'Slow-mo', 'skill.tailSnip.name': 'Tail Snip', 'skill.shield.name': 'Shield', 'skill.mangoRain.name': 'Mango Rain',
   'skill.reject.energy': 'Need {cost} energy', 'skill.reject.active': 'Already on!',
-  'skill.reject.noTarget': 'Too short to snip', 'skill.reject.busy': 'Not now!',
+  'skill.reject.noTarget': 'Too short to snip',
   'tip.orb.first': 'Energy orb! Fuel for skills',
   'death.snipWall': CAUSE_TEXT.snipWall, 'death.rubble': CAUSE_TEXT.rubble,
   'loadout.title': 'Pick your skills', 'loadout.go': 'Go!', 'loadout.back': 'Back',

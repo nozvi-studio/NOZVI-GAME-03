@@ -271,14 +271,6 @@ describe('MEC-002 P1 mango rules', () => {
     expect(sim.snapshot().snake[0]).toEqual({ x: 7, y: 0 });
   });
 
-  it('MEC-002-R10 rot and retry timers do not advance during the transition', () => {
-    for (const mango of [null, { x: 16, y: 16, golden: false, leftMs: 7500, totalMs: 8000 }]) {
-      const sim = simFromAscii(b, [], { snake: SQUARE, extraState: { phase: 'transition', transitionLeftMs: 1000, mango, retryMs: 113 } });
-      sim.advance(1); const before = exportState(sim);
-      sim.advance(998); expect(exportState(sim).mango).toEqual(before.mango); expect(exportState(sim).retryMs).toBe(before.retryMs);
-    }
-  });
-
   it('MEC-003-R13 director does not spawn while no mango is on the board', () => {
     const s = exportState(deferred()); s.mango = null; s.spawnInMs = -1;
     const before = structuredClone(s);

@@ -36,7 +36,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 |---|---|---|---|---|---|
 | MEC-001 | Snake movement, growth, self-collision, **length reset on level up** | Core steering challenge | P0 (port), P1 (reset) | `docs/specs/mechanics/MEC-001-snake.md` | Implemented (P1) |
 | MEC-002 | Mangoes: rot timer, golden mango, rotten mango → temporary obstacle | Time pressure, risk/reward | P0, P1, P2 | `docs/specs/mechanics/MEC-002-mango.md` | Implemented (P1) |
-| MEC-003 | Level & biome progression: 30 levels, 6 biomes × 5 levels, quotas, speed curve, level transition | Short-term goal, escalation, sense of travel | P1 | `docs/specs/mechanics/MEC-003-levels-biomes.md` | Implemented (P1) |
+| MEC-003 | Level & biome progression: 30 levels, 6 biomes × 5 levels, quotas, speed curve, level up | Short-term goal, escalation, sense of travel | P1 | `docs/specs/mechanics/MEC-003-levels-biomes.md` | Implemented (P1) |
 | MEC-004 | Obstacle families + director + fairness rules (warn → solid → crumble, never on snake, always a path) | Escalating, readable danger | P0 (port), P2 (new families) | to write (template 03) | Partly implemented (rocks, fences, rising ground, mazes) |
 | MEC-006 | Energy orbs, energy bar, 4 skills with energy cost and side effects | Clever escapes and farming at a cost | P1 | `docs/specs/mechanics/MEC-006-energy-skills.md` | Implemented (P1) |
 | MEC-007 | Skill loadout: pick 2 of the unlocked skills before a run | Strategy before the run; uncluttered phone controls | P1 | `docs/specs/mechanics/MEC-007-loadout.md` | Implemented (P1) |
@@ -83,7 +83,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 - **Quota:** mangoes needed to clear level *n* (1-based) = `4 + floor((n − 1) / 3)` → L1 = 4, L30 = 13; 255 mangoes for a full clear.
 - **Speed:** tick = `140 ms − 2 ms × (n − 1)` → L1 = 140 ms, L30 = 82 ms. (Replaces the prototype's 10-level curve whose minimum was never reached.)
 - **Length reset on level up (owner decision A):** when the bar fills, the snake shrinks to its start length (4 segments) keeping head position and direction; growth restarts from there. Golden mangoes still grow +1.
-- **Level transition (≈1 s, no input lost):** temporary hazards crumble, the new level's permanent layout (if any) fades in with warnings, rot timers pause. Exact sequence → MEC-003 spec.
+- **Level up (no freeze):** the snake keeps moving and existing obstacles stay until they end by their own lifetime; from the higher levels a short slowdown eases back to the new speed (owner 2026-11-04). Exact rules → MEC-003-R7..R9 and R22.
 - **Director:** spawn interval `max(1.6 s, 5 s − 0.12 s × n)`; small-hazard cap `min(10, 2 + floor(n / 3))`. Challenge levels: interval × 0.8, cap +2.
 
 ### 5.3 Fairness rules (apply to every obstacle family, MEC-004)
