@@ -354,3 +354,9 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - Choice C (extra amended rules): `HazardFamily.onLevelEnd` and its MEC-004-R16 / MEC-012-R4 rules were removed; `busy` was removed from `skillRejected` reasons (MEC-006-R13, MEC-007); the `transitionEnd` event, `phase` and `transitionLeftMs` were removed (MEC-003).
 - Consequence: Slow-mo and the slowdown use the larger factor (MEC-006-R17); MEC-012 (P2a, not built yet) now has no level-end fade.
 
+## 2026-11-04 - P2a plan after level-up flow B (lead rulings)
+- Context: the P2a plan (`docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md`) was written before flow B and used `onLevelEnd` and the level-end fade. The plan was revised; two points were not settled by the specs.
+- FB-1 (lead ruling): the mud tile factor multiplies the flow B slow factor: effective tick = `round(baseTickMs × max(Slow-mo factor, level-up slowdown curFactor) × tileFactor)`. MEC-004-R7 named only Slow-mo as `slowFactor`; the MEC-006-R17 max rule is used as `slowFactor`. P2a Task 5 updates the MEC-004-R7 text. Reason: one slow factor (Slow-mo and slowdown never stack, as flow B decided), and mud keeps its "half speed" meaning in every state.
+- FB-2 (lead ruling): the escape-check and bot timelines (MEC-004-R18/R19) use one fixed tick per search, read from `effectiveTick(s, b)` at the start, even while a level-up slowdown eases. The real tick can only get shorter in the search window; the per-family fuzz (I1-I7) runs through level ups to catch any gap. Reason: keeps the BFS simple and deterministic.
+- Also (follows from flow B, not a new rule): tile patches have no level-end hook and keep their lifecycle across a level up (MEC-012-R4/EC9); the capClass director keeps the slowdown skip (MEC-003-R11); P2 design §20 item 3 is void.
+
