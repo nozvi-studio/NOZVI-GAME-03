@@ -61,7 +61,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
   });
   it('GDD-13 M and sound button persist settings through the session', () => {
     const h = setup(); bindKeyboard(h.game);
-    h.game.input.keyboard!.emit('keydown', { code: 'KeyM', preventDefault() {} });
+    h.browser.emit('keydown', { code: 'KeyM', preventDefault() {} });
     expect(load(h.store, rules).settings.sound).toBe(false);
     expect(sound.setOn).toHaveBeenLastCalledWith(false);
     h.click('sound-button');
