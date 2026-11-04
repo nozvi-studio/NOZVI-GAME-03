@@ -2,6 +2,15 @@
 
 > Newest entry first. AI: read the latest entry only (AGENTS §2b).
 
+## 2026-11-04 — P1 exit gate verdict: PASS (lead)
+- Basis (owner decision 2026-11-04: gate = 2 testers, and "agy QA pass => gate pass"):
+  - Owner desktop log: 13 runs, max L9, deaths wall 11 / self 2. The 4 wall deaths at exactly 1260 ms were no-input runs (9 steps x 140 ms from spawn), not a bug; the owner kept the start rule. `run_end.turns` is now logged to tell idle from lost input.
+  - Owner phone log: 3 runs, max L2, deaths wall 1 / rock 1; 1 run quit without `run_end`.
+  - Owner feedback fixed: WASD lag (native keydown), level-up flow B (no freeze, obstacles stay, slowdown tiers MEC-003-R22).
+  - agy black-box browser QA of flow B, desktop 1280x800 + phone 390x844: 11/11 PASS. Item 5 (L16) was checked through the debug state because checkpoints stop at L12. Report kept outside git (.superpowers/qa/qa-levelup-b.md).
+- Not met / carried to P2: the original 5-tester protocol and replay >= 3 metric were waived by the owner; session-length targets (GDD §4) are still open. Re-check with the P2 exit playtest (P2c Task 8).
+- Verdict: P1 gate PASS. version/v0.1 merged into dev; P2 starts on version/v0.2.
+
 ## 2026-11-04 — P1 playtest protocol (pending owner)
 - Build: branch `chore/p1-playtest` (P1 Task 10). `npm run build` + `npx vite preview --host` on LAN (or a static host); testers open the game with `?debug=1`.
 - Session: 5 testers, fresh save each (clear site data first), up to 15 min of unprompted play; the observer only notes comments, never prompts.
