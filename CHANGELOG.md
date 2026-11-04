@@ -2,6 +2,8 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+### Docs
+- docs: P0 parity check on desktop recorded in PLAYTEST (phone run pending owner); prototype frozen (P0 PR 9).
 ### Tests
 - test(qa): independent black-box QA suite for P0 Task 2 by the tester worker (34 cases; MEC-004-R13 warn bound skipped until P2a).
 ### Features

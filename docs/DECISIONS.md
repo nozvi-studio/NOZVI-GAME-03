@@ -128,3 +128,9 @@ Append-only. Format: `## YYYY-MM-DD — <decision>` then Context / Choice / Alte
 - Choice: retain HUD scene capture for button-down exclusion; clear active board swipes on native window mouse-up and matching touch-end/cancel, with listeners removed on shutdown. Clip the root board container to its inner 18px rounded boundary and draw the 4px external outline as a separate scene object that follows shake.
 - Alternatives: forward release events from every HUD control; include the outline in the content mask. The latter lets late-added floating scores cover the ink and differs from prototype CSS L72-73.
 - Consequence: no core rules, balance or dependencies change. Focused tests cover captured releases, touch identity and floating-score containment; real device input and clipping during shake still need visual verification.
+
+## 2026-11-05 — Prototype frozen after P0 parity
+**Decision:** `prototype/mango-snake-hard.html` is frozen (comment on line 2). Reason: P1 changes the rules in `src/`; the prototype stays only as the parity reference of PLAYTEST 2026-11-05.
+
+## 2026-11-05 — QA process: independent tester
+**Decision (owner, 2026-11-04):** feature code is written by Codex or Claude; agy is the dedicated tester and never writes feature code. After each task agy derives black-box cases from the MEC specs (public API only), writes them under `tests/qa/` and runs browser checks; the lead triages failures (code bug → implementer, test error → agy, spec gap → owner).
