@@ -14,7 +14,7 @@ export interface Balance {
   board: { cols: number; rows: number };
   snake: { start: Pair[]; startDir: Pair; maxQueuedTurns: number };
   speed: { startMs: number; minMs: number; msPerLevel: number };
-  level: { maxLevel: number; perBiome: number; needBase: number; needStepLevels: number; transitionMs: number; table: LevelRow[] };
+  level: { maxLevel: number; perBiome: number; needBase: number; needStepLevels: number; table: LevelRow[] };
   levelUpSlowdown: { tiers: SlowdownTier[] };
   mango: {
     rotBaseMs: number; rotPerEatenMs: number; rotMinMs: number; goldenRotFactor: number; goldenChance: number;
@@ -102,7 +102,7 @@ const SPEC: Spec = {
   board: { cols: 'int+', rows: 'int+' },
   snake: { start: 'pairs', startDir: 'pair', maxQueuedTurns: 'int+' },
   speed: { startMs: 'int+', minMs: 'int+', msPerLevel: 'int0' },
-  level: { maxLevel: 'int+', perBiome: 'int+', needBase: 'int+', needStepLevels: 'int+', transitionMs: 'int+', table: listOf({
+  level: { maxLevel: 'int+', perBiome: 'int+', needBase: 'int+', needStepLevels: 'int+', table: listOf({
     from: 'int+', to: 'int+', weights: (v, path) => {
       if (!isObj(v)) fail(path, 'must be an object');
       for (const [key, value] of Object.entries(v)) {

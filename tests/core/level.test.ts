@@ -50,9 +50,10 @@ it('MEC-003-R14 unknown family key or shape name fails parseBalance', () => {
 it('MEC-003-R16 parseBalance rejects a level that introduces two families', () => {
   expect(() => loadBalance(j => j.level.table[5].rottenRocks = true)).toThrow(/introduces/);
 });
-it('MEC-003-R7 level.transitionMs is a positive banner time and no longer tied to crumble', () => {
-  expect(() => loadBalance(j => j.level.transitionMs = 1)).not.toThrow();
-  expect(() => loadBalance(j => j.level.transitionMs = 0)).toThrow(/level.transitionMs/);
+it('MEC-003-R7 balance has no level.transitionMs (no level-up freeze; banner uses ui.bannerMs)', () => {
+  const b = loadBalance();
+  expect('transitionMs' in b.level).toBe(false);
+  expect(b.ui.bannerMs).toBeGreaterThan(0);
 });
 it('MEC-001-R6 parseBalance rejects start.length greater than minLength + 1', () => {
   expect(() => loadBalance(j => j.snake.start.push([4, 8]))).toThrow(/snake.start/);
