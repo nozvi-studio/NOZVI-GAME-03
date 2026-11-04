@@ -328,3 +328,8 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - Ruling: keys with no spec text got plain English strings (`loadout.back` "Back", `skill.reject.busy` "Not now!", `banner.freshStart` "Fresh start!" per GDD, `hud.energy` "Energy {energy}/{max}"); P0 `TEXT`/`CAUSE_TEXT` helpers stay for existing callers. `cause.clear` text is "You cleared level 30!".
 - Ruling: the orb first-time tip uses the save `bestLevel` captured when the HUD is created (after `startRun`); `startRun` only raises bestLevel to the start level, so `< 2` is equivalent to the pre-run check. Checkpoint banners compare `session.save().unlockedCheckpoints` length before/after each `levelUp`.
 - Ruling: HudScene is ~340 lines (over the ~300 guide) to keep the whole HUD event table in one file; split candidate for P2.
+## 2026-11-04 - GitNexus code graph and test scope (owner)
+- GitNexus 1.6.9 indexes the repo into `.gitnexus/` (excluded via `.git/info/exclude`, not committed). Agents check `status` and use `query`/`context`/`impact` at task start, and refresh the index asynchronously at task end. Reason: cheaper, more accurate code location than file scanning (AGENTS.md §2b).
+- Always `--index-only`: keeps GitNexus from rewriting AGENTS.md/CLAUDE.md and `.claude/` (protected files, §8). `--workers 2` because the host's low-memory reaper kills heavy processes.
+- Test scope: minimal targeted tests during work; full `npm test` + `npm run typecheck` only before commit or merge. Reason: the full suite takes ~15-17 s and was being run after every edit.
+- Rules live in AGENTS.md §2c and §6b (ruleset 0.3.2).

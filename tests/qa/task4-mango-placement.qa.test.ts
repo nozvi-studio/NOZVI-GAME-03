@@ -179,8 +179,7 @@ describe('QA Task 4: Mango Placement & Golden Chance (Black-Box)', () => {
   });
 
   it('QA-T4-08 eating normal mango updates score progress eaten and snake length', () => {
-    // Spec: design §5 MEC-001: "score += 1 (golden 3), eaten += 1, progress += 1 (golden 2), place a new mango;
-    // the snake grows by 1 (no tail pop)."
+    // updated for P1 MEC-002-R3 / MEC-002 §7
     const sim = restoreSim(b, buildState(b, {
       snake: [[8, 8], [7, 8], [6, 8]],
       dir: [1, 0],
@@ -195,7 +194,8 @@ describe('QA Task 4: Mango Placement & Golden Chance (Black-Box)', () => {
     const snap = sim.snapshot();
 
     expect(snap.score).toBe(1);
-    expect(stateOf(sim).eaten).toBe(1);
+    expect(snap.eatenInRun).toBe(1);
+    expect(snap.eatenInLevel).toBe(1);
     expect(snap.progress).toBe(1);
     expect(snap.snake).toHaveLength(4);
     expect(snap.snake[0]).toEqual({ x: 9, y: 8 });
@@ -206,11 +206,13 @@ describe('QA Task 4: Mango Placement & Golden Chance (Black-Box)', () => {
       y: 8,
       golden: false,
       points: 1,
+      progressGain: 1,
+      source: 'mango',
     });
   });
 
   it('QA-T4-09 eating golden mango awards 3 points and 2 progress', () => {
-    // Spec: design §5 MEC-001: "score += 1 (golden 3) ... progress += 1 (golden 2)"
+    // updated for P1 MEC-002-R3 / MEC-002 §7
     const sim = restoreSim(b, buildState(b, {
       snake: [[8, 8], [7, 8], [6, 8]],
       dir: [1, 0],
@@ -225,7 +227,8 @@ describe('QA Task 4: Mango Placement & Golden Chance (Black-Box)', () => {
     const snap = sim.snapshot();
 
     expect(snap.score).toBe(8); // 5 + 3
-    expect(stateOf(sim).eaten).toBe(4); // 3 + 1
+    expect(snap.eatenInRun).toBe(4);
+    expect(snap.eatenInLevel).toBe(4);
     expect(snap.progress).toBe(3); // 1 + 2
     expect(snap.snake).toHaveLength(4);
     expect(sim.drainEvents()).toContainEqual({
@@ -234,6 +237,8 @@ describe('QA Task 4: Mango Placement & Golden Chance (Black-Box)', () => {
       y: 8,
       golden: true,
       points: 3,
+      progressGain: 2,
+      source: 'mango',
     });
   });
 
