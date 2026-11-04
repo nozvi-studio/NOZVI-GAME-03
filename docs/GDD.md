@@ -3,7 +3,8 @@
 > Casual-game GDD. Sections marked **[REQUIRED]** must be filled (no `TBD`) before any gameplay code.
 > This GDD is intentionally longer than a typical casual GDD because it is the **master overview** from which per-phase specs (`docs/specs/mechanics/MEC-xxx.md`) and plans are generated with Superpowers. The GDD owns intent, scope and phases; exact rules and edge cases belong in MEC specs and win over this file once written.
 > Numbers below are **starting values**. They move to `config/balance.json` in Phase 0 and are tuned there; after that, the config is the source of truth and this file links to it.
-> **Version:** 0.2 · **Updated:** 2026-11-03 · **Owner:** Quốc Khánh Nguyễn
+> **Version:** 0.3 · **Updated:** 2026-11-04 · **Owner:** Quốc Khánh Nguyễn
+> **UI design (D2 canvas):** https://claude.ai/artifact/9zVMtmVhjWzeHeyWwjQ9JX — visual reference only; this GDD wins on rules and numbers.
 >
 > **OPEN (owner)** = proposal waiting for the owner's decision; it blocks gameplay code for that section (AGENTS §5).
 > **ASSUMPTION** = the agent's interpretation of the owner's description; confirm or correct before the relevant phase starts.
@@ -54,7 +55,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 - **Accessibility:** reduced-motion setting disables shake and big flashes; warnings never rely on color alone (blink + icon + shape).
 
 ## 3b. First-time user experience (first 60 s) [REQUIRED]
-- **Second 0–5:** Home shows the snake (default skin) and one big Play button. First run skips the loadout screen (skills are locked).
+- **Second 0–5:** Home shows the mascot snake (default skin: Mango-cat) and one big Play button. First run skips the loadout screen (skills are locked).
 - **Teaching steering:** Level 1 = rocks only, quota 4 mangoes; the first mango spawns within reach and never next to the head.
 - **First success:** first mango within ~5 s; level 1 cleared within ~30 s; the level-up shrink is shown with a "Fresh start!" banner.
 - **First failure and retry:** crash → shake + death line naming the cause → results screen (marbles earned) → "Play again" (1 tap). The first results screen points to the marble machine with an arrow.
@@ -177,6 +178,9 @@ Starting values; they move to `config/balance.json` in P0 and are tuned there.
 | Skill costs | Slow-mo 40 · Tail Snip 30 · Shield 50 · Mango Rain 80 | §6.3 |
 | Checkpoints | reach L10/15/20/25/30 → start at L4/6/8/10/12 · carry 50% energy (max 50) · ramp over 5 mangoes | §6.4 |
 | Marbles | `floor(mangoes / 2) + 2 × levels cleared + 10 × biomes cleared + 30 (full clear)` | §8.1 |
+| Machine slots | 2 coins 30% · Wheel 15% · Mystery skin 5% · 5 coins 20% · 2 coins 30% | §8.2; ≈ 3.5 coins per marble |
+| Wheel bonus | 5 coins × (×1 58% · ×2 23% · ×3 13% · ×5 6%) | §8.2; expected ≈ ×1.72 |
+| Skin prices / duplicates | buy 300 / 800 / 2000 coins · duplicate → 15 / 40 / 100 coins (Common / Rare / Epic) | §8.2, §8.3 |
 
 ## 8. Progression & meta [P4]
 All meta currency is earned by playing. **No real-money purchases** (owner decision, 2026-11-03).
@@ -186,19 +190,24 @@ All meta currency is earned by playing. **No real-money purchases** (owner decis
 - Rough target: a level-8 run ≈ 30–40 marbles. Tune so a new player wins their **first skin within the first 2–3 runs**.
 
 ### 8.2 Marble machine (MEC-010)
-- A vertical pachinko board in the art style of §10: pegs, 2 round bumpers, a curved guide, and **5 prize slots** at the bottom, e.g. `10 coins · 25 coins · ★ Mystery skin · 25 coins · 10 coins`.
+- A vertical pachinko board in the art style of §10: pegs, 2 round bumpers, a curved guide, and **5 prize slots** at the bottom: `2 coins · Wheel · ★ Mystery skin · 5 coins · 2 coins` (owner decision, 2026-11-04).
 - **PUSH** button shoots 1 marble (hold for auto-fire; ×10 button after 50 marbles owned). Marble count and coin count always visible.
-- **Outcome is decided first** by a weighted table (seeded RNG), then the physics animation is guided into that slot. This keeps the published odds exact. The motion must still look natural.
-- Starting odds: 10 coins 30% × 2, 25 coins 17.5% × 2, Mystery 5%. Mystery rarity: Common 70%, Rare 25%, Epic 5%.
-- **Public odds:** an "i" button shows the full odds table, always in sync with the config (tested).
+- **One-way economy:** marbles are earned only by playing and spent only here; the machine pays **coins or skins, never marbles**.
+- **Outcome is decided first** by a weighted table (seeded RNG), then the physics animation is guided into that slot. This keeps the published odds exact. The motion must still look natural. **The player never aims** (no slingshot or aim line anywhere in the meta): PUSH, spin and drop are triggers only, so nothing suggests a skill element that does not exist.
+- Starting odds: 2 coins 30% × 2, 5 coins 20%, Wheel 15%, Mystery 5%. Mystery rarity: Common 70%, Rare 25%, Epic 5% (per marble: 3.5% / 1.25% / 0.25%).
+- **Wheel bonus (build last in P4; drop it if P4 runs late):** the marble that lands in Wheel opens a wheel paying 5 coins × a multiplier (×1 58%, ×2 23%, ×3 13%, ×5 6%). The multiplier is decided with the slot; "Tap to spin" only plays the animation.
+- **Mystery skin:** always gives a skin. The rarity roll is shown as a drop into Common / Rare / Epic baskets (reveal animation only, no second gamble), then the skin card (Equip now / Keep for later).
+- **Public odds:** an "i" button shows the full odds table (slots, wheel multipliers, rarity, per-marble rates), always in sync with the config (tested).
 - **Pity:** if 40 marbles in a row give no skin, the next marble lands in Mystery.
-- **Duplicates:** a skin you already own converts to coins (Common 60, Rare 150, Epic 400).
+- **Duplicates:** a skin you already own converts to coins (Common 15, Rare 40, Epic 100).
+- **Economy check (estimate, tune in P4):** ≈ 3.5 coins per marble → a 35-marble run ≈ 120 coins → Common ≈ 2–3 runs, Rare ≈ 7, Epic ≈ 17 runs, on top of Mystery drops.
 
 ### 8.3 Skins & coins (MEC-011)
-- **Skin = chibi head icon + body made of same-colored blocks** that grows like the snake (cheap to produce: one head drawing per skin + a color). Launch set proposal: Snake (default), Dog, Cat, Capybara, + 8 more (e.g. Duck, Frog, Panda, Fox, Pig, Axolotl, Hamster, Mango-cat).
-- Rarity shows in presentation, not power (skins never change gameplay): Common = head + color · Rare = + eat effect / trail particles · Epic = + animated head, custom death reaction and sound.
-- **Coins** buy any skin directly in the shop (Common 300, Rare 800, Epic 2000), so the player always has a deterministic path to the skin they want.
-- Equip from the Skins screen; the equipped skin is shown on Home.
+- **Skin = chibi head icon + body made of same-colored blocks** that grows like the snake (cheap to produce: one head drawing per skin + a color). Launch set proposal: **Mango-cat "Ginger" (default and mascot, owner decision 2026-11-04)**, Tuxedo cat, Cream cat (fur recolors), Snake, Dog, Capybara, + more (e.g. Duck, Frog, Panda, Fox, Pig, Axolotl, Hamster). Whether a cat mascot beats a snake in store/portal thumbnails is a **market hypothesis**; test it with thumbnail/icon variants in P5.
+- **The food is always the mango**, for every skin (golden and rotten mangoes are gameplay signals). Skin personality goes into the eat effect and reactions, never into the food item.
+- Rarity shows in presentation, not power (skins never change gameplay): Common = head + color · Rare = + eat effect / trail particles · Epic = + animated head, custom death reaction and sound. Trails are part of a skin, not a separate item.
+- **Coins** buy any skin directly in the shop (Common 300, Rare 800, Epic 2000), so the player always has a deterministic path to the skin they want. Prices are shown in coins; the Skins screen shows the coin balance.
+- Equip from the Skins screen (one "Characters" list, no extra tabs at launch); the equipped skin is shown on Home.
 - **Reason to come back tomorrow:** **OPEN (owner)** — candidates: daily seeded run with a marble bonus, daily free marbles, endless mode after L30, new skin sets per season.
 
 ### 8.4 Save data (local)
@@ -209,9 +218,10 @@ Best level, best score, unlocked checkpoints, carried energy, marbles, coins, ow
 - If monetization is ever added (e.g. opt-in rewarded ads for extra marbles), it requires a DECISIONS entry approved by the owner and a fresh legal check: buying marbles with real money would make the marble machine a loot box (banned or regulated in some countries; app stores require disclosed odds).
 
 ## 10. Art, audio & UI direction [REQUIRED]
-### 10.1 Style (owner decision, 2026-11-03: hybrid)
-- **UI, characters, marble machine:** chunky cartoon — thick dark outlines, saturated colors, glossy rounded buttons, big readable numbers, rounded "Baloo 2" font. This is where the "wow" is (marble machine, skins, results).
-- **Game board:** flat and low-detail so play stays readable. Plain ground with a subtle checker, high-contrast obstacles with outlines, warnings use color + blink + icon.
+### 10.1 Style (owner decision, 2026-11-04: "D2 cozy puzzle-cat", replaces the 2026-11-03 chunky-cartoon UI)
+- **Reference:** the D2 design canvas linked at the top of this file (screens, shared parts, colour palette).
+- **UI, characters, marble machine:** soft pastel cozy style — cream ground, pastel accents, soft drop shadows, pill-shaped buttons, big readable numbers. Fonts: **Lilita One** (titles, outlined letters) + **Nunito** (UI text). Both are SIL OFL fonts; **self-host them** in the build (offline play, §13), and keep their license files.
+- **Game board:** flat and low-detail so play stays readable. Plain ground with a subtle checker. **Obstacles must stay high-contrast against the pastel ground** (dark outline or strong value difference); warnings use color + blink + icon. Check this on a real 5" phone for every biome palette, especially Frozen Pond and Storm Garden.
 - **Biomes:** each biome has its own palette and ground tile (§5.1) — the cheapest way to show progress.
 - **Inspiration, not copying:** take the chunky-cartoon *feel* from reference screenshots, but design our own layout, icons and characters.
 - Light and dark themes for the board; UI stays in its cartoon style.
@@ -223,7 +233,7 @@ Best level, best score, unlocked checkpoints, carried energy, marbles, coins, ow
 - Short cheeky death lines per cause (text first; voice optional, parking lot).
 
 ### 10.3 Screens
-Boot → Home (Play from checkpoint · Play from L1 · Marble machine · Skins · Settings) → Loadout (pick 2 skills) → Game (HUD: level, biome, quota bar, energy bar, 2 skill buttons, pause, "next checkpoint at L__" hint) → Results → Marble machine → Home. Pause and countdown are overlays on the board.
+Boot → Home (Play from checkpoint · Play from L1 · Marble machine · Skins · Settings) → Loadout (pick 2 skills) → Game (HUD: level, biome, quota bar, energy bar, 2 skill buttons, pause, "next checkpoint at L__" hint) → Results → Marble machine (→ Wheel bonus / Skin reveal) → Home. Pause and countdown are overlays on the board. The game screen has no Back button: back (button, gesture or `Esc`) opens Pause. "Quit run" in Pause ends the run like a death: results with marbles for the levels cleared, so quitting never pays more than playing on.
 
 ### 10.4 Feedback & juice [REQUIRED for P3]
 | Event | Visual | Sound | Haptic |
@@ -265,3 +275,4 @@ Big phases; each phase gets **one spec set + one plan** (Superpowers `brainstorm
 ## Parking lot (ideas not in scope)
 - Wrap zones (MEC-005), teleport portals, one-way arrow tiles, rival AI snake competing for mangoes, fake mango with a learnable tell, banana peel, lawnmower sweep.
 - Endless mode after L30, daily seeded run, online leaderboard, seasonal skin sets, voiced death lines, Vietnamese localization.
+- Separate cosmetic categories (Trails and Frames tabs from the D2 design); per-skin food items (fish, bone, melon parts in the D2 design).

@@ -48,3 +48,15 @@ Append-only. Format: `## YYYY-MM-DD — <decision>` then Context / Choice / Alte
 - Choice: fixed milestones every 5 levels — reaching L10/15/20/25/30 permanently unlocks a start at L4/6/8/10/12 (≈ 40%); 50% of energy at death (max 50) carries to the next run; speed ramps from L1 speed over 5 mangoes; player may still start at L1.
 - Alternatives: one continue inside the same run at L11; a start level computed as 40% of the best level (smoother but harder to read and to balance).
 - Consequence: MEC-008 spec follows GDD §6.4; marbles count only levels cleared in the run; P1 playtest checks whether slow speed + later-biome obstacles feels fair.
+
+## 2026-11-04 — UI style "D2 cozy puzzle-cat" (supersedes the chunky-cartoon UI in "Art direction" 2026-11-03)
+- Context: The owner reviewed the D2 design canvas (https://claude.ai/artifact/9zVMtmVhjWzeHeyWwjQ9JX) and wants to follow its style.
+- Choice: soft pastel UI with Lilita One + Nunito (self-hosted, SIL OFL); the board stays flat with high-contrast obstacles; Mango-cat "Ginger" is the default skin and mascot; the food is always the mango for every skin.
+- Alternatives: keep the chunky thick-outline style (stronger "wow", but the owner prefers D2); per-skin food (more personality, but breaks golden/rotten mango readability and the "Mango" brand).
+- Consequence: GDD v0.3 §10.1, §8.3, §3b; obstacle contrast on pastel grounds must be checked on a real 5" phone per biome; cat-vs-snake mascot is a hypothesis to test with thumbnails in P5.
+
+## 2026-11-04 — Marble machine v2: one-way coin economy, Wheel bonus, no aiming (refines "Meta: marble machine" 2026-11-03)
+- Context: The D2 design added a Wheel bonus that multiplied marbles, slingshot aiming, a second skin-drop gamble, marble-priced skins and Trails/Frames tabs. Audit: marble multipliers loop back into the machine and inflate the economy; aiming either breaks published odds or fakes player control; GDD coin values (10/25 per slot) gave ≈ 516 coins per run, so the 300-coin skins would last only days.
+- Choice: slots 2 coins 30% · Wheel 15% · Mystery 5% · 5 coins 20% · 2 coins 30%; Wheel pays 5 coins × (×1/×2/×3/×5), built last in P4; the machine never pays marbles; no aiming anywhere (outcome decided first, animations are triggers only); Mystery always gives a skin (the basket drop is a reveal); duplicates → 15/40/100 coins; skins priced in coins (300/800/2000); one Characters list, Trails/Frames parked.
+- Alternatives: drop the Wheel entirely (simplest); skill-based aiming (odds cannot be published exactly, good aimers break the economy); keep 10/25-coin slots (skins too cheap).
+- Consequence: GDD v0.3 §7, §8.2, §8.3, Parking lot; ≈ 3.5 coins per marble is a starting estimate to tune in P4; MEC-010/011 specs follow these numbers.

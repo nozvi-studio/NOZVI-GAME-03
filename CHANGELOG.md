@@ -10,6 +10,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - `docs/GDD.md` §6.4: checkpoints are milestone start levels for new runs (L10/15/20/25/30 → L4/6/8/10/12) with 50% energy carry-over, replacing the in-run continue.
 - `AGENTS.md` §1 Stack: Phaser 3 + TypeScript + Vite + Vitest (owner-approved); `docs/GDD.md`: Mango Rain confirmed as the 4th skill, web-first platform confirmed.
 - `docs/DECISIONS.md`: stack, redesign v0.2, meta/odds, art direction and roadmap decisions.
+- `docs/GDD.md` v0.3 (owner-approved audit of the D2 design canvas): D2 pastel UI style with Lilita One + Nunito; Mango-cat default skin; mango food for every skin; marble machine slots 2/5 coins + Wheel bonus (coins) + Mystery, no aiming, duplicates 15/40/100 coins; Back in game opens Pause; Trails/Frames parked. Two `docs/DECISIONS.md` entries.
 ### Fixed
 ### Removed
 - Pre-ruleset design docs and Notion CSV databases under `docs/` (content condensed into `docs/GDD.md`; originals remain in commit `9fe2bb0`).
