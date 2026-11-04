@@ -5,7 +5,7 @@
 ## 1. Purpose & links
 - Defines the two ground-tile families: **mud** (the snake moves at half speed while its head is on it) and **ice** (the snake cannot turn while its head is on it). Neither can kill.
 - GDD: §5.1 (biome 2 mud, biome 3 ice), §5.3 (fairness), §5.4 (catalogue rows "Mud tiles", "Ice tiles"; "Never use" list), §6.3 (Slow-mo), §7.
-- Framework: MEC-004 (registry, GroundTiles block R5, collision R6, speed R7, fairness R11–R14, death context R15, level end R16, verification R17–R18). Design: P2 design §5, §8, §9, §10, §11.
+- Framework: MEC-004 (registry, GroundTiles block R5, collision R6, speed R7, fairness R11–R14, death context R15, level up R16, verification R17–R18). Design: P2 design §5, §8, §9, §10, §11.
 - Related: MEC-001 (turn queue, step), MEC-002 (`reserved`, mango placement), MEC-003 (table, introduction, level up), MEC-006 (Slow-mo tick, Shield, step order), MEC-008 (speed ramp).
 
 ## 2. Player-facing summary

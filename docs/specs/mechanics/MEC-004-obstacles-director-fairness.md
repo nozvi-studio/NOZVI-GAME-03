@@ -100,7 +100,7 @@
 5. **Shield break of a mover** while the mover is the only thing in that cell: the mover is removed; rubble goes to the cell beyond in the **head's** direction for R6, the **mover's** direction for R8.
 6. **Area hit and move hit in the same ms:** families update before the snake step (`docs/ARCHITECTURE.md` "Sim step order"), so an area hit kills first; a consumed Shield cannot save the following move.
 7. **Death context when the head was on fading ice:** fading tiles are inactive, so no context.
-8. **Level up during a blast or roll:** R16 removes them at t = 0; no hit.
+8. **Level up during a blast or roll:** they survive the level up, keep their own lifecycle and can still hit (MEC-003-R8, R16).
 9. **Escape check with an active Shield:** the search ignores skills (Shield never makes a state "escapable").
 10. **Escape check false positive** from approximations (no growth, constant tick): a failing seed is triaged by hand; the fix is either the family rule or a documented exception in the family spec.
 
@@ -163,7 +163,7 @@ Fuzz seed counts (50 / 200) and the bot settings are test/tool constants, not ba
 - `MEC-004-R12 spawns are not blocked when the mango was already unreachable`
 - `MEC-004-R13 parseBalance rejects a warnMs below 900`
 - `MEC-004-R15 died context is ice when the fatal step started on active ice`
-- `MEC-004-R16 a level up leaves every family instance untouched` (see MEC-003-R8 tests)
+- `MEC-003-R8 obstacles survive a level up, also families not enabled in the new level, and keep their own lifetimes` (covers R16)
 - `MEC-004-R17 fuzz invariants I1-I7 hold for every director family`
 - `MEC-004-R18 escapeExists is false in a dead-end corridor and true in open board`
 - `MEC-004-R18 no director spawn removes the last escape`

@@ -344,10 +344,10 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - Level-up slowdown (approved rule change, MEC-003/MEC-008 to be updated): on level up the snake keeps moving, existing obstacles stay, the level banner shows as today. The tick is immediately multiplied by a tier factor and eases back to the new level's normal tick. Tiers by level reached: 2-5 none; 6-15 x1.4 eased over 1 s; 16-30 x1.6 eased over 1.5 s. While Slow-mo is active the slower factor wins (no stacking). All values in `config/balance.json`.
 - Bugs from the playtest, fixed on their own branches: 4/13 desktop runs died at the wall after exactly 1260 ms on level 1; WASD felt delayed.
 
-## 2026-11-04 Level-up flow B implementation choices
+## 2026-11-04 - Level-up flow B implementation choices
 - Context: Flow B (no level-up freeze, no crumble, slowdown tiers) left a few details open; the specs now state them (MEC-003-R7..R12/R22, MEC-006-R13/R17, ARCHITECTURE "Sim step order").
-- Choice A: the tick accumulator is kept at a level up (assumption A); MEC-006-R18 clamps it when the effective tick changes.
-- Choice B: a run that starts at a checkpoint level gets no slowdown (assumption B); the first spawn timer is `firstSpawnMs` at once.
+- Choice A: the tick accumulator is kept at a level up (assumption A in `docs/superpowers/plans/2026-11-04-levelup-flow-b.md`); MEC-006-R18 clamps it when the effective tick changes.
+- Choice B: a run that starts at a checkpoint level gets no slowdown (assumption B in the same plan); the first spawn timer is `firstSpawnMs` at once.
 - Choice: the director skips while the slowdown is active instead of using a summed timer, which keeps "first spawn `firstSpawnMs` after the slowdown ends" exact, also with an empty mango slot.
 - Choice: rotten rocks keep their MEC-002-R7 lifetime at a level up (owner answer 1).
 - Choice: the level-up banner uses `ui.bannerMs` (owner answer 2); `level.transitionMs` and its parseBalance guard were removed.

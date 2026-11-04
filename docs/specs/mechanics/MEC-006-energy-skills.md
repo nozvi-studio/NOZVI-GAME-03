@@ -101,7 +101,7 @@ Save fields: none owned here. Start energy and carry-over are MEC-008; unlocks a
 - **MEC-002 mango:** MEC-002-R2 is the single `reserved` list (it includes orbs, rain mangoes, snip walls and rubble). Golden mango gives +10 energy (R9). Rain mangoes are separate objects and do not affect rot time or golden gating (R33, MEC-002-R11).
 - **MEC-003 levels:** rain progress counts toward the quota. Orb, rain and effect timers keep running through a level up, skill presses are accepted, snip wall and rubble survive. Energy is never reset by a level-up.
 - **MEC-004 obstacles:** hazard placement uses the MEC-002-R2 `reserved` list; BFS `reachable` adds snip walls and rubble (every state) as walls (orbs and rain mangoes are not walls). Fairness rule 3 still targets the regular mango only. New cause keys: `snipWall`, `rubble`.
-- **MEC-008 checkpoints:** provides `startEnergy`; reads `snapshot.energy` at death. Base tick (incl. speed ramp) comes from MEC-008 and is multiplied by Slow-mo. Whether rain mangoes advance the speed ramp is MEC-008's rule; the `ate` event carries `source` for it.
+- **MEC-008 checkpoints:** provides `startEnergy`; reads `snapshot.energy` at death. Base tick (incl. speed ramp) comes from MEC-008 and is multiplied per R17 (Slow-mo and the MEC-003-R22 slowdown, larger factor wins). Whether rain mangoes advance the speed ramp is MEC-008's rule; the `ate` event carries `source` for it.
 - **MEC-007 loadout:** provides `loadout`; mid-run unlocks may fill an empty slot (MEC-007).
 
 ## 7. Core API changes
