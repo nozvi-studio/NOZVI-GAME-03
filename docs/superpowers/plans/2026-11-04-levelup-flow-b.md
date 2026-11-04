@@ -10,14 +10,9 @@
 
 **Spec:** `docs/superpowers/specs/2026-11-04-levelup-flow-b-design.md` (owner-approved 2026-11-04). Affected mechanic specs: MEC-001-R9/R11, MEC-002-R8/R10/EC4, MEC-003-R7..R11 (+ new R22), MEC-006-R10/R13/R16/R17/R35/EC15, `docs/ARCHITECTURE.md` "Sim step order".
 
-## Open questions (owner)
-1. **Rotten rock lifetime.** Spec rule 5 says "Rotten rocks have no lifetime and stay until the run ends." The code and MEC-002-R7 give each rotten rock a lifetime (`mango.rottenRockLifeMs` 5000 ms, then a 450 ms crumble; `src/core/hazards/rottenRock.ts` `update`). This plan keeps the MEC-002-R7 lifetime unchanged (only the level-up crumble is removed), which matches the same rule's "each … ends by its own lifetime rules". If the owner wants permanent rotten rocks, that is a separate change to MEC-002-R7 and `rottenRock.ts`, not in this plan.
-2. **Level-up banner duration.** Spec rule 1 sets the banner to `level.transitionMs` (1000 ms). Today every HUD banner uses `ui.bannerMs` (1800 ms), and the level-up banner can carry up to four lines (level, biome, new obstacle, checkpoint). The plan follows the spec (1000 ms, Task 6); the agy QA pass (Task 8) checks readability on phone. If it is too short, the owner can raise `level.transitionMs` in `config/balance.json` (no code change).
-
-Assumptions taken without asking (recorded in `docs/DECISIONS.md` by Task 7; reverse them there if wrong):
-- A. The tick accumulator is **not** reset at a level up (old MEC-001-R9 set `acc = 0`). The snake keeps its rhythm; the MEC-006-R18 clamp `acc = min(acc, eff)` still applies when the effective tick changes.
-- B. A run that **starts** at a checkpoint level has no slowdown (it is not a level up; spec rule 2 is "by the level just reached").
-- C. The spec's "affected specs" list misses rules that also describe the freeze: MEC-001-R9/R11, MEC-002-R8/R10, MEC-006-R10/R13/R16/EC15. They are amended in Task 7 to match the spec (no rule beyond the spec changes).
+## Owner answers (2026-11-04)
+1. **Rotten rock lifetime:** keep MEC-002-R7 (5000 ms life, then 450 ms crumble). Only the level-up crumble is removed. The spec rule 5 sentence was a lead error and is corrected.
+2. **Level-up banner duration:** use `ui.bannerMs` (1800 ms), like every other HUD banner. `level.transitionMs` no longer drives anything; Task 6 removes it.
 
 ## Global Constraints
 - English only in files (AGENTS §0). Conventional Commits. Work on one task branch from `version/v0.1` (e.g. `feat/levelup-flow-b`), merge back with `git merge --no-ff` after the full suite and typecheck pass (AGENTS §6).
@@ -44,8 +39,7 @@ Assumptions taken without asking (recorded in `docs/DECISIONS.md` by Task 7; rev
 | `src/core/skills/mangoRain.ts` | new `checkLevelClear` signature | 3 |
 | `src/core/hazards/{rock,fence,maze,terrain,rottenRock,snipWall,rubble,timed}.ts` | remove `onLevelEnd` / `endTimedLevel` | 4 |
 | `src/core/hazards/director.ts` | skip while `levelUpSlow !== null` | 5 |
-| `src/game/flow/bannerTiming.ts` (new) | pure banner duration per kind | 6 |
-| `src/game/scenes/HudScene.ts` | level-up banner uses `bannerMs(b, 'levelUp')` | 6 |
+| `config/balance.json`, `src/core/balance.ts` | `level.transitionMs` removed; banner keeps `ui.bannerMs` | 6 |
 | `src/game/text.ts` | remove `skill.reject.busy` | 3 |
 | `tests/core/slowdown.test.ts` (new) | MEC-003-R22 balance, unit and integration tests | 1, 2, 3, 5 |
 | `tests/core/*.test.ts`, `tests/qa/*.qa.test.ts`, `tests/support/p1fuzz.ts`, `tests/core/fuzz.test.ts`, `tests/game/text.test.ts` | rewritten/deleted tests (each named in its task) | 3, 4 |
@@ -608,53 +602,30 @@ In `tests/core/fuzz.test.ts:36` replace the test with `it('MEC-003-R22 fuzz: lev
 
 ---
 
-### Task 6: Level-up banner as a non-blocking overlay for `level.transitionMs`
+### Task 6: Level-up banner stays on `ui.bannerMs`; retire `level.transitionMs`
+
+Owner answer 2: the level-up banner keeps today's `showBanner` default (`ui.bannerMs`, 1800 ms). It is already a non-interactive text object, so it never blocks input. After Tasks 3-4, `level.transitionMs` has no reader left, so it is removed.
 
 **Files:**
-- Create: `src/game/flow/bannerTiming.ts`, `tests/game/bannerTiming.test.ts`
-- Modify: `src/game/scenes/HudScene.ts:196-199` (`showBanner`), `:260-269` (`onLevelUp`)
+- Modify: `config/balance.json` (delete `level.transitionMs`), `src/core/balance.ts` (type field + validation), any test helper or test that sets or reads it (find with `grep -rn transitionMs src tests`)
+- Test: `tests/core/level.test.ts`
 
 **Interfaces:**
-- Produces: `export type BannerKind = 'levelUp' | 'default'`; `export function bannerMs(b: Balance, kind: BannerKind): number`; `HudScene.showBanner(text: string, ms?: number): void`.
-- Consumes: `Balance.level.transitionMs`, `Balance.ui.bannerMs`.
+- Produces: `Balance.level` without `transitionMs`.
+- Consumes: nothing new; `HudScene.showBanner` unchanged.
 
-- [ ] **Step 1: Write the failing test** — `tests/game/bannerTiming.test.ts`:
+- [ ] **Step 1: Write the failing test** in `tests/core/level.test.ts` (replaces the Task 4 rewrite "MEC-003-R7 level.transitionMs is a positive banner time ..."):
 ```ts
-import { describe, it, expect } from 'vitest';
-import { bannerMs } from '../../src/game/flow/bannerTiming';
-import { loadBalance } from '../support/balance';
-
-const b = loadBalance();
-describe('MEC-003-R7 banner timing', () => {
-  it('MEC-003-R7 the level-up banner shows for level.transitionMs; other banners keep ui.bannerMs', () => {
-    expect(bannerMs(b, 'levelUp')).toBe(b.level.transitionMs);
-    expect(bannerMs(b, 'default')).toBe(b.ui.bannerMs);
+  it('MEC-003-R7 balance has no level.transitionMs (no level-up freeze; banner uses ui.bannerMs)', () => {
+    const b = loadBalance();
+    expect('transitionMs' in b.level).toBe(false);
+    expect(b.ui.bannerMs).toBeGreaterThan(0);
   });
-});
 ```
-- [ ] **Step 2: Run it** — `npx vitest run tests/game/bannerTiming.test.ts`. Expected: FAIL, cannot resolve `src/game/flow/bannerTiming`.
-- [ ] **Step 3: Implement** `src/game/flow/bannerTiming.ts`:
-```ts
-// Pure banner timing (no Phaser import).
-import type { Balance } from '../../core/balance';
-
-export type BannerKind = 'levelUp' | 'default';
-
-// MEC-003-R7 the level-up banner is a non-blocking overlay shown for level.transitionMs.
-export function bannerMs(b: Balance, kind: BannerKind): number {
-  return kind === 'levelUp' ? b.level.transitionMs : b.ui.bannerMs;
-}
-```
-(Use the same `Balance` import path style as the other files in `src/game/flow/`.) In `HudScene.ts` import `bannerMs` and change:
-```ts
-  private showBanner(text: string, ms = bannerMs(this.balance, 'default')): void {
-    this.hideBanner(); this.banner.setText(text).setVisible(true);
-    this.bannerTimer = this.time.delayedCall(ms, () => this.banner.setVisible(false));
-  }
-```
-and in `onLevelUp` change `this.showBanner(lines.join('\n'));` to `this.showBanner(lines.join('\n'), bannerMs(this.balance, 'levelUp'));`. The banner text object is not interactive, so it never blocks input; nothing else changes.
-- [ ] **Step 4: Run** `npx vitest run tests/game/bannerTiming.test.ts tests/boundary.test.ts`. Expected: PASS.
-- [ ] **Step 5: Commit.** CHANGELOG `### Changed`: `- feat(game): level-up banner is a non-blocking overlay for level.transitionMs (MEC-003-R7).` Full `npm test`, `npm run typecheck`. `git commit -m "feat(game): level-up banner timing"`.
+- [ ] **Step 2: Run** `npx vitest run tests/core/level.test.ts -t "MEC-003-R7"`. Expected: FAIL (`expected true to be false`).
+- [ ] **Step 3: Implement.** Delete `"transitionMs": 1000` from `config/balance.json` `level`; delete `transitionMs` from the `level` type and its check in `src/core/balance.ts`. Run `grep -rn transitionMs src tests` and delete every remaining reference. If a `src/` reference is still live (not dead code left by Tasks 3-4), stop and report it to the lead instead of deleting it.
+- [ ] **Step 4: Run** `npx vitest run tests/core/level.test.ts tests/boundary.test.ts` and `npm run typecheck`. Expected: PASS.
+- [ ] **Step 5: Commit.** CHANGELOG `### Changed`: `- chore(core): remove level.transitionMs; level-up banner uses ui.bannerMs (MEC-003-R7).` Full `npm test`, `npm run typecheck`. `git commit -m "chore(core): retire level.transitionMs"`.
 
 ---
 
@@ -671,7 +642,7 @@ and in `onLevelUp` change `this.showBanner(lines.join('\n'));` to `this.showBann
 **Interfaces:** none (docs only).
 
 - [ ] **Step 1: MEC-003.** Delete the `phase` row of the state table; add a row `levelUpSlow | {factor, easeMs, leftMs} \| null | R22`. Replace R7-R11 with:
-  - **R7 Sequence (no freeze).** Inside the eating step: eat resolves → length reset (MEC-001-R4) → `level += 1`, `levelsCleared += 1`, `progress` = overflow, `eatenInLevel = 0`, `levelTimeMs = 0` → director timer `director.firstSpawnMs`, maze cooldown 0 (R11) → slowdown starts (R22) → emit `shrunk`, `levelUp` → ramp end (MEC-008-R8) → unlocks (MEC-007-R12) → if the regular mango was eaten, MEC-002-R8(b) places the next one. The sim keeps stepping; the HUD shows "Level N" for `level.transitionMs` as a non-blocking overlay.
+  - **R7 Sequence (no freeze).** Inside the eating step: eat resolves → length reset (MEC-001-R4) → `level += 1`, `levelsCleared += 1`, `progress` = overflow, `eatenInLevel = 0`, `levelTimeMs = 0` → director timer `director.firstSpawnMs`, maze cooldown 0 (R11) → slowdown starts (R22) → emit `shrunk`, `levelUp` → ramp end (MEC-008-R8) → unlocks (MEC-007-R12) → if the regular mango was eaten, MEC-002-R8(b) places the next one. The sim keeps stepping; the HUD shows "Level N" for `ui.bannerMs` as a non-blocking overlay.
   - **R7.1** retired (a warning maze keeps its own lifecycle).
   - **R8 What stays.** Every hazard, rotten rock, terrain piece, snip wall and rubble keeps its state and ends by its own lifetime rules (MEC-002-R7, MEC-004, MEC-006-R22/R28). Hazards of a family not enabled in the new level keep working until they end.
   - **R9 Nothing is frozen.** Mango rot and retry, director, maze cooldown, `levelTimeMs`, orbs, skills and rain timers keep counting through a level up.
@@ -683,7 +654,7 @@ and in `onLevelUp` change `this.showBanner(lines.join('\n'));` to `this.showBann
 - [ ] **Step 3: MEC-002.** R8: replace "(frozen during the transition, R10)" with "(its timer keeps running)". R10 → "**No pause at level up.** `ageMs` and `retryMs` keep counting through a level up (MEC-003-R9). Slow-mo does not slow `ageMs` (MEC-006-R19)." EC4: the "reserved crumbling cells" clause is removed; the next mango is placed after the reset with the normal MEC-002-R2 reserved list.
 - [ ] **Step 4: MEC-006.** R10: "orb timers keep counting through a level up". R13: order `empty → active → energy → noTarget` (no `busy`). R16: drop "and do not advance during a MEC-003 level transition". R17: "effective tick = `round(baseTickMs × max(slowmo ? tickFactor : 1, curFactor))` where `curFactor` is the MEC-003-R22 level-up slowdown factor (1 when none); the two never stack." R35: drop "and the transition branch". EC15: "snip walls and rubble survive a level up and end by their own lifetime." Update the matching test-name list lines (R10, R13, R16, R35).
 - [ ] **Step 5: ARCHITECTURE "Sim step order".** Delete step 3 (transition branch) and renumber; add step "7a. Level-up slowdown: `leftMs −= 1`, null at 0 (MEC-003-R22)"; step 5 director: "skipped while `mango = null` (MEC-003-R13) or while a level-up slowdown is active (MEC-003-R11)"; step 8: `eff = round(base × max(slowmo ? tickFactor : 1, curFactor))`; step 12.4: "the level-up chain (MEC-003-R7: director reset, slowdown start, events), then, if the regular mango was eaten, place the next one (MEC-002-R8)"; delete "sets the tick accumulator to 0 for the transition, MEC-001-R9". Remove the "To be copied…" banner line if it is still there.
-- [ ] **Step 6: DECISIONS.** Append `## 2026-11-04 Level-up flow B implementation choices` with: the accumulator is kept (assumption A); no slowdown at a checkpoint start (B); director skip instead of a summed timer (keeps "starts when the slowdown ends" exact, also with an empty mango slot); rotten rock lifetime kept per MEC-002-R7 pending owner answer (open question 1); extra amended rules (C).
+- [ ] **Step 6: DECISIONS.** Append `## 2026-11-04 Level-up flow B implementation choices` with: the accumulator is kept (assumption A); no slowdown at a checkpoint start (B); director skip instead of a summed timer (keeps "starts when the slowdown ends" exact, also with an empty mango slot); rotten rock lifetime kept per MEC-002-R7 (owner answer 1); level-up banner uses ui.bannerMs (owner answer 2); extra amended rules (C).
 - [ ] **Step 7: Verify** — `git grep -n "transitionEnd\|transitionLeftMs\|reason \`busy\`\|onLevelEnd" -- docs src tests` returns only historical entries in `docs/DECISIONS.md`, `CHANGELOG.md` released sections and old plans/specs under `docs/superpowers/`. Then `npm test` and `npm run typecheck` (docs-only, both still pass).
 - [ ] **Step 8: Commit.** CHANGELOG `### Docs`: `- docs(spec): level-up flow B rules in MEC-001/002/003/006 and ARCHITECTURE step order (MEC-003-R22).` Update `docs/STATUS.md`. `git commit -m "docs(spec): level-up flow B rules and step order"`.
 
@@ -719,7 +690,7 @@ and in `onLevelUp` change `this.showBanner(lines.join('\n'));` to `this.showBann
 ### Spec coverage
 | Spec rule | Task(s) | Tests |
 |---|---|---|
-| 1 No freeze; banner overlay for `level.transitionMs`; input always | 3, 6 | MEC-003-R7 no freeze; MEC-001-R9 keeps stepping; MEC-003-R7 banner timing; QA 1-3 |
+| 1 No freeze; banner overlay for `ui.bannerMs`; input always | 3, 6 | MEC-003-R7 no freeze; MEC-001-R9 keeps stepping; MEC-003-R7 no transitionMs; QA 1-3 |
 | 2 Slowdown tiers, linear ease, restart on re-level | 1, 2, 3 | MEC-003-R22 config, tier, ease midpoint/exact end, x1.4 at 6/15, x1.6 at 16, restart; fuzz window |
 | 3 Slow-mo max rule, no stacking (MEC-006-R17) | 2, 3, 7 | MEC-006-R17 larger factor wins (unit + integration); QA 9 |
 | 4 Ramp interaction | 2, 3 | MEC-003-R22 multiplies ramp tick; MEC-003-R22 / MEC-008-R8 level up ends ramp then slows level tick |
@@ -735,7 +706,7 @@ and in `onLevelUp` change `this.showBanner(lines.join('\n'));` to `this.showBann
 - `startLevelUp(s, b, ctx)` and `checkLevelClear(s, b, ctx)` lose `fromRegularMango` in Task 3; both callers (`snake.ts`, `skills/mangoRain.ts`) are updated in the same task.
 - `skillRejected.reason` loses `'busy'` in `types.ts`, `skills.ts` and the text key in the same task.
 - `HazardFamily.onLevelEnd` is removed from the interface and all seven families in the same task (Task 4); the call site in `transition.ts` is removed there too.
-- `bannerMs(b, kind)` returns `number`; `showBanner(text, ms?)` keeps its old default.
+- `showBanner(text)` unchanged; `Balance.level.transitionMs` removed in Task 6.
 
 ### Placeholder scan
 No "TBD", "TODO", "similar to Task N" or unspecified code. Line numbers refer to `version/v0.1` at 00a232c; if a file shifted, locate by the quoted code. Task 3 Step 6 and the QA-P1T4-05 / QA-P1T7-30 items give an explicit rule for any freeze-only assertion this list missed, instead of guessing hidden lines.

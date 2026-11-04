@@ -13,8 +13,8 @@ Only files listed here exist. Status: Draft / Approved / Deprecated.
 | P0-DESIGN | `docs/superpowers/specs/2026-11-03-p0-foundation-design.md` | P0 architecture, port behavior of MEC-001…004 (prototype rules), test strategy, pinned versions | Approved |
 | P0-PLAN | `docs/superpowers/plans/2026-11-03-p0-foundation.md` | P0 task-by-task implementation plan (9 PRs) | Approved |
 | P1-DESIGN | `docs/superpowers/specs/2026-11-03-p1-core-loop-design.md` | P1 new core loop design, delivery order, playtest protocol; step order moved to ARCH | Approved |
-| P1-LEVELUP-B | `docs/superpowers/specs/2026-11-04-levelup-flow-b-design.md` | P1 rework: level up without freeze or crumble, slowdown tiers; supersedes MEC-003 R7-R11 | In review |
-| P1-LEVELUP-B-PLAN | `docs/superpowers/plans/2026-11-04-levelup-flow-b.md` | Implementation plan for level-up flow B (8 tasks: slowdown tiers, no freeze, no crumble, director, banner, specs, QA) | In review |
+| P1-LEVELUP-B | `docs/superpowers/specs/2026-11-04-levelup-flow-b-design.md` | P1 rework: level up without freeze or crumble, slowdown tiers; supersedes MEC-003 R7-R11 | Approved |
+| P1-LEVELUP-B-PLAN | `docs/superpowers/plans/2026-11-04-levelup-flow-b.md` | Implementation plan for level-up flow B (8 tasks: slowdown tiers, no freeze, no crumble, director, banner, specs, QA) | Approved |
 | P1-PLAN | `docs/superpowers/plans/2026-11-03-p1-core-loop.md` | P1 implementation plan (10 PRs) | Approved |
 | P2-DESIGN | `docs/superpowers/specs/2026-11-03-p2-content-design.md` | P2 umbrella design (P2a/P2b/P2c), changes to P1 specs | Approved |
 | P2A-PLAN | `docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md` | P2a implementation plan (family framework, mud, ice) | Approved |
