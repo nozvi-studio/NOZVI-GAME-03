@@ -18,7 +18,7 @@ Updated: 2026-11-04 · Keep under ~80 lines. One row per module, not per file.
 ## Modules
 | Module (folder) | Responsibility | Key files (max 3) | Depends on | Requirement IDs | Tests |
 |---|---|---|---|---|---|
-| `prototype/` | Whole playable prototype: tuning, state, hazards director, fairness (BFS), input, rendering, synth audio | `mango-snake-hard.html` | Google Fonts (network, optional) | MEC-001…MEC-004 | none |
+| `prototype/` | **Frozen (reference only)** whole playable prototype; run with `python3 -m http.server`: tuning, state, hazards director, fairness (BFS), input, rendering, synth audio | `mango-snake-hard.html` | Google Fonts (network, optional) | MEC-001…MEC-004 | none |
 | `src/game/` | Phaser board/HUD scenes, cards, banners, countdown, input, synth/haptics and browser save wiring | scenes/GameScene.ts, scenes/HudScene.ts, text.ts | phaser, src/core + src/meta (public indexes) | GDD-13, GDD-8.4, MEC-001 through MEC-004 | tests/game/, boundary + build; visual QA pending |
 | `src/core/` | Pure rules: balance, RNG, grid/BFS, cell queries, snake, levels, mango placement/rot (MEC-002), hazards/ (registry, director, families; MEC-004) and Sim snapshots | sim.ts, snake.ts, mango.ts | — | MEC-001…004, GDD-7 | tests/core/ |
 | `src/meta/` | Versioned save envelope + KeyValueStore port | index.ts, save.ts | — | GDD-8.4 | tests/meta/ |
