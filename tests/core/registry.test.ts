@@ -7,18 +7,18 @@ import { buildState } from '../support/state';
 
 const b = loadBalance();
 describe('MEC-004 registry', () => {
-  it('MEC-002-R7 FAMILIES order is rock, fence, maze, terrain, rottenRock', () => {
-    expect(FAMILIES.map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock']);
+  it('MEC-006-R23 FAMILIES order is rock, fence, maze, terrain, rottenRock, snipWall', () => {
+    expect(FAMILIES.map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall']);
     expect(FAMILIES.map(f => FAMILY[f.key])).toEqual(FAMILIES);
   });
   it('MEC-004 capClass small: rock and fence only', () => {
-    expect(FAMILIES.map(f => f.capClass)).toEqual(['small', 'small', 'big', 'big', 'none']);
+    expect(FAMILIES.map(f => f.capClass)).toEqual(['small', 'small', 'big', 'big', 'none', 'none']);
   });
-  it('MEC-002-R7 causes: rock, fence, maze, ground, rotten', () => {
-    expect(FAMILIES.map(f => f.cause)).toEqual(['rock', 'fence', 'maze', 'ground', 'rotten']);
+  it('MEC-006-R23 causes: rock, fence, maze, ground, rotten, snipWall', () => {
+    expect(FAMILIES.map(f => f.cause)).toEqual(['rock', 'fence', 'maze', 'ground', 'rotten', 'snipWall']);
   });
-  it('MEC-002-R7 rottenRock is breakable; the P0 families remain unbreakable', () => {
-    expect(FAMILIES.map(f => f.breakable)).toEqual([false, false, false, false, true]);
+  it('MEC-006-R23 rottenRock and snipWall are breakable; P0 families remain unbreakable', () => {
+    expect(FAMILIES.map(f => f.breakable)).toEqual([false, false, false, false, true, true]);
   });
   it('MEC-004 bfsWallAt: timed cells in any state true, terrain false', () => {
     const s = buildState(b);
