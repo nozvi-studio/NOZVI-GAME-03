@@ -25,7 +25,7 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
   });
 
   it('QA-T5-14 MEC-004 levelUp events carry unlocked hazard family', () => {
-    // updated for P1 MEC-003-R1/R15/R16
+    // updated for P1 MEC-003-R7
     const sim = createSim(b, 100);
     expect(sim.snapshot().level).toBe(1);
 
@@ -36,7 +36,15 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     expect(testSim.snapshot().level).toBe(6);
     const events = testSim.drainEvents();
     const lvl6 = events.find(e => e.type === 'levelUp');
-    expect(lvl6).toEqual({ type: 'levelUp', level: 6, unlocked: 'fence' });
+    expect(lvl6).toEqual({
+      type: 'levelUp',
+      level: 6,
+      biome: 2,
+      challenge: false,
+      biomeChanged: true,
+      clearedLevelTimeMs: s.tickMs,
+      unlocked: 'fence',
+    });
   });
 
   it('QA-T5-15 MEC-004 rock and fence shape pools expand by level', () => {
@@ -230,17 +238,25 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
   });
 
   it('QA-T5-23 MEC-004 hazardIncoming event emitted for fence, terrain, and maze but not rock', () => {
-    // updated for P1 MEC-003-R1/R15
-    const s = buildState(b, { level: 1, spawnInMs: 0 });
+    // updated for P1 MEC-003-R13
+    // Under MEC-003-R13 and ARCHITECTURE step 5, director is skipped while mango is null
+    const noMangoState = buildState(b, { seed: 1, level: 6, spawnInMs: 0 });
+    noMangoState.mango = null;
+    const noMangoSim = restoreSim(b, noMangoState);
+    noMangoSim.advance(1);
+    expect(noMangoSim.drainEvents().some(e => e.type === 'hazardIncoming')).toBe(false);
+
+    // With mango present at level 1, rock spawns without hazardIncoming
+    const s = buildState(b, { level: 1, spawnInMs: 0, mango: [0, 0] });
     const sim = restoreSim(b, s);
     sim.advance(1); // triggers director
     const rockIncoming = sim.drainEvents().find(e => e.type === 'hazardIncoming');
     expect(rockIncoming).toBeUndefined();
 
-    // At level 6 (fence available)
+    // At level 6 (fence available) with mango present, hazardIncoming is emitted for fence
     let fenceIncoming = false;
     for (let seed = 1; seed < 50; seed++) {
-      const s2 = buildState(b, { seed, level: 6, spawnInMs: 0 });
+      const s2 = buildState(b, { seed, level: 6, spawnInMs: 0, mango: [0, 0] });
       const testSim = restoreSim(b, s2);
       testSim.advance(1);
       const ev = testSim.drainEvents().find(e => e.type === 'hazardIncoming');
