@@ -5,6 +5,13 @@ import { key, nearHead, reachable } from './grid';
 import { familyRow } from './level';
 import { rngFrom, type Rng } from './rng';
 import type { Cell, MangoState, SimState, StepCtx } from './types';
+import { addEnergy } from './energy';
+
+// MEC-006-R9 golden mangoes grant energy at every level, after the ate event.
+export function goldenEnergy(s: SimState, b: Balance, ctx: StepCtx): void {
+  const gained = addEnergy(s, b, b.energy.goldenGain);
+  if (gained > 0) ctx.emit({ type: 'energyChanged', energy: s.energy, delta: gained, source: 'golden' });
+}
 
 // MEC-002-R4 placement rot time depends only on the current level's regular mango count.
 export const rotTimeMs = (b: Balance, eatenInLevel: number, golden: boolean): number =>

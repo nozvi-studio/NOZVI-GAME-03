@@ -152,7 +152,10 @@ describe('MEC-002 mango', () => {
     const sim = restoreSim(b, buildState(b, { mango: [9, 8], golden: true }));
     sim.advance(140);
     expect(sim.snapshot()).toMatchObject({ score: 3, progress: 2 });
-    expect(sim.drainEvents()).toEqual([{ type: 'ate', x: 9, y: 8, golden: true, points: 3, progressGain: 2, source: 'mango' }]);
+    expect(sim.drainEvents()).toEqual([
+      { type: 'ate', x: 9, y: 8, golden: true, points: 3, progressGain: 2, source: 'mango' },
+      { type: 'energyChanged', energy: 10, delta: 10, source: 'golden' },
+    ]);
   });
 
   it('MEC-002 snapshot mango ageMs = totalMs - leftMs', () => {
@@ -213,12 +216,12 @@ describe('MEC-002 P1 mango rules', () => {
   it.each([false, true])('MEC-002-R3 regular mango increments eatenInLevel and eatenInRun; both start at 0 at a checkpoint start (golden %s)', golden => {
     expect(createSim(b, 1, { startLevel: 12 }).snapshot()).toMatchObject({ eatenInLevel: 0, eatenInRun: 0 });
     const sim = simFromAscii(b, [golden ? '.....G' : '.....M'], { snake: [[4, 0], [3, 0], [2, 0], [1, 0]], quiet: true, options: { startLevel: 12 } });
-    sim.advance(118);
+    sim.advance(140);
     expect(sim.snapshot()).toMatchObject({ eatenInLevel: 1, eatenInRun: 1 });
     expect(sim.drainEvents()[0]).toMatchObject({ type: 'ate', progressGain: golden ? 2 : 1, source: 'mango' });
     const s = exportState(sim); s.progress = sim.snapshot().need - 1;
     s.mango = { x: 6, y: 0, golden: false, leftMs: 8000, totalMs: 8000 };
-    const next = simFromState(b, s); next.advance(118);
+    const next = simFromState(b, s); next.advance(136);
     expect(next.snapshot()).toMatchObject({ level: 13, eatenInLevel: 0, eatenInRun: 2 });
   });
 
@@ -284,7 +287,7 @@ describe('MEC-002 P1 mango rules', () => {
   });
 
   it('MEC-002-EC1 mango rotting the ms the head would enter it leaves no rock', () => {
-    const sim = rotSim(12, 3, 2), s = exportState(sim); s.acc = 117;
+    const sim = rotSim(12, 3, 2), s = exportState(sim); s.acc = 139;
     const next = simFromState(b, s); next.advance(1);
     expect(next.drainEvents()).toEqual([{ type: 'rotted', x: 3, y: 2, leftRock: false }]);
     expect(next.snapshot()).toMatchObject({ status: 'playing', snake: [{ x: 3, y: 2 }, { x: 2, y: 2 }, { x: 1, y: 2 }, { x: 0, y: 2 }] });

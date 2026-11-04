@@ -40,7 +40,7 @@ describe('MEC-003 transition', () => {
   });
 
   it('MEC-003-R6 clearing L30 ends the run with won true and emits runWon without levelUp', () => {
-    const sim = levelUpSim({ level: 30, progress: 12 });
+    const sim = levelUpSim({ level: 30, progress: 12, rampActive: false });
     sim.advance(140);
     expect(types(sim)).toEqual(['ate', 'runWon']);
     expect(sim.snapshot()).toMatchObject({ status: 'over', outcome: { won: true }, levelsCleared: 30, length: 6, score: 1, timeMs: 82, mango: null });
@@ -166,7 +166,7 @@ describe('MEC-003 transition', () => {
   });
 
   it('MEC-003-R7 levelUp carries biome, challenge, biomeChanged, unlocked and clearedLevelTimeMs', () => {
-    const sim = levelUpSim({ level: 5, progress: 4, levelTimeMs: 6868 });
+    const sim = levelUpSim({ level: 5, progress: 4, levelTimeMs: 6868, rampActive: false });
     sim.advance(132);
     expect(sim.drainEvents().find(e => e.type === 'levelUp')).toEqual({
       type: 'levelUp', level: 6, biome: 2, challenge: false, biomeChanged: true, unlocked: 'fence', clearedLevelTimeMs: 7000,

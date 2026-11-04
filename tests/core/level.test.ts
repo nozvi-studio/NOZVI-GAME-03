@@ -63,7 +63,7 @@ it('MEC-003-R1 sim level is 1-based', () => {
 });
 it('MEC-003 section 7 createSim validates startLevel', () => {
   for (const startLevel of [0, 31, 2.5]) expect(() => createSim(b, 1, {startLevel})).toThrow(RangeError);
-  expect(createSim(b, 1, {startLevel: 12}).snapshot()).toMatchObject({level: 12, need: 7, tickMs: 118});
+  expect(createSim(b, 1, {startLevel: 12}).snapshot()).toMatchObject({level: 12, need: 7, tickMs: 140});
 });
 it('MEC-003-R15 fenceFirstLevel follows the family table', () => { expect(fenceFirstLevel(b)).toBe(6); });
   it('MEC-003-R5 golden progress overflow carries into the next level', () => {
@@ -73,7 +73,7 @@ it('MEC-003-R15 fenceFirstLevel follows the family table', () => { expect(fenceF
   });
 
   it('MEC-003-R6 max level wins when its quota is cleared', () => {
-    const sim = restoreSim(b, buildState(b, { level: 30, progress: 12, mango: [9, 8], spawnInMs: QUIET }));
+    const sim = restoreSim(b, { ...buildState(b, { level: 30, progress: 12, mango: [9, 8], spawnInMs: QUIET }), rampActive: false });
     sim.advance(82);
     expect(sim.snapshot()).toMatchObject({ level: 30, progress: 13, status: 'over', outcome: { won: true } });
     expect(sim.drainEvents()).toEqual([{ type: 'ate', x: 9, y: 8, golden: false, points: 1, progressGain: 1, source: 'mango' }, { type: 'runWon', score: 1, timeMs: 82 }]);
@@ -83,10 +83,12 @@ it('MEC-003-R15 fenceFirstLevel follows the family table', () => { expect(fenceF
     const sim = restoreSim(b, buildState(b, { progress: 3, mango: [9, 8], spawnInMs: QUIET }));
     sim.advance(140);
     expect(stateOf(sim).level).toBe(2);
-    expect(stateOf(sim).tickMs).toBe(138);
+    expect(stateOf(sim).tickMs).toBe(140); // MEC-008-R9 keeps the eating step's tick.
     expect(sim.drainEvents()).toEqual([
       { type: 'ate', x: 9, y: 8, golden: false, points: 1, progressGain: 1, source: 'mango' },
       { type: 'shrunk', from: 5, to: 4, removed: [{ x: 5, y: 8 }] },
       { type: 'levelUp', level: 2, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 140 },
     ]);
+    sim.advance(1001);
+    expect(stateOf(sim).tickMs).toBe(138);
   });
