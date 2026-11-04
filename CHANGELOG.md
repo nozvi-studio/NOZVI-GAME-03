@@ -2,6 +2,8 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+### Fixed
+- fix(core): regular mango updates the speed ramp before the level-clear check, so rampEnded precedes levelUp (ARCHITECTURE step 12.4).
 ### Docs
 - docs: AGENTS.md 0.3.2 adds GitNexus workflow (status at task start, async analyze at task end) and minimal-vs-full test scope rule.
 - docs: owner phone run passes P0 parity.
