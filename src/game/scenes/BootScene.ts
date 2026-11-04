@@ -12,7 +12,9 @@ export class BootScene extends Phaser.Scene {
     this.registry.set('balance', balance);
     const store = localStore();
     this.registry.set('store', store);
-    this.registry.set('save', load(store));
+    // MEC-008-R12 validate the save against the active balance without coupling meta to core.
+    this.registry.set('save', load(store, { skillIds: balance.loadout.order,
+      maxLevel: balance.level.maxLevel, carryMax: balance.checkpoints.carryMax }));
     this.scene.start('Game');
     this.scene.launch('Hud');
   }

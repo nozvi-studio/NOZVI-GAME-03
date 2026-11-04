@@ -55,7 +55,7 @@ describe('GDD-13 HUD flow, audio and save wiring', () => {
   it('GDD-13 M and sound button persist settings and enabling sound chirps', () => {
     const h = setup(); bindKeyboard(h.game);
     h.game.input.keyboard!.emit('keydown', { code: 'KeyM', preventDefault() {} });
-    expect(load(h.store)).toEqual({ bestScore: 5, settings: { sound: false } });
+    expect(load(h.store)).toEqual({ ...defaultSave(), bestScore: 5, settings: { sound: false } });
     expect(sound.setOn).toHaveBeenLastCalledWith(false);
     h.click('sound-button');
     expect(load(h.store).settings.sound).toBe(true); expect(sound.play).toHaveBeenCalledWith('eat');

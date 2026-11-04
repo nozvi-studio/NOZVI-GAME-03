@@ -11,7 +11,7 @@ Updated: 2026-11-04 · Keep under ~80 lines. One row per module, not per file.
 | Input | `src/game/input/` - keyboard, CSS-pixel swipe and D-pad adapters |
 | Balance config | `config/balance.json` (read via `parseBalance` in `src/core/balance.ts`; P1 balance v2, validated family table) |
 | Save / load | `src/meta/save.ts` |
-| Save / load (browser) | `src/game/platform/localStore.ts` (Boot loads; HUD saves best and sound) |
+| Save / load (browser) | `src/game/platform/localStore.ts` (Boot loads v2 with balance rules; HUD saves best and sound) |
 | Player-facing strings | `src/game/text.ts` |
 | Test setup | `vitest.config.ts`, `tests/` (`npm test`, `npm run test:fuzz`) |
 
@@ -21,7 +21,7 @@ Updated: 2026-11-04 · Keep under ~80 lines. One row per module, not per file.
 | `prototype/` | **Frozen (reference only)** whole playable prototype; run with `python3 -m http.server`: tuning, state, hazards director, fairness (BFS), input, rendering, synth audio | `mango-snake-hard.html` | Google Fonts (network, optional) | MEC-001…MEC-004 | none |
 | `src/game/` | Phaser board/HUD scenes, cards, banners, countdown, input, synth/haptics and browser save wiring | scenes/GameScene.ts, scenes/HudScene.ts, text.ts | phaser, src/core + src/meta (public indexes) | GDD-13, GDD-8.4, MEC-001 through MEC-004 | tests/game/, boundary + build; visual QA pending |
 | `src/core/` | Pure rules: balance, RNG, grid/BFS, cell queries, snake, 1-based level.ts formulas and family table, mango placement/rot (MEC-002), hazards/ (registry, director, families; MEC-004) and Sim snapshots | sim.ts, snake.ts, mango.ts | — | MEC-001…004, GDD-7 | tests/core/ |
-| `src/meta/` | Versioned save envelope + KeyValueStore port | index.ts, save.ts | — | GDD-8.4 | tests/meta/ |
+| `src/meta/` | Save v2/migration + KeyValueStore port; permanent checkpoint progression, loadout sanitizing, local run log | save.ts, progression.ts, loadout.ts / runLog.ts | — | MEC-003-R18..R20, MEC-007-R4, MEC-008 | tests/meta/ |
 | `src/types/` | Ambient type shims for third-party types | phaser-shims.d.ts | — | — | typecheck |
 | `tests/` | Vitest tests and helpers | boundary.test.ts, support/boundary.ts, support/balance.ts | vitest | GDD-13 | — |
 

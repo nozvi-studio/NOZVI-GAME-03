@@ -176,3 +176,38 @@ Append-only. Format: `## YYYY-MM-DD — <decision>` then Context / Choice / Alte
 | QA-T8-08 | MEC-003-R1: results text consumes 1-based levels. |
 - Replacement coverage: core balance, level, shapes, director, snake and game text/HUD suites assert P1 values without editing independent QA sources. QA-T2-17 remains its existing P2a skip; two existing todo cases remain.
 - Final evidence: filtered normal suite 364 passed / 24 skipped / 2 todo in 7.65 s with three isolated thread workers; filtered heavy fuzz (200 seeds) has the same totals and exits 0. Typecheck and native-loader production build exit 0. A read-only review found no Critical/Important issues. The copied historical "To be copied" note is retained as a minor documentation artifact to honor the verbatim-copy requirement.
+
+## 2026-11-04 - P1 Task 2 execution rulings
+- Task 2: Ruling: use the real P0 `MIGRATIONS` name, as recorded in the P1 plan name mapping; export it publicly with the v2 APIs. No behavior change from the planned migration registry.
+- Task 2: Ruling: retain the P0 `SaveData` field shape and a `save` overload for staged game/QA callers; partial P0 writes receive the new defaults in a complete v2 envelope. `SaveDataV2` is the full P1 interface. Cost if wrong: legacy callers could replace P1 fields if they construct a partial save instead of preserving the loaded object.
+- Task 2: Ruling: retain a deprecated P0 `load(store, migrations?)` overload, merging custom migrations with the built-in v1 migration; it reads P0 fields and defaults the new fields because it has no balance rules. The required P1 `load(store, rules)` API validates every field. Boot now supplies the active balance slices; its regression test proved progression was lost without them. Cost if wrong: a future P1 caller using the deprecated overload would lose P1 fields on a later save; P1 callers must pass rules.
+- Task 2: Ruling: minimally update Boot and the owned HUD/platform tests to consume v2; the plan omitted these existing integration callers. No gameplay behavior is added. Cost if wrong: startup could use the wrong save validation limits; the Boot integration test checks the active balance path.
+- Task 2: Ruling: the owner's explicit instruction to execute Task 2 authorizes its planned MEC-003-R19 `run_start.entry` addition (`home` or `results`) for the P1 Results/Home metric. No further rules change.
+- Task 2: Ruling: use native config loading and threads for Vitest, and native config loading for Vite, per the recorded Windows environment workaround; three test workers, sequential test/typecheck/build. No dependencies or npm script changes.
+
+### P1 Task 2 obsolete independent QA cases (sources unchanged)
+| QA test ID | Superseding plan/spec rule |
+|---|---|
+| QA-T6-01 | Task 2 save v2; MEC-008-R12 and section 3 add five default progression/loadout fields. |
+| QA-T6-02 | Task 2 save v2; MEC-008-R12 empty-store defaults include all v2 fields. |
+| QA-T6-03 | Task 2 save v2; MEC-008-R12 fresh defaults include all v2 fields. Fresh-copy behavior remains covered. |
+| QA-T6-04 | Task 2 save v2; MEC-008-R12 round trips return the complete v2 data shape. |
+| QA-T6-05 | Task 2 save v2; MEC-008-R12 current envelope version is 2, with new fields. |
+| QA-T6-08 | Task 2 save v2; MEC-008-R12 migration continues through version 2 and adds its fields. |
+| QA-T6-14 | Task 2 per-field validators; MEC-008-R12 resets only invalid fields, preserving valid score/sound. |
+| QA-T8-15 | Task 2 save v2; MEC-008-R12 browser-store round trips return complete v2 data. |
+- Replacement coverage: tests/meta/save.test.ts covers v2 round trips, migration, per-field recovery, clamping, checkpoint/loadout validation, envelope fallback and fresh defaults; tests/game/boot.test.ts covers active-balance loading; owned platform/HUD tests assert v2 shapes. The earlier Task 1 QA exclusions are no longer needed after the independent tester's update.
+
+### Task 2 final review and scope rulings
+- Final review: independent read-only reviewer found no Critical or Important issues; no code fixes required.
+- Final: minor (deferred): round-trip nondefault values for every v2 field and all five log variants in additional tests; current tests cover the exact plan examples and the reviewer found implementation correct. Cost: less direct round-trip coverage for those combinations.
+- Final: Ruling: reviewer did not run verification commands because the executor runs them sequentially to limit host memory; executor verified the full filtered suite, typecheck and build. Cost: no independent second execution.
+- Final: Ruling: browser startup, console, rendering, mobile behavior and real-browser persistence were not checked; this meta-only task uses the requested command gates plus real-handler platform/HUD and Boot tests. Cost: browser-only issues remain for agy/owner QA.
+- Final: Ruling: documentation review was left to the executor while edits were underway; checked required CODEMAP/CHANGELOG/STATUS updates and CRLF locally. The owner's Task 2 instruction authorizes the planned R19 field addition. Cost: no second documentation review.
+- Final: Ruling: branch ancestry and git/dependency operations were outside reviewer scope; existing feat/p1-meta is retained and no commits, merges, pushes or installs were performed, as requested. Cost: integration remains the owner's next step.
+- Final: Ruling: other P1 tasks, session lifecycle persistence, export and UI hint rendering remain out of scope; this task supplies pure helpers and the necessary existing Boot call adaptation. Cost: the new lifecycle behavior awaits later tasks.
+- Final: Ruling: superseded QA assertions remain untouched; all eight IDs and their replacement rule are listed above and only those cases are filtered. Cost: unfiltered npm test remains red until the independent tester updates them.
+- Final: Ruling: compatibility overloads and uppercase MIGRATIONS were deliberately excluded from the reviewer's judgment; the executor retains them for existing P0 consumers under the execution rulings above. Cost: P1 callers must use the explicit-rules API.
+- Final: Ruling: unchanged code beyond HUD persistence and boundaries was excluded from review to honor the task's scope. Cost: unrelated defects are not assessed.
+- Final: Ruling: malformed developer config, invalid typed gameplay inputs, unsupported cause keys and impractical counter overflow are outside the specified helpers' input contract; disk save/log data is validated, and core parseBalance owns config validation. Cost: direct callers violating typed/config contracts have no extra guarantees.
+- Final: Ruling: frozen prototype and environment files were not read, honoring explicit restrictions. Cost: no prototype comparison; mechanic specs remain authoritative.
