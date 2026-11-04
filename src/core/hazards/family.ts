@@ -10,7 +10,7 @@ export function defineFamily<K extends FamilyKey, S extends HazardInstance>(
     key, cause: rules.cause, capClass: rules.capClass, maxActiveKey: rules.maxActiveKey, breakable: rules.breakable,
     ...(rules.onBreak ? { onBreak: rules.onBreak } : {}),
     spawn(s, ctx) {
-      const instance = rules.spawn(ctx, ctx.rng ?? rngFrom(s.rng));
+      const instance = rules.spawn(ctx, ctx.rng ?? rngFrom(s.rng), s);
       if (!instance) return null;
       if (instance.family === 'rock' || instance.family === 'fence' || instance.family === 'maze') addTimedHazards(s, instance);
       else get(s).push(instance);

@@ -7,10 +7,11 @@ import { breakTimed, makeTimed, timedHasCell, timedSolidAt, updateTimed } from '
 const rules: InstanceRules<TimedHazard> = {
   key: 'maze', cause: 'maze', capClass: 'big', maxActiveKey: null, breakable: true,
   onBreak: (s, x, y) => breakTimed(s, 'maze', x, y),
-  spawn(ctx, rng) {
-    const m = ctx.balance.maze;
+  // MEC-004-R10-R12 test reachability for the complete filtered maze.
+  spawn(ctx, rng, s) {
+    const b = ctx.balance, m = b.maze;
     const cells = mazeCells(rng.pick(m.layouts)).filter(c => ctx.cellFree(c.x, c.y));
-    if (cells.length < m.minCells) return null;
+    if (cells.length < m.minCells || !ctx.candidateValid(s, cells, { nearDist: b.fairness.nearHeadDist, wallCells: cells })) return null;
     return makeTimed('maze', cells, m.warnMs, m.lifeMs + rng.next() * m.lifeRandMs);
   },
   update: updateTimed, solidAt: timedSolidAt, bfsWallAt: timedHasCell, reservedAt: timedHasCell,

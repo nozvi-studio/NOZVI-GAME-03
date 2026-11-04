@@ -368,3 +368,8 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - Preserve MEC-002-R7 rotten-rock collision priority through the single `solidFamilyWithPriority` helper. General composite queries retain registry order.
 - Until Task 2 supplies update-time collision dispatch, `hitHead` throws if unexpectedly invoked; current families never call it.
 - Leave the GDD MEC-012 row untouched pending lead approval.
+
+## 2026-11-05 - MEC-004 L3: rule 3 applies retroactively (lead ruling)
+- Apply MEC-004-R12 to every director family, including P0/P1 rocks, fences, mazes and terrain. Reject a candidate if its new BFS walls disconnect a previously reachable regular mango; an already unreachable mango does not block placement (L4).
+- Consequence: existing seeded spawn sequences may change when a candidate fails rule 3. Terrain adds no BFS walls and remains subject to the owner-approved distance of 4 (MEC-004-R11).
+- Flow B keeps every family instance through a level up (MEC-004-R16). P2 design section 20 item 3 is void; MEC-003-R7 is unchanged.

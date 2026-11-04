@@ -7,6 +7,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - feat(core): level-up slowdown state and Slow-mo max rule in effectiveTick (MEC-003-R22, MEC-006-R17).
 - feat(core): levelUpSlowdown tiers in balance config with validation (MEC-003-R22).
 ### Changed
+- feat(core): director by capClass and fairness rule 3 for all families (MEC-004-R9-R13)
 - refactor(core): route hazard queries through the family registry and move per-family state lists into SimState.families without behavior changes (MEC-004-R1-R4).
 - chore(core): remove level.transitionMs; level-up banner uses ui.bannerMs (MEC-003-R7).
 - feat(core): director first spawn starts when the level-up slowdown ends (MEC-003-R11).

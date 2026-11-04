@@ -10,7 +10,7 @@ import { rubbleFamily } from './rubble';
 import { timedHazards, updateTimed } from './timed';
 import { solidFamilyWithPriority } from './queries';
 
-const DEFAULT_FAMILIES: readonly HazardFamily[] = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily, rubbleFamily];
+export const DEFAULT_FAMILIES: readonly HazardFamily[] = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily, rubbleFamily];
 export let FAMILIES: readonly HazardFamily[] = DEFAULT_FAMILIES;
 export const FAMILY: Record<FamilyKey, HazardFamily> = {
   rock: ROCK, fence: FENCE, maze: MAZE, terrain: TERRAIN, rottenRock: rottenRockFamily, snipWall: snipWallFamily, rubble: rubbleFamily,

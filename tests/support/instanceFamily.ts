@@ -2,6 +2,7 @@ import type { HazardFamily, FamilyKey, SimState, SpawnCtx, StepCtx } from '../..
 import type { Rng } from '../../src/core/rng';
 import { buildState } from './state';
 import { loadBalance } from './balance';
+import { spawnCtx } from '../../src/core/hazards/director';
 
 // MEC-004-R2 run the P0 instance-level assertions against the new state-level API.
 // Each call isolates one instance; spawn assumes one successful call creates exactly one instance.
@@ -14,9 +15,9 @@ export function instanceFamily<K extends FamilyKey>(family: HazardFamily & { rea
     return s;
   };
   return {
-    spawn(ctx: SpawnCtx, rng: Rng): Instance | null {
+    spawn(ctx: Omit<SpawnCtx, 'candidateValid'>, rng: Rng): Instance | null {
       const s = buildState(ctx.balance);
-      if (!family.spawn(s, { ...ctx, rng })) return null;
+      if (!family.spawn(s, { ...spawnCtx(s, ctx.balance), ...ctx, rng })) return null;
       return s.families[family.key][0] as Instance;
     },
     update(instance: Instance, ctx: StepCtx): 'keep' | 'remove' {

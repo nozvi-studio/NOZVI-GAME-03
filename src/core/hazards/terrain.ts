@@ -21,7 +21,8 @@ const rules: InstanceRules<TerrainHazard> = {
   onBreak(s, x, y) {
     for (const T of s.families.terrain) if (T.cells.some(c => c.up && c.x === x && c.y === y)) T.cells = T.cells.filter(c => c.x !== x || c.y !== y);
   },
-  spawn(ctx, rng) {
+  // MEC-004-R10-R12 terrain reserves cells but adds no BFS walls.
+  spawn(ctx, rng, s) {
     const b = ctx.balance, tr = b.terrain, { cols, rows } = b.board;
     for (let i = 0; i < tr.tries; i++) {
       let cells: Raw[] = [];
@@ -37,7 +38,7 @@ const rules: InstanceRules<TerrainHazard> = {
           cells.push({ x: ox + a, y: oy + w, delay: ((a + w) % 2) * (tr.periodMs / 2) });
       }
       cells = cells.filter(c => ctx.cellFree(c.x, c.y, b.fairness.terrainNearHeadDist));
-      if (cells.length >= tr.minCells)
+      if (cells.length >= tr.minCells && ctx.candidateValid(s, cells, { nearDist: b.fairness.terrainNearHeadDist, wallCells: [] }))
         return { family: 'terrain', t: 0, lifeMs: tr.lifeMs + rng.next() * tr.lifeRandMs,
                  cells: cells.map(c => ({ ...c, up: false, vis: 'down' as const })) };
     }

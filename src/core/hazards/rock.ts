@@ -7,13 +7,15 @@ import { breakTimed, makeTimed, timedHasCell, timedSolidAt, updateTimed } from '
 const rules: InstanceRules<TimedHazard> = {
   key: 'rock', cause: 'rock', capClass: 'small', maxActiveKey: null, breakable: true,
   onBreak: (s, x, y) => breakTimed(s, 'rock', x, y),
-  spawn(ctx, rng) {
+  // MEC-004-R10-R12 reject each unfair candidate before drawing its lifetime.
+  spawn(ctx, rng, s) {
     const b = ctx.balance, r = b.rock;
     const shape = r.shapes[rng.pick(rockPool(b, ctx.level))];       // picked once, before the tries (L429)
     for (let i = 0; i < r.tries; i++) {
       const ox = rng.int(b.board.cols), oy = rng.int(b.board.rows);  // not clamped: off-board cells fail cellFree
       const cells = shape.map(([dx, dy]) => ({ x: ox + dx, y: oy + dy }));
-      if (cells.every(c => ctx.cellFree(c.x, c.y))) return makeTimed('rock', cells, r.warnMs, r.lifeMs + rng.next() * r.lifeRandMs);
+      if (cells.every(c => ctx.cellFree(c.x, c.y)) && ctx.candidateValid(s, cells, { nearDist: b.fairness.nearHeadDist, wallCells: cells }))
+        return makeTimed('rock', cells, r.warnMs, r.lifeMs + rng.next() * r.lifeRandMs);
     }
     return null;
   },

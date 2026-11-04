@@ -5,6 +5,7 @@ import { makeTimed, updateTimed } from '../../src/core/hazards/timed';
 import { ROCK } from '../../src/core/hazards/rock';
 import { FENCE } from '../../src/core/hazards/fence';
 import { MAZE } from '../../src/core/hazards/maze';
+import { spawnCtx } from '../../src/core/hazards/director';
 import { cellBfsWall, cellReserved } from '../../src/core/cells';
 import { restoreSim } from '../../src/core/sim';
 import type { SimEvent, SpawnCtx, StepCtx, TimedPhase } from '../../src/core/types';
@@ -85,14 +86,16 @@ describe('MEC-004 timed hazards', () => {
 
   it('MEC-004 maze drops non-free cells and needs 6', () => {
     const allowed = [{ x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 }, { x: 10, y: 4 }, { x: 11, y: 4 }, { x: 12, y: 4 }];
-    const ctx: SpawnCtx = { balance: b, level: 6, cellFree: (x, y) => allowed.some(c => c.x === x && c.y === y) };
+    const ctx: Omit<SpawnCtx, 'candidateValid'> = { balance: b, level: 6, cellFree: (x, y) => allowed.some(c => c.x === x && c.y === y) };
     const five = { ...ctx, cellFree: (x: number, y: number) => ctx.cellFree(x, y) && x !== 12 };
     const a = fixed([]);
     expect(instanceFamily(MAZE).spawn(five, a.rng)).toBeNull(); expect(a.calls).toEqual(['pick(4)']);
     expect(instanceFamily(MAZE).spawn(ctx, fixed([]).rng)?.cells).toHaveLength(6);
-    for (const [layout, length] of [20, 30, 20, 28].entries()) {
-      const h = instanceFamily(MAZE).spawn({ ...ctx, cellFree: () => true }, fixed([layout]).rng);
-      expect(h?.cells).toHaveLength(length); expect(h?.warnMs).toBe(2600);
+    // MEC-004-R10/R11 real board filtering removes near-head and front-lane cells.
+    for (const [layout, length] of [20, 23, 11, 26].entries()) {
+      const s = buildState(b);
+      const cells = MAZE.spawn(s, { ...spawnCtx(s, b), rng: fixed([layout]).rng });
+      expect(cells).toHaveLength(length); expect(s.families.maze[0]?.warnMs).toBe(2600);
     }
   });
   it('MEC-004 warn → solid → crumble → removed with exact durations', () => {

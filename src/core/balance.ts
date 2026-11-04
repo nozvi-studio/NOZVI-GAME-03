@@ -1,5 +1,6 @@
 // src/core/balance.ts — Balance type + parseBalance (design §6). GDD-7
 import type { LevelRow } from './types';
+import { DEFAULT_FAMILIES } from './hazards/registry';
 
 export type Pair = [number, number];
 export type RockShapeKey = 'single' | 'lineH' | 'lineV' | 'corner' | 'block';
@@ -21,7 +22,7 @@ export interface Balance {
     goldenMinEaten: number; points: { normal: number; golden: number }; progress: { normal: number; golden: number };
     nearHeadDist: number; rottenRockLifeMs: number; placeRetryMs: number;
   };
-  fairness: { nearHeadDist: number; frontLaneCells: number; terrainNearHeadDist: number };
+  fairness: { nearHeadDist: number; frontLaneCells: number; terrainNearHeadDist: number; minWarnMs: number; minWarnTicks: number; escapeHorizonMs: number };
   hazard: { crumbleMs: number };
   rock: {
     warnMs: number; lifeMs: number; lifeRandMs: number; tries: number;
@@ -106,7 +107,8 @@ const SPEC: Spec = {
     from: 'int+', to: 'int+', weights: (v, path) => {
       if (!isObj(v)) fail(path, 'must be an object');
       for (const [key, value] of Object.entries(v)) {
-        if (!['rock', 'fence', 'terrain', 'maze'].includes(key)) fail(path, 'unknown family ' + key);
+        // MEC-004-R1 only registered director families may have table weights.
+        if (!DEFAULT_FAMILIES.some(f => f.key === key && f.capClass !== 'none')) fail(path, 'unknown or non-director family ' + key);
         check(value, 'num0', path + '.' + key);
       }
     }, rockShapes: namesOf(ROCK_KEYS, true), fenceShapes: namesOf(FENCE_KINDS, true), rottenRocks: 'bool',
@@ -117,7 +119,7 @@ const SPEC: Spec = {
     goldenMinEaten: 'int0', points: { normal: 'int+', golden: 'int+' }, progress: { normal: 'int+', golden: 'int+' },
     nearHeadDist: 'int+', rottenRockLifeMs: 'int+', placeRetryMs: 'int+',
   },
-  fairness: { nearHeadDist: 'int+', frontLaneCells: 'int+', terrainNearHeadDist: 'int+' },
+  fairness: { nearHeadDist: 'int+', frontLaneCells: 'int+', terrainNearHeadDist: 'int+', minWarnMs: 'int+', minWarnTicks: 'int+', escapeHorizonMs: 'int+' },
   hazard: { crumbleMs: 'int+' },
   rock: { ...timed, tries: 'int+',
     shapes: recordOf(ROCK_KEYS, 'pairs') },
@@ -172,6 +174,11 @@ export function parseBalance(json: unknown): Balance {
   if (b.speed.minMs > b.speed.startMs) fail('speed.minMs', 'must be ≤ speed.startMs');
   if (b.mango.rotMinMs > b.mango.rotBaseMs) fail('mango.rotMinMs', 'must be ≤ mango.rotBaseMs');
   if (b.terrain.upMs + b.terrain.warnMs >= b.terrain.periodMs) fail('terrain.periodMs', 'must be > upMs + warnMs');
+  // MEC-004-R13 warning time uses the L1 base tick, independent of slow effects.
+  const minWarnMs = Math.max(b.fairness.minWarnMs, b.fairness.minWarnTicks * b.speed.startMs);
+  for (const family of ['rock', 'fence', 'maze', 'terrain'] as const) {
+    if (b[family].warnMs < minWarnMs) fail(family + '.warnMs', 'must be >= ' + minWarnMs);
+  }
   if (b.snake.start.length < 2) fail('snake.start', 'must have at least 2 cells');
   if (Math.abs(b.snake.startDir[0]) + Math.abs(b.snake.startDir[1]) !== 1) fail('snake.startDir', 'must be one unit step');
   // MEC-001-R6 a reset can only trim after growth.

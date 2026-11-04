@@ -3,10 +3,35 @@ import { describe, expect, it } from 'vitest';
 import json from '../../config/balance.json';
 import { parseBalance } from '../../src/core/balance';
 import { loadBalance } from '../support/balance';
+import { withFamilies } from '../support/fakeFamily';
+import { buildState } from '../support/state';
 
 const mutate = (fn: (j: any) => void): unknown => { const j = structuredClone(json) as any; fn(j); return j; };
 
 describe('GDD-7 balance', () => {
+  it('MEC-004-R11 fairness pins the terrain distance and rule 1/escape tuning', () => {
+    expect(loadBalance().fairness).toEqual({ nearHeadDist: 4, frontLaneCells: 4, terrainNearHeadDist: 4,
+      minWarnMs: 900, minWarnTicks: 4, escapeHorizonMs: 4000 });
+  });
+  it('MEC-004-R13 parseBalance rejects a warnMs below 900', () => {
+    for (const family of ['rock', 'fence', 'maze', 'terrain']) {
+      expect(() => loadBalance(j => { j[family].warnMs = 899; })).toThrow(new RegExp(family + '\\.warnMs'));
+    }
+  });
+  it('MEC-004-R13 warning minimum uses four L1 base ticks', () => {
+    expect(() => loadBalance(j => { j.speed.startMs = 400; })).toThrow(/rock.warnMs/);
+    expect(() => loadBalance(j => { j.rock.warnMs = 900; })).not.toThrow();
+  });
+  it('MEC-004-R1 parseBalance rejects an unknown or capClass none weight key', () => {
+    for (const weights of [{ rottenRock: 1 }, { lava: 1 }])
+      expect(() => loadBalance(j => { j.level.table[0].weights = weights; })).toThrow(/level.table\[0\].weights/);
+  });
+  it('MEC-004-R1 parseBalance validates registered descriptors independently of query test overrides', () => {
+    const s = buildState(loadBalance());
+    withFamilies(s, [{ key: 'rock', capClass: 'none' }], () => {
+      expect(() => loadBalance()).not.toThrow();
+    });
+  });
   it('GDD-7 balance.json passes parseBalance', () => { expect(() => loadBalance()).not.toThrow(); });
 
   it('MEC-003 P1 balance v2 table pins every MEC section 9 value', () => {

@@ -85,7 +85,7 @@ describe('MEC-004 terrain', () => {
     const a = fixed([1, 2], [false]), distances: (number | undefined)[] = [];
     const h = instanceFamily(TERRAIN).spawn({ balance: b, level: 4, cellFree: (_x, _y, d) => { distances.push(d); return true; } }, a.rng);
     expect(a.calls).toEqual(['chance(0.5)', 'int(14)', 'int(14)', 'next']);
-    expect(h?.cells).toHaveLength(16); expect(distances).toEqual(Array<number>(16).fill(3));
+    expect(h?.cells).toHaveLength(16); expect(distances).toEqual(Array<number>(16).fill(4));
     expect(h?.cells.map(c => c.delay)).toEqual([0, 1700, 0, 1700, 1700, 0, 1700, 0, 0, 1700, 0, 1700, 1700, 0, 1700, 0]);
     expect(h?.cells[0]).toMatchObject({ x: 1, y: 2, up: false, vis: 'down' });
   });

@@ -1,6 +1,7 @@
 // src/core/types.ts — public API types of the core (design §4, §4.1)
 import type { Balance, FenceKind } from './balance';
 import type { Rng, RngState } from './rng';
+import type { CandidateOpts } from './hazards/placement';
 
 export type Step = -1 | 0 | 1;
 export interface Dir { x: Step; y: Step }
@@ -12,7 +13,7 @@ export interface SimOptions { startLevel?: number; startEnergy?: number; loadout
 export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze';
 export type IntroKey = TableFamily | 'rottenRock';
 export interface LevelRow {
-  from: number; to: number; weights: Partial<Record<TableFamily, number>>;
+  from: number; to: number; weights: Partial<Record<FamilyKey, number>>;
   rockShapes: string[]; fenceShapes: string[]; rottenRocks: boolean;
 }
 export type CauseKey = 'wall' | 'self' | 'rotten' | 'rock' | 'fence' | 'maze' | 'ground' | 'snipWall' | 'rubble';   // prototype CAUSES L336
@@ -71,7 +72,7 @@ export type SimEvent =
   | { type: 'landed'; hazardType: TimedKey }
   | { type: 'dust'; x: number; y: number }
   | { type: 'rotted'; x: number; y: number; leftRock: boolean }
-  | { type: 'hazardIncoming'; family: UnlockKey }
+  | { type: 'hazardIncoming'; family: FamilyKey }
   | { type: 'died'; cause: CauseKey; x: number; y: number; context?: TileKind };
 
 /** All Sim state. Plain JSON data only: no closures, Map/Set or class instances. */
@@ -178,10 +179,16 @@ export interface Sim {
 }
 
 /** Per-call view for spawning; never stored in SimState. */
+export interface SpawnObserver {
+  spawned(family: FamilyKey, cells: readonly Cell[], before: SimState, after: SimState): void;
+}
 export interface SpawnCtx {
   readonly balance: Balance;
   readonly level: number;
   readonly rng?: Rng; // Controlled RNG for director/test contexts; otherwise uses SimState.rng.
+  readonly observer?: SpawnObserver;
+  /** MEC-004-R10-R12 supplied by spawnCtx to keep descriptors independent of the registry. */
+  candidateValid(s: SimState, cells: readonly Cell[], opts: CandidateOpts): boolean;
   /** In bounds, not reserved, not near the head (d defaults to balance.fairness.nearHeadDist). */
   cellFree(x: number, y: number, d?: number): boolean;
 }
@@ -197,7 +204,7 @@ export interface InstanceRules<S extends { family: FamilyKey }> {
   cause: CauseKey;                                     // rock→'rock', fence→'fence', maze→'maze', terrain→'ground'
   capClass: CapClass;                                  // rock, fence: 'small' (director cap); maze, terrain: 'big'
   maxActiveKey: string | null;                         // balance key of a per-family max; terrain: 'terrain.maxActive'
-  spawn(ctx: SpawnCtx, rng: Rng): S | null;            // placement rules of design §5, unchanged
+  spawn(ctx: SpawnCtx, rng: Rng, s: SimState): S | null; // MEC-004-R10-R12 validates candidates against the live board.
   update(state: S, ctx: StepCtx): 'keep' | 'remove';   // one 1 ms step
   solidAt(state: S, x: number, y: number): boolean;    // collision
   bfsWallAt(state: S, x: number, y: number): boolean;  // reachability walls

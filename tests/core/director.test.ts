@@ -1,15 +1,19 @@
 import { addTimedHazards, replaceTimedHazards, timedHazards } from '../../src/core/hazards/timed';
-import { describe, expect, it } from 'vitest';
-import { pickWeighted, spawnCtx, updateDirector } from '../../src/core/hazards/director';
+import { describe, expect, it, vi } from 'vitest';
+import { directorOptions, pickWeighted, spawnCtx, updateDirector } from '../../src/core/hazards/director';
 import { makeTimed } from '../../src/core/hazards/timed';
 import { nearHead } from '../../src/core/grid';
 import { rngFrom, seedRng } from '../../src/core/rng';
 import { restoreSim, stateOf } from '../../src/core/sim';
 import type { FamilyKey, SimState, TerrainHazard } from '../../src/core/types';
+import { __setFamiliesForTest, FAMILIES, FAMILY } from '../../src/core/hazards/registry';
+import { solidCauseAt, tileAt } from '../../src/core/hazards/queries';
+import { startLevelUp } from '../../src/core/transition';
+import { testCtx } from '../../src/core/testing';
 import { loadBalance } from '../support/balance';
 import { fixed } from '../support/rngStub';
 import { buildState } from '../support/state';
-import { withFamilies } from '../support/fakeFamily';
+import { fakeFamily, withFamilies } from '../support/fakeFamily';
 
 const b = loadBalance();
 function due(level: number): SimState { return buildState(b, { level, spawnInMs: 1, mango: [9, 8] }); }
@@ -26,6 +30,80 @@ function selected(level: number, roll: number): FamilyKey | undefined {
 }
 
 describe('MEC-004 director', () => {
+  it('MEC-004-R9 small cap counts all small families; modifier not counted; one big family at a time', () => {
+    const s = due(1), balance = structuredClone(b);
+    Object.assign(balance.level.table[0]!.weights, { rock: 3, fence: 2, terrain: 2, maze: 2, rubble: 1 });
+    const fams = [fakeFamily({ key: 'rock', capClass: 'small', count: 1 }),
+      fakeFamily({ key: 'fence', capClass: 'small', count: 1 }),
+      fakeFamily({ key: 'terrain', capClass: 'big', count: 1 }),
+      fakeFamily({ key: 'maze', capClass: 'big' }),
+      fakeFamily({ key: 'rubble', capClass: 'modifier' })];
+    expect(directorOptions(s, balance, fams).map(o => o.family.key)).toEqual(['rubble']);
+  });
+  it('MEC-004-R9 options follow registry order and table weights', () => {
+    expect(directorOptions(due(11), b).map(o => [o.family.key, o.weight])).toEqual([['rock', 3], ['fence', 2], ['terrain', 2]]);
+    expect(directorOptions(due(26), b).map(o => o.family.key)).toEqual(['rock', 'fence', 'maze', 'terrain']);
+  });
+  it('MEC-004-R9 per-family maxActive gates small and modifier options', () => {
+    const s = due(11);
+    const fams = [fakeFamily({ key: 'rock', capClass: 'small', count: 1 }),
+      fakeFamily({ key: 'fence', capClass: 'modifier', count: 1 })].map(f => ({ ...f, maxActiveKey: 'terrain.maxActive' }));
+    expect(directorOptions(s, b, fams)).toEqual([]);
+  });
+  it('MEC-003-R11 the capClass director spawns nothing while the level-up slowdown is active', () => {
+    const s = due(6); s.levelUpSlow = { factor: 1.4, easeMs: 1000, leftMs: 1000 };
+    const previous = FAMILIES, spawn = vi.fn(() => [{ x: 0, y: 0 }]);
+    __setFamiliesForTest([{ ...fakeFamily({ key: 'rock', capClass: 'modifier' }), spawn }]);
+    try { for (let i = 0; i < 999; i++) updateDirector(s, b, rngFrom(s.rng)); }
+    finally { __setFamiliesForTest(previous); }
+    expect(spawn).not.toHaveBeenCalled(); expect(s.spawnInMs).toBe(1); expect(s.mazeCooldownMs).toBe(0);
+  });
+  it('MEC-004-R16 a level up leaves every family instance in place', () => {
+    const s = due(6), rock = makeTimed('rock', [{ x: 1, y: 1 }], 1500, 6000);
+    rock.state = 'solid'; rock.cells[0]!.on = true; addTimedHazards(s, rock);
+    s.families.terrain.push(terrain());
+    const previous = FAMILIES;
+    __setFamiliesForTest([...previous, fakeFamily({ key: 'rubble', tile: { kind: 'mud', cells: [[2, 2]] } })]);
+    const answers = () => Array.from({ length: 289 }, (_, i) => [solidCauseAt(s, i % 17, Math.floor(i / 17)), tileAt(s, i % 17, Math.floor(i / 17))]);
+    try {
+      const before = JSON.stringify(s.families), queries = answers();
+      startLevelUp(s, b, testCtx(b, s));
+      expect(JSON.stringify(s.families)).toBe(before); expect(answers()).toEqual(queries);
+    } finally { __setFamiliesForTest(previous); }
+  });
+  it('MEC-004-R11 terrain cells never spawn within Manhattan distance 3 of the head', () => {
+    const s = due(11), rng = fixed([5, 5], [false]).rng;
+    const cells = FAMILY.terrain.spawn(s, { ...spawnCtx(s, b), rng });
+    expect(cells).not.toBeNull();
+    for (const c of cells!) expect(Math.abs(c.x - 8) + Math.abs(c.y - 8)).toBeGreaterThan(3);
+  });
+  it('MEC-004-R10 observer receives a detached pre-spawn state and the successful cells', () => {
+    const s = due(1), spawned = vi.fn();
+    updateDirector(s, b, rngFrom(s.rng), { ...spawnCtx(s, b), observer: { spawned } });
+    expect(spawned).toHaveBeenCalledTimes(1);
+    const [family, cells, before, after] = spawned.mock.calls[0]!;
+    expect(family).toBe('rock'); expect(cells).toEqual(s.families.rock[0]!.cells.map(({ x, y }) => ({ x, y })));
+    expect(before.families.rock).toEqual([]); expect(before).not.toBe(s); expect(after).toBe(s);
+    s.families.rock[0]!.cells[0]!.x = -1;
+    expect(before.families.rock).toEqual([]);
+  });
+  it('MEC-004-R10 director does not clone state without an observer', () => {
+    const s = due(1), clone = vi.spyOn(globalThis, 'structuredClone');
+    try { updateDirector(s, b, rngFrom(s.rng)); expect(clone).not.toHaveBeenCalled(); }
+    finally { clone.mockRestore(); }
+  });
+  it('MEC-004-R10 failed attempts are not observed and retry success has its own before state', () => {
+    const s = due(6), previous = FAMILIES, spawned = vi.fn();
+    const fail = vi.fn(() => null);
+    __setFamiliesForTest([{ ...fakeFamily({ key: 'rock', capClass: 'small' }), spawn: fail }, FAMILY.fence]);
+    try {
+      updateDirector(s, b, fixed([]).rng, { ...spawnCtx(s, b), observer: { spawned } });
+      expect(fail).toHaveBeenCalledTimes(1); expect(spawned).toHaveBeenCalledTimes(1);
+      const [family, , before, after] = spawned.mock.calls[0]!;
+      expect(family).toBe('fence'); expect(before.families.fence).toEqual([]);
+      expect(after.families.fence).toHaveLength(1);
+    } finally { __setFamiliesForTest(previous); }
+  });
   it('MEC-004-R9 small cap counts every family with capClass small', () => {
     const s = due(1), rng = fixed([]);
     withFamilies(s, [{ key: 'terrain', capClass: 'small', count: 2 }], () => {
@@ -66,7 +144,8 @@ describe('MEC-004 director', () => {
     expect([0, 0.6, 0.99].map(r => selected(1, r))).toEqual(['rock', 'rock', 'rock']);
     expect([0, 0.61, 0.99].map(r => selected(6, r))).toEqual(['rock', 'fence', 'fence']);
     expect([0, 0.5, 0.99].map(r => selected(11, r))).toEqual(['rock', 'fence', 'terrain']);
-    expect([0, 0.4, 0.7, 0.99].map(r => selected(26, r))).toEqual(['rock', 'fence', 'terrain', 'maze']);
+    // MEC-004-R9 registry order places maze before terrain at L26.
+    expect([0, 0.4, 0.7, 0.99].map(r => selected(26, r))).toEqual(['rock', 'fence', 'maze', 'terrain']);
   });
   it('MEC-004 maze and terrain never overlap; maze cooldown 26000', () => {
     const maze = due(26); smallCap(maze);
@@ -75,13 +154,13 @@ describe('MEC-004 director', () => {
     const ground = due(26); smallCap(ground); ground.families.terrain.push(terrain());
     const c = fixed([]); updateDirector(ground, b, c.rng); expect(c.calls).toEqual([]);
     expect(timedHazards(ground).some(h => h.family === 'maze')).toBe(false);
-    const s = due(26); updateDirector(s, b, fixed([], [], [0.99]).rng);
+    const s = due(26); updateDirector(s, b, fixed([], [], [0.7]).rng);
     expect(timedHazards(s)[0]?.family).toBe('maze'); expect(s.mazeCooldownMs).toBe(26000);
     replaceTimedHazards(s, []); s.families.terrain = []; s.spawnInMs = 1;
     updateDirector(s, b, fixed([], [], [0.99]).rng);
     expect(s.families.terrain).toHaveLength(1); expect(s.mazeCooldownMs).toBe(25999);
     replaceTimedHazards(s, []); s.families.terrain = []; s.spawnInMs = 1; s.mazeCooldownMs = 1;
-    updateDirector(s, b, fixed([], [], [0.99]).rng);
+    updateDirector(s, b, fixed([], [], [0.7]).rng);
     expect(timedHazards(s)[0]?.family).toBe('maze'); expect(s.mazeCooldownMs).toBe(26000);
   });
   it('MEC-004 MEC-003-R15 terrain max active is 1 at every enabled level', () => {
@@ -100,7 +179,7 @@ describe('MEC-004 director', () => {
     expect(a.calls.filter(c => c.startsWith('pick'))).toEqual(['pick(5)', 'pick(2)']);
   });
   it('MEC-004 hazardIncoming is emitted for fence, maze and terrain, not rock', () => {
-    for (const [roll, family] of [[0, 'rock'], [0.4, 'fence'], [0.7, 'terrain'], [0.99, 'maze']] as const) {
+    for (const [roll, family] of [[0, 'rock'], [0.4, 'fence'], [0.7, 'maze'], [0.99, 'terrain']] as const) {
       const s = due(26); updateDirector(s, b, fixed([], [], [roll]).rng);
       expect(s.events).toEqual(family === 'rock' ? [] : [{ type: 'hazardIncoming', family }]);
     }
@@ -111,7 +190,7 @@ describe('MEC-004 director', () => {
       const s = due(1 + i % 30); updateDirector(s, b, rng);
       expect(timedHazards(s).length + s.families.terrain.length).toBe(1);
       for (const h of [...timedHazards(s), ...s.families.terrain]) for (const c of h.cells)
-        expect(nearHead(s.snake[0]!, s.dir, c.x, c.y, h.family === 'terrain' ? 3 : 4, 4)).toBe(false);
+        expect(nearHead(s.snake[0]!, s.dir, c.x, c.y, 4, 4)).toBe(false);
     }
   });
   it('MEC-004 spawnCtx rejects off-board, reserved, near-head and front-lane cells', () => {

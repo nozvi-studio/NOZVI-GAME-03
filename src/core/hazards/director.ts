@@ -2,10 +2,13 @@
 import type { Balance } from '../balance';
 import { cellReserved } from '../cells';
 import { inBounds, nearHead } from '../grid';
-import { directorIntervalMs, enabledFamilies, familyRow, smallHazardCap } from '../level';
+import { directorIntervalMs, familyRow, smallHazardCap } from '../level';
 import type { Rng } from '../rng';
-import type { TableFamily, SimState, SpawnCtx } from '../types';
-import { FAMILIES, FAMILY } from './registry';
+import type { HazardFamily, SimState, SpawnCtx } from '../types';
+import { FAMILIES } from './registry';
+import { candidateValid } from './placement';
+
+export type { SpawnObserver } from '../types';
 
 // MEC-004 prototype weighted pick: r = next() * total; walk while r > w[i]
 export function pickWeighted(weights: readonly number[], rng: Rng): number {
@@ -18,14 +21,37 @@ export function pickWeighted(weights: readonly number[], rng: Rng): number {
 export function spawnCtx(s: SimState, b: Balance): SpawnCtx {
   return {
     balance: b, level: s.level,
+    candidateValid: (state, cells, opts) => candidateValid(state, b, cells, opts),
     cellFree: (x, y, d = b.fairness.nearHeadDist) =>
       inBounds(b.board.cols, b.board.rows, x, y) && !cellReserved(s, x, y)
       && !nearHead(s.snake[0]!, s.dir, x, y, d, b.fairness.frontLaneCells),
   };
 }
 
-// MEC-003-R4/R14 table-driven director; preserves P0 weighted-pick and retry RNG order
-export function updateDirector(s: SimState, b: Balance, rng: Rng): void {
+// MEC-004-R9 every cap and gate is evaluated over the ordered registry.
+export function directorOptions(s: SimState, b: Balance, fams: readonly HazardFamily[] = FAMILIES): { family: HazardFamily; weight: number }[] {
+  const counts = new Map(fams.map(f => [f, f.count?.(s) ?? s.families[f.key].length]));
+  const smallCount = fams.reduce((n, f) => n + (f.capClass === 'small' ? counts.get(f)! : 0), 0);
+  const bigActive = fams.some(f => f.capClass === 'big' && counts.get(f)! > 0);
+  const cap = smallHazardCap(b, s.level), weights = familyRow(b, s.level).weights;
+  return fams.flatMap(family => {
+    const weight = weights[family.key] ?? 0;
+    if (weight <= 0 || family.capClass === 'none') return [];
+    if (family.capClass === 'small' && smallCount >= cap) return [];
+    if (family.capClass === 'big' && bigActive) return [];
+    if (family.key === 'maze' && s.mazeCooldownMs > 0) return [];
+    if (family.maxActiveKey !== null) {
+      let max: unknown = b;
+      for (const part of family.maxActiveKey.split('.')) max = (max as Record<string, unknown>)[part];
+      if (typeof max !== 'number') throw new Error('Invalid maxActiveKey: ' + family.maxActiveKey);
+      if (counts.get(family)! >= max) return [];
+    }
+    return [{ family, weight }];
+  });
+}
+
+// MEC-003-R4/R14; MEC-004-R9/R10 preserve weighted-pick and retry draws within registry order.
+export function updateDirector(s: SimState, b: Balance, rng: Rng, ctx?: SpawnCtx): void {
   // MEC-003-R13 deferred mango placement freezes the director.
   if (s.mango === null) return;
   // MEC-003-R11 / MEC-003-R22 the first-spawn timer of a level starts when its slowdown ends.
@@ -34,24 +60,17 @@ export function updateDirector(s: SimState, b: Balance, rng: Rng): void {
   s.spawnInMs -= 1;
   if (s.spawnInMs > 0) return;
   s.spawnInMs = directorIntervalMs(b, s.level);
-  const cap = smallHazardCap(b, s.level);
-  let smallCount = 0;
-  for (const f of FAMILIES) if (f.capClass === 'small') smallCount += f.count?.(s) ?? s.families[f.key].length;
-  const mazeActive = s.families.maze.length > 0;
-  const options: TableFamily[] = enabledFamilies(b, s.level).filter(k => {
-    if (k === 'rock' || k === 'fence') return smallCount < cap;
-    if (k === 'terrain') return !mazeActive && s.families.terrain.length < b.terrain.maxActive;
-    return s.mazeCooldownMs <= 0 && !mazeActive && !s.families.terrain.length;
-  });
-  const weights = familyRow(b, s.level).weights;
-  const ctx = spawnCtx(s, b);
+  const options = directorOptions(s, b);
+  const context = ctx ?? spawnCtx(s, b);
   while (options.length) {
-    const i = pickWeighted(options.map(k => weights[k]!), rng);
-    const k = options[i]!;
-    const inst = FAMILY[k].spawn(s, { ...ctx, rng });
-    if (inst) {
-      if (k === 'maze') s.mazeCooldownMs = b.maze.cooldownMs;
-      if (k !== 'rock') s.events.push({ type: 'hazardIncoming', family: k });
+    const i = pickWeighted(options.map(o => o.weight), rng);
+    const { family } = options[i]!;
+    const before = context.observer ? structuredClone(s) : undefined;
+    const cells = family.spawn(s, { ...context, rng });
+    if (cells) {
+      if (family.key === 'maze') s.mazeCooldownMs = b.maze.cooldownMs;
+      if (family.key !== 'rock') s.events.push({ type: 'hazardIncoming', family: family.key });
+      if (before) context.observer!.spawned(family.key, cells, before, s);
       return;
     }
     options.splice(i, 1);                      // didn't fit: try something else
