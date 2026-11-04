@@ -7,6 +7,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - docs: owner phone run passes P0 parity.
 - docs: P0 parity check on desktop recorded in PLAYTEST (phone run pending owner); prototype frozen (P0 PR 9).
 ### Tests
+- test(qa): P1 Task 5 energy QA; level fixtures set rampActive false for mid-run states.
 - test(qa): P1 Task 4 mango QA; superseded ate/rot/director QA updated.
 - test(qa): P1 Task 3 transition QA; superseded level/board/director QA updated.
 - test(qa): P1 Task 2 meta black-box QA; save QA updated for MEC-008-R12.
