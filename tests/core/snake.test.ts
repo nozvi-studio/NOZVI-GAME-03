@@ -35,8 +35,8 @@ describe('MEC-001 snake', () => {
     sim.advance(140);
     const s = stateOf(sim);
     expect(s.snake.map(c => [c.x, c.y])).toEqual([[9, 8], [8, 8], [7, 8], [6, 8], [5, 8]]);
-    expect([s.score, s.eaten, s.progress]).toEqual([1, 1, 1]);
-    expect(sim.drainEvents()).toEqual([{ type: 'ate', x: 9, y: 8, golden: false, points: 1 }]);
+    expect([s.score, s.eatenInRun, s.progress]).toEqual([1, 1, 1]);
+    expect(sim.drainEvents()).toEqual([{ type: 'ate', x: 9, y: 8, golden: false, points: 1, progressGain: 1, source: 'mango' }]);
     expect(s.tailFrom).toEqual({ x: 5, y: 8 });
   });
 

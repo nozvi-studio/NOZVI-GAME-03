@@ -10,6 +10,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - test(qa): rewrite 23 superseded P0 QA cases for P1 Task 1 rules; QA files typecheck again.
 - test(qa): independent black-box QA suite for P0 Task 2 by the tester worker (34 cases; MEC-004-R13 warn bound skipped until P2a).
 ### Features
+- feat(core): mango counters, rot by level, temporary rotten rocks from L12, deferred placement (P1 PR 4)
 - feat(core): length reset, 1 s level transition, level-30 run win, simFromAscii test helper (P1 PR 3)
 - feat(meta): save v2 with migration, checkpoint progression, loadout sanitizing, local run log (P1 PR 2)
 - feat(core): balance v2, 1-based levels, per-level family table (P1 PR 1).

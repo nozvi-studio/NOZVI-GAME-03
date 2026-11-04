@@ -27,7 +27,7 @@ it('P1-D6 picture objects override the generated mango and extraState is merged 
   expect(sim.snapshot()).toMatchObject({ mango: { golden: true, totalMs: 4000 }, level: 12, score: 9 });
   expect(simFromAscii(b, [], { snake: SQUARE }).snapshot().mango).toBeNull();
 });
-it.each(['R', 'o', 'm', 'S', 'u'])('P1-D6 unsupported legend %s throws until its task', c => {
+it.each(['o', 'm', 'S', 'u'])('P1-D6 unsupported legend %s throws until its task', c => {
   expect(() => simFromAscii(b, [c], { snake: SQUARE })).toThrow(`simFromAscii: ${c} not supported yet`);
 });
 it('P1-D6 testCtx emits events and queries the real snake', () => {

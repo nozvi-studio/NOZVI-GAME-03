@@ -41,17 +41,19 @@ export function stepSnake(s: SimState, b: Balance, rng: Rng): void {
   if (eating) eat(s, b, rng); else s.snake.pop();
 }
 
-function eat(s: SimState, b: Balance, rng: Rng): void {          // L781–795
+// MEC-002-R3/R8 count regular mangoes before level reset and replacement.
+function eat(s: SimState, b: Balance, rng: Rng): void {
   const m = s.mango as MangoState;
   const points = m.golden ? b.mango.points.golden : b.mango.points.normal;
   s.score += points;
-  s.eaten += 1;
-  s.mango = null;
-  s.events.push({ type: 'ate', x: m.x, y: m.y, golden: m.golden, points });
+  s.eatenInRun += 1; s.eatenInLevel += 1;
+  const progressGain = m.golden ? b.mango.progress.golden : b.mango.progress.normal;
+  s.events.push({ type: 'ate', x: m.x, y: m.y, golden: m.golden, points, progressGain, source: 'mango' });
   // MEC-003-R5/R6 the final clear wins; earlier clears reset length and start transition.
-  s.progress += m.golden ? b.mango.progress.golden : b.mango.progress.normal;
+  s.progress += progressGain;
   if (s.progress >= quota(b, s.level)) {
     if (s.level === b.level.maxLevel) {
+      s.mango = null;
       s.levelsCleared = b.level.maxLevel; s.status = 'over'; s.outcome = { won: true };
       s.events.push({ type: 'runWon', score: s.score, timeMs: s.timeMs });
     } else startLevelUp(s, b, {

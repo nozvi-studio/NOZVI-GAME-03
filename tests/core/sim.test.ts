@@ -15,7 +15,7 @@ describe('MEC-001 Sim', () => {
   it('MEC-001 drainEvents empties the queue', () => {
     const sim = restoreSim(b, buildState(b, { mango: [9, 8], spawnInMs: QUIET }));
     sim.advance(140);
-    expect(sim.drainEvents()).toEqual([{ type: 'ate', x: 9, y: 8, golden: false, points: 1 }]);
+    expect(sim.drainEvents()).toEqual([{ type: 'ate', x: 9, y: 8, golden: false, points: 1, progressGain: 1, source: 'mango' }]);
     expect(sim.drainEvents()).toEqual([]);
   });
 });
