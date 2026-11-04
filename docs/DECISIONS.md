@@ -318,3 +318,8 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - Task 8: Ruling: `processEvents(session, events)` is a test-only export of session.ts implemented via a module WeakMap of per-session handlers, so it runs exactly the `frame` code path without adding methods to the public `Session` interface.
 - Task 8: Ruling: `startRun` reads `bestLevel`, loadout and carry first, then saves `carriedEnergy = 0`, creates the sim, allocates the run id, then applies MEC-008-R1 for the start level so any `checkpoint_unlocked` records carry the new run id. The save is written twice at start; observable state matches the plan order.
 - Task 8: Ruling: the log is held in memory and flushed only at run end, pause and hidden (P1-D5); tests that inspect mid-run records call `pause()`/`hidden()` first. `runWon` applies MEC-008-R2 inside the run-end path. Calls to pause/hidden/quit/frame without an active run are no-ops; `snapshot()` without any run throws.
+## 2026-11-04 - GitNexus code graph and test scope (owner)
+- GitNexus 1.6.9 indexes the repo into `.gitnexus/` (excluded via `.git/info/exclude`, not committed). Agents check `status` and use `query`/`context`/`impact` at task start, and refresh the index asynchronously at task end. Reason: cheaper, more accurate code location than file scanning (AGENTS.md §2b).
+- Always `--index-only`: keeps GitNexus from rewriting AGENTS.md/CLAUDE.md and `.claude/` (protected files, §8). `--workers 2` because the host's low-memory reaper kills heavy processes.
+- Test scope: minimal targeted tests during work; full `npm test` + `npm run typecheck` only before commit or merge. Reason: the full suite takes ~15-17 s and was being run after every edit.
+- Rules live in AGENTS.md §2c and §6b (ruleset 0.3.2).

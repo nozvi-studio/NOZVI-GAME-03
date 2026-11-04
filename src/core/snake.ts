@@ -62,10 +62,11 @@ function eat(s: SimState, b: Balance, rng: Rng): void {
   const progressGain = m.golden ? b.mango.progress.golden : b.mango.progress.normal;
   s.events.push({ type: 'ate', x: m.x, y: m.y, golden: m.golden, points, progressGain, source: 'mango' });
   if (m.golden) goldenEnergy(s, b, ctx);
+  // MEC-008-R8 ramp counter runs before the level-clear check (ARCHITECTURE step 12.4).
+  rampOnMangoEaten(s, b, ctx);
   // MEC-003-R5/R6 the final clear wins; earlier clears reset length and start transition.
   s.progress += progressGain;
   checkLevelClear(s, b, ctx, true);
-  rampOnMangoEaten(s, b, ctx);
   s.tailFrom = { ...(s.snake[s.snake.length - 1] as Cell) };
   if (s.status === 'playing' && s.phase === 'playing') placeMango(s, b, rng);
 }
