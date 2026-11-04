@@ -30,6 +30,8 @@ export interface TimedHazard {
 export type TerrainVis = 'down' | 'warn' | 'up';
 export interface TerrainCell { x: number; y: number; delay: number; up: boolean; vis: TerrainVis }
 export interface TerrainHazard { family: 'terrain'; t: number; lifeMs: number; cells: TerrainCell[] }
+/** MEC-003-R22 active level-up slowdown; leftMs counts sim ms down to 0. */
+export interface LevelUpSlow { factor: number; easeMs: number; leftMs: number }
 export interface RottenRock { family: 'rottenRock'; x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }
 export interface SnipWall { family: 'snipWall'; cells: Cell[]; state: 'solid' | 'crumble'; leftMs: number }
 export interface Rubble { family: 'rubble'; x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }
@@ -82,6 +84,7 @@ export interface SimState {
   loadout: [SkillId | null, SkillId | null];
   bestLevel: number;
   slowmo: { leftMs: number } | null;
+  levelUpSlow: LevelUpSlow | null;
   snipWalls: SnipWall[];
   shield: { leftMs: number } | null;
   rubble: Rubble[];
@@ -127,6 +130,7 @@ export interface TerrainView { t: number; lifeMs: number; cells: readonly { x: n
 export interface SimSnapshot {
   skills: readonly { slot: 0 | 1; id: SkillId | null; cost: number; affordable: boolean; active: boolean; leftMs: number }[];
   slowmo: { leftMs: number } | null;
+  levelUpSlow: LevelUpSlow | null;
   snipWall: readonly { x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }[];
   shield: { leftMs: number } | null;
   rubble: readonly Omit<Rubble, 'family'>[];

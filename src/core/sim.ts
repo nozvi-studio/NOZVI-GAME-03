@@ -7,6 +7,7 @@ import { biome, isChallenge, needFor, levelTickMs } from './level';
 import { orbTick } from './energy';
 import { effectiveTick, SKILLS, skillTimers, slotCount, unlockedSkills, useSkill } from './skills';
 import { placeMango, mangoTick } from './mango';
+import { levelUpSlowTick } from './slowdown';
 import { rainTick } from './skills/mangoRain';
 import { rngFrom, seedRng, type Rng } from './rng';
 import { queueTurn, stepSnake } from './snake';
@@ -38,7 +39,7 @@ export function initialState(b: Balance, seed: number, options: SimOptions = {})
     headFrom: { ...snake[0]! }, tailFrom: { ...snake[snake.length - 1]! },
     acc: 0, tickMs: levelTickMs(b, 1), mango: null, rottenRocks: [], hazards: [], terrains: [],
     energy, orbs: [], orbSpawnMs: 0, rampActive: true, rampEaten: 0,
-    bestLevel, loadout: [loadout[0], loadout[1]], slowmo: null, snipWalls: [],
+    bestLevel, loadout: [loadout[0], loadout[1]], slowmo: null, levelUpSlow: null, snipWalls: [],
     shield: null, rubble: [], rain: null, rainMangoes: [], rainBudgets: [], nextCastId: 1,
     spawnInMs: b.director.firstSpawnMs, mazeCooldownMs: 0, score: 0, eatenInRun: 0, retryMs: 0, level, progress: 0,
     phase: 'playing', transitionLeftMs: 0, levelTimeMs: 0, timeMs: 0,
@@ -62,6 +63,8 @@ function stepMs(s: SimState, b: Balance, rng: Rng): void {
   updateDirector(s, b, rng);
   stepHazards(s, ctx);
   skillTimers(s, b, ctx);
+  // MEC-003-R22 step 7a: the slowdown eases before the speed is computed.
+  levelUpSlowTick(s);
   // MEC-006-R18 preserve negative bonk pauses and permit at most one immediate move.
   const eff = effectiveTick(s, b);
   if (eff !== s.tickMs) { s.acc = Math.min(s.acc, eff); s.tickMs = eff; }
@@ -78,7 +81,7 @@ function snapshotOf(s: SimState, b: Balance): SimSnapshot {
     skills: c.loadout.map((id, slot) => ({ slot: slot as 0 | 1, id, cost: id === null ? 0 : b.skills[id].cost,
       affordable: id !== null && s.energy >= b.skills[id].cost,
       active: id !== null && SKILLS[id].active(s), leftMs: id === null ? 0 : SKILLS[id].leftMs(s) })),
-    slowmo: c.slowmo, shield: c.shield,
+    slowmo: c.slowmo, levelUpSlow: c.levelUpSlow, shield: c.shield,
     rubble: c.rubble.map(({ x, y, state, leftMs }) => ({ x, y, state, leftMs })),
     rain: c.rain && { leftMs: c.rain.leftMs, dropsLeft: c.rain.drops - c.rain.dropped },
     rainMangoes: c.rainMangoes.map(({ x, y, ageMs }) => ({ x, y, leftMs: b.skills.mangoRain.mangoLifeMs - ageMs })),

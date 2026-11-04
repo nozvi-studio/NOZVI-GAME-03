@@ -1,5 +1,6 @@
 import type { Balance } from './balance';
 import { baseTickMs } from './ramp';
+import { levelUpSlowFactor } from './slowdown';
 import { slowmoSkill } from './skills/slowmo';
 import { tailSnipSkill } from './skills/tailSnip';
 import { shieldSkill } from './skills/shield';
@@ -65,10 +66,11 @@ export function skillTimers(s: SimState, _b: Balance, ctx: StepCtx): void {
   }
 }
 
-// MEC-006-R17 apply Slow-mo to the live level/checkpoint-ramp speed.
+// MEC-006-R17 / MEC-003-R22 max(Slow-mo, level-up slowdown) on the live level/ramp tick; never stacked.
 export function effectiveTick(s: SimState, b: Balance): number {
   const base = baseTickMs(s, b);
-  return s.slowmo ? Math.round(base * b.skills.slowmo.tickFactor) : base;
+  const f = Math.max(s.slowmo ? b.skills.slowmo.tickFactor : 1, levelUpSlowFactor(s));
+  return f === 1 ? base : Math.round(base * f);
 }
 
 // MEC-007-R12 bestLevel stays the saved options value throughout the run.
