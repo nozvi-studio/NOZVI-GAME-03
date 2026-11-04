@@ -142,4 +142,13 @@ describe('MEC-003-R22 slowdown at a level up', () => {
     const types = sim.drainEvents().map(e => e.type);
     expect(types).toContain('skillUsed'); expect(types).not.toContain('skillRejected');
   });
+  it('MEC-003-R11 the first-spawn timer starts when the slowdown ends', () => {
+    const sim = upAt(5);
+    expect(exportState(sim)).toMatchObject({ level: 6, spawnInMs: b.director.firstSpawnMs, mazeCooldownMs: 0 });
+    sim.advance(1000);
+    expect(stateOf(sim).levelUpSlow).toBeNull();
+    expect(exportState(sim).spawnInMs).toBe(b.director.firstSpawnMs);
+    sim.advance(1);
+    expect(exportState(sim).spawnInMs).toBe(b.director.firstSpawnMs - 1);
+  });
 });

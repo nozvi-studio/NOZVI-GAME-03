@@ -28,6 +28,8 @@ export function spawnCtx(s: SimState, b: Balance): SpawnCtx {
 export function updateDirector(s: SimState, b: Balance, rng: Rng): void {
   // MEC-003-R13 deferred mango placement freezes the director.
   if (s.mango === null) return;
+  // MEC-003-R11 / MEC-003-R22 the first-spawn timer of a level starts when its slowdown ends.
+  if (s.levelUpSlow !== null) return;
   s.mazeCooldownMs -= 1;
   s.spawnInMs -= 1;
   if (s.spawnInMs > 0) return;

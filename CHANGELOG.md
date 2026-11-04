@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - feat(core): level-up slowdown state and Slow-mo max rule in effectiveTick (MEC-003-R22, MEC-006-R17).
 - feat(core): levelUpSlowdown tiers in balance config with validation (MEC-003-R22).
 ### Changed
+- feat(core): director first spawn starts when the level-up slowdown ends (MEC-003-R11).
 - feat(core): level up no longer freezes the sim; skills castable and timers running during level up; slowdown starts at level up (MEC-003-R7..R11/R22, MEC-006-R13).
 - feat(core): obstacles, rotten rocks, terrain, snip walls and rubble survive a level up; no level-up crumble (MEC-003-R8, MEC-006-EC15).
 - chore(log): `run_end` records `turns`, the count of turns accepted by the MEC-001 queue; old logs without it still load (MEC-003-R19).
