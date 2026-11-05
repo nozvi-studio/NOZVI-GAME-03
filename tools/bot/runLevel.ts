@@ -1,14 +1,14 @@
 import type { Balance } from '../../src/core/balance';
 import { biome } from '../../src/core/level';
 import { createSimInternal, stateOf } from '../../src/core/simInternal';
-import type { CauseKey, SimEvent, TileKind } from '../../src/core/types';
-import { BOT } from './botConfig';
+import type { CauseKey, SimEvent, SimState, TileKind } from '../../src/core/types';
+import { BOT, SAMPLE_EVERY_MS } from './botConfig';
 import { chooseMove } from './policy';
 
 export interface LevelResult { level: number; seed: number; outcome: 'clear' | 'death' | 'timeout'; cause?: CauseKey; context?: TileKind; biome: number }
 
 // MEC-004-R19 headless bot: one level from startLevel; a levelUp counts as an immediate clear (flow B).
-export function runLevel(balance: Balance, level: number, seed: number): LevelResult {
+export function runLevel(balance: Balance, level: number, seed: number, onSecond?: (s: SimState) => void): LevelResult {
   const sim = createSimInternal(balance, seed, { startLevel: level }, {});
   const s = stateOf(sim), base = { level, seed, biome: biome(balance, level) };
   const scan = (events: SimEvent[]): LevelResult | null => {
@@ -25,6 +25,7 @@ export function runLevel(balance: Balance, level: number, seed: number): LevelRe
     const head = s.snake[0]!, hx = head.x, hy = head.y;
     do {
       sim.advance(1); elapsed++;
+      if (onSecond && elapsed % SAMPLE_EVERY_MS === 0) onSecond(s);
       const done = scan(sim.drainEvents());
       if (done) return done;
       if (s.status === 'over') return { ...base, outcome: 'death' };

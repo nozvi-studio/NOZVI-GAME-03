@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:fuzz": "vitest run --mode fuzz",
-    "bot:report": "vitest run --mode bot tools/bot/report.test.ts",
+    "bot:report": "vitest run --mode bot tools/bot/report.test.ts --reporter=verbose",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": { "phaser": "3.90.0" },
