@@ -45,12 +45,14 @@ export class CoconutSpawnTracker {
 
 export interface MoverMark { id: string; cell: number; phase: 'warn' | 'mover'; warnMs: number; elapsedMs?: number }
 
-// MEC-013-R2/R3 TR-B4: the entire warning path precedes one occupied moving cell.
+// MEC-013-R2/R3 MEC-015-R3 TR-B4: the entire warning path precedes one occupied moving cell.
 export function moverCells(snap: SimSnapshot, cols: number): MoverMark[] {
-  return snap.families.coconut.flatMap(r => {
+  const rolls = [...snap.families.coconut.map(r => ({ ...r, family: 'coconut' })),
+    ...snap.families.npc.map(r => ({ ...r, family: 'npc' }))];
+  return rolls.flatMap(r => {
     const phase = r.state === 'warn' ? 'warn' as const : 'mover' as const;
     const cells = r.state === 'warn' ? r.path : r.state === 'move' && r.cell ? [r.cell] : [];
-    return cells.map(c => ({ id: 'coconut:' + r.id, cell: key(cols, c.x, c.y), phase, warnMs: r.warnMs,
+    return cells.map(c => ({ id: r.family + ':' + r.id, cell: key(cols, c.x, c.y), phase, warnMs: r.warnMs,
       ...(phase === 'warn' ? { elapsedMs: r.t } : {}) }));
   });
 }

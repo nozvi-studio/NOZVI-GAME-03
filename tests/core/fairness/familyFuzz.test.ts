@@ -5,7 +5,7 @@ const FUZZ = import.meta.env.MODE === 'fuzz';
 // Fuzz-mode size; override with VITE_FUZZ_SEEDS / VITE_FUZZ_MS (full matrix 200 x 120000 for overnight runs).
 const FUZZ_SEEDS = Number(import.meta.env.VITE_FUZZ_SEEDS ?? 200);
 const FUZZ_MS = Number(import.meta.env.VITE_FUZZ_MS ?? 120000);
-const INTRO = { rock: 1, fence: 6, terrain: 11, maze: 26, mud: 7, ice: 13, coconut: 16, gate: 17, spike: 18 } as const;
+const INTRO = { rock: 1, fence: 6, terrain: 11, maze: 26, mud: 7, ice: 13, coconut: 16, gate: 17, spike: 18, npc: 21 } as const;
 describe('MEC-004-R17 per-family fuzz', () => {
   for (const [family, level] of Object.entries(INTRO)) {
     it(`MEC-004-R17 fuzz invariants I1-I7 hold for ${family}`, () => {
