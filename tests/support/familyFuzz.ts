@@ -2,7 +2,7 @@ import type { Balance } from '../../src/core/balance';
 import { escapeExists } from '../../src/core/fairness/escape';
 import { inBounds, key, nearHead } from '../../src/core/grid';
 import { keepsMangoReachable, reachableFrom } from '../../src/core/hazards/placement';
-import { bfsWall, solidCauseAt } from '../../src/core/hazards/queries';
+import { bfsWall, reservedByFamilies, solidCauseAt } from '../../src/core/hazards/queries';
 import { FAMILIES, FAMILY } from '../../src/core/hazards/registry';
 import { birdCanTarget } from '../../src/core/hazards/bird';
 import { isReserved } from '../../src/core/reserved';
@@ -73,6 +73,12 @@ function cellsOf(snap: SimSnapshot, cols: number, showMs: number): Map<string, M
   for (const m of snap.families.bomb) {
     if (m.state !== 'active') add('bomb', m, m.state === 'count' ? 'lethal' : 'warn', 'bomb');
     if (m.state !== 'warn') for (const c of m.area) add(BOMB_AREA, c, m.state === 'active' ? 'lethal' : 'warn', 'bomb');
+  }
+  // MEC-018-R3 ring cells warn (also while waiting under the snake) until they close.
+  const ring = snap.families.shrink;
+  if (ring) for (const c of ring.cells) {
+    if (c.on) add('shrink', c, 'lethal', 'shrink');
+    else if (ring.state !== 'fade') add('shrink', c, 'warn', 'shrink');
   }
   for (const tile of snap.tiles) for (const c of tile.cells) {
     if (c.on) add(tile.family, c, 'active', null);
@@ -168,10 +174,12 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
           const tooNear = family === 'coconut' ? (rowLane ? cell.y === head.y : cell.x === head.x)
             || nearHead(head, before.dir, cell.x, cell.y, 0, b.fairness.frontLaneCells)
             : nearHead(head, before.dir, cell.x, cell.y, d, b.fairness.frontLaneCells);
-          if (tooNear) bad(`I2 ${family} near head at (${cell.x},${cell.y})`);
+          // MEC-018-R3 TR-C3 the ring waits to close instead of excluding cells near the head; I1 covers its closing.
+          if (tooNear && family !== 'shrink') bad(`I2 ${family} near head at (${cell.x},${cell.y})`);
           // MEC-013-EC1/R7 existing food does not prevent the warning lane; hazards and body still do.
           const placementState = family === 'coconut' ? { ...before, mango: null, orbs: [], rainMangoes: [] } : before;
-          if (isReserved(placementState, cell.x, cell.y)) bad(`I5 ${family} on reserved cell (${cell.x},${cell.y})`);
+          // MEC-018-R6/R7 the ring displaces food and may span the snake; only other hazards may not hold a ring cell.
+          if (family === 'shrink' ? reservedByFamilies(before, cell.x, cell.y) : isReserved(placementState, cell.x, cell.y)) bad(`I5 ${family} on reserved cell (${cell.x},${cell.y})`);
         }
         const walls = cells.filter(cell => bfsWall(after, cell.x, cell.y));
         const mango = before.mango, mangoKey = mango && key(cols, mango.x, mango.y);

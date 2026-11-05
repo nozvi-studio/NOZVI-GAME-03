@@ -70,7 +70,8 @@ describe('GDD-7 balance', () => {
       { from: 21, to: 21, weights: { rock: 3, fence: 2, terrain: 2, mud: 2, ice: 2, coconut: 2, gate: 2, spike: 2, npc: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
       { from: 22, to: 22, weights: { rock: 3, fence: 2, terrain: 2, mud: 2, ice: 2, coconut: 2, gate: 2, spike: 2, npc: 2, bird: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
       { from: 23, to: 25, weights: { rock: 3, fence: 2, terrain: 2, mud: 2, ice: 2, coconut: 2, gate: 2, spike: 2, npc: 2, bird: 2, bomb: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
-      { from: 26, to: 30, weights: { rock: 3, fence: 2, terrain: 2, maze: 2, mud: 2, ice: 2, coconut: 2, gate: 2, spike: 2, npc: 2, bird: 2, bomb: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
+      { from: 26, to: 26, weights: { rock: 3, fence: 2, terrain: 2, maze: 2, mud: 2, ice: 2, coconut: 2, gate: 2, spike: 2, npc: 2, bird: 2, bomb: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
+      { from: 27, to: 30, weights: { rock: 3, fence: 2, terrain: 2, maze: 2, mud: 2, ice: 2, coconut: 2, gate: 2, spike: 2, npc: 2, bird: 2, bomb: 2, shrink: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
     ] });
     expect(b.gate).toEqual({ landWarnMs: 1500, openMs: 2400, warnMs: 900, closedMs: 1500, lifeMs: 14000, lifeRandMs: 4000,
       maxActive: 1, tries: 40, lineLen: [5, 7], shapePool: ['line', 'U'], shapes: { U: {

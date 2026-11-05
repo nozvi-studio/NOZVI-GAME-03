@@ -212,7 +212,7 @@ describe('MEC-004 director', () => {
     const rng = rngFrom(seedRng(42));
     for (let i = 0; i < 200; i++) {
       const s = due(1 + i % 30); updateDirector(s, b, rng);
-      expect(timedHazards(s).length + s.families.terrain.length + s.families.mud.patches.length + s.families.ice.patches.length + s.families.coconut.rolls.length + s.families.gate.gates.length + s.families.spike.groups.length + s.families.npc.npcs.length + (s.families.bird.target ? 1 : 0) + s.families.bomb.bombs.length).toBe(1);
+      expect(timedHazards(s).length + s.families.terrain.length + s.families.mud.patches.length + s.families.ice.patches.length + s.families.coconut.rolls.length + s.families.gate.gates.length + s.families.spike.groups.length + s.families.npc.npcs.length + (s.families.bird.target ? 1 : 0) + s.families.bomb.bombs.length + (s.families.shrink.active ? 1 : 0)).toBe(1);
       for (const h of [...timedHazards(s), ...s.families.terrain, ...s.families.mud.patches, ...s.families.ice.patches, ...s.families.spike.groups]) for (const c of h.cells)
         expect(nearHead(s.snake[0]!, s.dir, c.x, c.y, 4, 4)).toBe(false);
       for (const g of s.families.gate.gates) for (const c of [...g.fence, ...g.gate])

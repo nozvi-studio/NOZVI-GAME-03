@@ -15,10 +15,11 @@ import { gate } from './gate';
 import { npc } from './npc';
 import { bird } from './bird';
 import { bomb } from './bomb';
+import { shrink } from './shrink';
 import { timedHazards, updateTimed } from './timed';
 import { solidFamilyWithPriority } from './queries';
 
-export const DEFAULT_FAMILIES: readonly HazardFamily[] = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily, rubbleFamily, mud, ice, coconut, gate, spike, npc, bird, bomb];
+export const DEFAULT_FAMILIES: readonly HazardFamily[] = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily, rubbleFamily, mud, ice, coconut, gate, spike, npc, bird, bomb, shrink];
 
 // MEC-004-R1 a family module imported before the registry (registry <-> queries cycle) is still undefined here.
 export function assertFamiliesDefined(families: readonly HazardFamily[]): void {
@@ -30,7 +31,7 @@ assertFamiliesDefined(DEFAULT_FAMILIES);
 export let FAMILIES: readonly HazardFamily[] = DEFAULT_FAMILIES;
 export const FAMILY: Record<keyof SimState['families'], HazardFamily> & Partial<Record<FamilyKey, HazardFamily>> = {
   rock: ROCK, fence: FENCE, maze: MAZE, terrain: TERRAIN, rottenRock: rottenRockFamily, snipWall: snipWallFamily, rubble: rubbleFamily,
-  mud, ice, coconut, gate, spike, npc, bird, bomb,
+  mud, ice, coconut, gate, spike, npc, bird, bomb, shrink,
 };
 
 /** Test-only global seam. Always restore with null in a finally block. */

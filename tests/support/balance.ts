@@ -11,7 +11,10 @@ export const loadBalance = (patch?: (json: any) => void): Balance => {
 // MEC-004-R17 / MEC-003-R15 isolate one family without changing its shipped weight.
 export function soloTable(b: Balance, family: FamilyKey): Balance {
   const copy = structuredClone(b);
-  copy.level.table = [{ from: 1, to: 30, weights: { [family]: family === 'rock' ? 3 : 2 },
-    rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: false }];
+  const row = (from: number, to: number, weights: Record<string, number>) => ({ from, to, weights,
+    rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: false });
+  // MEC-018-R11 parseBalance only allows shrink weights from L27, so its solo table starts there.
+  copy.level.table = family === 'shrink' ? [row(1, 26, {}), row(27, 30, { shrink: 2 })]
+    : [row(1, 30, { [family]: family === 'rock' ? 3 : 2 })];
   return parseBalance(copy);
 }

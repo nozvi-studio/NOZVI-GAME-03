@@ -15,13 +15,13 @@ export interface Cell { x: number; y: number }
 export type SkillId = 'slowmo' | 'tailSnip' | 'shield' | 'mangoRain';
 export type Loadout = readonly [SkillId | null, SkillId | null];
 export interface SimOptions { startLevel?: number; startEnergy?: number; loadout?: Loadout; bestLevel?: number }
-export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze' | 'mud' | 'ice' | 'coconut' | 'gate' | 'spike' | 'npc' | 'bird' | 'bomb';
+export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze' | 'mud' | 'ice' | 'coconut' | 'gate' | 'spike' | 'npc' | 'bird' | 'bomb' | 'shrink';
 export type IntroKey = TableFamily | 'rottenRock';
 export interface LevelRow {
   from: number; to: number; weights: Partial<Record<FamilyKey, number>>;
   rockShapes: string[]; fenceShapes: string[]; rottenRocks: boolean;
 }
-export type CauseKey = 'wall' | 'self' | 'rotten' | 'rock' | 'fence' | 'maze' | 'ground' | 'snipWall' | 'rubble' | 'coconut' | 'gate' | 'spike' | 'cat' | 'chicken' | 'bomb';
+export type CauseKey = 'wall' | 'self' | 'rotten' | 'rock' | 'fence' | 'maze' | 'ground' | 'snipWall' | 'rubble' | 'coconut' | 'gate' | 'spike' | 'cat' | 'chicken' | 'bomb' | 'shrink';
 export type FamilyKey = TableFamily | 'rottenRock' | 'snipWall' | 'rubble' | 'coconut' | 'gate' | 'spike' | 'npc' | 'bird' | 'bomb';
 export type TileKind = 'mud' | 'ice';
 export type HitKind = 'mover' | 'area';
@@ -80,12 +80,13 @@ export type SimEvent =
   | { type: 'hazardIncoming'; family: FamilyKey }
   | { type: 'moverHit'; family: 'coconut' | 'npc'; x: number; y: number }
   | { type: 'bombBlast'; x: number; y: number; cells: Cell[] }
+  | { type: 'mangoDisplaced'; from: Cell; to: Cell | null }
   | { type: 'mangoStolen'; x: number; y: number }
   | { type: 'died'; cause: CauseKey; x: number; y: number; context?: TileKind };
 
 /** All Sim state. Plain JSON data only: no closures, Map/Set or class instances. */
 export interface SimState {
-  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; rubble: Rubble[]; mud: { patches: TilePatch[]; nextId: number }; ice: { patches: TilePatch[]; nextId: number }; coconut: { rolls: { id: number; lane: 'row' | 'col'; index: number; mover: MoverState }[]; nextId: number }; gate: { gates: GateInstance[]; nextId: number }; spike: { groups: SpikeGroup[]; nextId: number }; npc: { npcs: { id: number; variant: 'cat' | 'chicken'; mover: MoverState }[]; nextId: number }; bird: { target: BirdTarget | null }; bomb: { bombs: BombInstance[]; nextId: number } };
+  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; rubble: Rubble[]; mud: { patches: TilePatch[]; nextId: number }; ice: { patches: TilePatch[]; nextId: number }; coconut: { rolls: { id: number; lane: 'row' | 'col'; index: number; mover: MoverState }[]; nextId: number }; gate: { gates: GateInstance[]; nextId: number }; spike: { groups: SpikeGroup[]; nextId: number }; npc: { npcs: { id: number; variant: 'cat' | 'chicken'; mover: MoverState }[]; nextId: number }; bird: { target: BirdTarget | null }; bomb: { bombs: BombInstance[]; nextId: number }; shrink: ShrinkState };
   nextHazardSeq: number;
   snake: Cell[];               // head first
   dir: Dir;
@@ -150,13 +151,19 @@ export interface BirdView extends BirdTarget { shadowMs: number }
 /** MEC-017 presentation view: leftMs is the warn, countdown or active time left; area is the clipped plus. */
 export interface BombView { id: number; x: number; y: number; state: 'warn' | 'count' | 'active'; leftMs: number; area: readonly Cell[] }
 
+/** MEC-018 §3 one ring cell; closed = solid (cause shrink). */
+export interface ShrinkCell { x: number; y: number; closed: boolean }
+export interface ShrinkState { active: { t: number; phase: 'warn' | 'closed' | 'crumble'; cells: ShrinkCell[] } | null; cooldownMs: number }
+/** MEC-018 §7 presentation view: state 'fade' is the crumble phase; leftMs counts down the current phase. */
+export interface ShrinkView { state: 'warn' | 'closed' | 'fade'; leftMs: number; cells: readonly { x: number; y: number; on: boolean }[] }
+
 export interface SpikeView {
   id: number; t: number; lifeMs: number; ending: boolean;
   cells: readonly { x: number; y: number; delay: number; vis: TerrainVis }[];
 }
 
 export interface SimSnapshot {
-  families: { coconut: readonly CoconutView[]; gate: readonly GateView[]; spike: readonly SpikeView[]; npc: readonly NpcView[]; bird: BirdView | null; bomb: readonly BombView[] };
+  families: { coconut: readonly CoconutView[]; gate: readonly GateView[]; spike: readonly SpikeView[]; npc: readonly NpcView[]; bird: BirdView | null; bomb: readonly BombView[]; shrink: ShrinkView | null };
   tiles: readonly { family: TileKind; id: number; state: 'warn' | 'active' | 'fade'; leftMs: number; cells: readonly { x: number; y: number; on: boolean }[]; ring?: readonly Cell[] }[];
   headTile: TileKind | null;
   skills: readonly { slot: 0 | 1; id: SkillId | null; cost: number; affordable: boolean; active: boolean; leftMs: number }[];

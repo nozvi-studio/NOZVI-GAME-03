@@ -3,6 +3,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Added
+- feat(core): shrinking board family from level 27: outer ring warns 2000 ms, closes up to 6000 ms (waits under the snake and near the head), reopens via crumble; mangoDisplaced event, ring displaces mango/orbs/rain mangoes (MEC-018)
 - docs: MEC-018 shrinking board spec and MEC-003 challenge rules for P2c (OQ-C1..C3 provisional defaults)
 - fix(core): head entering an NPC now emits moverHit (family npc) once, with and without Shield (MEC-015-R7)
 - fix(game): P2b review fix-ups (chicken beak follows NpcView.dir, spike warn never blinks to empty, shield area-hit guard, bot level range env overrides)
