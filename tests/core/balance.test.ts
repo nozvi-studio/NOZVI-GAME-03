@@ -10,6 +10,11 @@ import { DEFAULT_FAMILIES } from '../../src/core/hazards/registry';
 const mutate = (fn: (j: any) => void): unknown => { const j = structuredClone(json) as any; fn(j); return j; };
 
 describe('GDD-7 balance', () => {
+  it('MEC-014-R1 gate U tags name exactly two distinct cells in the shape', () => {
+    for (const gateCells of [[[1, 0]], [[1, 0], [1, 0]], [[1, 0], [99, 0]], [[1, 0], [2, 0], [3, 0]]])
+      expect(() => loadBalance(j => { j.gate.shapes.U.gateCells = gateCells; })).toThrow(/gate.shapes.U.gateCells/);
+    expect(() => loadBalance(j => { j.gate.shapes.U.cells.push([0, 0]); })).toThrow(/gate.shapes.U.cells/);
+  });
   it('MEC-004-R9 parseBalance validates every family maxActiveKey even when disabled', () => {
     const families = Object.freeze(DEFAULT_FAMILIES.map(f => Object.freeze({ ...f,
       maxActiveKey: f.key === 'rubble' ? 'testCap.nested.limit' : f.maxActiveKey,
@@ -65,7 +70,10 @@ describe('GDD-7 balance', () => {
       { from: 26, to: 30, weights: { rock: 3, fence: 2, terrain: 2, maze: 2, mud: 2, ice: 2, coconut: 2, gate: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
     ] });
     expect(b.gate).toEqual({ landWarnMs: 1500, openMs: 2400, warnMs: 900, closedMs: 1500, lifeMs: 14000, lifeRandMs: 4000,
-      maxActive: 1, tries: 40, lineLen: [5, 7], shapePool: ['line', 'U'] });
+      maxActive: 1, tries: 40, lineLen: [5, 7], shapePool: ['line', 'U'], shapes: { U: {
+        cells: [[0, 0], [0, 1], [0, 2], [0, 3], [1, 3], [2, 3], [3, 3], [3, 2], [3, 1], [3, 0], [1, 0], [2, 0]],
+        gateCells: [[1, 0], [2, 0]],
+      } } });
     expect(b.coconut).toEqual({ warnMs: 1500, cellMs: 90, maxActive: 2, tries: 20 });
     expect(b.mango).toMatchObject({"rotBaseMs":8000,"rotPerEatenMs":150,"rotMinMs":4000,"goldenRotFactor":0.5,"goldenChance":0.15,"goldenMinEaten":3,"points":{"normal":1,"golden":3},"progress":{"normal":1,"golden":2},"nearHeadDist":3,"rottenRockLifeMs":5000,"placeRetryMs":250});
     expect(b.director).toMatchObject({"firstSpawnMs":2500,"intervalBaseMs":5000,"intervalPerLevelMs":120,"intervalMinMs":1600,"capBase":2,"capPerLevels":3,"capMax":10,"challengeIntervalFactor":1,"challengeCapBonus":0});

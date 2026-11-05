@@ -132,9 +132,14 @@ export interface HazardView {
 }
 export interface TerrainView { t: number; lifeMs: number; cells: readonly { x: number; y: number; vis: TerrainVis; delay: number }[] }
 export interface CoconutView { id: number; path: readonly Cell[]; cell: Cell | null; state: MoverState['state']; t: number; warnMs: number }
+export interface GateView {
+  id: number; t: number; lifeMs: number; state: 'warn' | 'live' | 'crumble';
+  fence: readonly TimedCell[];
+  gate: readonly { x: number; y: number; delay: number; vis: TerrainVis }[];
+}
 
 export interface SimSnapshot {
-  families: { coconut: readonly CoconutView[]; gate: readonly GateInstance[] };
+  families: { coconut: readonly CoconutView[]; gate: readonly GateView[] };
   tiles: readonly { family: TileKind; id: number; state: 'warn' | 'active' | 'fade'; leftMs: number; cells: readonly { x: number; y: number; on: boolean }[]; ring?: readonly Cell[] }[];
   headTile: TileKind | null;
   skills: readonly { slot: 0 | 1; id: SkillId | null; cost: number; affordable: boolean; active: boolean; leftMs: number }[];

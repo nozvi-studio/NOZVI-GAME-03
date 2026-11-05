@@ -1,5 +1,5 @@
 import type { Pair } from '../balance';
-import type { Cell, HazardFamily, SimState, TimedCell } from '../types';
+import type { Cell, GateView, HazardFamily, SimState, TimedCell } from '../types';
 import { stepCycleCell, type CycleCell } from './blocks/cycleCells';
 import { transform } from './shapes';
 
@@ -10,6 +10,13 @@ const MAX_GATE_CELLS = 2;
 const at = (c: Cell, x: number, y: number) => c.x === x && c.y === y;
 const gates = (s: SimState) => s.families.gate.gates;
 
+// MEC-004-R2 snapshot-owned views omit the cycle block's internal collision flag.
+export function gateSnapshot(s: SimState): GateView[] {
+  return gates(s).map(({ id, t, lifeMs, state, fence, gate: cells }) => ({ id, t, lifeMs, state,
+    fence: fence.map(c => ({ ...c })), gate: cells.map(({ x, y, delay, vis }) => ({ x, y, delay, vis })),
+  }));
+}
+
 // MEC-014-R1..R4 a gate owns permanent fence walls and timed, passable BFS gaps.
 export const gate: HazardFamily = {
   key: 'gate', cause: 'gate', capClass: 'small', maxActiveKey: 'gate.maxActive', breakable: true,
@@ -19,11 +26,12 @@ export const gate: HazardFamily = {
     const kind = ctx.rng.pick(g.shapePool), count = 1 + ctx.rng.int(MAX_GATE_CELLS);
     const raw: Pair[] = kind === 'line'
       ? Array.from({ length: g.lineLen[0] + ctx.rng.int(g.lineLen[1] - g.lineLen[0] + 1) }, (_, x) => [x, 0])
-      : b.fence.shapes.U;
+      : g.shapes.U.cells;
     const firstMiddle = Math.floor((raw.length - count) / 2);
+    const mouth = kind === 'U' ? g.shapes.U.gateCells.map(([x, y]) => raw.findIndex(p => p[0] === x && p[1] === y)) : [];
     const gateIndices = new Set(kind === 'line'
       ? Array.from({ length: count }, (_, i) => firstMiddle + i)
-      : count === MAX_GATE_CELLS ? [0, raw.length - 1] : [ctx.rng.int(MAX_GATE_CELLS) === 0 ? 0 : raw.length - 1]);
+      : count === MAX_GATE_CELLS ? mouth : [mouth[ctx.rng.int(mouth.length)]!]);
     // P0 transform preserves cell ordering, including the tagged middle/mouth cells.
     const shape = transform(raw, ctx.rng, b.fence.mirrorChance);
     const w = Math.max(...shape.map(p => p[0])) + 1, h = Math.max(...shape.map(p => p[1])) + 1;
@@ -75,5 +83,5 @@ export const gate: HazardFamily = {
     }
   },
   count: s => gates(s).length,
-  snapshot: s => structuredClone(gates(s)),
+  snapshot: gateSnapshot,
 };

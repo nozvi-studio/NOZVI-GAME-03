@@ -33,7 +33,8 @@ export interface Balance {
   ice: GroundTileBalance;
   coconut: { warnMs: number; cellMs: number; maxActive: number; tries: number };
   gate: { landWarnMs: number; openMs: number; warnMs: number; closedMs: number; lifeMs: number; lifeRandMs: number;
-    maxActive: number; tries: number; lineLen: Pair; shapePool: ('line' | 'U')[] };
+    maxActive: number; tries: number; lineLen: Pair; shapePool: ('line' | 'U')[];
+    shapes: { U: { cells: Pair[]; gateCells: Pair[] } } };
   rock: {
     warnMs: number; lifeMs: number; lifeRandMs: number; tries: number;
     shapes: Record<RockShapeKey, Pair[]>;
@@ -74,7 +75,6 @@ export interface Balance {
 const ROCK_KEYS: readonly RockShapeKey[] = ['single', 'lineH', 'lineV', 'corner', 'block'];
 const FENCE_SHAPE_KEYS: readonly FenceShapeKey[] = ['L', 'T', 'Z', 'F', 'U', 'plus'];
 const FENCE_KINDS: readonly FenceKind[] = ['line', ...FENCE_SHAPE_KEYS];
-const MIN_GATE_WARN_MS = 900; // MEC-014-R2 hard minimum, even if general fairness tuning is lower.
 
 type Rule = 'int+' | 'int0' | 'num+' | 'prob' | 'pair' | 'pairs' | 'pairs0' | 'ints' | 'quad' | 'bool' | 'num0';
 type Check = Rule | Spec | ((v: unknown, path: string) => void);
@@ -143,7 +143,7 @@ const SPEC: Spec = {
   ice: groundTiles,
   coconut: { warnMs: 'int+', cellMs: 'int+', maxActive: 'int+', tries: 'int+' },
   gate: { ...timed, landWarnMs: 'int+', openMs: 'int+', closedMs: 'int+', maxActive: 'int+', tries: 'int+',
-    lineLen: 'pair', shapePool: namesOf(['line', 'U']) },
+    lineLen: 'pair', shapePool: namesOf(['line', 'U']), shapes: { U: { cells: 'pairs', gateCells: 'pairs' } } },
   rock: { ...timed, tries: 'int+',
     shapes: recordOf(ROCK_KEYS, 'pairs') },
   fence: { ...timed, tries: 'int+', lineBase: 'int+', lineExtraMax: 'int0', gapMinLen: 'int+', mirrorChance: 'prob',
@@ -209,12 +209,16 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
     if (b[family].warnMs < minWarnMs) fail(family + '.warnMs', 'must be >= ' + minWarnMs);
   }
   // MEC-014-R1/R2 gate warnings meet rule 1; closures are shorter than openings.
-  const gateWarnMs = Math.max(MIN_GATE_WARN_MS, minWarnMs);
-  for (const key of ['landWarnMs', 'warnMs'] as const)
-    if (b.gate[key] < gateWarnMs) fail('gate.' + key, 'must be >= ' + gateWarnMs);
+  if (b.gate.landWarnMs < minWarnMs) fail('gate.landWarnMs', 'must be >= ' + minWarnMs);
   if (b.gate.closedMs >= b.gate.openMs) fail('gate.closedMs', 'must be < openMs');
   if (b.gate.lineLen[0] < 5 || b.gate.lineLen[1] > 7 || b.gate.lineLen[0] > b.gate.lineLen[1])
     fail('gate.lineLen', 'must be an ordered range within 5..7');
+  // MEC-014-R1 every mouth tag refers to one unique cell before transforming the shape.
+  const uShape = b.gate.shapes.U, uCells = new Set(uShape.cells.map(p => p.join(',')));
+  if (uCells.size !== uShape.cells.length) fail('gate.shapes.U.cells', 'must contain distinct cells');
+  const mouth = uShape.gateCells.map(p => p.join(','));
+  if (mouth.length !== 2 || new Set(mouth).size !== 2 || mouth.some(p => !uCells.has(p)))
+    fail('gate.shapes.U.gateCells', 'must tag exactly two distinct shape cells');
   // MEC-012-R1 every pooled shape exists and every configured shape is 4-connected.
   if (b.mud.tickFactor <= 1) fail('mud.tickFactor', 'must be > 1');
   for (const family of ['mud', 'ice'] as const) {

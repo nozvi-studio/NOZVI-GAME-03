@@ -1,20 +1,22 @@
-import { it, expect } from 'vitest';
+import { it, expect, expectTypeOf } from 'vitest';
 import { gate, type GateInstance } from '../../../src/core/hazards/gate';
 import { solidCauseAt, bfsWall, reservedByFamilies } from '../../../src/core/hazards/queries';
 import { spawnCtx, directorOptions, updateDirector } from '../../../src/core/hazards/director';
 import { resolveHeadCell } from '../../../src/core/hazards/collision';
-import { escapeExists } from '../../../src/core/fairness/escape';
+import { escapeExists, searchTimeline } from '../../../src/core/fairness/escape';
 import { buildTimeline } from '../../../src/core/fairness/timeline';
-import { key } from '../../../src/core/grid';
+import { key, reachable } from '../../../src/core/grid';
 import { effectiveTick } from '../../../src/core/skills';
 import { introducedAt, familyRow } from '../../../src/core/level';
-import { rngFrom, seedRng } from '../../../src/core/rng';
+import { rngFrom } from '../../../src/core/rng';
 import { restoreSim, stateOf } from '../../../src/core/sim';
 import { FAMILIES, __setFamiliesForTest } from '../../../src/core/hazards/registry';
 import { runFamilyFuzz } from '../../support/familyFuzz';
 import { buildBoard } from '../../support/board';
 import { hitCtx } from '../../support/fakeFamily';
 import { loadBalance, soloTable } from '../../support/balance';
+import { fixed } from '../../support/rngStub';
+import type { GateView } from '../../../src/core/types';
 
 const liveGate = (): GateInstance => ({ id: 1, t: 1500, lifeMs: 14000, state: 'live',
   fence: [4, 5, 7, 8].map(x => ({ x, y: 10, on: true, ageMs: 0 })),
@@ -28,14 +30,33 @@ const advance = (f: ReturnType<typeof fixture>, ms: number) => {
   for (let i = 0; i < ms; i++) gate.update(f.s, f.ctx);
 };
 
+// MEC-014-R1 unrotated gate U at (5,5); placement still uses the real fairness checks.
+const uFixture = (count: 1 | 2, mouth = 0) => {
+  const b = loadBalance(j => { j.gate.shapePool = ['U']; });
+  const s = buildBoard({ head: [12, 12], level: 17 });
+  const rng = fixed([0, count - 1, ...(count === 1 ? [mouth] : []), 0, 5, 5]).rng;
+  expect(gate.spawn(s, { ...spawnCtx(s, b), rng })).not.toBeNull();
+  return { b, s, g: s.families.gate.gates[0]!, ctx: hitCtx(s) };
+};
+
 it('MEC-004-R2 MEC-014-R2 gate snapshots survive clone/restore without live aliases', () => {
   const f = fixture(), sim = restoreSim(f.b, f.s), snap = sim.snapshot();
-  expect(snap.families).toHaveProperty('gate', [f.g]);
+  expect(snap.families.gate).toEqual([{ id: 1, t: 1500, lifeMs: 14000, state: 'live',
+    fence: [4, 5, 7, 8].map(x => ({ x, y: 10, on: true, ageMs: 0 })),
+    gate: [{ x: 6, y: 10, delay: 0, vis: 'up' }],
+  }]);
+  expectTypeOf(snap.families.gate[0]!.fence).toEqualTypeOf<readonly {
+    x: number; y: number; on: boolean; ageMs: number;
+  }[]>();
+  expectTypeOf(snap.families.gate).toEqualTypeOf<readonly GateView[]>();
   expect(sim.clone().snapshot()).toEqual(snap);
   const live = stateOf(sim), copy = gate.snapshot(live);
   live.families.gate.gates[0]!.gate[0]!.x = 99;
+  live.families.gate.gates[0]!.fence[0]!.x = 98;
   expect(copy).toMatchObject([{ gate: [{ x: 6 }] }]);
   expect(snap.families).toMatchObject({ gate: [{ gate: [{ x: 6 }] }] });
+  expect(copy).toMatchObject([{ fence: [{ x: 4 }, { x: 5 }, { x: 7 }, { x: 8 }] }]);
+  expect(snap.families.gate[0]!.fence[0]!.x).toBe(4);
 });
 
 it('MEC-014-R4 fence cells are BFS walls with cause fence; a closed gate cell has cause gate and is no BFS wall', () => {
@@ -71,7 +92,7 @@ it('MEC-014-R1 gate spawn makes a line of 5-7 or a U with 1-2 gate cells', () =>
     expect(cells).toHaveLength(all.length);
     expect([1, 2]).toContain(g.gate.length);
     const line = all.every(c => c.x === all[0]!.x) || all.every(c => c.y === all[0]!.y);
-    expect(line ? all.length >= 5 && all.length <= 7 : all.length === b.fence.shapes.U.length).toBe(true);
+    expect(line ? all.length >= 5 && all.length <= 7 : all.length === 12).toBe(true);
     if (line) for (const c of g.gate) {
       const coords = all.map(p => all[0]!.x === all[1]!.x ? p.y : p.x);
       expect(coords.slice().sort((a, b) => a - b).slice(1, -1)).toContain(all[0]!.x === all[1]!.x ? c.y : c.x);
@@ -81,7 +102,7 @@ it('MEC-014-R1 gate spawn makes a line of 5-7 or a U with 1-2 gate cells', () =>
     expect(g.gate.every(c => !c.up && c.vis === 'down')).toBe(true);
     sizes.add(all.length); counts.add(g.gate.length);
   }
-  expect([...sizes].sort()).toEqual([5, 6, 7, b.fence.shapes.U.length]);
+  expect([...sizes].sort((a, b) => a - b)).toEqual([5, 6, 7, 12]);
   expect([...counts].sort()).toEqual([1, 2]);
 });
 it('MEC-014-R3 a gate cell under the snake keeps warning and closes after the snake leaves', () => {
@@ -138,24 +159,50 @@ it('MEC-014-R8 solid fence cells report fence deaths and Shield removes just tha
   expect(solidCauseAt(f.s, 4, 10)).toBeNull();
   expect(f.g.fence).toHaveLength(3);
 });
-it('MEC-014-R10 a gate spawn never removes the last escape (U trap)', () => {
-  const b = loadBalance(j => { j.gate.shapePool = ['U']; });
-  let spawns = 0, escapes = 0;
-  for (let seed = 1; seed <= 100; seed++) {
-    const rng = rngFrom(seedRng(seed));
-    const head: [number, number] = [4 + rng.int(9), 2 + rng.int(13)];
-    const walls: [number, number][] = [];
-    for (let i = 0; i < 20; i++) {
-      const c: [number, number] = [rng.int(17), rng.int(17)];
-      if (c[1] !== head[1]) walls.push(c);
-    }
-    const s = buildBoard({ head, level: 17, seed, walls });
-    const before = escapeExists(b, s);
-    if (gate.spawn(s, spawnCtx(s, b))) spawns++;
-    if (before) { escapes++; expect(escapeExists(b, s), `seed ${seed}`).toBe(true); }
-  }
-  expect(spawns).toBeGreaterThan(0); expect(escapes).toBeGreaterThan(0);
-}, 30000);
+it.each([1, 2] as const)('MEC-014-R1 a closed U mouth seals the 2x2 interior with %i gate cells', count => {
+  const f = uFixture(count), { b, s, g } = f;
+  g.t = b.gate.landWarnMs + b.gate.openMs + b.gate.warnMs - 1;
+  advance(f, 1);
+  expect(g.gate.map(({ x, y }) => [x, y])).toEqual(count === 1 ? [[6, 5]] : [[6, 5], [7, 5]]);
+  expect(solidCauseAt(s, 5, 5)).toBe('fence');
+  expect(solidCauseAt(s, 8, 5)).toBe('fence');
+  const inside = { x: 6, y: 6 };
+  const closed = reachable(b.board.cols, b.board.rows, inside, (x, y) => solidCauseAt(s, x, y) !== null);
+  expect([...closed].sort((a, b) => a - b)).toEqual([108, 109, 125, 126]);
+  g.t += b.gate.closedMs - 1;
+  advance(f, 1);
+  const open = reachable(b.board.cols, b.board.rows, inside, (x, y) => solidCauseAt(s, x, y) !== null);
+  expect(open.has(key(b.board.cols, 6, 4))).toBe(true);
+});
+it('MEC-014-R1 a one-cell U gate can select either mouth cell without changing the P0 fence U', () => {
+  const { b, s, g } = uFixture(1, 1);
+  expect(g.gate.map(({ x, y }) => [x, y])).toEqual([[7, 5]]);
+  expect(g.fence.some(c => c.x === 6 && c.y === 5)).toBe(true);
+  expect(b.fence.shapes.U).toEqual([[0, 0], [0, 1], [0, 2], [1, 2], [2, 2], [3, 2], [3, 1], [3, 0]]);
+  expect(reservedByFamilies(s, 6, 5)).toBe(true);
+});
+it.each([1, 2] as const)('MEC-014-R10 a snake inside a U trap escapes through reopening with %i gate cells', count => {
+  const f = uFixture(count), { b, s, g } = f;
+  // The U spawns away from the snake; the snake enters before the mouth closes.
+  s.snake = [{ x: 6, y: 6 }, { x: 6, y: 7 }, { x: 7, y: 7 }, { x: 7, y: 6 }];
+  s.dir = { x: 1, y: 0 }; s.rampActive = false;
+  g.t = b.gate.landWarnMs + b.gate.openMs + b.gate.warnMs - 1;
+  advance(f, 1);
+  expect(s.snake[0]).toEqual({ x: 6, y: 6 });
+  expect(solidCauseAt(s, 6, 5)).toBe('gate');
+  expect(solidCauseAt(s, 7, 5)).toBe(count === 1 ? 'fence' : 'gate');
+  const outside = { x: 6, y: 4 }, outsideKey = key(b.board.cols, outside.x, outside.y);
+  expect(reachable(b.board.cols, b.board.rows, s.snake[0]!, (x, y) => solidCauseAt(s, x, y) !== null).has(outsideKey)).toBe(false);
+  const steps = Math.ceil(b.fairness.escapeHorizonMs / effectiveTick(s, b));
+  const tl = buildTimeline(b, s, steps), openStep = Math.ceil(b.gate.closedMs / tl.tickMs);
+  expect(tl.lethal[openStep - 1]!.has(key(b.board.cols, 6, 5))).toBe(true);
+  expect(tl.lethal[openStep]!.has(key(b.board.cols, 6, 5))).toBe(false);
+  expect(escapeExists(b, s)).toBe(true);
+  expect(searchTimeline(tl, s, outside).firstMoveToGoalSafe).not.toBeNull();
+  // A permanently sealed mouth offers survival laps, but no route to the exterior.
+  for (const cells of tl.lethal) { cells.add(key(b.board.cols, 6, 5)); cells.add(key(b.board.cols, 7, 5)); }
+  expect(searchTimeline(tl, s, outside).firstMoveToGoalSafe).toBeNull();
+});
 it('MEC-014-R10 fairness sees late-live closed gates reopen while fence cells stay solid', () => {
   const f = fixture(), { b, s, g } = f;
   g.t = b.gate.landWarnMs + b.gate.openMs + b.gate.warnMs;
@@ -201,13 +248,18 @@ it('MEC-014-R1 failed placement preserves state and supplies only fence cells as
 it('MEC-014-R2 balance rejects short warnings, invalid rhythms and invalid shapes or line ranges', () => {
   for (const key of ['warnMs', 'landWarnMs'])
     expect(() => loadBalance(j => { j.gate[key] = 899; })).toThrow(new RegExp('gate.' + key));
-  for (const key of ['warnMs', 'landWarnMs'])
-    expect(() => loadBalance(j => { j.fairness.minWarnMs = 1; j.fairness.minWarnTicks = 1; j.gate[key] = 899; }))
-      .toThrow(new RegExp('gate.' + key));
   expect(() => loadBalance(j => { j.gate.closedMs = j.gate.openMs; })).toThrow(/gate.closedMs/);
   expect(() => loadBalance(j => { j.gate.shapePool = ['L']; })).toThrow(/gate.shapePool/);
   for (const lineLen of [[7, 5], [0, 7], [5, 8], [4, 7], [5]])
     expect(() => loadBalance(j => { j.gate.lineLen = lineLen; })).toThrow(/gate.lineLen/);
+});
+
+it('MEC-014-R2 gate warnings use the shared fairness minimum and L1 tick rule', () => {
+  expect(() => loadBalance(j => { j.fairness.minWarnMs = 600; j.gate.warnMs = 600; j.gate.landWarnMs = 600; })).not.toThrow();
+  for (const field of ['warnMs', 'landWarnMs']) {
+    expect(() => loadBalance(j => { j.fairness.minWarnMs = 600; j.gate[field] = 599; })).toThrow(new RegExp('gate.' + field));
+    expect(() => loadBalance(j => { j.fairness.minWarnMs = 1; j.gate[field] = 559; })).toThrow(new RegExp('gate.' + field));
+  }
 });
 
 it('MEC-004-R17 MEC-014-R3 family invariants detect gate cells closing without a warning', () => {

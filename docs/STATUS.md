@@ -6,7 +6,7 @@
 - [x] P1 closed: flow B + WASD fix + run_end.turns merged; agy browser QA 11/11 PASS; version/v0.1 -> dev.
 - [x] P2 plans ready: P2a (revised for flow B) `docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md`; P2b `2026-11-04-p2b-movers-cycles-blasts.md`; P2c `2026-11-04-p2c-shrink-challenge-tuning.md`.
 - [x] P2a merged into version/v0.2: registry/queries, collision + death context, director capClass + fairness 1-3, escape check + family fuzz, GroundTiles, mud (L7), ice (L13), bot + death-cause report, run-log context. 938 pass; reduced fuzz + bot report pass (PLAYTEST 2026-11-05).
-- [ ] **RESUME HERE:** Task 5 implemented (CycleCells + gates L17); targeted single-file tests and typecheck passed; no commit. Lead full-suite verification pending, then Task 6 (spikes).
+- [ ] **RESUME HERE:** Task 5 review fixes for 527b6fe verified: U mouth seals a 2x2 interior, true trap/BFS regressions, shared warning minimum and GateView; 128 tests in 9 single-file runs and typecheck pass; read-only review found no issues; no new commit. Lead full-suite verification pending.
 
 ## Next (ordered, max 5)
 1. P2a (framework + ground tiles), then P2b (movers, cycles, blasts, bird), then P2c (shrink, challenge levels, tuning, P2 exit).

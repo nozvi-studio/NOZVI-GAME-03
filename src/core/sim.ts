@@ -17,6 +17,7 @@ import { rngFrom, seedRng, type Rng } from './rng';
 import { queueTurn, stepSnake } from './snake';
 import type { Dir, HitCtx, Sim, SimSnapshot, SimState, SimOptions, Step, StepCtx } from './types';
 import { coconutSnapshot } from './hazards/coconut';
+import { gateSnapshot } from './hazards/gate';
 
 const toDir = ([x, y]: Pair): Dir => ({ x: x as Step, y: y as Step });
 const states = new WeakMap<Sim, SimState>();
@@ -88,8 +89,7 @@ function stepMs(s: SimState, b: Balance, rng: Rng, internal: InternalOptions): v
 function snapshotOf(s: SimState, b: Balance): SimSnapshot {
   // MEC-004-R17 projects only snapshot-owned data: per-ms fuzz must not clone pending events/internal state.
   return {
-    families: { coconut: coconutSnapshot(s), gate: s.families.gate.gates.map(g => ({ ...g,
-      fence: g.fence.map(c => ({ ...c })), gate: g.gate.map(c => ({ ...c })) })) },
+    families: { coconut: coconutSnapshot(s), gate: gateSnapshot(s) },
     // MEC-012-R2 snapshot-owned tile views retain the optional ice exit ring.
     tiles: (['mud', 'ice'] as const).flatMap(family => s.families[family].patches.map(p => ({ family, id: p.id, state: p.state,
       leftMs: Math.max(0, (p.state === 'warn' ? p.warnMs : p.state === 'active' ? p.lifeMs : b.hazard.crumbleMs) - p.t),

@@ -44,7 +44,7 @@ function cellsOf(snap: SimSnapshot, cols: number): Map<string, Mark> {
       else if (g.state !== 'crumble') add('gate', c, 'warn', 'fence');
     }
     for (const c of g.gate) {
-      if (c.up) add('gate', c, 'lethal', 'gate');
+      if (c.vis === 'up') add('gate', c, 'lethal', 'gate');
       else if (c.vis === 'warn') add('gate', c, 'warn', 'gate');
     }
   }

@@ -20,7 +20,11 @@
     "points": { "normal": 1, "golden": 3 }, "progress": { "normal": 1, "golden": 2 }, "nearHeadDist": 3, "rottenRockLifeMs": 5000, "placeRetryMs": 250 },
   "fairness": { "nearHeadDist": 4, "frontLaneCells": 4, "terrainNearHeadDist": 4, "minWarnMs": 900, "minWarnTicks": 4, "escapeHorizonMs": 4000 },
   "gate": { "landWarnMs": 1500, "openMs": 2400, "warnMs": 900, "closedMs": 1500, "lifeMs": 14000, "lifeRandMs": 4000,
-    "maxActive": 1, "tries": 40, "lineLen": [5, 7], "shapePool": ["line", "U"] },
+    "maxActive": 1, "tries": 40, "lineLen": [5, 7], "shapePool": ["line", "U"],
+    "shapes": { "U": {
+      "cells": [[0,0],[0,1],[0,2],[0,3],[1,3],[2,3],[3,3],[3,2],[3,1],[3,0],[1,0],[2,0]],
+      "gateCells": [[1,0],[2,0]]
+    } } },
   "coconut": { "warnMs": 1500, "cellMs": 90, "maxActive": 2, "tries": 20 },
   "hazard": { "crumbleMs": 450 },
   "mud": { "warnMs": 1500, "lifeMs": 9000, "lifeRandMs": 3000, "tries": 40, "maxActive": 2, "tickFactor": 2, "mirrorChance": 0.5,
