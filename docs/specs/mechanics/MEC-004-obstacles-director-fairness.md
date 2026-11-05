@@ -110,6 +110,7 @@
 - **MEC-003:** director formulas (R4), table and introduction rule (R14–R16), level-up rules R7-R11 and R22.
 - **MEC-006:** Shield uses `breakable`/`onBreak` (R6, R8); snip wall and rubble are `capClass none` families exempt from R11–R13; Slow-mo factor in R7; step order amended in `docs/ARCHITECTURE.md` "Sim step order" (MEC-006-R35 points there) with "families update in registry order".
 - **MEC-008:** the ramp gives `baseTickMs`; R13 uses `speed.startMs`, which bounds the ramp too.
+- **P2b families:** [MEC-013](MEC-013-rolling-coconuts.md) coconuts, [MEC-014](MEC-014-gates-spikes.md) gates and spikes, [MEC-015](MEC-015-patrol-npcs.md) cat and chicken, [MEC-016](MEC-016-mango-thief-bird.md) bird, [MEC-017](MEC-017-timed-bombs.md) bombs.
 
 ## 7. Core API changes
 ```ts

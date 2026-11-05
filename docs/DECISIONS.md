@@ -386,3 +386,8 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - `SpawnCtx.rng` is required (not optional): every spawn caller supplies the stream explicitly, and spawnCtx fills it from the simulation RNG. This supersedes the Task 1 optional-rng note.
 - Callers of `effectiveTick` stay head-tile-aware: they pass the head tile so MEC-012 mud slowdown applies only while the head is in mud.
 - Full fuzz runs (`npm run test:fuzz`) and `npm run bot:report` happen only at the P2a exit, because of RAM limits; normal work uses the smoke sample.
+
+## 2026-11-05 - P2b Task 1 rulings (lead, technical)
+- `HazardFamily.causeAt` (TR-B5) applies to the collision death cause too: `resolveHeadCell` and `applyHeadHit` report `causeAt(s, x, y) ?? cause`, not only `solidCauseAt`. Otherwise fence-cell deaths in a gate would report `gate` and NPC deaths would always report `cat` (MEC-014 L4, MEC-015 R7).
+- P2b families do not emit `hazardIncoming` in `spawn`; `emitsIncoming` stays unset and the director emits it (P2a MEC-004-R9). The plan's spawn sketches that call `ctx.emit({type: 'hazardIncoming'})` would duplicate the event.
+- `bfsDistance` does not exist in `grid.ts` after P2a (only `reachable`); Task 8 adds it.

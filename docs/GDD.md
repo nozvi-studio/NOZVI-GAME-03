@@ -38,6 +38,11 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 | MEC-002 | Mangoes: rot timer, golden mango, rotten mango → temporary obstacle | Time pressure, risk/reward | P0, P1, P2 | `docs/specs/mechanics/MEC-002-mango.md` | Implemented (P1) |
 | MEC-003 | Level & biome progression: 30 levels, 6 biomes × 5 levels, quotas, speed curve, level up | Short-term goal, escalation, sense of travel | P1 | `docs/specs/mechanics/MEC-003-levels-biomes.md` | Implemented (P1) |
 | MEC-012 | Ground tiles: mud (slows the head) and ice (slide until off) patches from L7 and L13 | Readable terrain variety without lethal cost | P2a | `docs/specs/mechanics/MEC-012-ground-tiles.md` | Implemented (P2a) |
+| MEC-013 | Rolling coconuts: a telegraphed lane, then a coconut rolls across it (L16) | Reading lanes | P2b | `docs/specs/mechanics/MEC-013-rolling-coconuts.md` | Proposed |
+| MEC-014 | Gates that open/close on a rhythm (L17) and spike traps on a global beat (L18) | Pathing + timing | P2b | `docs/specs/mechanics/MEC-014-gates-spikes.md` | Proposed |
+| MEC-015 | Patrolling cat / chicken on a visible back-and-forth route (L21) | Timing | P2b | `docs/specs/mechanics/MEC-015-patrol-npcs.md` | Proposed |
+| MEC-016 | Mango-thief bird: shadow on the mango, steals it if not eaten in time (L22) | Time pressure, never lethal | P2b | `docs/specs/mechanics/MEC-016-mango-thief-bird.md` | Proposed |
+| MEC-017 | Timed bombs: countdown, then a plus-shaped blast for one tick (L23) | Area avoidance | P2b | `docs/specs/mechanics/MEC-017-timed-bombs.md` | Proposed |
 | MEC-004 | Obstacle families + director + fairness rules (warn → solid → crumble, never on snake, always a path) | Escalating, readable danger | P0 (port), P2 (new families) | to write (template 03) | Partly implemented (rocks, fences, rising ground, mazes) |
 | MEC-006 | Energy orbs, energy bar, 4 skills with energy cost and side effects | Clever escapes and farming at a cost | P1 | `docs/specs/mechanics/MEC-006-energy-skills.md` | Implemented (P1) |
 | MEC-007 | Skill loadout: pick 2 of the unlocked skills before a run | Strategy before the run; uncluttered phone controls | P1 | `docs/specs/mechanics/MEC-007-loadout.md` | Implemented (P1) |
