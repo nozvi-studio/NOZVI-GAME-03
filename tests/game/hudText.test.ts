@@ -31,4 +31,7 @@ describe('MEC-003 §8 run start banner', () => {
     expect(runStartLines({ level: 10, challenge: true }, t)).toEqual(['Challenge: Fence field!']);
     expect(runStartLines({ level: 1, challenge: false }, t)).toEqual([]);
   });
+  it('MEC-003 §8 run-start banner derives from the snapshot at HUD create, so every challenge level start shows exactly one banner', () => {
+    for (const level of [5, 10, 15, 20, 25, 30]) expect(runStartLines({ level, challenge: true }, t)).toHaveLength(1);
+  });
 });

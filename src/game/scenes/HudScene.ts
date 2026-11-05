@@ -121,6 +121,13 @@ export class HudScene extends Phaser.Scene {
       this.bannerTimer?.remove(); this.tipTimer?.remove(); this.overTimer?.remove();
     });
     this.drawChrome(); this.refresh();
+    this.showRunStart();
+  }
+
+  // MEC-003 §8 run-start banner. Hud is (re)launched once per run start, after Game emitted newRun, so show it here.
+  private showRunStart(): void {
+    const start = runStartLines(this.gameScene.snapshot() ?? { level: 0, challenge: false }, t);
+    if (start.length) this.showBanner(start.join('\n'));
   }
 
   private label(x: number, y: number, text: string, size: number, name = ''): Phaser.GameObjects.Text {

@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(game): challenge banner shows on run start (HudScene shows runStartLines in create(); Hud launches after Game's newRun)
 - fix: P2c final review fix-ups (debug run marker excluded from deathCauseReport/summarizeLog, bot board-size verdict skipped on partial level ranges, MEC-018 R7 event names)
 ### Added
 - fix(core): shrink waits while another hazard holds a ring cell (MEC-018-R1); full-table fuzz I5 now clean
