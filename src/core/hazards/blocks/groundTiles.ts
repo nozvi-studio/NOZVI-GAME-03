@@ -1,4 +1,6 @@
-import type { Cell } from '../../types';
+import type { Cell, SimState, SpawnCtx, TileKind } from '../../types';
+import type { CandidateOpts } from '../placement';
+import { transform } from '../shapes';
 
 export interface TilePatch {
   id: number;
@@ -50,4 +52,27 @@ export function patchHas(p: TilePatch, x: number, y: number): boolean {
 // MEC-004-R7 the max skill/level slowdown and tile factor multiply before rounding.
 export function scaleTick(baseTickMs: number, slowFactor: number, tileFactor: number): number {
   return Math.round(baseTickMs * slowFactor * tileFactor);
+}
+
+// MEC-012-R1 shared mud/ice spawn: shape pick, transform, origin tries, then lifetime RNG, in that fixed order.
+export function spawnGroundPatch(
+  s: SimState, ctx: SpawnCtx, key: TileKind,
+  ring?: (cells: readonly Cell[]) => Cell[],
+): Cell[] | null {
+  const b = ctx.balance, cfg = b[key], rng = ctx.rng;
+  const shape = transform(cfg.shapes[rng.pick(cfg.shapePool)]!, rng, cfg.mirrorChance);
+  const w = Math.max(...shape.map(([x]) => x)) + 1, h = Math.max(...shape.map(([, y]) => y)) + 1;
+  for (let attempt = 0; attempt < cfg.tries; attempt++) {
+    const ox = rng.int(b.board.cols - w + 1), oy = rng.int(b.board.rows - h + 1);
+    const cells = shape.map(([x, y]) => ({ x: ox + x, y: oy + y })), exits = ring?.(cells);
+    const opts: CandidateOpts = exits === undefined
+      ? { nearDist: b.fairness.nearHeadDist, wallCells: [] }
+      : { nearDist: b.fairness.nearHeadDist, wallCells: cells, extraFree: exits };
+    if (!ctx.candidateValid(s, cells, opts)) continue;
+    const st = s.families[key];
+    st.patches.push(newPatch(st.nextId++, cells, cfg.warnMs, cfg.lifeMs + rng.next() * cfg.lifeRandMs, exits));
+    s.events.push({ type: 'hazardIncoming', family: key });
+    return cells;
+  }
+  return null;
 }

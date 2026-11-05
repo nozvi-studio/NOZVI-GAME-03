@@ -3,6 +3,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Added
+- feat(meta): log death context on run_end and show it on Results; docs: P2a exit report (MEC-003-R19, MEC-012-R12)
+- refactor: shared spawnGroundPatch, bot report ignores unknown cause, test and docs cleanups from P2a reviews
 - test(tools): headless bot and death-cause report (MEC-004-R19)
 - feat(core): ice tiles from level 13 (MEC-012)
 - feat(core): mud tiles from level 7 (MEC-012)

@@ -224,7 +224,8 @@ export interface HazardFamily {
   readonly cause: CauseKey | null;
   readonly capClass: CapClass;
   readonly maxActiveKey: string | null;
-  readonly emitsIncoming?: boolean; // MEC-004-R9 true when spawn/update owns hazardIncoming.
+  /** MEC-004-R9 true when the family owns or defers its own hazardIncoming warning, so the director stays silent. */
+  readonly emitsIncoming?: boolean;
   spawn(s: SimState, ctx: SpawnCtx): Cell[] | null;
   update(s: SimState, ctx: StepCtx & HitCtx): void;
   snapshot(s: SimState): unknown;

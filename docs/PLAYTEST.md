@@ -2,6 +2,14 @@
 
 > Newest entry first. AI: read the latest entry only (AGENTS §2b).
 
+## 2026-11-05 - P2a exit check (pending lead runs)
+- Build: branch `feat/p2a-ground-tiles` (mud from L7, ice from L13; MEC-004 framework).
+- `npm test`: <PENDING lead: pass count and seconds> · `npm run typecheck`: <PENDING> · `npm run test:fuzz`: <PENDING>.
+- `npm run bot:report` (L1-15, 5 seeds): every level cleared by >= 1 seed: <PENDING yes/no>.
+- WARN lines with one-line triage each: <PENDING paste, or "none">.
+- Browser QA (desktop and `vite --host` phone), L7 and L13 played to the end, no console errors: <PENDING>.
+- Death context spot check (Results shows the mud/ice line after a tile death): <PENDING>.
+
 ## 2026-11-04 — P1 exit gate verdict: PASS (lead)
 - Basis (owner decision 2026-11-04: gate = 2 testers, and "agy QA pass => gate pass"):
   - Owner desktop log: 13 runs, max L9, deaths wall 11 / self 2. The 4 wall deaths at exactly 1260 ms were no-input runs (9 steps x 140 ms from spawn), not a bug; the owner kept the start rule. `run_end.turns` is now logged to tell idle from lost input.

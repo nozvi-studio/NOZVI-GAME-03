@@ -3,6 +3,8 @@ import { PERCENT, WARN_SHARE } from './botConfig';
 import type { LevelResult } from './runLevel';
 
 const PLAYER_CAUSES: readonly CauseKey[] = ['wall', 'self'];
+/** Placeholder cause for deaths without one; never counted toward the family-share warning. */
+const UNKNOWN_CAUSE = 'unknown';
 const pct = (n: number, d: number) => Math.round((n / d) * PERCENT);
 
 // MEC-004-R19 death-cause report; warnings cover zero-clear levels and dominant family causes.
@@ -21,9 +23,9 @@ export function formatReport(results: readonly LevelResult[]): { markdown: strin
     if (!deaths.length) continue;
     const count = new Map<string, number>(), family = new Map<string, number>();
     for (const d of deaths) {
-      const cause = d.cause ?? 'unknown', row = d.context ? `${cause} (${d.context})` : cause;
+      const cause = d.cause ?? UNKNOWN_CAUSE, row = d.context ? `${cause} (${d.context})` : cause;
       count.set(row, (count.get(row) ?? 0) + 1);
-      if (!PLAYER_CAUSES.includes(cause as CauseKey)) family.set(cause, (family.get(cause) ?? 0) + 1);
+      if (cause !== UNKNOWN_CAUSE && !PLAYER_CAUSES.includes(cause as CauseKey)) family.set(cause, (family.get(cause) ?? 0) + 1);
     }
     out.push('', `### Biome ${b}`, '| cause (context) | count | share |', '|---|---|---|');
     const player: string[] = [];

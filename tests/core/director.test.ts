@@ -185,6 +185,7 @@ describe('MEC-004 director', () => {
   it('MEC-004 hazardIncoming is emitted once for fence, maze, terrain, mud and ice, with rock deferred', () => {
     for (const [roll, family] of [[0, 'rock'], [0.3, 'fence'], [0.45, 'maze'], [0.6, 'terrain'], [0.75, 'mud'], [0.99, 'ice']] as const) {
       const s = due(26), rng = rngFrom(seedRng(42)); let first = true;
+      // A fixed rng cannot serve: the first next() picks the family, and later draws must stay real so placement succeeds.
       updateDirector(s, b, { ...rng, next: () => { if (first) { first = false; return roll; } return rng.next(); } });
       expect(s.events).toEqual(family === 'rock' ? [] : [{ type: 'hazardIncoming', family }]);
     }

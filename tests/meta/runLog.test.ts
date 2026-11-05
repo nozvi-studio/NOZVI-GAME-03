@@ -67,3 +67,10 @@ describe('summarizeLog', () => {
     expect(s).toMatchObject({ runs: 2, causeShare: { rock: 1 }, runsPerSession: [2] });
   });
 });
+
+it('MEC-003-R19 run_end keeps the death context and deathCounts stay per cause', () => {
+  const next = appendRecord(emptyLog(), { type: 'run_end', runId: 1, t: 0, level: 13, score: 40, cause: 'self', context: 'ice',
+    durationMs: 90000, startLevel: 12, levelsCleared: 1, won: false }, 100);
+  expect(next.entries.at(-1)).toMatchObject({ cause: 'self', context: 'ice' });
+  expect(next.deathCounts).toEqual({ self: 1 });
+});

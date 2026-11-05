@@ -5,7 +5,7 @@
 ## Now (in progress)
 - [x] P1 closed: flow B + WASD fix + run_end.turns merged; agy browser QA 11/11 PASS; version/v0.1 -> dev.
 - [x] P2 plans ready: P2a (revised for flow B) `docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md`; P2b `2026-11-04-p2b-movers-cycles-blasts.md`; P2c `2026-11-04-p2c-shrink-challenge-tuning.md`.
-- [ ] **RESUME HERE:** P2a Task 8 bot and death-cause report is implemented and uncommitted (tools/bot, tests/tools); lead review, commit, and `npm run bot:report` run pending.
+- [ ] **RESUME HERE:** P2a Task 9 code and docs done and uncommitted; lead runs `npm run test:fuzz`, `npm run bot:report` (fill the PLAYTEST P2a entry), browser QA of L7/L13, then commits and merges P2a; next write MEC-013..017 and the P2b plan.
 
 ## Next (ordered, max 5)
 1. P2a (framework + ground tiles), then P2b (movers, cycles, blasts, bird), then P2c (shrink, challenge levels, tuning, P2 exit).

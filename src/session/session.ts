@@ -1,6 +1,6 @@
 // Pure session: wires save, sim and run log (P1-D1). Imports only the core and meta public entries.
 import { createSim, unlockedSkills, slotCount, unlockTable } from '../core/index';
-import type { Balance, CauseKey, Loadout, Sim, SimEvent, SimSnapshot, SkillId } from '../core/index';
+import type { Balance, CauseKey, Loadout, Sim, SimEvent, SimSnapshot, SkillId, TileKind } from '../core/index';
 import {
   load, save as writeSave, applyLevelReached, applyRunWon, carryEnergy, nextMilestone, sanitizeLoadout,
   loadLog, nextRun, appendRecord, flushLog,
@@ -16,6 +16,7 @@ export interface LoadoutModel { unlocked: SkillId[]; slotCount: 1 | 2; selection
 export interface RunSummary {
   won: boolean; cause: CauseKey | 'clear' | 'quit'; level: number; startLevel: number;
   levelsCleared: number; score: number; bestScore: number; newBest: boolean; carriedEnergy: number;
+  context?: TileKind;
 }
 export interface Session {
   homeModel(): HomeModel;
@@ -74,7 +75,7 @@ export function createSession(deps: SessionDeps): Session {
   };
 
   // MEC-008-R6 / MEC-003-R19/R20 run end: carry, best score, run_end record, save and flush.
-  const endRun = (cause: CauseKey | 'clear' | 'quit') => {
+  const endRun = (cause: CauseKey | 'clear' | 'quit', context?: TileKind) => {
     if (!run || run.over) return;
     const snap = run.sim.snapshot();
     const won = cause === 'clear';
@@ -83,11 +84,13 @@ export function createSession(deps: SessionDeps): Session {
     const newBest = snap.score > data.bestScore;
     persist({ ...data, carriedEnergy: carried, bestScore: Math.max(data.bestScore, snap.score) });
     record({ type: 'run_end', level: snap.level, score: snap.score, cause, durationMs: snap.timeMs,
-      startLevel: snap.startLevel, levelsCleared: snap.levelsCleared, won, turns: run.turns });
+      startLevel: snap.startLevel, levelsCleared: snap.levelsCleared, won, turns: run.turns,
+      ...(context === undefined ? {} : { context }) });
     flushLog(deps.store, log);
     run.over = true;
     run.summary = { won, cause, level: snap.level, startLevel: snap.startLevel, levelsCleared: snap.levelsCleared,
-      score: snap.score, bestScore: data.bestScore, newBest, carriedEnergy: carried };
+      score: snap.score, bestScore: data.bestScore, newBest, carriedEnergy: carried,
+      ...(context === undefined ? {} : { context }) };
   };
 
   const handle = (events: SimEvent[]) => {
@@ -102,7 +105,7 @@ export function createSession(deps: SessionDeps): Session {
           record({ type: 'skill_used', skill: e.skill, level: e.level, energyBefore: e.energyBefore });
           break;
         case 'runWon': endRun('clear'); break;
-        case 'died': endRun(e.cause); break;
+        case 'died': endRun(e.cause, e.context); break;
         default: break;
       }
     }

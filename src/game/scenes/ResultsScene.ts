@@ -15,7 +15,7 @@ export class ResultsScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(currentPalette().bg);
     const cx = WIDTH / 2;
     if (s) {
-      label(this, cx, 160, s.won ? t('results.won') : t('cause.' + s.cause), 26, 'results-cause').setWordWrapWidth(480).setAlign('center');
+      label(this, cx, 160, (s.won ? t('results.won') : t('cause.' + s.cause)) + (s.context ? ' ' + t('death.context.' + s.context) : ''), 26, 'results-cause').setWordWrapWidth(480).setAlign('center');
       label(this, cx, 250, t('results.level', { level: s.level }), 30, 'results-level');
       label(this, cx, 300, t('results.cleared', { n: s.levelsCleared }), 20, 'results-cleared');
       label(this, cx, 360, t('results.score', { score: s.score }), 34, 'results-score');

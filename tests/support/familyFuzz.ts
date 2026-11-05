@@ -86,7 +86,7 @@ function checkDeath(e: Extract<SimEvent, { type: 'died' }>, previous: Map<string
 function checkIce(s: SimState, b: Balance, bad: (m: string) => void): void {
   const same = (a: Cell, c: Cell) => a.x === c.x && a.y === c.y;
   for (const patch of s.families.ice.patches) {
-    if (patch.state === 'active') for (const c of patch.ring ?? []) {
+    if (patch.state === 'warn' || patch.state === 'active') for (const c of patch.ring ?? []) {
       if (!inBounds(b.board.cols, b.board.rows, c.x, c.y) || solidCauseAt(s, c.x, c.y) !== null
         || (s.mango !== null && same(s.mango, c)) || s.orbs.some(o => same(o, c)) || s.rainMangoes.some(m => same(m, c)))
         bad(`MEC-012-R10 unsafe ice exit (${c.x},${c.y})`);

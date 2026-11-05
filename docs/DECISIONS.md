@@ -380,3 +380,9 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 
 ## 2026-11-05 - MEC-004-R19 bot runs through Vitest
 - The headless bot and death-cause report live in `tools/bot/` and run via `vitest run --mode bot` (`npm run bot:report`); no new dependency or runner. The bot uses one fixed tick per search read from `effectiveTick` (FB-2) and treats `levelUp` as an immediate clear (flow B has no transition).
+
+## 2026-11-05 - P2a lead rulings carried to Task 9
+- `HazardFamily.emitsIncoming` marks families that own or defer their own `hazardIncoming` warning, so the director stays silent for them (JSDoc on the flag).
+- `SpawnCtx.rng` is required (not optional): every spawn caller supplies the stream explicitly, and spawnCtx fills it from the simulation RNG. This supersedes the Task 1 optional-rng note.
+- Callers of `effectiveTick` stay head-tile-aware: they pass the head tile so MEC-012 mud slowdown applies only while the head is in mud.
+- Full fuzz runs (`npm run test:fuzz`) and `npm run bot:report` happen only at the P2a exit, because of RAM limits; normal work uses the smoke sample.
