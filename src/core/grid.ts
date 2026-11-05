@@ -29,3 +29,31 @@ export function reachable(cols: number, rows: number, head: Cell, isWall: (x: nu
   }
   return seen;
 }
+
+// MEC-016-R1 cheapest path cost from `from` to `to`; stepCost(x, y) is the cost of leaving cell (x, y).
+// Dijkstra over in-bounds non-wall cells; null when `to` is unreachable. Result is transient, never stored.
+export function pathCost(cols: number, rows: number, from: Cell, to: Cell,
+  isWall: (x: number, y: number) => boolean, stepCost: (x: number, y: number) => number): number | null {
+  const n = cols * rows, dist = new Array<number>(n).fill(Infinity), done = new Array<boolean>(n).fill(false);
+  dist[key(cols, from.x, from.y)] = 0;
+  const target = key(cols, to.x, to.y);
+  for (;;) {
+    let k = -1;
+    for (let i = 0; i < n; i++) if (!done[i] && dist[i]! < Infinity && (k < 0 || dist[i]! < dist[k]!)) k = i;
+    if (k < 0) return null;
+    if (k === target) return dist[k]!;
+    done[k] = true;
+    const x = k % cols, y = (k - x) / cols, d = dist[k]! + stepCost(x, y);
+    for (const [dx, dy] of NEIGHBORS) {
+      const nx = x + dx, ny = y + dy;
+      if (!inBounds(cols, rows, nx, ny) || isWall(nx, ny)) continue;
+      const nk = key(cols, nx, ny);
+      if (d < dist[nk]!) dist[nk] = d;
+    }
+  }
+}
+
+// MEC-016-R1 BFS step count from `from` to `to`; null when unreachable.
+export function bfsDistance(cols: number, rows: number, from: Cell, to: Cell, isWall: (x: number, y: number) => boolean): number | null {
+  return pathCost(cols, rows, from, to, isWall, () => 1);
+}

@@ -48,8 +48,8 @@ function steer(sim: Sim, s: SimState, b: Balance, input: Rng): void {
 // Shallow copy of everything isReserved/goodCells read; enough because placements only add new objects.
 function shallow(s: SimState): SimState {
   return { ...s, snake: s.snake.map(c => ({ ...c })), dir: { ...s.dir }, orbs: [...s.orbs], rainMangoes: [...s.rainMangoes],
-    families: { ice: { ...s.families.ice, patches: [...s.families.ice.patches] }, mud: { ...s.families.mud, patches: [...s.families.mud.patches] }, rock: [...s.families.rock], fence: [...s.families.fence], maze: [...s.families.maze],
-      terrain: [...s.families.terrain], rottenRock: [...s.families.rottenRock], snipWall: [...s.families.snipWall], rubble: [...s.families.rubble] } };
+    families: { npc: { ...s.families.npc, npcs: [...s.families.npc.npcs] }, spike: { ...s.families.spike, groups: [...s.families.spike.groups] }, gate: { ...s.families.gate, gates: [...s.families.gate.gates] }, coconut: { ...s.families.coconut, rolls: [...s.families.coconut.rolls] }, ice: { ...s.families.ice, patches: [...s.families.ice.patches] }, mud: { ...s.families.mud, patches: [...s.families.mud.patches] }, rock: [...s.families.rock], fence: [...s.families.fence], maze: [...s.families.maze],
+      terrain: [...s.families.terrain], rottenRock: [...s.families.rottenRock], snipWall: [...s.families.snipWall], rubble: [...s.families.rubble], bird: { target: s.families.bird.target && { ...s.families.bird.target } }, bomb: { ...s.families.bomb, bombs: [...s.families.bomb.bombs] } } };
 }
 
 export function p1FuzzSeed(b: Balance, seed: number, simMs: number): P1Report {

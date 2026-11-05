@@ -2,6 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { bestLine, CAUSE_TEXT, deathMessage, incomingBanner, levelBanner, levelLabel, progressLabel, t, TEXT } from '../../src/game/text';
 
 describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
+  it('MEC-014-R9 levelBanner names gates at introduction', () => {
+    expect(levelBanner(17, 'gate')).toBe('Level 17: gates unlocked');
+  });
+  it('MEC-013-R8 levelBanner names rolling coconuts at introduction', () => {
+    expect(levelBanner(16, 'coconut')).toBe('Level 16: rolling coconuts unlocked');
+  });
   it('GDD-13 level banners (L605)', () => {
     expect(levelBanner(6, 'fence')).toBe('Level 6: fences unlocked');
     expect(levelBanner(11, 'terrain')).toBe('Level 11: rising ground unlocked');
@@ -27,6 +33,8 @@ describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
       rotten: 'You hit a rock left by a rotten mango.', rock: 'A falling rock got you.',
       fence: 'You ran into a fence.', maze: 'You ran into a hedge.', ground: 'The ground rose in front of you.',
       snipWall: 'You hit your discarded tail.', rubble: 'You hit the rubble.',
+      coconut: 'Hit by a coconut.', gate: 'Crushed by a gate.', spike: 'Spiked.',
+      cat: 'Ran into the cat.', chicken: 'Ran into the chicken.', bomb: 'Caught in the blast.',
     });
   });
   it('GDD-13 level bar labels', () => {
@@ -43,6 +51,14 @@ describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
       landsSoon: 'Lands soon', groundRising: 'Ground rising', mangoRotting: 'Mango rotting',
       over: 'Game over', won: 'You filled the board!', wonWhy: 'No room left for mangoes.',
     });
+  });
+  it('GDD-13 new causes have death messages before their families are registered', () => {
+    expect(deathMessage(false, 'coconut', 12, 16)).toBe('Hit by a coconut. Score 12, level 16.');
+    expect(deathMessage(false, 'gate', 12, 17)).toBe('Crushed by a gate. Score 12, level 17.');
+    expect(deathMessage(false, 'spike', 12, 18)).toBe('Spiked. Score 12, level 18.');
+    expect(deathMessage(false, 'cat', 12, 21)).toBe('Ran into the cat. Score 12, level 21.');
+    expect(deathMessage(false, 'chicken', 12, 21)).toBe('Ran into the chicken. Score 12, level 21.');
+    expect(deathMessage(false, 'bomb', 12, 23)).toBe('Caught in the blast. Score 12, level 23.');
   });
 });
 
@@ -68,4 +84,17 @@ describe('P1 text keys (MEC-003/006/007/008 §8)', () => {
     expect(t('banner.biome.6')).toBe('Storm Garden');
     expect(t('no.such.key')).toBe('no.such.key');
   });
+});
+
+it('MEC-014-R9 spike introduction has a readable level banner', () => {
+  expect(levelBanner(18, 'spike')).toBe('Level 18: spikes unlocked');
+});
+
+it('MEC-015-R8 NPC introduction has a readable level banner', () => {
+  expect(levelBanner(21, 'npc')).toBe('Level 21: cats and chickens unlocked');
+});
+
+it('MEC-003 §8 every P2b family has a banner and every P2b cause has a death text', () => {
+  for (const k of ['coconut', 'gate', 'spike', 'npc', 'bird', 'bomb']) expect(t(`banner.new.${k}`)).not.toMatch(/^banner\./);
+  for (const c of ['coconut', 'gate', 'spike', 'cat', 'chicken', 'bomb']) expect(t(`death.${c}`)).not.toMatch(/^death\./);
 });

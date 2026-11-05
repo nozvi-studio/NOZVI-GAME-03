@@ -11,6 +11,18 @@ import { buildBoard } from '../../support/board';
 import { runFamilyFuzz } from '../../support/familyFuzz';
 import { play, type Input } from '../../support/p1fuzz';
 
+it('MEC-015-R7 TR-B4 I6 checks chicken deaths instead of skipping the non-default variant', () => {
+  __setFamiliesForTest(DEFAULT_FAMILIES.map(f => f.key !== 'npc' ? f : { ...f,
+    causeAt: () => 'chicken',
+    update(_s, ctx) { ctx.hitHead('npc', 0, 0, 'mover', { x: 1, y: 0 }); },
+  }));
+  try {
+    const errors = runFamilyFuzz({ family: 'npc', mode: 'solo', startLevel: 21,
+      seeds: 1, durationMs: 10, escape: 'off' });
+    expect(errors.some(e => e.includes('I6 death by chicken'))).toBe(true);
+  } finally { __setFamiliesForTest(null); }
+});
+
 it('MEC-004-R17 rerun simulation seeds use a different stream from the input RNG', () => {
   const firstFrameRng = new Set<number>();
   const input = seedRng(1 + 1000003);

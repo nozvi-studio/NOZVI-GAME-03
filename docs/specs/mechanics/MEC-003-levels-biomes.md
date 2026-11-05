@@ -47,7 +47,7 @@ Save fields: none here (best level, checkpoints: MEC-008). Local run log: separa
 - **MEC-003-R13 Empty mango slot.** While no mango is on the board (MEC-001-R10), the director does not spawn.
 ### Obstacle families per level (P1 = existing families only)
 - **MEC-003-R14 Family table.** `level.table` is an ordered list of rows `{from, to, weights, rockShapes, fenceShapes, rottenRocks}`. Rows cover 1…30 exactly once (validated). A family is enabled on level n iff it has a weight > 0 in `familyRow(n).weights`. The director (MEC-004) uses those weights instead of P0's unlock levels; `rock.shapePoolByLevel` and the P0 fence tiers are replaced by `rockShapes` / `fenceShapes`. Unknown family keys or shape names fail `parseBalance`. P2 adds families by adding weight keys, shape lists and family parameter groups (data), plus the family's code.
-- **MEC-003-R15 P1 table.** P2 extends weight keys and introductions via MEC-012-R11; the shipped numbers live in `config/balance.json` (mud from L7). The table below records the P1 baseline.
+- **MEC-003-R15 P1 table.** P2 extends weight keys and introductions via MEC-012-R11 and MEC-013-R8; the shipped numbers live in `config/balance.json` (mud from L7, ice from L13, coconut from L16). The P2 coconut table splits the former L16–25 row into L16–20 and L21–25. The table below records the P1 baseline.
 
   | Levels | Biome | weights | rockShapes | fenceShapes | rottenRocks | Introduces |
   |---|---|---|---|---|---|---|

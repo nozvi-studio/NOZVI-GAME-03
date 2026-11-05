@@ -3,6 +3,17 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Added
+- fix(core): head entering an NPC now emits moverHit (family npc) once, with and without Shield (MEC-015-R7)
+- fix(game): P2b review fix-ups (chicken beak follows NpcView.dir, spike warn never blinks to empty, shield area-hit guard, bot level range env overrides)
+- feat(game): greybox visuals and texts for P2b families (coconut, gate, spike, npc, bird, bomb); bomb blast now hits at most once on the Shield-absorb path too (MEC-017-R3)
+- feat(core): mango-thief bird from level 22; NPC L routes keep both legs >= 2 cells (MEC-016, MEC-015-R2)
+- feat(core): area-blast block and timed bombs from level 23 (MEC-017); registry init guard for undefined families; modifier families without a fuzz invariant now fail
+- feat(core): patrolling cat and chicken from level 21 (MEC-015)
+- feat(core): spike traps on a global beat from level 18 (MEC-014)
+- feat(core): cycle-cell block and gates from level 17 (MEC-014)
+- feat(core): rolling coconuts from level 16 (MEC-013)
+- feat(core): mover building block (MEC-004-R5)
+- feat(core): P2b family and cause keys, mover/blast/steal events, per-cell cause (MEC-004-R3)
 - feat(meta): log death context on run_end and show it on Results; docs: P2a exit report (MEC-003-R19, MEC-012-R12)
 - refactor: shared spawnGroundPatch, bot report ignores unknown cause, test and docs cleanups from P2a reviews
 - test(tools): headless bot and death-cause report (MEC-004-R19)
@@ -26,6 +37,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - fix(game): keyboard turns (arrows/WASD) are queued on the native keydown instead of waiting for Phaser's per-frame keyboard queue; pure key map in src/game/input/keyMap.ts (MEC-001).
 - fix(core): regular mango updates the speed ramp before the level-clear check, so rampEnded precedes levelUp (ARCHITECTURE step 12.4).
 ### Docs
+- docs: MEC-013..017 P2b family specs (coconut, gate/spike, npc, bird, bomb) (P2b Task 1)
 - docs: P2a exit recorded (STATUS, PLAYTEST); browser QA deferred by owner.
 - test: fuzz-mode size knobs (VITE_FUZZ_SEEDS, VITE_FUZZ_MS) and no timeout for the legacy fuzz in fuzz mode; P2a exit results in PLAYTEST.
 - docs: P1 exit gate verdict (PASS) in PLAYTEST; STATUS for P2 start.

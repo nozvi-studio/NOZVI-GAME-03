@@ -253,6 +253,7 @@ export class HudScene extends Phaser.Scene {
         break;
       }
       case 'slotUnlocked': this.showTip(t('tip.slotUnlocked')); break;
+      case 'mangoStolen': this.showTip(t('toast.mangoStolen')); break; // MEC-016 §8 toast
       case 'rampEnded': this.synth.play('go'); break;
       case 'died': this.synth.play('die'); this.synth.buzz(ui.haptics.deathMs); break;
       default: break;

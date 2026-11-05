@@ -2,6 +2,12 @@
 
 > Newest entry first. AI: read the latest entry only (AGENTS §2b).
 
+## 2026-11-05 — P2b exit check
+- `npm test`: 1112 pass / 6 skip / 12 todo (1 worker); `npm run typecheck`: clean.
+- Fuzz (reduced, 20 seeds x 60 s, 1 worker): PASS, 1108 tests, about 39 min.
+- `npm run bot:report` L16-25 (5 seeds, `VITE_BOT_FROM=16 VITE_BOT_TO=25`): every level cleared by at least 1 seed (L25 1/5, L22 2/5). Deaths: biome 4: coconut 2 (67%), fence 1. Biome 5: coconut 5 (45%), chicken 3, cat 2, bomb 1. WARN coconut > 40% in biomes 4 and 5. Triage: the samples are small and the greedy bot does not dodge telegraphed lanes well. Retune coconut (interval/weight/cellMs) in P2c Task 6, using the tuning loop and a larger bot sample, before the owner playtest.
+- Browser QA: not run (host RAM). Carried to the P2c/P2 exit QA together with P2a L7/L13.
+
 ## 2026-11-05 - P2a exit check (pending lead runs)
 - Build: branch `feat/p2a-ground-tiles` (mud from L7, ice from L13; MEC-004 framework).
 - `npm test`: 938 pass / 6 skip / 12 todo (~76 s, 1 worker) · `npm run typecheck`: clean · fuzz mode (reduced, `VITE_FUZZ_SEEDS=30 VITE_FUZZ_MS=60000`, 1 worker): all family fuzz pass; legacy MEC-004 fuzz 12/12 pass (its 60 s timeout lifted in fuzz mode). Full 200 x 120 s family matrix not run (host RAM); run it overnight when the host allows.

@@ -16,6 +16,12 @@ import { rainTick } from './skills/mangoRain';
 import { rngFrom, seedRng, type Rng } from './rng';
 import { queueTurn, stepSnake } from './snake';
 import type { Dir, HitCtx, Sim, SimSnapshot, SimState, SimOptions, Step, StepCtx } from './types';
+import { coconutSnapshot } from './hazards/coconut';
+import { spikeSnapshot } from './hazards/spike';
+import { gateSnapshot } from './hazards/gate';
+import { npcSnapshot } from './hazards/npc';
+import { birdSnapshot } from './hazards/bird';
+import { bombSnapshot } from './hazards/bomb';
 
 const toDir = ([x, y]: Pair): Dir => ({ x: x as Step, y: y as Step });
 const states = new WeakMap<Sim, SimState>();
@@ -41,7 +47,7 @@ export function initialState(b: Balance, seed: number, options: SimOptions = {})
     snake, dir: toDir(b.snake.startDir), queue: [],
     headFrom: { ...snake[0]! }, tailFrom: { ...snake[snake.length - 1]! },
     acc: 0, tickMs: levelTickMs(b, 1), mango: null,
-    families: { rock: [], fence: [], maze: [], terrain: [], rottenRock: [], snipWall: [], rubble: [], mud: { patches: [], nextId: 1 }, ice: { patches: [], nextId: 1 } }, nextHazardSeq: 0,
+    families: { rock: [], fence: [], maze: [], terrain: [], rottenRock: [], snipWall: [], rubble: [], mud: { patches: [], nextId: 1 }, ice: { patches: [], nextId: 1 }, coconut: { rolls: [], nextId: 1 }, gate: { gates: [], nextId: 1 }, spike: { groups: [], nextId: 1 }, npc: { npcs: [], nextId: 1 }, bird: { target: null }, bomb: { bombs: [], nextId: 1 } }, nextHazardSeq: 0,
     energy, orbs: [], orbSpawnMs: 0, rampActive: true, rampEaten: 0,
     bestLevel, loadout: [loadout[0], loadout[1]], slowmo: null, levelUpSlow: null,
     shield: null, rain: null, rainMangoes: [], rainBudgets: [], nextCastId: 1,
@@ -87,6 +93,7 @@ function stepMs(s: SimState, b: Balance, rng: Rng, internal: InternalOptions): v
 function snapshotOf(s: SimState, b: Balance): SimSnapshot {
   // MEC-004-R17 projects only snapshot-owned data: per-ms fuzz must not clone pending events/internal state.
   return {
+    families: { coconut: coconutSnapshot(s), gate: gateSnapshot(s), spike: spikeSnapshot(s), npc: npcSnapshot(s), bird: birdSnapshot(s, b), bomb: bombSnapshot(s) },
     // MEC-012-R2 snapshot-owned tile views retain the optional ice exit ring.
     tiles: (['mud', 'ice'] as const).flatMap(family => s.families[family].patches.map(p => ({ family, id: p.id, state: p.state,
       leftMs: Math.max(0, (p.state === 'warn' ? p.warnMs : p.state === 'active' ? p.lifeMs : b.hazard.crumbleMs) - p.t),

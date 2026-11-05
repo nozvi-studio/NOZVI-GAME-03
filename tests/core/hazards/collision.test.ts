@@ -15,6 +15,40 @@ import { loadBalance } from '../../support/balance';
 const b = loadBalance();
 
 describe('MEC-004 collision', () => {
+  const perCellCauses = [
+    { key: 'gate', cause: 'gate', cellCause: 'fence', expected: 'fence' },
+    { key: 'npc', cause: 'cat', cellCause: 'chicken', expected: 'chicken' },
+    { key: 'gate', cause: 'gate', cellCause: null, expected: 'gate' },
+  ] as const;
+
+  it.each(perCellCauses)('MEC-004-R6 MEC-014-R4 MEC-015-R7 head entry uses causeAt with fallback: $key/$cellCause', ({ key, cause, cellCause, expected }) => {
+    for (const solid of [true, false]) {
+      const s = buildBoard({ head: [4, 8] });
+      const f = { ...fakeFamily({ key, cause, ...(solid ? { solid: [[5, 8]] } : { hit: { kind: 'mover', cells: [[5, 8]] } }) }),
+        causeAt: () => cellCause };
+      const previous = FAMILIES;
+      __setFamiliesForTest([f]);
+      try {
+        expect(resolveHeadCell(s, 5, 8, hitCtx(s))).toEqual({ kind: 'death', cause: expected });
+        stepSnake(s, b, rngFrom(s.rng));
+        expect(s.outcome).toEqual({ won: false, cause: expected });
+        expect(s.events.filter(e => e.type !== 'moverHit')).toEqual([{ type: 'died', cause: expected, x: 4, y: 8 }]); // moverHit for npc is covered by npc.test.ts
+      } finally { __setFamiliesForTest(previous); }
+    }
+  });
+
+  it.each(perCellCauses)('MEC-004-R8 MEC-014-R4 MEC-015-R7 update-time hit uses causeAt with fallback: $key/$cellCause', ({ key, cause, cellCause, expected }) => {
+    const s = buildBoard({ head: [4, 8] }), ctx = hitCtx(s);
+    const f = { ...fakeFamily({ key, cause }), causeAt: () => cellCause };
+    const previous = FAMILIES;
+    __setFamiliesForTest([f]);
+    try {
+      applyHeadHit(s, ctx, key, 4, 8, 'mover', { x: 1, y: 0 });
+      expect(s.outcome).toEqual({ won: false, cause: expected });
+      expect(ctx.events).toEqual([{ type: 'died', cause: expected, x: 4, y: 8 }]);
+    } finally { __setFamiliesForTest(previous); }
+  });
+
   it('MEC-004-R6 headHit cell kills with the family cause; shield breaks a breakable one', () => {
     const s = buildBoard({ head: [4, 8] });
     withFamilies(s, [{ key: 'rock', cause: 'rock', hit: { kind: 'mover', cells: [[5, 8]] }, breakable: true }], () => {

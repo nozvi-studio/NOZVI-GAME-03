@@ -17,8 +17,8 @@ describe('MEC-004 queries', () => {
     s.families.rottenRock[0]!.state = 'crumble';
     expect(solidFamilyWithPriority(s, 3, 3)?.key).toBe('rock');
   });
-  it('MEC-004-R1 registry order is rock fence maze terrain rottenRock snipWall rubble mud ice', () => {
-    expect(FAMILIES.map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'rubble', 'mud', 'ice']);
+  it('MEC-004-R1 registry order is rock fence maze terrain rottenRock snipWall rubble mud ice coconut gate spike npc bird bomb', () => {
+    expect(FAMILIES.map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'rubble', 'mud', 'ice', 'coconut', 'gate', 'spike', 'npc', 'bird', 'bomb']);
   });
   it('MEC-004-R3 solidCauseAt returns the first family cause in registry order', () => {
     const a = fakeFamily({ key: 'rock', cause: 'rock', solid: [[3, 3]] });
@@ -28,6 +28,20 @@ describe('MEC-004 queries', () => {
     expect(solidFamilyAt(s, 3, 3, [a, b])).toBe(a);
     expect(solidCauseAt(s, 4, 4, [a, b])).toBe('fence');
     expect(solidCauseAt(s, 5, 5, [a, b])).toBeNull();
+  });
+  it('MEC-004-R3 solidCauseAt prefers a family causeAt over its cause', () => {
+    const f = { ...fakeFamily({ key: 'gate', cause: 'gate', solid: [[3, 3], [4, 3]] }),
+      causeAt: (_s: unknown, x: number): 'fence' | 'gate' => x === 3 ? 'fence' : 'gate' };
+    const s = buildBoard({});
+    expect(solidCauseAt(s, 3, 3, [f])).toBe('fence');
+    expect(solidCauseAt(s, 4, 3, [f])).toBe('gate');
+  });
+  it('MEC-004-R3 null causeAt falls back to the selected family cause without consulting later families', () => {
+    const f = { ...fakeFamily({ key: 'gate', cause: 'gate', solid: [[3, 3]] }), causeAt: () => null };
+    const later = fakeFamily({ key: 'fence', cause: 'fence', solid: [[3, 3]] });
+    const s = buildBoard({});
+    expect(solidCauseAt(s, 3, 3, [f, later])).toBe('gate');
+    expect(solidCauseAt(s, 4, 3, [f, later])).toBeNull();
   });
   it('MEC-004-R3 tileAt and headHitAt return the first non-null family answer', () => {
     const t = fakeFamily({ key: 'rock', tile: { kind: 'mud', cells: [[2, 2]] }, hit: { kind: 'area', cells: [[6, 6]] } });
@@ -71,6 +85,6 @@ describe('MEC-004 queries', () => {
     expect(FAMILIES.every(f => !('onLevelEnd' in f))).toBe(true);
   });
   it('MEC-006-R24 shield breakable list equals families with breakable true', () => {
-    expect(FAMILIES.filter(f => f.breakable).map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall']);
+    expect(FAMILIES.filter(f => f.breakable).map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'coconut', 'gate', 'spike', 'npc', 'bomb']);
   });
 });

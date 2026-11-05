@@ -16,11 +16,13 @@ export function resolveHeadCell(s: SimState, x: number, y: number, ctx: StepCtx)
   const solid = solidFamilyWithPriority(s, x, y);
   const hit = solid ? { family: solid, kind: 'mover' as const } : headHitAt(s, x, y);
   if (!hit || hit.family.cause === null) return { kind: 'clear' };
+  // MEC-013-R5 / MEC-015-R7 head entry emits the same mover contact event as update-time entry (coconut and npc).
+  if (hit.kind === 'mover' && (hit.family.key === 'coconut' || hit.family.key === 'npc')) ctx.emit({ type: 'moverHit', family: hit.family.key, x, y });
   if (s.shield && (hit.kind === 'area' || hit.family.breakable)) {
     consumeShield(s, ctx, hit.family, x, y, hit.kind, s.dir);
     return { kind: hit.kind === 'area' ? 'absorbed' : 'broke', family: hit.family.key };
   }
-  return { kind: 'death', cause: hit.family.cause };
+  return { kind: 'death', cause: hit.family.causeAt?.(s, x, y) ?? hit.family.cause };
 }
 
 // MEC-004-R8 update-time hit dispatch.
@@ -33,9 +35,10 @@ export function applyHeadHit(s: SimState, ctx: StepCtx, key: FamilyKey, x: numbe
     return;
   }
   const context = deathContext(s, s.snake[0]!);
+  const cause = family.causeAt?.(s, x, y) ?? family.cause;
   s.status = 'over';
-  s.outcome = { won: false, cause: family.cause };
-  ctx.emit({ type: 'died', cause: family.cause, x, y, ...(context ? { context } : {}) });
+  s.outcome = { won: false, cause };
+  ctx.emit({ type: 'died', cause, x, y, ...(context ? { context } : {}) });
 }
 
 // MEC-004-R15 tile at the head when a fatal step or hit begins.
@@ -47,6 +50,7 @@ export function deathContext(s: SimState, headBefore: Cell): TileKind | undefine
 function consumeShield(s: SimState, ctx: StepCtx, family: HazardFamily, x: number, y: number, kind: HitKind, dir: Dir): void {
   const b = ctx.balance;
   if (kind === 'mover') family.onBreak?.(s, x, y);
+  else if (kind === 'area') family.onAreaHit?.(s, x, y);              // MEC-017-R3 one hit per blast on every path
   s.shield = null;
   ctx.emit({ type: 'skillEnded', skill: 'shield', reason: 'consumed' });
   let rubble: Cell | null = null;

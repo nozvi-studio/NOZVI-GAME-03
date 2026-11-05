@@ -386,3 +386,33 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - `SpawnCtx.rng` is required (not optional): every spawn caller supplies the stream explicitly, and spawnCtx fills it from the simulation RNG. This supersedes the Task 1 optional-rng note.
 - Callers of `effectiveTick` stay head-tile-aware: they pass the head tile so MEC-012 mud slowdown applies only while the head is in mud.
 - Full fuzz runs (`npm run test:fuzz`) and `npm run bot:report` happen only at the P2a exit, because of RAM limits; normal work uses the smoke sample.
+
+## 2026-11-05 - P2b Task 1 rulings (lead, technical)
+- `HazardFamily.causeAt` (TR-B5) applies to the collision death cause too: `resolveHeadCell` and `applyHeadHit` report `causeAt(s, x, y) ?? cause`, not only `solidCauseAt`. Otherwise fence-cell deaths in a gate would report `gate` and NPC deaths would always report `cat` (MEC-014 L4, MEC-015 R7).
+- P2b families do not emit `hazardIncoming` in `spawn`; `emitsIncoming` stays unset and the director emits it (P2a MEC-004-R9). The plan's spawn sketches that call `ctx.emit({type: 'hazardIncoming'})` would duplicate the event.
+- `bfsDistance` does not exist in `grid.ts` after P2a (only `reachable`); Task 8 adds it.
+
+## 2026-11-05 - P2b Task 3 mover lifetime accounting
+- Keep a JSON `lifeT` interval clock alongside the movement clock `t`. MEC-015-R6 lifetime starts on the first successful cell entry and is charged once per `cellMs`, including waits; the movement clock stays saturated during blocked retries. The draft charged lifetime before the first entry and on every 1 ms retry, which could expire an NPC early. Zero lifetime means one traversal, so `newMover` disables ping-pong in that case.
+
+## 2026-11-05 - P2b Task 5 U-gate review ruling (lead)
+- Gates own the U boundary and tagged mouth cells in `gate.shapes.U`; the P0 fence U stays unchanged. The gate U has a 2 x 2 interior and a two-cell-wide mouth: two gate cells cycle both mouth cells; one gate cell leaves the other mouth cell as fence. See MEC-014-R1/R10 and edge case 3. U-trap regressions must prove the closed mouth seals the interior and an exterior route exists through reopening (or the spawn is rejected).
+- Gate warning validation uses the shared MEC-004-R13 fairness minimum; no separate 900 ms constant. Gate snapshots expose `GateView` instead of internal `GateInstance` state.
+
+## 2026-11-05 - P2b spike review ruling
+- MEC-014-R6: the escape-check horizon cannot foresee a level-up beat reset; this is safe because the reset starts down and warnings still precede any rise.
+
+## 2026-11-05 - P2b bird rulings (MEC-016)
+- MEC-016-R1 / L3: the reachable-in-time cost is a Dijkstra path cost where each step costs the base tick, times `mud.tickFactor` when the step leaves an active mud cell (the head's tile sets the next tick, as in `effectiveTick`). Slow-mo and the level-up slowdown are ignored. Grid helpers `pathCost` and `bfsDistance` take `cols, rows, isWall` like `reachable`, so `grid.ts` stays independent of `SimState`.
+- MEC-016-R3: the replacement mango excludes the stolen cell (new optional `exclude` argument on `placeMango`), so "a new mango appears elsewhere" holds. Placement draws from the simulation RNG stream, like `mangoTick`.
+- MEC-016 edge case 3: family updates run before snake movement within one ms, so a steal on the shadow's final ms happens before that ms's move. An eat in any earlier ms wins. R1's 600 ms margin covers this one-ms gap.
+- MEC-015-R2: an L route draws `bend = 2 + rng.int(len - 3)` so both legs are at least 2 cells long. A route with len < 4 stays straight and skips the bend draw.
+
+## 2026-11-05 - P2b bomb rulings (MEC-017)
+- MEC-017-R2: the bomb's `blast` (area + countdown) is created at spawn, not at landing, so the area is reserved in every state including warn; the countdown is reset and starts at landing. `bfsWallAt` covers the bomb cell during warn and count only.
+- MEC-017-R3 "at most once per blast": the update-time area hit runs only on the activation ms (the head can enter the area later only by a snake move, handled by `headHit = 'area'` in `resolveHeadCell`). `BlastState.hit` is set on both paths (the activation hit and, through the new optional `onAreaHit` family hook called from `consumeShield`, a head-entry absorb), and `headHit` returns null afterwards, so a Shield absorb is never followed by a second hit in the same window. This holds even if the tick shortens (level-up slowdown easing out, Slow-mo ending): the effective tick can be longer or shorter than the base tick, so "at most one snake move per window" is not guaranteed and the `hit` flag is the guard. `activeMs` is measured once at activation with `baseTickMs` (TR-B7).
+- MEC-017: landing emits `dust` only, not `landed` (that event's `hazardType` is the P1 `TimedKey`).
+- Fuzz harness: the blast area is head-only, so area cells (`bombArea` marks) are exempt from I1 but keep I3 (3000 ms warning while counting) and I6 (lethal on the activation ms).
+
+## 2026-11-05 — Gate fence posts stay greybox squares (MEC-014 §8 deviation)
+The P0 `drawFence` helper needs a HazardView and Palette and joins rails across neighbours; it does not fit timed gate fence cells, so `cycles.ts` keeps plain post squares until the P2b art pass.

@@ -30,6 +30,11 @@ Only files listed here exist. Status: Draft / Approved / Deprecated.
 | MEC-007 | `docs/specs/mechanics/MEC-007-loadout.md` | Skill loadout | Approved |
 | MEC-008 | `docs/specs/mechanics/MEC-008-checkpoints.md` | Checkpoints, energy carry-over, save v2 | Approved |
 | MEC-012 | `docs/specs/mechanics/MEC-012-ground-tiles.md` | Mud and ice ground tiles | Approved |
+| MEC-013 | `docs/specs/mechanics/MEC-013-rolling-coconuts.md` | Rolling coconuts on telegraphed lanes | Approved |
+| MEC-014 | `docs/specs/mechanics/MEC-014-gates-spikes.md` | Gates on a rhythm and spike traps on a global beat | Approved |
+| MEC-015 | `docs/specs/mechanics/MEC-015-patrol-npcs.md` | Patrolling cat and chicken | Approved |
+| MEC-016 | `docs/specs/mechanics/MEC-016-mango-thief-bird.md` | Mango-thief bird (modifier) | Approved |
+| MEC-017 | `docs/specs/mechanics/MEC-017-timed-bombs.md` | Timed bombs with a plus-shaped blast | Approved |
 <!-- Add rows as specs are created, e.g.:
 | MEC-001 | `docs/specs/mechanics/MEC-001-jump.md` | Exact jump rules | Approved |
 | INT-001 | `docs/integrations/INT-001-analytics.md` | Analytics events, consent | Draft |
