@@ -25,7 +25,7 @@ export function npcSnapshot(s: SimState): NpcView[] {
   return npcs(s).map(n => {
     const cell = moverCell(n.mover);
     return { id: n.id, variant: n.variant, path: n.mover.path.map(c => ({ ...c })),
-      cell: cell && { ...cell }, state: n.mover.state, t: n.mover.t, warnMs: n.mover.warnMs };
+      cell: cell && { ...cell }, state: n.mover.state, t: n.mover.t, warnMs: n.mover.warnMs, dir: moverDir(n.mover) };
   });
 }
 

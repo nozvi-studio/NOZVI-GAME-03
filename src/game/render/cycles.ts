@@ -47,12 +47,12 @@ function drawSpikes(g: Graphics, groups: SimSnapshot['families']['spike'], cellP
     const alpha = group.ending ? CRUMBLE_ALPHA : 1;
     for (const c of group.cells) {
       const x = c.x * cellPx, y = c.y * cellPx;
-      if (c.vis === 'down') {
+      // A warn blink-off phase falls back to the down dots so the cell never flickers to empty.
+      if (c.vis === 'down' || (c.vis === 'warn' && !blinkOn(timeMs, reducedMotion))) {
         g.fillStyle(SPIKE.edge, alpha);
         for (const [dx, dy] of [[0.3, 0.7], [0.5, 0.35], [0.7, 0.7]] as const) g.fillCircle(x + cellPx * dx, y + cellPx * dy, cellPx * 0.05);
         continue;
       }
-      if (c.vis === 'warn' && !blinkOn(timeMs, reducedMotion)) continue;
       const m = cellPx * 0.12, step = (cellPx - m * 2) / 3;
       for (let i = 0; i < 3; i++) {
         const x1 = x + m + step * i, x2 = x1 + step, top = y + cellPx * 0.2, base = y + cellPx - m;

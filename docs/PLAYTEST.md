@@ -2,6 +2,12 @@
 
 > Newest entry first. AI: read the latest entry only (AGENTS §2b).
 
+## 2026-11-05 — P2b exit check
+- `npm test` / `npm run typecheck`: <PENDING lead>
+- Fuzz (reduced, 20 seeds x 60 s, 1 worker): PASS, 1108 tests, about 39 min.
+- `npm run bot:report` L16-25 (`VITE_BOT_FROM=16 VITE_BOT_TO=25`): <PENDING lead>
+- Browser QA (desktop and phone): not run (host RAM, same as P2a).
+
 ## 2026-11-05 - P2a exit check (pending lead runs)
 - Build: branch `feat/p2a-ground-tiles` (mud from L7, ice from L13; MEC-004 framework).
 - `npm test`: 938 pass / 6 skip / 12 todo (~76 s, 1 worker) · `npm run typecheck`: clean · fuzz mode (reduced, `VITE_FUZZ_SEEDS=30 VITE_FUZZ_MS=60000`, 1 worker): all family fuzz pass; legacy MEC-004 fuzz 12/12 pass (its 60 s timeout lifted in fuzz mode). Full 200 x 120 s family matrix not run (host RAM); run it overnight when the host allows.

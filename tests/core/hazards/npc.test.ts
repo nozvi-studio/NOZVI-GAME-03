@@ -1,7 +1,7 @@
 import { it, expect, expectTypeOf } from 'vitest';
 import { createSimInternal, stateOf } from '../../../src/core/simInternal';
 import { npc, routeCells } from '../../../src/core/hazards/npc';
-import { moverCell, newMover } from '../../../src/core/hazards/blocks/mover';
+import { moverCell, moverDir, newMover } from '../../../src/core/hazards/blocks/mover';
 import { spawnCtx, directorOptions, updateDirector } from '../../../src/core/hazards/director';
 import { solidCauseAt, bfsWall, reservedByFamilies, headHitAt } from '../../../src/core/hazards/queries';
 import { introducedAt, familyRow } from '../../../src/core/level';
@@ -100,6 +100,15 @@ it('MEC-015-R4 ping-pong reverses at the ends', () => {
   sim.advance(400 * 4);
   expect(moverCell(s.families.npc.npcs[0]!.mover)).toEqual(route[1]);
 });
+it('MEC-015-R4 snapshot dir flips on the ping-pong return leg', () => {
+  const { sim, s } = fixture();
+  s.families.npc.npcs.push({ id: 1, variant: 'chicken', mover: mk(route) });
+  sim.advance(1500 + 400 * 4);
+  const fwd = sim.snapshot().families.npc[0]!.dir;
+  sim.advance(400);
+  const back = sim.snapshot().families.npc[0]!.dir;
+  expect(back.x + 0).toBe(-fwd.x + 0); expect(back.y + 0).toBe(-fwd.y + 0);
+});
 it('MEC-015-R5 an NPC waits for a body cell and the body is never hit', () => {
   const { sim, s } = fixture();
   s.snake = [{ x: 4, y: 1 }, { x: 4, y: 2 }, { x: 4, y: 3 }, { x: 4, y: 4 }];
@@ -175,7 +184,7 @@ it('MEC-015-R3 snapshots expose NpcView with no live aliases and TR-B4 extracts 
   s.families.npc.npcs.push({ id: 1, variant: 'cat', mover: mk(route) });
   const snap = sim.snapshot();
   expectTypeOf(snap.families.npc).toEqualTypeOf<readonly NpcView[]>();
-  expect(snap.families.npc).toEqual([{ id: 1, variant: 'cat', path: route, cell: null, state: 'warn', t: 0, warnMs: 1500 }]);
+  expect(snap.families.npc).toEqual([{ id: 1, variant: 'cat', path: route, cell: null, state: 'warn', t: 0, warnMs: 1500, dir: moverDir(s.families.npc.npcs[0]!.mover) }]);
   expect(sim.clone().snapshot()).toEqual(snap);
   const warning = moverCells(snap, b.board.cols), since = new Map<string, number>(), errors: string[] = [];
   expect(warning).toHaveLength(route.length);

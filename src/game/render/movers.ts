@@ -62,12 +62,6 @@ function drawLane(g: Graphics, path: readonly Cell[], cellPx: number, timeMs: nu
   });
 }
 
-// MEC-015 §8 beak direction: toward the next route cell.
-function facing(n: NpcView): Dir {
-  const i = n.path.findIndex(c => c.x === n.cell?.x && c.y === n.cell?.y);
-  return pathDirs(n.path)[Math.max(0, i)]!;
-}
-
 function drawNpc(g: Graphics, n: NpcView, cellPx: number): void {
   if (!n.cell) return;
   const x = n.cell.x * cellPx, y = n.cell.y * cellPx, cx = x + cellPx / 2, cy = y + cellPx / 2;
@@ -78,7 +72,7 @@ function drawNpc(g: Graphics, n: NpcView, cellPx: number): void {
       .fillTriangle(x + inset + size, y + inset, x + inset + size * 0.7, y + inset, x + inset + size, y + inset - cellPx * 0.18);
     return;
   }
-  const d = facing(n), r = cellPx * 0.32;
+  const d = n.dir, r = cellPx * 0.32;
   g.fillStyle(CHICKEN.body).fillCircle(cx, cy, r);
   g.lineStyle(Math.max(1, cellPx * 0.05), CHICKEN.edge).strokeCircle(cx, cy, r);
   const bx = cx + d.x * r, by = cy + d.y * r, tip = cellPx * 0.16, wing = cellPx * 0.09;

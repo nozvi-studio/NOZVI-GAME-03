@@ -134,7 +134,8 @@ export interface HazardView {
 }
 export interface TerrainView { t: number; lifeMs: number; cells: readonly { x: number; y: number; vis: TerrainVis; delay: number }[] }
 export interface CoconutView { id: number; path: readonly Cell[]; cell: Cell | null; state: MoverState['state']; t: number; warnMs: number }
-export interface NpcView extends CoconutView { variant: 'cat' | 'chicken' }
+/** MEC-015 §8 dir is the current travel direction (backward on a ping-pong return leg). */
+export interface NpcView extends CoconutView { variant: 'cat' | 'chicken'; dir: Dir }
 export interface GateView {
   id: number; t: number; lifeMs: number; state: 'warn' | 'live' | 'crumble';
   fence: readonly TimedCell[];

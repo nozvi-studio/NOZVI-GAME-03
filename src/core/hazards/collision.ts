@@ -50,7 +50,7 @@ export function deathContext(s: SimState, headBefore: Cell): TileKind | undefine
 function consumeShield(s: SimState, ctx: StepCtx, family: HazardFamily, x: number, y: number, kind: HitKind, dir: Dir): void {
   const b = ctx.balance;
   if (kind === 'mover') family.onBreak?.(s, x, y);
-  else family.onAreaHit?.(s, x, y);               // MEC-017-R3 one hit per blast on every path
+  else if (kind === 'area') family.onAreaHit?.(s, x, y);              // MEC-017-R3 one hit per blast on every path
   s.shield = null;
   ctx.emit({ type: 'skillEnded', skill: 'shield', reason: 'consumed' });
   let rubble: Cell | null = null;

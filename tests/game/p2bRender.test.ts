@@ -4,7 +4,7 @@ import { arrowTriangle, blinkOn, dashedSegments, drawMovers, pathDirs, shadowSca
 import { drawCycles } from '../../src/game/render/cycles';
 import { bombDigit, digitSegments, drawBlasts } from '../../src/game/render/blasts';
 import { t } from '../../src/game/text';
-import type { SimSnapshot } from '../../src/core';
+import type { Dir, SimSnapshot } from '../../src/core';
 
 function graphics() {
   const calls: string[] = [];
@@ -53,12 +53,22 @@ it('MEC-013 §8 coconut warning blinks with arrows; reduced motion keeps a solid
   expect(r.calls).toContain('fillCircle');
 });
 it('MEC-015 §8 cat is a square with ears and chicken a circle with a beak', () => {
-  const npc = (variant: 'cat' | 'chicken') => snap({ npc: [{ id: 1, variant, path, cell: { x: 2, y: 1 }, state: 'move', t: 0, warnMs: 0 }] });
+  const npc = (variant: 'cat' | 'chicken') => snap({ npc: [{ id: 1, variant, path, cell: { x: 2, y: 1 }, state: 'move', t: 0, warnMs: 0, dir: { x: 1, y: 0 } }] });
   let r = graphics(); drawMovers(r.g, npc('cat'), 20, 0, false);
   expect(r.calls.filter(c => c === 'fillTriangle').length).toBeGreaterThanOrEqual(2);
   expect(r.calls).toContain('fillRect');
   r = graphics(); drawMovers(r.g, npc('chicken'), 20, 0, false);
   expect(r.calls).toContain('fillCircle'); expect(r.calls).toContain('fillTriangle');
+});
+it('MEC-015 §8 chicken beak follows NpcView.dir, backward on a return leg', () => {
+  const beakX = (dir: Dir) => {
+    const xs: number[] = [];
+    const g: unknown = new Proxy({}, { get: (_o, name: string) => (...a: number[]): unknown => { if (name === 'fillTriangle') xs.push(a[0]!); return g; } });
+    drawMovers(g as Phaser.GameObjects.Graphics, snap({ npc: [{ id: 1, variant: 'chicken', path, cell: { x: 2, y: 1 }, state: 'move', t: 0, warnMs: 0, dir }] }), 20, 0, false);
+    return xs[xs.length - 1]!;
+  };
+  expect(beakX({ x: 1, y: 0 })).toBeGreaterThan(55);
+  expect(beakX({ x: -1, y: 0 })).toBeLessThan(45);
 });
 it('MEC-016 §8 bird draws a shadow ellipse on the target mango', () => {
   const r = graphics();
@@ -80,7 +90,7 @@ it('MEC-014 §8 gate open is dashed, warn blinks with a lock, closed is solid; s
   r = graphics(); drawCycles(r.g, spike('down'), 20, 0, false);
   expect(r.calls).toContain('fillCircle'); expect(r.calls).not.toContain('fillTriangle');
   r = graphics(); drawCycles(r.g, spike('warn'), 20, 250, false);
-  expect(r.calls).toEqual([]);
+  expect(r.calls).toContain('fillCircle'); expect(r.calls).not.toContain('strokeTriangle');   // blink-off keeps the down dots
   r = graphics(); drawCycles(r.g, spike('warn'), 20, 250, true);
   expect(r.calls).toContain('strokeTriangle');
   r = graphics(); drawCycles(r.g, spike('up'), 20, 0, false);
