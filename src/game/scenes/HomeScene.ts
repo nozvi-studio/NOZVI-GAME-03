@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import type { Balance } from '../../core';
-import { summarizeLog, type RunLog } from '../../meta';
+import { summarizeLog, deathCauseReport, type RunLog } from '../../meta';
 import type { Session } from '../../session';
 import { createSynth, type Synth } from '../audio/synth';
 import { isDebug } from '../flow/debugFlag';
@@ -54,7 +54,10 @@ export class HomeScene extends Phaser.Scene {
   private setupDebug(): void {
     const balance = this.registry.get('balance') as Balance;
     (window as unknown as { __summarize?: (json: string) => unknown }).__summarize =
-      (json: string) => summarizeLog(JSON.parse(json) as RunLog, balance.log.sessionGapMs);
+      (json: string) => {
+        const log = JSON.parse(json) as RunLog;
+        return { ...summarizeLog(log, balance.log.sessionGapMs), deathReport: deathCauseReport(log, balance.log.sessionGapMs) };
+      };
     const done = label(this, WIDTH / 2, HEIGHT - 60, '', 16, 'home-export-done');
     button(this, WIDTH / 2, HEIGHT - 190, 200, 48, t('home.exportLog'), 'home-export', () => {
       const json = this.session.exportLog();

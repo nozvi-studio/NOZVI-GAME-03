@@ -97,3 +97,33 @@ export function summarizeLog(log: RunLog, sessionGapMs: number): LogSummary {
   s.skillRunShare = share([...skilled].filter(id => ended.has(id)).length, ended.size);
   return s;
 }
+
+export const PLAYER_CAUSES = ['wall', 'self'] as const;
+export const NON_DEATH_CAUSES = ['clear', 'quit'] as const;
+export interface DeathCauseReport {
+  deaths: number;
+  familyShare: Record<string, number>;
+  playerShare: Record<string, number>;
+  over40: string[];
+  review: string[];
+}
+
+// P2 design §15 / TR-C6: 40% rule on deaths only (clear and quit excluded); single source for the gate verdict.
+export function deathCauseReport(log: RunLog, sessionGapMs: number, limit = 0.4): DeathCauseReport {
+  const known = summarizeLog(log, sessionGapMs).causes;
+  const isPlayer = (c: string) => (PLAYER_CAUSES as readonly string[]).includes(c);
+  const isNonDeath = (c: string) => (NON_DEATH_CAUSES as readonly string[]).includes(c);
+  const familyN: Record<string, number> = {}, playerN: Record<string, number> = {}, baseN: Record<string, number> = {};
+  const seen = new Set<number>();
+  let deaths = 0;
+  for (const r of log.entries) {
+    if (r.type !== 'run_end' || seen.has(r.runId) || !Object.hasOwn(known, r.cause) || isNonDeath(r.cause)) continue;
+    seen.add(r.runId); deaths++;
+    if (isPlayer(r.cause)) { bump(playerN, r.context ? `${r.cause}:${r.context}` : r.cause); bump(baseN, r.cause); }
+    else bump(familyN, r.cause);
+  }
+  const shares = (m: Record<string, number>) => Object.fromEntries(Object.entries(m).map(([k, n]) => [k, share(n, deaths)]));
+  const familyShare = shares(familyN), playerShare = shares(playerN), playerTotal = shares(baseN);
+  const over = (m: Record<string, number>) => Object.keys(m).filter(k => m[k]! > limit).sort((a, b) => m[b]! - m[a]!);
+  return { deaths, familyShare, playerShare, over40: over(familyShare), review: over(playerTotal) };
+}
