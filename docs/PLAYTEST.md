@@ -2,6 +2,28 @@
 
 > Newest entry first. AI: read the latest entry only (AGENTS §2b).
 
+## 2026-11-05 — P2c tuning (bot report L1-30, 20 seeds, 180 s per run)
+- Method: `npm run bot:report` equivalent, split into 6 parallel biome bands (`VITE_BOT_FROM/TO`, 1 worker each, Windows Vitest flags) because one serial run takes about 82 min; per-biome tables are identical to a serial run (bot is seed-deterministic). A first serial run (L1-30 x 20 seeds, 82 min) printed nothing: Vitest hides console output of passing tests, so `bot:report` now passes `--reporter=verbose`. No deviation in seeds or levels.
+- **Baseline (round 0):** clears per level L1-30 all >= 6/20 (no level cleared by 0 seeds). Warnings: biome 3 fence 67% (2 of 3 deaths), biome 4 coconut 94% (29 of 31 deaths). Biome 5 chicken 40% (19/48 = 39.6%, not above 40%). First-level clears per biome: 19, 19, 16, 14, 10, 8 (non-increasing).
+- **Round 1 (config only):** `fence` 2 -> 1 in rows L11, L12, L13-14; `coconut` 2 -> 1 in rows L16, L17, L18-19. Challenge rows and biomes 5-6 untouched (their results are bit-identical to round 0).
+- **Result after round 1** (clear/death/timeout out of 20):
+
+| Biome | Levels | Clears per level | Deaths by cause |
+|---|---|---|---|
+| 1 | L1-5 | 19, 20, 20, 19, 20 | none |
+| 2 | L6-10 | 19, 18, 18, 17, 17 | none |
+| 3 | L11-15 | 17, 20, 20, 19, 20 | fence 1 of 1 death (noise) |
+| 4 | L16-20 | 18, 18, 18, 16, 8 | coconut 22 of 22 |
+| 5 | L21-25 | 10, 10, 11, 13, 8 | chicken 40%, coconut 21%, cat 21%, fence 8%, bomb 8%, wall 2% |
+| 6 | L26-30 | 8, 6, 8, 6, 8 | coconut 27%, cat 22%, chicken 20%, fence 14%, bomb 9%, maze 3%, rock 2%, wall 3% |
+
+- **WARNs left (2):** (a) biome 3: fence 100% of 1 death (statistical noise: 1 death in 100 runs; weight is already 1 in every non-challenge row of L11-14). (b) biome 4: coconut 100% of 22 deaths. Coconut is the only family that kills the bot in biome 4, so lowering other weights cannot move the share; coconut is at the weight-1 floor in L16-19, and 12 of the 22 deaths are on the L20 challenge level (coconut weight 4, MEC-003 section 12 weights kept: L20 is cleared 8/20, not 0). Experiment, not shipped: L20 coconut 4 -> 2 raised L20 clears 8 -> 15 of 20 but coconut still caused 100% of its deaths. Owner options: lower the L20 coconut weight and/or tune coconut family parameters (`coconut.maxActive`, `warnMs`, `cellMs`).
+- Monotonic difficulty check: first-level clears per biome 19, 19, 17, 18, 10, 8. Biome 4 (18) is above biome 3 (17) by one seed after the coconut tuning (within noise at 20 seeds); not corrected.
+- Timeouts (no clear, no death in 180 s) are 0-3 per level in L1-11 (bot is cautious on early levels, not a content issue).
+- **Board size (P2 design section 17, MEC-004-R20):** L25 median reachable free cells 274 of 289 (95%), L30 255.5 of 289 (88%), both far above 40%. Clear rate L21-25 = 50/100 = 50%, L26-30 = 36/100 = 36% (>= half of 50%). Verdict: **no escalation**, board stays 17 x 17 (P2-D8).
+- Tests after tuning: full suite 1149 pass, typecheck clean (golden pins in `tests/core/balance.test.ts`, `director.test.ts`, `hazards/coconut.test.ts` updated for the changed rows).
+
+
 ## 2026-11-05 — P2b exit check
 - `npm test`: 1112 pass / 6 skip / 12 todo (1 worker); `npm run typecheck`: clean.
 - Fuzz (reduced, 20 seeds x 60 s, 1 worker): PASS, 1108 tests, about 39 min.

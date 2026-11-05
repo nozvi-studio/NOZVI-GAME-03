@@ -50,7 +50,7 @@ describe('MEC-004 director', () => {
     expect(directorOptions(s, balance, fams).map(o => o.family.key)).toEqual(['rubble']);
   });
   it('MEC-004-R9 options follow registry order and table weights', () => {
-    expect(directorOptions(due(11), b).map(o => [o.family.key, o.weight])).toEqual([['rock', 3], ['fence', 2], ['terrain', 2], ['mud', 2]]);
+    expect(directorOptions(due(11), b).map(o => [o.family.key, o.weight])).toEqual([['rock', 3], ['fence', 1], ['terrain', 2], ['mud', 2]]);
     expect(directorOptions(due(26), b).map(o => o.family.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'mud', 'ice', 'coconut', 'gate', 'spike', 'npc', 'bird', 'bomb']);
   });
   it('MEC-004-R9 per-family maxActive gates small and modifier options', () => {

@@ -191,8 +191,8 @@ it('MEC-013-R8 coconut is introduced at L16 only', () => {
   for (let level = 1; level <= b.level.maxLevel; level++) {
     expect(introducedAt(b, level) === 'coconut').toBe(level === 16);
     const row = b.level.table.find(r => r.from <= level && level <= r.to)!;
-    // P2c: challenge rows carry their own weights, so 2 is pinned on non-challenge levels only.
-    if (level < 16 || level % 5 !== 0) expect(row.weights.coconut ?? 0).toBe(level >= 16 ? 2 : 0);
+    // P2c: challenge rows carry their own weights, so the P2c-tuned weight 1 is pinned on non-challenge levels only.
+    if (level < 16 || level % 5 !== 0) expect(row.weights.coconut ?? 0).toBe(level < 16 ? 0 : level < 20 ? 1 : 2);
   }
 });
 

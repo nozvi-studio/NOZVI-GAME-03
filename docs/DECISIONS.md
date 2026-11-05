@@ -416,3 +416,6 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 
 ## 2026-11-05 — Gate fence posts stay greybox squares (MEC-014 §8 deviation)
 The P0 `drawFence` helper needs a HazardView and Palette and joins rails across neighbours; it does not fit timed gate fence cells, so `cycles.ts` keeps plain post squares until the P2b art pass.
+
+## 2026-11-05 — P2c per-biome tuning: weights only, two WARNs left for the owner
+Bot report L1-30 x 20 seeds (evidence in `docs/PLAYTEST.md`, "P2c tuning"). Tuned weights only: fence 2 -> 1 in L11-14 rows, coconut 2 -> 1 in L16-19 rows. Challenge rows keep their MEC-003 section 12 weights (no challenge level had 0 clears). Left as WARN: biome 4 coconut 100% of deaths (sole killing family, 12 of 22 deaths on the L20 challenge row; weights cannot fix it) and biome 3 fence 1 of 1 death (noise). Owner options: L20 coconut weight 4 -> 2 (tested: L20 clears 8 -> 15 of 20) or coconut parameter tuning. Board size: L25 95% and L30 88% reachable, L26-30 clear 36% vs L21-25 50%: no escalation (P2-D8). The bot report now runs with `--reporter=verbose` because Vitest hides passing-test console output; `reachableFreeCells` takes the balance for board dimensions (SimState has none).

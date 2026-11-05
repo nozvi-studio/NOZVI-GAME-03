@@ -24,6 +24,7 @@
 - P2b OQ-B1..B6 and P2c OQ-C1..C5 (listed at the top of each plan): gate/spike rhythms, NPC speeds, stolen-mango cost, bird shadow, P2b strings, shrink frequency, challenge feedback/effect, P2 exit playtest size, tuning authority.
 
 ## Known issues / tech debt
+- P2c tuning WARNs for the owner: biome 4 coconut 100% of bot deaths (12 of 22 on L20 challenge row; options: L20 coconut weight 4 -> 2, or coconut params) and biome 3 fence 1 of 1 death (noise). Board size verdict: no escalation. See PLAYTEST "P2c tuning".
 - P2b browser QA not run (host RAM); fold with P2a L7/L13 into the P2 exit QA.
 - Codex paused by owner (2026-11-05): implementation via Claude subagents.
 - P2a browser QA (L7 mud, L13 ice) not run: agy killed by host low RAM; owner chose to merge (2026-11-05). Fold into P2b QA or the next owner playtest.
