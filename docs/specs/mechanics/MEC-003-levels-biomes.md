@@ -32,7 +32,7 @@ Save fields: none here (best level, checkpoints: MEC-008). Local run log: separa
 - **MEC-003-R1 Biomes.** `biome(n) = floor((n − 1) / 5) + 1` (1…6). `isChallenge(n) = (n mod 5 = 0)` → L5, 10, 15, 20, 25, 30.
 - **MEC-003-R2 Quota.** `quota(n) = 4 + floor((n − 1) / 3)`. L1 = 4, L30 = 13, sum L1…L30 = 255.
 - **MEC-003-R3 Speed.** `levelTickMs(n) = 140 − 2 × (n − 1)`. L1 = 140, L30 = 82. The live tick is `levelTickMs(level)` except during the MEC-008 ramp; the effective tick also applies the level-up slowdown (R22) and Slow-mo by the MEC-006-R17 max rule.
-- **MEC-003-R4 Director.** `directorIntervalMs(n) = max(1600, 5000 − 120 × n)`; `smallHazardCap(n) = min(10, 2 + floor(n / 3))`. On challenge levels: interval = `floor(directorIntervalMs(n) × director.challengeIntervalFactor)`, cap = `smallHazardCap(n) + director.challengeCapBonus`, both applied after the min/max clamps. The cap counts non-maze hazards (P0). **P1 config is neutral** (factor 1, bonus 0, lead decision L9), so challenge levels play like normal levels in P1 (L30: 1600 ms, cap 10); P2 sets the GDD §5.2 values (0.8 / +2 → L30: 1280 ms, cap 12) in config only.
+- **MEC-003-R4 Director.** `directorIntervalMs(n) = max(1600, 5000 − 120 × n)`; `smallHazardCap(n) = min(10, 2 + floor(n / 3))`. On challenge levels: interval = `floor(directorIntervalMs(n) × director.challengeIntervalFactor)`, cap = `smallHazardCap(n) + director.challengeCapBonus`, both applied after the min/max clamps. The cap counts non-maze hazards (P0). **P1 config was neutral** (factor 1, bonus 0, lead decision L9). **P2c sets the GDD §5.2 values in config only: `director.challengeIntervalFactor` 0.8, `director.challengeCapBonus` 2** (L30: 1280 ms, cap 12; L25: 1600 ms, cap 12; L5: 3520 ms, cap 5). A challenge level changes nothing else: mango quota and snake speed stay as in R2/R3 (OQ-C3, provisional default).
 ### Progress, level up, run win
 - **MEC-003-R5 Progress.** Eating adds progress (normal 1, golden 2; MEC-002). While `progress ≥ need` and level < 30: `progress −= need`, level += 1 (P0 overflow loop). At most one level up per step in practice (max overflow 1).
 - **MEC-003-R6 Run win.** When `progress ≥ need` at level 30: `levelsCleared = 30`, status `over`, outcome `{won: true}`, emit `runWon`. No length reset, no level up. This is the only run win (MEC-001-R10).
@@ -47,7 +47,7 @@ Save fields: none here (best level, checkpoints: MEC-008). Local run log: separa
 - **MEC-003-R13 Empty mango slot.** While no mango is on the board (MEC-001-R10), the director does not spawn.
 ### Obstacle families per level (P1 = existing families only)
 - **MEC-003-R14 Family table.** `level.table` is an ordered list of rows `{from, to, weights, rockShapes, fenceShapes, rottenRocks}`. Rows cover 1…30 exactly once (validated). A family is enabled on level n iff it has a weight > 0 in `familyRow(n).weights`. The director (MEC-004) uses those weights instead of P0's unlock levels; `rock.shapePoolByLevel` and the P0 fence tiers are replaced by `rockShapes` / `fenceShapes`. Unknown family keys or shape names fail `parseBalance`. P2 adds families by adding weight keys, shape lists and family parameter groups (data), plus the family's code.
-- **MEC-003-R15 P1 table.** P2 extends weight keys and introductions via MEC-012-R11 and MEC-013-R8; the shipped numbers live in `config/balance.json` (mud from L7, ice from L13, coconut from L16). The P2 coconut table splits the former L16–25 row into L16–20 and L21–25. The table below records the P1 baseline.
+- **MEC-003-R15 P1 table.** P2 extends weight keys and introductions via MEC-012-R11 and MEC-013-R8; the shipped numbers live in `config/balance.json` (mud from L7, ice from L13, coconut from L16). The P2 coconut table splits the former L16–25 row into L16–20 and L21–25. The table below records the P1 baseline. **P2c challenge rows (TR-C5):** L5, 10, 15, 20, 25 and 30 get their own rows (`from === to`; neighbours split, e.g. 7–9 / 10 / 11, 13–14 / 15, 16–19 / 20, 21–24 / 25, 27–29 / 30), keeping the neighbour row's shape lists and `rottenRocks`. Starting weights (P2 design §12): L5 "Rock rain" rock 5 (all shapes) · L10 "Fence field" fence 4, mud 2, rock 2 · L15 "Thin ice" ice 4, terrain 2, rock 2, fence 1 · L20 "Avalanche" coconut 4, rock 3, spike 2, gate 1 · L25 "Pet chaos" npc 4, bomb 2, bird 2, rock 1 · L30 "Final storm" every family 2. `parseBalance` rejects a table where `introducedAt(b, n)` is a multiple of 5 (a challenge row never introduces a family). Shrink (MEC-018) is introduced at L27 with weight 2 (provisional, OQ-C1). The shipped numbers stay in `config/balance.json`; per-biome tuning is P2c Task 6.
 
   | Levels | Biome | weights | rockShapes | fenceShapes | rottenRocks | Introduces |
   |---|---|---|---|---|---|---|
@@ -111,7 +111,7 @@ Save fields: none here (best level, checkpoints: MEC-008). Local run log: separa
 
 ## 8. Feedback in P1 (greybox)
 - `levelUp`: banner `banner.levelUp` "Level {n}" + `banner.freshStart`; if `biomeChanged`: `banner.biome.{1..6}` ("Mango Orchard" … "Storm Garden"); if `unlocked`: P0 family banner text key `banner.new.{family}` (adds `rottenRock`: "Rotten mangoes turn to rock!").
-- **Challenge banner and HUD marker are OFF in P1** (lead decision L9): the game layer ignores `levelUp.challenge`; no `banner.challenge.*` keys exist yet. P2 adds `banner.challenge.{5,10,…,30}` ("Rock rain" … "Final storm") and the level-label marker (color + "!" icon, not color only).
+- **Challenge banner and HUD marker (ON from P2c; OFF in P1, lead decision L9):** when `levelUp.challenge` is true the game layer shows `banner.challenge.{5,10,15,20,25,30}` = "Challenge: <name>!" with the names Rock rain, Fence field, Thin ice, Avalanche, Pet chaos, Final storm (OQ-C2, provisional wording). The HUD marker is a small star next to the level number for the whole challenge level (shape, not color only). The banner is also shown when a run starts on a challenge level.
 - HUD: "L{n} · Biome {b}" and the quota bar `progress/need`.
 - Board: greybox ground tint per biome (6 flat colors in the game layer's palette, not config).
 - Sounds: reuse P0 `level` for level up and biome change; `runWon` reuses `level` played twice. No new assets.
@@ -127,7 +127,7 @@ Save fields: none here (best level, checkpoints: MEC-008). Local run log: separa
 | `speed.startMs` / `speed.msPerLevel` / `speed.minMs` | 140 / 2 / 82 | GDD §5.2 (minMs = L30 value, safety clamp) |
 | `director.intervalBaseMs` / `intervalPerLevelMs` / `intervalMinMs` | 5000 / 120 / 1600 | GDD §5.2 |
 | `director.capBase` / `capPerLevels` / `capMax` | 2 / 3 / 10 | GDD §5.2 |
-| `director.challengeIntervalFactor` / `challengeCapBonus` | **1 / 0 in P1** (P2: 0.8 / 2, GDD §5.2) | lead decision L9 |
+| `director.challengeIntervalFactor` / `challengeCapBonus` | **0.8 / 2 from P2c** (1 / 0 in P1) | GDD §5.2; lead decision L9 |
 | `director.firstSpawnMs` | 2500 | P0, now per level (L2) |
 | `director.weights`, `level.unlock`, `level.needPerLevel`, `rock.shapePoolByLevel` | removed, replaced by `level.table` and the formulas above | R14 |
 | `terrain.maxActive` | 1 (`maxActiveLate`, `lateLevel` removed) | GDD §5.1 |
@@ -140,6 +140,9 @@ Read, owned elsewhere: `mango.rottenRockLifeMs` (5000, MEC-002 §9); `fairness.*
 - `MEC-003-R3 tick L1 is 140 ms and L30 is 82 ms`
 - `MEC-003-R4 with P1 config interval L1 4880, L29 1600, L30 1600; cap L1 2, L29 10, L30 10`
 - `MEC-003-R4 with factor 0.8 and bonus 2 (test balance) challenge L30 is 1280 ms and cap 12, L29 unchanged`
+- `MEC-003-R4 shipped config uses challenge factor 0.8 and bonus 2`
+- `MEC-003-R14 challenge rows L5 10 15 20 25 30 exist and introduce no family`
+- `MEC-003-R8 a closed ring survives a level up and reopens on its own timer`
 - `MEC-003-R5 overflow progress carries into the next level`
 - `MEC-003-R6 clearing L30 ends the run with won true and emits runWon without levelUp`
 - `MEC-003-R7 no freeze: the snake steps one level-2 tick after the level up`

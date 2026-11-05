@@ -35,6 +35,7 @@ Only files listed here exist. Status: Draft / Approved / Deprecated.
 | MEC-015 | `docs/specs/mechanics/MEC-015-patrol-npcs.md` | Patrolling cat and chicken | Approved |
 | MEC-016 | `docs/specs/mechanics/MEC-016-mango-thief-bird.md` | Mango-thief bird (modifier) | Approved |
 | MEC-017 | `docs/specs/mechanics/MEC-017-timed-bombs.md` | Timed bombs with a plus-shaped blast | Approved |
+| MEC-018 | `docs/specs/mechanics/MEC-018-shrinking-board.md` | Shrinking board (outer ring closes), P2c | Approved |
 <!-- Add rows as specs are created, e.g.:
 | MEC-001 | `docs/specs/mechanics/MEC-001-jump.md` | Exact jump rules | Approved |
 | INT-001 | `docs/integrations/INT-001-analytics.md` | Analytics events, consent | Draft |
