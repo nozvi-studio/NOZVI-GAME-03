@@ -2,6 +2,13 @@
 
 > Newest entry first. AI: read the latest entry only (AGENTS §2b).
 
+## 2026-11-05 — P2 exit check (lead; owner playtest pending)
+- Tests: full suite 1158 pass (~25 s), typecheck clean. Fairness per family + full-table L30 fuzz test pass.
+- Fuzz: reduced matrix (10 seeds x 60 s, every family solo + full) 22/22 pass after fix 5d96b3e (shrink no longer starts on a ring cell reserved by another family; found by fuzz I5 in full mode). Shrink rate at L30 after fix ~1.3/min (was 1.45). Full default matrix (200 x 120 s) NOT run: stopped for host RAM (owner choice); run overnight.
+- Bot report L1-30: reused the P2c tuning entry below (balance.json unchanged since). Every level cleared by >= 6/20 seeds; board size no escalation.
+- agy browser QA (phone 390x844 + desktop 1280x800, `?debug=1&level=N`, attempt 3 after two low-RAM kills): 9/10 PASS (L27 shrink lifecycle, mango displacement, shrink start exclusion, shield vs closed edge, level up with closed ring, L30 2 min big-event exclusivity, reduced motion, viewports, 0 console errors/warnings, L7 mud, L13 ice, L16-23 families). FAIL item 1: challenge banner missing on run start (Hud listener attached after `newRun`) -> fixed in 2f955a0; star marker PASS. Re-check of the banner folded into the owner playtest.
+- Open for owner playtest (40% gate via `deathCauseReport`, debug runs excluded): biome 4 coconut is 100% of bot deaths; biome 5 chicken 39.6%.
+
 ## 2026-11-05 — P2c tuning (bot report L1-30, 20 seeds, 180 s per run)
 - Method: `npm run bot:report` equivalent, split into 6 parallel biome bands (`VITE_BOT_FROM/TO`, 1 worker each, Windows Vitest flags) because one serial run takes about 82 min; per-biome tables are identical to a serial run (bot is seed-deterministic). A first serial run (L1-30 x 20 seeds, 82 min) printed nothing: Vitest hides console output of passing tests, so `bot:report` now passes `--reporter=verbose`. No deviation in seeds or levels.
 - **Baseline (round 0):** clears per level L1-30 all >= 6/20 (no level cleared by 0 seeds). Warnings: biome 3 fence 67% (2 of 3 deaths), biome 4 coconut 94% (29 of 31 deaths). Biome 5 chicken 40% (19/48 = 39.6%, not above 40%). First-level clears per biome: 19, 19, 16, 14, 10, 8 (non-increasing).
