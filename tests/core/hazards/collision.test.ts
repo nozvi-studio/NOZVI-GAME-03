@@ -32,7 +32,7 @@ describe('MEC-004 collision', () => {
         expect(resolveHeadCell(s, 5, 8, hitCtx(s))).toEqual({ kind: 'death', cause: expected });
         stepSnake(s, b, rngFrom(s.rng));
         expect(s.outcome).toEqual({ won: false, cause: expected });
-        expect(s.events).toEqual([{ type: 'died', cause: expected, x: 4, y: 8 }]);
+        expect(s.events.filter(e => e.type !== 'moverHit')).toEqual([{ type: 'died', cause: expected, x: 4, y: 8 }]); // moverHit for npc is covered by npc.test.ts
       } finally { __setFamiliesForTest(previous); }
     }
   });

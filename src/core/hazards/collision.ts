@@ -16,8 +16,8 @@ export function resolveHeadCell(s: SimState, x: number, y: number, ctx: StepCtx)
   const solid = solidFamilyWithPriority(s, x, y);
   const hit = solid ? { family: solid, kind: 'mover' as const } : headHitAt(s, x, y);
   if (!hit || hit.family.cause === null) return { kind: 'clear' };
-  // MEC-013-R5 head entry emits the same mover contact event as update-time coconut entry.
-  if (hit.kind === 'mover' && hit.family.key === 'coconut') ctx.emit({ type: 'moverHit', family: 'coconut', x, y });
+  // MEC-013-R5 / MEC-015-R7 head entry emits the same mover contact event as update-time entry (coconut and npc).
+  if (hit.kind === 'mover' && (hit.family.key === 'coconut' || hit.family.key === 'npc')) ctx.emit({ type: 'moverHit', family: hit.family.key, x, y });
   if (s.shield && (hit.kind === 'area' || hit.family.breakable)) {
     consumeShield(s, ctx, hit.family, x, y, hit.kind, s.dir);
     return { kind: hit.kind === 'area' ? 'absorbed' : 'broke', family: hit.family.key };

@@ -164,6 +164,13 @@ it.each([false, true])('MEC-015-R7 an NPC entering the head reports its variant 
   if (shield) expect(s.families.npc.npcs).toEqual([]);
   else expect(events.find(e => e.type === 'died')).toMatchObject({ cause: 'chicken' });
 });
+it.each([false, true])('MEC-015-R7 head entering an NPC emits moverHit once, with and without Shield (%s)', shield => {
+  const { sim, s } = fixture(false), head = s.snake[0]!, c = { x: head.x + 1, y: head.y };
+  s.shield = shield ? { leftMs: 5000 } : null;
+  s.families.npc.npcs.push({ id: 1, variant: 'cat', mover: { ...mk([c, { x: c.x, y: c.y + 1 }], 220), pos: 0, state: 'move', t: 0 } });
+  sim.advance(sim.snapshot().tickMs);
+  expect(sim.drainEvents().filter(e => e.type === 'moverHit')).toEqual([{ type: 'moverHit', family: 'npc', x: c.x, y: c.y }]);
+});
 it('MEC-015-R8 npc is introduced at L21 only', () => {
   const b = loadBalance();
   for (let level = 1; level <= 30; level++) {

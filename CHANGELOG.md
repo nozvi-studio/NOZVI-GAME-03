@@ -3,6 +3,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Added
+- fix(core): head entering an NPC now emits moverHit (family npc) once, with and without Shield (MEC-015-R7)
 - fix(game): P2b review fix-ups (chicken beak follows NpcView.dir, spike warn never blinks to empty, shield area-hit guard, bot level range env overrides)
 - feat(game): greybox visuals and texts for P2b families (coconut, gate, spike, npc, bird, bomb); bomb blast now hits at most once on the Shield-absorb path too (MEC-017-R3)
 - feat(core): mango-thief bird from level 22; NPC L routes keep both legs >= 2 cells (MEC-016, MEC-015-R2)
