@@ -171,6 +171,12 @@ function check(v: unknown, c: Check, path: string): void {
 export function parseBalance(json: unknown): Balance {
   check(json, SPEC, '');
   const b = json as Balance;
+  // MEC-004-R9 validate descriptor cap paths once, including disabled families.
+  for (const family of DEFAULT_FAMILIES) if (family.maxActiveKey !== null) {
+    let value: unknown = b;
+    for (const part of family.maxActiveKey.split('.')) value = isObj(value) && Object.hasOwn(value, part) ? value[part] : undefined;
+    check(value, 'int+', family.maxActiveKey);
+  }
   if (b.speed.minMs > b.speed.startMs) fail('speed.minMs', 'must be ≤ speed.startMs');
   if (b.mango.rotMinMs > b.mango.rotBaseMs) fail('mango.rotMinMs', 'must be ≤ mango.rotBaseMs');
   if (b.terrain.upMs + b.terrain.warnMs >= b.terrain.periodMs) fail('terrain.periodMs', 'must be > upMs + warnMs');

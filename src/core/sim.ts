@@ -2,7 +2,8 @@
 import { timedHazards } from './hazards/timed';
 import type { Balance, Pair } from './balance';
 import { snakeOn } from './cells';
-import { updateDirector } from './hazards/director';
+import { spawnCtx, updateDirector } from './hazards/director';
+import type { InternalOptions } from './simInternal';
 import { stepHazards } from './hazards/registry';
 import { applyHeadHit } from './hazards/collision';
 import { biome, isChallenge, needFor, levelTickMs } from './level';
@@ -51,13 +52,15 @@ export function initialState(b: Balance, seed: number, options: SimOptions = {})
 }
 
 // MEC-004 one 1 ms step in prototype frame() order (L997-1004).
-function stepMs(s: SimState, b: Balance, rng: Rng): void {
+function stepMs(s: SimState, b: Balance, rng: Rng, internal: InternalOptions): void {
   s.timeMs += 1;
   const ctx: StepCtx & HitCtx = { balance: b, snakeOn: (x, y) => snakeOn(s, x, y), emit: e => { s.events.push(e); },
     hitHead: (f, x, y, kind, dir) => applyHeadHit(s, ctx, f, x, y, kind, dir),
   };
   s.levelTimeMs += 1;
-  updateDirector(s, b, rng);
+  if (internal.directorEnabled !== false) {
+    updateDirector(s, b, rng, internal.observer ? { ...spawnCtx(s, b), observer: internal.observer } : undefined);
+  }
   stepHazards(s, ctx);
   if (s.status === 'over') return; // MEC-004-R8 death ends this millisecond before timers and movement.
   skillTimers(s, b, ctx);
@@ -70,16 +73,20 @@ function stepMs(s: SimState, b: Balance, rng: Rng): void {
   orbTick(s, b, ctx);
   rainTick(s, b, ctx);
   s.acc += 1;
-  if (s.acc >= s.tickMs) { s.acc -= s.tickMs; stepSnake(s, b, rng); }
+  if (s.acc >= s.tickMs) {
+    s.acc -= s.tickMs;
+    if (!internal.freezeSnake) stepSnake(s, b, rng);
+  }
 }
 
 function snapshotOf(s: SimState, b: Balance): SimSnapshot {
-  const c = structuredClone(s);
+  // MEC-004-R17 projects only snapshot-owned data: per-ms fuzz must not clone pending events/internal state.
+  const c = s;
   return {
     skills: c.loadout.map((id, slot) => ({ slot: slot as 0 | 1, id, cost: id === null ? 0 : b.skills[id].cost,
       affordable: id !== null && s.energy >= b.skills[id].cost,
       active: id !== null && SKILLS[id].active(s), leftMs: id === null ? 0 : SKILLS[id].leftMs(s) })),
-    slowmo: c.slowmo, levelUpSlow: c.levelUpSlow, shield: c.shield,
+    slowmo: c.slowmo && { ...c.slowmo }, levelUpSlow: c.levelUpSlow && { ...c.levelUpSlow }, shield: c.shield && { ...c.shield },
     rubble: c.families.rubble.map(({ x, y, state, leftMs }) => ({ x, y, state, leftMs })),
     rain: c.rain && { leftMs: c.rain.leftMs, dropsLeft: c.rain.drops - c.rain.dropped },
     rainMangoes: c.rainMangoes.map(({ x, y, ageMs }) => ({ x, y, leftMs: b.skills.mangoRain.mangoLifeMs - ageMs })),
@@ -87,14 +94,14 @@ function snapshotOf(s: SimState, b: Balance): SimSnapshot {
     energy: s.energy, energyMax: b.energy.max,
     orbs: c.orbs.map(({ x, y, ageMs }) => ({ x, y, leftMs: b.energy.orbLifeMs - ageMs })),
     rampActive: s.rampActive, rampMangoesLeft: s.rampActive ? Math.max(0, b.checkpoints.rampMangoes - s.rampEaten) : 0,
-    snake: c.snake, dir: c.dir, heading: c.queue.length ? c.queue[c.queue.length - 1]! : { ...c.dir },
-    headFrom: c.headFrom, tailFrom: c.tailFrom,
+    snake: c.snake.map(cell => ({ ...cell })), dir: { ...c.dir }, heading: { ...(c.queue.length ? c.queue[c.queue.length - 1]! : c.dir) },
+    headFrom: { ...c.headFrom }, tailFrom: { ...c.tailFrom },
     tickAlpha: s.status === 'over' ? 1 : Math.max(0, Math.min(1, s.acc / s.tickMs)),
     mango: c.mango && { ...c.mango, ageMs: c.mango.totalMs - c.mango.leftMs },
     rottenRocks: c.families.rottenRock.map(({ x, y, state, leftMs }) => ({ x, y, state, leftMs })),
     eatenInLevel: s.eatenInLevel, eatenInRun: s.eatenInRun,
     hazards: timedHazards(c).map(h => ({
-      type: h.family, state: h.state, t: h.t, warnMs: h.warnMs, lifeMs: h.lifeMs, cells: h.cells,
+      type: h.family, state: h.state, t: h.t, warnMs: h.warnMs, lifeMs: h.lifeMs, cells: h.cells.map(cell => ({ ...cell })),
       ...(h.kind ? { kind: h.kind } : {}),
     })),
     terrains: c.families.terrain.map(t => ({ t: t.t, lifeMs: t.lifeMs, cells: t.cells.map(({ x, y, vis, delay }) => ({ x, y, vis, delay })) })),
@@ -103,22 +110,22 @@ function snapshotOf(s: SimState, b: Balance): SimSnapshot {
     levelTimeMs: s.levelTimeMs, timeMs: s.timeMs,
     startLevel: s.startLevel, levelsCleared: s.levelsCleared,
     length: s.snake.length, minLength: b.skills.tailSnip.minLength,
-    status: s.status, outcome: c.outcome,
+    status: s.status, outcome: c.outcome && { ...c.outcome },
   };
 }
 
-function wrap(b: Balance, s: SimState): Sim {
+function wrap(b: Balance, s: SimState, internal: InternalOptions = {}): Sim {
   const rng = rngFrom(s.rng);
   const sim: Sim = {
     useSkill: slot => useSkill(s, b, { balance: b, snakeOn: (x, y) => snakeOn(s, x, y), emit: e => { s.events.push(e); } }, slot),
     turn: (dx, dy) => queueTurn(s, b, dx, dy),
     advance: ms => {
       if (!Number.isInteger(ms) || ms < 0) throw new RangeError(`advance(ms): non-negative integer expected, got ${ms}`);
-      for (let i = 0; i < ms && s.status === 'playing'; i++) stepMs(s, b, rng);
+      for (let i = 0; i < ms && s.status === 'playing'; i++) stepMs(s, b, rng, internal);
     },
     drainEvents: () => s.events.splice(0),
     snapshot: () => snapshotOf(s, b),
-    clone: () => restoreSim(b, s),
+    clone: () => restoreSim(b, s, internal),
   };
   states.set(sim, s);
   return sim;
@@ -130,7 +137,7 @@ export function createSim(b: Balance, seed: number, options?: SimOptions): Sim {
   return wrap(b, s);
 }
 /** Independent Sim from a state (deep copy). Used by clone(), tests and tools. */
-export function restoreSim(b: Balance, state: SimState): Sim { return wrap(b, structuredClone(state)); }
+export function restoreSim(b: Balance, state: SimState, internal?: InternalOptions): Sim { return wrap(b, structuredClone(state), internal); }
 /** Live state of a Sim. Tests and tools only; never mutate from the game layer. */
 export function stateOf(sim: Sim): Readonly<SimState> {
   const s = states.get(sim);

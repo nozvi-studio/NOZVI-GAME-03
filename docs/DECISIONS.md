@@ -373,3 +373,7 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - Apply MEC-004-R12 to every director family, including P0/P1 rocks, fences, mazes and terrain. Reject a candidate if its new BFS walls disconnect a previously reachable regular mango; an already unreachable mango does not block placement (L4).
 - Consequence: existing seeded spawn sequences may change when a candidate fails rule 3. Terrain adds no BFS walls and remains subject to the owner-approved distance of 4 (MEC-004-R11).
 - Flow B keeps every family instance through a level up (MEC-004-R16). P2 design section 20 item 3 is void; MEC-003-R7 is unchanged.
+
+## 2026-11-05 - MEC-004-R17 smoke sample size
+- Use 2 seeds with a 20-second run limit per family in the normal suite, the fallback authorized by P2a Task 4. Keep the full fuzz matrix at 200 seeds with a 120-second run limit and every-spawn escape checks.
+- Reason: reduce the added smoke cost when the complete suite exceeds its 10-second target. Existing tests and Windows worker startup also contribute; this sample reduction does not guarantee that the whole suite meets the target.
