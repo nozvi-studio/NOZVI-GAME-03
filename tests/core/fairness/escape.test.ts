@@ -3,12 +3,15 @@ import { escapeExists, searchTimeline } from '../../../src/core/fairness/escape'
 import { buildTimeline, type Timeline } from '../../../src/core/fairness/timeline';
 import { key } from '../../../src/core/grid';
 import { addTimedHazards, makeTimed } from '../../../src/core/hazards/timed';
+import { ROCK } from '../../../src/core/hazards/rock';
+import { FAMILIES, __setFamiliesForTest } from '../../../src/core/hazards/registry';
+import type { Dir } from '../../../src/core/types';
 import { createSimInternal, stateOf } from '../../../src/core/simInternal';
 import { createSim, restoreSim } from '../../../src/core/sim';
 import { effectiveTick } from '../../../src/core/skills';
 import { buildBoard } from '../../support/board';
 import { loadBalance } from '../../support/balance';
-import { withFamilies } from '../../support/fakeFamily';
+import { fakeFamily, withFamilies } from '../../support/fakeFamily';
 
 it('MEC-004-R18 escapeExists is false in a dead-end corridor and true in open board', () => {
   const b = loadBalance();
@@ -69,9 +72,62 @@ it('MEC-004-R18 timeline records update-time hits without mutating the source', 
   });
 });
 
+it('MEC-004-R18 timeline continues past a frozen-head hit at k=2 to an activation at k=5', () => {
+  const b = loadBalance(), s = buildBoard({ level: 21 });
+  s.rampActive = false;
+  const tick = effectiveTick(s, b), previous = FAMILIES;
+  const rock = makeTimed('rock', [{ x: 10, y: 12 }], b.rock.warnMs, 2 * tick);
+  rock.t = rock.warnMs - 5 * tick;
+  addTimedHazards(s, rock);
+  __setFamiliesForTest([
+    { ...fakeFamily({ key: 'terrain', cause: 'ground' }),
+      update(state, ctx) {
+        if (state.timeMs === 2 * tick) ctx.hitHead('terrain', state.snake[0]!.x, state.snake[0]!.y, 'area', state.dir);
+      },
+      headHit: (state, x, y) => state.timeMs === 2 * tick && x === 8 && y === 8 ? 'area' : null,
+    },
+    ROCK,
+  ]);
+  try {
+    const ordinary = restoreSim(b, s, { directorEnabled: false, freezeSnake: true });
+    ordinary.advance(2 * tick);
+    expect(ordinary.snapshot().outcome).toEqual({ won: false, cause: 'ground' });
+    const moving = restoreSim(b, s, { directorEnabled: false, ignoreOutcomes: true });
+    moving.advance(2 * tick);
+    expect(moving.snapshot().outcome).toEqual({ won: false, cause: 'ground' });
+    const frozen = restoreSim(b, s, { directorEnabled: false, freezeSnake: true, ignoreOutcomes: true });
+    frozen.advance(2 * tick);
+    const copy = frozen.clone();
+    copy.advance(6 * tick);
+    expect(copy.snapshot()).toMatchObject({ timeMs: 8 * tick, status: 'playing', outcome: null, snake: s.snake });
+    expect(frozen.snapshot().timeMs).toBe(2 * tick);
+    const original = structuredClone(s), tl = buildTimeline(b, s, 8), cell = key(b.board.cols, 10, 12);
+    expect(tl.lethal[2].has(key(b.board.cols, 8, 8))).toBe(true);
+    expect(tl.lethal[4].has(cell)).toBe(false);
+    expect(tl.lethal[5].has(cell)).toBe(true);
+    expect(tl.lethal[6].has(cell)).toBe(true);
+    expect(tl.lethal[7].has(cell)).toBe(false);
+    expect(tl.lethal[5].has(key(b.board.cols, 0, 0))).toBe(false);
+    expect(s).toEqual(original);
+  } finally { __setFamiliesForTest(previous); }
+});
+
+it.each([[16, 17], [17, 16], [18, 18]])('MEC-004-R20 escape rejects unsupported board %i x %i', (cols, rows) => {
+  const b = loadBalance(j => { j.board = { cols, rows }; }), s = buildBoard({});
+  expect(() => escapeExists(b, s)).toThrow(/17.*17/);
+  const tl: Timeline = { cols, rows, tickMs: 100, steps: 0, lethal: [new Set()], ice: [new Set()] };
+  expect(() => searchTimeline(tl, s)).toThrow(/17.*17/);
+});
+
+it.each([[0, 0], [1, 1], [2, 0]])('MEC-004-R18 search rejects non-unit direction (%i,%i)', (x, y) => {
+  const s = buildBoard({}), tl = buildTimeline(loadBalance(), s, 1);
+  s.dir = { x, y } as Dir;
+  expect(() => searchTimeline(tl, s)).toThrow(/unit.*direction/);
+});
+
 it('MEC-004-R18 goal-safe first move visits the goal and still reaches the horizon', () => {
   const s = buildBoard({ head: [8, 8], dir: [1, 0] });
-  const tl: Timeline = { tickMs: 100, steps: 2,
+  const tl: Timeline = { cols: 17, rows: 17, tickMs: 100, steps: 2,
     lethal: [new Set(), new Set(), new Set([key(17, 10, 8), key(17, 9, 7), key(17, 9, 9)])],
     ice: [new Set(), new Set(), new Set()] };
   expect(searchTimeline(tl, s, { x: 9, y: 8 })).toMatchObject({ reachedHorizon: true, firstMoveToGoalSafe: null });

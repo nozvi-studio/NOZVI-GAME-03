@@ -11,16 +11,15 @@ const mutate = (fn: (j: any) => void): unknown => { const j = structuredClone(js
 
 describe('GDD-7 balance', () => {
   it('MEC-004-R9 parseBalance validates every family maxActiveKey even when disabled', () => {
-    const family = DEFAULT_FAMILIES.find(f => f.key === 'rubble')! as { maxActiveKey: string | null };
-    const original = family.maxActiveKey;
-    try {
-      family.maxActiveKey = 'testCap.nested.limit';
-      for (const value of [undefined, '2', NaN, Infinity, -1, 0, 1.5]) {
-        expect(() => loadBalance(j => { j.testCap = { nested: { limit: value } }; })).toThrow(/testCap.nested.limit/);
-      }
-      expect(() => loadBalance()).toThrow(/testCap.nested.limit/);
-      expect(() => loadBalance(j => { j.testCap = { nested: { limit: 2 } }; })).not.toThrow();
-    } finally { family.maxActiveKey = original; }
+    const families = Object.freeze(DEFAULT_FAMILIES.map(f => Object.freeze({ ...f,
+      maxActiveKey: f.key === 'rubble' ? 'testCap.nested.limit' : f.maxActiveKey,
+    })));
+    for (const value of [undefined, '2', NaN, Infinity, -1, 0, 1.5]) {
+      expect(() => parseBalance(mutate(j => { j.testCap = { nested: { limit: value } }; }), families)).toThrow(/testCap.nested.limit/);
+    }
+    expect(() => parseBalance(structuredClone(json), families)).toThrow(/testCap.nested.limit/);
+    expect(() => parseBalance(mutate(j => { j.testCap = { nested: { limit: 2 } }; }), families)).not.toThrow();
+    expect(() => loadBalance()).not.toThrow();
   });
   it('MEC-004-R11 fairness pins the terrain distance and rule 1/escape tuning', () => {
     expect(loadBalance().fairness).toEqual({ nearHeadDist: 4, frontLaneCells: 4, terrainNearHeadDist: 4,

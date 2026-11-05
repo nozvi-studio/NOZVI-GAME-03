@@ -5,7 +5,7 @@
 ## Now (in progress)
 - [x] P1 closed: flow B + WASD fix + run_end.turns merged; agy browser QA 11/11 PASS; version/v0.1 -> dev.
 - [x] P2 plans ready: P2a (revised for flow B) `docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md`; P2b `2026-11-04-p2b-movers-cycles-blasts.md`; P2c `2026-11-04-p2c-shrink-challenge-tuning.md`.
-- [ ] **RESUME HERE:** P2a Task 4 implementation saved in WIP `886f89f`; retry 2 focused tests passed. Lead full-suite/fuzz verification and review pending.
+- [ ] **RESUME HERE:** P2a Task 4 review fixes applied over `e951e2d` (uncommitted); 43 touched-file tests passed. Lead full-suite/fuzz verification and review pending.
 
 ## Next (ordered, max 5)
 1. P2a (framework + ground tiles), then P2b (movers, cycles, blasts, bird), then P2c (shrink, challenge levels, tuning, P2 exit).

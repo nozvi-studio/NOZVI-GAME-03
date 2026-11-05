@@ -22,6 +22,7 @@ interface Input { t: number; dir: Dir }
 type TileView = { kind: TileKind; state: 'warn' | 'active' | 'fade'; cells: readonly (Cell & { on: boolean })[] };
 const DIRS: readonly Dir[] = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }];
 const INPUT_SEED_OFFSET = 1000003, TURN_INTERVAL_MS = 100, TURN_CHANCE = 0.35, REPLAY_CHUNK_MS = 37, SAMPLE_SPAWNS = 3;
+const RERUN_SEED_OFFSET = 1000033;
 
 function cellsOf(snap: SimSnapshot, cols: number): Map<string, Mark> {
   const marks = new Map<string, Mark>();
@@ -97,7 +98,7 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
   const { cols } = b.board;
   let time = 0, spawns = 0, run = 0;
   while (time < c.durationMs) {
-    const inputs: Input[] = [], start = time, simulationSeed = seed + run++ * INPUT_SEED_OFFSET;
+    const inputs: Input[] = [], start = time, simulationSeed = seed + run++ * RERUN_SEED_OFFSET;
     const sim = createSimInternal(b, simulationSeed, { startLevel: c.startLevel }, { observer: {
       spawned(family, cells, before, after) {
         spawns++;

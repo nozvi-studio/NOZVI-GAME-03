@@ -4,8 +4,11 @@ import { effectiveTick } from '../skills';
 import type { Cell, Dir, SimState } from '../types';
 import { buildTimeline, type Timeline } from './timeline';
 
-// MEC-004-R20 fixes the search board at 17 x 17; Timeline has no balance dependency.
+// MEC-004-R20 fixes the search board at 17 x 17; timelines carry their dimensions for validation.
 const BOARD_SIZE = 17;
+function assertBoardSize(cols: number, rows: number): void {
+  if (cols !== BOARD_SIZE || rows !== BOARD_SIZE) throw new RangeError('MEC-004-R20 escape search requires a 17 x 17 board');
+}
 const DIRS: readonly Dir[] = [{ x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 0, y: -1 }];
 type Node = [x: number, y: number, dir: number, k: number, g: number];
 export interface SearchResult {
@@ -16,12 +19,15 @@ export interface SearchResult {
 
 // MEC-004-R18 step 3: no growth or skills; original body cells release as the tail advances.
 export function searchTimeline(tl: Timeline, state: SimState, goal?: Cell): SearchResult {
+  assertBoardSize(tl.cols, tl.rows);
+  const dir = DIRS.findIndex(d => d.x === state.dir.x && d.y === state.dir.y);
+  if (dir < 0) throw new RangeError('MEC-004-R18 search requires a unit cardinal direction');
   const result: SearchResult = { reachedHorizon: false, firstMoveToHorizon: null, firstMoveToGoalSafe: null };
   const size = BOARD_SIZE * BOARD_SIZE * DIRS.length * (tl.steps + 1) * 2;
   const visited = new Uint8Array(size), firstMoves = new Uint8Array(size);
   const index = (x: number, y: number, d: number, k: number, g: number) =>
     (((k * BOARD_SIZE + y) * BOARD_SIZE + x) * DIRS.length + d) * 2 + g;
-  const head = state.snake[0]!, dir = DIRS.findIndex(d => d.x === state.dir.x && d.y === state.dir.y);
+  const head = state.snake[0]!;
   const atGoal = (x: number, y: number) => goal !== undefined && x === goal.x && y === goal.y;
   const root: Node = [head.x, head.y, dir, 0, +atGoal(head.x, head.y)], queue: Node[] = [root];
   visited[index(...root)] = 1;
@@ -55,6 +61,7 @@ export function searchTimeline(tl: Timeline, state: SimState, goal?: Cell): Sear
 
 // MEC-004-R18 a director spawn must preserve an existing path through this horizon.
 export function escapeExists(balance: Balance, state: SimState): boolean {
+  assertBoardSize(balance.board.cols, balance.board.rows);
   const steps = Math.ceil(balance.fairness.escapeHorizonMs / effectiveTick(state, balance));
   return searchTimeline(buildTimeline(balance, state, steps), state).reachedHorizon;
 }

@@ -1,5 +1,5 @@
 // src/core/balance.ts — Balance type + parseBalance (design §6). GDD-7
-import type { LevelRow } from './types';
+import type { HazardFamily, LevelRow } from './types';
 import { DEFAULT_FAMILIES } from './hazards/registry';
 
 export type Pair = [number, number];
@@ -167,12 +167,12 @@ function check(v: unknown, c: Check, path: string): void {
   if (!ok(v)) fail(path, msg);
 }
 
-/** Validates the balance JSON and returns it typed; throws `balance: <path> <reason>`. GDD-7 */
-export function parseBalance(json: unknown): Balance {
+/** Validates balance JSON; optional copied family metadata controls cap-path validation. GDD-7 */
+export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[] = DEFAULT_FAMILIES): Balance {
   check(json, SPEC, '');
   const b = json as Balance;
   // MEC-004-R9 validate descriptor cap paths once, including disabled families.
-  for (const family of DEFAULT_FAMILIES) if (family.maxActiveKey !== null) {
+  for (const family of capFamilies) if (family.maxActiveKey !== null) {
     let value: unknown = b;
     for (const part of family.maxActiveKey.split('.')) value = isObj(value) && Object.hasOwn(value, part) ? value[part] : undefined;
     check(value, 'int+', family.maxActiveKey);

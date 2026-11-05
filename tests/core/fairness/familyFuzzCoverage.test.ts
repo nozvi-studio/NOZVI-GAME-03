@@ -4,11 +4,27 @@ import { addTimedHazards, makeTimed } from '../../../src/core/hazards/timed';
 import { needFor } from '../../../src/core/level';
 import { restoreSim } from '../../../src/core/sim';
 import { stateOf } from '../../../src/core/simInternal';
+import { rngFrom, seedRng } from '../../../src/core/rng';
 import type { SimState } from '../../../src/core/types';
 import { loadBalance } from '../../support/balance';
 import { buildBoard } from '../../support/board';
 import { runFamilyFuzz } from '../../support/familyFuzz';
 import { play, type Input } from '../../support/p1fuzz';
+
+it('MEC-004-R17 rerun simulation seeds use a different stream from the input RNG', () => {
+  const firstFrameRng = new Set<number>();
+  const input = seedRng(1 + 1000003);
+  rngFrom(input).next(); // Initial mango placement consumes one world RNG draw.
+  __setFamiliesForTest(DEFAULT_FAMILIES.map(f => ({ ...f,
+    update(s, ctx) { if (s.timeMs === 1) firstFrameRng.add(s.rng.s); f.update(s, ctx); },
+  })));
+  try {
+    expect(runFamilyFuzz({ family: 'rock', mode: 'solo', startLevel: 1,
+      seeds: 1, durationMs: 5000, escape: 'off' })).toEqual([]);
+    expect(firstFrameRng.size).toBeGreaterThan(1);
+    expect(firstFrameRng.has(input.s)).toBe(false);
+  } finally { __setFamiliesForTest(null); }
+});
 
 it('MEC-004-R17 seeds consume their full playing-time budget after deaths and exercise real spawns', () => {
   const times = new Map<SimState, number>();

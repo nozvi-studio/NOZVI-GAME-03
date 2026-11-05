@@ -54,15 +54,19 @@ export function initialState(b: Balance, seed: number, options: SimOptions = {})
 // MEC-004 one 1 ms step in prototype frame() order (L997-1004).
 function stepMs(s: SimState, b: Balance, rng: Rng, internal: InternalOptions): void {
   s.timeMs += 1;
+  const ignoreOutcomes = internal.freezeSnake && internal.ignoreOutcomes;
   const ctx: StepCtx & HitCtx = { balance: b, snakeOn: (x, y) => snakeOn(s, x, y), emit: e => { s.events.push(e); },
-    hitHead: (f, x, y, kind, dir) => applyHeadHit(s, ctx, f, x, y, kind, dir),
+    hitHead: (f, x, y, kind, dir) => { if (!ignoreOutcomes) applyHeadHit(s, ctx, f, x, y, kind, dir); },
   };
   s.levelTimeMs += 1;
   if (internal.directorEnabled !== false) {
     updateDirector(s, b, rng, internal.observer ? { ...spawnCtx(s, b), observer: internal.observer } : undefined);
   }
   stepHazards(s, ctx);
-  if (s.status === 'over') return; // MEC-004-R8 death ends this millisecond before timers and movement.
+  if (s.status === 'over') {
+    if (!ignoreOutcomes) return; // MEC-004-R8 normal death ends this millisecond before timers and movement.
+    s.status = 'playing'; s.outcome = null;
+  }
   skillTimers(s, b, ctx);
   // MEC-003-R22 step 7a: the slowdown eases before the speed is computed.
   levelUpSlowTick(s);
@@ -81,36 +85,35 @@ function stepMs(s: SimState, b: Balance, rng: Rng, internal: InternalOptions): v
 
 function snapshotOf(s: SimState, b: Balance): SimSnapshot {
   // MEC-004-R17 projects only snapshot-owned data: per-ms fuzz must not clone pending events/internal state.
-  const c = s;
   return {
-    skills: c.loadout.map((id, slot) => ({ slot: slot as 0 | 1, id, cost: id === null ? 0 : b.skills[id].cost,
+    skills: s.loadout.map((id, slot) => ({ slot: slot as 0 | 1, id, cost: id === null ? 0 : b.skills[id].cost,
       affordable: id !== null && s.energy >= b.skills[id].cost,
       active: id !== null && SKILLS[id].active(s), leftMs: id === null ? 0 : SKILLS[id].leftMs(s) })),
-    slowmo: c.slowmo && { ...c.slowmo }, levelUpSlow: c.levelUpSlow && { ...c.levelUpSlow }, shield: c.shield && { ...c.shield },
-    rubble: c.families.rubble.map(({ x, y, state, leftMs }) => ({ x, y, state, leftMs })),
-    rain: c.rain && { leftMs: c.rain.leftMs, dropsLeft: c.rain.drops - c.rain.dropped },
-    rainMangoes: c.rainMangoes.map(({ x, y, ageMs }) => ({ x, y, leftMs: b.skills.mangoRain.mangoLifeMs - ageMs })),
-    snipWall: c.families.snipWall.flatMap(w => w.cells.map(c => ({ ...c, state: w.state, leftMs: w.leftMs }))),
+    slowmo: s.slowmo && { ...s.slowmo }, levelUpSlow: s.levelUpSlow && { ...s.levelUpSlow }, shield: s.shield && { ...s.shield },
+    rubble: s.families.rubble.map(({ x, y, state, leftMs }) => ({ x, y, state, leftMs })),
+    rain: s.rain && { leftMs: s.rain.leftMs, dropsLeft: s.rain.drops - s.rain.dropped },
+    rainMangoes: s.rainMangoes.map(({ x, y, ageMs }) => ({ x, y, leftMs: b.skills.mangoRain.mangoLifeMs - ageMs })),
+    snipWall: s.families.snipWall.flatMap(w => w.cells.map(c => ({ ...c, state: w.state, leftMs: w.leftMs }))),
     energy: s.energy, energyMax: b.energy.max,
-    orbs: c.orbs.map(({ x, y, ageMs }) => ({ x, y, leftMs: b.energy.orbLifeMs - ageMs })),
+    orbs: s.orbs.map(({ x, y, ageMs }) => ({ x, y, leftMs: b.energy.orbLifeMs - ageMs })),
     rampActive: s.rampActive, rampMangoesLeft: s.rampActive ? Math.max(0, b.checkpoints.rampMangoes - s.rampEaten) : 0,
-    snake: c.snake.map(cell => ({ ...cell })), dir: { ...c.dir }, heading: { ...(c.queue.length ? c.queue[c.queue.length - 1]! : c.dir) },
-    headFrom: { ...c.headFrom }, tailFrom: { ...c.tailFrom },
+    snake: s.snake.map(cell => ({ ...cell })), dir: { ...s.dir }, heading: { ...(s.queue.length ? s.queue[s.queue.length - 1]! : s.dir) },
+    headFrom: { ...s.headFrom }, tailFrom: { ...s.tailFrom },
     tickAlpha: s.status === 'over' ? 1 : Math.max(0, Math.min(1, s.acc / s.tickMs)),
-    mango: c.mango && { ...c.mango, ageMs: c.mango.totalMs - c.mango.leftMs },
-    rottenRocks: c.families.rottenRock.map(({ x, y, state, leftMs }) => ({ x, y, state, leftMs })),
+    mango: s.mango && { ...s.mango, ageMs: s.mango.totalMs - s.mango.leftMs },
+    rottenRocks: s.families.rottenRock.map(({ x, y, state, leftMs }) => ({ x, y, state, leftMs })),
     eatenInLevel: s.eatenInLevel, eatenInRun: s.eatenInRun,
-    hazards: timedHazards(c).map(h => ({
+    hazards: timedHazards(s).map(h => ({
       type: h.family, state: h.state, t: h.t, warnMs: h.warnMs, lifeMs: h.lifeMs, cells: h.cells.map(cell => ({ ...cell })),
       ...(h.kind ? { kind: h.kind } : {}),
     })),
-    terrains: c.families.terrain.map(t => ({ t: t.t, lifeMs: t.lifeMs, cells: t.cells.map(({ x, y, vis, delay }) => ({ x, y, vis, delay })) })),
+    terrains: s.families.terrain.map(t => ({ t: t.t, lifeMs: t.lifeMs, cells: t.cells.map(({ x, y, vis, delay }) => ({ x, y, vis, delay })) })),
     score: s.score, level: s.level, progress: s.progress, need: needFor(b, s.level), tickMs: s.tickMs,
     biome: biome(b, s.level), challenge: isChallenge(b, s.level),
     levelTimeMs: s.levelTimeMs, timeMs: s.timeMs,
     startLevel: s.startLevel, levelsCleared: s.levelsCleared,
     length: s.snake.length, minLength: b.skills.tailSnip.minLength,
-    status: s.status, outcome: c.outcome && { ...c.outcome },
+    status: s.status, outcome: s.outcome && { ...s.outcome },
   };
 }
 
@@ -121,7 +124,13 @@ function wrap(b: Balance, s: SimState, internal: InternalOptions = {}): Sim {
     turn: (dx, dy) => queueTurn(s, b, dx, dy),
     advance: ms => {
       if (!Number.isInteger(ms) || ms < 0) throw new RangeError(`advance(ms): non-negative integer expected, got ${ms}`);
-      for (let i = 0; i < ms && s.status === 'playing'; i++) stepMs(s, b, rng, internal);
+      // MEC-004-R18 terminal outcomes of the stationary reference head do not stop its timeline.
+      const ignoreOutcomes = internal.freezeSnake && internal.ignoreOutcomes;
+      if (ignoreOutcomes) { s.status = 'playing'; s.outcome = null; }
+      for (let i = 0; i < ms && s.status === 'playing'; i++) {
+        stepMs(s, b, rng, internal);
+        if (ignoreOutcomes) { s.status = 'playing'; s.outcome = null; }
+      }
     },
     drainEvents: () => s.events.splice(0),
     snapshot: () => snapshotOf(s, b),

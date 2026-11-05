@@ -6,14 +6,14 @@ import { stateOf } from '../simInternal';
 import { effectiveTick } from '../skills';
 import type { SimState } from '../types';
 
-export interface Timeline { tickMs: number; steps: number; lethal: Set<number>[]; ice: Set<number>[] }
+export interface Timeline { cols: number; rows: number; tickMs: number; steps: number; lethal: Set<number>[]; ice: Set<number>[] }
 
 // MEC-004-R18 step 2 / FB-2: freeze only movement; ease slowdown at a fixed initial sampling tick.
 export function buildTimeline(balance: Balance, state: SimState, steps: number): Timeline {
   const tickMs = effectiveTick(state, balance);
-  const sim = restoreSim(balance, state, { directorEnabled: false, freezeSnake: true });
+  const sim = restoreSim(balance, state, { directorEnabled: false, freezeSnake: true, ignoreOutcomes: true });
   const s = stateOf(sim), { cols, rows } = balance.board;
-  const tl: Timeline = { tickMs, steps, lethal: [], ice: [] };
+  const tl: Timeline = { cols, rows, tickMs, steps, lethal: [], ice: [] };
   for (let k = 0; k <= steps; k++) {
     if (k > 0) sim.advance(tickMs);
     const lethal = new Set<number>(), ice = new Set<number>();

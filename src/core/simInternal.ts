@@ -6,6 +6,8 @@ import type { Sim, SimOptions, SimState, SpawnObserver } from './types';
 export interface InternalOptions {
   directorEnabled?: boolean;
   freezeSnake?: boolean;
+  /** MEC-004-R18 keep frozen timeline clones alive without consuming defensive skills. */
+  ignoreOutcomes?: boolean;
   observer?: SpawnObserver;
 }
 
