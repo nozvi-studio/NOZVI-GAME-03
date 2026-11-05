@@ -17,8 +17,8 @@ describe('MEC-004 queries', () => {
     s.families.rottenRock[0]!.state = 'crumble';
     expect(solidFamilyWithPriority(s, 3, 3)?.key).toBe('rock');
   });
-  it('MEC-004-R1 registry order is rock fence maze terrain rottenRock snipWall rubble mud ice coconut gate spike npc bird', () => {
-    expect(FAMILIES.map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'rubble', 'mud', 'ice', 'coconut', 'gate', 'spike', 'npc', 'bird']);
+  it('MEC-004-R1 registry order is rock fence maze terrain rottenRock snipWall rubble mud ice coconut gate spike npc bird bomb', () => {
+    expect(FAMILIES.map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'rubble', 'mud', 'ice', 'coconut', 'gate', 'spike', 'npc', 'bird', 'bomb']);
   });
   it('MEC-004-R3 solidCauseAt returns the first family cause in registry order', () => {
     const a = fakeFamily({ key: 'rock', cause: 'rock', solid: [[3, 3]] });
@@ -85,6 +85,6 @@ describe('MEC-004 queries', () => {
     expect(FAMILIES.every(f => !('onLevelEnd' in f))).toBe(true);
   });
   it('MEC-006-R24 shield breakable list equals families with breakable true', () => {
-    expect(FAMILIES.filter(f => f.breakable).map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'coconut', 'gate', 'spike', 'npc']);
+    expect(FAMILIES.filter(f => f.breakable).map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'coconut', 'gate', 'spike', 'npc', 'bomb']);
   });
 });

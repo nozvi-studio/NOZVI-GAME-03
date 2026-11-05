@@ -35,6 +35,7 @@ export interface Balance {
   npc: { warnMs: number; lifeMs: number; lifeRandMs: number; maxActive: number; tries: number;
     variants: Record<'cat' | 'chicken', { weight: number; cellMs: number; routeLen: Pair }> };
   bird: { shadowMs: number; marginMs: number; maxActive: number };
+  bomb: { warnMs: number; countdownMs: number; arm: number; maxActive: number; tries: number };
   spike: { downMs: number; warnMs: number; upMs: number; showMs: number; lifeMs: number; lifeRandMs: number;
     maxActive: number; tries: number; shapePool: ('single' | 'pairH' | 'pairV')[];
     shapes: Record<'single' | 'pairH' | 'pairV', Pair[]> };
@@ -151,6 +152,7 @@ const SPEC: Spec = {
   npc: { ...timed, maxActive: 'int+', tries: 'int+',
     variants: recordOf(['cat', 'chicken'], { weight: 'num0', cellMs: 'int+', routeLen: 'pair' }) },
   bird: { shadowMs: 'int+', marginMs: 'int0', maxActive: 'int+' },
+  bomb: { warnMs: 'int+', countdownMs: 'int+', arm: 'int+', maxActive: 'int+', tries: 'int+' },
   spike: { ...timed, downMs: 'int+', upMs: 'int+', showMs: 'int+', maxActive: 'int+', tries: 'int+',
     shapePool: namesOf(['single', 'pairH', 'pairV']), shapes: recordOf(['single', 'pairH', 'pairV'], 'pairs') },
   gate: { ...timed, landWarnMs: 'int+', openMs: 'int+', closedMs: 'int+', maxActive: 'int+', tries: 'int+',
@@ -216,7 +218,7 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (b.terrain.upMs + b.terrain.warnMs >= b.terrain.periodMs) fail('terrain.periodMs', 'must be > upMs + warnMs');
   // MEC-004-R13 warning time uses the L1 base tick, independent of slow effects.
   const minWarnMs = Math.max(b.fairness.minWarnMs, b.fairness.minWarnTicks * b.speed.startMs);
-  for (const family of ['rock', 'fence', 'maze', 'terrain', 'mud', 'ice', 'coconut', 'gate', 'spike', 'npc'] as const) {
+  for (const family of ['rock', 'fence', 'maze', 'terrain', 'mud', 'ice', 'coconut', 'gate', 'spike', 'npc', 'bomb'] as const) {
     if (b[family].warnMs < minWarnMs) fail(family + '.warnMs', 'must be >= ' + minWarnMs);
   }
   if (b.spike.showMs < minWarnMs) fail('spike.showMs', 'must be >= ' + minWarnMs);

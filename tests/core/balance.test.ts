@@ -68,8 +68,9 @@ describe('GDD-7 balance', () => {
       { from: 17, to: 17, weights: { rock: 3, fence: 2, terrain: 2, mud: 2, ice: 2, coconut: 2, gate: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
       { from: 18, to: 20, weights: { rock: 3, fence: 2, terrain: 2, mud: 2, ice: 2, coconut: 2, gate: 2, spike: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
       { from: 21, to: 21, weights: { rock: 3, fence: 2, terrain: 2, mud: 2, ice: 2, coconut: 2, gate: 2, spike: 2, npc: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
-      { from: 22, to: 25, weights: { rock: 3, fence: 2, terrain: 2, mud: 2, ice: 2, coconut: 2, gate: 2, spike: 2, npc: 2, bird: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
-      { from: 26, to: 30, weights: { rock: 3, fence: 2, terrain: 2, maze: 2, mud: 2, ice: 2, coconut: 2, gate: 2, spike: 2, npc: 2, bird: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
+      { from: 22, to: 22, weights: { rock: 3, fence: 2, terrain: 2, mud: 2, ice: 2, coconut: 2, gate: 2, spike: 2, npc: 2, bird: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
+      { from: 23, to: 25, weights: { rock: 3, fence: 2, terrain: 2, mud: 2, ice: 2, coconut: 2, gate: 2, spike: 2, npc: 2, bird: 2, bomb: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
+      { from: 26, to: 30, weights: { rock: 3, fence: 2, terrain: 2, maze: 2, mud: 2, ice: 2, coconut: 2, gate: 2, spike: 2, npc: 2, bird: 2, bomb: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
     ] });
     expect(b.gate).toEqual({ landWarnMs: 1500, openMs: 2400, warnMs: 900, closedMs: 1500, lifeMs: 14000, lifeRandMs: 4000,
       maxActive: 1, tries: 40, lineLen: [5, 7], shapePool: ['line', 'U'], shapes: { U: {
@@ -83,6 +84,7 @@ describe('GDD-7 balance', () => {
       variants: { cat: { weight: 1, cellMs: 400, routeLen: [5, 8] }, chicken: { weight: 1, cellMs: 220, routeLen: [3, 5] } } });
     expect(b.coconut).toEqual({ warnMs: 1500, cellMs: 90, maxActive: 2, tries: 20 });
     expect(b.bird).toEqual({ shadowMs: 3000, marginMs: 600, maxActive: 1 });
+    expect(b.bomb).toEqual({ warnMs: 1200, countdownMs: 3000, arm: 2, maxActive: 1, tries: 40 });
     expect(b.mango).toMatchObject({"rotBaseMs":8000,"rotPerEatenMs":150,"rotMinMs":4000,"goldenRotFactor":0.5,"goldenChance":0.15,"goldenMinEaten":3,"points":{"normal":1,"golden":3},"progress":{"normal":1,"golden":2},"nearHeadDist":3,"rottenRockLifeMs":5000,"placeRetryMs":250});
     expect(b.director).toMatchObject({"firstSpawnMs":2500,"intervalBaseMs":5000,"intervalPerLevelMs":120,"intervalMinMs":1600,"capBase":2,"capPerLevels":3,"capMax":10,"challengeIntervalFactor":1,"challengeCapBonus":0});
     expect(b.energy).toMatchObject({"max":100,"orbGain":15,"goldenGain":10,"orbSpawnIntervalMs":6000,"orbMax":2,"orbLifeMs":8000,"orbBlinkMs":2000,"orbFromLevel":2});
@@ -152,4 +154,11 @@ it('P1-PT parseBalance rejects a non-positive or non-integer log.sessionGapMs', 
 it('MEC-016-R2 bird.shadowMs meets the fairness.minWarnMs floor', () => {
   expect(() => loadBalance(j => { j.bird.shadowMs = j.fairness.minWarnMs - 1; })).toThrow(/bird.shadowMs/);
   expect(() => loadBalance(j => { j.bird.shadowMs = j.fairness.minWarnMs; j.bird.marginMs = 0; })).not.toThrow();
+});
+
+it('MEC-017 bomb.warnMs meets the fairness.minWarnMs floor and bomb values are positive integers', () => {
+  expect(() => loadBalance(j => { j.bomb.warnMs = j.fairness.minWarnMs - 1; })).toThrow(/bomb.warnMs/);
+  expect(() => loadBalance(j => { j.bomb.warnMs = j.fairness.minWarnMs; })).not.toThrow();
+  expect(() => loadBalance(j => { j.bomb.arm = 0; })).toThrow(/bomb.arm/);
+  expect(() => loadBalance(j => { j.bomb.countdownMs = 1.5; })).toThrow(/bomb.countdownMs/);
 });

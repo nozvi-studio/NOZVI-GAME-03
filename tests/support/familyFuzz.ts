@@ -23,6 +23,20 @@ interface Input { t: number; dir: Dir }
 const DIRS: readonly Dir[] = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }];
 const INPUT_SEED_OFFSET = 1000003, TURN_INTERVAL_MS = 100, TURN_CHANCE = 0.35, REPLAY_CHUNK_MS = 37, SAMPLE_SPAWNS = 3;
 const RERUN_SEED_OFFSET = 1000033;
+/** MEC-017-R3 the blast area is head-only (body is safe), so it is exempt from I1 but keeps I3 and I6. */
+const BOMB_AREA = 'bombArea';
+/** MEC-004-R17 every modifier family must name its own spawn invariant; a missing entry is a violation, not a skip. */
+export const MODIFIER_INVARIANTS: Partial<Record<FamilyKey, { holds: (before: SimState, b: Balance) => boolean; fail: string }>> = {
+  bird: { holds: birdCanTarget, fail: 'MEC-016-R1 bird target was not reachable in time at spawn' },
+};
+
+// MEC-004-R17 modifiers place no cells, so I1-I5/R18 are replaced by the family's own invariant.
+export function checkModifierSpawn(family: FamilyKey, before: SimState, b: Balance, bad: (m: string) => void,
+  invariants = MODIFIER_INVARIANTS): void {
+  const invariant = invariants[family];
+  if (!invariant) bad(`modifier ${family} has no invariant`);
+  else if (!invariant.holds(before, b)) bad(invariant.fail);
+}
 
 function cellsOf(snap: SimSnapshot, cols: number, showMs: number): Map<string, Mark> {
   const marks = new Map<string, Mark>();
@@ -55,6 +69,11 @@ function cellsOf(snap: SimSnapshot, cols: number, showMs: number): Map<string, M
     else if (c.vis === 'warn' || g.t < showMs) add('spike', c, 'warn', 'spike');
   }
   for (const c of snap.rottenRocks) if (c.state === 'solid') add('rottenRock', c, 'lethal', 'rotten');
+  // MEC-017-R1..R3 blast extraction: the bomb cell warns then is solid; the area warns while counting, then is lethal.
+  for (const m of snap.families.bomb) {
+    if (m.state !== 'active') add('bomb', m, m.state === 'count' ? 'lethal' : 'warn', 'bomb');
+    if (m.state !== 'warn') for (const c of m.area) add(BOMB_AREA, c, m.state === 'active' ? 'lethal' : 'warn', 'bomb');
+  }
   for (const tile of snap.tiles) for (const c of tile.cells) {
     if (c.on) add(tile.family, c, 'active', null);
     else if (tile.state !== 'fade') add(tile.family, c, 'warn', null);
@@ -84,7 +103,7 @@ function checkTransitions(previous: Map<string, Mark>, current: Map<string, Mark
       continue;
     }
     if (old?.phase === mark.phase) continue;
-    if (snake.has(mark.cell)) bad(`I1 ${id} became ${mark.phase} on the snake`);
+    if (mark.family !== BOMB_AREA && snake.has(mark.cell)) bad(`I1 ${id} became ${mark.phase} on the snake`);
     if (mark.family !== 'rottenRock' && (old?.phase !== 'warn' || time - (warnSince.get(id) ?? time) < minWarnMs))
       bad(`I3 ${id} became ${mark.phase} without ${minWarnMs} ms continuous warning`);
     warnSince.delete(id);
@@ -140,10 +159,7 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
       spawned(family, cells, before, after) {
         spawns++;
         // MEC-004 / MEC-016 modifiers place no cells: skip I1-I3/I5 and check the family invariant instead.
-        if (FAMILY[family]?.capClass === 'modifier') {
-          if (family === 'bird' && !birdCanTarget(before, b)) bad('MEC-016-R1 bird target was not reachable in time at spawn');
-          return;
-        }
+        if (FAMILY[family]?.capClass === 'modifier') { checkModifierSpawn(family, before, b, bad); return; }
         const d = family === 'terrain' ? b.fairness.terrainNearHeadDist : b.fairness.nearHeadDist;
         for (const cell of cells) {
           const head = before.snake[0]!;
@@ -188,6 +204,8 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
       // Without skill casts, update-time death leaves acc untouched; a fatal snake step consumes its tick.
       for (const m of movers) if (m.phase === 'mover') marks.set(m.family + ':' + m.cell,
         { family: m.family, cell: m.cell, phase: 'lethal', cause: m.cause });
+      // MEC-017-R3 the blast kills on its activation ms (update time or the same ms's snake step).
+      for (const [id, m] of current) if (m.family === BOMB_AREA && m.phase === 'lethal') marks.set(id, m);
       for (const e of sim.drainEvents()) if (e.type === 'died') checkDeath(e, marks, snap, cols, stateOf(sim).acc !== accBefore, bad);
       marks = current;
       movers = currentMovers;

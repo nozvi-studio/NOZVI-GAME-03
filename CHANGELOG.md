@@ -4,6 +4,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 ## [Unreleased]
 ### Added
 - feat(core): mango-thief bird from level 22; NPC L routes keep both legs >= 2 cells (MEC-016, MEC-015-R2)
+- feat(core): area-blast block and timed bombs from level 23 (MEC-017); registry init guard for undefined families; modifier families without a fuzz invariant now fail
 - feat(core): patrolling cat and chicken from level 21 (MEC-015)
 - feat(core): spike traps on a global beat from level 18 (MEC-014)
 - feat(core): cycle-cell block and gates from level 17 (MEC-014)

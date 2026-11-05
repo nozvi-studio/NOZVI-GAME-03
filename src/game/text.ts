@@ -27,6 +27,7 @@ const UNLOCK_NAMES: Record<IntroKey, string> = { rock: 'rocks', rottenRock: 'rot
   gate: 'gates', // OQ-B6 provisional
   npc: 'cats and chickens', // OQ-B6 provisional
   bird: 'mango-thief birds', // OQ-B6 provisional
+  bomb: 'timed bombs', // OQ-B6 provisional
 };
 const INCOMING: Record<UnlockKey, string> = { fence: 'Fence incoming', maze: 'Maze incoming', terrain: 'The ground is shaking' };
 

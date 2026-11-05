@@ -14,14 +14,23 @@ import { spike } from './spike';
 import { gate } from './gate';
 import { npc } from './npc';
 import { bird } from './bird';
+import { bomb } from './bomb';
 import { timedHazards, updateTimed } from './timed';
 import { solidFamilyWithPriority } from './queries';
 
-export const DEFAULT_FAMILIES: readonly HazardFamily[] = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily, rubbleFamily, mud, ice, coconut, gate, spike, npc, bird];
+export const DEFAULT_FAMILIES: readonly HazardFamily[] = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily, rubbleFamily, mud, ice, coconut, gate, spike, npc, bird, bomb];
+
+// MEC-004-R1 a family module imported before the registry (registry <-> queries cycle) is still undefined here.
+export function assertFamiliesDefined(families: readonly HazardFamily[]): void {
+  families.forEach((f, i) => {
+    if (!f) throw new Error('Hazard registry: DEFAULT_FAMILIES entry at index ' + i + ' is undefined; a family module was imported before src/core/hazards/registry (import the registry or simInternal first)');
+  });
+}
+assertFamiliesDefined(DEFAULT_FAMILIES);
 export let FAMILIES: readonly HazardFamily[] = DEFAULT_FAMILIES;
 export const FAMILY: Record<keyof SimState['families'], HazardFamily> & Partial<Record<FamilyKey, HazardFamily>> = {
   rock: ROCK, fence: FENCE, maze: MAZE, terrain: TERRAIN, rottenRock: rottenRockFamily, snipWall: snipWallFamily, rubble: rubbleFamily,
-  mud, ice, coconut, gate, spike, npc, bird,
+  mud, ice, coconut, gate, spike, npc, bird, bomb,
 };
 
 /** Test-only global seam. Always restore with null in a finally block. */

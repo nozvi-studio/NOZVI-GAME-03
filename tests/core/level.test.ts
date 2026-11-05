@@ -27,7 +27,7 @@ describe('MEC-003 level formulas', () => {
     expect(familyRow(b, 1).rockShapes).toEqual(['single']);
     expect(enabledFamilies(b, 1)).toEqual(['rock']);
     expect(L.filter(n => enabledFamilies(b, n).includes('maze'))[0]).toBe(26);
-    expect(L.map(n => introducedAt(b, n)).filter(Boolean)).toEqual(['rock', 'fence', 'mud', 'terrain', 'rottenRock', 'ice', 'coconut', 'gate', 'spike', 'npc', 'bird', 'maze']);
+    expect(L.map(n => introducedAt(b, n)).filter(Boolean)).toEqual(['rock', 'fence', 'mud', 'terrain', 'rottenRock', 'ice', 'coconut', 'gate', 'spike', 'npc', 'bird', 'bomb', 'maze']);
   });
 });
 

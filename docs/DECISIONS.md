@@ -407,3 +407,9 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - MEC-016-R3: the replacement mango excludes the stolen cell (new optional `exclude` argument on `placeMango`), so "a new mango appears elsewhere" holds. Placement draws from the simulation RNG stream, like `mangoTick`.
 - MEC-016 edge case 3: family updates run before snake movement within one ms, so a steal on the shadow's final ms happens before that ms's move. An eat in any earlier ms wins. R1's 600 ms margin covers this one-ms gap.
 - MEC-015-R2: an L route draws `bend = 2 + rng.int(len - 3)` so both legs are at least 2 cells long. A route with len < 4 stays straight and skips the bend draw.
+
+## 2026-11-05 - P2b bomb rulings (MEC-017)
+- MEC-017-R2: the bomb's `blast` (area + countdown) is created at spawn, not at landing, so the area is reserved in every state including warn; the countdown is reset and starts at landing. `bfsWallAt` covers the bomb cell during warn and count only.
+- MEC-017-R3 "at most once per blast": the update-time area hit runs only on the activation ms (the head can enter the area later only by a snake move, handled by `headHit = 'area'` in `resolveHeadCell`). `BlastState.hit` is set when the activation hit lands, and `headHit` returns null afterwards, so a Shield that absorbed the blast is not followed by a second hit in the same window. `activeMs` is re-measured with `baseTickMs` at activation (TR-B7).
+- MEC-017: landing emits `dust` only, not `landed` (that event's `hazardType` is the P1 `TimedKey`).
+- Fuzz harness: the blast area is head-only, so area cells (`bombArea` marks) are exempt from I1 but keep I3 (3000 ms warning while counting) and I6 (lethal on the activation ms).
