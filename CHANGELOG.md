@@ -26,6 +26,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - fix(game): keyboard turns (arrows/WASD) are queued on the native keydown instead of waiting for Phaser's per-frame keyboard queue; pure key map in src/game/input/keyMap.ts (MEC-001).
 - fix(core): regular mango updates the speed ramp before the level-clear check, so rampEnded precedes levelUp (ARCHITECTURE step 12.4).
 ### Docs
+- test: fuzz-mode size knobs (VITE_FUZZ_SEEDS, VITE_FUZZ_MS) and no timeout for the legacy fuzz in fuzz mode; P2a exit results in PLAYTEST.
 - docs: P1 exit gate verdict (PASS) in PLAYTEST; STATUS for P2 start.
 - docs: update P2a plan for level-up flow B (no onLevelEnd; tiles survive a level up; slowdown x mud rule FB-1; real code paths).
 - docs: P2b (movers, cycles, blasts, bird) and P2c (shrink, challenge levels, tuning, P2 exit) implementation plans.

@@ -4,9 +4,9 @@
 
 ## 2026-11-05 - P2a exit check (pending lead runs)
 - Build: branch `feat/p2a-ground-tiles` (mud from L7, ice from L13; MEC-004 framework).
-- `npm test`: <PENDING lead: pass count and seconds> · `npm run typecheck`: <PENDING> · `npm run test:fuzz`: <PENDING>.
-- `npm run bot:report` (L1-15, 5 seeds): every level cleared by >= 1 seed: <PENDING yes/no>.
-- WARN lines with one-line triage each: <PENDING paste, or "none">.
+- `npm test`: 938 pass / 6 skip / 12 todo (~76 s, 1 worker) · `npm run typecheck`: clean · fuzz mode (reduced, `VITE_FUZZ_SEEDS=30 VITE_FUZZ_MS=60000`, 1 worker): all family fuzz pass; legacy MEC-004 fuzz 12/12 pass (its 60 s timeout lifted in fuzz mode). Full 200 x 120 s family matrix not run (host RAM); run it overnight when the host allows.
+- `npm run bot:report` (L1-15, 5 seeds): every level cleared by >= 1 seed: yes. 0 bot deaths; timeouts are greedy-bot slowness (L8 1/5 clears, L4-5 and L10-11 3/5), not unfair deaths.
+- WARN lines: none.
 - Browser QA (desktop and `vite --host` phone), L7 and L13 played to the end, no console errors: <PENDING>.
 - Death context spot check (Results shows the mud/ice line after a tile death): <PENDING>.
 

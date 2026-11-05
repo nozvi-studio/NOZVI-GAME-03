@@ -2,6 +2,9 @@ import { describe, it, expect } from 'vitest';
 import type { FamilyKey } from '../../../src/core/types';
 import { runFamilyFuzz } from '../../support/familyFuzz';
 const FUZZ = import.meta.env.MODE === 'fuzz';
+// Fuzz-mode size; override with VITE_FUZZ_SEEDS / VITE_FUZZ_MS (full matrix 200 x 120000 for overnight runs).
+const FUZZ_SEEDS = Number(import.meta.env.VITE_FUZZ_SEEDS ?? 200);
+const FUZZ_MS = Number(import.meta.env.VITE_FUZZ_MS ?? 120000);
 const INTRO = { rock: 1, fence: 6, terrain: 11, maze: 26, mud: 7, ice: 13 } as const;
 describe('MEC-004-R17 per-family fuzz', () => {
   for (const [family, level] of Object.entries(INTRO)) {
@@ -10,8 +13,8 @@ describe('MEC-004-R17 per-family fuzz', () => {
         ? (['solo', 'full'] as const).flatMap(mode => [level, 30].map(startLevel => ({ mode, startLevel })))
         : [{ mode: 'solo' as const, startLevel: level }];
       for (const r of runs) {
-        expect(runFamilyFuzz({ family: family as FamilyKey, ...r, seeds: FUZZ ? 200 : 2,
-          durationMs: FUZZ ? 120000 : 20000, escape: FUZZ ? 'all' : 'sample' })).toEqual([]);
+        expect(runFamilyFuzz({ family: family as FamilyKey, ...r, seeds: FUZZ ? FUZZ_SEEDS : 2,
+          durationMs: FUZZ ? FUZZ_MS : 20000, escape: FUZZ ? 'all' : 'sample' })).toEqual([]);
       }
     }, FUZZ ? 0 : 10000);
   }
