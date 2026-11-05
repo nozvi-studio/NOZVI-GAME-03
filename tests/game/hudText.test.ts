@@ -24,3 +24,11 @@ describe('MEC-003 §8 challenge banner and HUD marker', () => {
     expect(levelLabel({ level: 6, biome: 2, challenge: false }, t)).not.toContain('★');
   });
 });
+
+import { runStartLines } from '../../src/game/hudText';
+describe('MEC-003 §8 run start banner', () => {
+  it('MEC-003 §8 a run starting on a challenge level shows its challenge banner, other levels none', () => {
+    expect(runStartLines({ level: 10, challenge: true }, t)).toEqual(['Challenge: Fence field!']);
+    expect(runStartLines({ level: 1, challenge: false }, t)).toEqual([]);
+  });
+});

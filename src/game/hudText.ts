@@ -17,3 +17,8 @@ export function levelLabel(s: { level: number; biome: number; challenge: boolean
   const base = t('hud.level', { n: s.level, b: s.biome });
   return s.challenge ? `${base} ${t('hud.challenge')}` : base;
 }
+
+/** MEC-003 §8 run-start banner lines: the challenge banner when the run begins on a challenge level (e.g. checkpoint start). */
+export function runStartLines(s: { level: number; challenge: boolean }, t: T): string[] {
+  return s.challenge ? [t(`banner.challenge.${s.level}`)] : [];
+}

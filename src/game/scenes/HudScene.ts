@@ -8,7 +8,7 @@ import { createDpad } from '../input/dpad';
 import { acceptSkillInput, skillSlotForKey } from '../input/skillKeys';
 import { BOARD, DPAD, HEADER, LEVEL_BAR, WIDTH } from '../layout';
 import { currentPalette, P1_COLORS, reduceMotion, type Palette } from '../render/palette';
-import { levelLabel, levelUpLines } from '../hudText';
+import { levelLabel, levelUpLines, runStartLines } from '../hudText';
 import { incomingBanner, progressLabel, t, TEXT } from '../text';
 import type { GameScene } from './GameScene';
 
@@ -206,7 +206,12 @@ export class HudScene extends Phaser.Scene {
 
   private onFlow(effect: FlowEffect): void {
     switch (effect.type) {
-      case 'newRun': this.overTimer?.remove(); this.hideBanner(); this.synth.unlock(); break;
+      case 'newRun': {
+        this.overTimer?.remove(); this.hideBanner(); this.synth.unlock();
+        const start = runStartLines(this.gameScene.snapshot() ?? { level: 0, challenge: false }, t); // MEC-003 §8
+        if (start.length) this.showBanner(start.join('\n'));
+        break;
+      }
       case 'hideOverlay': this.overlay.setVisible(false); this.count.setVisible(false); break;
       case 'showPaused': this.count.setVisible(false); this.overlay.setVisible(true); break;
       case 'tick': this.count.setText(String(effect.n)).setVisible(true); this.synth.play('tick'); break;
