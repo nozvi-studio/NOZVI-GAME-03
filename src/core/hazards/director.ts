@@ -31,7 +31,8 @@ export function spawnCtx(s: SimState, b: Balance): SpawnCtx {
 // MEC-004-R9 every cap and gate is evaluated over the ordered registry.
 export function directorOptions(s: SimState, b: Balance, fams: readonly HazardFamily[] = FAMILIES): { family: HazardFamily; weight: number }[] {
   const counts = new Map(fams.map(f => {
-    const state = s.families[f.key];
+    // MEC-004-R9 new families provide count; the fallback covers existing state entries.
+    const state = s.families[f.key as keyof SimState['families']];
     return [f, f.count?.(s) ?? (Array.isArray(state) ? state.length : state.patches.length)] as const;
   }));
   const smallCount = fams.reduce((n, f) => n + (f.capClass === 'small' ? counts.get(f)! : 0), 0);

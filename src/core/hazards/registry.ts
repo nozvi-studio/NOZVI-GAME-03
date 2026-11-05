@@ -14,7 +14,7 @@ import { solidFamilyWithPriority } from './queries';
 
 export const DEFAULT_FAMILIES: readonly HazardFamily[] = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily, rubbleFamily, mud, ice];
 export let FAMILIES: readonly HazardFamily[] = DEFAULT_FAMILIES;
-export const FAMILY: Record<FamilyKey, HazardFamily> = {
+export const FAMILY: Record<keyof SimState['families'], HazardFamily> & Partial<Record<FamilyKey, HazardFamily>> = {
   rock: ROCK, fence: FENCE, maze: MAZE, terrain: TERRAIN, rottenRock: rottenRockFamily, snipWall: snipWallFamily, rubble: rubbleFamily,
   mud, ice,
 };

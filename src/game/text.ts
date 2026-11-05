@@ -14,6 +14,8 @@ export const CAUSE_TEXT: Record<CauseKey, string> = {
   rotten: 'You hit a rock left by a rotten mango.', rock: 'A falling rock got you.',
   fence: 'You ran into a fence.', maze: 'You ran into a hedge.', ground: 'The ground rose in front of you.',
   snipWall: 'You hit your discarded tail.', rubble: 'You hit the rubble.',
+  coconut: 'Hit by a coconut.', gate: 'Crushed by a gate.', spike: 'Spiked.',
+  cat: 'Ran into the cat.', chicken: 'Ran into the chicken.', bomb: 'Caught in the blast.',
 };
 const UNLOCK_NAMES: Record<IntroKey, string> = { rock: 'rocks', rottenRock: 'rotten rocks', fence: 'fences', terrain: 'rising ground', maze: 'hedge mazes', mud: 'mud', ice: 'ice' };
 const INCOMING: Record<UnlockKey, string> = { fence: 'Fence incoming', maze: 'Maze incoming', terrain: 'The ground is shaking' };

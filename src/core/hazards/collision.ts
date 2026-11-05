@@ -20,7 +20,7 @@ export function resolveHeadCell(s: SimState, x: number, y: number, ctx: StepCtx)
     consumeShield(s, ctx, hit.family, x, y, hit.kind, s.dir);
     return { kind: hit.kind === 'area' ? 'absorbed' : 'broke', family: hit.family.key };
   }
-  return { kind: 'death', cause: hit.family.cause };
+  return { kind: 'death', cause: hit.family.causeAt?.(s, x, y) ?? hit.family.cause };
 }
 
 // MEC-004-R8 update-time hit dispatch.
@@ -33,9 +33,10 @@ export function applyHeadHit(s: SimState, ctx: StepCtx, key: FamilyKey, x: numbe
     return;
   }
   const context = deathContext(s, s.snake[0]!);
+  const cause = family.causeAt?.(s, x, y) ?? family.cause;
   s.status = 'over';
-  s.outcome = { won: false, cause: family.cause };
-  ctx.emit({ type: 'died', cause: family.cause, x, y, ...(context ? { context } : {}) });
+  s.outcome = { won: false, cause };
+  ctx.emit({ type: 'died', cause, x, y, ...(context ? { context } : {}) });
 }
 
 // MEC-004-R15 tile at the head when a fatal step or hit begins.

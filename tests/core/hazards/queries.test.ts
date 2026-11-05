@@ -29,6 +29,20 @@ describe('MEC-004 queries', () => {
     expect(solidCauseAt(s, 4, 4, [a, b])).toBe('fence');
     expect(solidCauseAt(s, 5, 5, [a, b])).toBeNull();
   });
+  it('MEC-004-R3 solidCauseAt prefers a family causeAt over its cause', () => {
+    const f = { ...fakeFamily({ key: 'gate', cause: 'gate', solid: [[3, 3], [4, 3]] }),
+      causeAt: (_s: unknown, x: number): 'fence' | 'gate' => x === 3 ? 'fence' : 'gate' };
+    const s = buildBoard({});
+    expect(solidCauseAt(s, 3, 3, [f])).toBe('fence');
+    expect(solidCauseAt(s, 4, 3, [f])).toBe('gate');
+  });
+  it('MEC-004-R3 null causeAt falls back to the selected family cause without consulting later families', () => {
+    const f = { ...fakeFamily({ key: 'gate', cause: 'gate', solid: [[3, 3]] }), causeAt: () => null };
+    const later = fakeFamily({ key: 'fence', cause: 'fence', solid: [[3, 3]] });
+    const s = buildBoard({});
+    expect(solidCauseAt(s, 3, 3, [f, later])).toBe('gate');
+    expect(solidCauseAt(s, 4, 3, [f, later])).toBeNull();
+  });
   it('MEC-004-R3 tileAt and headHitAt return the first non-null family answer', () => {
     const t = fakeFamily({ key: 'rock', tile: { kind: 'mud', cells: [[2, 2]] }, hit: { kind: 'area', cells: [[6, 6]] } });
     const s = buildBoard({});

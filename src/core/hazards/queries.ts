@@ -14,8 +14,10 @@ export function solidFamilyWithPriority(s: SimState, x: number, y: number): Haza
   return solidFamilyAt(s, x, y);
 }
 
+// MEC-004-R3 prefer the selected family's per-cell cause, falling back to its default.
 export function solidCauseAt(s: SimState, x: number, y: number, fams: readonly HazardFamily[] = FAMILIES): CauseKey | null {
-  return solidFamilyAt(s, x, y, fams)?.cause ?? null;
+  const family = solidFamilyAt(s, x, y, fams);
+  return family ? family.causeAt?.(s, x, y) ?? family.cause : null;
 }
 
 // MEC-004-R3 placement and BFS compose every family, including optional test families.

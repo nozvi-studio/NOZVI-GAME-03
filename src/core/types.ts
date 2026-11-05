@@ -17,8 +17,8 @@ export interface LevelRow {
   from: number; to: number; weights: Partial<Record<FamilyKey, number>>;
   rockShapes: string[]; fenceShapes: string[]; rottenRocks: boolean;
 }
-export type CauseKey = 'wall' | 'self' | 'rotten' | 'rock' | 'fence' | 'maze' | 'ground' | 'snipWall' | 'rubble';   // prototype CAUSES L336
-export type FamilyKey = TableFamily | 'rottenRock' | 'snipWall' | 'rubble';
+export type CauseKey = 'wall' | 'self' | 'rotten' | 'rock' | 'fence' | 'maze' | 'ground' | 'snipWall' | 'rubble' | 'coconut' | 'gate' | 'spike' | 'cat' | 'chicken' | 'bomb';
+export type FamilyKey = TableFamily | 'rottenRock' | 'snipWall' | 'rubble' | 'coconut' | 'gate' | 'spike' | 'npc' | 'bird' | 'bomb';
 export type TileKind = 'mud' | 'ice';
 export type HitKind = 'mover' | 'area';
 export interface HitCtx { hitHead(family: FamilyKey, x: number, y: number, kind: HitKind, dir: Dir): void }
@@ -74,6 +74,9 @@ export type SimEvent =
   | { type: 'dust'; x: number; y: number }
   | { type: 'rotted'; x: number; y: number; leftRock: boolean }
   | { type: 'hazardIncoming'; family: FamilyKey }
+  | { type: 'moverHit'; family: 'coconut' | 'npc'; x: number; y: number }
+  | { type: 'bombBlast'; x: number; y: number; cells: Cell[] }
+  | { type: 'mangoStolen'; x: number; y: number }
   | { type: 'died'; cause: CauseKey; x: number; y: number; context?: TileKind };
 
 /** All Sim state. Plain JSON data only: no closures, Map/Set or class instances. */
@@ -222,6 +225,8 @@ export interface HazardFamily {
   readonly key: FamilyKey;
   readonly breakable: boolean;
   readonly cause: CauseKey | null;
+  /** MEC-004-R3 per-cell cause for gate fence cells and NPC variants; null falls back to cause. */
+  causeAt?(s: SimState, x: number, y: number): CauseKey | null;
   readonly capClass: CapClass;
   readonly maxActiveKey: string | null;
   /** MEC-004-R9 true when the family owns or defers its own hazardIncoming warning, so the director stays silent. */
