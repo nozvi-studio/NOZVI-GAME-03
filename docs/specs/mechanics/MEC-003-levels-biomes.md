@@ -141,7 +141,7 @@ Read, owned elsewhere: `mango.rottenRockLifeMs` (5000, MEC-002 §9); `fairness.*
 - `MEC-003-R4 with P1 config interval L1 4880, L29 1600, L30 1600; cap L1 2, L29 10, L30 10`
 - `MEC-003-R4 with factor 0.8 and bonus 2 (test balance) challenge L30 is 1280 ms and cap 12, L29 unchanged`
 - `MEC-003-R4 shipped config uses challenge factor 0.8 and bonus 2`
-- `MEC-003-R14 challenge rows L5 10 15 20 25 30 exist and introduce no family`
+- `MEC-003-R15 challenge rows L5 10 15 20 25 30 exist and introduce no family`
 - `MEC-003-R8 a closed ring survives a level up and reopens on its own timer`
 - `MEC-003-R5 overflow progress carries into the next level`
 - `MEC-003-R6 clearing L30 ends the run with won true and emits runWon without levelUp`

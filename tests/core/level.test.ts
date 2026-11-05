@@ -14,7 +14,8 @@ describe('MEC-003 level formulas', () => {
     expect([quota(b, 1), quota(b, 30)]).toEqual([4, 13]);
     expect(L.reduce((s, n) => s + quota(b, n), 0)).toBe(255);
   });
-  it('MEC-003-R4 with P1 config interval L1 4880, L29 1600, L30 1600; cap L1 2, L29 10, L30 10', () => {
+  it('MEC-003-R4 with neutral challenge keys interval L1 4880, L29 1600, L30 1600; cap L1 2, L29 10, L30 10', () => {
+    const b = loadBalance(j => { j.director.challengeIntervalFactor = 1; j.director.challengeCapBonus = 0; });
     expect([1, 29, 30].map(n => directorIntervalMs(b, n))).toEqual([4880, 1600, 1600]);
     expect([1, 29, 30].map(n => smallHazardCap(b, n))).toEqual([2, 10, 10]);
   });
@@ -92,3 +93,29 @@ it('MEC-003-R15 fenceFirstLevel follows the family table', () => { expect(fenceF
     sim.advance(1);
     expect(stateOf(sim).tickMs).toBe(138);
   });
+
+describe('P2c challenge rows (TR-C5)', () => {
+  it('MEC-003-R4 shipped challenge level uses interval x 0.8 and cap + 2', () => {
+    const b = loadBalance();
+    expect(isChallenge(b, 10)).toBe(true);
+    expect(directorIntervalMs(b, 10)).toBe(Math.floor(Math.max(1600, 5000 - 120 * 10) * 0.8));
+    expect(smallHazardCap(b, 10)).toBe(Math.min(10, 2 + Math.floor(10 / 3)) + 2);
+    expect(directorIntervalMs(b, 11)).toBe(Math.max(1600, 5000 - 120 * 11));
+  });
+  it('MEC-003-R15 challenge rows follow P2 design section 12', () => {
+    const b = loadBalance();
+    expect(familyRow(b, 5).weights).toEqual({ rock: 5 });
+    expect(familyRow(b, 10).weights).toEqual({ fence: 4, mud: 2, rock: 2 });
+    expect(familyRow(b, 15).weights).toEqual({ ice: 4, terrain: 2, rock: 2, fence: 1 });
+    expect(familyRow(b, 20).weights).toEqual({ coconut: 4, rock: 3, spike: 2, gate: 1 });
+    expect(familyRow(b, 25).weights).toEqual({ npc: 4, bomb: 2, bird: 2, rock: 1 });
+    expect(Object.keys(familyRow(b, 30).weights)).toHaveLength(13);
+    for (const n of [5, 10, 15, 20, 25, 30]) expect(familyRow(b, n).from).toBe(familyRow(b, n).to);
+  });
+  it('MEC-003-R16 no family is introduced on a challenge level', () => {
+    const b = loadBalance();
+    for (const n of [5, 10, 15, 20, 25, 30]) expect(introducedAt(b, n)).toBeUndefined();
+    expect([1, 6, 7, 11, 12, 13, 16, 17, 18, 21, 22, 23, 26, 27].map(n => introducedAt(b, n)))
+      .toEqual(['rock', 'fence', 'mud', 'terrain', 'rottenRock', 'ice', 'coconut', 'gate', 'spike', 'npc', 'bird', 'bomb', 'maze', 'shrink']);
+  });
+});

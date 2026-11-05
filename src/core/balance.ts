@@ -288,6 +288,7 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
     if (row.from < SHRINK_FROM_LEVEL && (row.weights.shrink ?? 0) > 0) fail(path + '.weights.shrink', 'must not be enabled before level ' + SHRINK_FROM_LEVEL);
     if (row.rottenRocks) enabled.push('rottenRock');
     const fresh = enabled.filter(k => !seen.has(k));
+    if (row.from % b.level.perBiome === 0 && fresh.length > 0) fail('level.table', 'challenge level ' + row.from + ' introduces ' + fresh[0]); // MEC-003-R16, TR-C5
     if (fresh.length > 1) fail(path, 'introduces more than one family');
     enabled.forEach(k => seen.add(k));
     if ((row.weights.rock ?? 0) > 0 && !row.rockShapes.length) fail(path + '.rockShapes', 'must enable a shape for rock');

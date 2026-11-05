@@ -120,7 +120,8 @@ it('MEC-014-R9 spike is introduced at L18 only', () => {
   const b = loadBalance();
   for (let level = 1; level <= 30; level++) {
     expect(introducedAt(b, level) === 'spike').toBe(level === 18);
-    expect(familyRow(b, level).weights.spike ?? 0).toBe(level >= 18 ? 2 : 0);
+    // P2c: challenge rows (L5 10 15 20 25 30) carry their own weights, so 2 is pinned on non-challenge levels only.
+    if (level < 18 || level % 5 !== 0) expect(familyRow(b, level).weights.spike ?? 0).toBe(level >= 18 ? 2 : 0);
   }
 });
 it('MEC-014-R5 spawn makes configured shapes with lifetime bounds and zero-delay down cells', () => {

@@ -135,7 +135,7 @@ describe('MEC-004 director', () => {
     sim.advance(1); expect(timedHazards(s)).toHaveLength(1); expect(s.spawnInMs).toBe(4880);
     sim.advance(4879); expect(timedHazards(s)).toHaveLength(1);
     sim.advance(1); expect(timedHazards(s)).toHaveLength(2);
-    const late = due(30); updateDirector(late, b, fixed([]).rng); expect(late.spawnInMs).toBe(1600);
+    const late = due(29); updateDirector(late, b, fixed([]).rng); expect(late.spawnInMs).toBe(1600);
   });
   it.each(['warn', 'solid', 'crumble'] as const)('MEC-004 cap counts non-maze hazards in any state: %s', phase => {
     const s = due(1);

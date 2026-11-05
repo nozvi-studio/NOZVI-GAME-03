@@ -3,6 +3,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Added
+- feat(config): challenge levels 5-30 get their own table rows (P2 design section 12 weights), director interval x0.8 and cap +2 on challenge levels; parseBalance rejects a challenge level that introduces a family (MEC-003-R4 R15 R16)
 - feat(game): shrink ring greybox (blink outline, arrows, hatched closed cells) and fairness invariants MEC-018-I1..I3 in the family fuzz harness (MEC-018)
 - feat(core): shrinking board family from level 27: outer ring warns 2000 ms, closes up to 6000 ms (waits under the snake and near the head), reopens via crumble; mangoDisplaced event, ring displaces mango/orbs/rain mangoes (MEC-018)
 - docs: MEC-018 shrinking board spec and MEC-003 challenge rules for P2c (OQ-C1..C3 provisional defaults)

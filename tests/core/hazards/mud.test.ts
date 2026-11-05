@@ -156,7 +156,8 @@ it('MEC-012-R11 mud is introduced at L7 only', () => {
     startLevelUp(s, b, ctx);
     const event = ctx.events.find(e => e.type === 'levelUp');
     expect(event?.type === 'levelUp' && event.unlocked === 'mud').toBe(level === 7);
-    expect(familyRow(b, level).weights.mud ?? 0).toBe(level >= 7 ? 2 : 0);
+    // P2c: challenge rows (L5 10 15 20 25 30) carry their own weights, so 2 is pinned on non-challenge levels only.
+    if (level < 7 || level % 5 !== 0) expect(familyRow(b, level).weights.mud ?? 0).toBe(level >= 7 ? 2 : 0);
   }
 });
 
