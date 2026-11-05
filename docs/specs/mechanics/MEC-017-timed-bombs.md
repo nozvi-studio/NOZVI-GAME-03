@@ -59,8 +59,7 @@ Descriptor: `{key: 'bomb', cause: 'bomb', capClass: 'small', maxActiveKey: 'bomb
 - `MEC-017-R2 countdown lasts 3000 ms and the area is reserved during it`
 - `MEC-017-R3 head in the area when the blast fires dies with cause bomb; body in the area is safe`
 - `MEC-017-R3 blast is active for exactly one base tick at activation, also during slow-mo`
-- `MEC-017-R4 shield absorbs one blast without bonk or rubble; shield on the bomb cell defuses it`
-- `MEC-017-R4 shield breaking the bomb cell defuses it (no bombBlast event)`
+- `MEC-017-R4 shield absorbs one blast without bonk or rubble; shield breaking the bomb cell defuses it without a bombBlast event`
 - `MEC-017-R5 a blast does not affect other bombs, hazards, mangoes or orbs`
 - `MEC-017-R6 bomb is introduced at L23 only`
 - Fuzz (MEC-004-R17/R18): solo `bomb: 23` and full table (blast extraction in the harness).

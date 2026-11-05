@@ -32,7 +32,7 @@ Save fields: none.
 - **Level up (MEC-004-R16, flow B).** No level-end hook: a warning or rolling coconut keeps its lifecycle through a level up and can still hit.
 
 ## 5. Edge cases
-1. **Coconut lane crosses the mango:** allowed; the mango cell is not reserved by placement rules for coconuts and the roll leaves it unchanged (R7).
+1. **Coconut lane crosses an existing mango:** allowed; an existing mango may lie on a lane and the roll leaves it unchanged (R7). No new mango is placed on a lane cell while the lane is reserved (R2).
 2. **Snake turns into the lane during the warning:** allowed; the lane was fair at spawn. If the head is on the lane when the coconut arrives, the head is hit.
 3. **Body crosses the lane:** the coconut shatters at the body (R4).
 4. **Head moves onto the coconut's current cell:** `headHit` → death `coconut` or Shield break.

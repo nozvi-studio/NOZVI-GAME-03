@@ -21,7 +21,7 @@ describe('MEC-004 collision', () => {
     { key: 'gate', cause: 'gate', cellCause: null, expected: 'gate' },
   ] as const;
 
-  it.each(perCellCauses)('MEC-004-R6 MEC-014-L4 MEC-015-R7 head entry uses causeAt with fallback: $key/$cellCause', ({ key, cause, cellCause, expected }) => {
+  it.each(perCellCauses)('MEC-004-R6 MEC-014-R4 MEC-015-R7 head entry uses causeAt with fallback: $key/$cellCause', ({ key, cause, cellCause, expected }) => {
     for (const solid of [true, false]) {
       const s = buildBoard({ head: [4, 8] });
       const f = { ...fakeFamily({ key, cause, ...(solid ? { solid: [[5, 8]] } : { hit: { kind: 'mover', cells: [[5, 8]] } }) }),
@@ -37,7 +37,7 @@ describe('MEC-004 collision', () => {
     }
   });
 
-  it.each(perCellCauses)('MEC-004-R8 MEC-014-L4 MEC-015-R7 update-time hit uses causeAt with fallback: $key/$cellCause', ({ key, cause, cellCause, expected }) => {
+  it.each(perCellCauses)('MEC-004-R8 MEC-014-R4 MEC-015-R7 update-time hit uses causeAt with fallback: $key/$cellCause', ({ key, cause, cellCause, expected }) => {
     const s = buildBoard({ head: [4, 8] }), ctx = hitCtx(s);
     const f = { ...fakeFamily({ key, cause }), causeAt: () => cellCause };
     const previous = FAMILIES;

@@ -391,3 +391,6 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - `HazardFamily.causeAt` (TR-B5) applies to the collision death cause too: `resolveHeadCell` and `applyHeadHit` report `causeAt(s, x, y) ?? cause`, not only `solidCauseAt`. Otherwise fence-cell deaths in a gate would report `gate` and NPC deaths would always report `cat` (MEC-014 L4, MEC-015 R7).
 - P2b families do not emit `hazardIncoming` in `spawn`; `emitsIncoming` stays unset and the director emits it (P2a MEC-004-R9). The plan's spawn sketches that call `ctx.emit({type: 'hazardIncoming'})` would duplicate the event.
 - `bfsDistance` does not exist in `grid.ts` after P2a (only `reachable`); Task 8 adds it.
+
+## 2026-11-05 - P2b Task 3 mover lifetime accounting
+- Keep a JSON `lifeT` interval clock alongside the movement clock `t`. MEC-015-R6 lifetime starts on the first successful cell entry and is charged once per `cellMs`, including waits; the movement clock stays saturated during blocked retries. The draft charged lifetime before the first entry and on every 1 ms retry, which could expire an NPC early. Zero lifetime means one traversal, so `newMover` disables ping-pong in that case.

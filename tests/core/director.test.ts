@@ -32,6 +32,13 @@ function selected(level: number, roll: number): FamilyKey | undefined {
 }
 
 describe('MEC-004 director', () => {
+  it.each([undefined, { target: null }])('MEC-004-R9 a family without count or a supported state throws with its key (%j)', state => {
+    const s = due(1);
+    Object.assign(s.families, { bird: state });
+    const family = fakeFamily({ key: 'bird', capClass: 'modifier' });
+    delete family.count;
+    expect(() => directorOptions(s, b, [family])).toThrowError('Missing count for hazard family: bird');
+  });
   it('MEC-004-R9 small cap counts all small families; modifier not counted; one big family at a time', () => {
     const s = due(1), balance = structuredClone(b);
     Object.assign(balance.level.table[0]!.weights, { rock: 3, fence: 2, terrain: 2, maze: 2, rubble: 1 });

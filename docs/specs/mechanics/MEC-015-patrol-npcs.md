@@ -60,7 +60,7 @@ Descriptor: `{key: 'npc', cause: 'cat', capClass: 'small', maxActiveKey: 'npc.ma
 - `MEC-015-R1 variants follow config weights`
 - `MEC-015-R2 routeCells builds straight and L routes`
 - `MEC-015-R3 route is telegraphed for 1500 ms before the first move and respects rule 2`
-- `MEC-015-R4 ping-pong reverses at the ends and leaves at an end after lifeMs`
+- `MEC-015-R4 ping-pong reverses at the ends`
 - `MEC-015-R5 an NPC waits for a body cell and the body is never hit`
 - `MEC-015-R6 NPC leaves at a route end after its life`
 - `MEC-015-R7 head moving into the NPC dies with the variant cause`

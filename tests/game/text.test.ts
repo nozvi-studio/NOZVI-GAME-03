@@ -46,15 +46,14 @@ describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
       over: 'Game over', won: 'You filled the board!', wonWhy: 'No room left for mangoes.',
     });
   });
-});
-
-it('MEC-013..017 new causes have death messages before their families are registered', () => {
-  expect(deathMessage(false, 'coconut', 12, 16)).toBe('Hit by a coconut. Score 12, level 16.');
-  expect(deathMessage(false, 'gate', 12, 17)).toBe('Crushed by a gate. Score 12, level 17.');
-  expect(deathMessage(false, 'spike', 12, 18)).toBe('Spiked. Score 12, level 18.');
-  expect(deathMessage(false, 'cat', 12, 21)).toBe('Ran into the cat. Score 12, level 21.');
-  expect(deathMessage(false, 'chicken', 12, 21)).toBe('Ran into the chicken. Score 12, level 21.');
-  expect(deathMessage(false, 'bomb', 12, 23)).toBe('Caught in the blast. Score 12, level 23.');
+  it('GDD-13 new causes have death messages before their families are registered', () => {
+    expect(deathMessage(false, 'coconut', 12, 16)).toBe('Hit by a coconut. Score 12, level 16.');
+    expect(deathMessage(false, 'gate', 12, 17)).toBe('Crushed by a gate. Score 12, level 17.');
+    expect(deathMessage(false, 'spike', 12, 18)).toBe('Spiked. Score 12, level 18.');
+    expect(deathMessage(false, 'cat', 12, 21)).toBe('Ran into the cat. Score 12, level 21.');
+    expect(deathMessage(false, 'chicken', 12, 21)).toBe('Ran into the chicken. Score 12, level 21.');
+    expect(deathMessage(false, 'bomb', 12, 23)).toBe('Caught in the blast. Score 12, level 23.');
+  });
 });
 
 describe('P1 text keys (MEC-003/006/007/008 §8)', () => {
