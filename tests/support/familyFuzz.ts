@@ -23,7 +23,7 @@ const DIRS: readonly Dir[] = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, {
 const INPUT_SEED_OFFSET = 1000003, TURN_INTERVAL_MS = 100, TURN_CHANCE = 0.35, REPLAY_CHUNK_MS = 37, SAMPLE_SPAWNS = 3;
 const RERUN_SEED_OFFSET = 1000033;
 
-function cellsOf(snap: SimSnapshot, cols: number): Map<string, Mark> {
+function cellsOf(snap: SimSnapshot, cols: number, showMs: number): Map<string, Mark> {
   const marks = new Map<string, Mark>();
   const add = (family: string, c: Cell, phase: Phase, cause: CauseKey | null) => {
     const cell = key(cols, c.x, c.y);
@@ -47,6 +47,11 @@ function cellsOf(snap: SimSnapshot, cols: number): Map<string, Mark> {
       if (c.vis === 'up') add('gate', c, 'lethal', 'gate');
       else if (c.vis === 'warn') add('gate', c, 'warn', 'gate');
     }
+  }
+  // MEC-014-R6 down spots are the initial show warning; later rises use the beat warning.
+  for (const g of snap.families.spike) for (const c of g.cells) {
+    if (c.vis === 'up') add('spike', c, 'lethal', 'spike');
+    else if (c.vis === 'warn' || g.t < showMs) add('spike', c, 'warn', 'spike');
   }
   for (const c of snap.rottenRocks) if (c.state === 'solid') add('rottenRock', c, 'lethal', 'rotten');
   for (const tile of snap.tiles) for (const c of tile.cells) {
@@ -151,7 +156,7 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
           && escapeExists(b, before) && !escapeExists(b, after)) bad(`R18 ${family} removed every escape`);
       },
     } });
-    let snap = sim.snapshot(), marks = cellsOf(snap, cols);
+    let snap = sim.snapshot(), marks = cellsOf(snap, cols, b.spike.showMs);
     let movers = moverCells(snap, cols);
     const moverWarnSince = new Map<string, number>();
     const warnSince = new Map<string, number>();
@@ -167,7 +172,7 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
       sim.advance(1); time++;
       snap = sim.snapshot();
       checkIce(stateOf(sim), b, bad);
-      const current = cellsOf(snap, cols);
+      const current = cellsOf(snap, cols, b.spike.showMs);
       const currentMovers = moverCells(snap, cols);
       checkMoverTransitions(movers, currentMovers, moverWarnSince, body, time, bad);
       checkTransitions(marks, current, warnSince, snake, time, minWarnMs, bad);

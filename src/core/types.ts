@@ -4,6 +4,7 @@ import type { Rng, RngState } from './rng';
 import type { CandidateOpts } from './hazards/placement';
 import type { TilePatch } from './hazards/blocks/groundTiles';
 import type { MoverState } from './hazards/blocks/mover';
+import type { SpikeGroup } from './hazards/spike';
 import type { GateInstance } from './hazards/gate';
 
 export type Step = -1 | 0 | 1;
@@ -13,7 +14,7 @@ export interface Cell { x: number; y: number }
 export type SkillId = 'slowmo' | 'tailSnip' | 'shield' | 'mangoRain';
 export type Loadout = readonly [SkillId | null, SkillId | null];
 export interface SimOptions { startLevel?: number; startEnergy?: number; loadout?: Loadout; bestLevel?: number }
-export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze' | 'mud' | 'ice' | 'coconut' | 'gate';
+export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze' | 'mud' | 'ice' | 'coconut' | 'gate' | 'spike';
 export type IntroKey = TableFamily | 'rottenRock';
 export interface LevelRow {
   from: number; to: number; weights: Partial<Record<FamilyKey, number>>;
@@ -83,7 +84,7 @@ export type SimEvent =
 
 /** All Sim state. Plain JSON data only: no closures, Map/Set or class instances. */
 export interface SimState {
-  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; rubble: Rubble[]; mud: { patches: TilePatch[]; nextId: number }; ice: { patches: TilePatch[]; nextId: number }; coconut: { rolls: { id: number; lane: 'row' | 'col'; index: number; mover: MoverState }[]; nextId: number }; gate: { gates: GateInstance[]; nextId: number } };
+  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; rubble: Rubble[]; mud: { patches: TilePatch[]; nextId: number }; ice: { patches: TilePatch[]; nextId: number }; coconut: { rolls: { id: number; lane: 'row' | 'col'; index: number; mover: MoverState }[]; nextId: number }; gate: { gates: GateInstance[]; nextId: number }; spike: { groups: SpikeGroup[]; nextId: number } };
   nextHazardSeq: number;
   snake: Cell[];               // head first
   dir: Dir;
@@ -138,8 +139,13 @@ export interface GateView {
   gate: readonly { x: number; y: number; delay: number; vis: TerrainVis }[];
 }
 
+export interface SpikeView {
+  id: number; t: number; lifeMs: number; ending: boolean;
+  cells: readonly { x: number; y: number; delay: number; vis: TerrainVis }[];
+}
+
 export interface SimSnapshot {
-  families: { coconut: readonly CoconutView[]; gate: readonly GateView[] };
+  families: { coconut: readonly CoconutView[]; gate: readonly GateView[]; spike: readonly SpikeView[] };
   tiles: readonly { family: TileKind; id: number; state: 'warn' | 'active' | 'fade'; leftMs: number; cells: readonly { x: number; y: number; on: boolean }[]; ring?: readonly Cell[] }[];
   headTile: TileKind | null;
   skills: readonly { slot: 0 | 1; id: SkillId | null; cost: number; affordable: boolean; active: boolean; leftMs: number }[];

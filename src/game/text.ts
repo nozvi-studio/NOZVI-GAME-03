@@ -23,6 +23,7 @@ export const CAUSE_TEXT: Record<CauseKey, string> = {
 };
 const UNLOCK_NAMES: Record<IntroKey, string> = { rock: 'rocks', rottenRock: 'rotten rocks', fence: 'fences', terrain: 'rising ground', maze: 'hedge mazes', mud: 'mud', ice: 'ice',
   coconut: 'rolling coconuts', // OQ-B6 provisional
+  spike: 'spikes', // OQ-B6 provisional
   gate: 'gates', // OQ-B6 provisional
 };
 const INCOMING: Record<UnlockKey, string> = { fence: 'Fence incoming', maze: 'Maze incoming', terrain: 'The ground is shaking' };

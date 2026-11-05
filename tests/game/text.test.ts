@@ -85,3 +85,7 @@ describe('P1 text keys (MEC-003/006/007/008 §8)', () => {
     expect(t('no.such.key')).toBe('no.such.key');
   });
 });
+
+it('MEC-014-R9 spike introduction has a readable level banner', () => {
+  expect(levelBanner(18, 'spike')).toBe('Level 18: spikes unlocked');
+});

@@ -32,6 +32,9 @@ export interface Balance {
   mud: GroundTileBalance & { tickFactor: number };
   ice: GroundTileBalance;
   coconut: { warnMs: number; cellMs: number; maxActive: number; tries: number };
+  spike: { downMs: number; warnMs: number; upMs: number; showMs: number; lifeMs: number; lifeRandMs: number;
+    maxActive: number; tries: number; shapePool: ('single' | 'pairH' | 'pairV')[];
+    shapes: Record<'single' | 'pairH' | 'pairV', Pair[]> };
   gate: { landWarnMs: number; openMs: number; warnMs: number; closedMs: number; lifeMs: number; lifeRandMs: number;
     maxActive: number; tries: number; lineLen: Pair; shapePool: ('line' | 'U')[];
     shapes: { U: { cells: Pair[]; gateCells: Pair[] } } };
@@ -142,6 +145,8 @@ const SPEC: Spec = {
   mud: { ...groundTiles, tickFactor: 'num+' },
   ice: groundTiles,
   coconut: { warnMs: 'int+', cellMs: 'int+', maxActive: 'int+', tries: 'int+' },
+  spike: { ...timed, downMs: 'int+', upMs: 'int+', showMs: 'int+', maxActive: 'int+', tries: 'int+',
+    shapePool: namesOf(['single', 'pairH', 'pairV']), shapes: recordOf(['single', 'pairH', 'pairV'], 'pairs') },
   gate: { ...timed, landWarnMs: 'int+', openMs: 'int+', closedMs: 'int+', maxActive: 'int+', tries: 'int+',
     lineLen: 'pair', shapePool: namesOf(['line', 'U']), shapes: { U: { cells: 'pairs', gateCells: 'pairs' } } },
   rock: { ...timed, tries: 'int+',
@@ -205,9 +210,10 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (b.terrain.upMs + b.terrain.warnMs >= b.terrain.periodMs) fail('terrain.periodMs', 'must be > upMs + warnMs');
   // MEC-004-R13 warning time uses the L1 base tick, independent of slow effects.
   const minWarnMs = Math.max(b.fairness.minWarnMs, b.fairness.minWarnTicks * b.speed.startMs);
-  for (const family of ['rock', 'fence', 'maze', 'terrain', 'mud', 'ice', 'coconut', 'gate'] as const) {
+  for (const family of ['rock', 'fence', 'maze', 'terrain', 'mud', 'ice', 'coconut', 'gate', 'spike'] as const) {
     if (b[family].warnMs < minWarnMs) fail(family + '.warnMs', 'must be >= ' + minWarnMs);
   }
+  if (b.spike.showMs < minWarnMs) fail('spike.showMs', 'must be >= ' + minWarnMs);
   // MEC-014-R1/R2 gate warnings meet rule 1; closures are shorter than openings.
   if (b.gate.landWarnMs < minWarnMs) fail('gate.landWarnMs', 'must be >= ' + minWarnMs);
   if (b.gate.closedMs >= b.gate.openMs) fail('gate.closedMs', 'must be < openMs');
