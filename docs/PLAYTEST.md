@@ -7,8 +7,8 @@
 - `npm test`: 938 pass / 6 skip / 12 todo (~76 s, 1 worker) · `npm run typecheck`: clean · fuzz mode (reduced, `VITE_FUZZ_SEEDS=30 VITE_FUZZ_MS=60000`, 1 worker): all family fuzz pass; legacy MEC-004 fuzz 12/12 pass (its 60 s timeout lifted in fuzz mode). Full 200 x 120 s family matrix not run (host RAM); run it overnight when the host allows.
 - `npm run bot:report` (L1-15, 5 seeds): every level cleared by >= 1 seed: yes. 0 bot deaths; timeouts are greedy-bot slowness (L8 1/5 clears, L4-5 and L10-11 3/5), not unfair deaths.
 - WARN lines: none.
-- Browser QA (desktop and `vite --host` phone), L7 and L13 played to the end, no console errors: <PENDING>.
-- Death context spot check (Results shows the mud/ice line after a tile death): <PENDING>.
+- Browser QA (desktop and phone), L7 and L13: NOT RUN. The agy run was killed by host low RAM; the owner chose to merge without it (2026-11-05). Carried to the P2b QA pass.
+- Death context spot check: covered by unit tests only (MEC-003-R19); browser check carried to the P2b QA pass.
 
 ## 2026-11-04 — P1 exit gate verdict: PASS (lead)
 - Basis (owner decision 2026-11-04: gate = 2 testers, and "agy QA pass => gate pass"):
