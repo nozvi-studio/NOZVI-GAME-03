@@ -24,13 +24,14 @@ const nearForMango = (s: SimState, b: Balance, x: number, y: number): boolean =>
   nearHead(s.snake[0]!, s.dir, x, y, b.mango.nearHeadDist, b.fairness.frontLaneCells);
 
 // MEC-002-R1/R5/R9 prefer fair candidates; an empty board slot defers without consuming RNG.
-export function placeMango(s: SimState, b: Balance, rng: Rng): boolean {
+// MEC-016-R3 `exclude` keeps a replacement mango off the cell it was just taken from.
+export function placeMango(s: SimState, b: Balance, rng: Rng, exclude?: Cell): boolean {
   const hadMango = s.mango !== null;
   s.mango = null;
   const reach = reachSet(s, b);
   const good: Cell[] = [], any: Cell[] = [];
   for (let y = 0; y < b.board.rows; y++) for (let x = 0; x < b.board.cols; x++) {
-    if (cellReserved(s, x, y)) continue;
+    if (cellReserved(s, x, y) || (exclude?.x === x && exclude.y === y)) continue;
     any.push({ x, y });
     if (reach.has(key(b.board.cols, x, y)) && !nearForMango(s, b, x, y)) good.push({ x, y });
   }

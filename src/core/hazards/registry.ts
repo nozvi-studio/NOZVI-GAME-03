@@ -13,14 +13,15 @@ import { coconut } from './coconut';
 import { spike } from './spike';
 import { gate } from './gate';
 import { npc } from './npc';
+import { bird } from './bird';
 import { timedHazards, updateTimed } from './timed';
 import { solidFamilyWithPriority } from './queries';
 
-export const DEFAULT_FAMILIES: readonly HazardFamily[] = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily, rubbleFamily, mud, ice, coconut, gate, spike, npc];
+export const DEFAULT_FAMILIES: readonly HazardFamily[] = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily, rubbleFamily, mud, ice, coconut, gate, spike, npc, bird];
 export let FAMILIES: readonly HazardFamily[] = DEFAULT_FAMILIES;
 export const FAMILY: Record<keyof SimState['families'], HazardFamily> & Partial<Record<FamilyKey, HazardFamily>> = {
   rock: ROCK, fence: FENCE, maze: MAZE, terrain: TERRAIN, rottenRock: rottenRockFamily, snipWall: snipWallFamily, rubble: rubbleFamily,
-  mud, ice, coconut, gate, spike, npc,
+  mud, ice, coconut, gate, spike, npc, bird,
 };
 
 /** Test-only global seam. Always restore with null in a finally block. */

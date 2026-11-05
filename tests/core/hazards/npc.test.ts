@@ -13,6 +13,7 @@ import { loadBalance, soloTable } from '../../support/balance';
 import { buildBoard } from '../../support/board';
 import { hitCtx } from '../../support/fakeFamily';
 import { moverCells, checkMoverTransitions } from '../../support/fuzz';
+import { fixed } from '../../support/rngStub';
 
 const mk = (cells: Cell[], cellMs = 400, lifeMs = 15000) => newMover(cells, 1500, cellMs, true, lifeMs);
 const route = [2, 3, 4, 5, 6].map(x => ({ x, y: 3 }));
@@ -209,4 +210,32 @@ it('MEC-015-R1 R2 R3 tuning validates weights, route bounds and the shared warni
   expect(() => loadBalance(j => { j.npc.warnMs = j.fairness.minWarnMs - 1; })).toThrow(/npc.warnMs/);
   expect(() => loadBalance(j => { j.fairness.minWarnMs = 600; j.npc.warnMs = 600; })).not.toThrow();
   expect(() => loadBalance(j => { j.fairness.minWarnMs = 1; j.npc.warnMs = 559; })).toThrow(/npc.warnMs/);
+});
+it('MEC-015-R2 L routes keep both legs at least 2 cells and turn perpendicularly', () => {
+  const b = loadBalance();
+  let bent = 0;
+  for (let seed = 1; seed <= 400; seed++) {
+    const s = buildBoard({ head: [8, 8], level: 21, seed });
+    if (!npc.spawn(s, spawnCtx(s, b))) continue;
+    const path = s.families.npc.npcs[0]!.mover.path;
+    const steps = path.slice(1).map((c, i) => ({ x: c.x - path[i]!.x, y: c.y - path[i]!.y }));
+    const turnAt = steps.findIndex(d => d.x !== steps[0]!.x || d.y !== steps[0]!.y);
+    if (turnAt < 0) continue;
+    bent++;
+    const t = steps[turnAt]!;
+    expect(Math.abs(t.x * steps[0]!.x + t.y * steps[0]!.y)).toBe(0);
+    expect(steps.slice(turnAt).every(d => d.x === t.x && d.y === t.y)).toBe(true);
+    expect(turnAt + 1).toBeGreaterThanOrEqual(2);          // first leg cells, including the corner
+    expect(path.length - (turnAt + 1)).toBeGreaterThanOrEqual(2); // second leg cells after the corner
+  }
+  expect(bent).toBeGreaterThan(0);
+});
+it('MEC-015-R2 the lowest bend draw still gives a first leg of 2 cells', () => {
+  const b = loadBalance(j => { j.npc.variants.chicken.weight = 0; });
+  const s = buildBoard({ head: [12, 12], level: 21 });
+  // variant pick, L chance; len offset 0 (len 5), lowest bend, start (2,2), dir +x, turn +y
+  const { rng } = fixed([0, 0, 2, 2, 0, 2], [], [0, 0.9]);
+  expect(npc.spawn(s, { ...spawnCtx(s, b), rng })).not.toBeNull();
+  expect(s.families.npc.npcs[0]!.mover.path).toEqual([
+    { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 3, y: 3 }, { x: 3, y: 4 }, { x: 3, y: 5 }]);
 });

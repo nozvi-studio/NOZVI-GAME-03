@@ -29,7 +29,7 @@ Descriptor: `{key: 'bird', cause: null, capClass: 'modifier', maxActiveKey: 'bir
 ## 5. Edge cases
 1. **Mango rots before the shadow ends:** impossible by R1 (rot time left > `shadowMs`).
 2. **Golden mango appears:** golden mangoes are never targeted.
-3. **Mango eaten on the last ms:** eating wins (the mango step runs before family updates per the step order); no steal.
+3. **Mango eaten on the last ms:** family updates run before snake movement in each ms, so the steal on the final shadow ms comes before that ms's move; an eat in any earlier ms wins and no steal follows (lead ruling 2026-11-05, DECISIONS).
 4. **Slow-mo:** the shadow is sim time; R1 uses the base tick, so Slow-mo only makes it harder if the player chooses it.
 5. **Board full at steal:** deferred mango placement (MEC-003-R13).
 

@@ -34,6 +34,7 @@ export interface Balance {
   coconut: { warnMs: number; cellMs: number; maxActive: number; tries: number };
   npc: { warnMs: number; lifeMs: number; lifeRandMs: number; maxActive: number; tries: number;
     variants: Record<'cat' | 'chicken', { weight: number; cellMs: number; routeLen: Pair }> };
+  bird: { shadowMs: number; marginMs: number; maxActive: number };
   spike: { downMs: number; warnMs: number; upMs: number; showMs: number; lifeMs: number; lifeRandMs: number;
     maxActive: number; tries: number; shapePool: ('single' | 'pairH' | 'pairV')[];
     shapes: Record<'single' | 'pairH' | 'pairV', Pair[]> };
@@ -149,6 +150,7 @@ const SPEC: Spec = {
   coconut: { warnMs: 'int+', cellMs: 'int+', maxActive: 'int+', tries: 'int+' },
   npc: { ...timed, maxActive: 'int+', tries: 'int+',
     variants: recordOf(['cat', 'chicken'], { weight: 'num0', cellMs: 'int+', routeLen: 'pair' }) },
+  bird: { shadowMs: 'int+', marginMs: 'int0', maxActive: 'int+' },
   spike: { ...timed, downMs: 'int+', upMs: 'int+', showMs: 'int+', maxActive: 'int+', tries: 'int+',
     shapePool: namesOf(['single', 'pairH', 'pairV']), shapes: recordOf(['single', 'pairH', 'pairV'], 'pairs') },
   gate: { ...timed, landWarnMs: 'int+', openMs: 'int+', closedMs: 'int+', maxActive: 'int+', tries: 'int+',
@@ -218,6 +220,8 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
     if (b[family].warnMs < minWarnMs) fail(family + '.warnMs', 'must be >= ' + minWarnMs);
   }
   if (b.spike.showMs < minWarnMs) fail('spike.showMs', 'must be >= ' + minWarnMs);
+  // MEC-016-R2 the shadow is the bird's warning and meets rule 1.
+  if (b.bird.shadowMs < minWarnMs) fail('bird.shadowMs', 'must be >= ' + minWarnMs);
   // MEC-015-R1/R2 bent routes need at least three cells and a selectable variant.
   if (b.npc.variants.cat.weight + b.npc.variants.chicken.weight <= 0) fail('npc.variants', 'must have positive total weight');
   for (const [variant, tuning] of Object.entries(b.npc.variants)) {

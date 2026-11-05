@@ -3,7 +3,8 @@ import { escapeExists } from '../../src/core/fairness/escape';
 import { inBounds, key, nearHead } from '../../src/core/grid';
 import { keepsMangoReachable, reachableFrom } from '../../src/core/hazards/placement';
 import { bfsWall, solidCauseAt } from '../../src/core/hazards/queries';
-import { FAMILIES } from '../../src/core/hazards/registry';
+import { FAMILIES, FAMILY } from '../../src/core/hazards/registry';
+import { birdCanTarget } from '../../src/core/hazards/bird';
 import { isReserved } from '../../src/core/reserved';
 import { rngFrom, seedRng } from '../../src/core/rng';
 import { createSim } from '../../src/core/sim';
@@ -138,6 +139,11 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
     const sim = createSimInternal(b, simulationSeed, { startLevel: c.startLevel }, { observer: {
       spawned(family, cells, before, after) {
         spawns++;
+        // MEC-004 / MEC-016 modifiers place no cells: skip I1-I3/I5 and check the family invariant instead.
+        if (FAMILY[family]?.capClass === 'modifier') {
+          if (family === 'bird' && !birdCanTarget(before, b)) bad('MEC-016-R1 bird target was not reachable in time at spawn');
+          return;
+        }
         const d = family === 'terrain' ? b.fairness.terrainNearHeadDist : b.fairness.nearHeadDist;
         for (const cell of cells) {
           const head = before.snake[0]!;

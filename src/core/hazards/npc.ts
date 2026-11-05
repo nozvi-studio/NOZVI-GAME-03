@@ -6,6 +6,7 @@ import { solidCauseAt } from './queries';
 const DIRS: readonly Dir[] = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }];
 const VARIANTS = ['cat', 'chicken'] as const;
 const STRAIGHT_CHANCE = 0.5;
+const MIN_LEG = 2;
 const npcs = (s: SimState) => s.families.npc.npcs;
 const at = (c: Cell | null, x: number, y: number) => c?.x === x && c.y === y;
 
@@ -40,7 +41,9 @@ export const npc: HazardFamily = {
     const tuning = cfg.variants[variant];
     for (let attempt = 0; attempt < cfg.tries; attempt++) {
       const len = ctx.rng.int(tuning.routeLen[1] - tuning.routeLen[0] + 1) + tuning.routeLen[0];
-      const bend = ctx.rng.next() < STRAIGHT_CHANCE ? null : 1 + ctx.rng.int(len - 2);
+      // MEC-015-R2 an L keeps both legs at least MIN_LEG cells; a route too short for that stays straight.
+      const lDraw = ctx.rng.next() >= STRAIGHT_CHANCE;
+      const bend = lDraw && len >= 2 * MIN_LEG ? MIN_LEG + ctx.rng.int(len - 2 * MIN_LEG + 1) : null;
       const start = { x: ctx.rng.int(b.board.cols), y: ctx.rng.int(b.board.rows) };
       const dir = DIRS[ctx.rng.int(DIRS.length)]!, turn = DIRS[ctx.rng.int(DIRS.length)]!;
       // An L must turn perpendicularly; collinear draws retry within the same attempt budget.

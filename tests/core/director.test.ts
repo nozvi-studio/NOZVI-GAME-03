@@ -28,7 +28,7 @@ function selected(level: number, roll: number): FamilyKey | undefined {
   const rng = rngFrom(seedRng(42));
   let first = true;
   updateDirector(s, b, { ...rng, next: () => { if (first) { first = false; return roll; } return rng.next(); } });
-  return s.families.npc.npcs.length ? 'npc' : s.families.spike.groups.length ? 'spike' : s.families.gate.gates.length ? 'gate' : s.families.coconut.rolls.length ? 'coconut' : s.families.ice.patches.length ? 'ice' : s.families.mud.patches.length ? 'mud' : s.families.terrain[0]?.family ?? timedHazards(s)[0]?.family;
+  return s.families.bird.target ? 'bird' : s.families.npc.npcs.length ? 'npc' : s.families.spike.groups.length ? 'spike' : s.families.gate.gates.length ? 'gate' : s.families.coconut.rolls.length ? 'coconut' : s.families.ice.patches.length ? 'ice' : s.families.mud.patches.length ? 'mud' : s.families.terrain[0]?.family ?? timedHazards(s)[0]?.family;
 }
 
 describe('MEC-004 director', () => {
@@ -51,7 +51,7 @@ describe('MEC-004 director', () => {
   });
   it('MEC-004-R9 options follow registry order and table weights', () => {
     expect(directorOptions(due(11), b).map(o => [o.family.key, o.weight])).toEqual([['rock', 3], ['fence', 2], ['terrain', 2], ['mud', 2]]);
-    expect(directorOptions(due(26), b).map(o => o.family.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'mud', 'ice', 'coconut', 'gate', 'spike', 'npc']);
+    expect(directorOptions(due(26), b).map(o => o.family.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'mud', 'ice', 'coconut', 'gate', 'spike', 'npc', 'bird']);
   });
   it('MEC-004-R9 per-family maxActive gates small and modifier options', () => {
     const s = due(11);
@@ -148,7 +148,7 @@ describe('MEC-004 director', () => {
     updateDirector(mazeOnly, b, fixed([]).rng);
     expect(timedHazards(mazeOnly).map(h => h.family)).toEqual(['maze', 'rock']);
   });
-  it('MEC-004 unlocks: fence from 6, mud from 7, terrain from 11, ice from 13, coconut from 16, gate from 17, spike from 18, npc from 21, maze from 26', () => {
+  it('MEC-004 unlocks: fence from 6, mud from 7, terrain from 11, ice from 13, coconut from 16, gate from 17, spike from 18, npc from 21, bird from 22, maze from 26', () => {
     // Probe each weighted interval with real family spawns; no family stubs.
     expect([0, 0.6, 0.99].map(r => selected(1, r))).toEqual(['rock', 'rock', 'rock']);
     expect([0, 0.61, 0.99].map(r => selected(6, r))).toEqual(['rock', 'fence', 'fence']);
@@ -162,14 +162,18 @@ describe('MEC-004 director', () => {
     expect(selected(18, 0.99)).toBe('spike');
     expect(selected(20, 0.99)).toBe('spike');
     expect(selected(21, 0.99)).toBe('npc');
-    expect([0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99].map(r => selected(26, r))).toEqual(['rock', 'fence', 'maze', 'terrain', 'mud', 'ice', 'coconut', 'gate', 'spike', 'npc']);
+    expect(selected(22, 0.99)).toBe('bird');
+    // L26 total weight 23: each roll lands inside one family's interval.
+    expect([0, 0.2, 0.27, 0.35, 0.45, 0.52, 0.6, 0.7, 0.78, 0.87, 0.99].map(r => selected(26, r))).toEqual(['rock', 'fence', 'maze', 'terrain', 'mud', 'ice', 'coconut', 'gate', 'spike', 'npc', 'bird']);
   });
   it('MEC-004 maze and terrain never overlap; maze cooldown 26000', () => {
     const maze = due(26); smallCap(maze);
     addTimedHazards(maze, makeTimed('maze', [{ x: 15, y: 15 }], 2600, 14000));
-    const a = fixed([]); updateDirector(maze, b, a.rng); expect(a.calls).toEqual([]); expect(maze.families.terrain).toEqual([]);
+    // MEC-016-R6 only the bird modifier stays offered past the small and big caps.
+    expect(directorOptions(maze, b).map(o => o.family.key)).toEqual(['bird']);
+    const a = fixed([]); updateDirector(maze, b, a.rng); expect(a.calls).toEqual(['next']); expect(maze.families.terrain).toEqual([]);
     const ground = due(26); smallCap(ground); ground.families.terrain.push(terrain());
-    const c = fixed([]); updateDirector(ground, b, c.rng); expect(c.calls).toEqual([]);
+    const c = fixed([]); updateDirector(ground, b, c.rng); expect(c.calls).toEqual(['next']);
     expect(timedHazards(ground).some(h => h.family === 'maze')).toBe(false);
     const s = due(26); updateDirector(s, b, fixed([], [], [0.3]).rng);
     expect(timedHazards(s)[0]?.family).toBe('maze'); expect(s.mazeCooldownMs).toBe(26000);
@@ -195,8 +199,8 @@ describe('MEC-004 director', () => {
     expect(timedHazards(s)).toEqual([]); expect(a.calls.filter(c => c === 'next')).toHaveLength(3);
     expect(a.calls.filter(c => c.startsWith('pick'))).toEqual(['pick(5)', 'pick(2)', 'pick(4)']);
   });
-  it('MEC-004 hazardIncoming is emitted once for fence, maze, terrain, mud, ice coconut gate spike and npc, with rock deferred', () => {
-    for (const [roll, family] of [[0, 'rock'], [0.2, 'fence'], [0.3, 'maze'], [0.4, 'terrain'], [0.5, 'mud'], [0.6, 'ice'], [0.7, 'coconut'], [0.8, 'gate'], [0.9, 'spike'], [0.99, 'npc']] as const) {
+  it('MEC-004 hazardIncoming is emitted once for fence, maze, terrain, mud, ice coconut gate spike npc and bird, with rock deferred', () => {
+    for (const [roll, family] of [[0, 'rock'], [0.2, 'fence'], [0.27, 'maze'], [0.35, 'terrain'], [0.45, 'mud'], [0.52, 'ice'], [0.6, 'coconut'], [0.7, 'gate'], [0.78, 'spike'], [0.87, 'npc'], [0.99, 'bird']] as const) {
       const s = due(26), rng = rngFrom(seedRng(42)); let first = true;
       // A fixed rng cannot serve: the first next() picks the family, and later draws must stay real so placement succeeds.
       updateDirector(s, b, { ...rng, next: () => { if (first) { first = false; return roll; } return rng.next(); } });
@@ -207,7 +211,7 @@ describe('MEC-004 director', () => {
     const rng = rngFrom(seedRng(42));
     for (let i = 0; i < 200; i++) {
       const s = due(1 + i % 30); updateDirector(s, b, rng);
-      expect(timedHazards(s).length + s.families.terrain.length + s.families.mud.patches.length + s.families.ice.patches.length + s.families.coconut.rolls.length + s.families.gate.gates.length + s.families.spike.groups.length + s.families.npc.npcs.length).toBe(1);
+      expect(timedHazards(s).length + s.families.terrain.length + s.families.mud.patches.length + s.families.ice.patches.length + s.families.coconut.rolls.length + s.families.gate.gates.length + s.families.spike.groups.length + s.families.npc.npcs.length + (s.families.bird.target ? 1 : 0)).toBe(1);
       for (const h of [...timedHazards(s), ...s.families.terrain, ...s.families.mud.patches, ...s.families.ice.patches, ...s.families.spike.groups]) for (const c of h.cells)
         expect(nearHead(s.snake[0]!, s.dir, c.x, c.y, 4, 4)).toBe(false);
       for (const g of s.families.gate.gates) for (const c of [...g.fence, ...g.gate])

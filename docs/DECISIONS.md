@@ -401,3 +401,9 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 
 ## 2026-11-05 - P2b spike review ruling
 - MEC-014-R6: the escape-check horizon cannot foresee a level-up beat reset; this is safe because the reset starts down and warnings still precede any rise.
+
+## 2026-11-05 - P2b bird rulings (MEC-016)
+- MEC-016-R1 / L3: the reachable-in-time cost is a Dijkstra path cost where each step costs the base tick, times `mud.tickFactor` when the step leaves an active mud cell (the head's tile sets the next tick, as in `effectiveTick`). Slow-mo and the level-up slowdown are ignored. Grid helpers `pathCost` and `bfsDistance` take `cols, rows, isWall` like `reachable`, so `grid.ts` stays independent of `SimState`.
+- MEC-016-R3: the replacement mango excludes the stolen cell (new optional `exclude` argument on `placeMango`), so "a new mango appears elsewhere" holds. Placement draws from the simulation RNG stream, like `mangoTick`.
+- MEC-016 edge case 3: family updates run before snake movement within one ms, so a steal on the shadow's final ms happens before that ms's move. An eat in any earlier ms wins. R1's 600 ms margin covers this one-ms gap.
+- MEC-015-R2: an L route draws `bend = 2 + rng.int(len - 3)` so both legs are at least 2 cells long. A route with len < 4 stays straight and skips the bend draw.

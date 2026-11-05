@@ -14,7 +14,7 @@ export interface Cell { x: number; y: number }
 export type SkillId = 'slowmo' | 'tailSnip' | 'shield' | 'mangoRain';
 export type Loadout = readonly [SkillId | null, SkillId | null];
 export interface SimOptions { startLevel?: number; startEnergy?: number; loadout?: Loadout; bestLevel?: number }
-export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze' | 'mud' | 'ice' | 'coconut' | 'gate' | 'spike' | 'npc';
+export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze' | 'mud' | 'ice' | 'coconut' | 'gate' | 'spike' | 'npc' | 'bird';
 export type IntroKey = TableFamily | 'rottenRock';
 export interface LevelRow {
   from: number; to: number; weights: Partial<Record<FamilyKey, number>>;
@@ -84,7 +84,7 @@ export type SimEvent =
 
 /** All Sim state. Plain JSON data only: no closures, Map/Set or class instances. */
 export interface SimState {
-  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; rubble: Rubble[]; mud: { patches: TilePatch[]; nextId: number }; ice: { patches: TilePatch[]; nextId: number }; coconut: { rolls: { id: number; lane: 'row' | 'col'; index: number; mover: MoverState }[]; nextId: number }; gate: { gates: GateInstance[]; nextId: number }; spike: { groups: SpikeGroup[]; nextId: number }; npc: { npcs: { id: number; variant: 'cat' | 'chicken'; mover: MoverState }[]; nextId: number } };
+  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; rubble: Rubble[]; mud: { patches: TilePatch[]; nextId: number }; ice: { patches: TilePatch[]; nextId: number }; coconut: { rolls: { id: number; lane: 'row' | 'col'; index: number; mover: MoverState }[]; nextId: number }; gate: { gates: GateInstance[]; nextId: number }; spike: { groups: SpikeGroup[]; nextId: number }; npc: { npcs: { id: number; variant: 'cat' | 'chicken'; mover: MoverState }[]; nextId: number }; bird: { target: BirdTarget | null } };
   nextHazardSeq: number;
   snake: Cell[];               // head first
   dir: Dir;
@@ -140,13 +140,18 @@ export interface GateView {
   gate: readonly { x: number; y: number; delay: number; vis: TerrainVis }[];
 }
 
+/** MEC-016-R2 bird shadow on the target mango; leftMs counts sim ms down to the steal. */
+export interface BirdTarget { x: number; y: number; leftMs: number }
+/** MEC-016 presentation copy of the shadow; shadowMs lets the view shrink it by leftMs / shadowMs. */
+export interface BirdView extends BirdTarget { shadowMs: number }
+
 export interface SpikeView {
   id: number; t: number; lifeMs: number; ending: boolean;
   cells: readonly { x: number; y: number; delay: number; vis: TerrainVis }[];
 }
 
 export interface SimSnapshot {
-  families: { coconut: readonly CoconutView[]; gate: readonly GateView[]; spike: readonly SpikeView[]; npc: readonly NpcView[] };
+  families: { coconut: readonly CoconutView[]; gate: readonly GateView[]; spike: readonly SpikeView[]; npc: readonly NpcView[]; bird: BirdView | null };
   tiles: readonly { family: TileKind; id: number; state: 'warn' | 'active' | 'fade'; leftMs: number; cells: readonly { x: number; y: number; on: boolean }[]; ring?: readonly Cell[] }[];
   headTile: TileKind | null;
   skills: readonly { slot: 0 | 1; id: SkillId | null; cost: number; affordable: boolean; active: boolean; leftMs: number }[];
