@@ -72,6 +72,10 @@ const KEYED: Readonly<Record<string, string>> = {
   'death.coconut': CAUSE_TEXT.coconut, 'death.gate': CAUSE_TEXT.gate, 'death.spike': CAUSE_TEXT.spike, // OQ-B6 provisional
   'death.cat': CAUSE_TEXT.cat, 'death.chicken': CAUSE_TEXT.chicken, 'death.bomb': CAUSE_TEXT.bomb, // OQ-B6 provisional
   'death.shrink': CAUSE_TEXT.shrink, // MEC-018 §8
+  'banner.challenge.5': 'Challenge: Rock rain!', 'banner.challenge.10': 'Challenge: Fence field!', // OQ-C2 provisional
+  'banner.challenge.15': 'Challenge: Thin ice!', 'banner.challenge.20': 'Challenge: Avalanche!',
+  'banner.challenge.25': 'Challenge: Pet chaos!', 'banner.challenge.30': 'Challenge: Final storm!',
+  'hud.challenge': '★', // OQ-C2 provisional
   'toast.mangoStolen': 'The bird took your mango!', // OQ-B6 provisional
   'loadout.title': 'Pick your skills', 'loadout.go': 'Go!', 'loadout.back': 'Back',
   'loadout.slot1': 'Slot 1', 'loadout.slot2': 'Slot 2', 'loadout.locked': 'Reach L{level}',

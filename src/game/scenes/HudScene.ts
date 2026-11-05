@@ -8,6 +8,7 @@ import { createDpad } from '../input/dpad';
 import { acceptSkillInput, skillSlotForKey } from '../input/skillKeys';
 import { BOARD, DPAD, HEADER, LEVEL_BAR, WIDTH } from '../layout';
 import { currentPalette, P1_COLORS, reduceMotion, type Palette } from '../render/palette';
+import { levelLabel, levelUpLines } from '../hudText';
 import { incomingBanner, progressLabel, t, TEXT } from '../text';
 import type { GameScene } from './GameScene';
 
@@ -261,10 +262,7 @@ export class HudScene extends Phaser.Scene {
     this.refresh();
   }
   private onLevelUp(e: Extract<SimEvent, { type: 'levelUp' }>): void {
-    // MEC-003 §8: challenge flag ignored in P1 (lead decision L9).
-    const lines = [`${t('banner.levelUp', { n: e.level })} · ${t('banner.freshStart')}`];
-    if (e.biomeChanged) lines.push(t(`banner.biome.${e.biome}`));
-    if (e.unlocked) lines.push(t(`banner.new.${e.unlocked}`));
+    const lines = levelUpLines(e, t); // MEC-003 §8 incl. challenge banner
     const cps = this.session.save().unlockedCheckpoints;
     if (cps.length > this.cpCount) { // MEC-008 §8 checkpoint banner + first-unlock tip
       lines.push(t('banner.checkpoint', { level: Math.max(...cps) }));
@@ -305,7 +303,7 @@ export class HudScene extends Phaser.Scene {
   private refresh(): void {
     const s = this.gameScene.snapshot(); if (!s) return;
     this.score.setText(String(s.score));
-    this.level.setText(t('hud.level', { n: s.level, b: s.biome }));
+    this.level.setText(levelLabel(s, t)); // MEC-003 §8 star while challenge
     const max = this.balance.level.maxLevel, full = s.level >= max;
     this.progress.setText(progressLabel(s.progress, s.need, s.level, max));
     const bar = this.bar.clear().fillStyle(this.p.panel).fillRoundedRect(LEVEL_BAR.x, LEVEL_BAR.y, LEVEL_BAR.width, LEVEL_BAR.height, 12);
