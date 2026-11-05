@@ -3,6 +3,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Added
+- test(tools): headless bot and death-cause report (MEC-004-R19)
 - feat(core): ice tiles from level 13 (MEC-012)
 - feat(core): mud tiles from level 7 (MEC-012)
 - feat(core): ground tile block and tile speed factor (MEC-004-R5 R7)

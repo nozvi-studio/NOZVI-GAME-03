@@ -377,3 +377,6 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 ## 2026-11-05 - MEC-004-R17 smoke sample size
 - Use 2 seeds with a 20-second run limit per family in the normal suite, the fallback authorized by P2a Task 4. Keep the full fuzz matrix at 200 seeds with a 120-second run limit and every-spawn escape checks.
 - Reason: reduce the added smoke cost when the complete suite exceeds its 10-second target. Existing tests and Windows worker startup also contribute; this sample reduction does not guarantee that the whole suite meets the target.
+
+## 2026-11-05 - MEC-004-R19 bot runs through Vitest
+- The headless bot and death-cause report live in `tools/bot/` and run via `vitest run --mode bot` (`npm run bot:report`); no new dependency or runner. The bot uses one fixed tick per search read from `effectiveTick` (FB-2) and treats `levelUp` as an immediate clear (flow B has no transition).
