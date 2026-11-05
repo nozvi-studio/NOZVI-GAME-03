@@ -22,7 +22,7 @@ export interface Session {
   homeModel(): HomeModel;
   loadoutModel(): LoadoutModel;
   confirmLoadout(l: Loadout): void;
-  startRun(startLevel: number, entry?: 'home' | 'results'): void;
+  startRun(startLevel: number, entry?: 'home' | 'results', debug?: boolean): void;
   lastStartLevel(): number | null;
   frame(ms: number): SimEvent[];
   turn(dx: -1 | 0 | 1, dy: -1 | 0 | 1): void;
@@ -38,6 +38,8 @@ export interface Session {
 interface RunState {
   sim: Sim; runId: number; startLevel: number; startEnergy: number; loadout: Loadout;
   over: boolean; summary: RunSummary | null; turns: number;
+  /** MEC-003-R21 debug start: no checkpoint or best-level progress is written during this run. */
+  debug: boolean;
 }
 
 type RecordBody = LogRecord extends infer R ? R extends LogRecord ? Omit<R, 't' | 'runId'> : never : never;
@@ -59,6 +61,7 @@ export function createSession(deps: SessionDeps): Session {
   let log: RunLog = loadLog(deps.store);
   let run: RunState | null = null;
   let lastStart: number | null = null;
+  let lastDebug = false;
 
   const persist = (d: SaveDataV2) => { data = d; writeSave(deps.store, data); };
   const record = (rec: RecordBody) => {
@@ -69,6 +72,7 @@ export function createSession(deps: SessionDeps): Session {
   const currentLoadout = (): Loadout => sanitizeLoadout(data.lastLoadout, bestLevel(), unlockTable(b));
 
   const reached = (level: number) => {
+    if (run?.debug) return; // MEC-003-R21 debug runs never unlock progress
     const r = applyLevelReached(data, level, b);
     if (r.data.bestLevel !== data.bestLevel || r.newCheckpoints.length > 0) persist(r.data);
     for (const cp of r.newCheckpoints) record({ type: 'checkpoint_unlocked', level: cp, reachedLevel: level });
@@ -79,7 +83,7 @@ export function createSession(deps: SessionDeps): Session {
     if (!run || run.over) return;
     const snap = run.sim.snapshot();
     const won = cause === 'clear';
-    if (won) persist(applyRunWon(data, b).data);
+    if (won && !run.debug) persist(applyRunWon(data, b).data);
     const carried = carryEnergy(snap.energy, b);
     const newBest = snap.score > data.bestScore;
     persist({ ...data, carriedEnergy: carried, bestScore: Math.max(data.bestScore, snap.score) });
@@ -133,8 +137,12 @@ export function createSession(deps: SessionDeps): Session {
       return { unlocked: unlockedSkills(b, bestLevel()), slotCount: slotCount(b, bestLevel()), selection: currentLoadout() };
     },
     confirmLoadout(l) { persist({ ...data, lastLoadout: [l[0], l[1]] }); }, // MEC-007-R9
-    startRun(startLevel, entry = 'home') { // MEC-008-R5, MEC-007-R10
-      if (startLevel !== 1 && !data.unlockedCheckpoints.includes(startLevel))
+    startRun(startLevel, entry = 'home', debug = false) { // MEC-008-R5, MEC-007-R10, MEC-003-R21 debug start
+      const dbg = debug || (entry === 'results' && lastDebug && startLevel === lastStart);
+      if (dbg) {
+        if (!Number.isInteger(startLevel) || startLevel < 1 || startLevel > b.level.maxLevel)
+          throw new RangeError('startRun: debug level ' + startLevel + ' is out of range');
+      } else if (startLevel !== 1 && !data.unlockedCheckpoints.includes(startLevel))
         throw new RangeError('startRun: level ' + startLevel + ' is not an unlocked start');
       const best = bestLevel();
       const loadout = currentLoadout();
@@ -142,8 +150,8 @@ export function createSession(deps: SessionDeps): Session {
       persist({ ...data, carriedEnergy: 0 });
       const sim = createSim(b, deps.newSeed(), { startLevel, startEnergy, loadout, bestLevel: best });
       const n = nextRun(log); log = n.log;
-      run = { sim, runId: n.runId, startLevel, startEnergy, loadout, over: false, summary: null, turns: 0 };
-      lastStart = startLevel;
+      run = { sim, runId: n.runId, startLevel, startEnergy, loadout, over: false, summary: null, turns: 0, debug: dbg };
+      lastStart = startLevel; lastDebug = dbg;
       reached(startLevel);
       record({ type: 'run_start', startLevel, startEnergy, loadout: [loadout[0], loadout[1]], entry });
     },

@@ -190,3 +190,24 @@ describe('session', () => {
     expect(s.frame(100)).toEqual([]);
   });
 });
+
+describe('session debug start', () => {
+  it('MEC-003-R21 debug start allows a locked level and writes no progress, replay stays debug', () => {
+    const { s } = setup();
+    s.startRun(25, 'home', true);
+    expect(s.snapshot().level).toBe(25);
+    processEvents(s, [levelUp(26)]);
+    expect(s.save().bestLevel).toBe(0);
+    expect(s.save().unlockedCheckpoints).toEqual([]);
+    processEvents(s, [{ type: 'runWon' } as SimEvent]);
+    expect(s.save().fullClear).toBe(false);
+    s.startRun(25, 'results');
+    processEvents(s, [levelUp(27)]);
+    expect(s.save().bestLevel).toBe(0);
+  });
+  it('MEC-003-R21 non-debug start of a locked level still throws; debug rejects out-of-range', () => {
+    const { s } = setup();
+    expect(() => s.startRun(25)).toThrow(RangeError);
+    expect(() => s.startRun(31, 'home', true)).toThrow(RangeError);
+  });
+});

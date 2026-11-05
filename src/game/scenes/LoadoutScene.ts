@@ -14,13 +14,14 @@ export class LoadoutScene extends Phaser.Scene {
   private balance!: Balance;
   private synth!: Synth;
   private level = 1;
+  private debug = false;
   private edit!: LoadoutEditState;
   private slots: Button[] = [];
   private cards: { id: SkillId; b: Button; sub: Phaser.GameObjects.Text }[] = [];
 
   constructor() { super('Loadout'); }
 
-  init(data: { level?: number }): void { this.level = data.level ?? 1; }
+  init(data: { level?: number; debug?: boolean }): void { this.level = data.level ?? 1; this.debug = data.debug === true; }
 
   create(): void {
     this.session = this.registry.get('session') as Session;
@@ -63,7 +64,7 @@ export class LoadoutScene extends Phaser.Scene {
   private go(): void {
     this.synth.play('uiGo');
     this.session.confirmLoadout(this.edit.selection);
-    beginRun(this, this.level, 'home');
+    beginRun(this, this.level, 'home', this.debug);
   }
   private back(): void { this.synth.play('uiTap'); this.scene.start('Home'); }
 

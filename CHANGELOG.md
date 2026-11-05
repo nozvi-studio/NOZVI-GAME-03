@@ -3,6 +3,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Added
+- feat(game): debug start level `?debug=1&level=N` (N 1..30) for browser QA; the run writes no best level, checkpoint or full-clear progress (MEC-003-R21)
 - chore(config): per-biome director tuning from the L1-30 bot report (fence 1 in L11-14, coconut 1 in L16-19 rows) and feat(tools): board-size check (`tools/bot/boardSize.ts`, MEC-004-R20); bot defaults L1-30, 20 seeds, 180 s (P2 design sections 13, 16, 17)
 - feat(meta): deathCauseReport (deaths only, family vs player causes, over40 and review lists) for the P2 40% rule; included in the debug __summarize output (TR-C6)
 - feat(game): challenge level banners (levelUpLines) and HUD star marker (levelLabel) in src/game/hudText.ts; text OQ-C2 provisional (MEC-003 §8)

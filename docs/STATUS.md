@@ -32,7 +32,7 @@
 - Windows: Vitest needs --configLoader native --pool threads --maxWorkers 2.
 - 4 skipped QA (reasons in files). Single 1.28 MB JS chunk.
 - Quitting mid-run does not log run_end (seen in phone log); decide in P2c log work.
-- Checkpoints only reach L12; debug-only jump to later levels would help QA of L16+.
+- Checkpoints only reach L12; for QA of L16+ use `?debug=1&level=N` (no progress written).
 
 ## Last session summary
 - Owner playtest feedback round: WASD fix, run_end.turns, level-up flow B (8-task SDD, reviews per task, final review ready), P1 gate verdict PASS, P2 plans written/revised. Pushed version/v0.1.
