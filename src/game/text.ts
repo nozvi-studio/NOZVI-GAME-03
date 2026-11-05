@@ -21,7 +21,9 @@ export const CAUSE_TEXT: Record<CauseKey, string> = {
   chicken: 'Ran into the chicken.', // OQ-B6 provisional
   bomb: 'Caught in the blast.', // OQ-B6 provisional
 };
-const UNLOCK_NAMES: Record<IntroKey, string> = { rock: 'rocks', rottenRock: 'rotten rocks', fence: 'fences', terrain: 'rising ground', maze: 'hedge mazes', mud: 'mud', ice: 'ice', coconut: 'rolling coconuts' };
+const UNLOCK_NAMES: Record<IntroKey, string> = { rock: 'rocks', rottenRock: 'rotten rocks', fence: 'fences', terrain: 'rising ground', maze: 'hedge mazes', mud: 'mud', ice: 'ice',
+  coconut: 'rolling coconuts', // OQ-B6 provisional
+};
 const INCOMING: Record<UnlockKey, string> = { fence: 'Fence incoming', maze: 'Maze incoming', terrain: 'The ground is shaking' };
 
 // GDD-13 all player-facing P0 labels and messages match design §7.5.

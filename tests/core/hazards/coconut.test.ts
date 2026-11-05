@@ -7,6 +7,7 @@ import { reservedByFamilies } from '../../../src/core/hazards/queries';
 import { resolveHeadCell } from '../../../src/core/hazards/collision';
 import { introducedAt } from '../../../src/core/level';
 import { rngFrom } from '../../../src/core/rng';
+import { placeMango } from '../../../src/core/mango';
 import { loadBalance, soloTable } from '../../support/balance';
 import { buildBoard } from '../../support/board';
 import { hitCtx } from '../../support/fakeFamily';
@@ -58,6 +59,22 @@ it('MEC-013-R2 lane cells are reserved while warning and rolling, but never soli
   expect(s.families.coconut.rolls[0]!.mover.state).toBe('move');
 });
 
+it('MEC-013-R2 placeMango never picks a cell on a warning or rolling coconut lane', () => {
+  for (const phase of ['warn', 'move'] as const) {
+    const b = loadBalance(), s = buildBoard({});
+    const mover = newMover(row(0), b.coconut.warnMs, b.coconut.cellMs, false, 0);
+    mover.state = phase; mover.pos = phase === 'warn' ? -1 : 0;
+    s.families.coconut.rolls.push({ id: 1, lane: 'row', index: 0, mover });
+    // Leave the lane and one safe cell available; picking the first candidate exposes a missing reservation.
+    for (let y = 1; y < b.board.rows; y++) for (let x = 0; x < b.board.cols; x++) {
+      if (x !== 0 || y !== 1) s.orbs.push({ x, y, ageMs: 0 });
+    }
+    const rng = rngFrom(s.rng);
+    expect(placeMango(s, b, { ...rng, pick: pool => pool[0]! })).toBe(true);
+    expect(s.mango).toMatchObject({ x: 0, y: 1 });
+  }
+});
+
 it('MEC-013-R3 coconut rolls one cell per 90 ms after a 1500 ms warning and kills the head', () => {
   const { b, sim, s } = fixture();
   sim.advance(b.coconut.warnMs - 1);
@@ -69,7 +86,7 @@ it('MEC-013-R3 coconut rolls one cell per 90 ms after a 1500 ms warning and kill
   sim.advance(1);
   expect(s.status).toBe('over');
   const events = sim.drainEvents();
-  expect(events).toContainEqual({ type: 'moverHit', family: 'coconut', x: 5, y: 3 });
+  expect(events.filter(e => e.type === 'moverHit')).toEqual([{ type: 'moverHit', family: 'coconut', x: 5, y: 3 }]);
   expect(events).toContainEqual({ type: 'died', cause: 'coconut', x: 5, y: 3 });
   expect(sim.drainEvents()).toEqual([]);
   expect(s.outcome?.cause).toBe('coconut');
@@ -109,6 +126,17 @@ it('MEC-013-R5 head moving onto a coconut dies or breaks it with Shield', () => 
     s.shield = shield ? { leftMs: 5000 } : null;
     expect(resolveHeadCell(s, 0, 3, hitCtx(s))).toEqual(shield ? { kind: 'broke', family: 'coconut' } : { kind: 'death', cause: 'coconut' });
     if (shield) expect(s.families.coconut.rolls).toEqual([]);
+  }
+});
+
+it('MEC-013-R5 head moving onto a coconut emits moverHit exactly once with or without Shield', () => {
+  for (const shield of [false, true]) {
+    const { b, sim, s } = fixture();
+    sim.advance(b.coconut.warnMs);
+    sim.drainEvents();
+    s.shield = shield ? { leftMs: 5000 } : null;
+    resolveHeadCell(s, 0, 3, hitCtx(s));
+    expect(sim.drainEvents().filter(e => e.type === 'moverHit')).toEqual([{ type: 'moverHit', family: 'coconut', x: 0, y: 3 }]);
   }
 });
 

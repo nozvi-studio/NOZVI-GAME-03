@@ -49,7 +49,8 @@ Save fields: none.
 ## 7. Core API changes
 - `FamilyKey` and `CauseKey` add `coconut`. Event `moverHit {family: 'coconut', x, y}` (TR-B8).
 - Modules: `src/core/hazards/blocks/mover.ts`, `src/core/hazards/coconut.ts` (`coconut`, `laneCandidates`), each main function with `// MEC-013-Rn`.
-- Snapshot: `families.coconut = {path, cell, state, t, warnMs}[]`.
+- `laneCandidates` computes front-lane cells locally from the head, direction and `fairness.frontLaneCells`; no `frontLane()` helper exists.
+- Snapshot: `families.coconut = {id, path, cell, state, t, warnMs}[]`.
 
 ## 8. Feedback (greybox)
 - Warning: lane highlight with arrows in roll direction, blinking 250 ms (reduced motion: solid outline). Rolling: brown circle. Text keys `banner.new.coconut`, `death.coconut` (strings provisional, OQ-B6, owner review at end of P2).

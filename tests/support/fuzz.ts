@@ -6,11 +6,42 @@ import { key, nearHead } from '../../src/core/grid';
 import { placeMango } from '../../src/core/mango';
 import { rngFrom, seedRng } from '../../src/core/rng';
 import { restoreSim, stateOf } from '../../src/core/sim';
-import type { TableFamily, Sim, SimSnapshot, SimState, Step } from '../../src/core/types';
+import type { Cell, TableFamily, Sim, SimSnapshot, SimState, Step } from '../../src/core/types';
 import { buildState } from './state';
 
 export interface FuzzReport { violations: string[]; steps: number; maxLevel: number; spawned: Record<TableFamily, number> }
 const DIRS: [Step, Step][] = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+type CoconutRoll = SimState['families']['coconut']['rolls'][number];
+
+// MEC-013-R2/EC1 harness-only spawn history: only the original mango at its spawn-time position is exempt.
+export class CoconutSpawnTracker {
+  private readonly mangoes = new WeakMap<CoconutRoll, { mango: SimState['mango']; position: Cell | null }>();
+
+  record(before: SimState, after: SimState): number {
+    const previousIds = new Set(before.families.coconut.rolls.map(r => r.id));
+    let spawned = 0;
+    for (const roll of after.families.coconut.rolls) {
+      if (previousIds.has(roll.id) || this.mangoes.has(roll)) continue;
+      // The observer's before state is cloned; after retains the live mango identity until it is replaced.
+      this.mangoes.set(roll, { mango: after.mango,
+        position: before.mango && { x: before.mango.x, y: before.mango.y } });
+      spawned++;
+    }
+    return spawned;
+  }
+
+  mangoReserved(s: SimState): boolean {
+    const mango = s.mango;
+    if (!mango) return false;
+    const rolls = s.families.coconut.rolls.filter(roll => {
+      const existing = this.mangoes.get(roll);
+      return !(existing?.mango === mango && existing.position?.x === mango.x && existing.position.y === mango.y);
+    });
+    return cellReserved({ ...s, mango: null, families: { ...s.families,
+      coconut: { ...s.families.coconut, rolls } } }, mango.x, mango.y);
+  }
+}
 
 export interface MoverMark { id: string; cell: number; phase: 'warn' | 'mover'; warnMs: number; elapsedMs?: number }
 
@@ -60,7 +91,10 @@ export function fuzzSeed(b: Balance, seed: number, simMs: number): FuzzReport {
   while (played < simMs) {
     const s0 = buildState(b, { seed: seed * 1000 + run, level: 1 + input.int(b.level.maxLevel), spawnInMs: b.director.firstSpawnMs });
     placeMango(s0, b, rngFrom(s0.rng));
-    const sim = restoreSim(b, s0), s = stateOf(sim);
+    const coconuts = new CoconutSpawnTracker();
+    const sim = restoreSim(b, s0, { observer: { spawned(family, _cells, before, after) {
+      if (family === 'coconut') rep.spawned.coconut += coconuts.record(before, after);
+    } } }), s = stateOf(sim);
     run++;
     while (s.status === 'playing' && played < simMs) {
       if (played % 16 === 0) steer(sim, s, b, input);
@@ -69,7 +103,7 @@ export function fuzzSeed(b: Balance, seed: number, simMs: number): FuzzReport {
       checkSpawns(s, b, head, dir, seen, rep);
       const moved = s.snake[0]!.x !== head.x || s.snake[0]!.y !== head.y;
       if (moved) rep.steps++;
-      if (moved || played % 16 === 0) checkState(s, rep, played);
+      if (moved || played % 16 === 0) checkState(s, rep, played, coconuts);
       rep.maxLevel = Math.max(rep.maxLevel, s.level);
     }
     if (s.status === 'over') {                              // the snake never moves after over
@@ -104,11 +138,9 @@ function checkSpawns(s: SimState, b: Balance, head: { x: number; y: number }, di
   }
 }
 
-function checkState(s: SimState, rep: FuzzReport, t: number): void {
+function checkState(s: SimState, rep: FuzzReport, t: number, coconuts: CoconutSpawnTracker): void {
   const m = s.mango;
-  // MEC-013-EC1 a later coconut warning can reserve the lane underneath an existing mango.
-  const withoutCoconuts = { ...s, mango: null, families: { ...s.families, coconut: { ...s.families.coconut, rolls: [] } } };
-  if (m && cellReserved(withoutCoconuts, m.x, m.y)) rep.violations.push(`t=${t}: mango on a reserved cell (${m.x},${m.y})`);
+  if (m && coconuts.mangoReserved(s)) rep.violations.push(`t=${t}: mango on a reserved cell (${m.x},${m.y})`);
   for (const c of s.snake) {
     if (timedHazards(s).some(h => h.cells.some(k => k.on && k.x === c.x && k.y === c.y))
       || s.families.terrain.some(T => T.cells.some(k => k.up && k.x === c.x && k.y === c.y)))
