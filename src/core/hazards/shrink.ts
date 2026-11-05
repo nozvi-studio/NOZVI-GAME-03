@@ -5,6 +5,8 @@ import { placeMango } from '../mango';
 import { rngFrom, type Rng } from '../rng';
 import type { Cell, HazardFamily, ShrinkView, SimState } from '../types';
 import { keepsMangoReachable } from './placement';
+import { reservedByFamilies } from './queries';
+import { FAMILIES } from './registry';
 
 // MEC-018-R2 outer ring, row-major.
 export function ringCells(cols: number, rows: number): Cell[] {
@@ -54,6 +56,9 @@ export const shrink: HazardFamily = {
     if (s.families.coconut.rolls.length) return null;
     if (s.families.npc.npcs.some(n => n.mover.path.some(c => onRing(b, c.x, c.y)))) return null;
     const ring = ringCells(b.board.cols, b.board.rows);
+    // MEC-018-R1 the ring waits while any other family holds a ring cell (the director retries later).
+    const others = FAMILIES.filter(f => f.key !== 'shrink');
+    if (ring.some(c => reservedByFamilies(s, c.x, c.y, others))) return null;
     // TR-C4 try the displacement on a copy (own RNG copy) and commit it only if rule 3 holds with the ring walled.
     const trial = structuredClone(s);
     displaceFromRing(trial, b, rngFrom(trial.rng), ring);

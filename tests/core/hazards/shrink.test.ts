@@ -100,6 +100,16 @@ it('MEC-018-R1 shrink does not start while an NPC route touches the ring', () =>
   expect(shrink.spawn(s, spawnCtx(s, b))).not.toBeNull();
 });
 
+it('MEC-018-R1 does not start while another family reserves a ring cell', () => {
+  const { b, s } = fixture();
+  s.families.mud.patches.push({ id: 1, cells: [{ x: 11, y: 0 }] } as unknown as SimState['families']['mud']['patches'][number]);
+  const before = structuredClone(s);
+  expect(shrink.spawn(s, spawnCtx(s, b))).toBeNull();
+  expect(s).toEqual(before);
+  s.families.mud.patches = [];
+  expect(shrink.spawn(s, spawnCtx(s, b))).not.toBeNull();
+});
+
 it('MEC-018-R1 shrink does not start when the ring would cut the head off from the mango', () => {
   const { b, s } = fixture();
   // Head on the ring, body closing the only interior neighbour: the path to the mango runs along the ring.
