@@ -135,8 +135,9 @@ it('MEC-013-R5 head moving onto a coconut emits moverHit exactly once with or wi
     sim.advance(b.coconut.warnMs);
     sim.drainEvents();
     s.shield = shield ? { leftMs: 5000 } : null;
-    resolveHeadCell(s, 0, 3, hitCtx(s));
-    expect(sim.drainEvents().filter(e => e.type === 'moverHit')).toEqual([{ type: 'moverHit', family: 'coconut', x: 0, y: 3 }]);
+    const ctx = hitCtx(s);
+    resolveHeadCell(s, 0, 3, ctx);
+    expect(ctx.events.filter(e => e.type === 'moverHit')).toEqual([{ type: 'moverHit', family: 'coconut', x: 0, y: 3 }]);
   }
 });
 
