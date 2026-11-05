@@ -3,6 +3,8 @@ import { it, expect, expectTypeOf } from 'vitest';
 import { createSimInternal, stateOf } from '../../../src/core/simInternal';
 import { plusArea, stepBlast, type BlastState } from '../../../src/core/hazards/blocks/areaBlast';
 import { bomb, type BombInstance } from '../../../src/core/hazards/bomb';
+import { resolveHeadCell } from '../../../src/core/hazards/collision';
+import { hitCtx } from '../../support/fakeFamily';
 import { spawnCtx } from '../../../src/core/hazards/director';
 import { bfsWall, headHitAt, reservedByFamilies, solidCauseAt } from '../../../src/core/hazards/queries';
 import { assertFamiliesDefined, DEFAULT_FAMILIES } from '../../../src/core/hazards/registry';
@@ -170,4 +172,17 @@ it('MEC-017 BombView snapshot exposes state, time left and area', () => {
 it('MEC-004-R1 registry init fails clearly when a family is undefined (import-order cycle guard)', () => {
   expect(DEFAULT_FAMILIES.every(Boolean)).toBe(true);
   expect(() => assertFamiliesDefined([DEFAULT_FAMILIES[0]!, undefined as unknown as HazardFamily])).toThrowError(/index 1.*import/);
+});
+
+it('MEC-017-R3 a blast hits at most once even if the tick shortens after a Shield absorb', () => {
+  const { b, s } = fixture();
+  s.snake = [{ x: 5, y: 8 }, { x: 4, y: 8 }, { x: 3, y: 8 }];
+  s.shield = { leftMs: 5000 };
+  s.families.bomb.bombs.push({ ...landed(b, 8, 8, 0, 500), blast: { area: plusArea(8, 8, b.bomb.arm, 17, 17), countdownMs: 0, activeMs: 500, phase: 'active' } });
+  const ctx = hitCtx(s);
+  expect(resolveHeadCell(s, 6, 8, ctx)).toEqual({ kind: 'absorbed', family: 'bomb' });   // Shield absorbs the entry
+  expect(s.shield).toBeNull();
+  // A shorter tick lets a second snake move land inside the same active window: it must not hit again.
+  expect(resolveHeadCell(s, 7, 8, ctx)).toEqual({ kind: 'clear' });
+  expect(s.families.bomb.bombs[0]!.blast!.hit).toBe(true);
 });

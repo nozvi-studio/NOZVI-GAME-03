@@ -266,4 +266,6 @@ export interface HazardFamily {
   tileAt?(s: SimState, x: number, y: number): TileKind | null;
   headHit?(s: SimState, x: number, y: number): HitKind | null;
   onBreak?(s: SimState, x: number, y: number): void;
+  /** MEC-017-R3 an area hit resolved on the head-entry path (Shield absorb); marks the blast as spent. */
+  onAreaHit?(s: SimState, x: number, y: number): void;
 }

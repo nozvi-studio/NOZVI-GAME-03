@@ -60,6 +60,15 @@ const KEYED: Readonly<Record<string, string>> = {
   'skill.reject.noTarget': 'Too short to snip',
   'tip.orb.first': 'Energy orb! Fuel for skills',
   'death.snipWall': CAUSE_TEXT.snipWall, 'death.rubble': CAUSE_TEXT.rubble,
+  'banner.new.coconut': 'Rolling coconuts! Watch the lanes', // OQ-B6 provisional
+  'banner.new.gate': 'Gates open and close', // OQ-B6 provisional
+  'banner.new.spike': 'Spikes pop up on the beat', // OQ-B6 provisional
+  'banner.new.npc': 'Cats and chickens on patrol', // OQ-B6 provisional
+  'banner.new.bird': 'A bird wants your mango!', // OQ-B6 provisional
+  'banner.new.bomb': 'Bombs! Stay out of the cross', // OQ-B6 provisional
+  'death.coconut': CAUSE_TEXT.coconut, 'death.gate': CAUSE_TEXT.gate, 'death.spike': CAUSE_TEXT.spike, // OQ-B6 provisional
+  'death.cat': CAUSE_TEXT.cat, 'death.chicken': CAUSE_TEXT.chicken, 'death.bomb': CAUSE_TEXT.bomb, // OQ-B6 provisional
+  'toast.mangoStolen': 'The bird took your mango!', // OQ-B6 provisional
   'loadout.title': 'Pick your skills', 'loadout.go': 'Go!', 'loadout.back': 'Back',
   'loadout.slot1': 'Slot 1', 'loadout.slot2': 'Slot 2', 'loadout.locked': 'Reach L{level}',
   'tip.skillUnlocked.slot': '{skill} unlocked! Tap {side} to use it',

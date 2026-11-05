@@ -68,6 +68,8 @@ export const bomb: HazardFamily = {
   bfsWallAt: (s, x, y) => bombs(s).some(m => !active(m) && at(m, x, y)),
   reservedAt: (s, x, y) => bombs(s).some(m => at(m, x, y) || inArea(m, x, y)),
   headHit: (s, x, y) => (bombs(s).some(m => active(m) && !m.blast!.hit && inArea(m, x, y)) ? 'area' : null),
+  // MEC-017-R3 the head-entry path marks every active blast covering the cell as spent.
+  onAreaHit(s, x, y) { for (const m of bombs(s)) if (active(m) && inArea(m, x, y)) m.blast!.hit = true; },
   // MEC-017-R4 Shield entering the counting bomb defuses it: removed with no blast.
   onBreak(s, x, y) { s.families.bomb.bombs = bombs(s).filter(m => !(counting(m) && at(m, x, y))); },
   snapshot: bombSnapshot,

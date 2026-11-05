@@ -93,3 +93,8 @@ it('MEC-014-R9 spike introduction has a readable level banner', () => {
 it('MEC-015-R8 NPC introduction has a readable level banner', () => {
   expect(levelBanner(21, 'npc')).toBe('Level 21: cats and chickens unlocked');
 });
+
+it('MEC-003 §8 every P2b family has a banner and every P2b cause has a death text', () => {
+  for (const k of ['coconut', 'gate', 'spike', 'npc', 'bird', 'bomb']) expect(t(`banner.new.${k}`)).not.toMatch(/^banner\./);
+  for (const c of ['coconut', 'gate', 'spike', 'cat', 'chicken', 'bomb']) expect(t(`death.${c}`)).not.toMatch(/^death\./);
+});
