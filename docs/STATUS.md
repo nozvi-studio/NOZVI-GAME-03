@@ -5,7 +5,7 @@
 ## Now (in progress)
 - [x] P1 closed: flow B + WASD fix + run_end.turns merged; agy browser QA 11/11 PASS; version/v0.1 -> dev.
 - [x] P2 plans ready: P2a (revised for flow B) `docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md`; P2b `2026-11-04-p2b-movers-cycles-blasts.md`; P2c `2026-11-04-p2c-shrink-challenge-tuning.md`.
-- [ ] **RESUME HERE:** P2a Task 6 mud is uncommitted; prior 181 targeted tests/typecheck passed. QA-T5-13 mud expectations corrected; director unlock QA file passes 11/11. Lead full verification and L7 browser QA pending.
+- [ ] **RESUME HERE:** P2a Task 7 ice is complete and uncommitted (WIP d598882 + state.test fix); lead review, commit and L13 browser QA pending.
 
 ## Next (ordered, max 5)
 1. P2a (framework + ground tiles), then P2b (movers, cycles, blasts, bird), then P2c (shrink, challenge levels, tuning, P2 exit).
