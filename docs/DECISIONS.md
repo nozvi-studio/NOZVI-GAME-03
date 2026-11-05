@@ -360,3 +360,29 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 - FB-2 (lead ruling): the escape-check and bot timelines (MEC-004-R18/R19) use one fixed tick per search, read from `effectiveTick(s, b)` at the start, even while a level-up slowdown eases. The real tick can only get shorter in the search window; the per-family fuzz (I1-I7) runs through level ups to catch any gap. Reason: keeps the BFS simple and deterministic.
 - Also (follows from flow B, not a new rule): tile patches have no level-end hook and keep their lifecycle across a level up (MEC-012-R4/EC9); the capClass director keeps the slowdown skip (MEC-003-R11); P2 design §20 item 3 is void.
 
+
+## 2026-11-05 - P2a Task 1 rulings
+- Convert `HazardFamily` to the state-level contract. Preserve existing per-instance algorithms as `InstanceRules`, composed by `defineFamily` in `hazards/family.ts`; descriptors retain no simulation state.
+- Serialize `TimedHazard.spawnSeq` and `SimState.nextHazardSeq` to retain P1 cross-family update and snapshot order through clone/restore. Assign sequences with `addTimedHazards`; reject missing sequences instead of silently treating them as zero.
+- Add optional `SpawnCtx.rng`: the director forwards its existing RNG; direct family calls default to `rngFrom(s.rng)`, preserving scripted RNG behavior.
+- Preserve MEC-002-R7 rotten-rock collision priority through the single `solidFamilyWithPriority` helper. General composite queries retain registry order.
+- Until Task 2 supplies update-time collision dispatch, `hitHead` throws if unexpectedly invoked; current families never call it.
+- Leave the GDD MEC-012 row untouched pending lead approval.
+
+## 2026-11-05 - MEC-004 L3: rule 3 applies retroactively (lead ruling)
+- Apply MEC-004-R12 to every director family, including P0/P1 rocks, fences, mazes and terrain. Reject a candidate if its new BFS walls disconnect a previously reachable regular mango; an already unreachable mango does not block placement (L4).
+- Consequence: existing seeded spawn sequences may change when a candidate fails rule 3. Terrain adds no BFS walls and remains subject to the owner-approved distance of 4 (MEC-004-R11).
+- Flow B keeps every family instance through a level up (MEC-004-R16). P2 design section 20 item 3 is void; MEC-003-R7 is unchanged.
+
+## 2026-11-05 - MEC-004-R17 smoke sample size
+- Use 2 seeds with a 20-second run limit per family in the normal suite, the fallback authorized by P2a Task 4. Keep the full fuzz matrix at 200 seeds with a 120-second run limit and every-spawn escape checks.
+- Reason: reduce the added smoke cost when the complete suite exceeds its 10-second target. Existing tests and Windows worker startup also contribute; this sample reduction does not guarantee that the whole suite meets the target.
+
+## 2026-11-05 - MEC-004-R19 bot runs through Vitest
+- The headless bot and death-cause report live in `tools/bot/` and run via `vitest run --mode bot` (`npm run bot:report`); no new dependency or runner. The bot uses one fixed tick per search read from `effectiveTick` (FB-2) and treats `levelUp` as an immediate clear (flow B has no transition).
+
+## 2026-11-05 - P2a lead rulings carried to Task 9
+- `HazardFamily.emitsIncoming` marks families that own or defer their own `hazardIncoming` warning, so the director stays silent for them (JSDoc on the flag).
+- `SpawnCtx.rng` is required (not optional): every spawn caller supplies the stream explicitly, and spawnCtx fills it from the simulation RNG. This supersedes the Task 1 optional-rng note.
+- Callers of `effectiveTick` stay head-tile-aware: they pass the head tile so MEC-012 mud slowdown applies only while the head is in mud.
+- Full fuzz runs (`npm run test:fuzz`) and `npm run bot:report` happen only at the P2a exit, because of RAM limits; normal work uses the smoke sample.

@@ -1,3 +1,4 @@
+import { timedHazards } from '../../src/core/hazards/timed';
 import { describe, it, expect } from 'vitest';
 import { simFromAscii, circle } from '../../src/core/testing';
 import { exportState, stateOf } from '../../src/core/sim';
@@ -106,21 +107,21 @@ describe('MEC-003 level up', () => {
   it('MEC-003-R8 obstacles survive a level up, also families not enabled in the new level, and keep their own lifetimes', () => {
     const sim = simFromAscii(b, ['.....M', '#FwRSu'], {
       snake: [[4, 0], [3, 0], [2, 0], [1, 0]], quiet: true, extraState: {
-        progress: 3, terrains: [{ family: 'terrain', t: 1, lifeMs: 10000, cells: [{ x: 9, y: 9, delay: 0, up: true, vis: 'up' }] }],
+        progress: 3, families: { terrain: [{ family: 'terrain', t: 1, lifeMs: 10000, cells: [{ x: 9, y: 9, delay: 0, up: true, vis: 'up' }] }] },
       },
     });
     const before = exportState(sim);
     sim.advance(140);
     const s = stateOf(sim);
     expect(s.level).toBe(2);
-    expect(s.hazards.map(h => h.state)).toEqual(before.hazards.map(h => h.state));
+    expect(timedHazards(s).map(h => h.state)).toEqual(timedHazards(before).map(h => h.state));
     expect(cellSolidCause(s, 0, 1)).not.toBeNull();
     expect(cellSolidCause(s, 1, 1)).not.toBeNull();
-    expect(s.rottenRocks[0]).toMatchObject({ state: 'solid', leftMs: b.mango.rottenRockLifeMs - 140 });
-    expect(s.snipWalls[0]).toMatchObject({ state: 'solid', leftMs: b.skills.tailSnip.wallLifeMs - 140 });
-    expect(s.rubble[0]).toMatchObject({ state: 'solid', leftMs: b.skills.shield.rubbleLifeMs - 140 });
-    expect(s.terrains).toHaveLength(1);
-    expect(s.terrains[0]!.t).toBeLessThan(s.terrains[0]!.lifeMs);
+    expect(s.families.rottenRock[0]).toMatchObject({ state: 'solid', leftMs: b.mango.rottenRockLifeMs - 140 });
+    expect(s.families.snipWall[0]).toMatchObject({ state: 'solid', leftMs: b.skills.tailSnip.wallLifeMs - 140 });
+    expect(s.families.rubble[0]).toMatchObject({ state: 'solid', leftMs: b.skills.shield.rubbleLifeMs - 140 });
+    expect(s.families.terrain).toHaveLength(1);
+    expect(s.families.terrain[0]!.t).toBeLessThan(s.families.terrain[0]!.lifeMs);
   });
 
   it('MEC-003-R9 rot, director and levelTimeMs keep running after a level up', () => {

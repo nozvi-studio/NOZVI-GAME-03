@@ -227,7 +227,9 @@ export class HudScene extends Phaser.Scene {
         break;
       case 'levelUp': this.onLevelUp(e); break;
       case 'runWon': this.synth.play('level'); this.time.delayedCall(ui.bannerMs / 4, () => this.synth.play('level')); break;
-      case 'hazardIncoming': this.showBanner(incomingBanner(e.family)); break;
+      case 'hazardIncoming':
+        if (e.family === 'fence' || e.family === 'maze' || e.family === 'terrain') this.showBanner(incomingBanner(e.family));
+        break;
       case 'landed': this.synth.play('land'); break;
       case 'rotted': this.synth.play('rot'); break;
       case 'orbSpawned':

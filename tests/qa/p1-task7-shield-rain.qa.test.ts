@@ -1,4 +1,5 @@
 // tests/qa/p1-task7-shield-rain.qa.test.ts — Black-box QA tests for P1 Task 7 Shield, Rubble & Mango Rain (MEC-006)
+import { addTimedHazards } from '../../src/core/hazards/timed';
 import { describe, expect, it } from 'vitest';
 import {
   createSim,
@@ -172,7 +173,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.loadout = ['shield', 'mangoRain'];
     s.bestLevel = 16;
     s.energy = 100;
-    s.hazards.push({
+    addTimedHazards(s, {
       family: 'rock',
       state: 'warn',
       t: 500,
@@ -207,7 +208,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.loadout = ['shield', 'mangoRain'];
     s.bestLevel = 16;
     s.energy = 100;
-    s.rubble.push({
+    s.families.rubble.push({
       family: 'rubble',
       x: 3,
       y: 8,
@@ -241,7 +242,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.loadout = ['shield', 'mangoRain'];
     s.bestLevel = 16;
     s.energy = 100;
-    s.hazards.push({
+    addTimedHazards(s, {
       family: 'rock',
       state: 'solid',
       t: 2000,
@@ -279,7 +280,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.loadout = ['shield', 'mangoRain'];
     s.bestLevel = 16;
     s.energy = 100;
-    s.hazards.push({
+    addTimedHazards(s, {
       family: 'fence',
       state: 'solid',
       t: 2500,
@@ -310,7 +311,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.loadout = ['shield', 'mangoRain'];
     s.bestLevel = 16;
     s.energy = 100;
-    s.hazards.push({
+    addTimedHazards(s, {
       family: 'maze',
       state: 'solid',
       t: 3000,
@@ -343,7 +344,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.energy = 100;
     const tr = b.terrain;
     const upAt = tr.startDelayMs + tr.periodMs - tr.upMs;
-    s.terrains.push({
+    s.families.terrain.push({
       family: 'terrain',
       t: upAt,
       lifeMs: 60000,
@@ -371,7 +372,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.loadout = ['shield', 'mangoRain'];
     s.bestLevel = 16;
     s.energy = 100;
-    s.rottenRocks.push({
+    s.families.rottenRock.push({
       family: 'rottenRock',
       x: 3,
       y: 8,
@@ -401,7 +402,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.loadout = ['shield', 'mangoRain'];
     s.bestLevel = 16;
     s.energy = 100;
-    s.snipWalls.push({
+    s.families.snipWall.push({
       family: 'snipWall',
       cells: [{ x: 3, y: 8 }],
       state: 'solid',
@@ -431,7 +432,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.loadout = ['shield', 'mangoRain'];
     s.bestLevel = 16;
     s.energy = 100;
-    s.hazards.push(
+    addTimedHazards(s,
       {
         family: 'rock',
         state: 'solid',
@@ -485,7 +486,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.loadout = ['shield', 'mangoRain'];
     s.bestLevel = 16;
     s.energy = 100;
-    s.hazards.push({
+    addTimedHazards(s, {
       family: 'rock',
       state: 'solid',
       t: 2000,
@@ -523,7 +524,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.loadout = ['shield', 'mangoRain'];
     s.bestLevel = 16;
     s.energy = 100;
-    s.hazards.push({
+    addTimedHazards(s, {
       family: 'rock',
       state: 'solid',
       t: 2000,
@@ -554,7 +555,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     const s = buildState(b, { snake: SQUARE_SNAKE, dir: [0, 1], spawnInMs: QUIET, mango: [15, 15], mangoLeftMs: 1_000_000 });
     s.loadout = ['shield', 'mangoRain'];
     s.bestLevel = 16;
-    s.rubble.push({
+    s.families.rubble.push({
       family: 'rubble',
       x: 12,
       y: 12,
@@ -589,7 +590,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.loadout = ['shield', 'mangoRain'];
     s.bestLevel = 16;
     s.energy = 100;
-    s.hazards.push({
+    addTimedHazards(s, {
       family: 'rock',
       state: 'solid',
       t: 2000,
@@ -622,7 +623,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.loadout = ['shield', 'mangoRain'];
     s.bestLevel = 16;
     s.energy = 100;
-    s.hazards.push({
+    addTimedHazards(s, {
       family: 'rock',
       state: 'solid',
       t: 2000,
@@ -713,7 +714,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     for (let x = 0; x < b.board.cols; x++) {
       for (let y = 0; y < b.board.rows; y++) {
         if (!SQUARE_SNAKE.some(c => c[0] === x && c[1] === y)) {
-          s.hazards.push({
+          addTimedHazards(s, {
             family: 'rock',
             state: 'warn',
             t: 0,
@@ -1006,7 +1007,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     s.loadout = ['shield', 'slowmo'];
     s.bestLevel = 16;
     s.energy = 90; // 50 for shield, 40 for slowmo
-    s.hazards.push({
+    addTimedHazards(s, {
       family: 'rock',
       state: 'solid',
       t: 2000,

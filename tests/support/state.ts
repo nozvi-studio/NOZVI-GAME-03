@@ -23,7 +23,7 @@ export function buildState(b: Balance, o: StateOpts = {}): SimState {
     const left = o.mangoLeftMs ?? b.mango.rotBaseMs;
     s.mango = { x: o.mango[0], y: o.mango[1], golden: o.golden ?? false, leftMs: left, totalMs: left };
   }
-  if (o.rottenRocks) s.rottenRocks = o.rottenRocks.map(([x, y]) => ({ family: 'rottenRock', x, y, state: 'solid', leftMs: b.mango.rottenRockLifeMs }));
+  if (o.rottenRocks) s.families.rottenRock = o.rottenRocks.map(([x, y]) => ({ family: 'rottenRock', x, y, state: 'solid', leftMs: b.mango.rottenRockLifeMs }));
   if (o.level !== undefined) { s.level = o.level; s.tickMs = tickMsFor(b, o.level); }
   s.progress = o.progress ?? s.progress; s.score = o.score ?? s.score;
   // MEC-002-R3 legacy fixture option seeds both counters; new fixtures can set them independently.

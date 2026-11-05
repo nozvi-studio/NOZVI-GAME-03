@@ -1,4 +1,6 @@
 // tests/qa/task5-fairness.qa.test.ts — black-box QA tests for Task 5 placement constraints & BFS fairness
+import { instanceFamily } from '../support/instanceFamily';
+import { addTimedHazards } from '../../src/core/hazards/timed';
 import { describe, it, expect } from 'vitest';
 import { loadBalance } from '../support/balance';
 import { buildState } from '../support/state';
@@ -43,11 +45,11 @@ describe('QA Task 5: Spawn Constraints & BFS Fairness', () => {
       snake: [[8, 8], [7, 8], [6, 8]],
       rottenRocks: [[3, 3]],
     });
-    s.hazards.push({
+    addTimedHazards(s, {
       family: 'rock', state: 'warn', t: 100, warnMs: 1500, lifeMs: 6000, landed: false,
       cells: [{ x: 12, y: 12, on: false, ageMs: 100 }],
     });
-    s.terrains.push({
+    s.families.terrain.push({
       family: 'terrain', t: 100, lifeMs: 18000,
       cells: [{ x: 1, y: 1, delay: 0, up: false, vis: 'down' }],
     });
@@ -101,9 +103,9 @@ describe('QA Task 5: Spawn Constraints & BFS Fairness', () => {
     for (let seed = 1; seed <= 30; seed++) {
       const trialState = structuredClone(s);
       const ctx = spawnCtx(trialState, b);
-      const res = ROCK.spawn(ctx, rngFrom(seedRng(seed)));
+      const res = instanceFamily(ROCK).spawn(ctx, rngFrom(seedRng(seed)));
       if (res) {
-        trialState.hazards.push(res);
+        addTimedHazards(trialState, res);
         // After committing, the mango MUST STILL be reachable!
         const reachAfter = reachable(17, 17, trialState.snake[0]!, (x, y) => cellBfsWall(trialState, x, y));
         expect(reachAfter.has(key(17, 0, 0))).toBe(true);
@@ -126,7 +128,7 @@ describe('QA Task 5: Spawn Constraints & BFS Fairness', () => {
     const ctx = spawnCtx(s, b);
     let spawned = false;
     for (let seed = 1; seed <= 20; seed++) {
-      const res = ROCK.spawn(ctx, rngFrom(seedRng(seed)));
+      const res = instanceFamily(ROCK).spawn(ctx, rngFrom(seedRng(seed)));
       if (res) {
         spawned = true;
         break;
@@ -144,7 +146,7 @@ describe('QA Task 5: Spawn Constraints & BFS Fairness', () => {
       mango: [8, 12],
     });
     // Add terrain row in 'up' state blocking the direct path
-    s.terrains.push({
+    s.families.terrain.push({
       family: 'terrain', t: 3000, lifeMs: 18000,
       cells: [
         { x: 7, y: 10, delay: 0, up: true, vis: 'up' },
@@ -154,11 +156,11 @@ describe('QA Task 5: Spawn Constraints & BFS Fairness', () => {
     });
 
     // Check TERRAIN family definition
-    expect(TERRAIN.bfsWallAt(s.terrains[0]!, 8, 10)).toBe(false);
+    expect(instanceFamily(TERRAIN).bfsWallAt(s.families.terrain[0]!, 8, 10)).toBe(false);
     expect(cellBfsWall(s, 8, 10)).toBe(false);
 
     // While solidAt IS true:
-    expect(TERRAIN.solidAt(s.terrains[0]!, 8, 10)).toBe(true);
+    expect(instanceFamily(TERRAIN).solidAt(s.families.terrain[0]!, 8, 10)).toBe(true);
     expect(cellSolidCause(s, 8, 10)).toBe('ground');
 
     // BFS wall function returns false, so reachability path can pass right through terrain
@@ -190,7 +192,7 @@ describe('QA Task 5: Spawn Constraints & BFS Fairness', () => {
       snake: [[8, 8], [7, 8], [6, 8], [5, 8]], // tail at (5, 8)
       mango: [4, 8],
     });
-    s.hazards.push({
+    addTimedHazards(s, {
       family: 'rock', state: 'solid', t: 2000, warnMs: 1500, lifeMs: 6000, landed: true,
       cells: [
         { x: 4, y: 7, on: true, ageMs: 2000 },

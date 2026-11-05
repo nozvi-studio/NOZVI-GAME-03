@@ -88,7 +88,7 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
       spawnInMs: QUIET,
     });
 
-    s.rottenRocks = [];
+    s.families.rottenRock = [];
     for (let y = 0; y < b.board.rows; y++) {
       for (let x = 0; x < b.board.cols; x++) {
         const isSnake = s.snake.some(c => c.x === x && c.y === y);
@@ -96,7 +96,7 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
         const isTarget = x === targetCell.x && y === targetCell.y;
         if (!isSnake && !isOldMango && !isTarget) {
           const state = (x + y) % 2 === 0 ? 'solid' : 'crumble';
-          s.rottenRocks.push({ family: 'rottenRock', x, y, state, leftMs: 4000 });
+          s.families.rottenRock.push({ family: 'rottenRock', x, y, state, leftMs: 4000 });
         }
       }
     }
@@ -366,7 +366,7 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
       spawnInMs: QUIET,
     });
     s.rampActive = false;
-    s.rottenRocks = [{ family: 'rottenRock', x: 2, y: 2, state: 'solid', leftMs: 5000 }];
+    s.families.rottenRock = [{ family: 'rottenRock', x: 2, y: 2, state: 'solid', leftMs: 5000 }];
     const sim = restoreSim(b, s);
 
     // Keep snake circling for 4999 ms
@@ -402,7 +402,7 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
       dir: [1, 0],
       spawnInMs: QUIET,
     });
-    sSolid.rottenRocks = [{ family: 'rottenRock', x: 9, y: 8, state: 'solid', leftMs: 3000 }];
+    sSolid.families.rottenRock = [{ family: 'rottenRock', x: 9, y: 8, state: 'solid', leftMs: 3000 }];
     const simSolid = restoreSim(b, sSolid);
     simSolid.advance(140);
     const snapSolid = simSolid.snapshot();
@@ -421,7 +421,7 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
       dir: [1, 0],
       spawnInMs: QUIET,
     });
-    sCrumble.rottenRocks = [{ family: 'rottenRock', x: 9, y: 8, state: 'crumble', leftMs: 300 }];
+    sCrumble.families.rottenRock = [{ family: 'rottenRock', x: 9, y: 8, state: 'crumble', leftMs: 300 }];
     const simCrumble = restoreSim(b, sCrumble);
     simCrumble.advance(140);
     const snapCrumble = simCrumble.snapshot();
@@ -457,11 +457,11 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
       mango: [9, 8],
       spawnInMs: QUIET,
     });
-    s.rottenRocks = [];
+    s.families.rottenRock = [];
     for (let y = 0; y < b.board.rows; y++) {
       for (let x = 0; x < b.board.cols; x++) {
         if (!(y === 8 && x >= 6 && x <= 9)) {
-          s.rottenRocks.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: 10000 });
+          s.families.rottenRock.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: 10000 });
         }
       }
     }
@@ -494,7 +494,7 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
     });
     s.retryMs = 0;
     // Fill board except snake, the step path [5, 8], and candidate cell [16, 16]
-    s.rottenRocks = [];
+    s.families.rottenRock = [];
     for (let y = 0; y < b.board.rows; y++) {
       for (let x = 0; x < b.board.cols; x++) {
         const isSnake = (y === 8 && x >= 1 && x <= 4);
@@ -503,9 +503,9 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
         if (!isSnake && !isStepPath) {
           if (isCandidate) {
             // Rock that crumbles and is removed after 100 ms
-            s.rottenRocks.push({ family: 'rottenRock', x, y, state: 'crumble', leftMs: 100 });
+            s.families.rottenRock.push({ family: 'rottenRock', x, y, state: 'crumble', leftMs: 100 });
           } else {
-            s.rottenRocks.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: 20000 });
+            s.families.rottenRock.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: 20000 });
           }
         }
       }
@@ -542,12 +542,12 @@ describe('QA P1 Task 4: Mangoes (MEC-002 Black-Box)', () => {
       spawnInMs: 0,
     });
     // Reserve all other cells with rocks so retry cannot place a mango
-    s.rottenRocks = [];
+    s.families.rottenRock = [];
     for (let y = 0; y < b.board.rows; y++) {
       for (let x = 0; x < b.board.cols; x++) {
         const isSnake = SQUARE_SNAKE.some(([sx, sy]) => sx === x && sy === y);
         if (!isSnake) {
-          s.rottenRocks.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: 50000 });
+          s.families.rottenRock.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: 50000 });
         }
       }
     }

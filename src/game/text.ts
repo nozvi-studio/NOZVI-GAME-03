@@ -15,7 +15,7 @@ export const CAUSE_TEXT: Record<CauseKey, string> = {
   fence: 'You ran into a fence.', maze: 'You ran into a hedge.', ground: 'The ground rose in front of you.',
   snipWall: 'You hit your discarded tail.', rubble: 'You hit the rubble.',
 };
-const UNLOCK_NAMES: Record<IntroKey, string> = { rock: 'rocks', rottenRock: 'rotten rocks', fence: 'fences', terrain: 'rising ground', maze: 'hedge mazes' };
+const UNLOCK_NAMES: Record<IntroKey, string> = { rock: 'rocks', rottenRock: 'rotten rocks', fence: 'fences', terrain: 'rising ground', maze: 'hedge mazes', mud: 'mud', ice: 'ice' };
 const INCOMING: Record<UnlockKey, string> = { fence: 'Fence incoming', maze: 'Maze incoming', terrain: 'The ground is shaking' };
 
 // GDD-13 all player-facing P0 labels and messages match design §7.5.
@@ -37,6 +37,10 @@ const KEYED: Readonly<Record<string, string>> = {
   'banner.biome.4': 'Rocky Hills', 'banner.biome.5': 'Backyard', 'banner.biome.6': 'Storm Garden',
   'banner.new.rock': 'Rocks unlocked', 'banner.new.rottenRock': 'Rotten mangoes turn to rock!',
   'banner.new.fence': 'Fences unlocked', 'banner.new.terrain': 'Rising ground unlocked', 'banner.new.maze': 'Hedge mazes unlocked',
+  'banner.new.mud': 'Mud! You slow down while your head is in it.',
+  'death.context.mud': 'You were slowed by mud.',
+  'banner.new.ice': "Ice! You slide straight until you're off it.",
+  'death.context.ice': 'You were sliding on ice.',
   'hud.level': 'L{n} · Biome {b}', 'hud.energy': 'Energy {energy}/{max}',
   'skill.slowmo.name': 'Slow-mo', 'skill.tailSnip.name': 'Tail Snip', 'skill.shield.name': 'Shield', 'skill.mangoRain.name': 'Mango Rain',
   'skill.reject.energy': 'Need {cost} energy', 'skill.reject.active': 'Already on!',

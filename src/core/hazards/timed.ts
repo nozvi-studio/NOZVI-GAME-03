@@ -2,6 +2,25 @@
 import type { FenceKind } from '../balance';
 import type { Cell, SimState, StepCtx, TimedHazard, TimedKey } from '../types';
 
+// MEC-004-R2 preserve the P1 cross-family spawn order in updates and snapshots.
+export function timedHazards(s: SimState): TimedHazard[] {
+  const hazards = [...s.families.rock, ...s.families.fence, ...s.families.maze];
+  for (const h of hazards) if (h.spawnSeq === undefined) throw new Error('Missing spawnSeq on timed hazard; insert with addTimedHazards');
+  return hazards.sort((a, b) => a.spawnSeq! - b.spawnSeq!);
+}
+
+export function addTimedHazards(s: SimState, ...hazards: TimedHazard[]): void {
+  for (const h of hazards) {
+    h.spawnSeq = s.nextHazardSeq++;
+    s.families[h.family].push(h);
+  }
+}
+
+export function replaceTimedHazards(s: SimState, hazards: TimedHazard[]): void {
+  s.families.rock = []; s.families.fence = []; s.families.maze = [];
+  for (const h of hazards) s.families[h.family].push(h);
+}
+
 // MEC-004 create a warning hazard with independently tracked landing cells.
 export function makeTimed(family: TimedKey, cells: readonly Cell[], warnMs: number, lifeMs: number, kind?: FenceKind): TimedHazard {
   const h: TimedHazard = {
@@ -36,6 +55,6 @@ export const timedHasCell = (h: TimedHazard, x: number, y: number): boolean => h
 
 // MEC-006-R26 Shield removes one solid cell; a hazard with no cells left is dropped.
 export function breakTimed(s: SimState, family: TimedKey, x: number, y: number): void {
-  for (const h of s.hazards) if (h.family === family && timedSolidAt(h, x, y)) h.cells = h.cells.filter(c => c.x !== x || c.y !== y);
-  s.hazards = s.hazards.filter(h => h.cells.length > 0);
+  for (const h of timedHazards(s)) if (h.family === family && timedSolidAt(h, x, y)) h.cells = h.cells.filter(c => c.x !== x || c.y !== y);
+  replaceTimedHazards(s, timedHazards(s).filter(h => h.cells.length > 0));
 }

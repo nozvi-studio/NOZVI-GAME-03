@@ -1,4 +1,5 @@
 // tests/support/fuzz.ts — seeded invariant fuzz (design §9 item 2). No new dependency.
+import { timedHazards } from '../../src/core/hazards/timed';
 import type { Balance } from '../../src/core/balance';
 import { cellReserved, snakeOn } from '../../src/core/cells';
 import { nearHead } from '../../src/core/grid';
@@ -21,7 +22,7 @@ export function snapHash(sim: Sim): string {          // FNV-1a over the snapsho
 /** Runs consecutive runs until simMs of sim time are played. Runs start at a seeded level 0…10 so late hazards are covered. */
 export function fuzzSeed(b: Balance, seed: number, simMs: number): FuzzReport {
   const input = rngFrom(seedRng(seed ^ 0x9e3779b9));      // input RNG, separate from the Sim RNG
-  const rep: FuzzReport = { violations: [], steps: 0, maxLevel: 0, spawned: { rock: 0, fence: 0, maze: 0, terrain: 0 } };
+  const rep: FuzzReport = { violations: [], steps: 0, maxLevel: 0, spawned: { rock: 0, fence: 0, maze: 0, terrain: 0, mud: 0, ice: 0 } };
   const seen = new WeakSet<object>();
   let played = 0, run = 0;
   while (played < simMs) {
@@ -62,7 +63,7 @@ function steer(sim: Sim, s: SimState, b: Balance, input: ReturnType<typeof rngFr
 }
 
 function checkSpawns(s: SimState, b: Balance, head: { x: number; y: number }, dir: SimState['dir'], seen: WeakSet<object>, rep: FuzzReport): void {
-  for (const h of [...s.hazards, ...s.terrains]) {
+  for (const h of [...timedHazards(s), ...s.families.terrain]) {
     if (seen.has(h)) continue;
     seen.add(h); rep.spawned[h.family]++;
     const d = h.family === 'terrain' ? b.fairness.terrainNearHeadDist : b.fairness.nearHeadDist;
@@ -75,8 +76,8 @@ function checkState(s: SimState, rep: FuzzReport, t: number): void {
   const m = s.mango;
   if (m && cellReserved({ ...s, mango: null }, m.x, m.y)) rep.violations.push(`t=${t}: mango on a reserved cell (${m.x},${m.y})`);
   for (const c of s.snake) {
-    if (s.hazards.some(h => h.cells.some(k => k.on && k.x === c.x && k.y === c.y))
-      || s.terrains.some(T => T.cells.some(k => k.up && k.x === c.x && k.y === c.y)))
+    if (timedHazards(s).some(h => h.cells.some(k => k.on && k.x === c.x && k.y === c.y))
+      || s.families.terrain.some(T => T.cells.some(k => k.up && k.x === c.x && k.y === c.y)))
       rep.violations.push(`t=${t}: solid cell under the snake at (${c.x},${c.y})`);
   }
 }

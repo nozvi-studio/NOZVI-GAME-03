@@ -5,7 +5,7 @@ export type LogRecord =
   | { type: 'level_up'; t: number; runId: number; level: number; levelTimeMs: number }
   | { type: 'skill_used'; t: number; runId: number; skill: string; level: number; energyBefore: number }
   | { type: 'checkpoint_unlocked'; t: number; runId: number; level: number; reachedLevel: number }
-  | { type: 'run_end'; t: number; runId: number; level: number; score: number; cause: string; durationMs: number; startLevel: number; levelsCleared: number; won: boolean; turns?: number };
+  | { type: 'run_end'; t: number; runId: number; level: number; score: number; cause: string; durationMs: number; startLevel: number; levelsCleared: number; won: boolean; turns?: number; context?: 'ice' | 'mud' };
 export interface RunLog { version: 1; nextRunId: number; entries: LogRecord[]; deathCounts: Record<string, number> }
 export const LOG_KEY = 'mango-snake.log';
 export const emptyLog = (): RunLog => ({ version: 1, nextRunId: 1, entries: [], deathCounts: {} });
@@ -22,7 +22,8 @@ function isRecord(v: unknown): v is LogRecord {
     case 'skill_used': return numbers('level', 'energyBefore') && typeof v.skill === 'string';
     case 'checkpoint_unlocked': return numbers('level', 'reachedLevel');
     case 'run_end': return numbers('level', 'score', 'durationMs', 'startLevel', 'levelsCleared') && typeof v.cause === 'string' && typeof v.won === 'boolean'
-      && (v.turns === undefined || finite(v.turns)); // turns is absent in logs written before it existed
+      && (v.turns === undefined || finite(v.turns)) // turns is absent in logs written before it existed
+      && (v.context === undefined || v.context === 'ice' || v.context === 'mud'); // MEC-003-R19 only tile deaths carry context
     default: return false;
   }
 }

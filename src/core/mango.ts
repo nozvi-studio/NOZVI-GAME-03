@@ -52,7 +52,7 @@ export function placeMango(s: SimState, b: Balance, rng: Rng): boolean {
 export function rotMango(s: SimState, b: Balance, rng: Rng): void {
   const m = s.mango as MangoState;
   const fair = familyRow(b, s.level).rottenRocks && reachSet(s, b).has(key(b.board.cols, m.x, m.y)) && !nearForMango(s, b, m.x, m.y);
-  if (fair) s.rottenRocks.push({ family: 'rottenRock', x: m.x, y: m.y, state: 'solid', leftMs: b.mango.rottenRockLifeMs });
+  if (fair) s.families.rottenRock.push({ family: 'rottenRock', x: m.x, y: m.y, state: 'solid', leftMs: b.mango.rottenRockLifeMs });
   s.events.push({ type: 'rotted', x: m.x, y: m.y, leftRock: fair });
   placeMango(s, b, rng); // MEC-001-R10 an empty mango slot never wins the run.
 }

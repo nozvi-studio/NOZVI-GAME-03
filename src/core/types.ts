@@ -1,6 +1,8 @@
 // src/core/types.ts — public API types of the core (design §4, §4.1)
 import type { Balance, FenceKind } from './balance';
 import type { Rng, RngState } from './rng';
+import type { CandidateOpts } from './hazards/placement';
+import type { TilePatch } from './hazards/blocks/groundTiles';
 
 export type Step = -1 | 0 | 1;
 export interface Dir { x: Step; y: Step }
@@ -9,14 +11,17 @@ export interface Cell { x: number; y: number }
 export type SkillId = 'slowmo' | 'tailSnip' | 'shield' | 'mangoRain';
 export type Loadout = readonly [SkillId | null, SkillId | null];
 export interface SimOptions { startLevel?: number; startEnergy?: number; loadout?: Loadout; bestLevel?: number }
-export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze';
+export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze' | 'mud' | 'ice';
 export type IntroKey = TableFamily | 'rottenRock';
 export interface LevelRow {
-  from: number; to: number; weights: Partial<Record<TableFamily, number>>;
+  from: number; to: number; weights: Partial<Record<FamilyKey, number>>;
   rockShapes: string[]; fenceShapes: string[]; rottenRocks: boolean;
 }
 export type CauseKey = 'wall' | 'self' | 'rotten' | 'rock' | 'fence' | 'maze' | 'ground' | 'snipWall' | 'rubble';   // prototype CAUSES L336
 export type FamilyKey = TableFamily | 'rottenRock' | 'snipWall' | 'rubble';
+export type TileKind = 'mud' | 'ice';
+export type HitKind = 'mover' | 'area';
+export interface HitCtx { hitHead(family: FamilyKey, x: number, y: number, kind: HitKind, dir: Dir): void }
 export type CapClass = 'small' | 'big' | 'modifier' | 'none';
 export type TimedKey = 'rock' | 'fence' | 'maze';
 export type UnlockKey = 'fence' | 'terrain' | 'maze';
@@ -24,6 +29,7 @@ export type UnlockKey = 'fence' | 'terrain' | 'maze';
 export type TimedPhase = 'warn' | 'solid' | 'crumble';
 export interface TimedCell { x: number; y: number; on: boolean; ageMs: number }
 export interface TimedHazard {
+  spawnSeq?: number;
   family: TimedKey; state: TimedPhase; t: number; warnMs: number; lifeMs: number;
   landed: boolean; cells: TimedCell[]; kind?: FenceKind;               // kind only on fences
 }
@@ -67,11 +73,13 @@ export type SimEvent =
   | { type: 'landed'; hazardType: TimedKey }
   | { type: 'dust'; x: number; y: number }
   | { type: 'rotted'; x: number; y: number; leftRock: boolean }
-  | { type: 'hazardIncoming'; family: UnlockKey }
-  | { type: 'died'; cause: CauseKey; x: number; y: number };
+  | { type: 'hazardIncoming'; family: FamilyKey }
+  | { type: 'died'; cause: CauseKey; x: number; y: number; context?: TileKind };
 
 /** All Sim state. Plain JSON data only: no closures, Map/Set or class instances. */
 export interface SimState {
+  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; rubble: Rubble[]; mud: { patches: TilePatch[]; nextId: number }; ice: { patches: TilePatch[]; nextId: number } };
+  nextHazardSeq: number;
   snake: Cell[];               // head first
   dir: Dir;
   queue: Dir[];                // queued turns, max balance.snake.maxQueuedTurns
@@ -84,9 +92,7 @@ export interface SimState {
   bestLevel: number;
   slowmo: { leftMs: number } | null;
   levelUpSlow: LevelUpSlow | null;
-  snipWalls: SnipWall[];
   shield: { leftMs: number } | null;
-  rubble: Rubble[];
   rain: RainState | null;
   rainMangoes: RainMango[];
   rainBudgets: { castId: number; left: number }[];
@@ -96,9 +102,6 @@ export interface SimState {
   rampActive: boolean;
   rampEaten: number;
   mango: MangoState | null;
-  rottenRocks: RottenRock[];
-  hazards: TimedHazard[];      // rock/fence/maze in spawn order (prototype `hazards`)
-  terrains: TerrainHazard[];   // prototype `terrains`
   spawnInMs: number;
   mazeCooldownMs: number;
   score: number;
@@ -125,6 +128,8 @@ export interface HazardView {
 export interface TerrainView { t: number; lifeMs: number; cells: readonly { x: number; y: number; vis: TerrainVis; delay: number }[] }
 
 export interface SimSnapshot {
+  tiles: readonly { family: TileKind; id: number; state: 'warn' | 'active' | 'fade'; leftMs: number; cells: readonly { x: number; y: number; on: boolean }[]; ring?: readonly Cell[] }[];
+  headTile: TileKind | null;
   skills: readonly { slot: 0 | 1; id: SkillId | null; cost: number; affordable: boolean; active: boolean; leftMs: number }[];
   slowmo: { leftMs: number } | null;
   levelUpSlow: LevelUpSlow | null;
@@ -177,9 +182,16 @@ export interface Sim {
 }
 
 /** Per-call view for spawning; never stored in SimState. */
+export interface SpawnObserver {
+  spawned(family: FamilyKey, cells: readonly Cell[], before: SimState, after: SimState): void;
+}
 export interface SpawnCtx {
   readonly balance: Balance;
   readonly level: number;
+  readonly rng: Rng; // Explicit spawn RNG; spawnCtx supplies the simulation stream by default.
+  readonly observer?: SpawnObserver;
+  /** MEC-004-R10-R12 supplied by spawnCtx to keep descriptors independent of the registry. */
+  candidateValid(s: SimState, cells: readonly Cell[], opts: CandidateOpts): boolean;
   /** In bounds, not reserved, not near the head (d defaults to balance.fairness.nearHeadDist). */
   cellFree(x: number, y: number, d?: number): boolean;
 }
@@ -190,16 +202,38 @@ export interface StepCtx {
   emit(e: SimEvent): void;
 }
 
-export interface HazardFamily<S extends { family: FamilyKey }> {
+export interface InstanceRules<S extends { family: FamilyKey }> {
   key: FamilyKey;
   cause: CauseKey;                                     // rock→'rock', fence→'fence', maze→'maze', terrain→'ground'
   capClass: CapClass;                                  // rock, fence: 'small' (director cap); maze, terrain: 'big'
   maxActiveKey: string | null;                         // balance key of a per-family max; terrain: 'terrain.maxActive'
-  spawn(ctx: SpawnCtx, rng: Rng): S | null;            // placement rules of design §5, unchanged
+  emitsIncoming?: boolean;                            // true when the family emits its own incoming warning
+  spawn(ctx: SpawnCtx, rng: Rng, s: SimState): S | null; // MEC-004-R10-R12 validates candidates against the live board.
   update(state: S, ctx: StepCtx): 'keep' | 'remove';   // one 1 ms step
   solidAt(state: S, x: number, y: number): boolean;    // collision
   bfsWallAt(state: S, x: number, y: number): boolean;  // reachability walls
   reservedAt(state: S, x: number, y: number): boolean; // placement reserved
   onBreak?(s: SimState, x: number, y: number): void;    // MEC-006-R26 removes one broken solid cell
   breakable: boolean;                                  // MEC-006-R24 Shield can break it; false only for rubble
+}
+
+// MEC-004-R2 state-level family contract; descriptors never retain simulation state.
+export interface HazardFamily {
+  readonly key: FamilyKey;
+  readonly breakable: boolean;
+  readonly cause: CauseKey | null;
+  readonly capClass: CapClass;
+  readonly maxActiveKey: string | null;
+  /** MEC-004-R9 true when the family owns or defers its own hazardIncoming warning, so the director stays silent. */
+  readonly emitsIncoming?: boolean;
+  spawn(s: SimState, ctx: SpawnCtx): Cell[] | null;
+  update(s: SimState, ctx: StepCtx & HitCtx): void;
+  snapshot(s: SimState): unknown;
+  solidAt(s: SimState, x: number, y: number): boolean;
+  bfsWallAt(s: SimState, x: number, y: number): boolean;
+  reservedAt(s: SimState, x: number, y: number): boolean;
+  count?(s: SimState): number;
+  tileAt?(s: SimState, x: number, y: number): TileKind | null;
+  headHit?(s: SimState, x: number, y: number): HitKind | null;
+  onBreak?(s: SimState, x: number, y: number): void;
 }

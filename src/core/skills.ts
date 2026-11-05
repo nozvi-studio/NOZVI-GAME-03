@@ -1,6 +1,8 @@
 import type { Balance } from './balance';
 import { baseTickMs } from './ramp';
 import { levelUpSlowFactor } from './slowdown';
+import { scaleTick } from './hazards/blocks/groundTiles';
+import { tileAt } from './hazards/queries';
 import { slowmoSkill } from './skills/slowmo';
 import { tailSnipSkill } from './skills/tailSnip';
 import { shieldSkill } from './skills/shield';
@@ -65,11 +67,13 @@ export function skillTimers(s: SimState, _b: Balance, ctx: StepCtx): void {
   }
 }
 
-// MEC-006-R17 / MEC-003-R22 max(Slow-mo, level-up slowdown) on the live level/ramp tick; never stacked.
+// MEC-006-R17 / MEC-003-R22 / MEC-004-R7 max(Slow-mo, level-up slowdown) multiplies the tile factor.
 export function effectiveTick(s: SimState, b: Balance): number {
   const base = baseTickMs(s, b);
   const f = Math.max(s.slowmo ? b.skills.slowmo.tickFactor : 1, levelUpSlowFactor(s));
-  return f === 1 ? base : Math.round(base * f);
+  const head = s.snake[0]!;
+  const tileFactor = tileAt(s, head.x, head.y) === 'mud' ? b.mud.tickFactor : 1; // MEC-012-R6
+  return scaleTick(base, f, tileFactor);
 }
 
 // MEC-007-R12 bestLevel stays the saved options value throughout the run.

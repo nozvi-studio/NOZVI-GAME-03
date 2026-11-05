@@ -1,6 +1,7 @@
+// tests/core/mango.test.ts
+import { replaceTimedHazards, timedHazards } from '../../src/core/hazards/timed';
 import { simFromAscii, circle, SQUARE } from '../../src/core/testing';
 import { updateDirector } from '../../src/core/hazards/director';
-// tests/core/mango.test.ts
 import { describe, expect, it } from 'vitest';
 import { cellBfsWall, cellReserved } from '../../src/core/cells';
 import { key, reachable, nearHead } from '../../src/core/grid';
@@ -36,7 +37,7 @@ describe('MEC-002 mango', () => {
   it('MEC-002 a fair rot leaves a rotten rock; an unfair rot does not and may re-pick the same cell', () => {
     const fair = buildState(b, { mango: [2, 2], level: 12 });
     rotMango(fair, b, rngFrom(seedRng(5)));
-    expect(fair.rottenRocks).toEqual([{ family: 'rottenRock', x: 2, y: 2, state: 'solid', leftMs: 5000 }]);
+    expect(fair.families.rottenRock).toEqual([{ family: 'rottenRock', x: 2, y: 2, state: 'solid', leftMs: 5000 }]);
     expect(fair.events).toEqual([{ type: 'rotted', x: 2, y: 2, leftRock: true }]);
     expect(fair.mango).not.toMatchObject({ x: 2, y: 2 });
 
@@ -45,12 +46,12 @@ describe('MEC-002 mango', () => {
     const head = s.snake[0]!;
     for (let y = 0; y < 17; y++) for (let x = 0; x < 17; x++) {
       const taken = s.snake.some(c => c.x === x && c.y === y) || (x === 10 && y === 8);
-      if (!taken && !nearHead(head, s.dir, x, y, 3, 4)) s.rottenRocks.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: b.mango.rottenRockLifeMs });
+      if (!taken && !nearHead(head, s.dir, x, y, 3, 4)) s.families.rottenRock.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: b.mango.rottenRockLifeMs });
     }
-    const rocks = s.rottenRocks.length;
+    const rocks = s.families.rottenRock.length;
     const pick = scripted(p => p.find(c => c.x === 10 && c.y === 8) ?? p[0]!);
     rotMango(s, b, pick.rng);
-    expect(s.rottenRocks.length).toBe(rocks);
+    expect(s.families.rottenRock.length).toBe(rocks);
     expect(s.events).toEqual([{ type: 'rotted', x: 10, y: 8, leftRock: false }]);
     expect(s.mango).toMatchObject({ x: 10, y: 8 });
   });
@@ -98,7 +99,7 @@ describe('MEC-002 mango', () => {
     const s = buildState(b, { mango: [10, 8] });
     for (let y = 0; y < 17; y++) for (let x = 0; x < 17; x++) {
       const taken = s.snake.some(c => c.x === x && c.y === y) || (x === 10 && y === 8);
-      if (!taken && !nearHead(s.snake[0]!, s.dir, x, y, 3, 4)) s.rottenRocks.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: b.mango.rottenRockLifeMs });
+      if (!taken && !nearHead(s.snake[0]!, s.dir, x, y, 3, 4)) s.families.rottenRock.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: b.mango.rottenRockLifeMs });
     }
     return s;
   }
@@ -126,7 +127,7 @@ describe('MEC-002 mango', () => {
   function lastCellBoard(leftMs = 8000) {
     const s = buildState(b, { snake: [[8, 8], [7, 8], [6, 8]], mango: [9, 8], mangoLeftMs: leftMs, spawnInMs: QUIET });
     for (let y = 0; y < 17; y++) for (let x = 0; x < 17; x++) {
-      if (!(y === 8 && x >= 6 && x <= 9)) s.rottenRocks.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: b.mango.rottenRockLifeMs });
+      if (!(y === 8 && x >= 6 && x <= 9)) s.families.rottenRock.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: b.mango.rottenRockLifeMs });
     }
     return s;
   }
@@ -198,7 +199,7 @@ describe('MEC-002 P1 mango rules', () => {
 
   it('MEC-002-R7 rotten rock is solid 5000 ms, crumbles 450 ms, then is removed', () => {
     const sim = simFromAscii(b, [], { snake: SQUARE, dir: [0, 1], quiet: true, options: { startLevel: 12 },
-      extraState: { rottenRocks: [{ family: 'rottenRock', x: 10, y: 10, state: 'solid', leftMs: 5000 }] } });
+      extraState: { families: { rottenRock: [{ family: 'rottenRock', x: 10, y: 10, state: 'solid', leftMs: 5000 }] } } });
     circle(sim, 4999); expect(sim.snapshot().rottenRocks[0]).toMatchObject({ state: 'solid', leftMs: 1 });
     circle(sim, 1); expect(sim.snapshot().rottenRocks[0]).toMatchObject({ state: 'crumble', leftMs: 450 });
     circle(sim, 449); expect(sim.snapshot().rottenRocks[0]).toMatchObject({ state: 'crumble', leftMs: 1 });
@@ -246,7 +247,7 @@ describe('MEC-002 P1 mango rules', () => {
 
   it.each(['solid', 'crumble'] as const)('MEC-002-R7 rotten rock kills with cause rotten only while solid: %s', state => {
     const sim = simFromAscii(b, ['.....R'], { snake: [[4, 0], [3, 0], [2, 0], [1, 0]], quiet: true,
-      extraState: { rottenRocks: [{ family: 'rottenRock', x: 5, y: 0, state, leftMs: 5000 }] } });
+      extraState: { families: { rottenRock: [{ family: 'rottenRock', x: 5, y: 0, state, leftMs: 5000 }] } } });
     sim.advance(140);
     if (state === 'solid') expect(sim.drainEvents()).toContainEqual({ type: 'died', cause: 'rotten', x: 4, y: 0 });
     else { expect(sim.snapshot().snake[0]).toEqual({ x: 5, y: 0 }); expect(sim.snapshot().status).toBe('playing'); }
@@ -259,7 +260,7 @@ describe('MEC-002 P1 mango rules', () => {
     sim.advance(249); expect(exportState(sim).retryMs).toBe(249);
     sim.advance(1); expect(exportState(sim).retryMs).toBe(0);
     expect(sim.drainEvents()).toEqual([]); expect(exportState(sim).rng).toEqual(rng);
-    const s = exportState(sim); s.hazards = s.hazards.filter(h => !h.cells.some(c => c.x === 16 && c.y === 16));
+    const s = exportState(sim); replaceTimedHazards(s, timedHazards(s).filter(h => !h.cells.some(c => c.x === 16 && c.y === 16)));
     const next = simFromState(b, s); next.advance(249); expect(next.snapshot().mango).toBeNull();
     next.advance(1); expect(next.snapshot().mango).toMatchObject({ x: 16, y: 16, ageMs: 0 });
     expect(next.drainEvents()).toEqual([]);
@@ -275,7 +276,7 @@ describe('MEC-002 P1 mango rules', () => {
     const s = exportState(deferred()); s.mango = null; s.spawnInMs = -1;
     const before = structuredClone(s);
     for (let ms = 0; ms < 3000; ms++) updateDirector(s, b, rngFrom(s.rng));
-    expect(s.hazards).toEqual(before.hazards); expect(s.spawnInMs).toBe(-1); expect(s.rng).toEqual(before.rng);
+    expect(timedHazards(s)).toEqual(timedHazards(before)); expect(s.spawnInMs).toBe(-1); expect(s.rng).toEqual(before.rng);
   });
 
   it('MEC-002-EC1 mango rotting the ms the head would enter it leaves no rock', () => {

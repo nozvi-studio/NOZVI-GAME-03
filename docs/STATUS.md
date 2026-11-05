@@ -5,7 +5,8 @@
 ## Now (in progress)
 - [x] P1 closed: flow B + WASD fix + run_end.turns merged; agy browser QA 11/11 PASS; version/v0.1 -> dev.
 - [x] P2 plans ready: P2a (revised for flow B) `docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md`; P2b `2026-11-04-p2b-movers-cycles-blasts.md`; P2c `2026-11-04-p2c-shrink-challenge-tuning.md`.
-- [ ] **RESUME HERE:** execute P2a with subagent-driven development on `feat/p2a-...` branches from `version/v0.2`.
+- [x] P2a merged into version/v0.2: registry/queries, collision + death context, director capClass + fairness 1-3, escape check + family fuzz, GroundTiles, mud (L7), ice (L13), bot + death-cause report, run-log context. 938 pass; reduced fuzz + bot report pass (PLAYTEST 2026-11-05).
+- [ ] **RESUME HERE:** start P2b (`docs/superpowers/plans/2026-11-04-p2b-movers-cycles-blasts.md`) on a task branch from version/v0.2; Task 1 writes MEC-013..017.
 
 ## Next (ordered, max 5)
 1. P2a (framework + ground tiles), then P2b (movers, cycles, blasts, bird), then P2c (shrink, challenge levels, tuning, P2 exit).
@@ -22,6 +23,8 @@
 - P2b OQ-B1..B6 and P2c OQ-C1..C5 (listed at the top of each plan): gate/spike rhythms, NPC speeds, stolen-mango cost, bird shadow, P2b strings, shrink frequency, challenge feedback/effect, P2 exit playtest size, tuning authority.
 
 ## Known issues / tech debt
+- P2a browser QA (L7 mud, L13 ice) not run: agy killed by host low RAM; owner chose to merge (2026-11-05). Fold into P2b QA or the next owner playtest.
+- Full family fuzz matrix 200 x 120 s not run (host RAM); run overnight with default VITE_FUZZ_* when possible.
 - Windows: Vitest needs --configLoader native --pool threads --maxWorkers 2.
 - 4 skipped QA (reasons in files). Single 1.28 MB JS chunk.
 - Quitting mid-run does not log run_end (seen in phone log); decide in P2c log work.

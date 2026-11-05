@@ -90,7 +90,7 @@ describe('QA Task 4: Mango Rot Lifecycle & Full Board (Black-Box)', () => {
       spawnInMs: QUIET,
     });
     // Box (0, 0) in with rotten rocks so BFS cannot reach it
-    s.rottenRocks.push({ x: 0, y: 1 }, { x: 1, y: 1 }, { x: 1, y: 0 });
+    s.families.rottenRock.push({ x: 0, y: 1 }, { x: 1, y: 1 }, { x: 1, y: 0 });
 
     const sim = restoreSim(b, s);
     sim.advance(1);
@@ -142,7 +142,7 @@ describe('QA Task 4: Mango Rot Lifecycle & Full Board (Black-Box)', () => {
     const s = buildState(b, { level: 12, mango: [2, 2] });
     rotMango(s, b, rngFrom(seedRng(5)));
 
-    expect(s.rottenRocks).toContainEqual(expect.objectContaining({ x: 2, y: 2 }));
+    expect(s.families.rottenRock).toContainEqual(expect.objectContaining({ x: 2, y: 2 }));
     expect(s.mango).not.toMatchObject({ x: 2, y: 2 });
     expect(s.events).toContainEqual({ type: 'rotted', x: 2, y: 2, leftRock: true });
   });
@@ -159,7 +159,7 @@ describe('QA Task 4: Mango Rot Lifecycle & Full Board (Black-Box)', () => {
     for (let y = 0; y < b.board.rows; y++) {
       for (let x = 0; x < b.board.cols; x++) {
         if (!(y === 8 && x >= 6 && x <= 9)) {
-          s.rottenRocks.push({ x, y });
+          s.families.rottenRock.push({ x, y });
         }
       }
     }
@@ -184,7 +184,7 @@ describe('QA Task 4: Mango Rot Lifecycle & Full Board (Black-Box)', () => {
     for (let y = 0; y < b.board.rows; y++) {
       for (let x = 0; x < b.board.cols; x++) {
         if (!(y === 8 && x >= 6 && x <= 9)) {
-          s.rottenRocks.push({ x, y });
+          s.families.rottenRock.push({ x, y });
         }
       }
     }

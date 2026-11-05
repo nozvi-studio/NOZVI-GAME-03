@@ -1,3 +1,4 @@
+import { instanceFamily } from '../support/instanceFamily';
 import { describe, it, expect } from 'vitest';
 import type { SimEvent } from '../../src/core/types';
 import { makeTimed } from '../../src/core/hazards/timed';
@@ -35,11 +36,12 @@ describe('MEC-006 Shield', () => {
   });
   it('MEC-006-R24 shield breaks fence, terrain up cell, maze hedge, rotten rock and snip wall; never rubble', () => {
     const maze = makeTimed('maze', [{ x: 3, y: 0 }], 1, 600000);
+    maze.spawnSeq = 0; // This fixture supplies the only timed instance directly through extraState.
     maze.state = 'solid'; maze.landed = true; maze.cells[0]!.on = true;
     const tr = b.terrain, upAt = tr.startDelayMs + tr.periodMs - tr.upMs;
     const terrain = { family: 'terrain' as const, t: upAt, lifeMs: 600000, cells: [{ x: 3, y: 0, delay: 0, up: true, vis: 'up' as const }] };
     const cases: [string, object, string][] = [
-      ['...F', {}, 'fence'], ['....', { terrains: [terrain] }, 'terrain'], ['....', { hazards: [maze] }, 'maze'],
+      ['...F', {}, 'fence'], ['....', { families: { terrain: [terrain] } }, 'terrain'], ['....', { families: { maze: [maze] } }, 'maze'],
       ['...R', {}, 'rottenRock'], ['...S', {}, 'snipWall']];
     for (const [row, extra, family] of cases) {
       const sim = shieldSim(row, extra); sim.useSkill(0); sim.drainEvents(); sim.advance(140);
@@ -80,15 +82,15 @@ describe('MEC-006 Shield', () => {
     const s = exportState(shieldSim('....'));
     const r = { family: 'rubble' as const, x: 5, y: 5, state: 'solid' as const, leftMs: b.skills.shield.rubbleLifeMs };
     const ctx = testCtx(b, s);
-    for (let t = 1; t < 1500; t++) rubbleFamily.update(r, ctx);
+    for (let t = 1; t < 1500; t++) instanceFamily(rubbleFamily).update(r, ctx);
     expect(r.state).toBe('solid');
-    expect(rubbleFamily.solidAt(r, 5, 5)).toBe(true);
-    rubbleFamily.update(r, ctx);
+    expect(instanceFamily(rubbleFamily).solidAt(r, 5, 5)).toBe(true);
+    instanceFamily(rubbleFamily).update(r, ctx);
     expect(r).toMatchObject({ state: 'crumble', leftMs: 450 });
-    expect(rubbleFamily.solidAt(r, 5, 5)).toBe(false);
-    expect(rubbleFamily.reservedAt(r, 5, 5) && rubbleFamily.bfsWallAt(r, 5, 5)).toBe(true);
-    for (let t = 1; t < 450; t++) expect(rubbleFamily.update(r, ctx)).toBe('keep');
-    expect(rubbleFamily.update(r, ctx)).toBe('remove');
+    expect(instanceFamily(rubbleFamily).solidAt(r, 5, 5)).toBe(false);
+    expect(instanceFamily(rubbleFamily).reservedAt(r, 5, 5) && instanceFamily(rubbleFamily).bfsWallAt(r, 5, 5)).toBe(true);
+    for (let t = 1; t < 450; t++) expect(instanceFamily(rubbleFamily).update(r, ctx)).toBe('keep');
+    expect(instanceFamily(rubbleFamily).update(r, ctx)).toBe('remove');
   });
   it('MEC-006-R16 shield ends with skillEnded timeout after 5000 ms with no hit', () => {
     const sim = simFromAscii(b, [], { snake: SQUARE, dir: [0, 1], quiet: true, options: opts });

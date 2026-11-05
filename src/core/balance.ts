@@ -1,5 +1,6 @@
 // src/core/balance.ts — Balance type + parseBalance (design §6). GDD-7
-import type { LevelRow } from './types';
+import type { HazardFamily, LevelRow } from './types';
+import { DEFAULT_FAMILIES } from './hazards/registry';
 
 export type Pair = [number, number];
 export type RockShapeKey = 'single' | 'lineH' | 'lineV' | 'corner' | 'block';
@@ -9,6 +10,11 @@ export interface MazeLayout { segments: [number, number, number, number][]; excl
 
 /** MEC-003-R22 one slowdown tier, by the level just reached. */
 export interface SlowdownTier { from: number; to: number; factor: number; easeMs: number }
+
+interface GroundTileBalance {
+  warnMs: number; lifeMs: number; lifeRandMs: number; tries: number; maxActive: number; mirrorChance: number;
+  shapePool: string[]; shapes: Record<string, Pair[]>;
+}
 
 export interface Balance {
   board: { cols: number; rows: number };
@@ -21,8 +27,10 @@ export interface Balance {
     goldenMinEaten: number; points: { normal: number; golden: number }; progress: { normal: number; golden: number };
     nearHeadDist: number; rottenRockLifeMs: number; placeRetryMs: number;
   };
-  fairness: { nearHeadDist: number; frontLaneCells: number; terrainNearHeadDist: number };
+  fairness: { nearHeadDist: number; frontLaneCells: number; terrainNearHeadDist: number; minWarnMs: number; minWarnTicks: number; escapeHorizonMs: number };
   hazard: { crumbleMs: number };
+  mud: GroundTileBalance & { tickFactor: number };
+  ice: GroundTileBalance;
   rock: {
     warnMs: number; lifeMs: number; lifeRandMs: number; tries: number;
     shapes: Record<RockShapeKey, Pair[]>;
@@ -97,6 +105,13 @@ const namesOf = (allowed: readonly string[], allowEmpty = false) => (v: unknown,
 };
 const recordOf = (keys: readonly string[], item: Check): Spec => Object.fromEntries(keys.map(k => [k, item]));
 const timed: Spec = { warnMs: 'int+', lifeMs: 'int+', lifeRandMs: 'int0' };
+const groundTiles: Spec = { ...timed, tries: 'int+', maxActive: 'int+', mirrorChance: 'prob',
+  shapePool: listOf((v, path) => { if (typeof v !== 'string') fail(path, 'must be a shape name'); }),
+  shapes: (v, path) => {
+    if (!isObj(v) || !Object.keys(v).length) fail(path, 'must contain shapes');
+    for (const [name, shape] of Object.entries(v)) check(shape, 'pairs', path + '.' + name);
+  },
+};
 
 const SPEC: Spec = {
   board: { cols: 'int+', rows: 'int+' },
@@ -106,7 +121,8 @@ const SPEC: Spec = {
     from: 'int+', to: 'int+', weights: (v, path) => {
       if (!isObj(v)) fail(path, 'must be an object');
       for (const [key, value] of Object.entries(v)) {
-        if (!['rock', 'fence', 'terrain', 'maze'].includes(key)) fail(path, 'unknown family ' + key);
+        // MEC-004-R1 only registered director families may have table weights.
+        if (!DEFAULT_FAMILIES.some(f => f.key === key && f.capClass !== 'none')) fail(path, 'unknown or non-director family ' + key);
         check(value, 'num0', path + '.' + key);
       }
     }, rockShapes: namesOf(ROCK_KEYS, true), fenceShapes: namesOf(FENCE_KINDS, true), rottenRocks: 'bool',
@@ -117,8 +133,10 @@ const SPEC: Spec = {
     goldenMinEaten: 'int0', points: { normal: 'int+', golden: 'int+' }, progress: { normal: 'int+', golden: 'int+' },
     nearHeadDist: 'int+', rottenRockLifeMs: 'int+', placeRetryMs: 'int+',
   },
-  fairness: { nearHeadDist: 'int+', frontLaneCells: 'int+', terrainNearHeadDist: 'int+' },
+  fairness: { nearHeadDist: 'int+', frontLaneCells: 'int+', terrainNearHeadDist: 'int+', minWarnMs: 'int+', minWarnTicks: 'int+', escapeHorizonMs: 'int+' },
   hazard: { crumbleMs: 'int+' },
+  mud: { ...groundTiles, tickFactor: 'num+' },
+  ice: groundTiles,
   rock: { ...timed, tries: 'int+',
     shapes: recordOf(ROCK_KEYS, 'pairs') },
   fence: { ...timed, tries: 'int+', lineBase: 'int+', lineExtraMax: 'int0', gapMinLen: 'int+', mirrorChance: 'prob',
@@ -165,13 +183,42 @@ function check(v: unknown, c: Check, path: string): void {
   if (!ok(v)) fail(path, msg);
 }
 
-/** Validates the balance JSON and returns it typed; throws `balance: <path> <reason>`. GDD-7 */
-export function parseBalance(json: unknown): Balance {
+/** Validates balance JSON; optional copied family metadata controls cap-path validation. GDD-7 */
+export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[] = DEFAULT_FAMILIES): Balance {
   check(json, SPEC, '');
   const b = json as Balance;
+  // MEC-004-R9 validate descriptor cap paths once, including disabled families.
+  for (const family of capFamilies) if (family.maxActiveKey !== null) {
+    let value: unknown = b;
+    for (const part of family.maxActiveKey.split('.')) value = isObj(value) && Object.hasOwn(value, part) ? value[part] : undefined;
+    check(value, 'int+', family.maxActiveKey);
+  }
   if (b.speed.minMs > b.speed.startMs) fail('speed.minMs', 'must be ≤ speed.startMs');
   if (b.mango.rotMinMs > b.mango.rotBaseMs) fail('mango.rotMinMs', 'must be ≤ mango.rotBaseMs');
   if (b.terrain.upMs + b.terrain.warnMs >= b.terrain.periodMs) fail('terrain.periodMs', 'must be > upMs + warnMs');
+  // MEC-004-R13 warning time uses the L1 base tick, independent of slow effects.
+  const minWarnMs = Math.max(b.fairness.minWarnMs, b.fairness.minWarnTicks * b.speed.startMs);
+  for (const family of ['rock', 'fence', 'maze', 'terrain', 'mud', 'ice'] as const) {
+    if (b[family].warnMs < minWarnMs) fail(family + '.warnMs', 'must be >= ' + minWarnMs);
+  }
+  // MEC-012-R1 every pooled shape exists and every configured shape is 4-connected.
+  if (b.mud.tickFactor <= 1) fail('mud.tickFactor', 'must be > 1');
+  for (const family of ['mud', 'ice'] as const) {
+    const tiles = b[family];
+    for (const name of tiles.shapePool) if (!Object.hasOwn(tiles.shapes, name)) fail(family + '.shapePool', 'unknown shape ' + name);
+    for (const [name, cells] of Object.entries(tiles.shapes)) {
+    const remaining = new Set(cells.map(([x, y]) => `${x},${y}`));
+    const pending = [cells[0]!];
+    remaining.delete(pending[0]!.join(','));
+    while (pending.length) {
+      const [x, y] = pending.pop()!;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+        if (remaining.delete(`${x + dx},${y + dy}`)) pending.push([x + dx, y + dy]);
+      }
+    }
+      if (remaining.size) fail(family + '.shapes.' + name, 'must be 4-connected');
+    }
+  }
   if (b.snake.start.length < 2) fail('snake.start', 'must have at least 2 cells');
   if (Math.abs(b.snake.startDir[0]) + Math.abs(b.snake.startDir[1]) !== 1) fail('snake.startDir', 'must be one unit step');
   // MEC-001-R6 a reset can only trim after growth.

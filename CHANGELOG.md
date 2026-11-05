@@ -3,18 +3,31 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Added
+- feat(meta): log death context on run_end and show it on Results; docs: P2a exit report (MEC-003-R19, MEC-012-R12)
+- refactor: shared spawnGroundPatch, bot report ignores unknown cause, test and docs cleanups from P2a reviews
+- test(tools): headless bot and death-cause report (MEC-004-R19)
+- feat(core): ice tiles from level 13 (MEC-012)
+- feat(core): mud tiles from level 7 (MEC-012)
+- feat(core): ground tile block and tile speed factor (MEC-004-R5 R7)
+- test(core): escape check and per-family fairness fuzz harness (MEC-004-R17 R18)
+- feat(core): generic head collision, head hits and death context (MEC-004-R6 R8 R15)
 - feat(core): level-up slowdown state and Slow-mo max rule in effectiveTick (MEC-003-R22, MEC-006-R17).
 - feat(core): levelUpSlowdown tiers in balance config with validation (MEC-003-R22).
 ### Changed
+- feat(core): director by capClass and fairness rule 3 for all families (MEC-004-R9-R13)
+- refactor(core): route hazard queries through the family registry and move per-family state lists into SimState.families without behavior changes (MEC-004-R1-R4).
 - chore(core): remove level.transitionMs; level-up banner uses ui.bannerMs (MEC-003-R7).
 - feat(core): director first spawn starts when the level-up slowdown ends (MEC-003-R11).
 - feat(core): level up no longer freezes the sim; skills castable and timers running during level up; slowdown starts at level up (MEC-003-R7..R11/R22, MEC-006-R13).
 - feat(core): obstacles, rotten rocks, terrain, snip walls and rubble survive a level up; no level-up crumble (MEC-003-R8, MEC-006-EC15).
 - chore(log): `run_end` records `turns`, the count of turns accepted by the MEC-001 queue; old logs without it still load (MEC-003-R19).
 ### Fixed
+- fix(config): add minWarnMs, minWarnTicks and escapeHorizonMs to config/balance.json and set terrainNearHeadDist to 4 as expected by Task 3.
 - fix(game): keyboard turns (arrows/WASD) are queued on the native keydown instead of waiting for Phaser's per-frame keyboard queue; pure key map in src/game/input/keyMap.ts (MEC-001).
 - fix(core): regular mango updates the speed ramp before the level-clear check, so rampEnded precedes levelUp (ARCHITECTURE step 12.4).
 ### Docs
+- docs: P2a exit recorded (STATUS, PLAYTEST); browser QA deferred by owner.
+- test: fuzz-mode size knobs (VITE_FUZZ_SEEDS, VITE_FUZZ_MS) and no timeout for the legacy fuzz in fuzz mode; P2a exit results in PLAYTEST.
 - docs: P1 exit gate verdict (PASS) in PLAYTEST; STATUS for P2 start.
 - docs: update P2a plan for level-up flow B (no onLevelEnd; tiles survive a level up; slowdown x mud rule FB-1; real code paths).
 - docs: P2b (movers, cycles, blasts, bird) and P2c (shrink, challenge levels, tuning, P2 exit) implementation plans.

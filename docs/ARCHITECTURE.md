@@ -1,5 +1,5 @@
 # Architecture
-Updated: 2026-11-04 · Source: `docs/superpowers/specs/2026-11-03-p0-foundation-design.md` §3–§4.
+Updated: 2026-11-05 · Source: `docs/superpowers/specs/2026-11-03-p0-foundation-design.md` §3–§4.
 
 ## Modules and boundaries
 | Module | Contents | May import | Must not use |
@@ -24,7 +24,7 @@ Rules: the core holds no player-facing strings (events carry keys; `src/game/tex
 2. `timeMs += 1`.
 3. `levelTimeMs += 1`.
 4. Director (P0, with MEC-003-R4/R14 inputs; skipped while `mango = null` (MEC-003-R13) or while a level-up slowdown is active (MEC-003-R11)).
-5. Hazard families `update` in registry order (P0 families, then `rottenRock` MEC-002-R7, `snipWall` MEC-006-R22, `rubble` MEC-006-R28).
+5. Timed rock/fence/maze instances update together in serialized spawn order (MEC-004-R2, preserves P1 events), then terrain, `rottenRock` MEC-002-R7, `snipWall` MEC-006-R22, `rubble` MEC-006-R28 in registry order.
 6. Skill effect timers: Slow-mo, Shield (`skillEnded` on timeout; MEC-006-R16). Tail Snip "active" is derived from the `snipWall` family (MEC-006-R14).
 7. Level-up slowdown: `leftMs −= 1`, set to null at 0 (MEC-003-R22).
 8. Speed: `base = rampActive ? rampTick(rampEaten) : levelTickMs(level)` (MEC-008-R8, MEC-003-R3); `eff = round(base × max(slowmo ? tickFactor : 1, curFactor))` (MEC-006-R17, `curFactor` from MEC-003-R22); if `eff` changed, `acc = min(acc, eff)` (MEC-006-R18).
@@ -44,4 +44,4 @@ All randomness uses the core RNG in this order. Determinism contract unchanged (
 MEC-006-R35 points here.
 
 ## Hazard family registry
-`src/core/hazards/registry.ts`: `FAMILIES = [ROCK, FENCE, MAZE, TERRAIN]` (ordered), one `HazardFamily` per `FamilyKey` (`spawn`, `update`, `solidAt`, `bfsWallAt`, `reservedAt`, `cause`, `capClass`, `maxActiveKey`, `breakable`). Cell queries (`src/core/cells.ts`) check snake and rotten rocks first, then families in `FAMILIES` order. `SpawnCtx`/`StepCtx` are per-call views, never stored in state.
+`src/core/hazards/registry.ts`: `FAMILIES = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily, rubbleFamily]` (ordered), one state-level `HazardFamily` per `FamilyKey`. Each descriptor exposes spawn/update/snapshot, solid/BFS/reserved queries, count, cause/cap metadata and Shield breakability. `queries.ts` owns registry-order composite queries; P1 collision boundaries retain rotten-rock-first priority (MEC-002-R7). Each family's JSON instances live in `SimState.families[key]`; timed instances carry `spawnSeq` assigned from `nextHazardSeq`, preserving cross-family update and snapshot order through clone/restore. `family.ts` composes the unchanged instance rules into descriptors. `SpawnCtx`/`StepCtx` are per-call views, never stored in state. There is no level-end hook (MEC-004-R16).

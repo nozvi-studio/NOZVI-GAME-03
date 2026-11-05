@@ -102,7 +102,7 @@ describe('MEC-006 Mango Rain', () => {
     live.advance(140);
     expect(live.snapshot().mango).toMatchObject({ x: 12, y: 12, totalMs: 8000, leftMs: 8000 - 140 });
   });
-  const levelUpRain = (extra: Partial<SimState> = {}) => {
+  const levelUpRain = (extra: Omit<Partial<SimState>, 'families'> & { families?: Partial<SimState['families']> } = {}) => {
     const need = quota(b, 16);
     return simFromAscii(b, ['...m'], { snake: SNAKE, quiet: true, options: opts, extraState: {
       progress: need - 1, rain: { castId: 1, leftMs: 3000, elapsedMs: 3000, drops: 6, dropped: 4 },
@@ -129,8 +129,8 @@ describe('MEC-006 Mango Rain', () => {
   });
   it('MEC-006-EC15 snip wall and rubble survive a level up', () => {
     const sim = levelUpRain({ mango: { ...FAR },
-      snipWalls: [{ family: 'snipWall', cells: [{ x: 9, y: 9 }], state: 'solid', leftMs: 3000 }],
-      rubble: [{ family: 'rubble', x: 8, y: 8, state: 'solid', leftMs: 1500 }] });
+      families: { snipWall: [{ family: 'snipWall', cells: [{ x: 9, y: 9 }], state: 'solid', leftMs: 3000 }],
+      rubble: [{ family: 'rubble', x: 8, y: 8, state: 'solid', leftMs: 1500 }] } });
     sim.advance(140);
     expect(sim.snapshot()).toMatchObject({
       snipWall: [{ x: 9, y: 9, state: 'solid', leftMs: 2860 }], rubble: [{ x: 8, y: 8, state: 'solid', leftMs: 1360 }] });

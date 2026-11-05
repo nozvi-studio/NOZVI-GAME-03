@@ -1,8 +1,11 @@
+import { instanceFamily } from '../support/instanceFamily';
+import { addTimedHazards } from '../../src/core/hazards/timed';
 import { describe, expect, it } from 'vitest';
 import { makeTimed, updateTimed } from '../../src/core/hazards/timed';
 import { ROCK } from '../../src/core/hazards/rock';
 import { FENCE } from '../../src/core/hazards/fence';
 import { MAZE } from '../../src/core/hazards/maze';
+import { spawnCtx } from '../../src/core/hazards/director';
 import { cellBfsWall, cellReserved } from '../../src/core/cells';
 import { restoreSim } from '../../src/core/sim';
 import type { SimEvent, SpawnCtx, StepCtx, TimedPhase } from '../../src/core/types';
@@ -26,7 +29,7 @@ describe('MEC-004 timed hazards', () => {
     const s = buildState(b, { spawnInMs: QUIET });
     const h = makeTimed('rock', [{ x: 9, y: 8 }], 1500, 6000);
     h.state = phase;
-    s.hazards.push(h);
+    addTimedHazards(s, h);
     const sim = restoreSim(b, s); sim.advance(140);
     expect(sim.snapshot().status).toBe('playing');
     expect(sim.snapshot().snake[0]).toEqual({ x: 9, y: 8 });
@@ -35,7 +38,7 @@ describe('MEC-004 timed hazards', () => {
   it.each(['fence', 'maze', 'rock'] as const)('MEC-004 a solid hazard cell kills with its family cause: %s', family => {
     const s = buildState(b, { spawnInMs: QUIET });
     const h = makeTimed(family, [{ x: 9, y: 8 }], 1500, 6000);
-    h.state = 'solid'; h.cells[0]!.on = true; s.hazards.push(h);
+    h.state = 'solid'; h.cells[0]!.on = true; addTimedHazards(s, h);
     const sim = restoreSim(b, s); sim.advance(140);
     expect(sim.snapshot().outcome).toEqual({ won: false, cause: family });
   });
@@ -43,7 +46,7 @@ describe('MEC-004 timed hazards', () => {
   it('MEC-004 cause order: rotten before hazard', () => {
     const s = buildState(b, { spawnInMs: QUIET, rottenRocks: [[9, 8]] });
     const h = makeTimed('rock', [{ x: 9, y: 8 }], 1500, 6000);
-    h.state = 'solid'; h.cells[0]!.on = true; s.hazards.push(h);
+    h.state = 'solid'; h.cells[0]!.on = true; addTimedHazards(s, h);
     const sim = restoreSim(b, s); sim.advance(140);
     expect(sim.snapshot().outcome).toEqual({ won: false, cause: 'rotten' });
   });
@@ -51,7 +54,7 @@ describe('MEC-004 timed hazards', () => {
   it.each(['warn', 'solid', 'crumble'] as TimedPhase[])('MEC-004 hazard cells in any state are reserved and BFS walls: %s', phase => {
     const s = buildState(b);
     const h = makeTimed('rock', [{ x: 2, y: 2 }], 1500, 6000);
-    h.state = phase; s.hazards.push(h);
+    h.state = phase; addTimedHazards(s, h);
     expect(cellReserved(s, 2, 2)).toBe(true);
     expect(cellBfsWall(s, 2, 2)).toBe(true);
     expect(cellReserved(s, 2, 3)).toBe(false);
@@ -60,22 +63,22 @@ describe('MEC-004 timed hazards', () => {
 
   it('MEC-004 hazard life is drawn after a successful placement', () => {
     const a = fixed([0, 1, 2], [], [0.5]);
-    expect(ROCK.spawn({ balance: b, level: 1, cellFree: () => true }, a.rng)?.lifeMs).toBe(8000);
+    expect(instanceFamily(ROCK).spawn({ balance: b, level: 1, cellFree: () => true }, a.rng)?.lifeMs).toBe(8000);
     expect(a.calls).toEqual(['pick(1)', 'int(17)', 'int(17)', 'next']);
     const fail = fixed([]);
-    expect(ROCK.spawn({ balance: b, level: 1, cellFree: () => false }, fail.rng)).toBeNull();
+    expect(instanceFamily(ROCK).spawn({ balance: b, level: 1, cellFree: () => false }, fail.rng)).toBeNull();
     expect(fail.calls).not.toContain('next');
   });
 
   it('MEC-004 rock picks the shape once, then 40 tries with origin int(17), int(17)', () => {
     const a = fixed([]);
-    expect(ROCK.spawn({ balance: b, level: 1, cellFree: () => false }, a.rng)).toBeNull();
+    expect(instanceFamily(ROCK).spawn({ balance: b, level: 1, cellFree: () => false }, a.rng)).toBeNull();
     expect(a.calls).toEqual(['pick(1)', ...Array<string>(80).fill('int(17)')]);
   });
 
   it('MEC-004 fence RNG order', () => {
     const a = fixed([0, 3, 2, 0, 1, 2], [false], [0.5]);
-    const h = FENCE.spawn({ balance: b, level: 16, cellFree: () => true }, a.rng);
+    const h = instanceFamily(FENCE).spawn({ balance: b, level: 16, cellFree: () => true }, a.rng);
     expect(a.calls).toEqual(['pick(7)', 'int(5)', 'int(6)', 'int(4)', 'chance(0.5)', 'int(10)', 'int(17)', 'next']);
     expect(h?.kind).toBe('line'); expect(h?.warnMs).toBe(2000); expect(h?.lifeMs).toBe(11000);
     expect(h?.cells).toHaveLength(7);
@@ -83,14 +86,16 @@ describe('MEC-004 timed hazards', () => {
 
   it('MEC-004 maze drops non-free cells and needs 6', () => {
     const allowed = [{ x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 }, { x: 10, y: 4 }, { x: 11, y: 4 }, { x: 12, y: 4 }];
-    const ctx: SpawnCtx = { balance: b, level: 6, cellFree: (x, y) => allowed.some(c => c.x === x && c.y === y) };
+    const ctx: Omit<SpawnCtx, 'candidateValid' | 'rng'> = { balance: b, level: 6, cellFree: (x, y) => allowed.some(c => c.x === x && c.y === y) };
     const five = { ...ctx, cellFree: (x: number, y: number) => ctx.cellFree(x, y) && x !== 12 };
     const a = fixed([]);
-    expect(MAZE.spawn(five, a.rng)).toBeNull(); expect(a.calls).toEqual(['pick(4)']);
-    expect(MAZE.spawn(ctx, fixed([]).rng)?.cells).toHaveLength(6);
-    for (const [layout, length] of [20, 30, 20, 28].entries()) {
-      const h = MAZE.spawn({ ...ctx, cellFree: () => true }, fixed([layout]).rng);
-      expect(h?.cells).toHaveLength(length); expect(h?.warnMs).toBe(2600);
+    expect(instanceFamily(MAZE).spawn(five, a.rng)).toBeNull(); expect(a.calls).toEqual(['pick(4)']);
+    expect(instanceFamily(MAZE).spawn(ctx, fixed([]).rng)?.cells).toHaveLength(6);
+    // MEC-004-R10/R11 real board filtering removes near-head and front-lane cells.
+    for (const [layout, length] of [20, 23, 11, 26].entries()) {
+      const s = buildState(b);
+      const cells = MAZE.spawn(s, { ...spawnCtx(s, b), rng: fixed([layout]).rng });
+      expect(cells).toHaveLength(length); expect(s.families.maze[0]?.warnMs).toBe(2600);
     }
   });
   it('MEC-004 warn → solid → crumble → removed with exact durations', () => {
