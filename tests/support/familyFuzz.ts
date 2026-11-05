@@ -10,6 +10,7 @@ import { createSim } from '../../src/core/sim';
 import { createSimInternal, stateOf } from '../../src/core/simInternal';
 import type { Cell, CauseKey, Dir, FamilyKey, Sim, SimEvent, SimSnapshot, SimState } from '../../src/core/types';
 import { loadBalance, soloTable } from './balance';
+import { checkMoverTransitions, moverCells } from './fuzz';
 
 export interface FuzzConfig {
   family: FamilyKey; mode: 'solo' | 'full'; startLevel: number; seeds: number; durationMs: number;
@@ -78,6 +79,9 @@ function checkDeath(e: Extract<SimEvent, { type: 'died' }>, previous: Map<string
   cols: number, snakeStep: boolean, bad: (m: string) => void): void {
   if (!FAMILIES.some(f => f.cause === e.cause && f.capClass !== 'none') && e.cause !== 'rotten') return;
   const cell = snakeStep ? key(cols, e.x + snap.dir.x, e.y + snap.dir.y) : key(cols, e.x, e.y);
+  // MEC-013-R5 an update-time mover enters the hit cell in this ms; snake entry uses the previous cell.
+  if (e.cause === 'coconut' && (snakeStep ? previous.has('coconut:' + cell)
+    : moverCells(snap, cols).some(m => m.phase === 'mover' && m.cell === cell))) return;
   if (![...previous.values()].some(m => m.phase === 'lethal' && m.cause === e.cause && m.cell === cell))
     bad(`I6 death by ${e.cause} at (${e.x},${e.y}) had no matching lethal cell in the previous ms`);
 }
@@ -117,8 +121,16 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
         spawns++;
         const d = family === 'terrain' ? b.fairness.terrainNearHeadDist : b.fairness.nearHeadDist;
         for (const cell of cells) {
-          if (nearHead(before.snake[0]!, before.dir, cell.x, cell.y, d, b.fairness.frontLaneCells)) bad(`I2 ${family} near head at (${cell.x},${cell.y})`);
-          if (isReserved(before, cell.x, cell.y)) bad(`I5 ${family} on reserved cell (${cell.x},${cell.y})`);
+          const head = before.snake[0]!;
+          // MEC-013-R1 TR-B3 replaces Manhattan proximity with head row/column and front-lane exclusion.
+          const rowLane = cells.every(c => c.y === cells[0]!.y);
+          const tooNear = family === 'coconut' ? (rowLane ? cell.y === head.y : cell.x === head.x)
+            || nearHead(head, before.dir, cell.x, cell.y, 0, b.fairness.frontLaneCells)
+            : nearHead(head, before.dir, cell.x, cell.y, d, b.fairness.frontLaneCells);
+          if (tooNear) bad(`I2 ${family} near head at (${cell.x},${cell.y})`);
+          // MEC-013-EC1/R7 existing food does not prevent the warning lane; hazards and body still do.
+          const placementState = family === 'coconut' ? { ...before, mango: null, orbs: [], rainMangoes: [] } : before;
+          if (isReserved(placementState, cell.x, cell.y)) bad(`I5 ${family} on reserved cell (${cell.x},${cell.y})`);
         }
         const walls = cells.filter(cell => bfsWall(after, cell.x, cell.y));
         const mango = before.mango, mangoKey = mango && key(cols, mango.x, mango.y);
@@ -129,6 +141,8 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
       },
     } });
     let snap = sim.snapshot(), marks = cellsOf(snap, cols);
+    let movers = moverCells(snap, cols);
+    const moverWarnSince = new Map<string, number>();
     const warnSince = new Map<string, number>();
     const minWarnMs = Math.max(b.fairness.minWarnMs, b.fairness.minWarnTicks * b.speed.startMs);
     while (time < c.durationMs && snap.status === 'playing') {
@@ -137,15 +151,21 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
         inputs.push({ t: time - start, dir }); sim.turn(dir.x, dir.y);
       }
       const snake = new Set(snap.snake.map(cell => key(cols, cell.x, cell.y)));
+      const body = new Set(snap.snake.slice(1).map(cell => key(cols, cell.x, cell.y)));
       const accBefore = stateOf(sim).acc;
       sim.advance(1); time++;
       snap = sim.snapshot();
       checkIce(stateOf(sim), b, bad);
       const current = cellsOf(snap, cols);
+      const currentMovers = moverCells(snap, cols);
+      checkMoverTransitions(movers, currentMovers, moverWarnSince, body, time, bad);
       checkTransitions(marks, current, warnSince, snake, time, minWarnMs, bad);
       // Without skill casts, update-time death leaves acc untouched; a fatal snake step consumes its tick.
+      for (const m of movers) if (m.phase === 'mover') marks.set('coconut:' + m.cell,
+        { family: 'coconut', cell: m.cell, phase: 'lethal', cause: 'coconut' });
       for (const e of sim.drainEvents()) if (e.type === 'died') checkDeath(e, marks, snap, cols, stateOf(sim).acc !== accBefore, bad);
       marks = current;
+      movers = currentMovers;
     }
     const other = createSim(b, simulationSeed, { startLevel: c.startLevel });
     replay(other, inputs, time - start);

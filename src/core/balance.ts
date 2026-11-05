@@ -31,6 +31,7 @@ export interface Balance {
   hazard: { crumbleMs: number };
   mud: GroundTileBalance & { tickFactor: number };
   ice: GroundTileBalance;
+  coconut: { warnMs: number; cellMs: number; maxActive: number; tries: number };
   rock: {
     warnMs: number; lifeMs: number; lifeRandMs: number; tries: number;
     shapes: Record<RockShapeKey, Pair[]>;
@@ -137,6 +138,7 @@ const SPEC: Spec = {
   hazard: { crumbleMs: 'int+' },
   mud: { ...groundTiles, tickFactor: 'num+' },
   ice: groundTiles,
+  coconut: { warnMs: 'int+', cellMs: 'int+', maxActive: 'int+', tries: 'int+' },
   rock: { ...timed, tries: 'int+',
     shapes: recordOf(ROCK_KEYS, 'pairs') },
   fence: { ...timed, tries: 'int+', lineBase: 'int+', lineExtraMax: 'int0', gapMinLen: 'int+', mirrorChance: 'prob',
@@ -198,7 +200,7 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (b.terrain.upMs + b.terrain.warnMs >= b.terrain.periodMs) fail('terrain.periodMs', 'must be > upMs + warnMs');
   // MEC-004-R13 warning time uses the L1 base tick, independent of slow effects.
   const minWarnMs = Math.max(b.fairness.minWarnMs, b.fairness.minWarnTicks * b.speed.startMs);
-  for (const family of ['rock', 'fence', 'maze', 'terrain', 'mud', 'ice'] as const) {
+  for (const family of ['rock', 'fence', 'maze', 'terrain', 'mud', 'ice', 'coconut'] as const) {
     if (b[family].warnMs < minWarnMs) fail(family + '.warnMs', 'must be >= ' + minWarnMs);
   }
   // MEC-012-R1 every pooled shape exists and every configured shape is 4-connected.

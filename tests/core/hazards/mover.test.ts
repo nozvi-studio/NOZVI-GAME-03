@@ -3,6 +3,10 @@ import { moverCell, moverDir, newMover, stepMover, type MoverEnv } from '../../.
 
 const path = [0, 1, 2, 3].map(x => ({ x, y: 5 }));
 const free: MoverEnv = { blocked: () => false, bodyOn: () => false, headAt: () => false };
+
+it.each([0, 1])('MEC-004-R5 newMover rejects a path with %i cells', length => {
+  expect(() => newMover(path.slice(0, length), 1500, 90, false, 0)).toThrow(/at least two cells/);
+});
 const run = (m: ReturnType<typeof newMover>, ms: number, env: MoverEnv = free, mode: 'wait' | 'stop' = 'stop') => {
   let result: ReturnType<typeof stepMover> = 'keep';
   for (let i = 0; i < ms && result === 'keep'; i++) result = stepMover(m, env, mode);

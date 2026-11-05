@@ -3,6 +3,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Added
+- feat(core): rolling coconuts from level 16 (MEC-013)
 - feat(core): mover building block (MEC-004-R5)
 - feat(core): P2b family and cause keys, mover/blast/steal events, per-cell cause (MEC-004-R3)
 - feat(meta): log death context on run_end and show it on Results; docs: P2a exit report (MEC-003-R19, MEC-012-R12)

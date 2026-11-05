@@ -2,7 +2,7 @@
 import type { Balance } from './balance';
 import type { IntroKey, LevelRow, TableFamily } from './types';
 
-const TABLE_ORDER: readonly TableFamily[] = ['rock', 'fence', 'terrain', 'maze', 'mud', 'ice'];
+const TABLE_ORDER: readonly TableFamily[] = ['rock', 'fence', 'terrain', 'maze', 'mud', 'ice', 'coconut'];
 export const biome = (b: Balance, n: number): number => Math.floor((n - 1) / b.level.perBiome) + 1; // MEC-003-R1
 export const isChallenge = (b: Balance, n: number): boolean => n % b.level.perBiome === 0; // MEC-003-R1
 export const quota = (b: Balance, n: number): number => b.level.needBase + Math.floor((n - 1) / b.level.needStepLevels); // MEC-003-R2

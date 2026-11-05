@@ -46,11 +46,24 @@ describe('GDD-7 balance', () => {
   });
   it('GDD-7 balance.json passes parseBalance', () => { expect(() => loadBalance()).not.toThrow(); });
 
-  it('MEC-003 P1 balance v2 table pins every MEC section 9 value', () => {
+  it('MEC-003/MEC-013 P2 balance v2 table pins every MEC section 9 value', () => {
     const b = loadBalance();
     expect(b.snake).toMatchObject({"start":[[8,8],[7,8],[6,8],[5,8]],"startDir":[1,0],"maxQueuedTurns":3});
     expect(b.speed).toMatchObject({"startMs":140,"msPerLevel":2,"minMs":82});
-    expect(b.level).toMatchObject({"maxLevel":30,"perBiome":5,"needBase":4,"needStepLevels":3,"table":[{"from":1,"to":2,"weights":{"rock":3},"rockShapes":["single"],"fenceShapes":[],"rottenRocks":false},{"from":3,"to":4,"weights":{"rock":3},"rockShapes":["single","lineH","lineV"],"fenceShapes":[],"rottenRocks":false},{"from":5,"to":5,"weights":{"rock":3},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":[],"rottenRocks":false},{"from":6,"to":6,"weights":{"rock":3,"fence":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line"],"rottenRocks":false},{"from":7,"to":10,"weights":{"rock":3,"fence":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line","L"],"rottenRocks":false},{"from":11,"to":11,"weights":{"rock":3,"fence":2,"terrain":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line","L"],"rottenRocks":false},{"from":12,"to":12,"weights":{"rock":3,"fence":2,"terrain":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line","L"],"rottenRocks":true},{"from":13,"to":15,"weights":{"rock":3,"fence":2,"terrain":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line","L","T","Z"],"rottenRocks":true},{"from":16,"to":25,"weights":{"rock":3,"fence":2,"terrain":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line","L","T","Z","F","U","plus"],"rottenRocks":true},{"from":26,"to":30,"weights":{"rock":3,"fence":2,"terrain":2,"maze":2},"rockShapes":["single","lineH","lineV","corner","block"],"fenceShapes":["line","L","T","Z","F","U","plus"],"rottenRocks":true}]});
+    expect(b.level).toEqual({ maxLevel: 30, perBiome: 5, needBase: 4, needStepLevels: 3, table: [
+      { from: 1, to: 2, weights: { rock: 3 }, rockShapes: ['single'], fenceShapes: [], rottenRocks: false },
+      { from: 3, to: 4, weights: { rock: 3 }, rockShapes: ['single', 'lineH', 'lineV'], fenceShapes: [], rottenRocks: false },
+      { from: 5, to: 5, weights: { rock: 3 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: [], rottenRocks: false },
+      { from: 6, to: 6, weights: { rock: 3, fence: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line'], rottenRocks: false },
+      { from: 7, to: 10, weights: { rock: 3, fence: 2, mud: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L'], rottenRocks: false },
+      { from: 11, to: 11, weights: { rock: 3, fence: 2, terrain: 2, mud: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L'], rottenRocks: false },
+      { from: 12, to: 12, weights: { rock: 3, fence: 2, terrain: 2, mud: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L'], rottenRocks: true },
+      { from: 13, to: 15, weights: { rock: 3, fence: 2, terrain: 2, mud: 2, ice: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z'], rottenRocks: true },
+      { from: 16, to: 20, weights: { rock: 3, fence: 2, terrain: 2, mud: 2, ice: 2, coconut: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
+      { from: 21, to: 25, weights: { rock: 3, fence: 2, terrain: 2, mud: 2, ice: 2, coconut: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
+      { from: 26, to: 30, weights: { rock: 3, fence: 2, terrain: 2, maze: 2, mud: 2, ice: 2, coconut: 2 }, rockShapes: ['single', 'lineH', 'lineV', 'corner', 'block'], fenceShapes: ['line', 'L', 'T', 'Z', 'F', 'U', 'plus'], rottenRocks: true },
+    ] });
+    expect(b.coconut).toEqual({ warnMs: 1500, cellMs: 90, maxActive: 2, tries: 20 });
     expect(b.mango).toMatchObject({"rotBaseMs":8000,"rotPerEatenMs":150,"rotMinMs":4000,"goldenRotFactor":0.5,"goldenChance":0.15,"goldenMinEaten":3,"points":{"normal":1,"golden":3},"progress":{"normal":1,"golden":2},"nearHeadDist":3,"rottenRockLifeMs":5000,"placeRetryMs":250});
     expect(b.director).toMatchObject({"firstSpawnMs":2500,"intervalBaseMs":5000,"intervalPerLevelMs":120,"intervalMinMs":1600,"capBase":2,"capPerLevels":3,"capMax":10,"challengeIntervalFactor":1,"challengeCapBonus":0});
     expect(b.energy).toMatchObject({"max":100,"orbGain":15,"goldenGain":10,"orbSpawnIntervalMs":6000,"orbMax":2,"orbLifeMs":8000,"orbBlinkMs":2000,"orbFromLevel":2});

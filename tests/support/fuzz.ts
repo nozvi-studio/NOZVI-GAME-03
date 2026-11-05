@@ -2,15 +2,47 @@
 import { timedHazards } from '../../src/core/hazards/timed';
 import type { Balance } from '../../src/core/balance';
 import { cellReserved, snakeOn } from '../../src/core/cells';
-import { nearHead } from '../../src/core/grid';
+import { key, nearHead } from '../../src/core/grid';
 import { placeMango } from '../../src/core/mango';
 import { rngFrom, seedRng } from '../../src/core/rng';
 import { restoreSim, stateOf } from '../../src/core/sim';
-import type { TableFamily, Sim, SimState, Step } from '../../src/core/types';
+import type { TableFamily, Sim, SimSnapshot, SimState, Step } from '../../src/core/types';
 import { buildState } from './state';
 
 export interface FuzzReport { violations: string[]; steps: number; maxLevel: number; spawned: Record<TableFamily, number> }
 const DIRS: [Step, Step][] = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+
+export interface MoverMark { id: string; cell: number; phase: 'warn' | 'mover'; warnMs: number; elapsedMs?: number }
+
+// MEC-013-R2/R3 TR-B4: the entire warning path precedes one occupied moving cell.
+export function moverCells(snap: SimSnapshot, cols: number): MoverMark[] {
+  return snap.families.coconut.flatMap(r => {
+    const phase = r.state === 'warn' ? 'warn' as const : 'mover' as const;
+    const cells = r.state === 'warn' ? r.path : r.state === 'move' && r.cell ? [r.cell] : [];
+    return cells.map(c => ({ id: 'coconut:' + r.id, cell: key(cols, c.x, c.y), phase, warnMs: r.warnMs,
+      ...(phase === 'warn' ? { elapsedMs: r.t } : {}) }));
+  });
+}
+
+// MEC-013-R2/R4 TR-B4: body-only I1 on entry, and one full-path warning per roll for I3.
+export function checkMoverTransitions(previous: readonly MoverMark[], current: readonly MoverMark[],
+  warnSince: Map<string, number>, body: ReadonlySet<number>, time: number, bad: (m: string) => void): void {
+  const live = new Set(current.map(m => m.id));
+  for (const id of warnSince.keys()) if (!live.has(id)) warnSince.delete(id);
+  for (const mark of current) {
+    if (mark.phase === 'warn') {
+      // The director spawns before the same millisecond's hazard update (first observed t is 1).
+      if (!warnSince.has(mark.id)) warnSince.set(mark.id, time - (mark.elapsedMs ?? 0));
+      continue;
+    }
+    const old = previous.find(m => m.id === mark.id && m.phase === 'mover');
+    if (old?.cell === mark.cell) continue;
+    if (body.has(mark.cell)) bad(`I1 ${mark.id} moved into the body`);
+    if (!old && (!previous.some(m => m.id === mark.id && m.phase === 'warn')
+      || time - (warnSince.get(mark.id) ?? time) < mark.warnMs))
+      bad(`I3 ${mark.id} moved without ${mark.warnMs} ms path warning`);
+  }
+}
 
 export function snapHash(sim: Sim): string {          // FNV-1a over the snapshot JSON
   const str = JSON.stringify(sim.snapshot());
@@ -22,7 +54,7 @@ export function snapHash(sim: Sim): string {          // FNV-1a over the snapsho
 /** Runs consecutive runs until simMs of sim time are played. Runs start at a seeded level 0…10 so late hazards are covered. */
 export function fuzzSeed(b: Balance, seed: number, simMs: number): FuzzReport {
   const input = rngFrom(seedRng(seed ^ 0x9e3779b9));      // input RNG, separate from the Sim RNG
-  const rep: FuzzReport = { violations: [], steps: 0, maxLevel: 0, spawned: { rock: 0, fence: 0, maze: 0, terrain: 0, mud: 0, ice: 0 } };
+  const rep: FuzzReport = { violations: [], steps: 0, maxLevel: 0, spawned: { rock: 0, fence: 0, maze: 0, terrain: 0, mud: 0, ice: 0, coconut: 0 } };
   const seen = new WeakSet<object>();
   let played = 0, run = 0;
   while (played < simMs) {
@@ -74,7 +106,9 @@ function checkSpawns(s: SimState, b: Balance, head: { x: number; y: number }, di
 
 function checkState(s: SimState, rep: FuzzReport, t: number): void {
   const m = s.mango;
-  if (m && cellReserved({ ...s, mango: null }, m.x, m.y)) rep.violations.push(`t=${t}: mango on a reserved cell (${m.x},${m.y})`);
+  // MEC-013-EC1 a later coconut warning can reserve the lane underneath an existing mango.
+  const withoutCoconuts = { ...s, mango: null, families: { ...s.families, coconut: { ...s.families.coconut, rolls: [] } } };
+  if (m && cellReserved(withoutCoconuts, m.x, m.y)) rep.violations.push(`t=${t}: mango on a reserved cell (${m.x},${m.y})`);
   for (const c of s.snake) {
     if (timedHazards(s).some(h => h.cells.some(k => k.on && k.x === c.x && k.y === c.y))
       || s.families.terrain.some(T => T.cells.some(k => k.up && k.x === c.x && k.y === c.y)))
