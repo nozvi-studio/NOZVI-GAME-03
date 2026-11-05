@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import type { FamilyKey } from '../../../src/core/types';
-import { checkModifierSpawn, runFamilyFuzz } from '../../support/familyFuzz';
+import type { FamilyKey, SimSnapshot } from '../../../src/core/types';
+import { checkModifierSpawn, checkShrink, runFamilyFuzz } from '../../support/familyFuzz';
 import { loadBalance } from '../../support/balance';
 import { buildBoard } from '../../support/board';
 const FUZZ = import.meta.env.MODE === 'fuzz';
@@ -40,4 +40,32 @@ it('MEC-004-R17 a modifier family with no explicit invariant fails the fuzz inst
   const ok: string[] = [];
   checkModifierSpawn('bird', s, b, m => ok.push(m), { bird: { holds: () => true, fail: 'x' } });
   expect(ok).toEqual([]);
+});
+
+it('MEC-018 fuzz: ring never closes on the snake or near the head; nothing collectible on an active ring', () => {
+  expect(runFamilyFuzz({ family: 'shrink', mode: 'solo', startLevel: 27, seeds: 3, durationMs: 30000, escape: 'sample' })).toEqual([]);
+}, 10000);
+
+describe('MEC-018 invariants detect violations', () => {
+  const b = loadBalance();
+  const ring = (state: 'warn' | 'closed' | 'fade', on: boolean) => ({ state, leftMs: 0, cells: [{ x: 0, y: 5, on }] });
+  const snap = (shrink: ReturnType<typeof ring>, over: object = {}) => ({
+    snake: [{ x: 5, y: 5 }], dir: { x: 1, y: 0 }, mango: null, orbs: [], rainMangoes: [], families: { shrink }, ...over,
+  }) as unknown as SimSnapshot;
+  const run = (prev: SimSnapshot, cur: SimSnapshot) => { const out: string[] = []; checkShrink(prev, cur, b, m => out.push(m)); return out; };
+  it('MEC-018-I1 a ring cell closing near the head or on the snake is reported', () => {
+    const near = { snake: [{ x: 1, y: 5 }] };
+    expect(run(snap(ring('warn', false), near), snap(ring('closed', true), near)).join()).toContain('MEC-018-I1');
+    const on = { snake: [{ x: 9, y: 9 }, { x: 0, y: 5 }] };
+    expect(run(snap(ring('warn', false), { snake: [{ x: 9, y: 9 }] }), snap(ring('closed', true), on)).join()).toContain('on the snake');
+  });
+  it('MEC-018-I2 a collectible on an active ring cell is reported', () => {
+    expect(run(snap(ring('warn', false)), snap(ring('warn', false), { orbs: [{ x: 0, y: 5, leftMs: 1 }] })).join()).toContain('MEC-018-I2');
+  });
+  it('MEC-018-I3 a closed cell in the fade phase is reported', () => {
+    expect(run(snap(ring('closed', true)), snap(ring('fade', true))).join()).toContain('MEC-018-I3');
+  });
+  it('MEC-018-I1 a legal close far from the head is clean', () => {
+    expect(run(snap(ring('warn', false)), snap(ring('closed', true)))).toEqual([]);
+  });
 });

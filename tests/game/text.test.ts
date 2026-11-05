@@ -98,3 +98,8 @@ it('MEC-003 §8 every P2b family has a banner and every P2b cause has a death te
   for (const k of ['coconut', 'gate', 'spike', 'npc', 'bird', 'bomb']) expect(t(`banner.new.${k}`)).not.toMatch(/^banner\./);
   for (const c of ['coconut', 'gate', 'spike', 'cat', 'chicken', 'bomb']) expect(t(`death.${c}`)).not.toMatch(/^death\./);
 });
+
+it('MEC-018-R11 shrink has a banner and a death text', () => {
+  expect(t('banner.new.shrink')).toBe('The board shrinks! The edge closes for a while.');
+  expect(t('death.shrink')).toBe('You hit the closed edge.');
+});

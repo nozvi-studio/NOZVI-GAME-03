@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import { expect, it } from 'vitest';
 import { arrowTriangle, blinkOn, dashedSegments, drawMovers, pathDirs, shadowScale } from '../../src/game/render/movers';
+import { drawShrink } from '../../src/game/render/shrink';
 import { drawCycles } from '../../src/game/render/cycles';
 import { bombDigit, digitSegments, drawBlasts } from '../../src/game/render/blasts';
 import { t } from '../../src/game/text';
@@ -113,4 +114,19 @@ it('MEC-013..017 §8 banners, death texts and the stolen-mango toast resolve', (
   for (const k of ['coconut', 'gate', 'spike', 'npc', 'bird', 'bomb']) expect(t(`banner.new.${k}`)).not.toMatch(/^banner\./);
   for (const c of ['coconut', 'gate', 'spike', 'cat', 'chicken', 'bomb']) expect(t(`death.${c}`)).not.toMatch(/^death\./);
   expect(t('toast.mangoStolen')).toBe('The bird took your mango!');
+});
+
+it('MEC-018 §8 drawShrink blinks the warn outline, hatches closed cells, and keeps a solid outline in reduced motion', () => {
+  const view = (state: 'warn' | 'closed' | 'fade') => ({ families: { shrink: { state, leftMs: 100,
+    cells: [{ x: 0, y: 0, on: state === 'closed' }, { x: 1, y: 0, on: false }] } } }) as unknown as SimSnapshot;
+  const none = graphics(); drawShrink(none.g, { families: { shrink: null } } as unknown as SimSnapshot, 20, 0, false);
+  expect(none.calls).toEqual([]);
+  const off = graphics(); drawShrink(off.g, view('warn'), 20, 250, false);
+  expect(off.calls).toEqual([]);
+  const on = graphics(); drawShrink(on.g, view('warn'), 20, 0, false);
+  expect(on.calls).toContain('lineBetween'); expect(on.calls).toContain('fillTriangle');
+  const still = graphics(); drawShrink(still.g, view('warn'), 20, 250, true);
+  expect(still.calls).toContain('strokeRect');
+  const closed = graphics(); drawShrink(closed.g, view('closed'), 20, 250, false);
+  expect(closed.calls).toContain('fillRect'); expect(closed.calls).toContain('lineBetween');
 });
