@@ -127,6 +127,8 @@ export interface HazardView {
 export interface TerrainView { t: number; lifeMs: number; cells: readonly { x: number; y: number; vis: TerrainVis; delay: number }[] }
 
 export interface SimSnapshot {
+  tiles: readonly { family: TileKind; id: number; state: 'warn' | 'active' | 'fade'; leftMs: number; cells: readonly { x: number; y: number; on: boolean }[] }[];
+  headTile: TileKind | null;
   skills: readonly { slot: 0 | 1; id: SkillId | null; cost: number; affordable: boolean; active: boolean; leftMs: number }[];
   slowmo: { leftMs: number } | null;
   levelUpSlow: LevelUpSlow | null;

@@ -5,6 +5,7 @@ import { snakeOn } from './cells';
 import { spawnCtx, updateDirector } from './hazards/director';
 import type { InternalOptions } from './simInternal';
 import { stepHazards } from './hazards/registry';
+import { tileAt } from './hazards/queries';
 import { applyHeadHit } from './hazards/collision';
 import { biome, isChallenge, needFor, levelTickMs } from './level';
 import { orbTick } from './energy';
@@ -86,6 +87,8 @@ function stepMs(s: SimState, b: Balance, rng: Rng, internal: InternalOptions): v
 function snapshotOf(s: SimState, b: Balance): SimSnapshot {
   // MEC-004-R17 projects only snapshot-owned data: per-ms fuzz must not clone pending events/internal state.
   return {
+    // MEC-012 section 7 tile families populate the tile views when registered.
+    tiles: [], headTile: tileAt(s, s.snake[0]!.x, s.snake[0]!.y),
     skills: s.loadout.map((id, slot) => ({ slot: slot as 0 | 1, id, cost: id === null ? 0 : b.skills[id].cost,
       affordable: id !== null && s.energy >= b.skills[id].cost,
       active: id !== null && SKILLS[id].active(s), leftMs: id === null ? 0 : SKILLS[id].leftMs(s) })),

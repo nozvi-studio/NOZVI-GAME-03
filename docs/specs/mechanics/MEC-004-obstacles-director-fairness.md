@@ -59,7 +59,7 @@
   - Otherwise → death with that cause.
   If (b) gives kind `'area'`: handled as an R8 area hit (Shield absorbs it once, the head moves in; otherwise death).
   Warning, crumbling and inactive cells are passable (P0).
-- **MEC-004-R7 Speed with tiles.** In the speed update (`docs/ARCHITECTURE.md` "Sim step order"), effective tick = `round(baseTickMs × slowFactor × tileFactor)`, where `slowFactor` = `skills.slowmo.tickFactor` while Slow-mo is active, else 1, and `tileFactor` = the factor MEC-012 gives for `tileAt(head)` (mud 2, otherwise 1). MEC-006-R18 (accumulator clamp on change) applies unchanged.
+- **MEC-004-R7 Speed with tiles.** In the speed update (`docs/ARCHITECTURE.md` "Sim step order"), effective tick = `round(baseTickMs × slowFactor × tileFactor)`, where `slowFactor` = `max(slowmo ? skills.slowmo.tickFactor : 1, levelUpSlowFactor(s))`, the MEC-006-R17 maximum of Slow-mo and the MEC-003-R22 level-up slowdown (lead ruling FB-1), and `tileFactor` = the factor MEC-012 gives for `tileAt(head)` (mud 2, otherwise 1). MEC-006-R18 (accumulator clamp on change) applies unchanged.
 - **MEC-004-R8 Non-move hits.** When a family's `update` calls `ctx.hitHead(family, x, y, kind, dir)` (`kind: 'mover' | 'area'`):
   - `kind = 'mover'`: Shield active and family `breakable` → `onBreak` at that cell, Shield consumed (`skillEnded {reason: 'consumed'}`), `shieldBroke {x, y, family, rubble}` with MEC-006-R28 rubble (direction = the mover's direction), bonk per MEC-006-R27. Otherwise death with the family's `cause`.
   - `kind = 'area'`: Shield active → Shield consumed, `shieldBroke {x, y, family, rubble: null}`, no bonk, no rubble (P2-D5). Otherwise death with the family's `cause`.
