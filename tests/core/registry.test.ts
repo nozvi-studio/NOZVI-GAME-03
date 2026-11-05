@@ -8,19 +8,19 @@ import { buildState } from '../support/state';
 
 const b = loadBalance();
 describe('MEC-004 registry', () => {
-  it('MEC-006-R35 registry order is rock fence maze terrain rottenRock snipWall rubble mud ice coconut', () => {
-    expect(FAMILIES.map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'rubble', 'mud', 'ice', 'coconut']);
+  it('MEC-006-R35 registry order is rock fence maze terrain rottenRock snipWall rubble mud ice coconut gate', () => {
+    expect(FAMILIES.map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'rubble', 'mud', 'ice', 'coconut', 'gate']);
     expect(FAMILIES.map(f => FAMILY[f.key])).toEqual(FAMILIES);
   });
-  it('MEC-004 capClass small: rock fence mud ice and coconut', () => {
-    expect(FAMILIES.map(f => f.capClass)).toEqual(['small', 'small', 'big', 'big', 'none', 'none', 'none', 'small', 'small', 'small']);
-    expect(FAMILIES.map(f => f.maxActiveKey).slice(4)).toEqual([null, null, null, 'mud.maxActive', 'ice.maxActive', 'coconut.maxActive']);
+  it('MEC-004 capClass small: rock fence mud ice coconut and gate', () => {
+    expect(FAMILIES.map(f => f.capClass)).toEqual(['small', 'small', 'big', 'big', 'none', 'none', 'none', 'small', 'small', 'small', 'small']);
+    expect(FAMILIES.map(f => f.maxActiveKey).slice(4)).toEqual([null, null, null, 'mud.maxActive', 'ice.maxActive', 'coconut.maxActive', 'gate.maxActive']);
   });
-  it('MEC-006-R23 causes: rock, fence, maze, ground, rotten, snipWall, rubble, null, null, coconut', () => {
-    expect(FAMILIES.map(f => f.cause)).toEqual(['rock', 'fence', 'maze', 'ground', 'rotten', 'snipWall', 'rubble', null, null, 'coconut']);
+  it('MEC-006-R23 causes: rock, fence, maze, ground, rotten, snipWall, rubble, null, null, coconut, gate', () => {
+    expect(FAMILIES.map(f => f.cause)).toEqual(['rock', 'fence', 'maze', 'ground', 'rotten', 'snipWall', 'rubble', null, null, 'coconut', 'gate']);
   });
-  it('MEC-006-R24 breakable false for rubble mud and ice, true for coconut; every breakable family has onBreak', () => {
-    expect(FAMILIES.map(f => f.breakable)).toEqual([true, true, true, true, true, true, false, false, false, true]);
+  it('MEC-006-R24 breakable false for rubble mud and ice, true for coconut and gate; every breakable family has onBreak', () => {
+    expect(FAMILIES.map(f => f.breakable)).toEqual([true, true, true, true, true, true, false, false, false, true, true]);
     expect(FAMILIES.filter(f => f.breakable).every(f => typeof f.onBreak === 'function')).toBe(true);
   });
   it('MEC-004 bfsWallAt: timed cells in any state true, terrain false', () => {

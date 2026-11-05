@@ -3,6 +3,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Added
+- feat(core): cycle-cell block and gates from level 17 (MEC-014)
 - feat(core): rolling coconuts from level 16 (MEC-013)
 - feat(core): mover building block (MEC-004-R5)
 - feat(core): P2b family and cause keys, mover/blast/steal events, per-cell cause (MEC-004-R3)

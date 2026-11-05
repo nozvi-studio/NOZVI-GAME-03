@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { bestLine, CAUSE_TEXT, deathMessage, incomingBanner, levelBanner, levelLabel, progressLabel, t, TEXT } from '../../src/game/text';
 
 describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
+  it('MEC-014-R9 levelBanner names gates at introduction', () => {
+    expect(levelBanner(17, 'gate')).toBe('Level 17: gates unlocked');
+  });
   it('MEC-013-R8 levelBanner names rolling coconuts at introduction', () => {
     expect(levelBanner(16, 'coconut')).toBe('Level 16: rolling coconuts unlocked');
   });

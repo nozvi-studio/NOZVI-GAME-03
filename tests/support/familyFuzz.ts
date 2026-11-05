@@ -37,6 +37,17 @@ function cellsOf(snap: SimSnapshot, cols: number): Map<string, Mark> {
     if (c.vis === 'up') add('terrain', c, 'lethal', 'ground');
     else if (c.vis === 'warn') add('terrain', c, 'warn', 'ground');
   }
+  // MEC-014-R2/R3/R4 fence landing and repeated gate warnings are both observable.
+  for (const g of snap.families.gate) {
+    for (const c of g.fence) {
+      if (c.on) add('gate', c, 'lethal', 'fence');
+      else if (g.state !== 'crumble') add('gate', c, 'warn', 'fence');
+    }
+    for (const c of g.gate) {
+      if (c.up) add('gate', c, 'lethal', 'gate');
+      else if (c.vis === 'warn') add('gate', c, 'warn', 'gate');
+    }
+  }
   for (const c of snap.rottenRocks) if (c.state === 'solid') add('rottenRock', c, 'lethal', 'rotten');
   for (const tile of snap.tiles) for (const c of tile.cells) {
     if (c.on) add(tile.family, c, 'active', null);

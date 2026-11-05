@@ -15,8 +15,9 @@ it('MEC-004-R2 timed hazards reject a missing spawn sequence even for one instan
 
 it('MEC-004-R2 family state is plain data and survives clone and restore', () => {
   const b = loadBalance(), s = initialState(b, 1);
-  expect(Object.keys(s.families)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'rubble', 'mud', 'ice', 'coconut']);
+  expect(Object.keys(s.families)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'rubble', 'mud', 'ice', 'coconut', 'gate']);
   expect(s.families.coconut).toEqual({ rolls: [], nextId: 1 });
+  expect(s.families.gate).toEqual({ gates: [], nextId: 1 });
   expect(s).not.toHaveProperty('hazards');
   expect(s).not.toHaveProperty('terrains');
   expect(exportState(restoreSim(b, s).clone())).toEqual(s);

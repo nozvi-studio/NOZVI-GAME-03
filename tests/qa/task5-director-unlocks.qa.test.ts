@@ -13,8 +13,8 @@ import type { TimedHazard, TerrainHazard } from '../../src/core/types';
 describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
   const b = loadBalance();
 
-  it('QA-T5-13 MEC-004/MEC-012/MEC-013 unlock levels: fence at 6, mud at 7, terrain at 11, ice at 13, coconut at 16, maze at 26', () => {
-    // MEC-003-R14/R15, MEC-012-R11 and MEC-013-R8 preserve table order and first introductions.
+  it('QA-T5-13 MEC-004/MEC-012/MEC-013/MEC-014 unlock levels: fence at 6, mud at 7, terrain at 11, ice at 13, coconut at 16, gate at 17, maze at 26', () => {
+    // MEC-003-R14/R15, MEC-012-R11 MEC-013-R8 and MEC-014-R9 preserve table order and first introductions.
     expect(enabledFamilies(b, 1)).toEqual(['rock']);
     expect(enabledFamilies(b, 6)).toEqual(['rock', 'fence']);
     expect(enabledFamilies(b, 6)).not.toContain('mud');
@@ -24,11 +24,14 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     expect(enabledFamilies(b, 13)).toContain('ice');
     expect(enabledFamilies(b, 15)).not.toContain('coconut');
     expect(enabledFamilies(b, 16)).toEqual(['rock', 'fence', 'terrain', 'mud', 'ice', 'coconut']);
-    expect(enabledFamilies(b, 26)).toEqual(['rock', 'fence', 'terrain', 'maze', 'mud', 'ice', 'coconut']);
+    expect(enabledFamilies(b, 26)).toEqual(['rock', 'fence', 'terrain', 'maze', 'mud', 'ice', 'coconut', 'gate']);
     expect(introducedAt(b, 6)).toBe('fence');
     expect(introducedAt(b, 11)).toBe('terrain');
     expect(introducedAt(b, 12)).toBe('rottenRock');
     expect(introducedAt(b, 13)).toBe('ice');
+    expect(enabledFamilies(b, 16)).not.toContain('gate');
+    expect(enabledFamilies(b, 17)).toEqual(['rock', 'fence', 'terrain', 'mud', 'ice', 'coconut', 'gate']);
+    expect(introducedAt(b, 17)).toBe('gate');
     expect(introducedAt(b, 16)).toBe('coconut');
     expect(introducedAt(b, 26)).toBe('maze');
   });

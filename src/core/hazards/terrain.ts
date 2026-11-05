@@ -2,8 +2,11 @@
 import { defineFamily } from './family';
 import type { Balance } from '../balance';
 import type { InstanceRules, TerrainCell, TerrainHazard, TerrainVis } from '../types';
+import { cyclePhase, stepCycleCell, type CyclePhases } from './blocks/cycleCells';
 
 type Raw = { x: number; y: number; delay: number };
+const phases = (b: Balance): CyclePhases => ({ downMs: b.terrain.periodMs - b.terrain.upMs - b.terrain.warnMs,
+  warnMs: b.terrain.warnMs, upMs: b.terrain.upMs });
 
 // MEC-004 wanted state of one cell at T.t, before the snake check
 export function terrainWant(T: TerrainHazard, c: TerrainCell, b: Balance): TerrainVis {
@@ -11,8 +14,7 @@ export function terrainWant(T: TerrainHazard, c: TerrainCell, b: Balance): Terra
   if (T.t >= T.lifeMs) return 'down';
   const ct = T.t - tr.startDelayMs - c.delay;
   if (ct < 0) return 'down';
-  const l = ct % tr.periodMs, downMs = tr.periodMs - tr.upMs - tr.warnMs;
-  return l < downMs ? 'down' : l < downMs + tr.warnMs ? 'warn' : 'up';
+  return cyclePhase(phases(b), ct);
 }
 
 const rules: InstanceRules<TerrainHazard> = {
@@ -46,11 +48,12 @@ const rules: InstanceRules<TerrainHazard> = {
   },
   update(T, ctx) {
     T.t += 1;
+    const p = phases(ctx.balance);
     for (const c of T.cells) {
-      let want = terrainWant(T, c, ctx.balance);
-      if (want === 'up' && !c.up && ctx.snakeOn(c.x, c.y)) want = 'warn';   // wait for the snake to pass
-      c.up = want === 'up';
-      c.vis = want;
+      if (T.t >= T.lifeMs) { c.up = false; c.vis = 'down'; }
+      // MEC-004-R5 preserve P0's already-raised cells; only a new rise waits.
+      else stepCycleCell(c, p, T.t - ctx.balance.terrain.startDelayMs - c.delay,
+        (x, y) => !c.up && ctx.snakeOn(x, y));
     }
     return T.t < T.lifeMs + ctx.balance.terrain.fadeOutMs ? 'keep' : 'remove';
   },
