@@ -398,3 +398,6 @@ The owner-listed Task 3 exclusions remain: QA-T3-20, QA-T3-21, QA-T3-22, QA-T3-2
 ## 2026-11-05 - P2b Task 5 U-gate review ruling (lead)
 - Gates own the U boundary and tagged mouth cells in `gate.shapes.U`; the P0 fence U stays unchanged. The gate U has a 2 x 2 interior and a two-cell-wide mouth: two gate cells cycle both mouth cells; one gate cell leaves the other mouth cell as fence. See MEC-014-R1/R10 and edge case 3. U-trap regressions must prove the closed mouth seals the interior and an exterior route exists through reopening (or the spawn is rejected).
 - Gate warning validation uses the shared MEC-004-R13 fairness minimum; no separate 900 ms constant. Gate snapshots expose `GateView` instead of internal `GateInstance` state.
+
+## 2026-11-05 - P2b spike review ruling
+- MEC-014-R6: the escape-check horizon cannot foresee a level-up beat reset; this is safe because the reset starts down and warnings still precede any rise.

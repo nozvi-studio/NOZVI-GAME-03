@@ -93,11 +93,14 @@ function checkTransitions(previous: Map<string, Mark>, current: Map<string, Mark
 // MEC-004-R17 I6: snake-step events name the old head; update-time events name the hit cell.
 function checkDeath(e: Extract<SimEvent, { type: 'died' }>, previous: Map<string, Mark>, snap: SimSnapshot,
   cols: number, snakeStep: boolean, bad: (m: string) => void): void {
-  if (!FAMILIES.some(f => f.cause === e.cause && f.capClass !== 'none') && e.cause !== 'rotten') return;
+  if (!FAMILIES.some(f => f.cause === e.cause && f.capClass !== 'none')
+    && e.cause !== 'rotten' && e.cause !== 'chicken') return;
   const cell = snakeStep ? key(cols, e.x + snap.dir.x, e.y + snap.dir.y) : key(cols, e.x, e.y);
-  // MEC-013-R5 an update-time mover enters the hit cell in this ms; snake entry uses the previous cell.
-  if (e.cause === 'coconut' && (snakeStep ? previous.has('coconut:' + cell)
-    : moverCells(snap, cols).some(m => m.phase === 'mover' && m.cell === cell))) return;
+  // MEC-013-R5 MEC-015-R7 update-time movers enter this ms; snake entry uses the previous cell and variant.
+  const moverFamily = e.cause === 'coconut' ? 'coconut' : e.cause === 'cat' || e.cause === 'chicken' ? 'npc' : null;
+  if (moverFamily && (snakeStep ? previous.get(moverFamily + ':' + cell)?.cause === e.cause
+    : moverCells(snap, cols).some(m => m.family === moverFamily && m.cause === e.cause
+      && m.phase === 'mover' && m.cell === cell))) return;
   if (![...previous.values()].some(m => m.phase === 'lethal' && m.cause === e.cause && m.cell === cell))
     bad(`I6 death by ${e.cause} at (${e.x},${e.y}) had no matching lethal cell in the previous ms`);
 }
@@ -177,8 +180,8 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
       checkMoverTransitions(movers, currentMovers, moverWarnSince, body, time, bad);
       checkTransitions(marks, current, warnSince, snake, time, minWarnMs, bad);
       // Without skill casts, update-time death leaves acc untouched; a fatal snake step consumes its tick.
-      for (const m of movers) if (m.phase === 'mover') marks.set('coconut:' + m.cell,
-        { family: 'coconut', cell: m.cell, phase: 'lethal', cause: 'coconut' });
+      for (const m of movers) if (m.phase === 'mover') marks.set(m.family + ':' + m.cell,
+        { family: m.family, cell: m.cell, phase: 'lethal', cause: m.cause });
       for (const e of sim.drainEvents()) if (e.type === 'died') checkDeath(e, marks, snap, cols, stateOf(sim).acc !== accBefore, bad);
       marks = current;
       movers = currentMovers;

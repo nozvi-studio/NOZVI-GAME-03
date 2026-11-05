@@ -6,7 +6,7 @@
 - [x] P1 closed: flow B + WASD fix + run_end.turns merged; agy browser QA 11/11 PASS; version/v0.1 -> dev.
 - [x] P2 plans ready: P2a (revised for flow B) `docs/superpowers/plans/2026-11-03-p2a-framework-ground-tiles.md`; P2b `2026-11-04-p2b-movers-cycles-blasts.md`; P2c `2026-11-04-p2c-shrink-challenge-tuning.md`.
 - [x] P2a merged into version/v0.2: registry/queries, collision + death context, director capClass + fairness 1-3, escape check + family fuzz, GroundTiles, mud (L7), ice (L13), bot + death-cause report, run-log context. 938 pass; reduced fuzz + bot report pass (PLAYTEST 2026-11-05).
-- [ ] **RESUME HERE:** Task 6 spike family implemented without commit: L18 global beat, display delay, safe ending, Shield gaps and SpikeView; 166 tests in 13 single-file runs plus typecheck pass. All affected family/balance pins updated. Lead full-suite verification pending.
+- [ ] **RESUME HERE:** Task 7 NPC family and Task 6 spike review follow-ups complete after WIP 98d507a; 233 tests in 17 targeted single-file checks and final typecheck pass. Pins updated; no new commit. Lead full-suite verification pending.
 
 ## Next (ordered, max 5)
 1. P2a (framework + ground tiles), then P2b (movers, cycles, blasts, bird), then P2c (shrink, challenge levels, tuning, P2 exit).

@@ -162,7 +162,7 @@ it('MEC-015-R8 npc is introduced at L21 only', () => {
   }
 });
 it('MEC-015-R8 director announces NPCs once and enforces the small family cap', () => {
-  const b = soloTable(loadBalance(), 'npc'), s = buildBoard({ level: 21 });
+  const b = soloTable(loadBalance(), 'npc'), s = buildBoard({ level: 21, mango: [8, 1] });
   s.spawnInMs = 1; updateDirector(s, b, rngFrom(s.rng));
   expect(s.families.npc.npcs).toHaveLength(1);
   expect(s.events.filter(e => e.type === 'hazardIncoming')).toEqual([{ type: 'hazardIncoming', family: 'npc' }]);

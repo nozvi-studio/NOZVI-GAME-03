@@ -6,6 +6,7 @@ import { resolveHeadCell } from '../../../src/core/hazards/collision';
 import { introducedAt, familyRow } from '../../../src/core/level';
 import { restoreSim, stateOf } from '../../../src/core/sim';
 import { rngFrom } from '../../../src/core/rng';
+import { startLevelUp } from '../../../src/core/transition';
 import { FAMILIES, __setFamiliesForTest } from '../../../src/core/hazards/registry';
 import { runFamilyFuzz } from '../../support/familyFuzz';
 import { buildTimeline } from '../../../src/core/fairness/timeline';
@@ -80,6 +81,32 @@ it('MEC-014-R6 level-up resets the beat while preserving a surviving group', () 
   expect(s.families.spike.groups).toHaveLength(1);
   expect(solidCauseAt(s, 2, 12)).toBeNull();
   expect(s.families.spike.groups[0]!.cells[0]!.vis).toBe('down');
+});
+it('MEC-014-R6 after a level-up reset the beat runs down then warn then up', () => {
+  const { b, s, ctx } = fixture();
+  spike.update(s, ctx);
+  expect(solidCauseAt(s, 2, 12)).toBe('spike');
+  startLevelUp(s, b, ctx);
+  const sim = restoreSim(b, s, { directorEnabled: false, freezeSnake: true });
+  sim.advance(1);
+  expect(sim.snapshot().families.spike[0]!.cells[0]!.vis).toBe('down');
+  sim.advance(b.spike.downMs - 2);
+  expect(sim.snapshot().families.spike[0]!.cells[0]!.vis).toBe('down');
+  sim.advance(1);
+  expect(sim.snapshot().families.spike[0]!.cells[0]!.vis).toBe('warn');
+  sim.advance(b.spike.warnMs - 1);
+  expect(sim.snapshot().families.spike[0]!.cells[0]!.vis).toBe('warn');
+  sim.advance(1);
+  expect(sim.snapshot().families.spike[0]!.cells[0]!.vis).toBe('up');
+  expect(stateOf(sim).levelTimeMs).toBeGreaterThanOrEqual(2700);
+});
+it('MEC-014-R5 symmetric spike placement does not consume a mirror draw', () => {
+  const b = loadBalance(), s = buildBoard({ level: 18 }), ctx = spawnCtx(s, b);
+  let mirrorDraws = 0;
+  expect(spike.spawn(s, { ...ctx, rng: { ...ctx.rng, chance(p) {
+    mirrorDraws++; return ctx.rng.chance(p);
+  } } })).not.toBeNull();
+  expect(mirrorDraws).toBe(0);
 });
 it('MEC-014-R7 spike cells are reserved in every phase and never BFS walls', () => {
   const { b, s, ctx } = fixture();

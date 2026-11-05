@@ -3,6 +3,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Added
+- feat(core): patrolling cat and chicken from level 21 (MEC-015)
 - feat(core): spike traps on a global beat from level 18 (MEC-014)
 - feat(core): cycle-cell block and gates from level 17 (MEC-014)
 - feat(core): rolling coconuts from level 16 (MEC-013)

@@ -49,6 +49,9 @@ it('MEC-013-R2 fuzz keeps reservations from other coconut rolls and other hazard
 it('MEC-013-R6 fuzz counts observed coconut spawns', () => {
   expect(fuzzSeed(soloTable(loadBalance(), 'coconut'), 3, 20000).spawned.coconut).toBeGreaterThan(0);
 });
+it('MEC-015-R8 fuzz counts observed NPC spawns', () => {
+  expect(fuzzSeed(soloTable(loadBalance(), 'npc'), 3, 20000).spawned.npc).toBeGreaterThan(0);
+});
 
 it('MEC-013-R2 TR-B4 extraction marks the whole warning lane and only the occupied moving cell', () => {
   const b = loadBalance(), sim = createSimInternal(b, 1, {}, { directorEnabled: false, freezeSnake: true });
@@ -57,10 +60,30 @@ it('MEC-013-R2 TR-B4 extraction marks the whole warning lane and only the occupi
   expect(moverCells(sim.snapshot(), b.board.cols)).toHaveLength(b.board.cols);
   expect(moverCells(sim.snapshot(), b.board.cols).every(m => m.phase === 'warn')).toBe(true);
   sim.advance(b.coconut.warnMs);
-  expect(moverCells(sim.snapshot(), b.board.cols)).toEqual([{ id: 'coconut:1', cell: key(b.board.cols, 0, 0), phase: 'mover', warnMs: b.coconut.warnMs }]);
+  expect(moverCells(sim.snapshot(), b.board.cols)).toEqual([{ id: 'coconut:1', family: 'coconut', cause: 'coconut',
+    cell: key(b.board.cols, 0, 0), phase: 'mover', warnMs: b.coconut.warnMs }]);
 });
 
-const mark = (phase: 'warn' | 'mover', cell = 0): MoverMark => ({ id: 'coconut:1', cell, phase, warnMs: 1500 });
+const mark = (phase: 'warn' | 'mover', cell = 0): MoverMark => ({ id: 'coconut:1', family: 'coconut', cause: 'coconut', cell, phase, warnMs: 1500 });
+it('MEC-015-R3 R5 TR-B4 retains the route warning while an NPC waits to enter its first cell', () => {
+  const b = loadBalance(), sim = createSimInternal(b, 1, { startLevel: 21 }, { directorEnabled: false, freezeSnake: true });
+  const s = stateOf(sim), path = [2, 3, 4].map(x => ({ x, y: 0 }));
+  s.snake = [{ x: 8, y: 8 }, { x: 2, y: 0 }];
+  s.families.npc.npcs.push({ id: 1, variant: 'chicken', mover: newMover(path, 1500, 220, true, 15000) });
+  let previous = moverCells(sim.snapshot(), b.board.cols);
+  const warnings = new Map<string, number>(), errors: string[] = [];
+  checkMoverTransitions([], previous, warnings, new Set(), 0, m => errors.push(m));
+  for (let t = 1; t <= 1901; t++) {
+    if (t === 1901) s.snake.pop();
+    const body = new Set(s.snake.slice(1).map(c => key(b.board.cols, c.x, c.y)));
+    sim.advance(1);
+    const current = moverCells(sim.snapshot(), b.board.cols);
+    checkMoverTransitions(previous, current, warnings, body, t, m => errors.push(m));
+    previous = current;
+  }
+  expect(previous).toMatchObject([{ id: 'npc:1', phase: 'mover' }]);
+  expect(errors).toEqual([]);
+});
 it('MEC-013-R4 TR-B4 I1 rejects body entry and permits a head hit', () => {
   const bad: string[] = [], warnings = new Map([['coconut:1', 0]]);
   checkMoverTransitions([mark('mover')], [mark('mover', 1)], warnings, new Set([1]), 1501, m => bad.push(m));

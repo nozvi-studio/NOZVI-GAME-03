@@ -22,10 +22,10 @@ export function lineFence(b: Balance, level: number, rng: Rng): Pair[] {
 }
 
 // MEC-004 random quarter turns, optional mirror, shift to the origin (L457–463)
-export function transform(shape: readonly Pair[], rng: Rng, mirrorChance: number): Pair[] {
+export function transform(shape: readonly Pair[], rng: Rng, mirrorChance?: number): Pair[] {
   let pts: Pair[] = shape.map(([x, y]) => [x, y]);
   for (let r = rng.int(4); r > 0; r--) pts = pts.map(([x, y]) => [-y, x]);
-  if (rng.chance(mirrorChance)) pts = pts.map(([x, y]) => [-x, y]);
+  if (mirrorChance !== undefined && rng.chance(mirrorChance)) pts = pts.map(([x, y]) => [-x, y]);
   const mx = Math.min(...pts.map(p => p[0])), my = Math.min(...pts.map(p => p[1]));
   return pts.map(([x, y]) => [x - mx + 0, y - my + 0]);          // + 0 turns -0 into 0 for toEqual
 }

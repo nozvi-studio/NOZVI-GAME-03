@@ -24,7 +24,7 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
     expect(enabledFamilies(b, 13)).toContain('ice');
     expect(enabledFamilies(b, 15)).not.toContain('coconut');
     expect(enabledFamilies(b, 16)).toEqual(['rock', 'fence', 'terrain', 'mud', 'ice', 'coconut']);
-    expect(enabledFamilies(b, 26)).toEqual(['rock', 'fence', 'terrain', 'maze', 'mud', 'ice', 'coconut', 'gate', 'spike']);
+    expect(enabledFamilies(b, 26)).toEqual(['rock', 'fence', 'terrain', 'maze', 'mud', 'ice', 'coconut', 'gate', 'spike', 'npc']);
     expect(introducedAt(b, 6)).toBe('fence');
     expect(introducedAt(b, 11)).toBe('terrain');
     expect(introducedAt(b, 12)).toBe('rottenRock');

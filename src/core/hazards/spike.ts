@@ -3,6 +3,7 @@ import { cyclePhase, stepCycleCell, type CycleCell } from './blocks/cycleCells';
 import { transform } from './shapes';
 
 export interface SpikeGroup { id: number; t: number; lifeMs: number; cells: CycleCell[]; ending: boolean }
+const NOT_SHOWN_TIME = -1; // CycleCells treats negative time as down until the display warning has elapsed.
 const groups = (s: SimState) => s.families.spike.groups;
 const at = (c: Cell, x: number, y: number) => c.x === x && c.y === y;
 
@@ -19,7 +20,8 @@ export const spike: HazardFamily = {
   spawn(s, ctx) {
     const b = ctx.balance, cfg = b.spike;
     if (groups(s).length >= cfg.maxActive) return null;
-    const shape = transform(cfg.shapes[ctx.rng.pick(cfg.shapePool)], ctx.rng, b.fence.mirrorChance);
+    // MEC-014-R5 symmetric single/pair shapes need rotation only, with no mirror RNG draw.
+    const shape = transform(cfg.shapes[ctx.rng.pick(cfg.shapePool)], ctx.rng);
     const w = Math.max(...shape.map(([x]) => x)) + 1, h = Math.max(...shape.map(([, y]) => y)) + 1;
     for (let i = 0; i < cfg.tries; i++) {
       const ox = ctx.rng.int(b.board.cols - w + 1), oy = ctx.rng.int(b.board.rows - h + 1);
@@ -38,7 +40,7 @@ export const spike: HazardFamily = {
       g.t++;
       if (g.t >= g.lifeMs) g.ending = true;
       if (g.ending && phase === 'down') return false;
-      for (const c of g.cells) stepCycleCell(c, cfg, g.t < cfg.showMs ? -1 : s.levelTimeMs, ctx.snakeOn);
+      for (const c of g.cells) stepCycleCell(c, cfg, g.t < cfg.showMs ? NOT_SHOWN_TIME : s.levelTimeMs, ctx.snakeOn);
       return true;
     });
   },

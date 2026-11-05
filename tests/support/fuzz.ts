@@ -43,17 +43,23 @@ export class CoconutSpawnTracker {
   }
 }
 
-export interface MoverMark { id: string; cell: number; phase: 'warn' | 'mover'; warnMs: number; elapsedMs?: number }
+export interface MoverMark {
+  id: string; family: 'coconut' | 'npc'; cause: 'coconut' | 'cat' | 'chicken';
+  cell: number; phase: 'warn' | 'mover'; warnMs: number; elapsedMs?: number;
+}
 
 // MEC-013-R2/R3 MEC-015-R3 TR-B4: the entire warning path precedes one occupied moving cell.
 export function moverCells(snap: SimSnapshot, cols: number): MoverMark[] {
-  const rolls = [...snap.families.coconut.map(r => ({ ...r, family: 'coconut' })),
-    ...snap.families.npc.map(r => ({ ...r, family: 'npc' }))];
+  const rolls = [...snap.families.coconut.map(r => ({ ...r, family: 'coconut' as const, cause: 'coconut' as const })),
+    ...snap.families.npc.map(r => ({ ...r, family: 'npc' as const, cause: r.variant }))];
   return rolls.flatMap(r => {
-    const phase = r.state === 'warn' ? 'warn' as const : 'mover' as const;
-    const cells = r.state === 'warn' ? r.path : r.state === 'move' && r.cell ? [r.cell] : [];
-    return cells.map(c => ({ id: r.family + ':' + r.id, cell: key(cols, c.x, c.y), phase, warnMs: r.warnMs,
-      ...(phase === 'warn' ? { elapsedMs: r.t } : {}) }));
+    // MEC-015-R5 a body/solid can delay first entry beyond warnMs; retain the telegraphed route until entry.
+    const warning = r.state === 'warn' || (r.state === 'move' && r.cell === null);
+    const phase = warning ? 'warn' as const : 'mover' as const;
+    const cells = warning ? r.path : r.state === 'move' && r.cell ? [r.cell] : [];
+    return cells.map(c => ({ id: r.family + ':' + r.id, family: r.family, cause: r.cause,
+      cell: key(cols, c.x, c.y), phase, warnMs: r.warnMs,
+      ...(warning ? { elapsedMs: r.state === 'warn' ? r.t : r.warnMs } : {}) }));
   });
 }
 
@@ -87,7 +93,7 @@ export function snapHash(sim: Sim): string {          // FNV-1a over the snapsho
 /** Runs consecutive runs until simMs of sim time are played. Runs start at a seeded level 0…10 so late hazards are covered. */
 export function fuzzSeed(b: Balance, seed: number, simMs: number): FuzzReport {
   const input = rngFrom(seedRng(seed ^ 0x9e3779b9));      // input RNG, separate from the Sim RNG
-  const rep: FuzzReport = { violations: [], steps: 0, maxLevel: 0, spawned: { rock: 0, fence: 0, maze: 0, terrain: 0, mud: 0, ice: 0, coconut: 0, gate: 0, spike: 0 } };
+  const rep: FuzzReport = { violations: [], steps: 0, maxLevel: 0, spawned: { rock: 0, fence: 0, maze: 0, terrain: 0, mud: 0, ice: 0, coconut: 0, gate: 0, spike: 0, npc: 0 } };
   const seen = new WeakSet<object>();
   let played = 0, run = 0;
   while (played < simMs) {
@@ -96,6 +102,7 @@ export function fuzzSeed(b: Balance, seed: number, simMs: number): FuzzReport {
     const coconuts = new CoconutSpawnTracker();
     const sim = restoreSim(b, s0, { observer: { spawned(family, _cells, before, after) {
       if (family === 'coconut') rep.spawned.coconut += coconuts.record(before, after);
+      if (family === 'npc') rep.spawned.npc++;
     } } }), s = stateOf(sim);
     run++;
     while (s.status === 'playing' && played < simMs) {
