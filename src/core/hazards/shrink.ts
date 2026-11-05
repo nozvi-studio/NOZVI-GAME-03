@@ -63,6 +63,7 @@ export const shrink: HazardFamily = {
     const trial = structuredClone(s);
     displaceFromRing(trial, b, rngFrom(trial.rng), ring);
     if (!keepsMangoReachable(trial, b, ring)) return null;
+    // Copy back every field displaceFromRing/placeMango may mutate (orbs, rainMangoes, mango, retryMs, events, rng); add any new one here.
     s.orbs = trial.orbs; s.rainMangoes = trial.rainMangoes; s.mango = trial.mango; s.retryMs = trial.retryMs;
     s.events.push(...trial.events.slice(s.events.length)); s.rng.s = trial.rng.s;
     st.active = { t: 0, phase: 'warn', cells: ring.map(c => ({ ...c, closed: false })) };

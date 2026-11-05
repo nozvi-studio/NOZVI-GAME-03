@@ -153,7 +153,7 @@ export function createSession(deps: SessionDeps): Session {
       run = { sim, runId: n.runId, startLevel, startEnergy, loadout, over: false, summary: null, turns: 0, debug: dbg };
       lastStart = startLevel; lastDebug = dbg;
       reached(startLevel);
-      record({ type: 'run_start', startLevel, startEnergy, loadout: [loadout[0], loadout[1]], entry });
+      record({ type: 'run_start', startLevel, startEnergy, loadout: [loadout[0], loadout[1]], entry, ...(dbg ? { debug: true } : {}) });
     },
     lastStartLevel: () => lastStart,
     frame(ms) {

@@ -24,8 +24,9 @@ it.skipIf(import.meta.env.MODE !== 'bot')('MEC-004-R19 bot report L1-30', () => 
   }
   const { markdown, warnings } = formatReport(results);
   console.log(markdown); console.log(warnings.join('\n'));
+  if (BOARD_LEVELS.some(l => !(samples.get(l)?.length))) { console.log('board-size: skipped, L25/L30 not in range'); return; }
   const res = (l: number): BoardSizeResult => {
-    const m = median(samples.get(l) ?? [0]);
+    const m = median(samples.get(l)!);
     return { level: l, medianReachable: m, boardCells, share: m / boardCells, clearRate: clearRate(results, l, l) };
   };
   const r25 = res(25), r30 = res(30);

@@ -100,3 +100,12 @@ it('P2-EXIT player causes above 40% go to review, not over40', () => {
   expect(r.review).toEqual(['wall']);
   expect(r.over40).toEqual([]);
 });
+
+it('MEC-003-R21 debug runs excluded from deathCauseReport', () => {
+  let log = emptyLog();
+  log = appendRecord(log, startRun(1), 100); log = appendRecord(log, endCtx(1, 'bomb'), 100);
+  log = appendRecord(log, { ...startRun(2), debug: true } as LogRecord, 100); log = appendRecord(log, endCtx(2, 'coconut'), 100);
+  const r = deathCauseReport(log, 600000), s = summarizeLog(log, 600000);
+  expect(r.deaths).toBe(1); expect(r.familyShare).toEqual({ bomb: 1 });
+  expect(s.runs).toBe(1); expect(s.causes).toEqual({ bomb: 1 }); expect(s.levelsReached).toEqual({ 20: 1 });
+});

@@ -1,7 +1,7 @@
 import type { KeyValueStore } from './storage';
 
 export type LogRecord =
-  | { type: 'run_start'; t: number; runId: number; startLevel: number; startEnergy: number; loadout: readonly [string | null, string | null]; entry: 'home' | 'results' }
+  | { type: 'run_start'; t: number; runId: number; startLevel: number; startEnergy: number; loadout: readonly [string | null, string | null]; entry: 'home' | 'results'; debug?: boolean }
   | { type: 'level_up'; t: number; runId: number; level: number; levelTimeMs: number }
   | { type: 'skill_used'; t: number; runId: number; skill: string; level: number; energyBefore: number }
   | { type: 'checkpoint_unlocked'; t: number; runId: number; level: number; reachedLevel: number }
@@ -16,7 +16,7 @@ function isRecord(v: unknown): v is LogRecord {
   if (!object(v) || !finite(v.t) || !Number.isInteger(v.runId) || (v.runId as number) < 1) return false;
   const numbers = (...keys: string[]) => keys.every(k => finite(v[k]));
   switch (v.type) {
-    case 'run_start': return numbers('startLevel', 'startEnergy') && (v.entry === 'home' || v.entry === 'results')
+    case 'run_start': return numbers('startLevel', 'startEnergy') && (v.entry === 'home' || v.entry === 'results') && (v.debug === undefined || typeof v.debug === 'boolean')
       && Array.isArray(v.loadout) && v.loadout.length === 2 && v.loadout.every(id => id === null || typeof id === 'string');
     case 'level_up': return numbers('level', 'levelTimeMs');
     case 'skill_used': return numbers('level', 'energyBefore') && typeof v.skill === 'string';
@@ -73,13 +73,18 @@ export interface LogSummary {
 const share = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 1000) / 1000 : 0);
 const bump = <K extends string | number>(m: Record<K, number>, k: K) => { m[k] = (Object.hasOwn(m, k) ? m[k] : 0) + 1; };
 
+// MEC-003-R21 runs started through the debug start level are marked on their run_start.
+const debugRunIds = (log: RunLog) => new Set(log.entries.flatMap(r => (r.type === 'run_start' && r.debug === true ? [r.runId] : [])));
+
 // P1 design §11 pure playtest summary of an exported run log.
 export function summarizeLog(log: RunLog, sessionGapMs: number): LogSummary {
   const s: LogSummary = { runs: 0, runsFromResults: 0, runsFromHome: 0, checkpointStarts: 0, levelsReached: {}, causes: {},
     causeShare: {}, runsWithSkill: 0, skillRunShare: 0, runsPerSession: [] };
   const started = new Set<number>(), skilled = new Set<number>(), ended = new Set<number>();
   let lastEnd: number | null = null;
+  const dbg = debugRunIds(log);
   for (const r of log.entries) {
+    if (dbg.has(r.runId)) continue; // MEC-003-R21 debug runs never feed playtest stats
     if (r.type === 'run_start' && !started.has(r.runId)) {
       started.add(r.runId); s.runs++;
       if (r.entry === 'home') s.runsFromHome++; else s.runsFromResults++;
@@ -114,10 +119,10 @@ export function deathCauseReport(log: RunLog, sessionGapMs: number, limit = 0.4)
   const isPlayer = (c: string) => (PLAYER_CAUSES as readonly string[]).includes(c);
   const isNonDeath = (c: string) => (NON_DEATH_CAUSES as readonly string[]).includes(c);
   const familyN: Record<string, number> = {}, playerN: Record<string, number> = {}, baseN: Record<string, number> = {};
-  const seen = new Set<number>();
+  const seen = new Set<number>(), dbg = debugRunIds(log);
   let deaths = 0;
   for (const r of log.entries) {
-    if (r.type !== 'run_end' || seen.has(r.runId) || !Object.hasOwn(known, r.cause) || isNonDeath(r.cause)) continue;
+    if (r.type !== 'run_end' || dbg.has(r.runId) || seen.has(r.runId) || !Object.hasOwn(known, r.cause) || isNonDeath(r.cause)) continue;
     seen.add(r.runId); deaths++;
     if (isPlayer(r.cause)) { bump(playerN, r.context ? `${r.cause}:${r.context}` : r.cause); bump(baseN, r.cause); }
     else bump(familyN, r.cause);
