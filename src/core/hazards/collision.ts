@@ -56,6 +56,7 @@ function consumeShield(s: SimState, ctx: StepCtx, family: HazardFamily, x: numbe
       rubble = { x: rx, y: ry };
       s.families.rubble.push({ family: 'rubble', ...rubble, state: 'solid', leftMs: b.skills.shield.rubbleLifeMs });
     }
+    // MEC-012-EC7 lead ruling: bonk duration intentionally includes the current head tile.
     s.acc = -b.skills.shield.bonkPauseTicks * effectiveTick(s, b);
   }
   ctx.emit({ type: 'shieldBroke', x, y, family: family.key, rubble });

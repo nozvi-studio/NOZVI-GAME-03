@@ -13,12 +13,14 @@ import type { TimedHazard, TerrainHazard } from '../../src/core/types';
 describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
   const b = loadBalance();
 
-  it('QA-T5-13 MEC-004 unlock levels: fence at 2, terrain at 4, maze at 6', () => {
-    // updated for P1 MEC-003-R14/R15
+  it('QA-T5-13 MEC-004/MEC-012 unlock levels: fence at 6, mud at 7, terrain at 11, maze at 26', () => {
+    // MEC-003-R14/R15 and MEC-012-R11 preserve table order and introduce mud at L7.
     expect(enabledFamilies(b, 1)).toEqual(['rock']);
     expect(enabledFamilies(b, 6)).toEqual(['rock', 'fence']);
-    expect(enabledFamilies(b, 11)).toEqual(['rock', 'fence', 'terrain']);
-    expect(enabledFamilies(b, 26)).toEqual(['rock', 'fence', 'terrain', 'maze']);
+    expect(enabledFamilies(b, 6)).not.toContain('mud');
+    expect(enabledFamilies(b, 7)).toContain('mud');
+    expect(enabledFamilies(b, 11)).toEqual(['rock', 'fence', 'terrain', 'mud']);
+    expect(enabledFamilies(b, 26)).toEqual(['rock', 'fence', 'terrain', 'maze', 'mud']);
     expect(introducedAt(b, 6)).toBe('fence');
     expect(introducedAt(b, 11)).toBe('terrain');
     expect(introducedAt(b, 12)).toBe('rottenRock');

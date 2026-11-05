@@ -62,6 +62,7 @@ export function searchTimeline(tl: Timeline, state: SimState, goal?: Cell): Sear
 // MEC-004-R18 a director spawn must preserve an existing path through this horizon.
 export function escapeExists(balance: Balance, state: SimState): boolean {
   assertBoardSize(balance.board.cols, balance.board.rows);
+  // MEC-012-R6 lead ruling: escape horizon intentionally uses the initial head tile.
   const steps = Math.ceil(balance.fairness.escapeHorizonMs / effectiveTick(state, balance));
   return searchTimeline(buildTimeline(balance, state, steps), state).reachedHorizon;
 }

@@ -30,7 +30,10 @@ export function spawnCtx(s: SimState, b: Balance): SpawnCtx {
 
 // MEC-004-R9 every cap and gate is evaluated over the ordered registry.
 export function directorOptions(s: SimState, b: Balance, fams: readonly HazardFamily[] = FAMILIES): { family: HazardFamily; weight: number }[] {
-  const counts = new Map(fams.map(f => [f, f.count?.(s) ?? s.families[f.key].length]));
+  const counts = new Map(fams.map(f => {
+    const state = s.families[f.key];
+    return [f, f.count?.(s) ?? (Array.isArray(state) ? state.length : state.patches.length)] as const;
+  }));
   const smallCount = fams.reduce((n, f) => n + (f.capClass === 'small' ? counts.get(f)! : 0), 0);
   const bigActive = fams.some(f => f.capClass === 'big' && counts.get(f)! > 0);
   const cap = smallHazardCap(b, s.level), weights = familyRow(b, s.level).weights;
@@ -69,7 +72,8 @@ export function updateDirector(s: SimState, b: Balance, rng: Rng, ctx?: SpawnCtx
     const cells = family.spawn(s, { ...context, rng });
     if (cells) {
       if (family.key === 'maze') s.mazeCooldownMs = b.maze.cooldownMs;
-      if (family.key !== 'rock') s.events.push({ type: 'hazardIncoming', family: family.key });
+      // MEC-012-R1 mud emits its warning at patch creation, including direct spawns.
+      if (family.key !== 'rock' && family.key !== 'mud') s.events.push({ type: 'hazardIncoming', family: family.key });
       if (before) context.observer!.spawned(family.key, cells, before, s);
       return;
     }

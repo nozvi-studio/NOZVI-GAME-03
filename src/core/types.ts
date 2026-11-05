@@ -2,6 +2,7 @@
 import type { Balance, FenceKind } from './balance';
 import type { Rng, RngState } from './rng';
 import type { CandidateOpts } from './hazards/placement';
+import type { TilePatch } from './hazards/blocks/groundTiles';
 
 export type Step = -1 | 0 | 1;
 export interface Dir { x: Step; y: Step }
@@ -10,7 +11,7 @@ export interface Cell { x: number; y: number }
 export type SkillId = 'slowmo' | 'tailSnip' | 'shield' | 'mangoRain';
 export type Loadout = readonly [SkillId | null, SkillId | null];
 export interface SimOptions { startLevel?: number; startEnergy?: number; loadout?: Loadout; bestLevel?: number }
-export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze';
+export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze' | 'mud';
 export type IntroKey = TableFamily | 'rottenRock';
 export interface LevelRow {
   from: number; to: number; weights: Partial<Record<FamilyKey, number>>;
@@ -77,7 +78,7 @@ export type SimEvent =
 
 /** All Sim state. Plain JSON data only: no closures, Map/Set or class instances. */
 export interface SimState {
-  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; rubble: Rubble[] };
+  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; rubble: Rubble[]; mud: { patches: TilePatch[]; nextId: number } };
   nextHazardSeq: number;
   snake: Cell[];               // head first
   dir: Dir;
@@ -127,7 +128,7 @@ export interface HazardView {
 export interface TerrainView { t: number; lifeMs: number; cells: readonly { x: number; y: number; vis: TerrainVis; delay: number }[] }
 
 export interface SimSnapshot {
-  tiles: readonly { family: TileKind; id: number; state: 'warn' | 'active' | 'fade'; leftMs: number; cells: readonly { x: number; y: number; on: boolean }[] }[];
+  tiles: readonly { family: TileKind; id: number; state: 'warn' | 'active' | 'fade'; leftMs: number; cells: readonly { x: number; y: number; on: boolean }[]; ring?: readonly Cell[] }[];
   headTile: TileKind | null;
   skills: readonly { slot: 0 | 1; id: SkillId | null; cost: number; affordable: boolean; active: boolean; leftMs: number }[];
   slowmo: { leftMs: number } | null;

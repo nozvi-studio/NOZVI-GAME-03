@@ -10,6 +10,7 @@ export interface Timeline { cols: number; rows: number; tickMs: number; steps: n
 
 // MEC-004-R18 step 2 / FB-2: freeze only movement; ease slowdown at a fixed initial sampling tick.
 export function buildTimeline(balance: Balance, state: SimState, steps: number): Timeline {
+  // MEC-012-R6 lead ruling: timeline sampling intentionally uses the initial head tile.
   const tickMs = effectiveTick(state, balance);
   const sim = restoreSim(balance, state, { directorEnabled: false, freezeSnake: true, ignoreOutcomes: true });
   const s = stateOf(sim), { cols, rows } = balance.board;

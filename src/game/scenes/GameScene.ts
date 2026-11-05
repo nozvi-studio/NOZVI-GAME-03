@@ -13,6 +13,7 @@ import { drawMango } from '../render/mango';
 import { currentPalette, reduceMotion, type Palette } from '../render/palette';
 import { drawSnake } from '../render/snake';
 import { drawGroundTint, drawSkillObjects, drawSkillOverlay } from '../render/skills';
+import { drawTiles } from '../render/tiles';
 
 export class GameScene extends Phaser.Scene {
   balance!: Balance;
@@ -174,6 +175,7 @@ export class GameScene extends Phaser.Scene {
     const cell = cellPx(this.balance), p = this.palette;
     for (const layer of Object.values(this.layers)) layer.clear();
     drawGroundTint(this.layers.ground, snapshot, BOARD.size);
+    drawTiles(this.layers.ground, snapshot.tiles, cell, time, this.reduced);
     drawTerrains(this.layers.terrain, snapshot.terrains, cell, p, this.balance, this.reduced);
     drawHazards(this.layers.hazards, snapshot.hazards, cell, p, this.balance, this.reduced);
     drawMango(this.layers.mango, snapshot, cell, p, time, this.reduced, this.mangoBornAt);

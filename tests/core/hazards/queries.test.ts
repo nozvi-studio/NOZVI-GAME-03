@@ -17,8 +17,8 @@ describe('MEC-004 queries', () => {
     s.families.rottenRock[0]!.state = 'crumble';
     expect(solidFamilyWithPriority(s, 3, 3)?.key).toBe('rock');
   });
-  it('MEC-004-R1 registry order is rock fence maze terrain rottenRock snipWall rubble', () => {
-    expect(FAMILIES.map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'rubble']);
+  it('MEC-004-R1 registry order is rock fence maze terrain rottenRock snipWall rubble mud', () => {
+    expect(FAMILIES.map(f => f.key)).toEqual(['rock', 'fence', 'maze', 'terrain', 'rottenRock', 'snipWall', 'rubble', 'mud']);
   });
   it('MEC-004-R3 solidCauseAt returns the first family cause in registry order', () => {
     const a = fakeFamily({ key: 'rock', cause: 'rock', solid: [[3, 3]] });

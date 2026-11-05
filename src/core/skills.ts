@@ -2,6 +2,7 @@ import type { Balance } from './balance';
 import { baseTickMs } from './ramp';
 import { levelUpSlowFactor } from './slowdown';
 import { scaleTick } from './hazards/blocks/groundTiles';
+import { tileAt } from './hazards/queries';
 import { slowmoSkill } from './skills/slowmo';
 import { tailSnipSkill } from './skills/tailSnip';
 import { shieldSkill } from './skills/shield';
@@ -70,7 +71,8 @@ export function skillTimers(s: SimState, _b: Balance, ctx: StepCtx): void {
 export function effectiveTick(s: SimState, b: Balance): number {
   const base = baseTickMs(s, b);
   const f = Math.max(s.slowmo ? b.skills.slowmo.tickFactor : 1, levelUpSlowFactor(s));
-  const tileFactor = 1; // MEC-012-R6 mud tuning and its head-cell factor arrive with the mud family.
+  const head = s.snake[0]!;
+  const tileFactor = tileAt(s, head.x, head.y) === 'mud' ? b.mud.tickFactor : 1; // MEC-012-R6
   return scaleTick(base, f, tileFactor);
 }
 

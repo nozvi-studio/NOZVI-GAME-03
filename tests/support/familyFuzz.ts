@@ -8,7 +8,7 @@ import { isReserved } from '../../src/core/reserved';
 import { rngFrom, seedRng } from '../../src/core/rng';
 import { createSim } from '../../src/core/sim';
 import { createSimInternal, stateOf } from '../../src/core/simInternal';
-import type { Cell, CauseKey, Dir, FamilyKey, Sim, SimEvent, SimSnapshot, TileKind } from '../../src/core/types';
+import type { Cell, CauseKey, Dir, FamilyKey, Sim, SimEvent, SimSnapshot } from '../../src/core/types';
 import { loadBalance, soloTable } from './balance';
 
 export interface FuzzConfig {
@@ -18,8 +18,6 @@ export interface FuzzConfig {
 type Phase = 'warn' | 'lethal' | 'active';
 interface Mark { family: string; cell: number; phase: Phase; cause: CauseKey | null }
 interface Input { t: number; dir: Dir }
-// Ground-tile snapshots arrive in P2a Task 5. Keep this adapter local to test support.
-type TileView = { kind: TileKind; state: 'warn' | 'active' | 'fade'; cells: readonly (Cell & { on: boolean })[] };
 const DIRS: readonly Dir[] = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }];
 const INPUT_SEED_OFFSET = 1000003, TURN_INTERVAL_MS = 100, TURN_CHANCE = 0.35, REPLAY_CHUNK_MS = 37, SAMPLE_SPAWNS = 3;
 const RERUN_SEED_OFFSET = 1000033;
@@ -39,9 +37,9 @@ function cellsOf(snap: SimSnapshot, cols: number): Map<string, Mark> {
     else if (c.vis === 'warn') add('terrain', c, 'warn', 'ground');
   }
   for (const c of snap.rottenRocks) if (c.state === 'solid') add('rottenRock', c, 'lethal', 'rotten');
-  for (const tile of (snap as SimSnapshot & { tiles?: readonly TileView[] }).tiles ?? []) for (const c of tile.cells) {
-    if (c.on) add(tile.kind, c, 'active', null);
-    else if (tile.state !== 'fade') add(tile.kind, c, 'warn', null);
+  for (const tile of snap.tiles) for (const c of tile.cells) {
+    if (c.on) add(tile.family, c, 'active', null);
+    else if (tile.state !== 'fade') add(tile.family, c, 'warn', null);
   }
   return marks;
 }

@@ -3,6 +3,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 ### Added
+- feat(core): mud tiles from level 7 (MEC-012)
 - feat(core): ground tile block and tile speed factor (MEC-004-R5 R7)
 - test(core): escape check and per-family fairness fuzz harness (MEC-004-R17 R18)
 - feat(core): generic head collision, head hits and death context (MEC-004-R6 R8 R15)

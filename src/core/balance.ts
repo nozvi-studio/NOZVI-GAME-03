@@ -24,6 +24,8 @@ export interface Balance {
   };
   fairness: { nearHeadDist: number; frontLaneCells: number; terrainNearHeadDist: number; minWarnMs: number; minWarnTicks: number; escapeHorizonMs: number };
   hazard: { crumbleMs: number };
+  mud: { warnMs: number; lifeMs: number; lifeRandMs: number; tries: number; maxActive: number; tickFactor: number;
+    shapePool: string[]; shapes: Record<string, Pair[]> };
   rock: {
     warnMs: number; lifeMs: number; lifeRandMs: number; tries: number;
     shapes: Record<RockShapeKey, Pair[]>;
@@ -121,6 +123,13 @@ const SPEC: Spec = {
   },
   fairness: { nearHeadDist: 'int+', frontLaneCells: 'int+', terrainNearHeadDist: 'int+', minWarnMs: 'int+', minWarnTicks: 'int+', escapeHorizonMs: 'int+' },
   hazard: { crumbleMs: 'int+' },
+  mud: { ...timed, tries: 'int+', maxActive: 'int+', tickFactor: 'num+',
+    shapePool: listOf((v, path) => { if (typeof v !== 'string') fail(path, 'must be a shape name'); }),
+    shapes: (v, path) => {
+      if (!isObj(v) || !Object.keys(v).length) fail(path, 'must contain shapes');
+      for (const [name, shape] of Object.entries(v)) check(shape, 'pairs', path + '.' + name);
+    },
+  },
   rock: { ...timed, tries: 'int+',
     shapes: recordOf(ROCK_KEYS, 'pairs') },
   fence: { ...timed, tries: 'int+', lineBase: 'int+', lineExtraMax: 'int0', gapMinLen: 'int+', mirrorChance: 'prob',
@@ -182,8 +191,23 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (b.terrain.upMs + b.terrain.warnMs >= b.terrain.periodMs) fail('terrain.periodMs', 'must be > upMs + warnMs');
   // MEC-004-R13 warning time uses the L1 base tick, independent of slow effects.
   const minWarnMs = Math.max(b.fairness.minWarnMs, b.fairness.minWarnTicks * b.speed.startMs);
-  for (const family of ['rock', 'fence', 'maze', 'terrain'] as const) {
+  for (const family of ['rock', 'fence', 'maze', 'terrain', 'mud'] as const) {
     if (b[family].warnMs < minWarnMs) fail(family + '.warnMs', 'must be >= ' + minWarnMs);
+  }
+  // MEC-012-R1 every pooled shape exists and every configured shape is 4-connected.
+  if (b.mud.tickFactor <= 1) fail('mud.tickFactor', 'must be > 1');
+  for (const name of b.mud.shapePool) if (!Object.hasOwn(b.mud.shapes, name)) fail('mud.shapePool', 'unknown shape ' + name);
+  for (const [name, cells] of Object.entries(b.mud.shapes)) {
+    const remaining = new Set(cells.map(([x, y]) => `${x},${y}`));
+    const pending = [cells[0]!];
+    remaining.delete(pending[0]!.join(','));
+    while (pending.length) {
+      const [x, y] = pending.pop()!;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+        if (remaining.delete(`${x + dx},${y + dy}`)) pending.push([x + dx, y + dy]);
+      }
+    }
+    if (remaining.size) fail('mud.shapes.' + name, 'must be 4-connected');
   }
   if (b.snake.start.length < 2) fail('snake.start', 'must have at least 2 cells');
   if (Math.abs(b.snake.startDir[0]) + Math.abs(b.snake.startDir[1]) !== 1) fail('snake.startDir', 'must be one unit step');
