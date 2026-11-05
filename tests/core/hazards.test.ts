@@ -86,7 +86,7 @@ describe('MEC-004 timed hazards', () => {
 
   it('MEC-004 maze drops non-free cells and needs 6', () => {
     const allowed = [{ x: 4, y: 4 }, { x: 5, y: 4 }, { x: 6, y: 4 }, { x: 10, y: 4 }, { x: 11, y: 4 }, { x: 12, y: 4 }];
-    const ctx: Omit<SpawnCtx, 'candidateValid'> = { balance: b, level: 6, cellFree: (x, y) => allowed.some(c => c.x === x && c.y === y) };
+    const ctx: Omit<SpawnCtx, 'candidateValid' | 'rng'> = { balance: b, level: 6, cellFree: (x, y) => allowed.some(c => c.x === x && c.y === y) };
     const five = { ...ctx, cellFree: (x: number, y: number) => ctx.cellFree(x, y) && x !== 12 };
     const a = fixed([]);
     expect(instanceFamily(MAZE).spawn(five, a.rng)).toBeNull(); expect(a.calls).toEqual(['pick(4)']);

@@ -1,14 +1,14 @@
 import type { Balance } from '../../src/core/balance';
 import { escapeExists } from '../../src/core/fairness/escape';
-import { key, nearHead } from '../../src/core/grid';
+import { inBounds, key, nearHead } from '../../src/core/grid';
 import { keepsMangoReachable, reachableFrom } from '../../src/core/hazards/placement';
-import { bfsWall } from '../../src/core/hazards/queries';
+import { bfsWall, solidCauseAt } from '../../src/core/hazards/queries';
 import { FAMILIES } from '../../src/core/hazards/registry';
 import { isReserved } from '../../src/core/reserved';
 import { rngFrom, seedRng } from '../../src/core/rng';
 import { createSim } from '../../src/core/sim';
 import { createSimInternal, stateOf } from '../../src/core/simInternal';
-import type { Cell, CauseKey, Dir, FamilyKey, Sim, SimEvent, SimSnapshot } from '../../src/core/types';
+import type { Cell, CauseKey, Dir, FamilyKey, Sim, SimEvent, SimSnapshot, SimState } from '../../src/core/types';
 import { loadBalance, soloTable } from './balance';
 
 export interface FuzzConfig {
@@ -82,6 +82,21 @@ function checkDeath(e: Extract<SimEvent, { type: 'died' }>, previous: Map<string
     bad(`I6 death by ${e.cause} at (${e.x},${e.y}) had no matching lethal cell in the previous ms`);
 }
 
+// MEC-012-R10/EC10 check the reserved exit ring and mud separation on every simulation ms.
+function checkIce(s: SimState, b: Balance, bad: (m: string) => void): void {
+  const same = (a: Cell, c: Cell) => a.x === c.x && a.y === c.y;
+  for (const patch of s.families.ice.patches) {
+    if (patch.state === 'active') for (const c of patch.ring ?? []) {
+      if (!inBounds(b.board.cols, b.board.rows, c.x, c.y) || solidCauseAt(s, c.x, c.y) !== null
+        || (s.mango !== null && same(s.mango, c)) || s.orbs.some(o => same(o, c)) || s.rainMangoes.some(m => same(m, c)))
+        bad(`MEC-012-R10 unsafe ice exit (${c.x},${c.y})`);
+    }
+    for (const mud of s.families.mud.patches) for (const m of mud.cells) for (const i of patch.cells) {
+      if (Math.abs(m.x - i.x) + Math.abs(m.y - i.y) <= 1) bad('MEC-012-EC10 mud touches ice');
+    }
+  }
+}
+
 // MEC-004-R17 natural runs (no freeze or level resets) with independent seeded inputs and I7 replay.
 export function runFamilyFuzz(c: FuzzConfig): string[] {
   const shipped = loadBalance(), b = c.mode === 'solo' ? soloTable(shipped, c.family) : shipped;
@@ -125,6 +140,7 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
       const accBefore = stateOf(sim).acc;
       sim.advance(1); time++;
       snap = sim.snapshot();
+      checkIce(stateOf(sim), b, bad);
       const current = cellsOf(snap, cols);
       checkTransitions(marks, current, warnSince, snake, time, minWarnMs, bad);
       // Without skill casts, update-time death leaves acc untouched; a fatal snake step consumes its tick.

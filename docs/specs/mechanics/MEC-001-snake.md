@@ -28,7 +28,7 @@ Core state (`src/core/snake.ts`), extending P0:
 No save fields. Length is never persisted.
 
 ## 4. Rules
-- **MEC-001-R1 Port.** Turn queue, step order, eating detection, tail-inclusion rule for self-collision, and cause order `wall → self → solid cell cause` are exactly P0 design §5 MEC-001.
+- **MEC-001-R1 Port.** Turn queue, step order, eating detection, tail-inclusion rule for self-collision, and cause order `wall → self → solid cell cause` are exactly P0 design §5 MEC-001. While the head starts a step on active ice, that step keeps its direction and leaves the turn queue untouched; the first step starting off ice takes the next queued turn (MEC-012-R9, P2 design §20 item 8).
 - **MEC-001-R2 Start.** Every run (any start level, MEC-008) starts with cells (8,8), (7,8), (6,8), (5,8), direction right, empty queue. Start length = 4 (GDD §7).
 - **MEC-001-R3 Growth.** Eating any mango (normal, golden, Mango Rain) grows the snake by exactly 1 segment (no tail pop that step). Golden grows +1, not +2 (GDD §5.2 "Golden mangoes still grow +1").
 - **MEC-001-R4 Length reset.** In the snake step where an eaten mango makes `progress ≥ need` and the level is below 30 (MEC-003-R6), after growth, the snake keeps its first `startLength` cells (head and the 3 segments directly behind it, in order) and drops the rest. Head cell and `dir` are unchanged. The turn queue is unchanged.

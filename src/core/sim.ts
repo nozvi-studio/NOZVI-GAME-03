@@ -41,7 +41,7 @@ export function initialState(b: Balance, seed: number, options: SimOptions = {})
     snake, dir: toDir(b.snake.startDir), queue: [],
     headFrom: { ...snake[0]! }, tailFrom: { ...snake[snake.length - 1]! },
     acc: 0, tickMs: levelTickMs(b, 1), mango: null,
-    families: { rock: [], fence: [], maze: [], terrain: [], rottenRock: [], snipWall: [], rubble: [], mud: { patches: [], nextId: 1 } }, nextHazardSeq: 0,
+    families: { rock: [], fence: [], maze: [], terrain: [], rottenRock: [], snipWall: [], rubble: [], mud: { patches: [], nextId: 1 }, ice: { patches: [], nextId: 1 } }, nextHazardSeq: 0,
     energy, orbs: [], orbSpawnMs: 0, rampActive: true, rampEaten: 0,
     bestLevel, loadout: [loadout[0], loadout[1]], slowmo: null, levelUpSlow: null,
     shield: null, rain: null, rainMangoes: [], rainBudgets: [], nextCastId: 1,
@@ -88,10 +88,10 @@ function snapshotOf(s: SimState, b: Balance): SimSnapshot {
   // MEC-004-R17 projects only snapshot-owned data: per-ms fuzz must not clone pending events/internal state.
   return {
     // MEC-012-R2 snapshot-owned tile views retain the optional ice exit ring.
-    tiles: s.families.mud.patches.map(p => ({ family: 'mud', id: p.id, state: p.state,
+    tiles: (['mud', 'ice'] as const).flatMap(family => s.families[family].patches.map(p => ({ family, id: p.id, state: p.state,
       leftMs: Math.max(0, (p.state === 'warn' ? p.warnMs : p.state === 'active' ? p.lifeMs : b.hazard.crumbleMs) - p.t),
       cells: p.cells.map(c => ({ ...c })), ...(p.ring ? { ring: p.ring.map(c => ({ ...c })) } : {}),
-    })), headTile: tileAt(s, s.snake[0]!.x, s.snake[0]!.y),
+    }))), headTile: tileAt(s, s.snake[0]!.x, s.snake[0]!.y),
     skills: s.loadout.map((id, slot) => ({ slot: slot as 0 | 1, id, cost: id === null ? 0 : b.skills[id].cost,
       affordable: id !== null && s.energy >= b.skills[id].cost,
       active: id !== null && SKILLS[id].active(s), leftMs: id === null ? 0 : SKILLS[id].leftMs(s) })),

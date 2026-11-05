@@ -8,14 +8,15 @@ import { rottenRockFamily } from './rottenRock';
 import { snipWallFamily } from './snipWall';
 import { rubbleFamily } from './rubble';
 import { mud } from './mud';
+import { ice } from './ice';
 import { timedHazards, updateTimed } from './timed';
 import { solidFamilyWithPriority } from './queries';
 
-export const DEFAULT_FAMILIES: readonly HazardFamily[] = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily, rubbleFamily, mud];
+export const DEFAULT_FAMILIES: readonly HazardFamily[] = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily, rubbleFamily, mud, ice];
 export let FAMILIES: readonly HazardFamily[] = DEFAULT_FAMILIES;
 export const FAMILY: Record<FamilyKey, HazardFamily> = {
   rock: ROCK, fence: FENCE, maze: MAZE, terrain: TERRAIN, rottenRock: rottenRockFamily, snipWall: snipWallFamily, rubble: rubbleFamily,
-  mud,
+  mud, ice,
 };
 
 /** Test-only global seam. Always restore with null in a finally block. */

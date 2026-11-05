@@ -1,17 +1,14 @@
 import type { HazardFamily } from '../types';
-import { rngFrom } from '../rng';
 import { transform } from './shapes';
 import { newPatch, patchCellOn, patchHas, stepPatch } from './blocks/groundTiles';
 
-const MIRROR_CHANCE = 0.5; // MEC-012-R1 fixed P0 transform probability, independent of fence tuning.
-
 // MEC-012 mud reserves ground without blocking movement or BFS; patches survive level up.
 export const mud: HazardFamily = {
-  key: 'mud', cause: null, capClass: 'small', maxActiveKey: 'mud.maxActive', breakable: false,
+  key: 'mud', cause: null, capClass: 'small', maxActiveKey: 'mud.maxActive', breakable: false, emitsIncoming: true,
   // MEC-012-R1 preserve the P0 shape, transform, origins, then lifetime RNG order.
   spawn(s, ctx) {
-    const b = ctx.balance, m = b.mud, rng = ctx.rng ?? rngFrom(s.rng);
-    const shape = transform(m.shapes[rng.pick(m.shapePool)]!, rng, MIRROR_CHANCE);
+    const b = ctx.balance, m = b.mud, rng = ctx.rng;
+    const shape = transform(m.shapes[rng.pick(m.shapePool)]!, rng, m.mirrorChance);
     const w = Math.max(...shape.map(([x]) => x)) + 1, h = Math.max(...shape.map(([, y]) => y)) + 1;
     for (let i = 0; i < m.tries; i++) {
       const ox = rng.int(b.board.cols - w + 1), oy = rng.int(b.board.rows - h + 1);

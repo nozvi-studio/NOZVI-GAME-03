@@ -3,7 +3,7 @@ import type { Balance } from '../balance';
 import { cellReserved } from '../cells';
 import { inBounds, nearHead } from '../grid';
 import { directorIntervalMs, familyRow, smallHazardCap } from '../level';
-import type { Rng } from '../rng';
+import { rngFrom, type Rng } from '../rng';
 import type { HazardFamily, SimState, SpawnCtx } from '../types';
 import { FAMILIES } from './registry';
 import { candidateValid } from './placement';
@@ -20,7 +20,7 @@ export function pickWeighted(weights: readonly number[], rng: Rng): number {
 
 export function spawnCtx(s: SimState, b: Balance): SpawnCtx {
   return {
-    balance: b, level: s.level,
+    balance: b, level: s.level, rng: rngFrom(s.rng),
     candidateValid: (state, cells, opts) => candidateValid(state, b, cells, opts),
     cellFree: (x, y, d = b.fairness.nearHeadDist) =>
       inBounds(b.board.cols, b.board.rows, x, y) && !cellReserved(s, x, y)
@@ -72,8 +72,8 @@ export function updateDirector(s: SimState, b: Balance, rng: Rng, ctx?: SpawnCtx
     const cells = family.spawn(s, { ...context, rng });
     if (cells) {
       if (family.key === 'maze') s.mazeCooldownMs = b.maze.cooldownMs;
-      // MEC-012-R1 mud emits its warning at patch creation, including direct spawns.
-      if (family.key !== 'rock' && family.key !== 'mud') s.events.push({ type: 'hazardIncoming', family: family.key });
+      // MEC-004-R9 families declare ownership of their incoming warning.
+      if (!family.emitsIncoming) s.events.push({ type: 'hazardIncoming', family: family.key });
       if (before) context.observer!.spawned(family.key, cells, before, s);
       return;
     }

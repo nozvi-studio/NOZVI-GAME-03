@@ -5,7 +5,7 @@ import { rockPool } from './shapes';
 import { breakTimed, makeTimed, timedHasCell, timedSolidAt, updateTimed } from './timed';
 
 const rules: InstanceRules<TimedHazard> = {
-  key: 'rock', cause: 'rock', capClass: 'small', maxActiveKey: null, breakable: true,
+  key: 'rock', cause: 'rock', capClass: 'small', maxActiveKey: null, breakable: true, emitsIncoming: true,
   onBreak: (s, x, y) => breakTimed(s, 'rock', x, y),
   // MEC-004-R10-R12 reject each unfair candidate before drawing its lifetime.
   spawn(ctx, rng, s) {

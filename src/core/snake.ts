@@ -1,6 +1,7 @@
 // src/core/snake.ts — MEC-001 (prototype turn L698–706, step L769–799)
 import type { Balance } from './balance';
 import { deathContext, resolveHeadCell } from './hazards/collision';
+import { tileAt } from './hazards/queries';
 import { eatRain } from './skills/mangoRain';
 import { inBounds } from './grid';
 import { placeMango, goldenEnergy } from './mango';
@@ -28,8 +29,8 @@ export function stepSnake(s: SimState, b: Balance, rng: Rng): void {
   const ctx: StepCtx = { balance: b, snakeOn: (x, y) => s.snake.some(c => c.x === x && c.y === y), emit: e => { s.events.push(e); } };
   const head = s.snake[0]!;
   const context = deathContext(s, head);
-  const turn = s.queue.shift();
-  if (turn) s.dir = turn;
+  // MEC-012-R9 keep queued turns while the step starts on active ice, including through level up.
+  if (tileAt(s, head.x, head.y) !== 'ice' && s.queue.length) s.dir = s.queue.shift()!;
   const nx = head.x + s.dir.x, ny = head.y + s.dir.y;
   const eating = s.mango !== null && s.mango.x === nx && s.mango.y === ny;
   const body = eating ? s.snake : s.snake.slice(0, -1);

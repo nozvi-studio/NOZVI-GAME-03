@@ -11,7 +11,7 @@ export interface Cell { x: number; y: number }
 export type SkillId = 'slowmo' | 'tailSnip' | 'shield' | 'mangoRain';
 export type Loadout = readonly [SkillId | null, SkillId | null];
 export interface SimOptions { startLevel?: number; startEnergy?: number; loadout?: Loadout; bestLevel?: number }
-export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze' | 'mud';
+export type TableFamily = 'rock' | 'fence' | 'terrain' | 'maze' | 'mud' | 'ice';
 export type IntroKey = TableFamily | 'rottenRock';
 export interface LevelRow {
   from: number; to: number; weights: Partial<Record<FamilyKey, number>>;
@@ -78,7 +78,7 @@ export type SimEvent =
 
 /** All Sim state. Plain JSON data only: no closures, Map/Set or class instances. */
 export interface SimState {
-  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; rubble: Rubble[]; mud: { patches: TilePatch[]; nextId: number } };
+  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; rubble: Rubble[]; mud: { patches: TilePatch[]; nextId: number }; ice: { patches: TilePatch[]; nextId: number } };
   nextHazardSeq: number;
   snake: Cell[];               // head first
   dir: Dir;
@@ -188,7 +188,7 @@ export interface SpawnObserver {
 export interface SpawnCtx {
   readonly balance: Balance;
   readonly level: number;
-  readonly rng?: Rng; // Controlled RNG for director/test contexts; otherwise uses SimState.rng.
+  readonly rng: Rng; // Explicit spawn RNG; spawnCtx supplies the simulation stream by default.
   readonly observer?: SpawnObserver;
   /** MEC-004-R10-R12 supplied by spawnCtx to keep descriptors independent of the registry. */
   candidateValid(s: SimState, cells: readonly Cell[], opts: CandidateOpts): boolean;
@@ -207,6 +207,7 @@ export interface InstanceRules<S extends { family: FamilyKey }> {
   cause: CauseKey;                                     // rock→'rock', fence→'fence', maze→'maze', terrain→'ground'
   capClass: CapClass;                                  // rock, fence: 'small' (director cap); maze, terrain: 'big'
   maxActiveKey: string | null;                         // balance key of a per-family max; terrain: 'terrain.maxActive'
+  emitsIncoming?: boolean;                            // true when the family emits its own incoming warning
   spawn(ctx: SpawnCtx, rng: Rng, s: SimState): S | null; // MEC-004-R10-R12 validates candidates against the live board.
   update(state: S, ctx: StepCtx): 'keep' | 'remove';   // one 1 ms step
   solidAt(state: S, x: number, y: number): boolean;    // collision
@@ -223,6 +224,7 @@ export interface HazardFamily {
   readonly cause: CauseKey | null;
   readonly capClass: CapClass;
   readonly maxActiveKey: string | null;
+  readonly emitsIncoming?: boolean; // MEC-004-R9 true when spawn/update owns hazardIncoming.
   spawn(s: SimState, ctx: SpawnCtx): Cell[] | null;
   update(s: SimState, ctx: StepCtx & HitCtx): void;
   snapshot(s: SimState): unknown;

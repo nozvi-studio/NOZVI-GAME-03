@@ -13,7 +13,7 @@ import { drawMango } from '../render/mango';
 import { currentPalette, reduceMotion, type Palette } from '../render/palette';
 import { drawSnake } from '../render/snake';
 import { drawGroundTint, drawSkillObjects, drawSkillOverlay } from '../render/skills';
-import { drawTiles } from '../render/tiles';
+import { drawTiles, drawIceArrow } from '../render/tiles';
 
 export class GameScene extends Phaser.Scene {
   balance!: Balance;
@@ -182,6 +182,7 @@ export class GameScene extends Phaser.Scene {
     drawSkillObjects(this.layers.skills, snapshot, cell, p, this.balance, time);
     drawSnake(this.layers.snake, snapshot, cell, p, this.effects.gulp);
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);
+    drawIceArrow(this.layers.overlay, snapshot, cell);
     this.effects.draw(this.layers.effects, p);
   }
 }

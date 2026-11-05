@@ -22,7 +22,7 @@ export function snapHash(sim: Sim): string {          // FNV-1a over the snapsho
 /** Runs consecutive runs until simMs of sim time are played. Runs start at a seeded level 0…10 so late hazards are covered. */
 export function fuzzSeed(b: Balance, seed: number, simMs: number): FuzzReport {
   const input = rngFrom(seedRng(seed ^ 0x9e3779b9));      // input RNG, separate from the Sim RNG
-  const rep: FuzzReport = { violations: [], steps: 0, maxLevel: 0, spawned: { rock: 0, fence: 0, maze: 0, terrain: 0, mud: 0 } };
+  const rep: FuzzReport = { violations: [], steps: 0, maxLevel: 0, spawned: { rock: 0, fence: 0, maze: 0, terrain: 0, mud: 0, ice: 0 } };
   const seen = new WeakSet<object>();
   let played = 0, run = 0;
   while (played < simMs) {

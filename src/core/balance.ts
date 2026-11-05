@@ -11,6 +11,11 @@ export interface MazeLayout { segments: [number, number, number, number][]; excl
 /** MEC-003-R22 one slowdown tier, by the level just reached. */
 export interface SlowdownTier { from: number; to: number; factor: number; easeMs: number }
 
+interface GroundTileBalance {
+  warnMs: number; lifeMs: number; lifeRandMs: number; tries: number; maxActive: number; mirrorChance: number;
+  shapePool: string[]; shapes: Record<string, Pair[]>;
+}
+
 export interface Balance {
   board: { cols: number; rows: number };
   snake: { start: Pair[]; startDir: Pair; maxQueuedTurns: number };
@@ -24,8 +29,8 @@ export interface Balance {
   };
   fairness: { nearHeadDist: number; frontLaneCells: number; terrainNearHeadDist: number; minWarnMs: number; minWarnTicks: number; escapeHorizonMs: number };
   hazard: { crumbleMs: number };
-  mud: { warnMs: number; lifeMs: number; lifeRandMs: number; tries: number; maxActive: number; tickFactor: number;
-    shapePool: string[]; shapes: Record<string, Pair[]> };
+  mud: GroundTileBalance & { tickFactor: number };
+  ice: GroundTileBalance;
   rock: {
     warnMs: number; lifeMs: number; lifeRandMs: number; tries: number;
     shapes: Record<RockShapeKey, Pair[]>;
@@ -100,6 +105,13 @@ const namesOf = (allowed: readonly string[], allowEmpty = false) => (v: unknown,
 };
 const recordOf = (keys: readonly string[], item: Check): Spec => Object.fromEntries(keys.map(k => [k, item]));
 const timed: Spec = { warnMs: 'int+', lifeMs: 'int+', lifeRandMs: 'int0' };
+const groundTiles: Spec = { ...timed, tries: 'int+', maxActive: 'int+', mirrorChance: 'prob',
+  shapePool: listOf((v, path) => { if (typeof v !== 'string') fail(path, 'must be a shape name'); }),
+  shapes: (v, path) => {
+    if (!isObj(v) || !Object.keys(v).length) fail(path, 'must contain shapes');
+    for (const [name, shape] of Object.entries(v)) check(shape, 'pairs', path + '.' + name);
+  },
+};
 
 const SPEC: Spec = {
   board: { cols: 'int+', rows: 'int+' },
@@ -123,13 +135,8 @@ const SPEC: Spec = {
   },
   fairness: { nearHeadDist: 'int+', frontLaneCells: 'int+', terrainNearHeadDist: 'int+', minWarnMs: 'int+', minWarnTicks: 'int+', escapeHorizonMs: 'int+' },
   hazard: { crumbleMs: 'int+' },
-  mud: { ...timed, tries: 'int+', maxActive: 'int+', tickFactor: 'num+',
-    shapePool: listOf((v, path) => { if (typeof v !== 'string') fail(path, 'must be a shape name'); }),
-    shapes: (v, path) => {
-      if (!isObj(v) || !Object.keys(v).length) fail(path, 'must contain shapes');
-      for (const [name, shape] of Object.entries(v)) check(shape, 'pairs', path + '.' + name);
-    },
-  },
+  mud: { ...groundTiles, tickFactor: 'num+' },
+  ice: groundTiles,
   rock: { ...timed, tries: 'int+',
     shapes: recordOf(ROCK_KEYS, 'pairs') },
   fence: { ...timed, tries: 'int+', lineBase: 'int+', lineExtraMax: 'int0', gapMinLen: 'int+', mirrorChance: 'prob',
@@ -191,13 +198,15 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (b.terrain.upMs + b.terrain.warnMs >= b.terrain.periodMs) fail('terrain.periodMs', 'must be > upMs + warnMs');
   // MEC-004-R13 warning time uses the L1 base tick, independent of slow effects.
   const minWarnMs = Math.max(b.fairness.minWarnMs, b.fairness.minWarnTicks * b.speed.startMs);
-  for (const family of ['rock', 'fence', 'maze', 'terrain', 'mud'] as const) {
+  for (const family of ['rock', 'fence', 'maze', 'terrain', 'mud', 'ice'] as const) {
     if (b[family].warnMs < minWarnMs) fail(family + '.warnMs', 'must be >= ' + minWarnMs);
   }
   // MEC-012-R1 every pooled shape exists and every configured shape is 4-connected.
   if (b.mud.tickFactor <= 1) fail('mud.tickFactor', 'must be > 1');
-  for (const name of b.mud.shapePool) if (!Object.hasOwn(b.mud.shapes, name)) fail('mud.shapePool', 'unknown shape ' + name);
-  for (const [name, cells] of Object.entries(b.mud.shapes)) {
+  for (const family of ['mud', 'ice'] as const) {
+    const tiles = b[family];
+    for (const name of tiles.shapePool) if (!Object.hasOwn(tiles.shapes, name)) fail(family + '.shapePool', 'unknown shape ' + name);
+    for (const [name, cells] of Object.entries(tiles.shapes)) {
     const remaining = new Set(cells.map(([x, y]) => `${x},${y}`));
     const pending = [cells[0]!];
     remaining.delete(pending[0]!.join(','));
@@ -207,7 +216,8 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
         if (remaining.delete(`${x + dx},${y + dy}`)) pending.push([x + dx, y + dy]);
       }
     }
-    if (remaining.size) fail('mud.shapes.' + name, 'must be 4-connected');
+      if (remaining.size) fail(family + '.shapes.' + name, 'must be 4-connected');
+    }
   }
   if (b.snake.start.length < 2) fail('snake.start', 'must have at least 2 cells');
   if (Math.abs(b.snake.startDir[0]) + Math.abs(b.snake.startDir[1]) !== 1) fail('snake.startDir', 'must be one unit step');

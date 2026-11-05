@@ -184,6 +184,16 @@ it('MEC-012-R1 balance rejects invalid mud timing factor shapes and pool', () =>
     (m: any) => { m.warnMs = 899; }, (m: any) => { m.tickFactor = 1; },
     (m: any) => { m.tries = 0; }, (m: any) => { m.maxActive = 0; },
     (m: any) => { m.shapePool = ['missing']; }, (m: any) => { m.shapes.pair = []; },
-    (m: any) => { m.shapes.pair = [[0, 0], [2, 0]]; },
+    (m: any) => { m.shapes.pair = [[0, 0], [2, 0]]; }, (m: any) => { m.mirrorChance = -1; },
   ]) expect(() => loadBalance(j => patch(j.mud))).toThrow(/mud/);
+});
+
+it('MEC-012-R1 mud uses its own configured mirror chance and spawn context RNG', () => {
+  const { b, s } = setup(); b.mud.mirrorChance = 0.2;
+  const ctx = spawnCtx(s, b), chances: number[] = [];
+  expect(ctx.rng).toBeDefined();
+  const rng: Rng = { pick: a => a[0]!, int: n => n === 4 ? 0 : 2,
+    chance: p => { chances.push(p); return false; }, next: () => 0 };
+  expect(mud.spawn(s, { ...ctx, rng })).not.toBeNull();
+  expect(chances).toEqual([0.2]);
 });
