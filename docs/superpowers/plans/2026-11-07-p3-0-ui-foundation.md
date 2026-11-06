@@ -355,6 +355,8 @@ export function chip(scene: Phaser.Scene, x: number, y: number, text: string, fi
 export function titleText(scene: Phaser.Scene, x: number, y: number, text: string, sizeMock: number, fill?: string): Phaser.GameObjects.Text; // Lilita, stroke logoOutline TOKENS.title.strokePx, shadow y TOKENS.title.shadowY
 export function progressBar(scene: Phaser.Scene, x: number, y: number, wMock: number, hMock: number, fill: string): { g: Phaser.GameObjects.Graphics; set(value: number, max: number): void };
 ```
+Origins (later plans rely on this): `pillButton` and `chip` x,y = centre; `card`, `progressBar` and `titleText` x,y = top-left for card/bar, centre for title (`setOrigin(.5)`).
+Settings overlay contract (P3b-2 <-> P3b-3): Hud launches `scene.launch('Settings', { overlay: true })`; Settings stops itself on Back and emits `settings-closed` on `game.events`; Hud re-reads settings on that event and on Resume.
 Tone colours: green = `TOKENS.green.face/deep/line`, orange = `accent.orange/orangeDeep` with line `accent.orangeDeep`, cream = `surface.card/stone` with line `text.soft`. Text colour on green/orange is white with `labelStroke` outline in the tone line colour; on cream it is `text.primary`.
 
 - [ ] **Step 1: Failing test**
