@@ -15,14 +15,14 @@ const broke = (ev: SimEvent[]) => ev.find(e => e.type === 'shieldBroke') as Extr
 const died = (ev: SimEvent[]) => ev.find(e => e.type === 'died');
 
 describe('MEC-006 Shield', () => {
-  it('MEC-006-R26 shield breaks a rock, is consumed and leaves rubble beyond', () => {
+  it('MEC-006-R26 shield breaks a rock, is consumed and leaves no rubble (owner 2026-11-06)', () => {
     const sim = shieldSim('...#..');
     sim.useSkill(0); sim.drainEvents();
     sim.advance(140);
     expect(sim.drainEvents()).toEqual([
       { type: 'skillEnded', skill: 'shield', reason: 'consumed' },
-      { type: 'shieldBroke', x: 3, y: 0, family: 'rock', rubble: { x: 4, y: 0 } }]);
-    expect(sim.snapshot()).toMatchObject({ status: 'playing', shield: null, rubble: [{ x: 4, y: 0, state: 'solid', leftMs: 1500 }] });
+      { type: 'shieldBroke', x: 3, y: 0, family: 'rock' }]);
+    expect(sim.snapshot()).toMatchObject({ status: 'playing', shield: null, rubble: [] });
     expect(sim.snapshot().snake[0]).toEqual({ x: 3, y: 0 });
     expect(sim.snapshot().hazards).toEqual([]);
   });
@@ -67,17 +67,17 @@ describe('MEC-006 Shield', () => {
   it('MEC-006-R26 shield breaks each breakable family once and is consumed', () => {
     const sim = shieldSim('...##...'); sim.useSkill(0);
     sim.advance(140);
-    expect(broke(sim.drainEvents())).toMatchObject({ x: 3, rubble: null });
+    expect(broke(sim.drainEvents())).toMatchObject({ x: 3 });
     sim.advance(4 * 140);
     expect(died(sim.drainEvents())).toMatchObject({ cause: 'rock' });
   });
-  it('MEC-006-R28 rubble beyond the broken cell; skipped on reserved or out-of-bounds cells; kills with cause rubble', () => {
+  it('MEC-006-R28 no rubble after a break (mango beyond stays, edge); seeded rubble still kills and crumbles (owner 2026-11-06)', () => {
     const mango = shieldSim('...#M'); mango.useSkill(0); mango.advance(140);   // MEC-006-EC9
-    expect(broke(mango.drainEvents())).toMatchObject({ rubble: null });
+    expect(broke(mango.drainEvents())).toMatchObject({ family: 'rock' });
     expect(mango.snapshot().mango).toMatchObject({ x: 4, y: 0 });
     const edge = simFromAscii(b, ['................#'], { snake: [[15, 0], [14, 0], [13, 0], [12, 0]], quiet: true, options: opts });
     edge.useSkill(0); edge.advance(140);                                         // MEC-006-EC10
-    expect(broke(edge.drainEvents())).toMatchObject({ x: 16, rubble: null });
+    expect(broke(edge.drainEvents())).toMatchObject({ x: 16 });
     expect(edge.snapshot().rubble).toEqual([]);
     const s = exportState(shieldSim('....'));
     const r = { family: 'rubble' as const, x: 5, y: 5, state: 'solid' as const, leftMs: b.skills.shield.rubbleLifeMs };

@@ -13,7 +13,7 @@
 - Two skill buttons (slot 1 left, slot 2 right) fire the equipped skills if the bar has enough energy. Too little energy = "nope" shake.
 - Slow-mo (40): the snake moves slower for 4 s, but the board's timers do not slow down.
 - Tail Snip (30): cuts off the back half of the snake; the cut part turns into a rock wall for 3 s.
-- Shield (50): for 5 s, the first obstacle you headbutt breaks and you survive, with a short "bonk" stop; rubble lands in the next cell ahead. Mango Rain (80): 6–10 extra mangoes rain down over 6 s.
+- Shield (50): for 5 s, the first obstacle you headbutt breaks and you survive, with a short "bonk" stop; no rubble is left (owner 2026-11-06). Mango Rain (80): 6–10 extra mangoes rain down over 6 s.
 
 ## 3. State & data
 Core state (added to the sim, all integers in sim ms unless noted):
@@ -60,9 +60,9 @@ Save fields: none owned here. Start energy and carry-over are MEC-008; unlocks a
 **Shield (Headbutt)**
 - MEC-006-R24: Duration `skills.shield.durationMs` (5000). Breakable = the registry `breakable` flag (P2 design §20 item 10): rock/pebble, fence, terrain raised cell (`up`), maze hedge, rotten rock, snip-wall cell, rolling coconut, and gate-instance solid fence or closed gate cell. Breaking one gate-instance cell removes it for the rest of that instance's life (MEC-014-R8). Never breakable: board edge (`wall`), own body (`self`), rubble; mud and ice are nonlethal and not breakable. Gate cycles keep running in sim time during Slow-mo (R19).
 - MEC-006-R25: The MEC-001 collision order is unchanged: `wall` → `self` → solid cell. At the solid-cell stage, check the solid family first, then `headHit` (MEC-004-R6). Shield also applies to mover and area hits during family updates (MEC-004-R8). A cell in warning state is not solid and does not consume the shield.
-- MEC-006-R26: When the new head cell is a breakable solid cell and Shield is active: that one cell is removed (rotten rock removed; hazard cell removed from its hazard; terrain cell removed from its terrain for the rest of the terrain's life; snip-wall cell removed); the head moves into it normally (eating rules apply, growth none since no mango can be there); the shield is consumed (`shield = null`, `skillEnded {skill: 'shield', reason: 'consumed'}`); emits `shieldBroke {x, y, family, rubble}`. P2 extension (approved P2 design §20 item 11): a breakable mover hit follows the same rules through the family's `onBreak`, with bonk (R27) and rubble (R28); the rubble direction is the head's direction for entry and the mover's direction for an update-time hit (MEC-004-R6/R8). An area hit consumes Shield and emits the same events with `rubble: null`, without `onBreak`, bonk or rubble, regardless of the family's `breakable` flag.
+- MEC-006-R26: When the new head cell is a breakable solid cell and Shield is active: that one cell is removed (rotten rock removed; hazard cell removed from its hazard; terrain cell removed from its terrain for the rest of the terrain's life; snip-wall cell removed); the head moves into it normally (eating rules apply, growth none since no mango can be there); the shield is consumed (`shield = null`, `skillEnded {skill: 'shield', reason: 'consumed'}`); emits `shieldBroke {x, y, family}`. P2 extension (approved P2 design §20 item 11): a breakable mover hit follows the same rules through the family's `onBreak`, with bonk (R27) and no rubble (R28); the family's `onBreak` removes the mover (MEC-004-R6/R8). An area hit consumes Shield and emits the same events, without `onBreak` or bonk, regardless of the family's `breakable` flag.
 - MEC-006-R27: Bonk: after the break the tick accumulator is set to `−skills.shield.bonkPauseTicks × effectiveTick` (3 ticks), so the next snake step happens 4 ticks after the break. Turns may be queued during the bonk. Skills may also be used during the bonk, under the normal `useSkill` rules (owner, 2026-11-04).
-- MEC-006-R28: Rubble: "behind the broken obstacle" = the cell one step beyond it in the head's movement direction (broken cell + current direction). Rubble is placed there only if that cell is in bounds and not `reserved` (so never on the snake, a mango, an orb, a rain mango, or another obstacle); otherwise `rubble: null` in the event. Rubble is solid for `skills.shield.rubbleLifeMs` (1500), cause `rubble`, not breakable; in every state a BFS wall and reserved (§3). It is exempt from §5.3 rules 1–3 (lead decision, §11); the bonk pause (R27) still gives the player 4 ticks to react.
+- MEC-006-R28: Shield leaves no rubble (owner 2026-11-06, supersedes the 2026-11-03 rule that placed rubble in the cell beyond the break; playtest: rubble ahead of the head killed on a straight run, so the skill hurt more than it helped). The bonk pause (R27) stays. The `rubble` family (solid for `skills.shield.rubbleLifeMs` (1500), cause `rubble`, not breakable, BFS wall and reserved in every state) is kept as an inert, unchanged family; no skill path creates it now.
 
 **Mango Rain**
 - MEC-006-R29: On cast: `drops = dropsMin + rng.int(dropsMax − dropsMin + 1)` (6–10). Drop `i` (0-based) happens when `rain.elapsedMs ≥ i × floor(durationMs / drops)` (first drop in the cast call itself). The rain ends at `durationMs` (6000); undropped drops are impossible by construction.
@@ -84,8 +84,8 @@ Save fields: none owned here. Start energy and carry-over are MEC-008; unlocks a
 6. Head loops back into its own snip wall: death, cause `snipWall` (or Shield breaks it).
 7. Shield active, head hits the board edge or itself: death with the normal cause; shield is not consumed (run is over).
 8. Shield active, head hits rubble from an earlier shield: death, cause `rubble`.
-9. Shield breaks a fence cell and the cell beyond is the regular mango: no rubble (R28); the mango stays.
-10. Shield breaks the last cell before the edge: beyond is out of bounds, no rubble.
+9. Shield breaks a fence cell and the cell beyond is the regular mango: no rubble (R28), the mango stays.
+10. Shield breaks the last cell before the edge: no rubble (R28).
 11. Shield expires during the bonk pause (cannot happen: it was consumed by the break). Shield expires with no hit: `skillEnded {reason: 'timeout'}`.
 12. Slow-mo ends during the bonk pause: the negative accumulator is kept; R18 clamp does not raise it.
 13. Mango Rain on a nearly full board: some drops are skipped; energy is not refunded.
@@ -167,7 +167,7 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 - MEC-006-R25 shield never saves from wall or self; warning cells do not consume it
 - MEC-006-R26 shield breaks each breakable family once and is consumed
 - MEC-006-R27 next step 4 ticks after the break
-- MEC-006-R28 rubble beyond the broken cell; skipped on reserved or out-of-bounds cells; kills with cause rubble
+- MEC-006-R28 shield break (rock and mover) leaves no rubble and the bonk pause still applies (owner 2026-11-06); a seeded rubble cell still kills with cause rubble
 - MEC-006-R29 drop count 6–10 and schedule over 6000 ms, deterministic per seed
 - MEC-006-R31 rain mango vanishes at 8000 ms without rock
 - MEC-006-R32 rain progress capped at floor(need × 0.5) per cast; extras give score only
@@ -186,14 +186,14 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 - A cut cell in the head's next cell is not walled (prevents an unreactable death from the player's own skill).
 - Shield breaks every P1 solid obstacle incl. maze hedge and snip wall; rubble is not breakable (one readable rule: "rubble is dust, always solid").
 - "Behind" = the cell beyond the broken one in the movement direction; a 3-tick bonk pause makes that forced turn fair (4-tick warning).
-- Rubble is not placed on reserved cells (never destroys a mango or orb).
+- (superseded 2026-11-06: Shield places no rubble, R28.)
 - Rain mangoes are never golden, never rot into rocks and vanish after 8 s (a paid skill should not create rocks).
 - Rain bar budget is per cast, fixed at cast time, may finish the level and carries over a level-up (simple, still ≤ 50% of any bar).
 - Rain mangoes do not change MEC-002 eaten counters (the regular mango's rot pace is not affected by a skill).
 - Effect timers keep running through a level up (nothing is frozen, MEC-003-R9).
 - Effective tick is rounded to whole ms and the accumulator is clamped on change (determinism, no double steps).
 - Snip walls and rubble use the MEC-004 hazard state rules (reserved and BFS wall in every state, solid only in `solid`), and rubble is a list (a recast Shield can leave a second rubble cell).
-- (lead, 2026-11-03) **Snip wall and Shield rubble are exempt from GDD §5.3 fairness rules 1–3.** GDD §6.3 is the more specific rule: they are the skill's price. The 3-tick bonk pause (R27) stays as specified. Replaces the former owner escalation.
+- (lead, 2026-11-03) **Snip wall and Shield rubble are exempt from GDD §5.3 fairness rules 1–3.** GDD §6.3 is the more specific rule: they are the skill's price. The 3-tick bonk pause (R27) stays as specified. Replaces the former owner escalation. **Superseded for Shield by owner 2026-11-06:** Shield now leaves no rubble (R28), so only the snip wall keeps this exemption; snip wall behavior is unchanged.
 - Lead review 2026-11-03: orbs from L2 in every run and Slow-mo `round(base × 1.6)` accepted.
 **(b) Escalate to owner**
 - None.

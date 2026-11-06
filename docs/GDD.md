@@ -142,7 +142,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 |---|---|---|---|
 | **Slow-mo** | 40 | Snake tick × 1.6 (slower) for 4 s | Mango rot timers and obstacle timers keep running in real time, so they feel faster |
 | **Tail Snip** | 30 | Removes the back half of the snake (min length 3) | The cut segments become a temporary rock wall for 3 s |
-| **Shield (Headbutt)** | 50 | For 5 s, the first hit on a breakable obstacle destroys it and the snake survives | Does not protect from the board edge or the snake's own body; rubble blocks the cell behind the broken obstacle for 1.5 s |
+| **Shield (Headbutt)** | 50 | For 5 s, the first hit on a breakable obstacle destroys it and the snake survives | Does not protect from the board edge or the snake's own body; a short bonk pause follows the break, no rubble is left (owner 2026-11-06) |
 | **Mango Rain** | 80 | For 6 s, 6–10 mangoes rain onto safe cells | Each mango still grows the snake (long snake risk); Rain mangoes fill at most 50% of the level bar per cast; extra ones give score and marbles only |
 
 Owner decision (2026-11-03): the "many-food farming event" is the 4th skill (Mango Rain), not a random board event.

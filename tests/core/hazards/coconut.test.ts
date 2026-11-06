@@ -108,13 +108,14 @@ it.each([false, true])('MEC-013-R5 shield breaks a coconut with non-zero moverDi
   const { b, sim, s } = fixture();
   const path = row(3); if (reverse) path.reverse();
   s.families.coconut.rolls[0]!.mover = newMover(path, b.coconut.warnMs, b.coconut.cellMs, false, 0);
-  s.dir = { x: 0, y: 1 }; // The rubble direction must come from the coconut, not the snake.
+  s.dir = { x: 0, y: 1 }; // Direction must come from the coconut, not the snake.
   s.shield = { leftMs: 5000 };
   sim.advance(b.coconut.warnMs + b.coconut.cellMs * (reverse ? 11 : 5));
   expect(s.status).toBe('playing');
   expect(s.shield).toBeNull();
   expect(s.families.coconut.rolls).toEqual([]);
-  expect(sim.drainEvents()).toContainEqual({ type: 'shieldBroke', family: 'coconut', x: 5, y: 3, rubble: { x: reverse ? 4 : 6, y: 3 } });
+  expect(sim.drainEvents()).toContainEqual({ type: 'shieldBroke', family: 'coconut', x: 5, y: 3 });
+  expect(s.families.rubble).toEqual([]);
   expect(s.acc).toBeLessThan(0);
 });
 

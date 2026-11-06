@@ -61,7 +61,7 @@ describe('MEC-004 collision', () => {
       expect(headHitAt(s, 5, 8)).toBeNull();
       expect(ctx.events).toEqual([
         { type: 'skillEnded', skill: 'shield', reason: 'consumed' },
-        { type: 'shieldBroke', x: 5, y: 8, family: 'rock', rubble: { x: 6, y: 8 } },
+        { type: 'shieldBroke', x: 5, y: 8, family: 'rock' },
       ]);
     });
   });
@@ -103,7 +103,7 @@ describe('MEC-004 collision', () => {
         expect(s.shield).toBeNull();
         expect(s.events).toEqual([
           { type: 'skillEnded', skill: 'shield', reason: 'consumed' },
-          { type: 'shieldBroke', x: 5, y: 8, family: selected.key, rubble: { x: 6, y: 8 } },
+          { type: 'shieldBroke', x: 5, y: 8, family: selected.key },
         ]);
       });
     }
@@ -153,7 +153,7 @@ describe('MEC-004 collision', () => {
     expect(s.acc).toBe(37);
     expect(ctx.events).toEqual([
       { type: 'skillEnded', skill: 'shield', reason: 'consumed' },
-      { type: 'shieldBroke', x: 4, y: 8, family: 'rock', rubble: null },
+      { type: 'shieldBroke', x: 4, y: 8, family: 'rock' },
     ]);
   });
 
@@ -195,7 +195,7 @@ describe('MEC-004 collision', () => {
     });
   });
 
-  it('MEC-004-R8 mover hit with shield breaks it, bonk accumulator is -3 ticks, rubble beyond in mover direction', () => {
+  it('MEC-004-R8 mover hit with shield breaks it, bonk accumulator is -3 ticks, no rubble (owner 2026-11-06)', () => {
     const s = buildBoard({ head: [4, 8], walls: [[4, 8]] }), ctx = hitCtx(s);
     s.shield = { leftMs: 5000 };
     s.levelUpSlow = { factor: 2, easeMs: 1000, leftMs: 1000 };
@@ -206,16 +206,16 @@ describe('MEC-004 collision', () => {
     expect(s.shield).toBeNull();
     expect(solidFamilyWithPriority(s, 4, 8)).toBeNull();
     expect(s.acc).toBe(-3 * tick);
-    expect(s.families.rubble).toEqual([{ family: 'rubble', x: 4, y: 9, state: 'solid', leftMs: 1500 }]);
-    expect(ctx.events.at(-1)).toEqual({ type: 'shieldBroke', x: 4, y: 8, family: 'rock', rubble: { x: 4, y: 9 } });
+    expect(s.families.rubble).toEqual([]);
+    expect(ctx.events.at(-1)).toEqual({ type: 'shieldBroke', x: 4, y: 8, family: 'rock' });
   });
 
-  it.each([{ x: -1, y: 0 }, { x: 0, y: -1 }] as const)('MEC-004-R8 rubble skips reserved or out-of-bounds destination $x,$y', dir => {
+  it.each([{ x: -1, y: 0 }, { x: 0, y: -1 }] as const)('MEC-004-R8 leaves no rubble for any direction $x,$y', dir => {
     const s = buildBoard({ head: [4, 0], walls: [[4, 0]] }), ctx = hitCtx(s);
     s.shield = { leftMs: 5000 };
     applyHeadHit(s, ctx, 'rock', 4, 0, 'mover', dir);
     expect(s.families.rubble).toEqual([]);
-    expect(ctx.events.at(-1)).toMatchObject({ type: 'shieldBroke', rubble: null });
+    expect(ctx.events.at(-1)).toMatchObject({ type: 'shieldBroke', family: 'rock' });
   });
 
   it.each(['ice', 'mud', undefined] as const)('MEC-004-R15 died context is %s when the fatal step started on that tile', tile => {

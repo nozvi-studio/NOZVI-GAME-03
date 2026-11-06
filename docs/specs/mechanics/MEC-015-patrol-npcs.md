@@ -23,7 +23,7 @@ Descriptor: `{key: 'npc', cause: 'cat', capClass: 'small', maxActiveKey: 'npc.ma
 - **MEC-015-R4 Ping-pong.** The NPC advances one cell per variant `cellMs`; at a route end it reverses. **Provisional default (OQ-B3): cat `cellMs` 400, chicken `cellMs` 220 — provisional, owner review at end of P2.**
 - **MEC-015-R5 Wait rule.** If the next cell is solid or holds a body cell (index > 0), the NPC waits and retries each ms (Mover `wait` mode); it never enters the body. The NPC cell is a BFS wall; it is not solid.
 - **MEC-015-R6 Leave.** `lifeMs = npc.lifeMs + rng.next() × npc.lifeRandMs` (15000…20000), counted per move interval from the first move (waiting consumes life). After it has elapsed, the NPC is removed when it sits at route end 0 or the last cell.
-- **MEC-015-R7 Head hit / Shield.** Head moving into the NPC cell is `headHit = 'mover'`; the NPC moving onto the head calls `ctx.hitHead('npc', x, y, 'mover', moverDir)`. Without Shield: death with cause = variant (`cat` / `chicken`, via `causeAt`). With Shield: Shield consumed, NPC removed (`onBreak`), `shieldBroke.family = 'npc'`, bonk and rubble per MEC-006.
+- **MEC-015-R7 Head hit / Shield.** Head moving into the NPC cell is `headHit = 'mover'`; the NPC moving onto the head calls `ctx.hitHead('npc', x, y, 'mover', moverDir)`. Without Shield: death with cause = variant (`cat` / `chicken`, via `causeAt`). With Shield: Shield consumed, NPC removed (`onBreak`), `shieldBroke.family = 'npc'`, bonk per MEC-006-R27; no rubble.
 - **MEC-015-R8 Introduction.** `level.table` rows L21…30 get `npc: 2`; npc is introduced at L21. Small cap, `npc.maxActive` 1.
 - **Level up (flow B).** No level-end hook; the NPC keeps patrolling.
 
