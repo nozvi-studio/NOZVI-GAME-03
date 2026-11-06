@@ -6,10 +6,14 @@ import { HEIGHT, WIDTH } from '../layout';
 import { reduceMotion } from '../render/palette';
 import { button, label } from './ui';
 
-// Debug-only layout for the owner's phone check (ART-001 sizes 24 / 40 / 124 / 256 CSS px).
+// Debug-only layout for the owner's phone check (ART-001 sizes 24 / 40 / 124 / 256 CSS px, each on light and dark).
 const PREVIEW = {
-  light: 0xf6eedc, dark: 0x1f2433, cols: 4, cellW: 132, gridTop: 70, rowH: 92, small: 24, mid: 40,
-  bigSize: 256, homeSize: 124, bodyW: 120, liveY: 700,
+  page: 0xcfcfcf, light: 0xf6eedc, dark: 0x1f2433, cols: 3, cellW: 180, gridTop: 100, rowH: 76,
+  swatchW: 84, swatchH: 56, swatchGap: 4, small: 24, mid: 40, smallDx: -18, midDx: 18, swatchDy: 28, labelDy: 66, labelSize: 13,
+  titleY: 20, titleSize: 20, btnY: 60, btnW: 100, btnH: 40, btnSize: 18, btnXs: [70, 190, 310, 430],
+  headRowY: 410, homeSize: 124, headSwatch: 130, headDx: 70, bodyRowY: 548, bodyW: 80, bodySwatchW: 90, bodySwatchH: 130,
+  bodyDx: 50, bodyCols: 4, bodyPad: 5,
+  bigSize: 256, liveTop: 680, liveY: 808,
 } as const;
 
 export class ArtPreviewScene extends Phaser.Scene {
@@ -21,30 +25,51 @@ export class ArtPreviewScene extends Phaser.Scene {
   create(): void {
     const cfg = (this.registry.get('balance') as Balance).ui.capy;
     const reduced = reduceMotion();
-    this.add.rectangle(0, 0, WIDTH / 2, HEIGHT, PREVIEW.light).setOrigin(0);
-    this.add.rectangle(WIDTH / 2, 0, WIDTH / 2, HEIGHT, PREVIEW.dark).setOrigin(0);
-    label(this, WIDTH / 2, 28, 'Capy preview', 24);
+    const P = PREVIEW;
+    this.add.rectangle(0, 0, WIDTH, HEIGHT, P.page).setOrigin(0);
+    label(this, WIDTH / 2, P.titleY, 'Capy preview', P.titleSize);
+    const swatch = (x: number, y: number, w: number, h: number, color: number): void => {
+      this.add.rectangle(x, y, w, h, color).setOrigin(0);
+    };
     CAPY_EXPRESSIONS.forEach((e, i) => {
-      const x = (i % PREVIEW.cols) * PREVIEW.cellW + PREVIEW.cellW / 2, y = PREVIEW.gridTop + Math.floor(i / PREVIEW.cols) * PREVIEW.rowH;
-      this.add.image(x - 22, y + 24, capyHeadKey(e, 'board')).setDisplaySize(PREVIEW.small, PREVIEW.small);
-      this.add.image(x + 14, y + 24, capyHeadKey(e, 'board')).setDisplaySize(PREVIEW.mid, PREVIEW.mid);
-      label(this, x, y + 62, e, 13);
+      const x0 = (i % P.cols) * P.cellW + (P.cellW - 2 * P.swatchW - P.swatchGap) / 2;
+      const y = P.gridTop + Math.floor(i / P.cols) * P.rowH;
+      [P.light, P.dark].forEach((color, k) => {
+        const sx = x0 + k * (P.swatchW + P.swatchGap);
+        swatch(sx, y, P.swatchW, P.swatchH, color);
+        this.add.image(sx + P.swatchW / 2 + P.smallDx, y + P.swatchDy, capyHeadKey(e, 'board')).setDisplaySize(P.small, P.small);
+        this.add.image(sx + P.swatchW / 2 + P.midDx, y + P.swatchDy, capyHeadKey(e, 'board')).setDisplaySize(P.mid, P.mid);
+      });
+      label(this, x0 + P.swatchW + P.swatchGap / 2, y + P.labelDy, e, P.labelSize);
     });
-    const homeY = PREVIEW.gridTop + 3 * PREVIEW.rowH + 80;
-    this.add.image(PREVIEW.homeSize / 2 + 16, homeY, capyHeadKey('idle', 'large')).setDisplaySize(PREVIEW.homeSize, PREVIEW.homeSize);
-    BODY_POSES.forEach((p, i) => this.add.image(200 + i * (PREVIEW.bodyW + 30), homeY,
-      capyBodyKey(p)).setDisplaySize(PREVIEW.bodyW, PREVIEW.bodyW * CAPY_BODY_SIZE.h / CAPY_BODY_SIZE.w));
-    this.live = this.add.image(WIDTH / 2, PREVIEW.liveY, capyHeadKey('idle', 'large'));
-    const base = PREVIEW.bigSize / CAPY_SIZES.large;
+    [P.light, P.dark].forEach((color, k) => {
+      const sx = P.bodyPad + k * (P.headSwatch + P.bodyPad);
+      swatch(sx, P.headRowY, P.headSwatch, P.headSwatch, color);
+      this.add.image(sx + P.headSwatch / 2, P.headRowY + P.headSwatch / 2, capyHeadKey('idle', 'large')).setDisplaySize(P.homeSize, P.homeSize);
+    });
+    BODY_POSES.forEach((pose, i) => [P.light, P.dark].forEach((color, k) => {
+      const sx = P.bodyPad + (i * 2 + k) * (P.bodySwatchW + P.bodyPad);
+      swatch(sx, P.bodyRowY, P.bodySwatchW, P.bodySwatchH, color);
+      this.add.image(sx + P.bodySwatchW / 2, P.bodyRowY + P.bodySwatchH / 2, capyBodyKey(pose))
+        .setDisplaySize(P.bodyW, P.bodyW * CAPY_BODY_SIZE.h / CAPY_BODY_SIZE.w);
+    }));
+    const liveBg = this.add.rectangle(0, P.liveTop, WIDTH, HEIGHT - P.liveTop, P.light).setOrigin(0);
+    let lightBg = true;
+    this.live = this.add.image(WIDTH / 2, P.liveY, capyHeadKey('idle', 'large'));
+    const base = P.bigSize / CAPY_SIZES.large;
     this.state = createCapyAnim(this.time.now, cfg, Math.random);
-    button(this, 90, HEIGHT - 50, 140, 56, 'Eat', 'preview-eat', () => { this.state = capyEat(this.state, this.time.now); });
-    button(this, WIDTH / 2, HEIGHT - 50, 140, 56, 'Die', 'preview-die', () => { this.state = capyDie(this.state, this.time.now); });
-    button(this, WIDTH - 90, HEIGHT - 50, 140, 56, 'Reset', 'preview-reset', () => { this.state = createCapyAnim(this.time.now, cfg, Math.random); });
+    const acts: [string, () => void][] = [
+      ['Eat', () => { this.state = capyEat(this.state, this.time.now); }],
+      ['Die', () => { this.state = capyDie(this.state, this.time.now); }],
+      ['Reset', () => { this.state = createCapyAnim(this.time.now, cfg, Math.random); }],
+      ['BG', () => { lightBg = !lightBg; liveBg.setFillStyle(lightBg ? P.light : P.dark); }],
+    ];
+    acts.forEach(([text, fn], i) => button(this, P.btnXs[i], P.btnY, P.btnW, P.btnH, text, `preview-${text.toLowerCase()}`, fn, P.btnSize));
     const onUpdate = (now: number): void => {
       const { state, pose } = capyPose(this.state, now, cfg, reduced, Math.random);
       this.state = state;
       this.live.setTexture(capyHeadKey(pose.expression, 'large')).setScale(base * pose.scaleX, base * pose.scaleY)
-        .setAngle(pose.rotationDeg).setY(PREVIEW.liveY + pose.dy * (PREVIEW.bigSize / 48));
+        .setAngle(pose.rotationDeg).setY(P.liveY + pose.dy * (P.bigSize / 48));
     };
     this.events.on(Phaser.Scenes.Events.UPDATE, onUpdate);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(Phaser.Scenes.Events.UPDATE, onUpdate));
