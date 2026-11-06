@@ -1,0 +1,32 @@
+{
+  "name": "capy_head",
+  "subject": "the head only of a chibi capybara mascot, front view, no body",
+  "identity": "A cute chibi capybara, the head fills most of the image. Head: a wide rounded-square shape (wider than tall, soft rounded corners), warm tan fur #C79A6B with a slightly lighter top of the head #D6AB7C. Two small round ears sit on the top corners of the head, fur #B1865A, no inner-ear detail. Eyes: two tiny dark round eyes #17261B set high on the face, each with a small white highlight dot and a thin half-lowered upper eyelid line that gives a deadpan, slightly grumpy but cozy look; the eyes are wide apart. A large rounded muzzle patch in darker brown #B1865A covers the lower face; two small dark nostrils #4A2E1B sit on top of the muzzle; the mouth is a small flat or very slightly curved line under the nostrils. Soft pink blush ovals #FF8FA3 on the cheeks. The image shows ONLY the head and a hint of the neck line; no torso, arms or legs. Style: chunky cartoon, thick dark warm-brown outline #4A2E1B of even weight (about 2 percent of the image width), flat saturated colours, one soft shadow tone and one highlight per shape, no gradients. Neutral idle expression.",
+  "pose": "neutral deadpan expression, head level",
+  "facing": "front",
+  "facing_parts": "face, gaze and chest",
+  "view": "straight-on front view, no perspective tilt",
+  "class": "prop",
+  "finish": "hd",
+  "key": "blue",
+  "genre": "for a cozy casual mobile snake game",
+  "pronoun": "it",
+  "style_ref": {
+    "path": "../reference/style-grumpy-cat-sheet.png",
+    "what": "the owner's style reference sheet: thick brown outline, half-lidded deadpan eyes, simple flat shading",
+    "do_not_copy": "the character, the purple colour, the pose, the mint-green eyes or the layout"
+  },
+  "extra_bans": [
+    "no leaf, stem, fruit or mango shape anywhere on the character",
+    "no accessories, clothes or held items",
+    "no ground shadow",
+    "no extra characters",
+    "no body below the chin"
+  ],
+  "opaque_parts": "fur, ears, muzzle and outline",
+  "identity_ref": {
+    "path": "../body/master.png",
+    "what": "the approved full-body capy master",
+    "copy": "the face, ears, muzzle, colours and outline weight exactly"
+  }
+}

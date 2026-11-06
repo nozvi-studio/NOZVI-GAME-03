@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: ART-002 capy master still brief and `assets/raw/master/capy/specs/` (body and head spec JSON for agent-sprite-forge via Codex CLI, acceptance checklist, Remotion motion test)
 - docs: ART-001 character coordinate system draft (capy reference, anchors, action list, asset folders, no-API-key production routes); assets/work git-ignored; v2 applies owner answers (GDD outline, head + body, 256/384 px, 12 fps, Remotion route)
 - feat(game): run start waits for the first direction input after the countdown (new `waiting` flow phase, wait hint on the HUD, reverse input ignored; owner 2026-11-06, MEC-001-R2)
 - feat(game): debug "+1" and "Key" level-skip buttons in the HUD (`?debug=1` only); `Sim.debugSkipTo`, `Session.debugSkipTo`, `keyLevels`/`nextKeyLevel`, `debug_skip` log record marks the run debug (MEC-003-R21)
