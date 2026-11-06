@@ -25,6 +25,14 @@ export function introducedAt(b: Balance, n: number): IntroKey | undefined { // M
 }
 export const fenceFirstLevel = (b: Balance): number => b.level.table.find(r => (r.weights.fence ?? 0) > 0)?.from ?? Infinity; // MEC-003-R15
 
+// MEC-003-R21 debug skip targets: challenge levels plus every level that introduces a family or rotten rocks.
+export function keyLevels(b: Balance): number[] {
+  const out: number[] = [];
+  for (let n = 1; n <= b.level.maxLevel; n++) if (isChallenge(b, n) || introducedAt(b, n) !== undefined) out.push(n);
+  return out;
+}
+export const nextKeyLevel = (current: number, b: Balance): number | null => keyLevels(b).find(n => n > current) ?? null; // MEC-003-R21
+
 // P0 public names retained for its existing consumers; all now take 1-based levels.
 export const needFor = quota;
 export const tickMsFor = levelTickMs;

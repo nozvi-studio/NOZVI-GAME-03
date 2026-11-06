@@ -2,6 +2,7 @@ import type { KeyValueStore } from './storage';
 
 export type LogRecord =
   | { type: 'run_start'; t: number; runId: number; startLevel: number; startEnergy: number; loadout: readonly [string | null, string | null]; entry: 'home' | 'results'; debug?: boolean }
+  | { type: 'debug_skip'; t: number; runId: number; from: number; to: number }
   | { type: 'level_up'; t: number; runId: number; level: number; levelTimeMs: number }
   | { type: 'skill_used'; t: number; runId: number; skill: string; level: number; energyBefore: number }
   | { type: 'checkpoint_unlocked'; t: number; runId: number; level: number; reachedLevel: number }
@@ -18,6 +19,7 @@ function isRecord(v: unknown): v is LogRecord {
   switch (v.type) {
     case 'run_start': return numbers('startLevel', 'startEnergy') && (v.entry === 'home' || v.entry === 'results') && (v.debug === undefined || typeof v.debug === 'boolean')
       && Array.isArray(v.loadout) && v.loadout.length === 2 && v.loadout.every(id => id === null || typeof id === 'string');
+    case 'debug_skip': return numbers('from', 'to');
     case 'level_up': return numbers('level', 'levelTimeMs');
     case 'skill_used': return numbers('level', 'energyBefore') && typeof v.skill === 'string';
     case 'checkpoint_unlocked': return numbers('level', 'reachedLevel');
@@ -74,7 +76,7 @@ const share = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 1000) / 10
 const bump = <K extends string | number>(m: Record<K, number>, k: K) => { m[k] = (Object.hasOwn(m, k) ? m[k] : 0) + 1; };
 
 // MEC-003-R21 runs started through the debug start level are marked on their run_start.
-const debugRunIds = (log: RunLog) => new Set(log.entries.flatMap(r => (r.type === 'run_start' && r.debug === true ? [r.runId] : [])));
+const debugRunIds = (log: RunLog) => new Set(log.entries.flatMap(r => ((r.type === 'run_start' && r.debug === true) || r.type === 'debug_skip' ? [r.runId] : [])));
 
 // P1 design §11 pure playtest summary of an exported run log.
 export function summarizeLog(log: RunLog, sessionGapMs: number): LogSummary {

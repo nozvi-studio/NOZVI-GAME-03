@@ -1,7 +1,7 @@
 import { restoreSim, stateOf } from '../../src/core/sim';
 import { buildState, QUIET } from '../support/state';
 import { describe, it, expect } from 'vitest';
-import { biome, isChallenge, quota, levelTickMs, directorIntervalMs, smallHazardCap, familyRow, enabledFamilies, introducedAt, createSim, fenceFirstLevel } from '../../src/core';
+import { biome, isChallenge, quota, levelTickMs, directorIntervalMs, smallHazardCap, familyRow, enabledFamilies, introducedAt, keyLevels, nextKeyLevel, createSim, fenceFirstLevel } from '../../src/core';
 import { loadBalance } from '../support/balance';
 const b = loadBalance();
 const L = Array.from({ length: 30 }, (_, i) => i + 1);
@@ -117,5 +117,23 @@ describe('P2c challenge rows (TR-C5)', () => {
     for (const n of [5, 10, 15, 20, 25, 30]) expect(introducedAt(b, n)).toBeUndefined();
     expect([1, 6, 7, 11, 12, 13, 16, 17, 18, 21, 22, 23, 26, 27].map(n => introducedAt(b, n)))
       .toEqual(['rock', 'fence', 'mud', 'terrain', 'rottenRock', 'ice', 'coconut', 'gate', 'spike', 'npc', 'bird', 'bomb', 'maze', 'shrink']);
+  });
+});
+
+describe('MEC-003-R21 debug key levels', () => {
+  it('MEC-003-R21 keyLevels are the challenge levels plus every family introduction level, sorted', () => {
+    expect(keyLevels(b)).toEqual([1, 5, 6, 7, 10, 11, 12, 13, 15, 16, 17, 18, 20, 21, 22, 23, 25, 26, 27, 30]);
+  });
+  it('MEC-003-R21 nextKeyLevel is the first key level after the current one and null at the end', () => {
+    expect([1, 4, 5, 7, 14, 29].map(n => nextKeyLevel(n, b))).toEqual([5, 5, 6, 10, 15, 30]);
+    expect(nextKeyLevel(30, b)).toBeNull();
+  });
+  it('MEC-003-R21 debugSkipTo jumps by one level-up chain, refuses backwards and out-of-range', () => {
+    const sim = createSim(b, 7, { startLevel: 3 });
+    expect(sim.debugSkipTo(3)).toBe(false); expect(sim.debugSkipTo(31)).toBe(false);
+    expect(sim.debugSkipTo(6)).toBe(true);
+    expect(sim.snapshot()).toMatchObject({ level: 6, progress: 0, length: b.snake.start.length });
+    const ups = sim.drainEvents().filter(e => e.type === 'levelUp');
+    expect(ups).toHaveLength(1); expect(ups[0]).toMatchObject({ level: 6, biomeChanged: true });
   });
 });

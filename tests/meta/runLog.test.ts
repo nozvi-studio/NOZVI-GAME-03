@@ -109,3 +109,12 @@ it('MEC-003-R21 debug runs excluded from deathCauseReport', () => {
   expect(r.deaths).toBe(1); expect(r.familyShare).toEqual({ bomb: 1 });
   expect(s.runs).toBe(1); expect(s.causes).toEqual({ bomb: 1 }); expect(s.levelsReached).toEqual({ 20: 1 });
 });
+
+it('MEC-003-R21 a debug_skip record marks its run debug for stats and validates on load', () => {
+  let log = emptyLog();
+  log = appendRecord(log, startRun(1), 100);
+  log = appendRecord(log, { type: 'debug_skip', t: 5, runId: 1, from: 1, to: 6 } as LogRecord, 100); log = appendRecord(log, endCtx(1, 'bomb'), 100);
+  expect(summarizeLog(log, 600000).runs).toBe(0); expect(deathCauseReport(log, 600000).deaths).toBe(0);
+  const store = memoryStore(); store.set(LOG_KEY, JSON.stringify(log));
+  expect(loadLog(store).entries).toHaveLength(3);
+});
