@@ -1,11 +1,11 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-05 by Claude (lead) **Milestone:** M1 - P2c done on `feat/p2c-shrink-challenge`; P2 exit waits on owner playtest. **Version branch:** `version/v0.2`
+**Updated:** 2026-11-05 by Claude (lead) **Milestone:** M1 - P2c merged into version/v0.2 (2026-11-06); P2 exit waits on owner playtest. **Version branch:** `version/v0.2`
 
 ## Now (in progress)
 - [x] P2a, P2b merged into version/v0.2 (PLAYTEST 2026-11-05).
 - [x] P2c Tasks 1-8 on feat/p2c-shrink-challenge: MEC-018 shrink L27, challenge levels L5-30 (x0.8 interval, cap +2, banner + star), bot tuning L1-30, deathCauseReport (40% gate, debug runs excluded), debug start `?debug=1&level=N` (no progress written), final review fixes. 1158 pass, typecheck clean; reduced fuzz pass; agy QA 9/10 + banner fix (PLAYTEST "P2 exit check").
-- [ ] **RESUME HERE:** owner approves merge feat/p2c-shrink-challenge -> version/v0.2; then owner playtest (OQ-C4: 2 testers, >= 30 runs, >= 10 reaching biome 4) and run deathCauseReport on the merged log.
+- [ ] **RESUME HERE:** owner playtest (OQ-C4: 2 testers, >= 30 runs, >= 10 reaching biome 4) and run deathCauseReport on the merged log.
 
 ## Next (ordered, max 5)
 1. Owner playtest + 40% verdict; if over40 not empty: lead tunes (OQ-C5), re-playtest.
