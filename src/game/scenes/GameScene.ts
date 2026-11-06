@@ -96,7 +96,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   turn(dx: Step, dy: Step): void {
-    const result = flowTurn(this.flow, this.balance);
+    const result = flowTurn(this.flow, this.balance, dx, dy); // MEC-001-R2
     this.apply(result.effects);
     if (result.forward) this.session.turn(dx, dy);
   }

@@ -32,4 +32,5 @@
 - Rubble family has no production source since Shield stopped leaving rubble (owner 2026-11-06); remove family + `skills.shield.rubbleLifeMs` in a cleanup task.
 
 ## Last session summary
+- 2026-11-06 feat/start-waits-first-input: run start now waits for the first direction input (owner decision, MEC-001-R2, new `waiting` flow phase). Needs merge into version/v0.2 and a phone check of the hint.
 - P2c executed via subagent-driven development (Sonnet implementers + reviewers, Opus final review, agy browser QA). Fuzz found and fixed shrink-on-reserved-cell; QA found and fixed run-start banner race.

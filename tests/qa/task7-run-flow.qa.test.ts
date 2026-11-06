@@ -46,6 +46,7 @@ describe('QA Task 7: Run Flow State Machine (Black-Box)', () => {
     const f = createFlow();
     flowStart(f, b);
     flowTick(f, b, b.flow.countdownMs); // finish countdown
+    expect(f.status).toBe('waiting'); flowTurn(f, b, 0, -1); // MEC-001-R2 first input starts
     expect(f.status).toBe('playing');
 
     const fx = flowPause(f);
@@ -107,7 +108,7 @@ describe('QA Task 7: Run Flow State Machine (Black-Box)', () => {
   it('QA-T7-19 P0-Design §7.1 flowTogglePause toggles between active and paused', () => {
     const f = createFlow();
     flowStart(f, b);
-    flowTick(f, b, b.flow.countdownMs);
+    flowTick(f, b, b.flow.countdownMs); flowTurn(f, b, 0, -1); // MEC-001-R2
     expect(f.status).toBe('playing');
 
     const pauseFx = flowTogglePause(f, b);
@@ -138,8 +139,9 @@ describe('QA Task 7: Run Flow State Machine (Black-Box)', () => {
     expect(flowKey(f, b, 'Escape')).toEqual([{ type: 'hideOverlay' }]);
     expect(f.status).toBe('countdown');
 
-    // Finish countdown to playing
+    // Finish countdown: no input yet, so the run waits (MEC-001-R2); the first turn starts it
     flowTick(f, b, b.flow.countdownMs);
+    expect(f.status).toBe('waiting'); flowTurn(f, b, 0, -1);
     expect(f.status).toBe('playing');
 
     // In playing: Space pauses
@@ -179,6 +181,7 @@ describe('QA Task 7: Run Flow State Machine (Black-Box)', () => {
     expect(turnCountdown.effects).toEqual([]);
 
     flowTick(fReady, b, b.flow.countdownMs);
+    expect(fReady.status).toBe('waiting'); flowTurn(fReady, b, 0, -1); // MEC-001-R2
     expect(fReady.status).toBe('playing');
     const turnPlaying = flowTurn(fReady, b);
     expect(turnPlaying.forward).toBe(true);
@@ -222,7 +225,7 @@ describe('QA Task 7: Run Flow State Machine (Black-Box)', () => {
     // Finish countdown
     const fxGo = flowTick(f, b, 484);
     expect(fxGo).toEqual([{ type: 'go' }]);
-    expect(f.status).toBe('playing');
+    expect(f.status).toBe('waiting'); // MEC-001-R2 waits for the first input
   });
 
   it('QA-T7-24 P0-Design §7.1 flowTick does nothing outside countdown', () => {
@@ -239,11 +242,11 @@ describe('QA Task 7: Run Flow State Machine (Black-Box)', () => {
     expect(flowTick(fOver, b, 100)).toEqual([]);
   });
 
-  it('QA-T7-25 P0-Design §7.1 large delta in flowTick transitions to playing and emits go', () => {
+  it('QA-T7-25 P0-Design §7.1 large delta in flowTick transitions to waiting and emits go (MEC-001-R2)', () => {
     const f = createFlow();
     flowStart(f, b);
     const fx = flowTick(f, b, 2000);
     expect(fx.some(e => e.type === 'go')).toBe(true);
-    expect(f.status).toBe('playing');
+    expect(f.status).toBe('waiting');
   });
 });

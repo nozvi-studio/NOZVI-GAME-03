@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(game): run start waits for the first direction input after the countdown (new `waiting` flow phase, wait hint on the HUD, reverse input ignored; owner 2026-11-06, MEC-001-R2)
 - feat(game): debug "+1" and "Key" level-skip buttons in the HUD (`?debug=1` only); `Sim.debugSkipTo`, `Session.debugSkipTo`, `keyLevels`/`nextKeyLevel`, `debug_skip` log record marks the run debug (MEC-003-R21)
 - fix(core): Shield breaks without leaving rubble (MEC-006-R28, owner 2026-11-06); bonk pause stays, `shieldBroke` loses its `rubble` field
 - docs: P2 exit check entry in PLAYTEST (agy QA 9/10 + banner fix, reduced fuzz pass) and STATUS after P2c

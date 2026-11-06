@@ -56,7 +56,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 - **Touch (primary):** swipe anywhere on the board to turn; optional on-screen D-pad (setting). Up to 3 buffered turns; no instant reverse.
 - **Skills:** 2 large skill buttons in the bottom corners (left = slot 1, right = slot 2), reachable with thumbs. Each shows its icon, energy cost and an "affordable" glow. A skill that is not affordable is greyed and gives a short "nope" shake + sound when tapped.
 - **Keyboard (desktop web):** arrows / WASD to steer; `J` / `K` (also `Q` / `E`) for skill slots 1 / 2; `P` / `Esc` pause.
-- **Launch to first input:** ≤ 5 s on a mid-range phone. Play → loadout (remembers last choice, 1 tap to confirm) → 3-2-1 countdown (1.5 s).
+- **Launch to first input:** ≤ 5 s on a mid-range phone. Play → loadout (remembers last choice, 1 tap to confirm) → 3-2-1 countdown (1.5 s) → the snake waits for the first direction input (MEC-001-R2).
 - **Accessibility:** reduced-motion setting disables shake and big flashes; warnings never rely on color alone (blink + icon + shape).
 
 ## 3b. First-time user experience (first 60 s) [REQUIRED]
