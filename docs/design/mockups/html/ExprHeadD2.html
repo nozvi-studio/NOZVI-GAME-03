@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ExprHeadD2</title>
+<style>
+    .sc-placeholder{background:color-mix(in srgb,currentColor 8%,transparent);
+      border:1px solid color-mix(in srgb,currentColor 50%,transparent);
+      border-radius:2px;box-sizing:border-box;overflow:hidden}
+    @keyframes sc-shine{0%{background-position:100% 50%}100%{background-position:0% 50%}}
+    html.sc-dc-streaming .sc-placeholder,
+    html.sc-dc-streaming .sc-interp.sc-missing{position:relative;
+      background:color-mix(in srgb,currentColor 5%,transparent);
+      border-color:transparent}
+    html.sc-dc-streaming .sc-placeholder::before,
+    html.sc-dc-streaming .sc-interp.sc-missing::before{content:'';
+      position:absolute;inset:0;pointer-events:none;
+      background:linear-gradient(90deg,rgba(217,119,87,0) 25%,rgba(247,225,211,.95) 37%,rgba(217,119,87,0) 63%);
+      background-size:400% 100%;animation:sc-shine 1.4s ease infinite}
+    html.sc-dc-streaming .sc-placeholder:nth-child(n+9 of .sc-placeholder)::before,
+    html.sc-dc-streaming .sc-interp.sc-missing:nth-child(n+9 of .sc-interp.sc-missing)::before{animation:none;
+      background:color-mix(in srgb,currentColor 8%,transparent)}
+    .sc-placeholder-error{padding:4px 8px;font:11px/1.4 ui-monospace,monospace;
+      color:color-mix(in srgb,currentColor 70%,transparent);word-break:break-word}
+    .sc-interp.sc-missing{display:inline-block;width:2em;height:1em;overflow:hidden;
+      vertical-align:text-bottom;background:rgba(255,255,255,.3);border:1px solid rgba(0,0,0,.5);
+      border-radius:2px;box-sizing:border-box;color:transparent;
+      user-select:none}
+    .sc-interp.sc-unresolved{font-family:ui-monospace,monospace;font-size:.85em;
+      color:color-mix(in srgb,currentColor 50%,transparent);
+      background:color-mix(in srgb,currentColor 10%,transparent);border-radius:3px;
+      padding:0 3px}
+    .sc-host.sc-has-error{position:relative}
+    .sc-logic-error{position:absolute;top:8px;left:8px;z-index:2147483647;max-width:60ch;
+      padding:6px 10px;background:#b00020;color:#fff;font:12px/1.4 ui-monospace,monospace;
+      border-radius:4px;white-space:pre-wrap;pointer-events:none}
+    /* Mirrors PRINT_BASELINE_CSS in apps/web deck-stage-export.ts — keep both
+       in sync until dc-runtime regains a build step. */
+    @media print {
+      @page { margin: 0.5cm; }
+      figure, table { break-inside: avoid; }
+      #dc-root, #dc-root > .sc-host { height: auto; }
+      *, *::before, *::after {
+        print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+        animation-delay: -99s !important; animation-duration: .001s !important;
+        animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+        animation-play-state: running !important; transition-duration: 0s !important;
+      }
+    }
+  </style>
+<style>x-dc{display:none!important}</style>
+<style data-dc-tpl="1">
+body{margin:0}
+
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+<div id="dc-root"><div class="sc-host" data-sc-name="ExprHeadD2"><div data-dc-tpl="2" style="width: 96px; height: 96px; line-height: 0;">
+  <svg data-dc-tpl="3" width="96" height="96" viewBox="0 0 48 48" aria-hidden="true" style="display: block; overflow: visible;">
+    <defs data-dc-tpl="4"><radialGradient data-dc-tpl="5" id="eg-snake" cx="50%" cy="28%" r="78%"><stop data-dc-tpl="6" offset="0" stop-color="#A9C0FF"></stop><stop data-dc-tpl="7" offset="1" stop-color="#5E86F2"></stop></radialGradient></defs>
+    <path data-dc-tpl="8" d="M0 0" fill="#000" opacity="0" stroke-linejoin="round"></path>
+    <path data-dc-tpl="9" d="M0 0" fill="#F7A9B8" opacity="0"></path>
+    <path data-dc-tpl="10" d="M24 4.6C35.6 4.6 44 12.4 44 23.8 44 35 36 43 24 44.6 12 43 4 35 4 23.8 4 12.4 12.4 4.6 24 4.6z" fill="url(#eg-snake)"></path>
+    <ellipse data-dc-tpl="11" cx="24" cy="35.4" rx="11.5" ry="7.6" fill="#E4ECFF"></ellipse>
+    <ellipse data-dc-tpl="12" cx="9.5" cy="30.6" rx="2.8" ry="1.9" fill="#FF8FA3" opacity="0.45"></ellipse>
+    <ellipse data-dc-tpl="13" cx="38.5" cy="30.6" rx="2.8" ry="1.9" fill="#FF8FA3" opacity="0.45"></ellipse>
+    <g data-dc-tpl="14" opacity="1"><g data-dc-tpl="15"><animateTransform data-dc-tpl="16" attributeName="transform" type="translate" values="0 0;0 0;0 0;0 0;0 .9;0 0" keyTimes="0;.6;.7;.8;.9;1" dur="3s" repeatCount="indefinite"></animateTransform><path data-dc-tpl="17" d="M24 40V44M24 44l-2.4 2.4M24 44l2.4 2.4" fill="none" stroke="#F0607A" stroke-width="1.9" stroke-linecap="round"></path></g></g>
+    <path data-dc-tpl="18" d="M21 33.6a.9 1.2 0 1 0 1.8 0a.9 1.2 0 1 0 -1.8 0zM25.2 33.6a.9 1.2 0 1 0 1.8 0a.9 1.2 0 1 0 -1.8 0z" fill="#2B3A73"></path>
+    <g data-dc-tpl="19" transform="translate(24 38)" stroke="#2B3A73" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path data-dc-tpl="20" d="M-6.2 -.6Q0 4.4 6.2 -.6" opacity="1"></path>
+      <g data-dc-tpl="21" opacity="0" stroke="none"><path data-dc-tpl="22" d="M-5 -1Q0 -2.6 5 -1Q4.6 6.4 0 6.4Q-4.6 6.4 -5 -1z" fill="#6B2B3A"></path><path data-dc-tpl="23" d="M-2.4 4.6q2.4-2.4 4.8 0q-1 1.8-2.4 1.8T-2.4 4.6z" fill="#F07C93"></path></g>
+      <g data-dc-tpl="24" opacity="0" stroke="none"><g data-dc-tpl="25"><animateTransform data-dc-tpl="26" attributeName="transform" type="scale" values="1 .35;1 1;1 .35" dur=".5s" repeatCount="indefinite"></animateTransform><ellipse data-dc-tpl="27" cx="0" cy="2" rx="3.6" ry="3" fill="#6B2B3A"></ellipse></g></g>
+      <ellipse data-dc-tpl="28" cx="0" cy="1.8" rx="2" ry="2.5" fill="#6B2B3A" stroke="none" opacity="0"></ellipse>
+      <path data-dc-tpl="29" d="M-4.2 1.6q2.1-2.6 4.2 0t4.2 0" opacity="0"></path>
+      <path data-dc-tpl="30" d="M-6 -1Q0 5.2 6 -1Q0 2 -6 -1z" fill="#FFFFFF" opacity="0"></path>
+      <path data-dc-tpl="31" d="M-3 1.4H3" opacity="0"></path>
+    </g>
+    <g data-dc-tpl="32" fill="none" stroke="#3A2A2A" stroke-width="1.8" stroke-linecap="round" opacity="0"><path data-dc-tpl="33" d="M0 0"></path><path data-dc-tpl="34" d="M0 0"></path></g>
+    <g data-dc-tpl="35" transform="translate(15.5 23)">
+      <g data-dc-tpl="36" transform="scale(1)">
+        <g data-dc-tpl="37" opacity="1"><g data-dc-tpl="38" transform="scale(1 1)">
+          <g data-dc-tpl="39"><animateTransform data-dc-tpl="40" attributeName="transform" type="scale" values="1 1;1 1;1 .12;1 1;1 1" keyTimes="0;.9;.935;.97;1" dur="4.5s" repeatCount="indefinite"></animateTransform>
+            <ellipse data-dc-tpl="41" cx="0" cy="0" rx="5.8" ry="6.2" fill="#FFF7D6" transform="scale(1)"></ellipse>
+            <g data-dc-tpl="42" transform="translate(0 0)"><g data-dc-tpl="43"><animateTransform data-dc-tpl="44" attributeName="transform" type="translate" values="0 0;-1.3 0.325;-1.3 0.325;1.3 0;1.3 0;0 -0.65;0 0" keyTimes="0;.15;.35;.55;.75;.88;1" dur="6s" repeatCount="indefinite"></animateTransform>
+              <ellipse data-dc-tpl="45" cx="0" cy="0.3" rx="1.8" ry="4.8" fill="#1E1B2E"></ellipse>
+              <circle data-dc-tpl="46" cx="-1.6" cy="-2" r="1.3" fill="#fff"></circle>
+            </g></g>
+          </g></g></g>
+        <g data-dc-tpl="47" opacity="0" fill="none" stroke="#1E1B2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path data-dc-tpl="48" d="M-4.2 2Q0 -4.6 4.2 2"></path></g>
+        <g data-dc-tpl="49" opacity="0" fill="none" stroke="#1E1B2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path data-dc-tpl="50" d="M-4 -3.6L3 0L-4 3.6" transform="scale(1 1)"></path></g>
+        <g data-dc-tpl="51" opacity="0"><path data-dc-tpl="52" d="M0 -5.2l1.5 3.4 3.7.4-2.8 2.5.8 3.6L0 2.9l-3.2 2 .8-3.6-2.8-2.5 3.7-.4z" fill="#FFC845" stroke="#C98A12" stroke-width=".8" stroke-linejoin="round" transform="scale(1.35)"></path></g>
+        <g data-dc-tpl="53" opacity="0" fill="none" stroke="#1E1B2E" stroke-width="2.2" stroke-linecap="round"><ellipse data-dc-tpl="54" cx="0" cy="0" rx="5.8" ry="6.2" fill="#FFF7D6" stroke="none"></ellipse><path data-dc-tpl="55" d="M-3.2 -3.2l6.4 6.4M3.2 -3.2l-6.4 6.4"></path></g>
+      </g>
+    </g>
+    <g data-dc-tpl="56" transform="translate(32.5 23)">
+      <g data-dc-tpl="57" transform="scale(1)">
+        <g data-dc-tpl="58" opacity="1"><g data-dc-tpl="59" transform="scale(1 1)">
+          <g data-dc-tpl="60"><animateTransform data-dc-tpl="61" attributeName="transform" type="scale" values="1 1;1 1;1 .12;1 1;1 1" keyTimes="0;.9;.935;.97;1" dur="4.5s" repeatCount="indefinite"></animateTransform>
+            <ellipse data-dc-tpl="62" cx="0" cy="0" rx="5.8" ry="6.2" fill="#FFF7D6" transform="scale(1)"></ellipse>
+            <g data-dc-tpl="63" transform="translate(0 0)"><g data-dc-tpl="64"><animateTransform data-dc-tpl="65" attributeName="transform" type="translate" values="0 0;-1.3 0.325;-1.3 0.325;1.3 0;1.3 0;0 -0.65;0 0" keyTimes="0;.15;.35;.55;.75;.88;1" dur="6s" repeatCount="indefinite"></animateTransform>
+              <ellipse data-dc-tpl="66" cx="0" cy="0.3" rx="1.8" ry="4.8" fill="#1E1B2E"></ellipse>
+              <circle data-dc-tpl="67" cx="-1.6" cy="-2" r="1.3" fill="#fff"></circle>
+            </g></g>
+          </g></g></g>
+        <g data-dc-tpl="68" opacity="0" fill="none" stroke="#1E1B2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path data-dc-tpl="69" d="M-4.2 2Q0 -4.6 4.2 2"></path></g>
+        <g data-dc-tpl="70" opacity="0" fill="none" stroke="#1E1B2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path data-dc-tpl="71" d="M-4 -3.6L3 0L-4 3.6" transform="scale(-1 1)"></path></g>
+        <g data-dc-tpl="72" opacity="0"><path data-dc-tpl="73" d="M0 -5.2l1.5 3.4 3.7.4-2.8 2.5.8 3.6L0 2.9l-3.2 2 .8-3.6-2.8-2.5 3.7-.4z" fill="#FFC845" stroke="#C98A12" stroke-width=".8" stroke-linejoin="round" transform="scale(1.35)"></path></g>
+        <g data-dc-tpl="74" opacity="0" fill="none" stroke="#1E1B2E" stroke-width="2.2" stroke-linecap="round"><ellipse data-dc-tpl="75" cx="0" cy="0" rx="5.8" ry="6.2" fill="#FFF7D6" stroke="none"></ellipse><path data-dc-tpl="76" d="M-3.2 -3.2l6.4 6.4M3.2 -3.2l-6.4 6.4"></path></g>
+      </g>
+    </g>
+    <g data-dc-tpl="77" opacity="0"><path data-dc-tpl="78" d="M41 10q3.4 4.2 0 7q-3.4-2.8 0-7z" fill="#8FD3F5" stroke="#4FA6D6" stroke-width=".6"></path></g>
+    <g data-dc-tpl="79" opacity="0" fill="#FFC845" stroke="#C98A12" stroke-width=".5" stroke-linejoin="round"><path data-dc-tpl="80" d="M5 6l1.2 2.8L9 10l-2.8 1.2L5 14l-1.2-2.8L1 10l2.8-1.2z"></path><path data-dc-tpl="81" d="M43 3l.9 2.1L46 6l-2.1.9L43 9l-.9-2.1L40 6l2.1-.9z"></path></g>
+    <g data-dc-tpl="82" opacity="0" fill="none" stroke="#6B4C82" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path data-dc-tpl="83" d="M38 7h4.5l-4.5 5.5h4.5"></path><path data-dc-tpl="84" d="M44 1.5h3l-3 3.6h3"></path></g>
+  </svg></div></div></div>
+
+
+
+
+</body>
+</html>

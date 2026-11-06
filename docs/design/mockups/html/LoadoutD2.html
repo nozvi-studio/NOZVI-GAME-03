@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Loadout D2</title>
+<style>
+    .sc-placeholder{background:color-mix(in srgb,currentColor 8%,transparent);
+      border:1px solid color-mix(in srgb,currentColor 50%,transparent);
+      border-radius:2px;box-sizing:border-box;overflow:hidden}
+    @keyframes sc-shine{0%{background-position:100% 50%}100%{background-position:0% 50%}}
+    html.sc-dc-streaming .sc-placeholder,
+    html.sc-dc-streaming .sc-interp.sc-missing{position:relative;
+      background:color-mix(in srgb,currentColor 5%,transparent);
+      border-color:transparent}
+    html.sc-dc-streaming .sc-placeholder::before,
+    html.sc-dc-streaming .sc-interp.sc-missing::before{content:'';
+      position:absolute;inset:0;pointer-events:none;
+      background:linear-gradient(90deg,rgba(217,119,87,0) 25%,rgba(247,225,211,.95) 37%,rgba(217,119,87,0) 63%);
+      background-size:400% 100%;animation:sc-shine 1.4s ease infinite}
+    html.sc-dc-streaming .sc-placeholder:nth-child(n+9 of .sc-placeholder)::before,
+    html.sc-dc-streaming .sc-interp.sc-missing:nth-child(n+9 of .sc-interp.sc-missing)::before{animation:none;
+      background:color-mix(in srgb,currentColor 8%,transparent)}
+    .sc-placeholder-error{padding:4px 8px;font:11px/1.4 ui-monospace,monospace;
+      color:color-mix(in srgb,currentColor 70%,transparent);word-break:break-word}
+    .sc-interp.sc-missing{display:inline-block;width:2em;height:1em;overflow:hidden;
+      vertical-align:text-bottom;background:rgba(255,255,255,.3);border:1px solid rgba(0,0,0,.5);
+      border-radius:2px;box-sizing:border-box;color:transparent;
+      user-select:none}
+    .sc-interp.sc-unresolved{font-family:ui-monospace,monospace;font-size:.85em;
+      color:color-mix(in srgb,currentColor 50%,transparent);
+      background:color-mix(in srgb,currentColor 10%,transparent);border-radius:3px;
+      padding:0 3px}
+    .sc-host.sc-has-error{position:relative}
+    .sc-logic-error{position:absolute;top:8px;left:8px;z-index:2147483647;max-width:60ch;
+      padding:6px 10px;background:#b00020;color:#fff;font:12px/1.4 ui-monospace,monospace;
+      border-radius:4px;white-space:pre-wrap;pointer-events:none}
+    /* Mirrors PRINT_BASELINE_CSS in apps/web deck-stage-export.ts — keep both
+       in sync until dc-runtime regains a build step. */
+    @media print {
+      @page { margin: 0.5cm; }
+      figure, table { break-inside: avoid; }
+      #dc-root, #dc-root > .sc-host { height: auto; }
+      *, *::before, *::after {
+        print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+        animation-delay: -99s !important; animation-duration: .001s !important;
+        animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+        animation-play-state: running !important; transition-duration: 0s !important;
+      }
+    }
+  </style>
+<style>x-dc{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&amp;family=Nunito:wght@700;800;900&amp;display=swap" data-dc-tpl="1">
+<style data-dc-tpl="2">
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+.lt{font-family:'Lilita One',sans-serif;-webkit-text-stroke:9px #6B4C82;paint-order:stroke fill;line-height:.95;display:inline-block}
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+<div id="dc-root"><div class="sc-host" data-sc-name="LoadoutD2"><div data-dc-tpl="3" style="position: relative; width: 390px; height: 844px; box-sizing: border-box; background: rgb(248, 242, 232); font-family: Nunito, system-ui, sans-serif; color: rgb(90, 59, 59); display: flex; flex-direction: column; padding: 22px 16px 0px; gap: 12px; overflow: hidden;">
+
+  <div data-dc-tpl="4" style="display: flex; align-items: center; justify-content: space-between;">
+    <a data-dc-tpl="5" href="HomeD2.html" aria-label="Back" style="width: 44px; height: 44px; border-radius: 50%; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.15) 0px 4px 10px -3px; display: flex; align-items: center; justify-content: center; text-decoration: none;"><svg data-dc-tpl="6" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="7" d="M19 12H5M11 5l-7 7 7 7"></path></svg></a>
+    <span data-dc-tpl="8" style="font-weight: 900; font-size: 24px;"><span class="sc-interp">Pick 2 skills</span></span>
+    <div data-dc-tpl="9" aria-hidden="true" style="width: 44px;"></div>
+  </div>
+
+  <div data-dc-tpl="10" style="display: flex; justify-content: space-between; box-sizing: border-box; padding: 16px 8px 14px; border-radius: 26px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 10px 22px -12px;">
+      <div data-dc-tpl="11" style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 150px;">
+        <div data-dc-tpl="12" style="width: 84px; height: 84px; border-radius: 50%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; background: rgb(255, 252, 246); box-shadow: rgba(80, 140, 180, 0.3) 0px 7px 0px, rgba(255, 233, 138, 0.85) 0px 0px 0px 7px;">
+          <svg data-dc-tpl="14" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle data-dc-tpl="15" cx="12" cy="13.5" r="8"></circle><path data-dc-tpl="16" d="M12 9v4.8l3 1.8M9.5 3h5"></path></svg>
+          
+          
+        </div>
+        <span data-dc-tpl="28" style="display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center;">
+          <span data-dc-tpl="29" style="font-weight: 800; font-size: 12px; letter-spacing: 0.08em; color: rgb(138, 106, 106);">SLOT 1</span>
+          <span data-dc-tpl="30" style="font-weight: 900; font-size: 15px; line-height: 1.15;"><span class="sc-interp">Slow-mo</span></span>
+        </span>
+      </div>
+      <div data-dc-tpl="31" style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 150px;">
+        <div data-dc-tpl="32" style="width: 84px; height: 84px; border-radius: 50%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; background: rgb(255, 252, 246); box-shadow: rgba(80, 140, 180, 0.3) 0px 7px 0px, rgba(255, 233, 138, 0.85) 0px 0px 0px 7px;">
+          <svg data-dc-tpl="38" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle data-dc-tpl="39" cx="6.5" cy="17.5" r="2.7"></circle><circle data-dc-tpl="40" cx="17.5" cy="17.5" r="2.7"></circle><path data-dc-tpl="41" d="M8.2 15.5L17 4M15.8 15.5L7 4"></path></svg>
+          
+          
+        </div>
+        <span data-dc-tpl="48" style="display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center;">
+          <span data-dc-tpl="49" style="font-weight: 800; font-size: 12px; letter-spacing: 0.08em; color: rgb(138, 106, 106);">SLOT 2</span>
+          <span data-dc-tpl="50" style="font-weight: 900; font-size: 15px; line-height: 1.15;"><span class="sc-interp">Tail Snip</span></span>
+        </span>
+      </div>
+  </div>
+
+  <div data-dc-tpl="51" style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+    <button data-dc-tpl="52" type="button" role="switch" aria-checked="true" aria-label="Start at checkpoint level 6. Switch off to start at level 1." style="height: 44px; padding: 0px 12px 0px 14px; border-radius: 999px; border: 0px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.15) 0px 4px 10px -3px; display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; color: rgb(90, 59, 59);">
+      <svg data-dc-tpl="53" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="54" d="M6 21V4M6 4h12l-3 4.5L18 13H6"></path></svg>
+      <span data-dc-tpl="55"><span class="sc-interp">Start at L6</span></span>
+      <span data-dc-tpl="56" style="position: relative; flex: 0 0 auto; width: 42px; height: 24px; border-radius: 12px; box-sizing: border-box; background: rgb(121, 211, 145); box-shadow: rgb(74, 154, 99) 0px 0px 0px 2px inset;"><span data-dc-tpl="57" style="position: absolute; top: 3px; left: 21px; width: 18px; height: 18px; border-radius: 50%; background: rgb(255, 255, 255); box-shadow: rgba(90, 59, 59, 0.3) 0px 1px 2px;"></span></span>
+    </button>
+    <div data-dc-tpl="58" style="height: 44px; box-sizing: border-box; padding: 0px 16px 0px 12px; border-radius: 999px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.15) 0px 4px 10px -3px; display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px;">
+      <svg data-dc-tpl="59" width="18" height="18" viewBox="0 0 24 24" fill="#3CC6DA" aria-hidden="true"><path data-dc-tpl="60" d="M13 2L5 13.5h6L10 22l9-12.5h-6.5L13 2z"></path></svg>
+      <span data-dc-tpl="61">Start energy 25</span>
+    </div>
+  </div>
+  <div data-dc-tpl="62" style="margin-top: -4px; text-align: center; font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);">Energy carries over from your last run</div>
+
+  <div data-dc-tpl="63" style="display: flex; flex-direction: column; gap: 10px;">
+    <button data-dc-tpl="64" type="button" aria-pressed="true" aria-label="Slow-mo, costs 40 energy. Slower snake for 4 s; mango and obstacle timers keep real time" style="display: flex; align-items: center; gap: 12px; width: 100%; height: 80px; box-sizing: border-box; padding: 0px 14px; border: 0px; border-radius: 22px; background: rgb(255, 252, 246); color: rgb(90, 59, 59); font-family: inherit; cursor: pointer; box-shadow: rgb(127, 201, 140) 0px 0px 0px 3px, rgba(110, 80, 70, 0.22) 0px 6px 12px -8px;">
+      <span data-dc-tpl="65" style="flex: 0 0 auto; width: 52px; height: 52px; border-radius: 50%; background: rgb(188, 221, 244); display: flex; align-items: center; justify-content: center;"><svg data-dc-tpl="66" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle data-dc-tpl="67" cx="12" cy="13.5" r="8"></circle><path data-dc-tpl="68" d="M12 9v4.8l3 1.8M9.5 3h5"></path></svg></span>
+      <span data-dc-tpl="69" style="flex: 1 1 0%; min-width: 0px; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left;">
+        <span data-dc-tpl="70" style="display: flex; align-items: center; gap: 8px;"><span data-dc-tpl="71" style="font-weight: 900; font-size: 17px; line-height: 1;">Slow-mo</span><span data-dc-tpl="72" style="display: flex; align-items: center; gap: 3px; height: 22px; padding: 0px 8px 0px 6px; border-radius: 999px; background: rgb(230, 245, 248); font-weight: 900; font-size: 13px; color: rgb(63, 77, 94);"><svg data-dc-tpl="73" width="11" height="11" viewBox="0 0 24 24" fill="#3CC6DA" aria-hidden="true"><path data-dc-tpl="74" d="M13 2L5 13.5h6L10 22l9-12.5h-6.5L13 2z"></path></svg><span data-dc-tpl="75">40</span></span></span>
+        <span data-dc-tpl="76" style="font-weight: 800; font-size: 13px; line-height: 1.2; color: rgb(138, 106, 106);">Slower snake 4 s · timers keep real time</span>
+      </span>
+      <span data-dc-tpl="78" style="flex: 0 0 auto; height: 26px; padding: 0px 10px; border-radius: 999px; background: rgb(121, 211, 145); color: rgb(35, 75, 53); font-weight: 900; font-size: 12px; display: flex; align-items: center;"><span class="sc-interp">Slot 1</span></span>
+    </button>
+    <button data-dc-tpl="79" type="button" aria-pressed="true" aria-label="Tail Snip, costs 30 energy. Cuts the back half; the cut part is a rock wall for 3 s" style="display: flex; align-items: center; gap: 12px; width: 100%; height: 80px; box-sizing: border-box; padding: 0px 14px; border: 0px; border-radius: 22px; background: rgb(255, 252, 246); color: rgb(90, 59, 59); font-family: inherit; cursor: pointer; box-shadow: rgb(127, 201, 140) 0px 0px 0px 3px, rgba(110, 80, 70, 0.22) 0px 6px 12px -8px;">
+      <span data-dc-tpl="80" style="flex: 0 0 auto; width: 52px; height: 52px; border-radius: 50%; background: rgb(246, 194, 211); display: flex; align-items: center; justify-content: center;"><svg data-dc-tpl="81" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle data-dc-tpl="82" cx="6.5" cy="17.5" r="2.7"></circle><circle data-dc-tpl="83" cx="17.5" cy="17.5" r="2.7"></circle><path data-dc-tpl="84" d="M8.2 15.5L17 4M15.8 15.5L7 4"></path></svg></span>
+      <span data-dc-tpl="85" style="flex: 1 1 0%; min-width: 0px; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left;">
+        <span data-dc-tpl="86" style="display: flex; align-items: center; gap: 8px;"><span data-dc-tpl="87" style="font-weight: 900; font-size: 17px; line-height: 1;">Tail Snip</span><span data-dc-tpl="88" style="display: flex; align-items: center; gap: 3px; height: 22px; padding: 0px 8px 0px 6px; border-radius: 999px; background: rgb(230, 245, 248); font-weight: 900; font-size: 13px; color: rgb(63, 77, 94);"><svg data-dc-tpl="89" width="11" height="11" viewBox="0 0 24 24" fill="#3CC6DA" aria-hidden="true"><path data-dc-tpl="90" d="M13 2L5 13.5h6L10 22l9-12.5h-6.5L13 2z"></path></svg><span data-dc-tpl="91">30</span></span></span>
+        <span data-dc-tpl="92" style="font-weight: 800; font-size: 13px; line-height: 1.2; color: rgb(138, 106, 106);">Cut back half · rock wall for 3 s</span>
+      </span>
+      <span data-dc-tpl="94" style="flex: 0 0 auto; height: 26px; padding: 0px 10px; border-radius: 999px; background: rgb(121, 211, 145); color: rgb(35, 75, 53); font-weight: 900; font-size: 12px; display: flex; align-items: center;"><span class="sc-interp">Slot 2</span></span>
+    </button>
+    <div data-dc-tpl="95" role="group" aria-label="Shield, locked. Unlocks at L11" style="display: flex; align-items: center; gap: 12px; height: 80px; box-sizing: border-box; padding: 0px 14px; border-radius: 22px; background: rgb(239, 230, 216);">
+      <span data-dc-tpl="96" style="flex: 0 0 auto; width: 52px; height: 52px; border-radius: 50%; background: rgb(227, 220, 210); display: flex; align-items: center; justify-content: center;"><svg data-dc-tpl="97" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect data-dc-tpl="98" x="5" y="11" width="14" height="10" rx="3"></rect><path data-dc-tpl="99" d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span>
+      <span data-dc-tpl="100" style="flex: 1 1 0%; min-width: 0px; display: flex; flex-direction: column; align-items: flex-start; gap: 3px;">
+        <span data-dc-tpl="101" style="font-weight: 900; font-size: 17px; line-height: 1; color: rgb(90, 59, 59);">Shield</span>
+        <span data-dc-tpl="102" style="display: flex; align-items: center; gap: 5px; font-weight: 800; font-size: 13px; line-height: 1.2; color: rgb(90, 59, 59);"><svg data-dc-tpl="103" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect data-dc-tpl="104" x="5" y="11" width="14" height="10" rx="3"></rect><path data-dc-tpl="105" d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg><span data-dc-tpl="106">Unlocks at L11</span></span>
+      </span>
+    </div>
+    <div data-dc-tpl="107" role="group" aria-label="Mango Rain, locked. Unlocks at L16" style="display: flex; align-items: center; gap: 12px; height: 80px; box-sizing: border-box; padding: 0px 14px; border-radius: 22px; background: rgb(239, 230, 216);">
+      <span data-dc-tpl="108" style="flex: 0 0 auto; width: 52px; height: 52px; border-radius: 50%; background: rgb(227, 220, 210); display: flex; align-items: center; justify-content: center;"><svg data-dc-tpl="109" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect data-dc-tpl="110" x="5" y="11" width="14" height="10" rx="3"></rect><path data-dc-tpl="111" d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span>
+      <span data-dc-tpl="112" style="flex: 1 1 0%; min-width: 0px; display: flex; flex-direction: column; align-items: flex-start; gap: 3px;">
+        <span data-dc-tpl="113" style="font-weight: 900; font-size: 17px; line-height: 1; color: rgb(90, 59, 59);">Mango Rain</span>
+        <span data-dc-tpl="114" style="display: flex; align-items: center; gap: 5px; font-weight: 800; font-size: 13px; line-height: 1.2; color: rgb(90, 59, 59);"><svg data-dc-tpl="115" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect data-dc-tpl="116" x="5" y="11" width="14" height="10" rx="3"></rect><path data-dc-tpl="117" d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg><span data-dc-tpl="118">Unlocks at L16</span></span>
+      </span>
+    </div>
+  </div>
+
+  <a data-dc-tpl="119" href="CountdownD2.html" style="position: absolute; left: 20px; right: 20px; bottom: 30px; display: flex; align-items: center; justify-content: center; height: 78px; border-radius: 999px; background: rgb(121, 211, 145); box-shadow: rgb(93, 184, 120) 0px -7px 0px inset, rgba(255, 255, 255, 0.4) 0px 4px 0px inset, rgb(74, 154, 99) 0px 6px 0px; text-decoration: none;"><span data-dc-tpl="120" class="lt" style="font-size: 46px; color: rgb(255, 255, 255); -webkit-text-stroke: 8px rgb(62, 122, 82);">Go!</span></a></div></div></div>
+
+
+
+
+</body>
+</html>

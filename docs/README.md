@@ -6,7 +6,7 @@ Only files listed here exist. Status: Draft / Approved / Deprecated.
 | ID | File | Owns (source of truth for) | Status |
 |---|---|---|---|
 | GDD | `docs/GDD.md` | Product intent, scope, milestones, mechanics index | Draft |
-| UI-MOCKUPS | `docs/design/UI-MOCKUPS.md` | D2 UI mockups (PNG + source), design tokens, board-to-code map | Draft |
+| UI-MOCKUPS | `docs/design/UI-MOCKUPS.md` | D2 UI mockups (static HTML primary, PNG reference), design tokens, board-to-code map | Draft |
 | STATUS | `docs/STATUS.md` | Current state, next steps, blockers | — |
 | CODEMAP | `docs/CODEMAP.md` | Where code lives, module boundaries, entry points | — |
 | DEC | `docs/DECISIONS.md` | Technical/design trade-offs (ADR-lite) | — |

@@ -2,18 +2,19 @@
 Status: Draft. Added 2026-11-06 for P3 (juice + screens). Owner: design (Claude Design project "Mango Snake - D2 design").
 
 ## 1. What this is
-The owner's D2 mockups were made in a Claude Design artifact (not Figma). They are committed here so an AI can implement P3 screens from them without network access.
-- `docs/design/mockups/png/<Board>.png` - rendered screenshots at 2x (390x844 CSS px portrait for screens). **Look at the PNG first.**
-- `docs/design/mockups/src/<Board>.dc.html` - exact source of each board: real layout numbers (px sizes, radii, gaps), colours, SVG paths, copy text, and the tweakable props (`data-props`, e.g. `skin`, `state`).
+The owner's D2 mockups were made in a Claude Design artifact (not Figma). They are committed here as **code** so an AI can implement P3 screens from them offline. **Code is the primary reference; PNG is for visual cross-checking only.**
+- `docs/design/mockups/html/<Board>.html` - **primary.** Static standalone HTML per board (no scripts, no runtime): every div, inline style (px sizes, radii, gaps, colours), SVG path and copy text as rendered in the default state. `html/index.html` lists all boards; links between boards work. Fonts load from Google Fonts (Nunito, Lilita One).
+- `docs/design/mockups/src/<Board>.dc.html` - original component source with the tweakable props (`data-props`: `skin`, `state`, `tweak`...) and the logic that computes positions. Use it to read variants and conditional blocks that the static HTML does not show.
 - `docs/design/mockups/src/canvas.json` - board list, sizes, titles, canvas positions and section titles (P1 core loop, P3 settings and biomes, P4 meta, head rig).
-- `docs/design/mockups/render.example.js` - Playwright script that produced the PNGs (see section 5).
+- `docs/design/mockups/png/<Board>.png` - 2x screenshots (390x844 CSS px for screens). **Reference only**: compare your result against them, never copy numbers from pixels.
+- `docs/design/mockups/export-html.example.js`, `render.example.js` - the scripts that produced the HTML and PNG (section 5).
 Original artifact: https://claude.ai/artifact/9zVMtmVhjWzeHeyWwjQ9JX (owner-shared; may change after this snapshot).
 
 ## 2. Rules for agents
-1. The PNG + `.dc.html` win over any assumption about look and feel. Gameplay rules still come from GDD / MEC specs; if a mockup shows behavior that conflicts with a spec, stop and ask (AGENTS section 5).
+1. The HTML (then `.dc.html` for variants) wins over any assumption about look and feel; the PNG only confirms it. Gameplay rules still come from GDD / MEC specs; if a mockup shows behavior that conflicts with a spec, stop and ask (AGENTS section 5).
 2. Do not hard-code colours or sizes in scenes: put them in one UI token module (create `src/game/uiTokens.ts` or the balance `ui` block when the first screen is ported) using section 3.
 3. Mockups are HTML/SVG; Phaser scenes must reproduce them with text, graphics and generated textures (SVG to texture as done for capy in `src/game/art/`). Do not embed the `.dc.html` files in the game.
-4. Prop variants (`skin`, `state`, `tweak`) are not all rendered as PNGs. Read `data-props` in the source for the options and the conditional blocks.
+4. Only the default state of each board is exported. Read `data-props` in `src/*.dc.html` for the other options (skins, Results states, Home first run) and their conditional blocks.
 5. Replaced visuals update this doc in the same PR (status column below).
 
 ## 3. Design tokens (from `PaletteD2.dc.html`)
@@ -50,4 +51,4 @@ Code column uses CODEMAP names. "planned" = no scene yet; check `docs/CODEMAP.md
 Board sizes and the canvas layout: `canvas.json` (`boards.<file>.w/h`).
 
 ## 5. Refreshing the snapshot
-The `.dc.html` files need the Claude Design runtime as `./support.js` (it is `artifact-type/dc-runtime.js` inside the artifact; not committed, 190 KB). To re-render: read the artifact files with the Artifact tool (`read` with `paths`), copy `project/*` plus `dc-runtime.js` renamed to `support.js` into one folder, serve it (`python3 -m http.server 8765`; `file://` fails because components are fetched), then run `render.example.js <folder> <outdir>` (needs Playwright). Fonts load from Google Fonts. Commit only the PNGs and `src/` files that changed.
+The `.dc.html` files need the Claude Design runtime as `./support.js` (it is `artifact-type/dc-runtime.js` inside the artifact; not committed, 190 KB). To refresh: read the artifact files with the Artifact tool (`read` with `paths`), copy `project/*` plus `dc-runtime.js` renamed to `support.js` into one folder, serve it (`python3 -m http.server 8765`; `file://` fails because components are fetched), then run `render.example.js <folder> <outdir>` for PNGs and `export-html.example.js <outdir> <folder>` for static HTML (needs Playwright; the HTML script drops scripts and the `<helmet>` block and rewrites `.dc.html` links to `.html`). Static HTML vs PNG matched within 0.2% of pixels except the head-rig boards (blink animation timing). Commit only the files that changed.

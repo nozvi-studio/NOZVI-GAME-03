@@ -2,7 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
-- docs: import D2 UI mockups (32 boards: PNG + .dc.html source + canvas.json) and `docs/design/UI-MOCKUPS.md` (tokens, board-to-code map, agent rules) for P3 screens
+- docs: import D2 UI mockups (32 boards: static HTML primary, .dc.html source + canvas.json, PNG for reference only) and `docs/design/UI-MOCKUPS.md` (tokens, board-to-code map, agent rules) for P3 screens
 - fix(game): capy SVGs load as base64 data URLs (Phaser treats data: URLs as base64); body feet no longer clipped
 - feat(game): debug capy art preview page (`?debug=1&artPreview=1`)
 - feat(game): capy face on the snake head (Boot rasterises capy SVGs; idle/eat/dead on the board)

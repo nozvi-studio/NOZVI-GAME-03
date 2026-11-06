@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Palette D2</title>
+<style>
+    .sc-placeholder{background:color-mix(in srgb,currentColor 8%,transparent);
+      border:1px solid color-mix(in srgb,currentColor 50%,transparent);
+      border-radius:2px;box-sizing:border-box;overflow:hidden}
+    @keyframes sc-shine{0%{background-position:100% 50%}100%{background-position:0% 50%}}
+    html.sc-dc-streaming .sc-placeholder,
+    html.sc-dc-streaming .sc-interp.sc-missing{position:relative;
+      background:color-mix(in srgb,currentColor 5%,transparent);
+      border-color:transparent}
+    html.sc-dc-streaming .sc-placeholder::before,
+    html.sc-dc-streaming .sc-interp.sc-missing::before{content:'';
+      position:absolute;inset:0;pointer-events:none;
+      background:linear-gradient(90deg,rgba(217,119,87,0) 25%,rgba(247,225,211,.95) 37%,rgba(217,119,87,0) 63%);
+      background-size:400% 100%;animation:sc-shine 1.4s ease infinite}
+    html.sc-dc-streaming .sc-placeholder:nth-child(n+9 of .sc-placeholder)::before,
+    html.sc-dc-streaming .sc-interp.sc-missing:nth-child(n+9 of .sc-interp.sc-missing)::before{animation:none;
+      background:color-mix(in srgb,currentColor 8%,transparent)}
+    .sc-placeholder-error{padding:4px 8px;font:11px/1.4 ui-monospace,monospace;
+      color:color-mix(in srgb,currentColor 70%,transparent);word-break:break-word}
+    .sc-interp.sc-missing{display:inline-block;width:2em;height:1em;overflow:hidden;
+      vertical-align:text-bottom;background:rgba(255,255,255,.3);border:1px solid rgba(0,0,0,.5);
+      border-radius:2px;box-sizing:border-box;color:transparent;
+      user-select:none}
+    .sc-interp.sc-unresolved{font-family:ui-monospace,monospace;font-size:.85em;
+      color:color-mix(in srgb,currentColor 50%,transparent);
+      background:color-mix(in srgb,currentColor 10%,transparent);border-radius:3px;
+      padding:0 3px}
+    .sc-host.sc-has-error{position:relative}
+    .sc-logic-error{position:absolute;top:8px;left:8px;z-index:2147483647;max-width:60ch;
+      padding:6px 10px;background:#b00020;color:#fff;font:12px/1.4 ui-monospace,monospace;
+      border-radius:4px;white-space:pre-wrap;pointer-events:none}
+    /* Mirrors PRINT_BASELINE_CSS in apps/web deck-stage-export.ts — keep both
+       in sync until dc-runtime regains a build step. */
+    @media print {
+      @page { margin: 0.5cm; }
+      figure, table { break-inside: avoid; }
+      #dc-root, #dc-root > .sc-host { height: auto; }
+      *, *::before, *::after {
+        print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+        animation-delay: -99s !important; animation-duration: .001s !important;
+        animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+        animation-play-state: running !important; transition-duration: 0s !important;
+      }
+    }
+  </style>
+<style>x-dc{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&amp;display=swap" data-dc-tpl="1">
+<style data-dc-tpl="2">
+body{margin:0}
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+<div id="dc-root"><div class="sc-host" data-sc-name="PaletteD2"><div data-dc-tpl="3" style="width: 960px; box-sizing: border-box; padding: 32px; background: rgb(248, 242, 232); font-family: Nunito, system-ui, sans-serif; color: rgb(90, 59, 59); display: flex; flex-direction: column; gap: 22px;">
+  <div data-dc-tpl="4" style="display: flex; flex-direction: column; gap: 4px;">
+    <span data-dc-tpl="5" style="font-weight: 900; font-size: 28px;">D2 colour palette</span>
+    <span data-dc-tpl="6" style="font-weight: 800; font-size: 14px; color: rgb(138, 106, 106);">Rule of thumb: warm cream base, one strong colour per screen (green CTA), pastels for everything else. Text is never pure black.</span>
+  </div>
+  
+    <div data-dc-tpl="8" style="display: flex; flex-direction: column; gap: 10px;">
+      <div data-dc-tpl="9" style="display: flex; align-items: baseline; gap: 10px;"><span data-dc-tpl="10" style="font-weight: 900; font-size: 18px;"><span class="sc-interp">Surfaces</span></span><span data-dc-tpl="11" style="font-weight: 800; font-size: 13px; color: rgb(138, 106, 106);"><span class="sc-interp">base layers</span></span></div>
+      <div data-dc-tpl="12" style="display: grid; grid-template-columns: repeat(6, minmax(0px, 1fr)); gap: 10px;">
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(248, 242, 232); box-shadow: rgba(110, 80, 70, 0.12) 0px -1px 0px inset;"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Cream</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#F8F2E8</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Screen background</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.12) 0px -1px 0px inset;"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Card</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#FFFCF6</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Cards, pills, tiles</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(255, 255, 255); box-shadow: rgba(110, 80, 70, 0.12) 0px -1px 0px inset;"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">White</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#FFFFFF</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Highlights only</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(239, 230, 216);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Sand</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#EFE6D8</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Tabs, disabled</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(227, 220, 210);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Stone</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#E3DCD2</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Locked / empty slots</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(251, 227, 200);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Peach</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#FBE3C8</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Hero panel, slots</span></span>
+            </div>
+          </div>
+        
+      </div>
+    </div>
+  
+    <div data-dc-tpl="8" style="display: flex; flex-direction: column; gap: 10px;">
+      <div data-dc-tpl="9" style="display: flex; align-items: baseline; gap: 10px;"><span data-dc-tpl="10" style="font-weight: 900; font-size: 18px;"><span class="sc-interp">Text &amp; lines</span></span><span data-dc-tpl="11" style="font-weight: 800; font-size: 13px; color: rgb(138, 106, 106);"><span class="sc-interp">no pure black anywhere</span></span></div>
+      <div data-dc-tpl="12" style="display: grid; grid-template-columns: repeat(6, minmax(0px, 1fr)); gap: 10px;">
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(90, 59, 59);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Plum brown</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#5A3B3B</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Primary text, icons</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(138, 106, 106);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Soft brown</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#8A6A6A</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Secondary text</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(183, 159, 138);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Faint</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#B79F8A</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Hints, inactive</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(63, 77, 94);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Slate</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#3F4D5E</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Labels on blue hill</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(107, 76, 130);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Logo outline</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#6B4C82</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Logo letters only</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(185, 133, 88);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Walnut</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#B98558</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Active tab</span></span>
+            </div>
+          </div>
+        
+      </div>
+    </div>
+  
+    <div data-dc-tpl="8" style="display: flex; flex-direction: column; gap: 10px;">
+      <div data-dc-tpl="9" style="display: flex; align-items: baseline; gap: 10px;"><span data-dc-tpl="10" style="font-weight: 900; font-size: 18px;"><span class="sc-interp">Action (green)</span></span><span data-dc-tpl="11" style="font-weight: 800; font-size: 13px; color: rgb(138, 106, 106);"><span class="sc-interp">Play / PUSH / Equip</span></span></div>
+      <div data-dc-tpl="12" style="display: grid; grid-template-columns: repeat(6, minmax(0px, 1fr)); gap: 10px;">
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(121, 211, 145);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Green</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#79D391</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Button face</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(93, 184, 120);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Green shade</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#5DB878</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Inner bevel, check badge</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(74, 154, 99);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Green deep</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#4A9A63</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Button shelf</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(62, 122, 82);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Green line</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#3E7A52</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Label outline</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(207, 235, 208);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Board mint</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#CFEBD0</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Board cells</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(194, 228, 198);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Board mint 2</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#C2E4C6</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Board checker</span></span>
+            </div>
+          </div>
+        
+      </div>
+    </div>
+  
+    <div data-dc-tpl="8" style="display: flex; flex-direction: column; gap: 10px;">
+      <div data-dc-tpl="9" style="display: flex; align-items: baseline; gap: 10px;"><span data-dc-tpl="10" style="font-weight: 900; font-size: 18px;"><span class="sc-interp">Accents</span></span><span data-dc-tpl="11" style="font-weight: 800; font-size: 13px; color: rgb(138, 106, 106);"><span class="sc-interp">pastel, used sparingly</span></span></div>
+      <div data-dc-tpl="12" style="display: grid; grid-template-columns: repeat(6, minmax(0px, 1fr)); gap: 10px;">
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(244, 161, 87);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Orange</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#F4A157</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Cat skin, progress, bumpers</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(219, 130, 56);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Orange deep</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#DB8238</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Fur stripes</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(248, 212, 104);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Butter</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#F8D468</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Stat tiles, slots</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(255, 200, 69);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Star gold</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#FFC845</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Best score star</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(246, 194, 211);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Pink</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#F6C2D3</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Stat tile, logo</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(142, 160, 255);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Periwinkle</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#8EA0FF</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Marbles (currency)</span></span>
+            </div>
+          </div>
+        
+      </div>
+    </div>
+  
+    <div data-dc-tpl="8" style="display: flex; flex-direction: column; gap: 10px;">
+      <div data-dc-tpl="9" style="display: flex; align-items: baseline; gap: 10px;"><span data-dc-tpl="10" style="font-weight: 900; font-size: 18px;"><span class="sc-interp">Sky &amp; hill</span></span><span data-dc-tpl="11" style="font-weight: 800; font-size: 13px; color: rgb(138, 106, 106);"><span class="sc-interp">footer scenery</span></span></div>
+      <div data-dc-tpl="12" style="display: grid; grid-template-columns: repeat(6, minmax(0px, 1fr)); gap: 10px;">
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(179, 222, 243);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Hill top</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#B3DEF3</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Footer hill</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(157, 211, 238);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Hill base</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#9DD3EE</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Hill gradient end</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(196, 231, 247);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Silhouette</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#C4E7F7</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Snake on hill</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(188, 221, 244);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Sky stat</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#BCDDF4</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Stat tile</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(198, 176, 245);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Lavender</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#C6B0F5</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Logo letter</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(60, 198, 218);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Cyan</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#3CC6DA</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Orb / water-style pickups</span></span>
+            </div>
+          </div>
+        
+      </div>
+    </div>
+  
+    <div data-dc-tpl="8" style="display: flex; flex-direction: column; gap: 10px;">
+      <div data-dc-tpl="9" style="display: flex; align-items: baseline; gap: 10px;"><span data-dc-tpl="10" style="font-weight: 900; font-size: 18px;"><span class="sc-interp">Characters</span></span><span data-dc-tpl="11" style="font-weight: 800; font-size: 13px; color: rgb(138, 106, 106);"><span class="sc-interp">default snake + animal skins</span></span></div>
+      <div data-dc-tpl="12" style="display: grid; grid-template-columns: repeat(6, minmax(0px, 1fr)); gap: 10px;">
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(111, 147, 245);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Snake blue</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#6F93F5</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Default body (mango leaf on head)</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(63, 99, 209);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Snake shade</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#3F63D1</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Body edge, spots</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(228, 236, 255);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Snake belly</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#E4ECFF</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Muzzle</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(251, 231, 176);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Pup tile</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#FBE7B0</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Picker background</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(215, 235, 210);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Capy tile</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#D7EBD2</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Picker background</span></span>
+            </div>
+          </div>
+        
+          <div data-dc-tpl="14" style="display: flex; flex-direction: column; border-radius: 16px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.22) 0px 6px 12px -8px; overflow: hidden;">
+            <div data-dc-tpl="15" style="height: 56px; background: rgb(220, 229, 255);"></div>
+            <div data-dc-tpl="16" style="padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 1px;">
+              <span data-dc-tpl="17" style="font-weight: 900; font-size: 13px;"><span class="sc-interp">Snake tile</span></span>
+              <span data-dc-tpl="18" style="font-weight: 800; font-size: 12px; color: rgb(138, 106, 106);"><span class="sc-interp">#DCE5FF</span></span>
+              <span data-dc-tpl="19" style="font-weight: 700; font-size: 11px; color: rgb(183, 159, 138);"><span class="sc-interp">Picker background</span></span>
+            </div>
+          </div>
+        
+      </div>
+    </div>
+  </div></div></div>
+
+
+
+
+</body>
+</html>

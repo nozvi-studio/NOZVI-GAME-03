@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Skin drop D2</title>
+<style>
+    .sc-placeholder{background:color-mix(in srgb,currentColor 8%,transparent);
+      border:1px solid color-mix(in srgb,currentColor 50%,transparent);
+      border-radius:2px;box-sizing:border-box;overflow:hidden}
+    @keyframes sc-shine{0%{background-position:100% 50%}100%{background-position:0% 50%}}
+    html.sc-dc-streaming .sc-placeholder,
+    html.sc-dc-streaming .sc-interp.sc-missing{position:relative;
+      background:color-mix(in srgb,currentColor 5%,transparent);
+      border-color:transparent}
+    html.sc-dc-streaming .sc-placeholder::before,
+    html.sc-dc-streaming .sc-interp.sc-missing::before{content:'';
+      position:absolute;inset:0;pointer-events:none;
+      background:linear-gradient(90deg,rgba(217,119,87,0) 25%,rgba(247,225,211,.95) 37%,rgba(217,119,87,0) 63%);
+      background-size:400% 100%;animation:sc-shine 1.4s ease infinite}
+    html.sc-dc-streaming .sc-placeholder:nth-child(n+9 of .sc-placeholder)::before,
+    html.sc-dc-streaming .sc-interp.sc-missing:nth-child(n+9 of .sc-interp.sc-missing)::before{animation:none;
+      background:color-mix(in srgb,currentColor 8%,transparent)}
+    .sc-placeholder-error{padding:4px 8px;font:11px/1.4 ui-monospace,monospace;
+      color:color-mix(in srgb,currentColor 70%,transparent);word-break:break-word}
+    .sc-interp.sc-missing{display:inline-block;width:2em;height:1em;overflow:hidden;
+      vertical-align:text-bottom;background:rgba(255,255,255,.3);border:1px solid rgba(0,0,0,.5);
+      border-radius:2px;box-sizing:border-box;color:transparent;
+      user-select:none}
+    .sc-interp.sc-unresolved{font-family:ui-monospace,monospace;font-size:.85em;
+      color:color-mix(in srgb,currentColor 50%,transparent);
+      background:color-mix(in srgb,currentColor 10%,transparent);border-radius:3px;
+      padding:0 3px}
+    .sc-host.sc-has-error{position:relative}
+    .sc-logic-error{position:absolute;top:8px;left:8px;z-index:2147483647;max-width:60ch;
+      padding:6px 10px;background:#b00020;color:#fff;font:12px/1.4 ui-monospace,monospace;
+      border-radius:4px;white-space:pre-wrap;pointer-events:none}
+    /* Mirrors PRINT_BASELINE_CSS in apps/web deck-stage-export.ts — keep both
+       in sync until dc-runtime regains a build step. */
+    @media print {
+      @page { margin: 0.5cm; }
+      figure, table { break-inside: avoid; }
+      #dc-root, #dc-root > .sc-host { height: auto; }
+      *, *::before, *::after {
+        print-color-adjust: exact; -webkit-print-color-adjust: exact;
+        backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+        animation-delay: -99s !important; animation-duration: .001s !important;
+        animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+        animation-play-state: running !important; transition-duration: 0s !important;
+      }
+    }
+  </style>
+<style>x-dc{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&amp;display=swap" data-dc-tpl="1">
+<style data-dc-tpl="2">
+body{margin:0}
+a{cursor:pointer}
+</style>
+<style>body{margin:0}</style>
+</head>
+<body>
+
+<div id="dc-root"><div class="sc-host" data-sc-name="MarbleSkinDropD2"><div data-dc-tpl="3" style="position: relative; width: 390px; height: 844px; box-sizing: border-box; background: rgb(248, 242, 232); font-family: Nunito, system-ui, sans-serif; color: rgb(90, 59, 59); overflow: hidden;">
+
+  <div data-dc-tpl="4" style="position: absolute; left: 16px; right: 16px; top: 22px; display: flex; align-items: center; justify-content: space-between;">
+    <a data-dc-tpl="5" href="MarbleMachineD2.html" aria-label="Back" style="width: 44px; height: 44px; border-radius: 50%; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.16) 0px 4px 10px -3px; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+      <svg data-dc-tpl="6" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path data-dc-tpl="7" d="M19 12H5M11 5l-7 7 7 7"></path></svg>
+    </a>
+    <span data-dc-tpl="8" style="font-weight: 900; font-size: 24px;">Skin drop</span>
+    <div data-dc-tpl="9" style="width: 44px;"></div>
+  </div>
+
+  <div data-dc-tpl="10" style="position: absolute; left: 0px; right: 0px; top: 80px; text-align: center; font-weight: 800; font-size: 15px; color: rgb(138, 106, 106);">Mystery skin! Which rarity will it be?</div>
+
+  <div data-dc-tpl="11" style="position: absolute; left: 16px; top: 116px; width: 358px; height: 600px; box-sizing: border-box; border-radius: 28px; background: rgb(255, 252, 246); box-shadow: rgba(110, 80, 70, 0.3) 0px 14px 24px -14px; overflow: hidden;">
+
+    <svg data-dc-tpl="12" width="358" height="70" viewBox="0 0 358 70" aria-hidden="true" style="position: absolute; left: 0px; top: 0px;"><path data-dc-tpl="13" d="M120 0H238L214 42H144z" fill="#EFE6D8"></path><path data-dc-tpl="14" d="M144 42H214L206 56H152z" fill="#E3DCD2"></path></svg>
+
+    <div data-dc-tpl="16" style="position: absolute; left: 28px; top: 90px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 97px; top: 90px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 166px; top: 90px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 235px; top: 90px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 304px; top: 90px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 63px; top: 126px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 132px; top: 126px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 201px; top: 126px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 270px; top: 126px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 28px; top: 162px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 97px; top: 162px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 166px; top: 162px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 235px; top: 162px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 304px; top: 162px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 63px; top: 198px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 132px; top: 198px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 270px; top: 198px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 28px; top: 234px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 97px; top: 234px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 166px; top: 234px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 235px; top: 234px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 304px; top: 234px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 63px; top: 270px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 132px; top: 270px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 201px; top: 270px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 270px; top: 270px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 28px; top: 306px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 97px; top: 306px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 166px; top: 306px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 235px; top: 306px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 304px; top: 306px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 63px; top: 342px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 132px; top: 342px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 201px; top: 342px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 270px; top: 342px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 28px; top: 378px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 97px; top: 378px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 166px; top: 378px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 235px; top: 378px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 304px; top: 378px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 63px; top: 414px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 132px; top: 414px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 201px; top: 414px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div><div data-dc-tpl="16" style="position: absolute; left: 270px; top: 414px; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; background: rgb(239, 230, 216); border: 3px solid rgb(122, 90, 90); box-shadow: rgba(255, 255, 255, 0.85) 0px 1.5px 0px inset;"></div>
+
+    <div data-dc-tpl="17" style="position: absolute; left: 172px; top: 140px; width: 10px; height: 10px; border-radius: 50%; background: rgb(244, 161, 87); opacity: 0.2;"></div>
+    <div data-dc-tpl="18" style="position: absolute; left: 170px; top: 116px; width: 14px; height: 14px; border-radius: 50%; background: rgb(244, 161, 87); opacity: 0.3;"></div>
+    <div data-dc-tpl="19" style="position: absolute; left: 168px; top: 88px; width: 18px; height: 18px; border-radius: 50%; background: rgb(244, 161, 87); opacity: 0.4;"></div>
+    <div data-dc-tpl="20" style="position: absolute; left: 150px; top: 177px; line-height: 0; filter: drop-shadow(rgba(110, 80, 70, 0.3) 0px 5px 6px);"><div data-dc-tpl="21" style="width: 56px; height: 56px; box-sizing: border-box; border-radius: 50%; background: radial-gradient(circle at 35% 30%, rgb(251, 225, 154), rgb(248, 212, 104) 60%, rgb(229, 168, 42)); border: 4px solid rgb(255, 252, 246); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 26px; color: rgb(90, 59, 59); line-height: 1;">?</div></div>
+
+    <div data-dc-tpl="22" style="position: absolute; left: 0px; right: 0px; bottom: 0px; height: 218px; box-sizing: border-box; padding: 0px 6px; display: flex; gap: 4px; align-items: flex-end;">
+      
+        <div data-dc-tpl="24" style="flex: 1 1 0%; min-width: 0px; height: 150px; box-sizing: border-box; padding: 8px 2px; border-radius: 18px 18px 0px 0px; background: rgb(248, 242, 232); display: flex; flex-direction: column; align-items: center; gap: 3px;">
+          <div data-dc-tpl="25" style="width: 64px; height: 64px; border-radius: 16px; background: rgb(239, 230, 216); display: flex; align-items: center; justify-content: center;">
+            <span data-dc-tpl="26" style="font-weight: 900; font-size: 28px; color: rgb(90, 59, 59);">?</span>
+          </div>
+                    <span data-dc-tpl="27" style="height: 16px; padding: 0px 6px; border-radius: 999px; font-weight: 900; font-size: 10px; display: flex; align-items: center; background: rgb(239, 230, 216); color: rgb(138, 106, 106);"><span class="sc-interp">Common</span></span>
+          <span data-dc-tpl="28" style="font-weight: 900; font-size: 14px; line-height: 1;"><span class="sc-interp">70%</span></span>
+                  </div>
+      
+        <div data-dc-tpl="24" style="flex: 1 1 0%; min-width: 0px; height: 150px; box-sizing: border-box; padding: 8px 2px; border-radius: 18px 18px 0px 0px; background: rgb(248, 242, 232); display: flex; flex-direction: column; align-items: center; gap: 3px;">
+          <div data-dc-tpl="25" style="width: 64px; height: 64px; border-radius: 16px; background: rgb(188, 221, 244); display: flex; align-items: center; justify-content: center;">
+            <span data-dc-tpl="26" style="font-weight: 900; font-size: 28px; color: rgb(90, 59, 59);">?</span>
+          </div>
+                    <span data-dc-tpl="27" style="height: 16px; padding: 0px 6px; border-radius: 999px; font-weight: 900; font-size: 10px; display: flex; align-items: center; background: rgb(188, 221, 244); color: rgb(63, 77, 94);"><span class="sc-interp">Rare</span></span>
+          <span data-dc-tpl="28" style="font-weight: 900; font-size: 14px; line-height: 1;"><span class="sc-interp">25%</span></span>
+                  </div>
+      
+        <div data-dc-tpl="24" style="flex: 1 1 0%; min-width: 0px; height: 150px; box-sizing: border-box; padding: 8px 2px; border-radius: 18px 18px 0px 0px; background: rgb(248, 242, 232); display: flex; flex-direction: column; align-items: center; gap: 3px;">
+          <div data-dc-tpl="25" style="width: 64px; height: 64px; border-radius: 16px; background: rgb(232, 225, 255); display: flex; align-items: center; justify-content: center;">
+            <span data-dc-tpl="26" style="font-weight: 900; font-size: 28px; color: rgb(90, 59, 59);">?</span>
+          </div>
+                    <span data-dc-tpl="27" style="height: 16px; padding: 0px 6px; border-radius: 999px; font-weight: 900; font-size: 10px; display: flex; align-items: center; background: rgb(232, 225, 255); color: rgb(107, 76, 130);"><span class="sc-interp">Epic</span></span>
+          <span data-dc-tpl="28" style="font-weight: 900; font-size: 14px; line-height: 1;"><span class="sc-interp">5%</span></span>
+                  </div>
+      
+    </div>
+  </div>
+
+  <div data-dc-tpl="29" style="position: absolute; left: 0px; right: 0px; top: 732px; text-align: center; font-weight: 700; font-size: 13px; color: rgb(138, 106, 106); padding: 0px 32px;">The result is decided when your marble lands in SKIN; the drop only shows it. A skin you already own turns into coins (15 / 40 / 100).</div>
+
+  </div></div></div>
+
+
+
+
+</body>
+</html>
