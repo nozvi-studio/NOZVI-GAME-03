@@ -11,7 +11,7 @@ Ship the reference Capybara character in the game: a layered SVG head (and body 
 
 ## 3. Character model
 - 48 × 48 unit box, pivot (24, 24), anchors exactly as ART-001 §3.
-- Outline `#4A2E1B`, width 2 units, round joins/caps, on head, ears and muzzle.
+- Outline `#4A2E1B`, width 2 units on head and ears, 1.2 on the muzzle; round joins/caps.
 - Palette from ART-001 §4 (face gradient `#D6AB7C → #C79A6B`, ears/muzzle `#B1865A`, pupils `#17261B`, nose/mouth `#4A2E1B`, blush `#FF8FA3`, pupil highlight white).
 - Fixed layers (back to front): `ears`, `head`, `blush`, `muzzle`, `nose`.
 - Swappable layers:
@@ -36,7 +36,7 @@ Ship the reference Capybara character in the game: a layered SVG head (and body 
 
 ## 4. Rendering
 - SVG strings are built by a pure function `buildCapySvg(expression, size)` (no Phaser import, unit-testable) in `src/game/art/` — pure module path chosen so it sits next to its only consumer; it imports nothing from Phaser.
-- Phaser loads each expression with `load.svg(key, dataUrl, { width, height })` at two sizes: `board` (64 px) and `large` (256 px). Keys: `capy/head/<expression>/<size>`, `capy/body/<pose>/large`. No new dependency, no PNG atlas at this stage.
+- Phaser loads each expression with `load.svg(key, dataUrl, { width, height })` at two sizes: `board` (96 px; board head is ~36 CSS px at ~3× DPR) and `large` (256 px). Keys: `capy/head/<expression>/<size>`, `capy/body/<pose>/large`. No new dependency, no PNG atlas at this stage.
 - The head on the board stays **front facing**: its position follows the snake head; the face texture is not rotated.
 
 ## 5. Motion (Phaser tweens in `src/game/`)
