@@ -1,5 +1,5 @@
 # ART-002 — Capybara master still brief (for Codex + agent-sprite-forge)
-Status: Draft · Depends on: ART-001 (anchors, outline, palette, actions) · Owner runs the commands on the owner's laptop (Windows, Codex CLI, no API key).
+Status: Fallback (owner 2026-11-06 chose the layered SVG route; use this only if a raster capy is needed) · Depends on: ART-001 (anchors, outline, palette, actions) · Owner runs the commands on the owner's laptop (Windows, Codex CLI, no API key).
 
 ## 1. Goal
 Produce and approve two master stills of the reference capy: **`capy_body`** (full body, front) and **`capy_head`** (head only). Every later asset (expression stills, clips, atlas, other skins) is derived from these two. Nothing is animated until both are approved.
@@ -8,7 +8,7 @@ Produce and approve two master stills of the reference capy: **`capy_body`** (fu
 | File | Purpose | Notes |
 |---|---|---|
 | `assets/raw/reference/style-grumpy-cat-sheet.png` | style reference (outline weight, deadpan eyes, flat shading) | mood only; confirm rights before commit; the spec forbids copying the character |
-| `assets/raw/reference/capy-figma-head.png` | identity reference for `capy_body` (optional) | export the capy `PlayerHead` from Figma at 512 px; note it has no outline yet (ART-001 Q7), so the style reference decides the outline |
+| `assets/raw/reference/capy-figma-head.png` (added 2026-11-06) | identity reference for `capy_body` (optional) | export the capy `PlayerHead` from Figma at 512 px; note it has no outline yet (ART-001 Q7), so the style reference decides the outline |
 
 If `capy-figma-head.png` is used, add to `capy_body.spec.json`: `"identity_ref": {"path": "../reference/capy-figma-head.png", "what": "the Figma capy head", "copy": "head shape, ear placement, muzzle shape and colours; ignore the missing outline"}`.
 

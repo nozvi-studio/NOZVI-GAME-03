@@ -1,5 +1,5 @@
 # ART-001 — Character Coordinate System (reference character: Capybara)
-Status: Draft v2 (owner answers Q1-Q5 applied 2026-11-06) · Phase: P3 prep · Source of truth for: character head anchors, outline/palette rules, action list, frame naming, asset folders.
+Status: Draft v3 (owner 2026-11-06: Figma personality + outline; layered SVG route, see docs/superpowers/specs/2026-11-06-capy-character-design.md) · Phase: P3 prep · Source of truth for: character head anchors, outline/palette rules, action list, frame naming, asset folders.
 Design source: Figma canvas "Mango Snake — D2" (board `PlayerHead`, `HeadRigD2`, `ExprHeadD2`). Style reference (mood only, not to be copied): owner-supplied "grumpy purple cat" turnaround/expression sheet.
 
 ## 1. Game concept (context for art; GDD owns the rules)
@@ -30,7 +30,7 @@ Rules: eyes, nose, mouth never leave their anchors; only head shape, ears and ma
 ## 4. Look rules for the raster capy (proposal, owner to confirm)
 - **Outline (owner 2026-11-06: follow the GDD):** thick dark warm brown (proposed `#4A2E1B`), about 2 px at 48-box scale (about 5% of head width, about 10 px on a 256 px frame), round joins, same weight on every action. Figma D2 heads (`stroke: none`) must be updated to match; until then Figma is out of date against GDD §10.1.
 - **Palette (from Figma):** face `#D6AB7C → #C79A6B`, ears and muzzle `#B1865A`, pupils `#17261B`, nose/mouth `#4A2E1B`, blush `#FF8FA3`. One shared palette per character; no new colours per action.
-- **Face personality (from the style reference):** half-lidded eyes with a visible lid line, slight brow asymmetry, flat mouth by default. Pupils get a highlight dot.
+- **Face personality (owner 2026-11-06: follow Figma):** round eyes with a highlight dot, gentle smile, pink blush by default. Half-lidded/deadpan looks are optional B expressions.
 - **Shading:** one soft shadow tone and one highlight; no gradients that disappear at 40 px.
 
 ## 5. Action list and frame budget
@@ -49,6 +49,8 @@ Naming: `capy_head_<action>_<nn>.png`, `capy_body_<action>_<nn>.png`, atlas `cap
 Rarity (Q2): not decided. Make the capy as good as possible first (all of section 5), then choose its rarity; the work is not rarity-gated.
 
 ## 6. Production pipeline and routes
+**Default route (owner 2026-11-06):** the agent draws the capy as layered SVG on these anchors and Phaser rasterises it at load (design spec above). The raster pipeline below is a fallback.
+
 Pipeline (agent-sprite-forge, MIT): approved master still → one clip or set of stills per action → key background → register to the anchors → loop/retime → finish → pack atlas + JSON (Aseprite-style JSON; Phaser loads it with `load.aseprite`, **not yet verified in Phaser by the tool — verify once by hand**).
 Routes without an API key (all run on the owner's machine, not in the cloud agent):
 1. **Master still and expression stills:** Codex CLI `image_gen` (signed-in subscription, no key). Output from another tool (for example agy) can be adopted with `master_still.py approve --still <png> --route <name>`.
