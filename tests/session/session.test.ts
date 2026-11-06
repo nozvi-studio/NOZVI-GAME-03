@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { processEvents } from '../../src/session/session';
-import { load, loadLog, LOG_KEY, SAVE_KEY } from '../../src/meta';
+import { load, loadLog, LOG_KEY, SAVE_KEY, summarizeLog } from '../../src/meta';
 import type { SimEvent } from '../../src/core';
 import { rules, setup, WALL_DEATH_MS } from './support';
 
@@ -209,5 +209,31 @@ describe('session debug start', () => {
     const { s } = setup();
     expect(() => s.startRun(25)).toThrow(RangeError);
     expect(() => s.startRun(31, 'home', true)).toThrow(RangeError);
+  });
+});
+
+describe('session debug skip', () => {
+  it('MEC-003-R21 debugSkipTo on a normal run converts it to debug: no progress, debug_skip logged, stats clean', () => {
+    const { s, store } = setup();
+    s.startRun(1);
+    expect(s.debugSkipTo(6)).toBe(true);
+    expect(s.snapshot().level).toBe(6);
+    s.frame(10); // drain the level-up event; only the normal start level (1) was recorded
+    expect(s.save().bestLevel).toBe(1); expect(s.save().unlockedCheckpoints).toEqual([]);
+    s.quit();
+    const log = loadLog(store);
+    expect(log.entries.map(e => e.type)).toContain('debug_skip');
+    expect(summarizeLog(log, 600000).runs).toBe(0);
+  });
+  it('MEC-003-R21 debugSkipTo is refused with no run, backwards, or after the run ended', () => {
+    const { s } = setup();
+    expect(s.debugSkipTo(5)).toBe(false);
+    s.startRun(1); expect(s.debugSkipTo(1)).toBe(false); s.quit();
+    expect(s.debugSkipTo(5)).toBe(false);
+  });
+  it('MEC-003-R21 a skipped debug run stays debug on retry from results', () => {
+    const { s } = setup();
+    s.startRun(10, 'home', true); expect(s.debugSkipTo(11)).toBe(true); s.quit();
+    s.startRun(10, 'results'); s.frame(10); expect(s.save().bestLevel).toBe(0);
   });
 });

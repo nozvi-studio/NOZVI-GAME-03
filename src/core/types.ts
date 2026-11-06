@@ -214,6 +214,7 @@ export interface Sim {
   advance(ms: number): void;                     // ms must be a non-negative integer; no-op after `over`
   drainEvents(): SimEvent[];                     // events since the last call, in order
   snapshot(): Readonly<SimSnapshot>;             // read-only view for rendering
+  debugSkipTo(level: number): boolean;           // MEC-003-R21 debug only: level-up chain into `level` (> current, <= max); false if refused
   clone(): Sim;                                  // independent copy: structuredClone of the state
 }
 

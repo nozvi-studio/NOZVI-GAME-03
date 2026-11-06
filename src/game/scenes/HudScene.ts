@@ -1,7 +1,9 @@
 import Phaser from 'phaser';
+import { nextKeyLevel } from '../../core';
 import type { Balance, SimEvent, SimSnapshot, SkillId } from '../../core';
 import type { Session } from '../../session';
 import { createSynth, type SfxName, type Synth } from '../audio/synth';
+import { isDebug } from '../flow/debugFlag';
 import { homeView } from '../flow/homeModel';
 import { flowPause, flowResume, flowTogglePause, type FlowEffect } from '../flow/runFlow';
 import { createDpad } from '../input/dpad';
@@ -57,6 +59,8 @@ export class HudScene extends Phaser.Scene {
   private bestLevelAtStart = 0;
   private orbTipShown = false;
   private leaving = false;
+  private debugKey: Phaser.GameObjects.Container | null = null;
+  private debugNext: Phaser.GameObjects.Container | null = null;
 
   constructor() { super('Hud'); }
 
@@ -79,6 +83,7 @@ export class HudScene extends Phaser.Scene {
     this.soundIcon = this.add.graphics(); sound.add(this.soundIcon);
     this.pauseButton = this.button(494, 44, 48, 48, 'pause-button', () => this.gameScene.apply(flowTogglePause(this.gameScene.flow, this.balance)));
     this.pauseIcon = this.add.graphics(); this.pauseButton.add(this.pauseIcon);
+    this.createDebugButtons();
     this.bar = this.add.graphics();
     this.level = this.label(LEVEL_BAR.x + 12, LEVEL_BAR.y + 3, '', 18, 'level');
     this.progress = this.label(LEVEL_BAR.x + LEVEL_BAR.width - 12, LEVEL_BAR.y + 3, '', 18).setOrigin(1, 0);
@@ -161,6 +166,21 @@ export class HudScene extends Phaser.Scene {
       });
       this.skills.push({ c, g, text });
     }
+  }
+  // MEC-003-R21 ?debug=1 only: "+1" and "Key" jump through the normal level-up path; the run becomes a debug run.
+  private createDebugButtons(): void {
+    this.debugKey = this.debugNext = null;
+    if (typeof window === 'undefined' || !isDebug(window.location?.search ?? '')) return;
+    const skip = (key: boolean): void => {
+      if (!acceptSkillInput(this.gameScene.flow.status)) return;
+      const cur = this.gameScene.snapshot()?.level; if (cur === undefined) return;
+      const to = key ? nextKeyLevel(cur, this.balance) : cur + 1;
+      if (to !== null && to <= this.balance.level.maxLevel) this.session.debugSkipTo(to);
+    };
+    this.debugNext = this.button(160, 76, 56, 24, 'debug-next', () => skip(false));
+    this.debugNext.add(this.label(0, 0, '+1', 15).setOrigin(.5));
+    this.debugKey = this.button(222, 76, 70, 24, 'debug-key', () => skip(true));
+    this.debugKey.add(this.label(0, 0, 'Key \u25B6', 15).setOrigin(.5));
   }
   private useSkill(slot: 0 | 1): void {
     if (acceptSkillInput(this.gameScene.flow.status)) this.session.useSkill(slot); // MEC-007-R15
@@ -317,6 +337,7 @@ export class HudScene extends Phaser.Scene {
     this.score.setText(String(s.score));
     this.level.setText(levelLabel(s, t)); // MEC-003 §8 star while challenge
     const max = this.balance.level.maxLevel, full = s.level >= max;
+    this.debugNext?.setVisible(!full); this.debugKey?.setVisible(nextKeyLevel(s.level, this.balance) !== null);
     this.progress.setText(progressLabel(s.progress, s.need, s.level, max));
     const bar = this.bar.clear().fillStyle(this.p.panel).fillRoundedRect(LEVEL_BAR.x, LEVEL_BAR.y, LEVEL_BAR.width, LEVEL_BAR.height, 12);
     bar.fillStyle(this.p.rock, .25).fillRoundedRect(LEVEL_BAR.x + 12, LEVEL_BAR.y + 31, LEVEL_BAR.width - 24, 7, 3);

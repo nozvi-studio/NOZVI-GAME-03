@@ -27,6 +27,8 @@ export interface Session {
   frame(ms: number): SimEvent[];
   turn(dx: -1 | 0 | 1, dy: -1 | 0 | 1): void;
   useSkill(slot: 0 | 1): void;
+  /** MEC-003-R21 debug only: level-up into `level` (> current); marks the run debug. Returns false when refused. */
+  debugSkipTo(level: number): boolean;
   snapshot(): Readonly<SimSnapshot>;
   pause(): void; hidden(): void; quit(): void;
   summary(): RunSummary | null;
@@ -165,6 +167,13 @@ export function createSession(deps: SessionDeps): Session {
     },
     turn(dx, dy) { if (run && !run.over && run.sim.turn(dx, dy)) run.turns++; }, // MEC-003-R19 turns
     useSkill(slot) { if (run && !run.over) run.sim.useSkill(slot); }, // MEC-007-R14
+    debugSkipTo(level) { // MEC-003-R21 converts a normal run to debug on first use; stats and progress stay clean
+      const from = run && !run.over ? run.sim.snapshot().level : 0;
+      if (!run || run.over || !run.sim.debugSkipTo(level)) return false;
+      if (!run.debug) { run.debug = true; lastDebug = true; }
+      record({ type: 'debug_skip', from, to: level });
+      return true;
+    },
     snapshot() {
       if (!run) throw new Error('snapshot: no run');
       return run.sim.snapshot();

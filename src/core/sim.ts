@@ -13,6 +13,7 @@ import { effectiveTick, SKILLS, skillTimers, slotCount, unlockedSkills, useSkill
 import { placeMango, mangoTick } from './mango';
 import { levelUpSlowTick } from './slowdown';
 import { rainTick } from './skills/mangoRain';
+import { startLevelUp } from './transition';
 import { rngFrom, seedRng, type Rng } from './rng';
 import { queueTurn, stepSnake } from './snake';
 import type { Dir, HitCtx, Sim, SimSnapshot, SimState, SimOptions, Step, StepCtx } from './types';
@@ -148,6 +149,12 @@ function wrap(b: Balance, s: SimState, internal: InternalOptions = {}): Sim {
     },
     drainEvents: () => s.events.splice(0),
     snapshot: () => snapshotOf(s, b),
+    debugSkipTo: level => { // MEC-003-R21 one normal level-up chain into `level`; intermediate levels are not replayed
+      if (s.status !== 'playing' || !Number.isInteger(level) || level <= s.level || level > b.level.maxLevel) return false;
+      s.level = level - 1; s.progress = needFor(b, s.level);
+      startLevelUp(s, b, { balance: b, snakeOn: (x, y) => snakeOn(s, x, y), emit: e => { s.events.push(e); } });
+      return true;
+    },
     clone: () => restoreSim(b, s, internal),
   };
   states.set(sim, s);

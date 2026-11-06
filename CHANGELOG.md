@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(game): debug "+1" and "Key" level-skip buttons in the HUD (`?debug=1` only); `Sim.debugSkipTo`, `Session.debugSkipTo`, `keyLevels`/`nextKeyLevel`, `debug_skip` log record marks the run debug (MEC-003-R21)
 - docs: P2 exit check entry in PLAYTEST (agy QA 9/10 + banner fix, reduced fuzz pass) and STATUS after P2c
 - fix(game): challenge banner shows on run start (HudScene shows runStartLines in create(); Hud launches after Game's newRun)
 - fix: P2c final review fix-ups (debug run marker excluded from deathCauseReport/summarizeLog, bot board-size verdict skipped on partial level ranges, MEC-018 R7 event names)
