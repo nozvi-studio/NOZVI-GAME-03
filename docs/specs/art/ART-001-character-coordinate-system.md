@@ -1,5 +1,5 @@
 # ART-001 — Character Coordinate System (reference character: Capybara)
-Status: Draft (owner review pending) · Phase: P3 prep · Source of truth for: character head anchors, outline/palette rules, action list, frame naming, asset folders.
+Status: Draft v2 (owner answers Q1-Q5 applied 2026-11-06) · Phase: P3 prep · Source of truth for: character head anchors, outline/palette rules, action list, frame naming, asset folders.
 Design source: Figma canvas "Mango Snake — D2" (board `PlayerHead`, `HeadRigD2`, `ExprHeadD2`). Style reference (mood only, not to be copied): owner-supplied "grumpy purple cat" turnaround/expression sheet.
 
 ## 1. Game concept (context for art; GDD owns the rules)
@@ -28,26 +28,31 @@ One 48 × 48 box, origin top-left, y down. All skins hang the face on the same p
 Rules: eyes, nose, mouth never leave their anchors; only head shape, ears and marks move per skin. No leaf, stem or fruit shape on any head (the mango is food).
 
 ## 4. Look rules for the raster capy (proposal, owner to confirm)
-- **Outline:** dark warm brown (proposed `#4A2E1B`), about 2 px at 48-box scale (about 5% of head width), round joins. Open point: the current Figma D2 heads use no outline (`stroke: none`), while GDD §10.1 says thick dark outlines. See §8, Q1.
+- **Outline (owner 2026-11-06: follow the GDD):** thick dark warm brown (proposed `#4A2E1B`), about 2 px at 48-box scale (about 5% of head width, about 10 px on a 256 px frame), round joins, same weight on every action. Figma D2 heads (`stroke: none`) must be updated to match; until then Figma is out of date against GDD §10.1.
 - **Palette (from Figma):** face `#D6AB7C → #C79A6B`, ears and muzzle `#B1865A`, pupils `#17261B`, nose/mouth `#4A2E1B`, blush `#FF8FA3`. One shared palette per character; no new colours per action.
 - **Face personality (from the style reference):** half-lidded eyes with a visible lid line, slight brow asymmetry, flat mouth by default. Pupils get a highlight dot.
 - **Shading:** one soft shadow tone and one highlight; no gradients that disappear at 40 px.
 
 ## 5. Action list and frame budget
-Display is small, so keep clips short. Frame size proposal: **256 × 256 px** per frame (Home 124 px at 2× DPR), 12 fps unless noted. ASSUMPTION: tune after a phone check.
+Display is small, so keep clips short. Owner delegated the choice (Q4); decision:
+- **Head frames: 256 × 256 px** (Home shows the head at 124 CSS px, so 2× DPR needs 248 px). **Body frames: 384 × 384 px** (Skins/Results only, shown at about 160–200 CSS px). Same anchors, scaled by 8 (head) and 8 (body drawn on the same 48-unit grid with the body below y 44.4, so the body frame is a 1.5× canvas around the head anchors).
+- **12 fps** for every action (cheap, reads as hand-animated at this size); engine tweens add the smooth motion.
+- Budget: about 40 head frames + about 24 body frames fit one 2048 × 2048 atlas page (padding 2, extrude 1). Re-check on a real phone before scaling to other skins.
 | Priority | Action | Frames | Loop | Notes |
 |---|---|---|---|---|
-| A (ships with every skin) | `idle` | 6–8 | yes | blink, slow eye wander, small breathing |
+| A (ships with every skin) | `idle` | 6–8 | yes | blink, slow eye wander, small breathing (head and body) |
 | A | `eat` | 6 | no | mouth opens, gulp, returns to idle |
 | A | `dead` | 8 | no | X eyes, flop; works with reduced motion (no shake) |
 | B (Rare/Epic) | `happy`, `chew`, `alert`, `scared`, `determined`, `hurt`, `sleepy`, `win` | 1–4 each | per action | names match `ExprHeadD2`; static expression stills plus engine tweens are acceptable |
-Naming: `capy_<action>_<nn>.png`, atlas `capy.png` + `capy.json`, animation keys `capy/<action>`.
+Scope (Q3): the reference capy has a **head set** (every action above) and a **body set** (`idle` and `win` for the Skins and Results screens; more later if needed). In-game bodies stay block-based per GDD §8.3.
+Naming: `capy_head_<action>_<nn>.png`, `capy_body_<action>_<nn>.png`, atlas `capy.png` + `capy.json`, animation keys `capy/head/<action>`, `capy/body/<action>`.
+Rarity (Q2): not decided. Make the capy as good as possible first (all of section 5), then choose its rarity; the work is not rarity-gated.
 
 ## 6. Production pipeline and routes
 Pipeline (agent-sprite-forge, MIT): approved master still → one clip or set of stills per action → key background → register to the anchors → loop/retime → finish → pack atlas + JSON (Aseprite-style JSON; Phaser loads it with `load.aseprite`, **not yet verified in Phaser by the tool — verify once by hand**).
 Routes without an API key (all run on the owner's machine, not in the cloud agent):
 1. **Master still and expression stills:** Codex CLI `image_gen` (signed-in subscription, no key). Output from another tool (for example agy) can be adopted with `master_still.py approve --still <png> --route <name>`.
-2. **Motion:** image-to-video needs the Grok CLI (ACP) or a paid API key; the Codex route has no image-to-video. Default alternative that needs neither: **per-expression stills + Phaser tweens** (squash/stretch, bob, blink by swapping frames). A clip made elsewhere can be supplied to the pipeline.
+2. **Motion:** image-to-video needs the Grok CLI (ACP) or a paid API key; the Codex route has no image-to-video. Options that need neither: (a) **per-expression stills + Phaser tweens** (squash/stretch, bob, blink by swapping frames); (b) the owner's **Remotion** setup (code-driven video): animate the approved master layers or stills (transform, squash, eye swaps) and render a PNG sequence or video, which the pipeline accepts as a supplied clip. Option (b) is deterministic, so identity does not drift between frames. Not yet verified: the owner's Remotion repo is not visible to the cloud agent.
 3. Keys, if ever used, go in environment variables or the user config file, never in the repo (AGENTS §6).
 Every AI-generated frame needs a human look (identity drift, outline weight, palette) before it enters `assets/game/`; keep the tool's licence terms in DECISIONS (GDD §10.1).
 
@@ -60,8 +65,12 @@ assets/game/capy/       final atlas PNG + JSON that Phaser loads
 ```
 
 ## 8. Open questions for the owner
-- Q1. Outline: add the dark outline to the Figma D2 heads (matches GDD §10.1), or keep D2's soft no-outline look and update GDD?
-- Q2. Rarity of Capybara (Common vector only, or Rare/Epic raster)? Raster clips are only required for Rare and above.
-- Q3. Head only, or also a full-body capy for the Skins/results screens?
-- Q4. Frame size 256 px and 12 fps acceptable?
-- Q5. Which route does the owner have installed: Codex CLI, Grok CLI, both?
+Answered by the owner 2026-11-06:
+- Q1 outline: follow the GDD (thick dark outline). Figma D2 needs the update.
+- Q2 rarity: deferred; build the capy to full quality first.
+- Q3 scope: head and body.
+- Q4 frame size/fps: agent's choice (section 5).
+- Q5 tools: Codex CLI installed; a Remotion-based video setup works on the owner's laptop.
+Still open:
+- Q6. Name/location of the owner's Remotion repo (it is not in this session's GitHub scope) and whether it can take a PNG master and export a PNG sequence.
+- Q7. Update the Figma D2 heads with the outline now, or after the capy master is approved?
