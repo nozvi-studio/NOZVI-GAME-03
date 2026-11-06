@@ -2,6 +2,14 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(game): capy SVGs load as base64 data URLs (Phaser treats data: URLs as base64); body feet no longer clipped
+- feat(game): debug capy art preview page (`?debug=1&artPreview=1`)
+- feat(game): capy face on the snake head (Boot rasterises capy SVGs; idle/eat/dead on the board)
+- feat(game): capy face pose state machine (idle breath/blink, eat, dead droop; reduced motion) and `ui.capy` balance
+- feat(game): pure capy SVG rig (12 expressions, 2 body poses) on the ART-001 anchors
+- docs: P3c capy character design spec (layered SVG per Figma + outline, idle/eat/dead motion, preview page); ART-001 v3, ART-002 demoted to fallback; Figma capy reference added
+- docs: ART-002 capy master still brief and `assets/raw/master/capy/specs/` (body and head spec JSON for agent-sprite-forge via Codex CLI, acceptance checklist, Remotion motion test)
+- docs: ART-001 character coordinate system draft (capy reference, anchors, action list, asset folders, no-API-key production routes); assets/work git-ignored; v2 applies owner answers (GDD outline, head + body, 256/384 px, 12 fps, Remotion route)
 - feat(game): run start waits for the first direction input after the countdown (new `waiting` flow phase, wait hint on the HUD, reverse input ignored; owner 2026-11-06, MEC-001-R2)
 - feat(game): debug "+1" and "Key" level-skip buttons in the HUD (`?debug=1` only); `Sim.debugSkipTo`, `Session.debugSkipTo`, `keyLevels`/`nextKeyLevel`, `debug_skip` log record marks the run debug (MEC-003-R21)
 - fix(core): Shield breaks without leaving rubble (MEC-006-R28, owner 2026-11-06); bonk pause stays, `shieldBroke` loses its `rubble` field

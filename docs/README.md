@@ -1,5 +1,5 @@
 # Docs map (read this instead of scanning docs/)
-Updated: 2026-11-04
+Updated: 2026-11-06
 
 ## 1. Document index
 Only files listed here exist. Status: Draft / Approved / Deprecated.
@@ -22,6 +22,8 @@ Only files listed here exist. Status: Draft / Approved / Deprecated.
 | P2C-PLAN | `docs/superpowers/plans/2026-11-04-p2c-shrink-challenge-tuning.md` | P2c implementation plan (shrinking board, challenge levels, biome tuning, board-size check, P2 exit with 40% metric; 8 tasks) | Draft |
 | ARCH | `docs/ARCHITECTURE.md` | Module boundaries, time model, Sim step order | Draft |
 | PLAYTEST | `docs/PLAYTEST.md` | Playtest evidence | — |
+| ART-001 | `docs/specs/art/ART-001-character-coordinate-system.md` | Character anchors, look rules, action list, asset folders and production routes (capy reference) | Draft |
+| ART-002 | `docs/specs/art/ART-002-capy-master-still.md` | Capy master still brief: spec files, Codex steps, acceptance checklist, motion test | Draft |
 | MEC-001 | `docs/specs/mechanics/MEC-001-snake.md` | Snake movement, growth, self-collision, length reset | Approved |
 | MEC-002 | `docs/specs/mechanics/MEC-002-mango.md` | Mango placement, golden, rot, rotten rock | Approved |
 | MEC-003 | `docs/specs/mechanics/MEC-003-levels-biomes.md` | 30 levels, quotas, speed, transition, run log | Approved |

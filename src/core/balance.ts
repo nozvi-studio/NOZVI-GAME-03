@@ -77,6 +77,9 @@ export interface Balance {
   ui: {
     bannerMs: number; swipeMinPx: number; swipeBoardFactor: number;
     haptics: { eatMs: number; level: number[]; deathMs: number }; terrainFadeInMs: number; hazardFlickerMs: number;
+    capy: { breathPeriodMs: number; breathAmp: number; blinkMs: number; blinkMinGapMs: number; blinkMaxGapMs: number;
+      eatOpenMs: number; eatChewMs: number; gulpScaleX: number; gulpScaleY: number;
+      deadDroopMs: number; deadRotDeg: number; deadDropPx: number; headCellScale: number };
   };
 }
 
@@ -193,6 +196,9 @@ const SPEC: Spec = {
   ui: {
     bannerMs: 'int+', swipeMinPx: 'num+', swipeBoardFactor: 'prob',
     haptics: { eatMs: 'int+', level: 'ints', deathMs: 'int+' }, terrainFadeInMs: 'int+', hazardFlickerMs: 'int+',
+    capy: { breathPeriodMs: 'int+', breathAmp: 'prob', blinkMs: 'int+', blinkMinGapMs: 'int+', blinkMaxGapMs: 'int+',
+      eatOpenMs: 'int+', eatChewMs: 'int+', gulpScaleX: 'num+', gulpScaleY: 'num+',
+      deadDroopMs: 'int+', deadRotDeg: 'num0', deadDropPx: 'num0', headCellScale: 'num+' },
   },
 };
 
@@ -303,6 +309,7 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (rain.dropsMin > rain.dropsMax) fail('skills.mangoRain.dropsMin', 'must be <= dropsMax');
   if (rain.mangoBlinkMs >= rain.mangoLifeMs) fail('skills.mangoRain.mangoBlinkMs', 'must be < mangoLifeMs');
   if (b.energy.orbBlinkMs >= b.energy.orbLifeMs) fail('energy.orbBlinkMs', 'must be < orbLifeMs');
+  if (b.ui.capy.blinkMaxGapMs < b.ui.capy.blinkMinGapMs) fail('ui.capy.blinkMaxGapMs', 'must be >= blinkMinGapMs');
   // MEC-007 section 9 unlock ordering and level bounds.
   const inLevelRange = (n: number) => n >= 1 && n <= b.level.maxLevel;
   if (b.loadout.order.length !== 4 || new Set(b.loadout.order).size !== 4) fail('loadout.order', 'must list each skill exactly once');

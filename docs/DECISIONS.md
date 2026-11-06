@@ -428,3 +428,15 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: after the run-start countdown the flow enters a `waiting` phase (pure `runFlow`, `FlowState.started`): no sim frame, no tick/director/timers, no `durationMs`. First non-reverse turn input (keys, swipe, D-pad) queues as today and starts play; straight starts too; reverse of the start direction is ignored; skill input ignored (MEC-007-R15). Pause/resume stay valid; a resume before the first input returns to `waiting`. Fresh run starts only, not level-ups (flow B). Provisional hint strings in `text.ts` (owner batch Q).
 - Alternatives: longer countdown; auto-move with a visible arrow only; any key/tap starts.
 - Consequence: MEC-001-R2, MEC-007-R9/R15, GDD section 3 flow updated; `ready` stays the idle pre-start status; QA flow tests send a first turn.
+
+## 2026-11-06 - Character art: one reference character (capy) and agent-sprite-forge as an optional tool
+- Context: Figma D2 heads look flat (no outline, 3 states). Owner wants livelier characters and proposed github.com/0x0funky/agent-sprite-forge (MIT): approved master still, per-action animation, atlas + JSON export.
+- Choice: perfect one reference character (Capybara) on the shared 48 x 48 rig, then clone other skins on the same anchors (ART-001). Use the tool only on the owner's machine with Codex CLI / Grok CLI (no API key); static expression stills + Phaser tweens are the default motion route. Folder layout in ART-001 section 7.
+- Alternatives: keep vector-only heads (cheap, flat); draw every skin separately; paid image/video APIs.
+- Consequence: nothing is added as a dependency yet; any generated asset needs a human check and a licence note. Outline question (GDD 10.1 vs Figma D2) is open (ART-001 Q1).
+
+## 2026-11-06 - Start P3 (capy) before the P2 exit playtest; capy drawn as layered SVG
+- Context: P2 code is done and accepted; the P2 exit playtest needs owner time. Owner wants a good-looking game first and will return to the playtest later.
+- Choice: owner-approved deviation from GDD section 11 order: P3 starts now, split into P3a juice, P3b screens, P3c capy; P3c first. Capy personality follows Figma (round eyes, smile) plus the GDD outline. The agent draws a layered SVG on the ART-001 rig; Phaser rasterises it with `load.svg` (no new dependency); motion by texture swaps and tweens.
+- Alternatives: finish the P2 exit first; Codex image_gen raster masters (ART-002, now fallback); owner exports from Figma.
+- Consequence: P2 exit (playtest, full fuzz) stays open in STATUS; spec docs/superpowers/specs/2026-11-06-capy-character-design.md.

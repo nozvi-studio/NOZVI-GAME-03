@@ -26,6 +26,8 @@ export class DrawObject extends Signals {
   setScale(v: number): this { this.scale = v; return this; }
   setSize(w: number, h: number): this { this.width = w; this.height = h; return this; }
   setOrigin(): this { return this; }
+  setTexture(): this { return this; }
+  setAngle(): this { return this; }
   setWordWrapWidth(): this { return this; }
   setAlign(): this { return this; }
   setColor(): this { return this; }
@@ -37,6 +39,8 @@ export class DrawObject extends Signals {
   saveTexture(): this { return this; }
   draw(): this { return this; }
   add(items: DrawObject | DrawObject[]): this { this.list.push(...(Array.isArray(items) ? items : [items])); return this; }
+  getIndex(o: DrawObject): number { return this.list.indexOf(o); }
+  addAt(o: DrawObject, i: number): this { this.list.splice(i, 0, o); return this; }
   clear(): this { this.commands = []; return this; }
   fillStyle(...a: unknown[]): this { this.commands.push(['fillStyle', ...a]); return this; }
   lineStyle(...a: unknown[]): this { this.commands.push(['lineStyle', ...a]); return this; }
