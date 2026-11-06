@@ -35,7 +35,7 @@ export const ART = {
   cheekY: 30, cheekDx: 15, cheekRx: 4, cheekRy: 2.6,
   noseY: 30.6, nostrils: [20.6, 27.4], nostrilRx: 1.6, nostrilRy: 1.2,
   muzzle: { x: 24, y: 34, rx: 12.6, ry: 8.4 }, mouthY: 37.6, mouthHalfW: 3.5, cx: 24,
-  body: { cx: 24, cy: 56, rx: 17, ry: 14, feetY: 69, feetDx: 9, footRx: 6, footRy: 3, armY: 50, armWinY: 40, armDx: 18, armRx: 4, armRy: 3 },
+  body: { cx: 24, cy: 56, rx: 17, ry: 14, feetY: 68, feetDx: 9, footRx: 6, footRy: 3, armY: 50, armWinY: 40, armDx: 18, armRx: 4, armRy: 3 },
 } as const;
 
 const n = (v: number): string => String(+v.toFixed(2));
@@ -108,6 +108,6 @@ export function capyBodySvg(p: CapyBodyPose): string {
   return wrap('0 0 48 72', head.slice(0, defsEnd) + body + head.slice(defsEnd));
 }
 
-export const svgDataUrl = (svg: string): string => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+export const svgDataUrl = (svg: string): string => 'data:image/svg+xml;base64,' + btoa(svg);
 export const capyHeadKey = (e: CapyExpression, size: CapySize): string => `capy/head/${e}/${size}`;
 export const capyBodyKey = (p: CapyBodyPose): string => `capy/body/${p}/large`;

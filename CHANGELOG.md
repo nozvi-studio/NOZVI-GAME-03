@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(game): capy SVGs load as base64 data URLs (Phaser treats data: URLs as base64); body feet no longer clipped
 - feat(game): debug capy art preview page (`?debug=1&artPreview=1`)
 - feat(game): capy face on the snake head (Boot rasterises capy SVGs; idle/eat/dead on the board)
 - feat(game): capy face pose state machine (idle breath/blink, eat, dead droop; reduced motion) and `ui.capy` balance

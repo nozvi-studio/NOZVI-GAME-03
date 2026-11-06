@@ -35,7 +35,7 @@ Ship the reference Capybara character in the game: a layered SVG head (and body 
 - Body (Skins/Results only): same palette and outline, round belly below the head, two stub feet; `idle` (breathing) and `win` (hop). In-game body stays block-based (GDD §8.3).
 
 ## 4. Rendering
-- SVG strings are built by a pure function `buildCapySvg(expression, size)` (no Phaser import, unit-testable) in `src/game/art/` — pure module path chosen so it sits next to its only consumer; it imports nothing from Phaser.
+- SVG strings are built by a pure function `capyHeadSvg(expression)` / `capyBodySvg(pose)` (plus `svgDataUrl`, base64) (no Phaser import, unit-testable) in `src/game/art/` — pure module path chosen so it sits next to its only consumer; it imports nothing from Phaser.
 - Phaser loads each expression with `load.svg(key, dataUrl, { width, height })` at two sizes: `board` (96 px; board head is ~36 CSS px at ~3× DPR) and `large` (256 px). Keys: `capy/head/<expression>/<size>`, `capy/body/<pose>/large`. No new dependency, no PNG atlas at this stage.
 - The head on the board stays **front facing**: its position follows the snake head; the face texture is not rotated.
 
@@ -50,7 +50,7 @@ Ship the reference Capybara character in the game: a layered SVG head (and body 
 `?artPreview=1` (debug only) opens a scene that shows every expression and body pose at 24, 40, 124 and 256 CSS px on light and dark board backgrounds, with idle/eat/dead playing. Used for the owner's 5" phone check.
 
 ## 7. Testing
-- Vitest: `buildCapySvg` output contains every fixed layer; eye centres at y 20.4, x 24 ± 9.6; mouth at y 37.6; outline colour and width present; every expression in the table resolves to existing variants; no unknown expression. Test names carry `ART-001`.
+- Vitest: `capyHeadSvg`/`capyBodySvg` output contains every fixed layer; eye centres at y 20.4, x 24 ± 9.6; mouth at y 37.6; outline colour and width present; every expression in the table resolves to existing variants; no unknown expression. Test names carry `ART-001`.
 - Full `npm test` + `npm run typecheck` before merge; agy browser QA on the board and the preview page (no console errors, capy visible, eat/dead play).
 
 ## 8. Out of scope

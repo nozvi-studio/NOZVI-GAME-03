@@ -1,5 +1,5 @@
 # Code map
-Updated: 2026-11-05 · Keep under ~80 lines. One row per module, not per file.
+Updated: 2026-11-06 · Keep under ~80 lines. One row per module, not per file.
 > Production code is being built in P0 (`src/`); the prototype stays as the behavior reference.
 
 ## Entry points
