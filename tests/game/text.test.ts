@@ -47,6 +47,7 @@ describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
       title: 'Mango Snake: Hard', header: 'Mango Snake', hard: 'hard', score: 'score', best: 'best',
       start: 'Fill the bar with mangoes to level up. Each level brings new obstacles.',
       play: 'Play', resume: 'Resume', playAgain: 'Play again', paused: 'Paused',
+      waitHintKeys: 'Press an arrow to go!', waitHintTouch: 'Swipe to go!',
       pausedText: 'You get a short countdown when you resume.',
       landsSoon: 'Lands soon', groundRising: 'Ground rising', mangoRotting: 'Mango rotting',
       over: 'Game over', won: 'You filled the board!', wonWhy: 'No room left for mangoes.',

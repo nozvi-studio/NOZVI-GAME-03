@@ -40,6 +40,7 @@ export class HudScene extends Phaser.Scene {
   private banner!: Phaser.GameObjects.Text;
   private tip!: Phaser.GameObjects.Text;
   private count!: Phaser.GameObjects.Text;
+  private waitHint!: Phaser.GameObjects.Text;
   private overlay!: Phaser.GameObjects.Container;
   private card!: Phaser.GameObjects.Graphics;
   private pauseButton!: Phaser.GameObjects.Container;
@@ -97,6 +98,8 @@ export class HudScene extends Phaser.Scene {
     this.tip = this.label(BOARD.x + BOARD.size / 2, BOARD.y + BOARD.size - 60, '', 17, 'tip')
       .setOrigin(.5, 0).setWordWrapWidth(BOARD.size - 40).setAlign('center').setVisible(false);
     this.count = this.label(BOARD.x + BOARD.size / 2, BOARD.y + BOARD.size / 2, '', 96, 'countdown').setOrigin(.5).setVisible(false);
+    // MEC-001-R2 hint while the run waits for the first direction input (strings provisional, owner batch Q)
+    this.waitHint = this.label(BOARD.x + BOARD.size / 2, BOARD.y + BOARD.size / 2, this.sys.game?.device?.input?.touch ? TEXT.waitHintTouch : TEXT.waitHintKeys, 28, 'wait-hint').setOrigin(.5).setAlign('center').setVisible(false);
     this.pad = createDpad(this, DPAD, d => this.gameScene.turn(d.x, d.y));
     const flow = (e: FlowEffect): void => this.onFlow(e);
     const events = (e: SimEvent[]): void => this.onEvents(e);
@@ -239,10 +242,11 @@ export class HudScene extends Phaser.Scene {
         if (start.length) this.showBanner(start.join('\n'));
         break;
       }
-      case 'hideOverlay': this.overlay.setVisible(false); this.count.setVisible(false); break;
-      case 'showPaused': this.count.setVisible(false); this.overlay.setVisible(true); break;
+      case 'hideOverlay': this.overlay.setVisible(false); this.count.setVisible(false); this.waitHint.setVisible(false); break;
+      case 'showPaused': this.count.setVisible(false); this.waitHint.setVisible(false); this.overlay.setVisible(true); break;
       case 'tick': this.count.setText(String(effect.n)).setVisible(true); this.synth.play('tick'); break;
-      case 'go': this.count.setVisible(false); this.synth.play('go'); break;
+      case 'go': this.count.setVisible(false); this.waitHint.setVisible(this.gameScene.flow.status === 'waiting'); this.synth.play('go'); break;
+      case 'begin': this.waitHint.setVisible(false); break;
     }
     this.refresh();
   }
@@ -316,7 +320,7 @@ export class HudScene extends Phaser.Scene {
   }
 
   private onOver(_s: SimSnapshot): void {
-    this.hideBanner(); this.count.setVisible(false); this.drawPause();
+    this.hideBanner(); this.count.setVisible(false); this.waitHint.setVisible(false); this.drawPause();
     this.best.setText(String(this.session.save().bestScore));
     this.toResults(reduceMotion() ? 0 : this.balance.flow.deathCardDelayMs);
   }

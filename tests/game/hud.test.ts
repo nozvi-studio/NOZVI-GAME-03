@@ -38,10 +38,17 @@ function setup(saveData: object = {}) {
   game.apply(flowStart(game.flow, b));
   return { ...h, hud, game, store, session, browser, doc, document, started, stopped,
     click: (name: string) => { h.find(name).emit('pointerdown'); h.find(name).emit('pointerup'); },
-    play: () => { game.apply(flowTick(game.flow, b, b.flow.countdownMs)); } };
+    play: () => { game.apply(flowTick(game.flow, b, b.flow.countdownMs)); game.turn(0, -1); } }; // MEC-001-R2 first input starts
 }
 
 describe('P1 HUD flow, audio and session wiring', () => {
+  it('MEC-001-R2 HUD shows the wait hint after the countdown until the first non-reverse input', () => {
+    const h = setup();
+    h.game.apply(flowTick(h.game.flow, b, b.flow.countdownMs));
+    expect(h.game.flow.status).toBe('waiting'); expect(h.find('wait-hint').visible).toBe(true);
+    h.game.turn(-1, 0); expect(h.game.flow.status).toBe('waiting'); expect(h.find('wait-hint').visible).toBe(true);
+    h.game.turn(0, -1); expect(h.game.flow.status).toBe('playing'); expect(h.find('wait-hint').visible).toBe(false);
+  });
   it('P1 HUD has no Play card: Game opens on the countdown; pause shows Resume and Quit', () => {
     const h = setup();
     expect(h.find('overlay').visible).toBe(false);

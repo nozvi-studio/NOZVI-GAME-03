@@ -35,7 +35,7 @@
 - MEC-007-R6: The screen shows `slotCount` slot boxes and all 4 skill cards. Locked cards show a lock and "Reach L{unlockLevel}"; they cannot be picked. Each card shows the skill letter, name, cost and one-line effect.
 - MEC-007-R7: Tapping a slot box makes it `activeSlot`. Tapping an unlocked card puts it into `activeSlot`; if the card was in the other slot, the two slots swap. Then `activeSlot` moves to the other slot (if `slotCount` is 2).
 - MEC-007-R8: The screen never allows an empty slot while an unchosen unlocked skill exists (the selection starts full after R4, and R7 only replaces or swaps). Slots may not hold the same skill twice.
-- MEC-007-R9: "Go!" (also `Enter` / `Space`) confirms with one tap: saves `lastLoadout = selection`, then starts the countdown (GDD §3: 1.5 s). "Back" (also `Esc`) returns Home without saving.
+- MEC-007-R9: "Go!" (also `Enter` / `Space`) confirms with one tap: saves `lastLoadout = selection`, then starts the countdown (GDD §3: 1.5 s); after the countdown the snake waits for the first direction input (MEC-001-R2). "Back" (also `Esc`) returns Home without saving.
 
 **Passing into the core**
 - MEC-007-R10: The game calls `createSim(balance, seed, {startLevel, startEnergy, loadout, bestLevel})` (`SimOptions`, MEC-003 §7); `bestLevel = max(1, save.bestLevel)` read before this run updates it (MEC-008-R5).
@@ -47,7 +47,7 @@
 
 **Firing**
 - MEC-007-R14: Input mapping (game layer): left skill button, `J` or `Q` → `sim.useSkill(0)`; right skill button, `K` or `E` → `sim.useSkill(1)`. Buttons react on pointer down. A button is drawn only for a non-null slot.
-- MEC-007-R15: Skill input is not forwarded during countdown, pause or after the run is over (no spend before the run starts). Keyboard auto-repeat is ignored (only the first `keydown`).
+- MEC-007-R15: Skill input is not forwarded during countdown, the waiting-for-first-input phase (MEC-001-R2), pause or after the run is over (no spend before the run starts). Keyboard auto-repeat is ignored (only the first `keydown`).
 - MEC-007-R16: Activation, costs and rejections are MEC-006 rules.
 
 ## 5. Edge cases
