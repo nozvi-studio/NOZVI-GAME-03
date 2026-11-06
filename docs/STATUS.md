@@ -7,7 +7,8 @@
 - [x] P2c Tasks 1-8 on feat/p2c-shrink-challenge: MEC-018 shrink L27, challenge levels L5-30 (x0.8 interval, cap +2, banner + star), bot tuning L1-30, deathCauseReport (40% gate, debug runs excluded), debug start `?debug=1&level=N` (no progress written), final review fixes. 1158 pass, typecheck clean; reduced fuzz pass; agy QA 9/10 + banner fix (PLAYTEST "P2 exit check").
 - [ ] **RESUME HERE:** owner sends the P2 exit playtest log (normal runs, no ?debug=1; start from checkpoint L10; >= 30 runs, >= 10 reaching biome 4). Lead runs deathCauseReport + summarizeLog, writes the verdict in PLAYTEST, tunes if over40 (OQ-C5).
 
-- [ ] **P3c capy (owner 2026-11-06: P3 before P2 exit, capy first):** on `feat/capy-character-spec`, not merged. Layered SVG capy per Figma + outline (12 expressions, 2 body poses), face on the snake head (idle/eat/dead, reduced motion), debug preview `?debug=1&artPreview=1`. 1192 tests pass, typecheck + build clean. **Browser QA not done** (agy timed out, then killed for low RAM). RESUME: owner or agy opens the preview and a run, checks no console errors, then merge --no-ff into version/v0.2.
+- [x] P3c capy merged into version/v0.2 (e40a333, owner approved 2026-11-06): SVG capy face on the snake head + debug preview `?debug=1&artPreview=1`.
+- [ ] Next P3 part: P3a juice (§10.4) or P3b screens — owner to pick.
 
 ## Next (ordered, max 5)
 1. Owner playtest + 40% verdict; if over40 not empty: lead tunes (OQ-C5), re-playtest.
