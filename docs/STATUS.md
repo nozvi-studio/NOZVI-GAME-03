@@ -28,7 +28,8 @@
 - Windows: Vitest needs --configLoader native --pool threads --maxWorkers 2. Host RAM low: agy browser QA gets killed when fuzz/bot run at the same time.
 - 4 skipped QA (reasons in files). Single 1.28 MB JS chunk.
 - Quitting mid-run does not log run_end (seen in phone log).
-- Checkpoints only reach L12; for QA of L16+ use `?debug=1&level=N`.
+- Checkpoints only reach L12; for QA use `?debug=1&level=N` or the debug HUD buttons "+1" / "Key ▶".
+- Rubble family has no production source since Shield stopped leaving rubble (owner 2026-11-06); remove family + `skills.shield.rubbleLifeMs` in a cleanup task.
 
 ## Last session summary
 - P2c executed via subagent-driven development (Sonnet implementers + reviewers, Opus final review, agy browser QA). Fuzz found and fixed shrink-on-reserved-cell; QA found and fixed run-start banner race.
