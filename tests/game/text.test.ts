@@ -34,7 +34,7 @@ describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
       fence: 'You ran into a fence.', maze: 'You ran into a hedge.', ground: 'The ground rose in front of you.',
       snipWall: 'You hit your discarded tail.', rubble: 'You hit the rubble.',
       coconut: 'Hit by a coconut.', gate: 'Crushed by a gate.', spike: 'Spiked.',
-      cat: 'Ran into the cat.', chicken: 'Ran into the chicken.', bomb: 'Caught in the blast.',
+      cat: 'Ran into the cat.', chicken: 'Ran into the chicken.', bomb: 'Caught in the blast.', shrink: 'You hit the closed edge.',
     });
   });
   it('GDD-13 level bar labels', () => {
@@ -97,4 +97,9 @@ it('MEC-015-R8 NPC introduction has a readable level banner', () => {
 it('MEC-003 §8 every P2b family has a banner and every P2b cause has a death text', () => {
   for (const k of ['coconut', 'gate', 'spike', 'npc', 'bird', 'bomb']) expect(t(`banner.new.${k}`)).not.toMatch(/^banner\./);
   for (const c of ['coconut', 'gate', 'spike', 'cat', 'chicken', 'bomb']) expect(t(`death.${c}`)).not.toMatch(/^death\./);
+});
+
+it('MEC-018-R11 shrink has a banner and a death text', () => {
+  expect(t('banner.new.shrink')).toBe('The board shrinks! The edge closes for a while.');
+  expect(t('death.shrink')).toBe('You hit the closed edge.');
 });

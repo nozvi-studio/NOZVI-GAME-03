@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { emptyLog, loadLog, nextRun, appendRecord, flushLog, memoryStore, LOG_KEY } from '../../src/meta';
+import { emptyLog, loadLog, nextRun, appendRecord, flushLog, memoryStore, LOG_KEY, deathCauseReport } from '../../src/meta';
 import type { LogRecord, KeyValueStore } from '../../src/meta';
 const end = (runId: number, cause = 'rock'): LogRecord => ({ type: 'run_end', t: runId, runId, level: 3, score: 8, cause, durationMs: 100, startLevel: 1, levelsCleared: 2, won: cause === 'clear' });
 it('MEC-003-R18 run log keeps the last 500 entries and cumulative deathCounts', () => {
@@ -73,4 +73,48 @@ it('MEC-003-R19 run_end keeps the death context and deathCounts stay per cause',
     durationMs: 90000, startLevel: 12, levelsCleared: 1, won: false }, 100);
   expect(next.entries.at(-1)).toMatchObject({ cause: 'self', context: 'ice' });
   expect(next.deathCounts).toEqual({ self: 1 });
+});
+
+const endCtx = (runId: number, cause: string, context?: 'ice' | 'mud'): LogRecord => ({ type: 'run_end', runId, t: runId * 1000, level: 20,
+  score: 10, cause, durationMs: 60000, startLevel: 16, levelsCleared: 1, won: cause === 'clear', ...(context ? { context } : {}) });
+const startRun = (runId: number): LogRecord => ({ type: 'run_start', runId, t: runId * 1000 - 500, startLevel: 16, startEnergy: 0, loadout: [null, null], entry: 'home' });
+
+it('P2-EXIT no death cause > 40%: shares count deaths only and split family vs player causes', () => {
+  let log = emptyLog();
+  const causes = ['coconut', 'coconut', 'bomb', 'self', 'wall', 'clear', 'quit'];
+  causes.forEach((c, i) => { log = appendRecord(log, startRun(i + 1), 100); log = appendRecord(log, endCtx(i + 1, c, c === 'self' ? 'ice' : undefined), 100); });
+  const r = deathCauseReport(log, 600000);
+  expect(r.deaths).toBe(5);
+  expect(r.familyShare).toEqual({ coconut: 0.4, bomb: 0.2 });
+  expect(r.playerShare).toEqual({ 'self:ice': 0.2, wall: 0.2 });
+  expect(Object.keys(r.familyShare).every(k => k in summarizeLog(log, 600000).causes)).toBe(true);
+  expect(r.over40).toEqual([]);
+  log = appendRecord(log, startRun(9), 100); log = appendRecord(log, endCtx(9, 'coconut'), 100);
+  expect(deathCauseReport(log, 600000).over40).toEqual(['coconut']);
+});
+
+it('P2-EXIT player causes above 40% go to review, not over40', () => {
+  let log = emptyLog();
+  ['wall', 'wall', 'bomb'].forEach((c, i) => { log = appendRecord(log, startRun(i + 1), 100); log = appendRecord(log, endCtx(i + 1, c), 100); });
+  const r = deathCauseReport(log, 600000);
+  expect(r.review).toEqual(['wall']);
+  expect(r.over40).toEqual([]);
+});
+
+it('MEC-003-R21 debug runs excluded from deathCauseReport', () => {
+  let log = emptyLog();
+  log = appendRecord(log, startRun(1), 100); log = appendRecord(log, endCtx(1, 'bomb'), 100);
+  log = appendRecord(log, { ...startRun(2), debug: true } as LogRecord, 100); log = appendRecord(log, endCtx(2, 'coconut'), 100);
+  const r = deathCauseReport(log, 600000), s = summarizeLog(log, 600000);
+  expect(r.deaths).toBe(1); expect(r.familyShare).toEqual({ bomb: 1 });
+  expect(s.runs).toBe(1); expect(s.causes).toEqual({ bomb: 1 }); expect(s.levelsReached).toEqual({ 20: 1 });
+});
+
+it('MEC-003-R21 a debug_skip record marks its run debug for stats and validates on load', () => {
+  let log = emptyLog();
+  log = appendRecord(log, startRun(1), 100);
+  log = appendRecord(log, { type: 'debug_skip', t: 5, runId: 1, from: 1, to: 6 } as LogRecord, 100); log = appendRecord(log, endCtx(1, 'bomb'), 100);
+  expect(summarizeLog(log, 600000).runs).toBe(0); expect(deathCauseReport(log, 600000).deaths).toBe(0);
+  const store = memoryStore(); store.set(LOG_KEY, JSON.stringify(log));
+  expect(loadLog(store).entries).toHaveLength(3);
 });

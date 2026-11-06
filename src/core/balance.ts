@@ -36,6 +36,7 @@ export interface Balance {
     variants: Record<'cat' | 'chicken', { weight: number; cellMs: number; routeLen: Pair }> };
   bird: { shadowMs: number; marginMs: number; maxActive: number };
   bomb: { warnMs: number; countdownMs: number; arm: number; maxActive: number; tries: number };
+  shrink: { warnMs: number; closedMs: number; cooldownMs: number; maxActive: number };
   spike: { downMs: number; warnMs: number; upMs: number; showMs: number; lifeMs: number; lifeRandMs: number;
     maxActive: number; tries: number; shapePool: ('single' | 'pairH' | 'pairV')[];
     shapes: Record<'single' | 'pairH' | 'pairV', Pair[]> };
@@ -79,6 +80,8 @@ export interface Balance {
   };
 }
 
+/** MEC-018-R11 first level of the shrink hazard (biome 6 big event). */
+const SHRINK_FROM_LEVEL = 27;
 const ROCK_KEYS: readonly RockShapeKey[] = ['single', 'lineH', 'lineV', 'corner', 'block'];
 const FENCE_SHAPE_KEYS: readonly FenceShapeKey[] = ['L', 'T', 'Z', 'F', 'U', 'plus'];
 const FENCE_KINDS: readonly FenceKind[] = ['line', ...FENCE_SHAPE_KEYS];
@@ -153,6 +156,7 @@ const SPEC: Spec = {
     variants: recordOf(['cat', 'chicken'], { weight: 'num0', cellMs: 'int+', routeLen: 'pair' }) },
   bird: { shadowMs: 'int+', marginMs: 'int0', maxActive: 'int+' },
   bomb: { warnMs: 'int+', countdownMs: 'int+', arm: 'int+', maxActive: 'int+', tries: 'int+' },
+  shrink: { warnMs: 'int+', closedMs: 'int+', cooldownMs: 'int+', maxActive: 'int+' },
   spike: { ...timed, downMs: 'int+', upMs: 'int+', showMs: 'int+', maxActive: 'int+', tries: 'int+',
     shapePool: namesOf(['single', 'pairH', 'pairV']), shapes: recordOf(['single', 'pairH', 'pairV'], 'pairs') },
   gate: { ...timed, landWarnMs: 'int+', openMs: 'int+', closedMs: 'int+', maxActive: 'int+', tries: 'int+',
@@ -280,8 +284,11 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
     const path = 'level.table[' + i + ']';
     if (row.from !== nextLevel || row.to < row.from || row.to > b.level.maxLevel) fail(path, 'must cover 1..maxLevel without gaps or overlaps');
     const enabled = Object.keys(row.weights).filter(k => row.weights[k as keyof typeof row.weights]! > 0);
+    // MEC-018-R11 the shrinking board starts at level 27.
+    if (row.from < SHRINK_FROM_LEVEL && (row.weights.shrink ?? 0) > 0) fail(path + '.weights.shrink', 'must not be enabled before level ' + SHRINK_FROM_LEVEL);
     if (row.rottenRocks) enabled.push('rottenRock');
     const fresh = enabled.filter(k => !seen.has(k));
+    if (row.from % b.level.perBiome === 0 && fresh.length > 0) fail('level.table', 'challenge level ' + row.from + ' introduces ' + fresh[0]); // MEC-003-R16, TR-C5
     if (fresh.length > 1) fail(path, 'introduces more than one family');
     enabled.forEach(k => seen.add(k));
     if ((row.weights.rock ?? 0) > 0 && !row.rockShapes.length) fail(path + '.rockShapes', 'must enable a shape for rock');

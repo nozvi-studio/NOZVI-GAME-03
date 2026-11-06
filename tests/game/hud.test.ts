@@ -67,12 +67,17 @@ describe('P1 HUD flow, audio and session wiring', () => {
     h.click('sound-button');
     expect(load(h.store, rules).settings.sound).toBe(true); expect(sound.play).toHaveBeenCalledWith('eat');
   });
-  it('MEC-003 §8 level up banner: level, fresh start, biome, new family; challenge ignored', () => {
+  it('MEC-003 §8 level up banner: level, fresh start, biome, new family', () => {
     const h = setup();
     h.game.events.emit('sim-events', [{ type: 'ate', x: 1, y: 1, points: 2, golden: true },
-      { type: 'levelUp', level: 6, biome: 2, challenge: true, biomeChanged: true, unlocked: 'fence', clearedLevelTimeMs: 1 }]);
+      { type: 'levelUp', level: 6, biome: 2, challenge: false, biomeChanged: true, unlocked: 'fence', clearedLevelTimeMs: 1 }]);
     expect(sound.play.mock.calls.map(c => c[0])).toEqual(['golden', 'level']);
     expect(h.find('banner').text).toBe('Level 6 · Fresh start!\nRice Paddy\nFences unlocked');
+  });
+  it('MEC-003 §8 challenge level up appends the challenge banner', () => {
+    const h = setup();
+    h.game.events.emit('sim-events', [{ type: 'levelUp', level: 5, biome: 1, challenge: true, biomeChanged: false, clearedLevelTimeMs: 1 }]);
+    expect(h.find('banner').text).toContain('Challenge: Rock rain!');
   });
   it('MEC-008 §8 checkpoint banner and first-unlock tip when the save gains a checkpoint', () => {
     const h = setup();

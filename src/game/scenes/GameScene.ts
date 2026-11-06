@@ -17,6 +17,7 @@ import { drawTiles, drawIceArrow } from '../render/tiles';
 import { drawMovers } from '../render/movers';
 import { drawCycles } from '../render/cycles';
 import { drawBlasts } from '../render/blasts';
+import { drawShrink } from '../render/shrink';
 
 export class GameScene extends Phaser.Scene {
   balance!: Balance;
@@ -184,6 +185,7 @@ export class GameScene extends Phaser.Scene {
     drawCycles(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawMovers(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawBlasts(this.layers.hazards, snapshot, cell, time, this.reduced);
+    drawShrink(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawMango(this.layers.mango, snapshot, cell, p, time, this.reduced, this.mangoBornAt);
     drawSkillObjects(this.layers.skills, snapshot, cell, p, this.balance, time);
     drawSnake(this.layers.snake, snapshot, cell, p, this.effects.gulp);

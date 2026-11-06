@@ -20,6 +20,7 @@ export const CAUSE_TEXT: Record<CauseKey, string> = {
   cat: 'Ran into the cat.', // OQ-B6 provisional
   chicken: 'Ran into the chicken.', // OQ-B6 provisional
   bomb: 'Caught in the blast.', // OQ-B6 provisional
+  shrink: 'You hit the closed edge.', // MEC-018 §8
 };
 const UNLOCK_NAMES: Record<IntroKey, string> = { rock: 'rocks', rottenRock: 'rotten rocks', fence: 'fences', terrain: 'rising ground', maze: 'hedge mazes', mud: 'mud', ice: 'ice',
   coconut: 'rolling coconuts', // OQ-B6 provisional
@@ -28,6 +29,7 @@ const UNLOCK_NAMES: Record<IntroKey, string> = { rock: 'rocks', rottenRock: 'rot
   npc: 'cats and chickens', // OQ-B6 provisional
   bird: 'mango-thief birds', // OQ-B6 provisional
   bomb: 'timed bombs', // OQ-B6 provisional
+  shrink: 'the shrinking board', // MEC-018 §8
 };
 const INCOMING: Record<UnlockKey, string> = { fence: 'Fence incoming', maze: 'Maze incoming', terrain: 'The ground is shaking' };
 
@@ -66,8 +68,14 @@ const KEYED: Readonly<Record<string, string>> = {
   'banner.new.npc': 'Cats and chickens on patrol', // OQ-B6 provisional
   'banner.new.bird': 'A bird wants your mango!', // OQ-B6 provisional
   'banner.new.bomb': 'Bombs! Stay out of the cross', // OQ-B6 provisional
+  'banner.new.shrink': 'The board shrinks! The edge closes for a while.', // MEC-018 §8
   'death.coconut': CAUSE_TEXT.coconut, 'death.gate': CAUSE_TEXT.gate, 'death.spike': CAUSE_TEXT.spike, // OQ-B6 provisional
   'death.cat': CAUSE_TEXT.cat, 'death.chicken': CAUSE_TEXT.chicken, 'death.bomb': CAUSE_TEXT.bomb, // OQ-B6 provisional
+  'death.shrink': CAUSE_TEXT.shrink, // MEC-018 §8
+  'banner.challenge.5': 'Challenge: Rock rain!', 'banner.challenge.10': 'Challenge: Fence field!', // OQ-C2 provisional
+  'banner.challenge.15': 'Challenge: Thin ice!', 'banner.challenge.20': 'Challenge: Avalanche!',
+  'banner.challenge.25': 'Challenge: Pet chaos!', 'banner.challenge.30': 'Challenge: Final storm!',
+  'hud.challenge': '★', // OQ-C2 provisional
   'toast.mangoStolen': 'The bird took your mango!', // OQ-B6 provisional
   'loadout.title': 'Pick your skills', 'loadout.go': 'Go!', 'loadout.back': 'Back',
   'loadout.slot1': 'Slot 1', 'loadout.slot2': 'Slot 2', 'loadout.locked': 'Reach L{level}',

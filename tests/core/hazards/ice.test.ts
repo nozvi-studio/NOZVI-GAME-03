@@ -98,7 +98,8 @@ it('MEC-012-R11 ice is introduced at L13 only', () => {
     startLevelUp(s, b, ctx);
     const event = ctx.events.find(e => e.type === 'levelUp');
     expect(event?.type === 'levelUp' && event.unlocked === 'ice').toBe(level === 13);
-    expect(familyRow(b, level).weights.ice ?? 0).toBe(level >= 13 ? 2 : 0);
+    // P2c: challenge rows (L5 10 15 20 25 30) carry their own weights, so 2 is pinned on non-challenge levels only.
+    if (level < 13 || level % 5 !== 0) expect(familyRow(b, level).weights.ice ?? 0).toBe(level >= 13 ? 2 : 0);
   }
 });
 

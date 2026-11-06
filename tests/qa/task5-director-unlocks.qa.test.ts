@@ -110,11 +110,11 @@ describe('QA Task 5: Director, Unlocks, Caps & Cooldowns', () => {
 
     const s5 = buildState(b, { level: 5, spawnInMs: 0, mango: [2, 2] });
     updateDirector(s5, b, rng);
-    expect(s5.spawnInMs).toBe(4400);
+    expect(s5.spawnInMs).toBe(3520); // P2c: L5 is a challenge level, 4400 x 0.8
 
     const s30 = buildState(b, { level: 30, spawnInMs: 0, mango: [2, 2] });
     updateDirector(s30, b, rng);
-    expect(s30.spawnInMs).toBe(1600);
+    expect(s30.spawnInMs).toBe(1280); // P2c: L30 challenge, 1600 x 0.8
   });
 
   it('QA-T5-17 MEC-004 small hazard cap counts rock and fence in any state', () => {

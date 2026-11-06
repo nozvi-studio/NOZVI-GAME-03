@@ -1,13 +1,16 @@
 import Phaser from 'phaser';
+import { nextKeyLevel } from '../../core';
 import type { Balance, SimEvent, SimSnapshot, SkillId } from '../../core';
 import type { Session } from '../../session';
 import { createSynth, type SfxName, type Synth } from '../audio/synth';
+import { isDebug } from '../flow/debugFlag';
 import { homeView } from '../flow/homeModel';
 import { flowPause, flowResume, flowTogglePause, type FlowEffect } from '../flow/runFlow';
 import { createDpad } from '../input/dpad';
 import { acceptSkillInput, skillSlotForKey } from '../input/skillKeys';
 import { BOARD, DPAD, HEADER, LEVEL_BAR, WIDTH } from '../layout';
 import { currentPalette, P1_COLORS, reduceMotion, type Palette } from '../render/palette';
+import { levelLabel, levelUpLines, runStartLines } from '../hudText';
 import { incomingBanner, progressLabel, t, TEXT } from '../text';
 import type { GameScene } from './GameScene';
 
@@ -56,6 +59,8 @@ export class HudScene extends Phaser.Scene {
   private bestLevelAtStart = 0;
   private orbTipShown = false;
   private leaving = false;
+  private debugKey: Phaser.GameObjects.Container | null = null;
+  private debugNext: Phaser.GameObjects.Container | null = null;
 
   constructor() { super('Hud'); }
 
@@ -78,6 +83,7 @@ export class HudScene extends Phaser.Scene {
     this.soundIcon = this.add.graphics(); sound.add(this.soundIcon);
     this.pauseButton = this.button(494, 44, 48, 48, 'pause-button', () => this.gameScene.apply(flowTogglePause(this.gameScene.flow, this.balance)));
     this.pauseIcon = this.add.graphics(); this.pauseButton.add(this.pauseIcon);
+    this.createDebugButtons();
     this.bar = this.add.graphics();
     this.level = this.label(LEVEL_BAR.x + 12, LEVEL_BAR.y + 3, '', 18, 'level');
     this.progress = this.label(LEVEL_BAR.x + LEVEL_BAR.width - 12, LEVEL_BAR.y + 3, '', 18).setOrigin(1, 0);
@@ -120,6 +126,13 @@ export class HudScene extends Phaser.Scene {
       this.bannerTimer?.remove(); this.tipTimer?.remove(); this.overTimer?.remove();
     });
     this.drawChrome(); this.refresh();
+    this.showRunStart();
+  }
+
+  // MEC-003 §8 run-start banner. Hud is (re)launched once per run start, after Game emitted newRun, so show it here.
+  private showRunStart(): void {
+    const start = runStartLines(this.gameScene.snapshot() ?? { level: 0, challenge: false }, t);
+    if (start.length) this.showBanner(start.join('\n'));
   }
 
   private label(x: number, y: number, text: string, size: number, name = ''): Phaser.GameObjects.Text {
@@ -153,6 +166,21 @@ export class HudScene extends Phaser.Scene {
       });
       this.skills.push({ c, g, text });
     }
+  }
+  // MEC-003-R21 ?debug=1 only: "+1" and "Key" jump through the normal level-up path; the run becomes a debug run.
+  private createDebugButtons(): void {
+    this.debugKey = this.debugNext = null;
+    if (typeof window === 'undefined' || !isDebug(window.location?.search ?? '')) return;
+    const skip = (key: boolean): void => {
+      if (!acceptSkillInput(this.gameScene.flow.status)) return;
+      const cur = this.gameScene.snapshot()?.level; if (cur === undefined) return;
+      const to = key ? nextKeyLevel(cur, this.balance) : cur + 1;
+      if (to !== null && to <= this.balance.level.maxLevel) this.session.debugSkipTo(to);
+    };
+    this.debugNext = this.button(160, 76, 56, 24, 'debug-next', () => skip(false));
+    this.debugNext.add(this.label(0, 0, '+1', 15).setOrigin(.5));
+    this.debugKey = this.button(222, 76, 70, 24, 'debug-key', () => skip(true));
+    this.debugKey.add(this.label(0, 0, 'Key \u25B6', 15).setOrigin(.5));
   }
   private useSkill(slot: 0 | 1): void {
     if (acceptSkillInput(this.gameScene.flow.status)) this.session.useSkill(slot); // MEC-007-R15
@@ -205,7 +233,12 @@ export class HudScene extends Phaser.Scene {
 
   private onFlow(effect: FlowEffect): void {
     switch (effect.type) {
-      case 'newRun': this.overTimer?.remove(); this.hideBanner(); this.synth.unlock(); break;
+      case 'newRun': {
+        this.overTimer?.remove(); this.hideBanner(); this.synth.unlock();
+        const start = runStartLines(this.gameScene.snapshot() ?? { level: 0, challenge: false }, t); // MEC-003 §8
+        if (start.length) this.showBanner(start.join('\n'));
+        break;
+      }
       case 'hideOverlay': this.overlay.setVisible(false); this.count.setVisible(false); break;
       case 'showPaused': this.count.setVisible(false); this.overlay.setVisible(true); break;
       case 'tick': this.count.setText(String(effect.n)).setVisible(true); this.synth.play('tick'); break;
@@ -261,10 +294,7 @@ export class HudScene extends Phaser.Scene {
     this.refresh();
   }
   private onLevelUp(e: Extract<SimEvent, { type: 'levelUp' }>): void {
-    // MEC-003 §8: challenge flag ignored in P1 (lead decision L9).
-    const lines = [`${t('banner.levelUp', { n: e.level })} · ${t('banner.freshStart')}`];
-    if (e.biomeChanged) lines.push(t(`banner.biome.${e.biome}`));
-    if (e.unlocked) lines.push(t(`banner.new.${e.unlocked}`));
+    const lines = levelUpLines(e, t); // MEC-003 §8 incl. challenge banner
     const cps = this.session.save().unlockedCheckpoints;
     if (cps.length > this.cpCount) { // MEC-008 §8 checkpoint banner + first-unlock tip
       lines.push(t('banner.checkpoint', { level: Math.max(...cps) }));
@@ -305,8 +335,9 @@ export class HudScene extends Phaser.Scene {
   private refresh(): void {
     const s = this.gameScene.snapshot(); if (!s) return;
     this.score.setText(String(s.score));
-    this.level.setText(t('hud.level', { n: s.level, b: s.biome }));
+    this.level.setText(levelLabel(s, t)); // MEC-003 §8 star while challenge
     const max = this.balance.level.maxLevel, full = s.level >= max;
+    this.debugNext?.setVisible(!full); this.debugKey?.setVisible(nextKeyLevel(s.level, this.balance) !== null);
     this.progress.setText(progressLabel(s.progress, s.need, s.level, max));
     const bar = this.bar.clear().fillStyle(this.p.panel).fillRoundedRect(LEVEL_BAR.x, LEVEL_BAR.y, LEVEL_BAR.width, LEVEL_BAR.height, 12);
     bar.fillStyle(this.p.rock, .25).fillRoundedRect(LEVEL_BAR.x + 12, LEVEL_BAR.y + 31, LEVEL_BAR.width - 24, 7, 3);

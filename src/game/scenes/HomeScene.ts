@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
 import type { Balance } from '../../core';
-import { summarizeLog, type RunLog } from '../../meta';
+import { summarizeLog, deathCauseReport, type RunLog } from '../../meta';
 import type { Session } from '../../session';
 import { createSynth, type Synth } from '../audio/synth';
-import { isDebug } from '../flow/debugFlag';
+import { debugStartLevel, isDebug } from '../flow/debugFlag';
 import { homeView, stepCheckpoint } from '../flow/homeModel';
 import { HEIGHT, WIDTH } from '../layout';
 import { currentPalette } from '../render/palette';
@@ -54,7 +54,10 @@ export class HomeScene extends Phaser.Scene {
   private setupDebug(): void {
     const balance = this.registry.get('balance') as Balance;
     (window as unknown as { __summarize?: (json: string) => unknown }).__summarize =
-      (json: string) => summarizeLog(JSON.parse(json) as RunLog, balance.log.sessionGapMs);
+      (json: string) => {
+        const log = JSON.parse(json) as RunLog;
+        return { ...summarizeLog(log, balance.log.sessionGapMs), deathReport: deathCauseReport(log, balance.log.sessionGapMs) };
+      };
     const done = label(this, WIDTH / 2, HEIGHT - 60, '', 16, 'home-export-done');
     button(this, WIDTH / 2, HEIGHT - 190, 200, 48, t('home.exportLog'), 'home-export', () => {
       const json = this.session.exportLog();
@@ -78,10 +81,14 @@ export class HomeScene extends Phaser.Scene {
     this.selected = stepCheckpoint(this.session.homeModel(), this.selected, dir);
     this.synth.play('uiTap'); this.refresh();
   }
-  private play(level: number): void {
+  private play(chosen: number): void {
     this.synth.unlock();
-    if (this.session.homeModel().showLoadout) this.scene.start('Loadout', { level });
-    else beginRun(this, level, 'home');
+    // MEC-003-R21 ?debug=1&level=N overrides the start level; the run writes no progress.
+    const balance = this.registry.get('balance') as Balance;
+    const dbgLevel = debugStartLevel(window.location.search, balance.level.maxLevel);
+    const level = dbgLevel ?? chosen, debug = dbgLevel !== null;
+    if (this.session.homeModel().showLoadout) this.scene.start('Loadout', { level, debug });
+    else beginRun(this, level, 'home', debug);
   }
   private refresh(): void {
     const v = this.homeView(), p = currentPalette();

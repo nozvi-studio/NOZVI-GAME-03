@@ -260,14 +260,14 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     const events = sim.drainEvents();
     expect(events).toEqual([
       { type: 'skillEnded', skill: 'shield', reason: 'consumed' },
-      { type: 'shieldBroke', x: 3, y: 8, family: 'rock', rubble: { x: 4, y: 8 } },
+      { type: 'shieldBroke', x: 3, y: 8, family: 'rock' },
     ]);
     const snap = sim.snapshot();
     expect(snap.status).toBe('playing');
     expect(snap.shield).toBeNull();
     expect(snap.snake[0]).toEqual({ x: 3, y: 8 });
     expect(snap.hazards).toEqual([]);
-    expect(snap.rubble).toEqual([{ x: 4, y: 8, state: 'solid', leftMs: 1500 }]);
+    expect(snap.rubble).toEqual([]);
   });
 
   it('QA-P1T7-10 MEC-006-R24/R26 shield breaks fence cell and removes it', () => {
@@ -537,7 +537,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     const sim = restoreSim(b, s);
     sim.useSkill(0);
     sim.advance(s.tickMs); // Break rock, rubble placed at (4, 8)
-    expect(sim.snapshot().rubble[0]).toMatchObject({ x: 4, y: 8, state: 'solid' });
+    expect(sim.snapshot().rubble).toEqual([]);
 
     // Queue turn UP to (3, 7)
     sim.turn(0, -1);
@@ -608,7 +608,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     const broke = sim.drainEvents().find(e => e.type === 'shieldBroke') as Extract<SimEvent, { type: 'shieldBroke' }>;
     expect(broke).toBeDefined();
     expect(broke.x).toBe(16);
-    expect(broke.rubble).toBeNull();
+    expect('rubble' in broke).toBe(false);
     expect(sim.snapshot().rubble).toEqual([]);
   });
 
@@ -640,7 +640,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     sim.advance(s.tickMs);
     const broke = sim.drainEvents().find(e => e.type === 'shieldBroke') as Extract<SimEvent, { type: 'shieldBroke' }>;
     expect(broke).toBeDefined();
-    expect(broke.rubble).toBeNull();
+    expect('rubble' in broke).toBe(false);
     expect(sim.snapshot().rubble).toEqual([]);
     expect(sim.snapshot().mango).toMatchObject({ x: 4, y: 8 });
   });

@@ -2,7 +2,22 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(game): debug "+1" and "Key" level-skip buttons in the HUD (`?debug=1` only); `Sim.debugSkipTo`, `Session.debugSkipTo`, `keyLevels`/`nextKeyLevel`, `debug_skip` log record marks the run debug (MEC-003-R21)
+- fix(core): Shield breaks without leaving rubble (MEC-006-R28, owner 2026-11-06); bonk pause stays, `shieldBroke` loses its `rubble` field
+- docs: P2 exit check entry in PLAYTEST (agy QA 9/10 + banner fix, reduced fuzz pass) and STATUS after P2c
+- fix(game): challenge banner shows on run start (HudScene shows runStartLines in create(); Hud launches after Game's newRun)
+- fix: P2c final review fix-ups (debug run marker excluded from deathCauseReport/summarizeLog, bot board-size verdict skipped on partial level ranges, MEC-018 R7 event names)
 ### Added
+- fix(core): shrink waits while another hazard holds a ring cell (MEC-018-R1); full-table fuzz I5 now clean
+- test: P2 exit fairness per family and full-table L30 fuzz (`tests/core/fairness/fullTable.test.ts`)
+- feat(game): debug start level `?debug=1&level=N` (N 1..30) for browser QA; the run writes no best level, checkpoint or full-clear progress (MEC-003-R21)
+- chore(config): per-biome director tuning from the L1-30 bot report (fence 1 in L11-14, coconut 1 in L16-19 rows) and feat(tools): board-size check (`tools/bot/boardSize.ts`, MEC-004-R20); bot defaults L1-30, 20 seeds, 180 s (P2 design sections 13, 16, 17)
+- feat(meta): deathCauseReport (deaths only, family vs player causes, over40 and review lists) for the P2 40% rule; included in the debug __summarize output (TR-C6)
+- feat(game): challenge level banners (levelUpLines) and HUD star marker (levelLabel) in src/game/hudText.ts; text OQ-C2 provisional (MEC-003 §8)
+- feat(config): challenge levels 5-30 get their own table rows (P2 design section 12 weights), director interval x0.8 and cap +2 on challenge levels; parseBalance rejects a challenge level that introduces a family (MEC-003-R4 R15 R16)
+- feat(game): shrink ring greybox (blink outline, arrows, hatched closed cells) and fairness invariants MEC-018-I1..I3 in the family fuzz harness (MEC-018)
+- feat(core): shrinking board family from level 27: outer ring warns 2000 ms, closes up to 6000 ms (waits under the snake and near the head), reopens via crumble; mangoDisplaced event, ring displaces mango/orbs/rain mangoes (MEC-018)
+- docs: MEC-018 shrinking board spec and MEC-003 challenge rules for P2c (OQ-C1..C3 provisional defaults)
 - fix(core): head entering an NPC now emits moverHit (family npc) once, with and without Shield (MEC-015-R7)
 - fix(game): P2b review fix-ups (chicken beak follows NpcView.dir, spike warn never blinks to empty, shield area-hit guard, bot level range env overrides)
 - feat(game): greybox visuals and texts for P2b families (coconut, gate, spike, npc, bird, bomb); bomb blast now hits at most once on the Shield-absorb path too (MEC-017-R3)

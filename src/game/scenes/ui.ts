@@ -34,9 +34,9 @@ export function paintButton(b: Button, p: Palette, fill = p.panel, line = 3): vo
 }
 
 /** P1 scene flow: start a session run, then open Game + Hud (the countdown starts in GameScene). */
-export function beginRun(scene: Phaser.Scene, level: number, entry: 'home' | 'results' = 'home'): void {
+export function beginRun(scene: Phaser.Scene, level: number, entry: 'home' | 'results' = 'home', debug = false): void {
   const session = scene.registry.get('session') as Session;
-  session.startRun(level, entry);
+  session.startRun(level, entry, debug);
   scene.scene.start('Game');
   scene.scene.launch('Hud');
 }

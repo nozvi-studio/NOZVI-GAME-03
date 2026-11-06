@@ -219,7 +219,8 @@ it('MEC-014-R9 gate is introduced at L17 only', () => {
   const b = loadBalance();
   for (let level = 1; level <= 30; level++) {
     expect(introducedAt(b, level) === 'gate').toBe(level === 17);
-    expect(familyRow(b, level).weights.gate ?? 0).toBe(level >= 17 ? 2 : 0);
+    // P2c: challenge rows (L5 10 15 20 25 30) carry their own weights, so 2 is pinned on non-challenge levels only.
+    if (level < 17 || level % 5 !== 0) expect(familyRow(b, level).weights.gate ?? 0).toBe(level >= 17 ? 2 : 0);
   }
 });
 it('MEC-014-R1 director emits one incoming event and gate maxActive counts every lifecycle phase', () => {

@@ -2,7 +2,7 @@ import type { Balance } from '../../src/core/balance';
 import { escapeExists } from '../../src/core/fairness/escape';
 import { inBounds, key, nearHead } from '../../src/core/grid';
 import { keepsMangoReachable, reachableFrom } from '../../src/core/hazards/placement';
-import { bfsWall, solidCauseAt } from '../../src/core/hazards/queries';
+import { bfsWall, reservedByFamilies, solidCauseAt } from '../../src/core/hazards/queries';
 import { FAMILIES, FAMILY } from '../../src/core/hazards/registry';
 import { birdCanTarget } from '../../src/core/hazards/bird';
 import { isReserved } from '../../src/core/reserved';
@@ -74,11 +74,37 @@ function cellsOf(snap: SimSnapshot, cols: number, showMs: number): Map<string, M
     if (m.state !== 'active') add('bomb', m, m.state === 'count' ? 'lethal' : 'warn', 'bomb');
     if (m.state !== 'warn') for (const c of m.area) add(BOMB_AREA, c, m.state === 'active' ? 'lethal' : 'warn', 'bomb');
   }
+  // MEC-018-R3 ring cells warn (also while waiting under the snake) until they close.
+  const ring = snap.families.shrink;
+  if (ring) for (const c of ring.cells) {
+    if (c.on) add('shrink', c, 'lethal', 'shrink');
+    else if (ring.state !== 'fade') add('shrink', c, 'warn', 'shrink');
+  }
   for (const tile of snap.tiles) for (const c of tile.cells) {
     if (c.on) add(tile.family, c, 'active', null);
     else if (tile.state !== 'fade') add(tile.family, c, 'warn', null);
   }
   return marks;
+}
+
+// MEC-018-I1/I2/I3 ring invariants, checked every ms from the snapshot. `prev` is the snapshot one ms earlier.
+export function checkShrink(prev: SimSnapshot, snap: SimSnapshot, b: Balance, bad: (m: string) => void): void {
+  const ring = snap.families.shrink;
+  if (!ring) return;
+  const was = prev.families.shrink, head = prev.snake[0]!;
+  const id = (c: Cell) => key(b.board.cols, c.x, c.y);
+  const onRing = new Set(ring.cells.map(id));
+  const wasOn = new Set((was?.cells ?? []).filter(c => c.on).map(id));
+  for (const c of ring.cells) {
+    if (!c.on || wasOn.has(id(c))) continue;
+    if (nearHead(head, prev.dir, c.x, c.y, b.fairness.nearHeadDist, b.fairness.frontLaneCells))
+      bad(`MEC-018-I1 ring cell (${c.x},${c.y}) closed near the head`);
+    if (snap.snake.some(p => p.x === c.x && p.y === c.y)) bad(`MEC-018-I1 ring cell (${c.x},${c.y}) closed on the snake`);
+  }
+  if (snap.mango && onRing.has(id(snap.mango))) bad(`MEC-018-I2 mango on ring cell (${snap.mango.x},${snap.mango.y})`);
+  for (const o of snap.orbs) if (onRing.has(id(o))) bad(`MEC-018-I2 orb on ring cell (${o.x},${o.y})`);
+  for (const m of snap.rainMangoes) if (onRing.has(id(m))) bad(`MEC-018-I2 rain mango on ring cell (${m.x},${m.y})`);
+  if (ring.state === 'fade' && ring.cells.some(c => c.on)) bad('MEC-018-I3 ring cell closed after warnMs + closedMs');
 }
 
 function replay(sim: Sim, inputs: readonly Input[], until: number): void {
@@ -168,14 +194,20 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
           const tooNear = family === 'coconut' ? (rowLane ? cell.y === head.y : cell.x === head.x)
             || nearHead(head, before.dir, cell.x, cell.y, 0, b.fairness.frontLaneCells)
             : nearHead(head, before.dir, cell.x, cell.y, d, b.fairness.frontLaneCells);
-          if (tooNear) bad(`I2 ${family} near head at (${cell.x},${cell.y})`);
+          // MEC-018-R3 TR-C3 the ring waits to close instead of excluding cells near the head; I1 covers its closing.
+          if (tooNear && family !== 'shrink') bad(`I2 ${family} near head at (${cell.x},${cell.y})`);
           // MEC-013-EC1/R7 existing food does not prevent the warning lane; hazards and body still do.
           const placementState = family === 'coconut' ? { ...before, mango: null, orbs: [], rainMangoes: [] } : before;
-          if (isReserved(placementState, cell.x, cell.y)) bad(`I5 ${family} on reserved cell (${cell.x},${cell.y})`);
+          // MEC-018-R6/R7 the ring displaces food and may span the snake; only other hazards may not hold a ring cell.
+          if (family === 'shrink' ? reservedByFamilies(before, cell.x, cell.y) : isReserved(placementState, cell.x, cell.y)) bad(`I5 ${family} on reserved cell (${cell.x},${cell.y})`);
         }
         const walls = cells.filter(cell => bfsWall(after, cell.x, cell.y));
-        const mango = before.mango, mangoKey = mango && key(cols, mango.x, mango.y);
-        if (!keepsMangoReachable(before, b, walls) || (mangoKey !== null && reachableFrom(before, b).has(mangoKey)
+        // MEC-018-R6 a displaced ring mango moves by design, so the cut-off check follows the mango that is left after the spawn.
+        const mango = family === 'shrink' ? after.mango : before.mango, mangoKey = mango && key(cols, mango.x, mango.y);
+        const kept = family !== 'shrink' || (before.mango !== null && after.mango !== null && before.mango.x === after.mango.x && before.mango.y === after.mango.y);
+        // The displaced mango is judged on the board before the ring, with the ring walled (mirrors the spawn trial).
+        const judged = family === 'shrink' ? { ...before, mango: after.mango } : before;
+        if (!keepsMangoReachable(judged, b, walls) || (kept && mangoKey !== null && reachableFrom(before, b).has(mangoKey)
           && !reachableFrom(after, b).has(mangoKey))) bad(`I4 ${family} cut off the mango`);
         if ((c.escape === 'all' || (c.escape === 'sample' && spawns <= SAMPLE_SPAWNS))
           && escapeExists(b, before) && !escapeExists(b, after)) bad(`R18 ${family} removed every escape`);
@@ -194,9 +226,11 @@ function runSeed(c: FuzzConfig, b: Balance, seed: number, violations: string[]):
       const snake = new Set(snap.snake.map(cell => key(cols, cell.x, cell.y)));
       const body = new Set(snap.snake.slice(1).map(cell => key(cols, cell.x, cell.y)));
       const accBefore = stateOf(sim).acc;
+      const prevSnap = snap;
       sim.advance(1); time++;
       snap = sim.snapshot();
       checkIce(stateOf(sim), b, bad);
+      checkShrink(prevSnap, snap, b, bad);
       const current = cellsOf(snap, cols, b.spike.showMs);
       const currentMovers = moverCells(snap, cols);
       checkMoverTransitions(movers, currentMovers, moverWarnSince, body, time, bad);

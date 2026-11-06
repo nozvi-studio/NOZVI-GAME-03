@@ -175,7 +175,8 @@ it('MEC-015-R8 npc is introduced at L21 only', () => {
   const b = loadBalance();
   for (let level = 1; level <= 30; level++) {
     expect(introducedAt(b, level) === 'npc').toBe(level === 21);
-    expect(familyRow(b, level).weights.npc ?? 0).toBe(level >= 21 ? 2 : 0);
+    // P2c: challenge rows (L5 10 15 20 25 30) carry their own weights, so 2 is pinned on non-challenge levels only.
+    if (level < 21 || level % 5 !== 0) expect(familyRow(b, level).weights.npc ?? 0).toBe(level >= 21 ? 2 : 0);
   }
 });
 it('MEC-015-R8 director announces NPCs once and enforces the small family cap', () => {

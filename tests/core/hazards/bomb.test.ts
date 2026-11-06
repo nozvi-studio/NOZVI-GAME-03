@@ -120,7 +120,7 @@ it('MEC-017-R4 shield absorbs one blast without bonk or rubble', () => {
   expect(s.status).toBe('playing');
   expect(s.shield).toBeNull();
   expect(s.families.rubble).toEqual([]);
-  expect(sim.drainEvents().find(e => e.type === 'shieldBroke')).toMatchObject({ family: 'bomb', rubble: null });
+  expect(sim.drainEvents().find(e => e.type === 'shieldBroke')).toMatchObject({ family: 'bomb' });
   expect(s.acc).toBeGreaterThanOrEqual(acc);
 });
 
