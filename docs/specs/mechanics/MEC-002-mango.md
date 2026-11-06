@@ -49,7 +49,7 @@ No save fields.
 5. **Level up from the regular mango:** MEC-003-R7 resets `eatenInLevel` before R8(b), so the new level's first mango has the full 8000 ms (golden 4000).
 6. **Placement fails at the level-up step:** deferred (R9); the retry timer keeps running and the first retry happens 250 ms later.
 7. **Snip wall makes the mango unreachable:** at rot time the cell is not fair, so no rock. (Placement of a new mango already requires reachability for the "good" set.)
-8. **Shield hits a rotten rock:** the rock is removed (MEC-006-R26); rubble follows MEC-006-R28.
+8. **Shield hits a rotten rock:** the rock is removed (MEC-006-R26); no rubble (MEC-006-R28).
 9. **Golden mango that fills the bar with overflow:** MEC-001 EC1 / MEC-003-R5; energy +10 is still added.
 10. **Two rots close together from L12:** each leaves its own 5000 ms rock; there is no cap on rotten rocks (P0 had none either).
 11. **Rot formula floor never binds in P1:** max `eatenInLevel` before a level up is 12 (quota 13 at L28–30), so normal rot time is 8000…6200 ms (golden 4000…3100). This is a consequence of the GDD formula; tuning is a P2 concern (§9).

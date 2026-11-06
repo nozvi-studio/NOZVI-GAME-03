@@ -1,5 +1,3 @@
-import { inBounds } from '../grid';
-import { isReserved } from '../reserved';
 import { effectiveTick } from '../skills';
 import type { CauseKey, Cell, Dir, FamilyKey, HazardFamily, HitKind, SimState, StepCtx, TileKind } from '../types';
 import { headHitAt, solidFamilyWithPriority, tileAt } from './queries';
@@ -46,22 +44,16 @@ export function deathContext(s: SimState, headBefore: Cell): TileKind | undefine
   return tileAt(s, headBefore.x, headBefore.y) ?? undefined;
 }
 
-// MEC-006-R26..R28 mover/solid breaks bonk and leave rubble; area absorption does neither.
+// MEC-006-R26..R28 mover/solid breaks bonk and leave NO rubble (owner 2026-11-06); area absorption does neither.
 function consumeShield(s: SimState, ctx: StepCtx, family: HazardFamily, x: number, y: number, kind: HitKind, dir: Dir): void {
   const b = ctx.balance;
   if (kind === 'mover') family.onBreak?.(s, x, y);
   else if (kind === 'area') family.onAreaHit?.(s, x, y);              // MEC-017-R3 one hit per blast on every path
   s.shield = null;
   ctx.emit({ type: 'skillEnded', skill: 'shield', reason: 'consumed' });
-  let rubble: Cell | null = null;
   if (kind === 'mover') {
-    const rx = x + dir.x, ry = y + dir.y;
-    if (inBounds(b.board.cols, b.board.rows, rx, ry) && !isReserved(s, rx, ry)) {
-      rubble = { x: rx, y: ry };
-      s.families.rubble.push({ family: 'rubble', ...rubble, state: 'solid', leftMs: b.skills.shield.rubbleLifeMs });
-    }
     // MEC-012-EC7 lead ruling: bonk duration intentionally includes the current head tile.
     s.acc = -b.skills.shield.bonkPauseTicks * effectiveTick(s, b);
   }
-  ctx.emit({ type: 'shieldBroke', x, y, family: family.key, rubble });
+  ctx.emit({ type: 'shieldBroke', x, y, family: family.key });
 }

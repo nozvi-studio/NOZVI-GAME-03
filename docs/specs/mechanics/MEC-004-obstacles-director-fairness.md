@@ -55,14 +55,14 @@
 
 ### Collision
 - **MEC-004-R6 Snake-move collision.** For the new head cell, in this order (MEC-001-R1 order extended): `wall` → `self` → solid-cell stage: (a) `solidCauseAt`, (b) `headHitAt`. If (a), or (b) with kind `'mover'`, gives a cause:
-  - Shield active and the family is `breakable` → MEC-006-R26/R27/R28 (the family's `onBreak` removes the object, bonk, rubble), the head moves in.
+  - Shield active and the family is `breakable` → MEC-006-R26/R27/R28 (the family's `onBreak` removes the object, bonk; no rubble), the head moves in.
   - Otherwise → death with that cause.
   If (b) gives kind `'area'`: handled as an R8 area hit (Shield absorbs it once, the head moves in; otherwise death).
   Warning, crumbling and inactive cells are passable (P0).
 - **MEC-004-R7 Speed with tiles.** In the speed update (`docs/ARCHITECTURE.md` "Sim step order"), effective tick = `round(baseTickMs × slowFactor × tileFactor)`, where `slowFactor` = `max(slowmo ? skills.slowmo.tickFactor : 1, levelUpSlowFactor(s))`, the MEC-006-R17 maximum of Slow-mo and the MEC-003-R22 level-up slowdown (lead ruling FB-1), and `tileFactor` = the factor MEC-012 gives for `tileAt(head)` (mud 2, otherwise 1). MEC-006-R18 (accumulator clamp on change) applies unchanged.
 - **MEC-004-R8 Non-move hits.** When a family's `update` calls `ctx.hitHead(family, x, y, kind, dir)` (`kind: 'mover' | 'area'`):
-  - `kind = 'mover'`: Shield active and family `breakable` → `onBreak` at that cell, Shield consumed (`skillEnded {reason: 'consumed'}`), `shieldBroke {x, y, family, rubble}` with MEC-006-R28 rubble (direction = the mover's direction), bonk per MEC-006-R27. Otherwise death with the family's `cause`.
-  - `kind = 'area'`: Shield active → Shield consumed, `shieldBroke {x, y, family, rubble: null}`, no bonk, no rubble (P2-D5). Otherwise death with the family's `cause`.
+  - `kind = 'mover'`: Shield active and family `breakable` → `onBreak` at that cell, Shield consumed (`skillEnded {reason: 'consumed'}`), `shieldBroke {x, y, family}`, no rubble (MEC-006-R28), bonk per MEC-006-R27. Otherwise death with the family's `cause`.
+  - `kind = 'area'`: Shield active → Shield consumed, `shieldBroke {x, y, family}`, no bonk (P2-D5). Otherwise death with the family's `cause`.
   - The death happens inside that family's update; later families do not update in that ms (status `over`, P0).
 
 ### Director
@@ -97,7 +97,7 @@
 2. **Spawn needed while no mango exists:** no spawn (MEC-003-R13), so R12 always has a target.
 3. **All candidates fail R12:** `spawn` returns false; the director retries other options (R9); nothing spawns this interval.
 4. **Two families' `solidAt` true at one cell** (possible only through MEC-006 snip walls, which are cut from body cells regardless of `reserved`, e.g. on a warning rock cell that later lands): the first in registry order gives the cause; Shield breaks that family's cell only.
-5. **Shield break of a mover** while the mover is the only thing in that cell: the mover is removed; rubble goes to the cell beyond in the **head's** direction for R6, the **mover's** direction for R8.
+5. **Shield break of a mover** while the mover is the only thing in that cell: the mover is removed; no rubble is left (MEC-006-R28, owner 2026-11-06).
 6. **Area hit and move hit in the same ms:** families update before the snake step (`docs/ARCHITECTURE.md` "Sim step order"), so an area hit kills first; a consumed Shield cannot save the following move.
 7. **Death context when the head was on fading ice:** fading tiles are inactive, so no context.
 8. **Level up during a blast or roll:** they survive the level up, keep their own lifecycle and can still hit (MEC-003-R8, R16).

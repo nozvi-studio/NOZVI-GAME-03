@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(core): Shield breaks without leaving rubble (MEC-006-R28, owner 2026-11-06); bonk pause stays, `shieldBroke` loses its `rubble` field
 - docs: P2 exit check entry in PLAYTEST (agy QA 9/10 + banner fix, reduced fuzz pass) and STATUS after P2c
 - fix(game): challenge banner shows on run start (HudScene shows runStartLines in create(); Hud launches after Game's newRun)
 - fix: P2c final review fix-ups (debug run marker excluded from deathCauseReport/summarizeLog, bot board-size verdict skipped on partial level ranges, MEC-018 R7 event names)

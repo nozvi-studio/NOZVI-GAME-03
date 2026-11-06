@@ -58,7 +58,7 @@ export type SimEvent =
   | { type: 'skillRejected'; slot: 0 | 1; skill: SkillId | null; reason: 'empty' | 'active' | 'energy' | 'noTarget' }
   | { type: 'skillEnded'; skill: SkillId; reason: 'timeout' | 'consumed' }
   | { type: 'tailSnipped'; cut: number; cells: Cell[] }
-  | { type: 'shieldBroke'; x: number; y: number; family: FamilyKey; rubble: Cell | null }
+  | { type: 'shieldBroke'; x: number; y: number; family: FamilyKey }
   | { type: 'rainDrop'; x: number; y: number }
   | { type: 'rainDropSkipped' }
   | { type: 'rainMangoExpired'; x: number; y: number }
