@@ -2,10 +2,13 @@ import Phaser from 'phaser';
 import json from '../../../config/balance.json';
 import { parseBalance } from '../../core';
 import { createSession } from '../../session';
+import { preloadCapy } from '../art/capyTextures';
 import { localStore } from '../platform/localStore';
 
 export class BootScene extends Phaser.Scene {
   constructor() { super('Boot'); }
+  // ART-001 capy textures are ready before any scene draws.
+  preload(): void { preloadCapy(this.load); }
   // GDD-13 validate config, then create the run session (P1-D1) and open Home.
   create(): void {
     const balance = parseBalance(structuredClone(json));

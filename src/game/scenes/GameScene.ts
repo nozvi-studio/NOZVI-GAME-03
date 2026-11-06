@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { Balance, SimEvent, SimSnapshot, Step } from '../../core';
 import type { Session } from '../../session';
+import { CapyHead } from '../art/capyHead';
 import { BOARD, cellPx } from '../layout';
 import { clockStep, createClock } from '../flow/clock';
 import { createFlow, flowKey, flowOver, flowPause, flowStart, flowTick, flowTurn, type FlowEffect, type FlowState } from '../flow/runFlow';
@@ -32,6 +33,7 @@ export class GameScene extends Phaser.Scene {
   private boardClip!: Phaser.GameObjects.Graphics;
   private layers!: Record<'ground' | 'terrain' | 'hazards' | 'mango' | 'skills' | 'snake' | 'overlay' | 'effects', Phaser.GameObjects.Graphics>;
   private effects!: Effects;
+  private capy!: CapyHead;
 
   constructor() { super('Game'); }
 
@@ -55,6 +57,7 @@ export class GameScene extends Phaser.Scene {
     this.boardClip.fillStyle(0xffffff).fillRoundedRect(0, 0, BOARD.size, BOARD.size, BOARD_RADIUS);
     this.board.setMask(this.boardClip.createGeometryMask());
     this.effects = new Effects(this, this.board, cellPx(this.balance), this.reduced);
+    this.capy = new CapyHead(this, this.board, this.layers.snake, this.balance.ui.capy, cellPx(this.balance), this.reduced, this.time.now);
     this.flow = createFlow();
     // P1 scene flow: the session run already exists (Home/Loadout/Results); Game opens on the P0 countdown.
     this.apply(flowStart(this.flow, this.balance));
@@ -86,6 +89,7 @@ export class GameScene extends Phaser.Scene {
   startRun(): void {
     this.mangoBornAt = this.time.now;
     this.effects.reset();
+    this.capy.reset(this.time.now);
     this.clock = createClock();
     this.tweens.killTweensOf(this.board);
     this.board.setPosition(BOARD.x, BOARD.y);
@@ -139,6 +143,7 @@ export class GameScene extends Phaser.Scene {
     for (const event of events) {
       switch (event.type) {
         case 'ate':
+          this.capy.eat(this.time.now);
           this.mangoBornAt = this.time.now;
           this.effects.burst(event.x, event.y, event.golden ? this.palette.gold : this.palette.food,
             ...(event.golden ? PARTICLE_BURSTS.golden : PARTICLE_BURSTS.eat));
@@ -152,6 +157,7 @@ export class GameScene extends Phaser.Scene {
         case 'dust': this.effects.burst(event.x, event.y, this.palette.rock, ...PARTICLE_BURSTS.dust); break;
         case 'levelUp': this.effects.levelFlash = 1; break;
         case 'died': {
+          this.capy.die(this.time.now);
           this.effects.deathFlash = 1;
           const head = snapshot.snake[0]!;
           this.effects.burst(head.x, head.y, this.palette.snake, ...PARTICLE_BURSTS.death);
@@ -188,7 +194,8 @@ export class GameScene extends Phaser.Scene {
     drawShrink(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawMango(this.layers.mango, snapshot, cell, p, time, this.reduced, this.mangoBornAt);
     drawSkillObjects(this.layers.skills, snapshot, cell, p, this.balance, time);
-    drawSnake(this.layers.snake, snapshot, cell, p, this.effects.gulp);
+    drawSnake(this.layers.snake, snapshot, cell, p, this.effects.gulp, false);
+    this.capy.update(snapshot, time, cell);
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);
     drawIceArrow(this.layers.overlay, snapshot, cell);
     this.effects.draw(this.layers.effects, p);
