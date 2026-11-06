@@ -11,3 +11,8 @@ export function debugStartLevel(search: string, maxLevel: number): number | null
   const n = Number(raw);
   return n >= 1 && n <= maxLevel ? n : null;
 }
+
+// ART-001 `?debug=1&artPreview=1` opens the capy preview page instead of Home.
+export function isArtPreview(search: string): boolean {
+  return isDebug(search) && new URLSearchParams(search).get('artPreview') === '1';
+}

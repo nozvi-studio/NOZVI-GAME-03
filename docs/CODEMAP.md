@@ -11,6 +11,7 @@ Updated: 2026-11-05 · Keep under ~80 lines. One row per module, not per file.
 | Input | `src/game/input/` - keyboard, CSS-pixel swipe and D-pad adapters |
 | Balance config | `config/balance.json` (read via `parseBalance` in `src/core/balance.ts`; P1 balance v2, validated family table) |
 | Save / load | `src/meta/save.ts` |
+| Art preview | `?debug=1&artPreview=1` → `src/game/scenes/ArtPreviewScene.ts` |
 | Save / load (browser) | `src/game/platform/localStore.ts` (Boot creates the session with it; the session owns all saves) |
 | Player-facing strings | `src/game/text.ts` |
 | Test setup | `vitest.config.ts`, `tests/` (`npm test`, `npm run test:fuzz`) |

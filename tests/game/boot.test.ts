@@ -12,3 +12,12 @@ it('MEC-008-R12 Boot passes balance rules so v2 progress survives loading', () =
   scene.create();
   expect(registry.get('save')).toEqual(data);
 });
+it('ART-001 Boot opens the art preview only with ?debug=1&artPreview=1', () => {
+  vi.stubGlobal('window', { localStorage: { getItem: () => null }, location: { search: '?debug=1&artPreview=1' } });
+  vi.stubGlobal('location', { search: '?debug=1&artPreview=1' });
+  const started: string[] = [];
+  const scene = new BootScene();
+  Object.assign(scene, { registry: new Map(), scene: { start: (k: string) => started.push(k), launch() {} } });
+  scene.create();
+  expect(started).toEqual(['ArtPreview']);
+});

@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(game): debug capy art preview page (`?debug=1&artPreview=1`)
 - feat(game): capy face on the snake head (Boot rasterises capy SVGs; idle/eat/dead on the board)
 - feat(game): capy face pose state machine (idle breath/blink, eat, dead droop; reduced motion) and `ui.capy` balance
 - feat(game): pure capy SVG rig (12 expressions, 2 body poses) on the ART-001 anchors

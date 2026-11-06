@@ -3,6 +3,7 @@ import json from '../../../config/balance.json';
 import { parseBalance } from '../../core';
 import { createSession } from '../../session';
 import { preloadCapy } from '../art/capyTextures';
+import { isArtPreview } from '../flow/debugFlag';
 import { localStore } from '../platform/localStore';
 
 export class BootScene extends Phaser.Scene {
@@ -20,6 +21,7 @@ export class BootScene extends Phaser.Scene {
       newSeed: () => (Math.random() * 2 ** 31) >>> 0, now: () => Date.now() });
     this.registry.set('session', session);
     this.registry.set('save', session.save());
-    this.scene.start('Home');
+    const search = typeof location === 'undefined' ? '' : location.search;
+    this.scene.start(isArtPreview(search) ? 'ArtPreview' : 'Home');
   }
 }

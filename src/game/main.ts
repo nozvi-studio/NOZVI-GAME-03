@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { HEIGHT, WIDTH } from './layout';
 import { currentPalette } from './render/palette';
+import { ArtPreviewScene } from './scenes/ArtPreviewScene';
 import { BootScene } from './scenes/BootScene';
 import { GameScene } from './scenes/GameScene';
 import { HomeScene } from './scenes/HomeScene';
@@ -16,7 +17,7 @@ new Phaser.Game({
   height: HEIGHT,
   backgroundColor: currentPalette().bg,
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [BootScene, HomeScene, LoadoutScene, GameScene, HudScene, ResultsScene],
+  scene: [BootScene, HomeScene, LoadoutScene, GameScene, HudScene, ResultsScene, ArtPreviewScene],
   input: { activePointers: 2 },
   render: { antialias: true },
 });
