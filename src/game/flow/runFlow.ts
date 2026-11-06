@@ -44,6 +44,13 @@ export function flowTurn(f: FlowState, b: Balance, dx = 0, dy = 0): { forward: b
     f.status = 'playing'; f.started = true;
     return { forward: true, effects: [{ type: 'begin' }] };
   }
+  if (f.status === 'countdown' && !f.started) {
+    // MEC-001-R2 a non-reverse turn during the start countdown counts as the first input (reverse is not forwarded).
+    const [sx, sy] = b.snake.startDir;
+    if (dx === -sx && dy === -sy) return { forward: false, effects: [] };
+    f.started = true;
+    return { forward: true, effects: [] };
+  }
   return { forward: f.status === 'playing' || f.status === 'countdown', effects: [] };
 }
 export function flowTick(f: FlowState, b: Balance, dtMs: number): FlowEffect[] {
@@ -52,7 +59,10 @@ export function flowTick(f: FlowState, b: Balance, dtMs: number): FlowEffect[] {
   const fx: FlowEffect[] = [];
   const n = Math.ceil(f.countLeftMs / (b.flow.countdownMs / b.flow.countdownDigits));
   if (n !== f.lastCount && n > 0) { f.lastCount = n; fx.push({ type: 'tick', n }); }
-  if (f.countLeftMs <= 0) { f.status = f.started ? 'playing' : 'waiting'; fx.push({ type: 'go' }); } // MEC-001-R2
+  if (f.countLeftMs <= 0) { // MEC-001-R2
+    f.status = f.started ? 'playing' : 'waiting'; fx.push({ type: 'go' });
+    if (f.started) fx.push({ type: 'begin' }); // hides the wait hint when input already came during the countdown
+  }
   return fx;
 }
 export const flowOver = (f: FlowState): void => { f.status = 'over'; };

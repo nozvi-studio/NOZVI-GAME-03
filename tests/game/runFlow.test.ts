@@ -91,6 +91,18 @@ describe('GDD-13 run flow (L651–700, L721–729, L988–994)', () => {
     const f = waiting(); flowTurn(f, b, 0, -1); flowOver(f); flowStart(f, b); flowTick(f, b, 1500);
     expect(f.status).toBe('waiting');
   });
+  it('MEC-001-R2 a turn during the start countdown starts movement at go', () => {
+    const f = createFlow(); flowStart(f, b);
+    expect(flowTurn(f, b, 0, -1)).toEqual({ forward: true, effects: [] });
+    expect(flowTick(f, b, 1500)).toEqual([{ type: 'go' }, { type: 'begin' }]);
+    expect(f.status).toBe('playing');
+  });
+  it('MEC-001-R2 a reverse turn during the start countdown is not forwarded and does not start', () => {
+    const f = createFlow(); flowStart(f, b);
+    expect(flowTurn(f, b, -1, 0)).toEqual({ forward: false, effects: [] });
+    flowTick(f, b, 1500);
+    expect(f.status).toBe('waiting');
+  });
   it('MEC-007-R15 skill input is ignored in waiting', () => {
     expect(acceptSkillInput('waiting')).toBe(false);
   });

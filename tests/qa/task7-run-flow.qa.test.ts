@@ -176,12 +176,12 @@ describe('QA Task 7: Run Flow State Machine (Black-Box)', () => {
     flowStart(fReady, b);
     expect(fReady.status).toBe('countdown');
 
-    const turnCountdown = flowTurn(fReady, b);
+    const turnCountdown = flowTurn(fReady, b, 0, -1); // MEC-001-R2 counts as the first input
     expect(turnCountdown.forward).toBe(true);
     expect(turnCountdown.effects).toEqual([]);
 
     flowTick(fReady, b, b.flow.countdownMs);
-    expect(fReady.status).toBe('waiting'); flowTurn(fReady, b, 0, -1); // MEC-001-R2
+    expect(fReady.status).toBe('playing'); // turned during the countdown (MEC-001-R2)
     expect(fReady.status).toBe('playing');
     const turnPlaying = flowTurn(fReady, b);
     expect(turnPlaying.forward).toBe(true);
