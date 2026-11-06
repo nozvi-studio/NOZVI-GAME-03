@@ -6,6 +6,7 @@ Only files listed here exist. Status: Draft / Approved / Deprecated.
 | ID | File | Owns (source of truth for) | Status |
 |---|---|---|---|
 | GDD | `docs/GDD.md` | Product intent, scope, milestones, mechanics index | Draft |
+| UI-MOCKUPS | `docs/design/UI-MOCKUPS.md` | D2 UI mockups (PNG + source), design tokens, board-to-code map | Draft |
 | STATUS | `docs/STATUS.md` | Current state, next steps, blockers | — |
 | CODEMAP | `docs/CODEMAP.md` | Where code lives, module boundaries, entry points | — |
 | DEC | `docs/DECISIONS.md` | Technical/design trade-offs (ADR-lite) | — |
@@ -51,7 +52,7 @@ Read the "First" column; open "Then" only if the task needs it. Never read every
 | Gameplay bug | MEC spec (or GDD §) for that behavior | CODEMAP module row → that module's files + tests |
 | Balance / tuning | GDD §7, balance config | MEC spec §9 |
 | Refactor | CODEMAP, ARCHITECTURE | DECISIONS (grep topic), module tests |
-| UI / juice | GDD §6, §10 | CODEMAP ui row |
+| UI / juice | GDD §6, §10, `docs/design/UI-MOCKUPS.md` (then the board PNG + `.dc.html` it points to) | CODEMAP ui row |
 | Analytics / ads / SDK | INT spec | GDD §9, §12; CODEMAP integrations row |
 | Playtest follow-up | PLAYTEST (latest entry only) | GDD §12 |
 | Release | STATUS, CHANGELOG [Unreleased] | Test results, INT specs |

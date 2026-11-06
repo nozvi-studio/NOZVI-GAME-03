@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MeowHead</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+
+<style>
+body{margin:0}
+
+</style>
+</helmet>
+<div style="{{rootStyle}}"><dc-import name="PlayerHead" skin="{{skin}}" size="{{size}}" glow="{{glowStr}}" eyes="{{eyes}}" stroke="{{stroke}}" sw="{{sw}}" hint-size="48px,48px"></dc-import></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"fur":{"editor":"enum","options":["ginger","tux","cream"],"default":"ginger"},"size":{"editor":"text","default":"64"},"glow":{"editor":"boolean","default":true},"eyes":{"editor":"enum","options":["normal","x"],"default":"normal"},"stroke":{"editor":"text","default":"none"},"sw":{"editor":"text","default":"0"},"$preview":{"width":120,"height":120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const fur = this.props.fur ?? 'ginger';
+    const px = Number(this.props.size ?? 64) || 64;
+    const glowOff = this.props.glow === false || this.props.glow === 'false';
+    return {
+      skin: fur === 'ginger' ? 'cat' : fur,
+      size: String(px),
+      glowStr: glowOff ? 'false' : 'true',
+      eyes: this.props.eyes === 'x' ? 'x' : 'normal',
+      stroke: this.props.stroke ?? 'none',
+      sw: String(this.props.sw ?? 0),
+      rootStyle: `width:${px}px;height:${px}px;line-height:0`
+    };
+  }
+}
+</script>
+</body>
+</html>

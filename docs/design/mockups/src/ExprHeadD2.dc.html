@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ExprHeadD2</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+
+<style>
+body{margin:0}
+
+</style>
+</helmet>
+<div style="{{rootStyle}}">
+  <svg width="{{px}}" height="{{px}}" viewBox="0 0 48 48" aria-hidden="true" style="display:block;overflow:visible">
+    <defs><radialGradient id="eg-{{skin}}" cx="50%" cy="28%" r="78%"><stop offset="0" stop-color="{{c1}}"/><stop offset="1" stop-color="{{c2}}"/></radialGradient></defs>
+    <path d="{{earsD}}" fill="{{earsFill}}" opacity="{{earsOp}}" stroke-linejoin="round"/>
+    <path d="{{earsInD}}" fill="#F7A9B8" opacity="{{earsOp}}"/>
+    <path d="{{headD}}" fill="url(#eg-{{skin}})"/>
+    <ellipse cx="{{mzCx}}" cy="{{mzCy}}" rx="{{mzRx}}" ry="{{mzRy}}" fill="{{mzFill}}"/>
+    <ellipse cx="{{chL}}" cy="{{chY}}" rx="2.8" ry="1.9" fill="#FF8FA3" opacity="{{chOp}}"/>
+    <ellipse cx="{{chR}}" cy="{{chY}}" rx="2.8" ry="1.9" fill="#FF8FA3" opacity="{{chOp}}"/>
+    <g opacity="{{tongueOp}}"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 0;0 0;0 0;0 .9;0 0" keyTimes="0;.6;.7;.8;.9;1" dur="3s" repeatCount="indefinite"/><path d="M24 40V44M24 44l-2.4 2.4M24 44l2.4 2.4" fill="none" stroke="#F0607A" stroke-width="1.9" stroke-linecap="round"/></g></g>
+    <path d="{{noseD}}" fill="{{noseFill}}"/>
+    <g transform="{{mouthAt}}" stroke="{{ink}}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M-6.2 -.6Q0 4.4 6.2 -.6" opacity="{{mSmile}}"/>
+      <g opacity="{{mBig}}" stroke="none"><path d="M-5 -1Q0 -2.6 5 -1Q4.6 6.4 0 6.4Q-4.6 6.4 -5 -1z" fill="#6B2B3A"/><path d="M-2.4 4.6q2.4-2.4 4.8 0q-1 1.8-2.4 1.8T-2.4 4.6z" fill="#F07C93"/></g>
+      <g opacity="{{mChew}}" stroke="none"><g><animateTransform attributeName="transform" type="scale" values="1 .35;1 1;1 .35" dur=".5s" repeatCount="indefinite"/><ellipse cx="0" cy="2" rx="3.6" ry="3" fill="#6B2B3A"/></g></g>
+      <ellipse cx="0" cy="1.8" rx="2" ry="2.5" fill="#6B2B3A" stroke="none" opacity="{{mO}}"/>
+      <path d="M-4.2 1.6q2.1-2.6 4.2 0t4.2 0" opacity="{{mWave}}"/>
+      <path d="M-6 -1Q0 5.2 6 -1Q0 2 -6 -1z" fill="#FFFFFF" opacity="{{mGrin}}"/>
+      <path d="M-3 1.4H3" opacity="{{mFlat}}"/>
+    </g>
+    <g fill="none" stroke="#3A2A2A" stroke-width="1.8" stroke-linecap="round" opacity="{{browOp}}"><path d="{{browL}}"/><path d="{{browR}}"/></g>
+    <g transform="translate({{eLx}} {{eY}})">
+      <g transform="{{eScale}}">
+        <g opacity="{{eOpen}}"><g transform="scale(1 {{sy}})">
+          <g><animateTransform attributeName="transform" type="scale" values="1 1;1 1;1 .12;1 1;1 1" keyTimes="0;.9;.935;.97;1" dur="4.5s" repeatCount="indefinite"/>
+            <ellipse cx="0" cy="0" rx="{{scRx}}" ry="{{scRy}}" fill="{{scFill}}" transform="scale(1)"/>
+            <g transform="translate(0 {{ly}})"><g><animateTransform attributeName="transform" type="translate" values="{{wanderVals}}" keyTimes="0;.15;.35;.55;.75;.88;1" dur="6s" repeatCount="indefinite"/>
+              <ellipse cx="0" cy="0.3" rx="{{pRx}}" ry="{{pRy}}" fill="#1E1B2E"/>
+              <circle cx="-1.6" cy="-2" r="1.3" fill="#fff"/>
+            </g></g>
+          </g></g></g>
+        <g opacity="{{eArc}}" fill="none" stroke="#1E1B2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M-4.2 2Q0 -4.6 4.2 2"/></g>
+        <g opacity="{{eHurt}}" fill="none" stroke="#1E1B2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M-4 -3.6L3 0L-4 3.6" transform="scale(1 1)"/></g>
+        <g opacity="{{eStar}}"><path d="{{starD}}" fill="#FFC845" stroke="#C98A12" stroke-width=".8" stroke-linejoin="round" transform="scale(1.35)"/></g>
+        <g opacity="{{eX}}" fill="none" stroke="#1E1B2E" stroke-width="2.2" stroke-linecap="round"><ellipse cx="0" cy="0" rx="{{scRx}}" ry="{{scRy}}" fill="{{scFill}}" stroke="none"/><path d="M-3.2 -3.2l6.4 6.4M3.2 -3.2l-6.4 6.4"/></g>
+      </g>
+    </g>
+    <g transform="translate({{eRx}} {{eY}})">
+      <g transform="{{eScale}}">
+        <g opacity="{{eOpen}}"><g transform="scale(1 {{sy}})">
+          <g><animateTransform attributeName="transform" type="scale" values="1 1;1 1;1 .12;1 1;1 1" keyTimes="0;.9;.935;.97;1" dur="4.5s" repeatCount="indefinite"/>
+            <ellipse cx="0" cy="0" rx="{{scRx}}" ry="{{scRy}}" fill="{{scFill}}" transform="scale(1)"/>
+            <g transform="translate(0 {{ly}})"><g><animateTransform attributeName="transform" type="translate" values="{{wanderVals}}" keyTimes="0;.15;.35;.55;.75;.88;1" dur="6s" repeatCount="indefinite"/>
+              <ellipse cx="0" cy="0.3" rx="{{pRx}}" ry="{{pRy}}" fill="#1E1B2E"/>
+              <circle cx="-1.6" cy="-2" r="1.3" fill="#fff"/>
+            </g></g>
+          </g></g></g>
+        <g opacity="{{eArc}}" fill="none" stroke="#1E1B2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M-4.2 2Q0 -4.6 4.2 2"/></g>
+        <g opacity="{{eHurt}}" fill="none" stroke="#1E1B2E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M-4 -3.6L3 0L-4 3.6" transform="scale(-1 1)"/></g>
+        <g opacity="{{eStar}}"><path d="{{starD}}" fill="#FFC845" stroke="#C98A12" stroke-width=".8" stroke-linejoin="round" transform="scale(1.35)"/></g>
+        <g opacity="{{eX}}" fill="none" stroke="#1E1B2E" stroke-width="2.2" stroke-linecap="round"><ellipse cx="0" cy="0" rx="{{scRx}}" ry="{{scRy}}" fill="{{scFill}}" stroke="none"/><path d="M-3.2 -3.2l6.4 6.4M3.2 -3.2l-6.4 6.4"/></g>
+      </g>
+    </g>
+    <g opacity="{{xSweat}}"><path d="M41 10q3.4 4.2 0 7q-3.4-2.8 0-7z" fill="#8FD3F5" stroke="#4FA6D6" stroke-width=".6"/></g>
+    <g opacity="{{xSpark}}" fill="#FFC845" stroke="#C98A12" stroke-width=".5" stroke-linejoin="round"><path d="M5 6l1.2 2.8L9 10l-2.8 1.2L5 14l-1.2-2.8L1 10l2.8-1.2z"/><path d="M43 3l.9 2.1L46 6l-2.1.9L43 9l-.9-2.1L40 6l2.1-.9z"/></g>
+    <g opacity="{{xZ}}" fill="none" stroke="#6B4C82" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M38 7h4.5l-4.5 5.5h4.5"/><path d="M44 1.5h3l-3 3.6h3"/></g>
+  </svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"skin":{"editor":"enum","options":["snake","cat"],"default":"snake"},"expr":{"editor":"enum","options":["idle","happy","chew","alert","scared","determined","hurt","sleepy","win","dead"],"default":"idle"},"size":{"editor":"text","default":"96"},"$preview":{"width":120,"height":120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const BASE = {
+      snake: { c: ['#A9C0FF', '#5E86F2'], ears: null, head: 'M24 4.6C35.6 4.6 44 12.4 44 23.8 44 35 36 43 24 44.6 12 43 4 35 4 23.8 4 12.4 12.4 4.6 24 4.6z',
+        muzzle: [24, 35.4, 11.5, 7.6, '#E4ECFF'], cheek: [30.6, 14.5], eye: { y: 23, dx: 8.5, rx: 5.8, ry: 6.2, sc: '#FFF7D6', prx: 1.8, pry: 4.8 },
+        nose: 'M21 33.6a.9 1.2 0 1 0 1.8 0a.9 1.2 0 1 0 -1.8 0zM25.2 33.6a.9 1.2 0 1 0 1.8 0a.9 1.2 0 1 0 -1.8 0z', noseFill: '#2B3A73', ink: '#2B3A73', mouthY: 38, tongue: true },
+      cat: { c: ['#FFCB93', '#F4A157'], ears: ['M4.5 21L6.5 3 20 11.5zM43.5 21L41.5 3 28 11.5z', '#F4A157', 'M8.6 16.5L9.6 7.6 16.4 11.8zM39.4 16.5L38.4 7.6 31.6 11.8z'],
+        head: 'M4 27.5a20 17 0 1 0 40 0a20 17 0 1 0 -40 0z', muzzle: [24, 35, 9.5, 6.4, '#FFFFFF'], cheek: [33.5, 15],
+        eye: { y: 28, dx: 9, rx: 6.3, ry: 7.2, sc: '#FFFFFF', prx: 4.7, pry: 4.7 }, nose: 'M22 34.2h4l-2 2.5z', noseFill: '#F07C93', ink: '#7A4A3A', mouthY: 38, tongue: false }
+    };
+    // Expression = a handful of numbers. Nothing here is skin specific.
+    // eye: open|arc|hurt|star|x  sy: lid openness  ps: pupil scale  lx/ly: look offset
+    // brow: [lift, tilt] tilt>0 = inner end lower (angry), tilt<0 = inner end higher (worried)
+    const EX = {
+      idle:       { eye: 'open', sy: 1,    ps: 1,    ly: 0,   wander: 1, brow: null,        mouth: 'smile', blush: 1,   extra: null },
+      happy:      { eye: 'arc',  sy: 1,    ps: 1,    ly: 0,   wander: 0, brow: null,        mouth: 'big',   blush: 1.7, extra: 'spark' },
+      chew:       { eye: 'open', sy: 0.55, ps: 1,    ly: 0.6, wander: 0, brow: null,        mouth: 'chew',  blush: 1.2, extra: null },
+      alert:      { eye: 'open', sy: 1.1,  ps: 1.25, ly: -0.6, wander: 0, brow: [-2.2, -1],  mouth: 'o',     blush: 1,   extra: null },
+      scared:     { eye: 'open', sy: 1.1,  ps: 0.6,  ly: 0,   wander: 0, brow: [-2, -2.4],  mouth: 'wave',  blush: 0.4, extra: 'sweat' },
+      determined: { eye: 'open', sy: 0.85, ps: 1,    ly: 0.3, wander: 0, brow: [0.6, 2],    mouth: 'grin',  blush: 1,   extra: 'spark' },
+      hurt:       { eye: 'hurt', sy: 1,    ps: 1,    ly: 0,   wander: 0, brow: null,        mouth: 'wave',  blush: 0.5, extra: null },
+      sleepy:     { eye: 'open', sy: 0.3,  ps: 1,    ly: 0.8, wander: 0, brow: null,        mouth: 'flat',  blush: 1,   extra: 'zzz' },
+      win:        { eye: 'star', sy: 1,    ps: 1,    ly: 0,   wander: 0, brow: null,        mouth: 'big',   blush: 1.7, extra: 'spark' },
+      dead:       { eye: 'x',    sy: 1,    ps: 1,    ly: 0,   wander: 0, brow: null,        mouth: 'wave',  blush: 0.3, extra: null }
+    };
+    const skin = BASE[this.props.skin] ? this.props.skin : 'snake';
+    const B = BASE[skin];
+    const ek = EX[this.props.expr] ? this.props.expr : 'idle';
+    const X = EX[ek];
+    const px = Number(this.props.size ?? 96) || 96;
+    const E = B.eye;
+    const w = 1.3 * X.wander;
+    const wv = `0 0;${-w} ${w * 0.25};${-w} ${w * 0.25};${w} 0;${w} 0;0 ${-w * 0.5};0 0`;
+    const lx = [24 - E.dx, 24 + E.dx];
+    const bY = E.y - E.ry * X.sy - 2.6;
+    const br = X.brow;
+    const bw = 4.2;
+    const browD = (side) => {
+      if (!br) return 'M0 0';
+      const cx = lx[side], dir = side === 0 ? 1 : -1; // dir>0: inner end is to the right
+      const y0 = bY + br[0], t = br[1];
+      return `M${cx - dir * bw} ${y0 - t * 0.6}L${cx + dir * bw} ${y0 + t * 0.6}`;
+    };
+    const m = X.mouth;
+    const sw = E.rx / 5.8;
+    const starD = 'M0 -5.2l1.5 3.4 3.7.4-2.8 2.5.8 3.6L0 2.9l-3.2 2 .8-3.6-2.8-2.5 3.7-.4z';
+    return {
+      skin, px,
+      c1: B.c[0], c2: B.c[1], ink: B.ink,
+      id: skin + '-' + ek,
+      earsD: B.ears ? B.ears[0] : 'M0 0', earsFill: B.ears ? B.ears[1] : '#000', earsOp: B.ears ? 1 : 0, earsInD: B.ears ? B.ears[2] : 'M0 0',
+      headD: B.head,
+      mzCx: B.muzzle[0], mzCy: B.muzzle[1], mzRx: B.muzzle[2], mzRy: B.muzzle[3], mzFill: B.muzzle[4],
+      chY: B.cheek[0], chL: 24 - B.cheek[1], chR: 24 + B.cheek[1], chOp: Math.min(0.85, 0.45 * X.blush),
+      noseD: B.nose, noseFill: B.noseFill,
+      eLx: lx[0], eRx: lx[1], eY: E.y,
+      scRx: E.rx, scRy: E.ry, scFill: E.sc, pRx: E.prx * X.ps, pRy: E.pry * (E.prx === E.pry ? X.ps : 1),
+      sy: X.sy, ly: X.ly, wanderVals: wv,
+      eOpen: X.eye === 'open' ? 1 : 0, eArc: X.eye === 'arc' ? 1 : 0, eHurt: X.eye === 'hurt' ? 1 : 0, eStar: X.eye === 'star' ? 1 : 0, eX: X.eye === 'x' ? 1 : 0,
+      eScale: `scale(${sw})`, starD,
+      browOp: br ? 1 : 0, browL: browD(0), browR: browD(1),
+      mouthAt: `translate(24 ${B.mouthY})`,
+      mSmile: m === 'smile' ? 1 : 0, mBig: m === 'big' ? 1 : 0, mChew: m === 'chew' ? 1 : 0, mO: m === 'o' ? 1 : 0, mWave: m === 'wave' ? 1 : 0, mGrin: m === 'grin' ? 1 : 0, mFlat: m === 'flat' ? 1 : 0,
+      tongueOp: B.tongue && (ek === 'idle' || ek === 'happy' || ek === 'determined') ? 1 : 0,
+      xSweat: X.extra === 'sweat' ? 1 : 0, xSpark: X.extra === 'spark' ? 1 : 0, xZ: X.extra === 'zzz' ? 1 : 0,
+      rootStyle: `width:${px}px;height:${px}px;line-height:0`
+    };
+  }
+}
+</script>
+</body>
+</html>

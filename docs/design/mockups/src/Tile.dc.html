@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="{{rootStyle}}">
+  <sc-if value="{{isMud}}" hint-placeholder-val="{{ true }}">
+    <div style="{{mudStyle}}">
+      <div style="{{puddleStyle}}"></div>
+      <div style="{{bubble1}}"></div>
+      <div style="{{bubble2}}"></div>
+    </div>
+  </sc-if>
+  <sc-if value="{{isWarn}}" hint-placeholder-val="{{ false }}">
+    <div style="{{warnStyle}}">
+      <svg width="{{arrow}}" height="{{arrow}}" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 12l6-6 6 6" fill="none" stroke="#B35F00" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </sc-if>
+  <sc-if value="{{isUp}}" hint-placeholder-val="{{ false }}">
+    <div style="{{upTop}}"></div>
+    <div style="{{upFront}}"></div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"look":{"editor":"enum","options":["A","B","C"],"default":"A"},"kind":{"editor":"enum","options":["mud","risewarn","riseup"],"default":"mud"},"cell":{"editor":"text","default":"21"},"$preview":{"width":120,"height":120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const look = this.props.look ?? 'A';
+    const kind = this.props.kind ?? 'mud';
+    const s = Number(this.props.cell ?? 21) || 21;
+    const k = s / 21;
+    const bw = look === 'B' ? Math.max(2, 2 * k) : look === 'C' ? Math.max(2, 2.2 * k) : 0;
+    const bcMud = look === 'B' ? '#4A2E1B' : '#FFFFFF';
+    const bcStone = look === 'B' ? '#2B3248' : '#FFFFFF';
+    const lift = look === 'C' ? `0 ${2 * k}px ${4 * k}px rgba(40,40,70,.25)` : look === 'B' ? `0 ${2 * k}px 0 rgba(43,50,72,.3)` : 'none';
+    const base = `position:absolute;left:${k}px;top:${k}px;width:${s - 2 * k}px;box-sizing:border-box;`;
+    return {
+      rootStyle: `position:relative;width:${s}px;height:${s}px`,
+      isMud: kind === 'mud',
+      isWarn: kind === 'risewarn',
+      isUp: kind === 'riseup',
+      arrow: Math.round(14 * k),
+      mudStyle: `${base}height:${s - 2 * k}px;border-radius:${7 * k}px;background:#B8956A;border:${bw}px solid ${bcMud};box-shadow:${lift}`,
+      puddleStyle: `position:absolute;left:22%;top:30%;width:56%;height:40%;border-radius:50%;background:#8F6F43`,
+      bubble1: `position:absolute;left:30%;top:36%;width:${3 * k}px;height:${3 * k}px;border-radius:50%;background:#B8956A`,
+      bubble2: `position:absolute;left:55%;top:48%;width:${2 * k}px;height:${2 * k}px;border-radius:50%;background:#B8956A`,
+      warnStyle: `${base}height:${s - 2 * k}px;border-radius:${5 * k}px;background:#D3D7E0;border:${2 * k}px dashed #FF9A1F;display:flex;align-items:center;justify-content:center;box-shadow:${lift}`,
+      upTop: `${base}height:${(s - 2 * k) * 0.68}px;top:${k}px;border-radius:${5 * k}px ${5 * k}px ${2 * k}px ${2 * k}px;background:#EDEFF4;border:${bw}px solid ${bcStone}`,
+      upFront: `${base}top:${k + (s - 2 * k) * 0.58}px;height:${(s - 2 * k) * 0.42}px;border-radius:${2 * k}px ${2 * k}px ${5 * k}px ${5 * k}px;background:#A9B0C0;border:${bw}px solid ${bcStone};z-index:-1`
+    };
+  }
+}
+</script>
+</body>
+</html>

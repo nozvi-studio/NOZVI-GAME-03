@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FencePiece</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="{{rootStyle}}">
+  <sc-for list="{{rails}}" as="r" hint-placeholder-count="6"><div style="{{r.style}}"></div></sc-for>
+  <sc-for list="{{posts}}" as="p" hint-placeholder-count="4"><div style="{{p.style}}"></div></sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"look":{"editor":"enum","options":["A","B","C"],"default":"A"},"cells":{"editor":"text","default":"0,0;1,0;2,0"},"cell":{"editor":"text","default":"21"},"$preview":{"width":160,"height":160}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const look = this.props.look ?? 'A';
+    const s = Number(this.props.cell ?? 21) || 21;
+    const k = s / 21;
+    const cells = (this.props.cells ?? '0,0;1,0;2,0').split(';').map((t) => t.split(',').map(Number));
+    const has = new Set(cells.map((c) => c.join(',')));
+    const W = (Math.max(...cells.map((c) => c[0])) + 1) * s;
+    const H = (Math.max(...cells.map((c) => c[1])) + 1) * s;
+    const P = {
+      A: { rail: '#C9965F', post: '#A9733E', bw: 0, bc: 'none', sh: 'none', hi: 'none' },
+      B: { rail: '#E3AC6D', post: '#CF9150', bw: Math.max(1.5, 1.6 * k), bc: '#4A2E1B', sh: `0 ${2 * k}px 0 rgba(74,46,27,.35)`, hi: `inset 0 ${2 * k}px 0 rgba(255,255,255,.4)` },
+      C: { rail: '#E8B57C', post: '#D79E62', bw: Math.max(1.5, 1.8 * k), bc: '#FFFFFF', sh: `0 ${2 * k}px ${4 * k}px rgba(60,40,20,.3)`, hi: `inset 0 ${2 * k}px 0 rgba(255,255,255,.35)` }
+    }[look];
+    const t = 0.2 * s;
+    const box = (x, y, w, h, bg, rad, extraShadow) =>
+      ({ style: `position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;box-sizing:border-box;border-radius:${rad}px;background:${bg};border:${P.bw}px solid ${P.bc};box-shadow:${[P.sh, extraShadow].filter((v) => v && v !== 'none').join(',') || 'none'}` });
+    const rails = [];
+    const posts = [];
+    cells.forEach(([x, y]) => {
+      const cx = x * s + s / 2;
+      const cy = y * s + s / 2;
+      if (has.has(`${x + 1},${y}`)) {
+        rails.push(box(cx, cy - 0.28 * s, s, t, P.rail, 2 * k));
+        rails.push(box(cx, cy + 0.08 * s, s, t, P.rail, 2 * k));
+      }
+      if (has.has(`${x},${y + 1}`)) {
+        rails.push(box(cx - 0.28 * s, cy, t, s, P.rail, 2 * k));
+        rails.push(box(cx + 0.08 * s, cy, t, s, P.rail, 2 * k));
+      }
+      const pw = 0.4 * s;
+      const ph = 0.7 * s;
+      posts.push(box(cx - pw / 2, cy - ph / 2, pw, ph, P.post, 3 * k, P.hi));
+    });
+    return { rails, posts, rootStyle: `position:relative;width:${W}px;height:${H}px` };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Odds D2</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&amp;display=swap">
+<style>
+body{margin:0}
+a,button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F8F2E8;font-family:'Nunito',system-ui,sans-serif;color:#5A3B3B;overflow:hidden">
+
+  <div style="position:absolute;left:16px;right:16px;top:22px;display:flex;align-items:center;gap:8px">
+    <a href="HomeD2.dc.html" aria-label="Back to home" style="flex:none;width:44px;height:44px;border-radius:50%;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.16);display:flex;align-items:center;justify-content:center;text-decoration:none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 5l-7 7 7 7"></path></svg>
+    </a>
+    <div style="display:flex;align-items:center;gap:6px;height:38px;padding:0 14px 0 8px;border-radius:999px;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.16);font-weight:900;font-size:18px">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#8EA0FF"></circle><circle cx="8.5" cy="8.5" r="2.6" fill="#FFFFFF" fill-opacity=".85"></circle></svg>
+      <span>41</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;height:38px;padding:0 14px 0 8px;border-radius:999px;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.16);font-weight:900;font-size:18px">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F8D468" stroke="#E5A82A" stroke-width="2"></circle><circle cx="12" cy="12" r="5.5" fill="none" stroke="#E5A82A" stroke-width="2"></circle></svg>
+      <span>120</span>
+    </div>
+    <div style="flex:1"></div>
+    <a href="OddsD2.dc.html" aria-label="Show prize odds" style="text-decoration:none;flex:none;width:44px;height:44px;border-radius:50%;border:0;padding:0;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.16);display:flex;align-items:center;justify-content:center">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"></circle><path d="M12 11v6"></path><circle cx="12" cy="7.6" r=".7" fill="#5A3B3B"></circle></svg>
+    </a>
+  </div>
+
+  <div style="position:absolute;left:12px;top:124px;width:366px;height:516px;box-sizing:border-box;border-radius:183px 183px 26px 26px / 142px 142px 26px 26px;background:#F6C77A;box-shadow:0 16px 26px -14px rgba(110,80,70,.45)">
+    <div style="position:absolute;left:4px;top:4px;right:4px;bottom:4px;box-sizing:border-box;border:5px dotted #FFFCF6;border-radius:179px 179px 22px 22px / 138px 138px 22px 22px"></div>
+
+    <div style="position:absolute;left:14px;top:14px;width:338px;height:488px;overflow:hidden;border-radius:169px 169px 14px 14px / 130px 130px 14px 14px;background:#FFFCF6">
+
+      <svg width="338" height="488" viewBox="0 0 338 488" aria-hidden="true" style="position:absolute;left:0;top:0">
+        <circle cx="169" cy="122" r="54" fill="#FBE3C8" opacity=".6"></circle>
+        <path d="M124 92L128 44L162 72zM214 92L210 44L176 72z" fill="#FBE3C8" opacity=".6"></path>
+        <path d="M40 250l5 10 11 1.5-8 7.5 2 11-10-5.5-10 5.5 2-11-8-7.5 11-1.5z" fill="#FBE3C8" opacity=".7"></path>
+        <path d="M298 250l5 10 11 1.5-8 7.5 2 11-10-5.5-10 5.5 2-11-8-7.5 11-1.5z" fill="#FBE3C8" opacity=".7"></path>
+        <path d="M324 470V150C324 66 262 24 188 24" fill="none" stroke="#EFE6D8" stroke-width="10" stroke-linecap="round"></path>
+        <path d="M324 470V150C324 66 262 24 188 24" fill="none" stroke="#FFFCF6" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 11"></path>
+      </svg>
+
+      <sc-for list="{{pegs}}" as="p" hint-placeholder-count="40"><div style="{{p.style}}"></div></sc-for>
+
+      <div style="position:absolute;left:44px;top:86px;width:52px;height:52px;box-sizing:border-box;border-radius:50%;background:#E8E1FF;border:5px solid #C6B0F5;box-shadow:0 5px 8px -4px rgba(110,80,70,.35)"><div style="position:absolute;left:8px;top:6px;width:9px;height:9px;border-radius:50%;background:#FFFFFF;opacity:.85"></div></div>
+      <div style="position:absolute;left:242px;top:86px;width:52px;height:52px;box-sizing:border-box;border-radius:50%;background:#FBE3C8;border:5px solid #F4A157;box-shadow:0 5px 8px -4px rgba(110,80,70,.35)"><div style="position:absolute;left:8px;top:6px;width:9px;height:9px;border-radius:50%;background:#FFFFFF;opacity:.85"></div></div>
+
+      <svg width="338" height="488" viewBox="0 0 338 488" aria-hidden="true" style="position: absolute; left: 0px; top: -11px">
+        <circle cx="169" cy="322" r="92" fill="none" stroke="#F3E4D2" stroke-width="4"></circle>
+        <circle cx="169" cy="322" r="64" fill="none" stroke="#F3E4D2" stroke-width="3"></circle>
+        
+        
+        
+        <rect x="162" y="278" width="14" height="10" rx="2" fill="#FFFCF6"></rect>
+        
+        
+        <circle cx="169" cy="322" r="27" fill="#F6C77A" stroke="#E5A82A" stroke-width="3"></circle>
+        <circle cx="169" cy="322" r="17" fill="#5A3B3B"></circle>
+        <circle cx="163" cy="316" r="4" fill="#FFFFFF" opacity=".35"></circle>
+        <path d="M115 287A64 64 0 0 1 154.6 259.6" fill="none" stroke="#7A5A5A" stroke-width="20" stroke-linecap="round"></path>
+        <path d="M115 287A64 64 0 0 1 154.6 259.6" fill="none" stroke="#EFE6D8" stroke-width="14" stroke-linecap="round"></path>
+        <path d="M117 283A62 62 0 0 1 152 259" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity=".85"></path>
+        <path d="M183.4 259.6A64 64 0 0 1 222.7 287.1" fill="none" stroke="#7A5A5A" stroke-width="20" stroke-linecap="round"></path>
+        <path d="M183.4 259.6A64 64 0 0 1 222.7 287.1" fill="none" stroke="#EFE6D8" stroke-width="14" stroke-linecap="round"></path>
+        <path d="M185 258A62 62 0 0 1 220 283" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity=".85"></path>
+        <path d="M126 338Q169 368 212 338" fill="none" stroke="#7A5A5A" stroke-width="20" stroke-linecap="round"></path>
+        <path d="M126 338Q169 368 212 338" fill="none" stroke="#EFE6D8" stroke-width="14" stroke-linecap="round"></path>
+        <path d="M131 336Q169 362 207 336" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" opacity=".85"></path>
+      </svg>
+
+      <div style="position:absolute;left:117px;top:100px;width:18px;height:18px;border-radius:50%;background:#8EA0FF;box-shadow:inset 4px 4px 0 -1px rgba(255,255,255,.75), 0 0 0 5px rgba(142,160,255,.25)"></div>
+      <div style="position:absolute;left:316px;top:444px;width:16px;height:16px;border-radius:50%;background:#8EA0FF;box-shadow:inset 3px 3px 0 -1px rgba(255,255,255,.75)"></div>
+
+      <div style="position:absolute;left:85px;top:372px;display:flex;align-items:center;justify-content:center;width:34px;height:22px;border-radius:999px;background:#FFFFFF;box-shadow:0 3px 6px -2px rgba(110,80,70,.3);font-weight:900;font-size:12px;color:#6B4C82">×5</div>
+      <div style="position:absolute;left:152px;top:372px;display:flex;align-items:center;justify-content:center;width:34px;height:22px;border-radius:999px;background:#FFFFFF;box-shadow:0 3px 6px -2px rgba(110,80,70,.3);font-weight:900;font-size:11px;color:#8A5A00">SKIN</div>
+
+      <div style="position:absolute;left:0;right:0;bottom:0;height:90px;box-sizing:border-box;padding:8px 6px 0;background:#F6C77A;display:flex;align-items:stretch;gap:4px">
+        <div style="flex:1;border-radius:12px 12px 0 0;background:#FBE3C8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+          <span style="display:flex;align-items:center;gap:3px;font-weight:900;font-size:22px;line-height:1"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F8D468" stroke="#E5A82A" stroke-width="2"></circle><circle cx="12" cy="12" r="5.5" fill="none" stroke="#E5A82A" stroke-width="2"></circle></svg>2</span>
+          <span style="font-size:12px;font-weight:800;color:#8A6A6A">30%</span>
+        </div>
+        <a href="MarbleWheelD2.dc.html" aria-label="Wheel bonus slot, 15 percent" style="flex:1;border-radius:12px 12px 0 0;background:#E8E1FF;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:#5A3B3B">
+          <div style="width:30px;height:30px;box-sizing:border-box;border-radius:50%;background:conic-gradient(#F6C2D3 0 25%, #F8D468 0 50%, #BCDDF4 0 75%, #CFEBD0 0);border:3px solid #FFFCF6;box-shadow:0 2px 5px -1px rgba(110,80,70,.3)"></div>
+          <span style="font-weight:900;font-size:10px;letter-spacing:.06em;line-height:1">WHEEL</span>
+          <span style="font-size:12px;font-weight:800;color:#8A6A6A;line-height:1">15%</span>
+        </a>
+        <a href="MarbleSkinDropD2.dc.html" aria-label="Skin drop slot, 5 percent" style="flex:1;border-radius:12px 12px 0 0;background:#F4A157;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-decoration:none;color:#5A3B3B">
+          <div style="position:relative;width:30px;height:30px">
+            <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" style="position:absolute;left:0;top:0"><path d="M12 2.5l2.9 6.2 6.6.8-4.9 4.6 1.3 6.6L12 17.4l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" fill="#FFC845"></path></svg>
+            <span style="position:absolute;left:0;right:0;top:6px;text-align:center;font-weight:900;font-size:16px;line-height:1">?</span>
+          </div>
+          <span style="font-weight:900;font-size:10px;letter-spacing:.06em;line-height:1">SKIN</span>
+          <span style="font-size:12px;font-weight:800;line-height:1">5%</span>
+        </a>
+        <div style="flex:1;border-radius:12px 12px 0 0;background:#F8D468;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+          <span style="display:flex;align-items:center;gap:3px;font-weight:900;font-size:22px;line-height:1"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F8D468" stroke="#E5A82A" stroke-width="2"></circle><circle cx="12" cy="12" r="5.5" fill="none" stroke="#E5A82A" stroke-width="2"></circle></svg>5</span>
+          <span style="font-size:12px;font-weight:800;color:#8A6A6A">20%</span>
+        </div>
+        <div style="flex:1;border-radius:12px 12px 0 0;background:#FBE3C8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+          <span style="display:flex;align-items:center;gap:3px;font-weight:900;font-size:22px;line-height:1"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F8D468" stroke="#E5A82A" stroke-width="2"></circle><circle cx="12" cy="12" r="5.5" fill="none" stroke="#E5A82A" stroke-width="2"></circle></svg>2</span>
+          <span style="font-size:12px;font-weight:800;color:#8A6A6A">30%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute;left:45px;top:84px;width:300px;height:44px;box-sizing:border-box;border-radius:16px;background:#FFFCF6;box-shadow:0 8px 14px -8px rgba(110,80,70,.35);display:flex;align-items:center;justify-content:space-between;padding:0 18px;z-index:2">
+    <div style="position:absolute;left:5px;top:5px;right:5px;bottom:5px;box-sizing:border-box;border:3px dotted #F6C77A;border-radius:12px"></div>
+    <div style="position:relative;display:flex;flex-direction:column;gap:4px">
+      <span style="font-weight:900;font-size:11px;letter-spacing:.08em;color:#8A6A6A;line-height:1">SKIN PITY 27/40</span>
+      <div style="width:120px;height:6px;border-radius:999px;background:#EFE6D8;overflow:hidden"><div style="width:67.5%;height:100%;background:#F4A157"></div></div>
+    </div>
+    <span style="position:relative;display:flex;align-items:center;gap:6px;font-weight:900;font-size:20px">
+      <span style="font-size:10px;letter-spacing:.08em;color:#8A6A6A;font-weight:900">LAST</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F8D468" stroke="#E5A82A" stroke-width="2"></circle><circle cx="12" cy="12" r="5.5" fill="none" stroke="#E5A82A" stroke-width="2"></circle></svg>
+      <span>+5</span>
+    </span>
+  </div>
+
+  <div style="position:absolute;left:70px;top:646px;width:250px;height:30px;border-radius:12px;background:conic-gradient(#EFE6D8 25%, #E3DCD2 0 50%, #EFE6D8 0 75%, #E3DCD2 0) 0 0 / 20px 20px;box-shadow:inset 0 3px 6px rgba(110,80,70,.12)"></div>
+  <div style="position:absolute;left:36px;top:650px;width:22px;height:22px;border-radius:50%;background:#8EA0FF;box-shadow:inset 4px 4px 0 -1px rgba(255,255,255,.7)"></div>
+  <div style="position:absolute;left:54px;top:660px;width:18px;height:18px;border-radius:50%;background:#F6C2D3;box-shadow:inset 3px 3px 0 -1px rgba(255,255,255,.7)"></div>
+  <div style="position:absolute;left:332px;top:650px;width:22px;height:22px;border-radius:50%;background:#F8D468;box-shadow:inset 4px 4px 0 -1px rgba(255,255,255,.7)"></div>
+  <div style="position:absolute;left:318px;top:660px;width:18px;height:18px;border-radius:50%;background:#8EA0FF;box-shadow:inset 3px 3px 0 -1px rgba(255,255,255,.7)"></div>
+
+  <div style="position:absolute;left:285px;top:692px;line-height:0"><dc-import name="PlayerHead" skin="snake" size="76" glow="false" stroke="none" sw="0" hint-size="76px,76px"></dc-import></div>
+
+  <div style="position:absolute;left:55px;top:748px;width:280px;height:44px;border-radius:44px;background:#B3DEF3;box-shadow:inset 0 -6px 0 #9DD3EE, 0 10px 16px -10px rgba(80,140,180,.5)"></div>
+  <button aria-label="Push, shoot one marble. Hold to auto-fire." style="position:absolute;left:80px;top:652px;width:230px;height:122px;padding:0;border:0;background:none;display:block">
+    <div style="position:absolute;left:0;top:0;width:230px;height:122px;box-sizing:border-box;border-radius:115px 115px 22px 22px / 122px 122px 22px 22px;background:linear-gradient(#8DE0A5, #79D391 55%, #5DB878);box-shadow:inset 0 -8px 0 #4A9A63, 0 8px 14px -8px rgba(74,154,99,.6)"></div>
+    <div style="position:absolute;left:46px;top:14px;width:90px;height:26px;border-radius:50%;background:#FFFFFF;opacity:.4;transform:rotate(-12deg)"></div>
+    <span style="position:absolute;left:0;right:0;top:46px;text-align:center;font-weight:900;font-size:38px;letter-spacing:.04em;color:#2F5B3F;line-height:1">PUSH</span>
+  </button>
+
+  <div style="position:absolute;left:18px;top:690px;display:flex;flex-direction:column;gap:8px;align-items:center">
+    <div style="min-width:52px;height:34px;box-sizing:border-box;padding:0 10px;border-radius:999px;background:#E8E1FF;box-shadow:inset 0 0 0 2.5px #C6B0F5;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#6B4C82">×1</div>
+    <div aria-disabled="true" style="min-width:52px;height:34px;box-sizing:border-box;padding:0 10px;border-radius:999px;background:#EFE6D8;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#B79F8A">×10 · 50</div>
+  </div>
+
+  <div style="position:absolute;left:75px;top:802px;width:240px;height:24px;border-radius:999px;background:#EFE6D8;overflow:hidden">
+    <div style="width:41%;height:100%;border-radius:999px;background:#8EA0FF"></div>
+    <span style="position:absolute;left:0;right:0;top:0;line-height:24px;text-align:center;font-weight:900;font-size:13px;color:#5A3B3B">41 marbles</span>
+  </div>
+
+  <div style="position:absolute;z-index:50;left:0;top:0;width:390px;height:844px;background:rgba(90,59,59,.45)"></div>
+  <div role="dialog" aria-label="Prize odds" style="position:absolute;z-index:51;left:0;right:0;top:52px;bottom:0;box-sizing:border-box;padding:10px 16px 0;border-radius:30px 30px 0 0;background:#F8F2E8;box-shadow:0 -14px 30px -10px rgba(90,59,59,.4);display:flex;flex-direction:column;gap:9px;overflow:hidden">
+    <div style="align-self:center;width:44px;height:5px;border-radius:999px;background:#E3DCD2" aria-hidden="true"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="font-weight:900;font-size:24px">Prize odds</span>
+      <a href="MarbleMachineD2.dc.html" aria-label="Close" style="width:44px;height:44px;border-radius:50%;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.16);display:flex;align-items:center;justify-content:center;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+    </div>
+    <div style="box-sizing:border-box;padding:12px 14px;border-radius:22px;background:#FFFCF6;box-shadow:0 6px 12px -8px rgba(110,80,70,.22);display:flex;flex-direction:column;gap:8px">
+      <span style="font-weight:900;font-size:16px;line-height:1.1">Where a marble lands</span>
+      <table style="width:100%;border-collapse:collapse"><thead><tr><th scope="col" style="text-align:left;font-weight:800;font-size:12px;letter-spacing:.08em;color:#8A6A6A;padding:0 0 2px">SLOT</th><th scope="col" style="text-align:left;font-weight:800;font-size:12px;letter-spacing:.08em;color:#8A6A6A;padding:0 0 2px">PRIZE</th><th scope="col" style="padding:0"><span style="position:absolute;width:1px;height:1px;overflow:hidden">Share</span></th><th scope="col" style="text-align:right;font-weight:800;font-size:12px;letter-spacing:.08em;color:#8A6A6A;padding:0 0 2px">CHANCE</th></tr></thead><tbody><tr><th scope="row" style="width:44px;height:32px;text-align:left;font-weight:900;font-size:14px;padding:0">1</th><td style="font-weight:800;font-size:15px;padding:0">2 coins</td><td style="width:96px;padding:0"><span style="display:block;height:8px;width:72.0px;border-radius:999px;background:#F8D468"></span></td><td style="width:44px;text-align:right;font-weight:900;font-size:15px;padding:0">30%</td></tr><tr><th scope="row" style="width:44px;height:32px;text-align:left;font-weight:900;font-size:14px;padding:0">2</th><td style="font-weight:800;font-size:15px;padding:0">Wheel bonus</td><td style="width:96px;padding:0"><span style="display:block;height:8px;width:36.0px;border-radius:999px;background:#C6B0F5"></span></td><td style="width:44px;text-align:right;font-weight:900;font-size:15px;padding:0">15%</td></tr><tr><th scope="row" style="width:44px;height:32px;text-align:left;font-weight:900;font-size:14px;padding:0">3</th><td style="font-weight:800;font-size:15px;padding:0">Mystery skin</td><td style="width:96px;padding:0"><span style="display:block;height:8px;width:12.0px;border-radius:999px;background:#F6C2D3"></span></td><td style="width:44px;text-align:right;font-weight:900;font-size:15px;padding:0">5%</td></tr><tr><th scope="row" style="width:44px;height:32px;text-align:left;font-weight:900;font-size:14px;padding:0">4</th><td style="font-weight:800;font-size:15px;padding:0">5 coins</td><td style="width:96px;padding:0"><span style="display:block;height:8px;width:48.0px;border-radius:999px;background:#F4A157"></span></td><td style="width:44px;text-align:right;font-weight:900;font-size:15px;padding:0">20%</td></tr><tr><th scope="row" style="width:44px;height:32px;text-align:left;font-weight:900;font-size:14px;padding:0">5</th><td style="font-weight:800;font-size:15px;padding:0">2 coins</td><td style="width:96px;padding:0"><span style="display:block;height:8px;width:72.0px;border-radius:999px;background:#F8D468"></span></td><td style="width:44px;text-align:right;font-weight:900;font-size:15px;padding:0">30%</td></tr></tbody></table>
+    </div>
+    <div style="box-sizing:border-box;padding:12px 14px;border-radius:22px;background:#FFFCF6;box-shadow:0 6px 12px -8px rgba(110,80,70,.22);display:flex;flex-direction:column;gap:8px">
+      <span style="font-weight:900;font-size:16px;line-height:1.1">Wheel multiplier</span>
+      <div style="display:flex;gap:6px"><span style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:14px;background:#EFE6D8"><span style="font-weight:900;font-size:15px">×1</span><span style="font-weight:800;font-size:13px">58%</span></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:14px;background:#FBE19A"><span style="font-weight:900;font-size:15px">×2</span><span style="font-weight:800;font-size:13px">23%</span></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:14px;background:#F6C2D3"><span style="font-weight:900;font-size:15px">×3</span><span style="font-weight:800;font-size:13px">13%</span></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:14px;background:#C6B0F5"><span style="font-weight:900;font-size:15px">×5</span><span style="font-weight:800;font-size:13px">6%</span></span></div>
+    </div>
+    <div style="box-sizing:border-box;padding:12px 14px;border-radius:22px;background:#FFFCF6;box-shadow:0 6px 12px -8px rgba(110,80,70,.22);display:flex;flex-direction:column;gap:8px">
+      <span style="font-weight:900;font-size:16px;line-height:1.1">Mystery skin rarity</span>
+      <div style="display:flex;gap:6px"><span style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:14px;background:#EFE6D8"><span style="font-weight:900;font-size:15px">Common</span><span style="font-weight:800;font-size:13px">70%</span></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:14px;background:#BCDDF4"><span style="font-weight:900;font-size:15px">Rare</span><span style="font-weight:800;font-size:13px">25%</span></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:14px;background:#E8E1FF"><span style="font-weight:900;font-size:15px">Epic</span><span style="font-weight:800;font-size:13px">5%</span></span></div>
+      <span style="font-weight:800;font-size:13px;color:#8A6A6A">Skin you already own turns into 15 / 40 / 100 coins.</span>
+    </div>
+    <div style="box-sizing:border-box;padding:12px 14px;border-radius:22px;background:#FFFCF6;box-shadow:0 6px 12px -8px rgba(110,80,70,.22);display:flex;flex-direction:column;gap:8px">
+      <span style="font-weight:900;font-size:16px;line-height:1.1">Per marble</span>
+      <div style="display:flex;gap:6px"><span style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:14px;background:#FBE19A"><span style="font-weight:900;font-size:15px">Coins</span><span style="font-weight:800;font-size:13px">80%</span></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:14px;background:#E8E1FF"><span style="font-weight:900;font-size:15px">Wheel</span><span style="font-weight:800;font-size:13px">15%</span></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 4px;border-radius:14px;background:#F6C2D3"><span style="font-weight:900;font-size:15px">Skin</span><span style="font-weight:800;font-size:13px">5%</span></span></div>
+      <span style="font-weight:800;font-size:13px;color:#8A6A6A">Average slot payout: 2.2 coins per marble, before the wheel.</span>
+    </div>
+    <div role="status" style="display:flex;align-items:center;gap:10px;box-sizing:border-box;padding:0 16px 0 12px;height:52px;border-radius:999px;background:#FBE19A;font-weight:900;font-size:16px"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.6.8-4.9 4.6 1.3 6.6L12 17.4l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" fill="#FFC845"/></svg><span>Skin guaranteed within 14 marbles</span></div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const spots = [
+      [169, 56], [128, 84], [210, 84], [169, 112], [128, 140], [210, 140],
+      [128, 168], [210, 169], [33, 196], [302, 196], [103, 218], [169, 220], [236, 218],
+      [62, 249], [275, 249], [34, 285], [302, 285], [62, 327], [275, 327]
+    ];
+    const pegs = spots.map(([x, y]) => ({
+      style: `position:absolute;left:${x - 8}px;top:${y - 8}px;width:16px;height:16px;box-sizing:border-box;border-radius:50%;background:#EFE6D8;border:3.5px solid #7A5A5A;box-shadow:inset 0 2px 0 rgba(255,255,255,.85), 0 3px 4px -2px rgba(110,80,70,.4)`
+    }));
+    return { pegs };
+  }
+}
+</script>
+</body>
+</html>

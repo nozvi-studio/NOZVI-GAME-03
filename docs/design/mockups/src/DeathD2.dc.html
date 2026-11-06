@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Death D2</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap">
+<style>
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+@keyframes warnBlink{0%,100%{opacity:1}50%{opacity:.35}}
+.warn{animation:warnBlink 1s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.warn{animation:none}}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F8F2E8;font-family:'Nunito',system-ui,sans-serif;color:#5A3B3B;display:flex;flex-direction:column;padding:20px 0 0;gap:14px;overflow:hidden">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px">
+    <div style="width:44px;height:44px" aria-hidden="true"></div>
+    <div style="text-align:center">
+      <div style="font-weight:800;font-size:24px;line-height:1">Level 8</div>
+      <div style="font-weight:700;font-size:13px;color:#8A6A6A;margin-top:3px">Rice Paddy</div>
+    </div>
+    <a href="PauseD2.dc.html" aria-label="Pause" style="text-decoration:none;width:44px;height:44px;border-radius:50%;border:0;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.15);display:flex;align-items:center;justify-content:center;padding:0">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#5A3B3B" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="2"/><rect x="14" y="4" width="5" height="16" rx="2"/></svg>
+    </a>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:0 16px">
+    <div style="display:flex;align-items:center;gap:6px;height:42px;padding:0 16px 0 8px;border-radius:999px;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.15);font-weight:800;font-size:19px">
+      <dc-import name="FoodIcon" skin="{{skin}}" size="28" stroke="none" sw="0" hint-size="28px,28px"></dc-import>
+      <span><span style="color:#2E9E5B">2</span>/6</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;height:42px;padding:0 16px 0 12px;border-radius:999px;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.15);font-weight:800;font-size:19px">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.6.8-4.9 4.6 1.3 6.6L12 17.4l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" fill="#FFC845"/></svg>
+      <span>44</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;height:42px;padding:0 14px 0 10px;border-radius:999px;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.15);font-weight:800;font-size:19px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#3CC6DA" aria-hidden="true"><path d="M13 2L5 13.5h6L10 22l9-12.5h-6.5L13 2z"/></svg>
+      <span style="width:46px;height:10px;border-radius:999px;background:#D9EEF3;overflow:hidden;display:block"><span style="display:block;width:35%;height:100%;border-radius:999px;background:#3CC6DA"></span></span>
+      <span>35</span>
+    </div>
+  </div>
+
+  <div style="align-self:center;box-sizing:border-box;width:369px;padding:6px;border-radius:26px;background:#FFFCF6;box-shadow:0 10px 22px -10px rgba(110,80,70,.22)">
+    <div style="position:relative;width:357px;height:357px;border-radius:20px;overflow:hidden;background:repeating-linear-gradient(0deg, transparent 0 19px, rgba(255,255,255,.5) 19px 21px), repeating-linear-gradient(90deg, transparent 0 19px, rgba(255,255,255,.5) 19px 21px), conic-gradient(#CFEBD0 25%, #C2E4C6 0 50%, #CFEBD0 0 75%, #C2E4C6 0) 0 0 / 42px 42px">
+
+      <div style="position:absolute;left:210px;top:294px"><dc-import name="Tile" look="C" kind="mud" cell="21" hint-size="21px,21px"></dc-import></div>
+      <div style="position:absolute;left:231px;top:294px"><dc-import name="Tile" look="C" kind="mud" cell="21" hint-size="21px,21px"></dc-import></div>
+      <div style="position:absolute;left:210px;top:315px"><dc-import name="Tile" look="C" kind="mud" cell="21" hint-size="21px,21px"></dc-import></div>
+      <div style="position:absolute;left:231px;top:315px"><dc-import name="Tile" look="C" kind="mud" cell="21" hint-size="21px,21px"></dc-import></div>
+
+      <div style="position:absolute;left:126px;top:63px"><dc-import name="FencePiece" look="C" cells="0,0;1,0;2,0;3,0;3,1;3,2" cell="21" hint-size="84px,63px"></dc-import></div>
+      <div style="position:absolute;left:42px;top:147px"><dc-import name="FencePiece" look="C" cells="0,0;0,1;0,2" cell="21" hint-size="21px,63px"></dc-import></div>
+
+      <div style="position:absolute;left:273px;top:63px"><dc-import name="Rock" look="C" kind="pebble" cell="21" hint-size="21px,21px"></dc-import></div>
+      <div style="position:absolute;left:294px;top:273px"><dc-import name="Rock" look="C" kind="rock" cell="21" hint-size="21px,21px"></dc-import></div>
+      <div style="position:absolute;left:84px;top:273px"><dc-import name="Rock" look="C" kind="boulder" cell="21" hint-size="21px,21px"></dc-import></div>
+      <div style="position:absolute;left:315px;top:231px"><dc-import name="Rock" look="C" kind="crumble" cell="21" hint-size="21px,21px"></dc-import></div>
+      <div class="warn" style="position:absolute;left:294px;top:147px"><dc-import name="Rock" look="C" kind="warn" cell="21" hint-size="21px,21px"></dc-import></div>
+
+      <div style="position:absolute;left:107px;top:128px;width:16px;height:16px;box-sizing:border-box;border-radius:5px;background:#3CC6DA;border:2.5px solid #FFFFFF;transform:rotate(45deg);box-shadow:0 2px 4px rgba(40,40,70,.3)"></div>
+
+      <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true" style="position:absolute;left:307.5px;top:76.5px"><circle cx="18" cy="18" r="16" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-dasharray="70 100" stroke-linecap="round" transform="rotate(-90 18 18)"/></svg>
+      <div style="position:absolute;left:311.5px;top:80.5px;filter:drop-shadow(0 2px 2px rgba(40,40,70,.25))"><dc-import name="FoodIcon" skin="{{skin}}" size="28" stroke="#FFFFFF" sw="2.8" hint-size="28px,28px"></dc-import></div>
+
+      <svg width="357" height="357" viewBox="0 0 357 357" aria-hidden="true" style="position:absolute;left:0;top:0;filter:drop-shadow(0 2px 2px rgba(60,40,40,.28))">
+        <path d="{{snakePath}}" fill="none" stroke="{{trailDark}}" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="{{snakePath}}" fill="none" stroke="{{trail}}" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="{{snakePath}}" fill="none" stroke="#FFFFFF" stroke-opacity=".5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" transform="translate(-2.5 -3)"/>
+      </svg>
+      <div style="{{headStyle}}"><dc-import name="PlayerHead" skin="{{skin}}" size="40" glow="false" eyes="x" stroke="none" sw="0" hint-size="40px,40px"></dc-import></div>
+    </div>
+  </div>
+
+  <div style="align-self:center;display:flex;align-items:center;gap:8px;height:34px;padding:0 16px 0 12px;border-radius:999px;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.15);font-weight:800;font-size:14px;color:#8A6A6A">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A6A6A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 21V4M6 4h12l-3 4.5L18 13H6"/></svg>
+    <span>Next checkpoint at L10</span>
+  </div>
+
+  <div style="position:absolute;left:-70px;bottom:-110px;width:530px;height:290px;border-radius:50% 50% 0 0 / 90px 90px 0 0;background:linear-gradient(#B3DEF3, #9DD3EE)"></div>
+  <svg width="86" height="46" viewBox="0 0 86 46" aria-hidden="true" style="position:absolute;left:152px;bottom:166px"><path d="M2 46C8 34 18 32 26 38c6 5 12 4 15-3 4-10 14-15 25-11 9 3 14 11 14 22z" fill="#C4E7F7"/></svg>
+
+  <div style="position:absolute;left:24px;right:24px;bottom:34px;display:flex;align-items:flex-end;justify-content:space-between">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+      <button aria-label="Slow-mo, costs 40 energy. Not enough energy yet." aria-disabled="true" style="width:84px;height:84px;border-radius:50%;border:0;padding:0;background:#E9F1F7;box-shadow:0 7px 0 rgba(80,140,180,.3);display:flex;align-items:center;justify-content:center">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#9DB1C2" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13.5" r="8"/><path d="M12 9v4.8l3 1.8M9.5 3h5"/></svg>
+      </button>
+      <span style="display:flex;align-items:center;gap:4px;height:26px;padding:0 10px 0 8px;border-radius:999px;background:#FFFCF6;font-weight:800;font-size:14px;color:#5A3B3B"><svg width="12" height="12" viewBox="0 0 24 24" fill="#3CC6DA" aria-hidden="true"><path d="M13 2L5 13.5h6L10 22l9-12.5h-6.5L13 2z"/></svg><span>40</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+      <button aria-label="Tail Snip, costs 30 energy" style="width:84px;height:84px;border-radius:50%;border:0;padding:0;background:#FFFCF6;box-shadow:0 7px 0 rgba(80,140,180,.3), 0 0 0 7px rgba(255,233,138,.85);display:flex;align-items:center;justify-content:center">
+        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.5" cy="17.5" r="2.7"/><circle cx="17.5" cy="17.5" r="2.7"/><path d="M8.2 15.5L17 4M15.8 15.5L7 4"/></svg>
+      </button>
+      <span style="display:flex;align-items:center;gap:4px;height:26px;padding:0 10px 0 8px;border-radius:999px;background:#FFFCF6;font-weight:800;font-size:14px;color:#5A3B3B"><svg width="12" height="12" viewBox="0 0 24 24" fill="#3CC6DA" aria-hidden="true"><path d="M13 2L5 13.5h6L10 22l9-12.5h-6.5L13 2z"/></svg><span>30</span></span>
+    </div>
+  </div>
+
+  <div aria-hidden="true" style="position:absolute;left:0;top:0;width:390px;height:844px;pointer-events:none;box-shadow:inset 0 0 0 7px rgba(229,72,58,.6), inset 0 0 90px 14px rgba(229,72,58,.5)"></div>
+  <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true" style="position:absolute;left:194.0px;top:237.0px"><path d="M22 2l4 11 11-4-6 10 10 5-11 3 3 11-9-7-8 8-1-12-12-1 9-8-7-10 11 3z" fill="#FFE98A" stroke="#FFFFFF" stroke-width="2.4" stroke-linejoin="round"/></svg>
+  <a href="ResultsD2.dc.html" style="position:absolute;left:30px;right:30px;top:392px;box-sizing:border-box;padding:14px 18px;border-radius:24px;background:#FFFCF6;box-shadow:0 14px 24px -10px rgba(90,59,59,.45);display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:#5A3B3B">
+    <span style="font-weight:800;font-size:12px;letter-spacing:.12em;color:#8A6A6A">RUN OVER</span>
+    <span style="font-weight:900;font-size:23px;line-height:1.15;text-align:center">Face-first into a fence.</span>
+  </a>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"skin":{"editor":"enum","options":["snake","cat","dog","capy"],"default":"snake"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const C = 21;
+    const skin = this.props.skin ?? 'snake';
+    const fur = skin;
+    const T = { snake: ['#6F93F5', '#3F63D1'], cat: ['#F4A157', '#DB8238'], dog: ['#E9B87F', '#C48A4F'], capy: ['#C79A6B', '#A8794D'] }[skin] ?? ['#6F93F5', '#3F63D1'];
+    const ctr = (c, r) => [c * C + C / 2, r * C + C / 2];
+    const smooth = (pts, r) => {
+      let d = `M${pts[0][0]} ${pts[0][1]}`;
+      for (let i = 1; i < pts.length - 1; i++) {
+        const [px, py] = pts[i - 1], [x, y] = pts[i], [nx, ny] = pts[i + 1];
+        const l1 = Math.hypot(px - x, py - y), l2 = Math.hypot(nx - x, ny - y);
+        const rr = Math.min(r, l1 / 2, l2 / 2);
+        d += ` L${x + (px - x) / l1 * rr} ${y + (py - y) / l1 * rr} Q${x} ${y} ${x + (nx - x) / l2 * rr} ${y + (ny - y) / l2 * rr}`;
+      }
+      const l = pts[pts.length - 1];
+      return d + ` L${l[0]} ${l[1]}`;
+    };
+    const pts = [[6, 12], [9, 12], [9, 6]].map(([c, r]) => ctr(c, r));
+    const head = pts[pts.length - 1];
+    return {
+      fur,
+      skin,
+      trail: T[0],
+      trailDark: T[1],
+      snakePath: smooth(pts, 10),
+      headStyle: `position:absolute;left:${head[0] - 20}px;top:${head[1] - 22}px`
+    };
+  }
+}
+</script>
+</body>
+</html>

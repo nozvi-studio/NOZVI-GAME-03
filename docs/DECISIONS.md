@@ -440,3 +440,9 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: owner-approved deviation from GDD section 11 order: P3 starts now, split into P3a juice, P3b screens, P3c capy; P3c first. Capy personality follows Figma (round eyes, smile) plus the GDD outline. The agent draws a layered SVG on the ART-001 rig; Phaser rasterises it with `load.svg` (no new dependency); motion by texture swaps and tweens.
 - Alternatives: finish the P2 exit first; Codex image_gen raster masters (ART-002, now fallback); owner exports from Figma.
 - Consequence: P2 exit (playtest, full fuzz) stays open in STATUS; spec docs/superpowers/specs/2026-11-06-capy-character-design.md.
+
+## 2026-11-06 - D2 UI mockups live in the repo
+- Context: owner provided UI mockups as a Claude Design artifact link (not Figma) for P3 screens; agents cannot rely on a private link.
+- Choice: commit PNG snapshots (2x) plus the `.dc.html` sources and `canvas.json` under `docs/design/mockups/`, with `docs/design/UI-MOCKUPS.md` as the map and token list. Runtime `support.js` is not committed.
+- Alternatives: link only (not reproducible offline); Figma export (no Figma file exists); PNGs only (loses exact numbers).
+- Consequence: about 6 MB added to the repo; refresh steps in UI-MOCKUPS section 5.

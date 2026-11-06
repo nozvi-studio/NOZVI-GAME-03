@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Palette D2</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width:960px;box-sizing:border-box;padding:32px;background:#F8F2E8;font-family:'Nunito',system-ui,sans-serif;color:#5A3B3B;display:flex;flex-direction:column;gap:22px">
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <span style="font-weight:900;font-size:28px">D2 colour palette</span>
+    <span style="font-weight:800;font-size:14px;color:#8A6A6A">Rule of thumb: warm cream base, one strong colour per screen (green CTA), pastels for everything else. Text is never pure black.</span>
+  </div>
+  <sc-for list="{{groups}}" as="g" hint-placeholder-count="6">
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-weight:900;font-size:18px">{{g.title}}</span><span style="font-weight:800;font-size:13px;color:#8A6A6A">{{g.note}}</span></div>
+      <div style="display:grid;grid-template-columns:repeat(6, minmax(0, 1fr));gap:10px">
+        <sc-for list="{{g.items}}" as="c" hint-placeholder-count="6">
+          <div style="display:flex;flex-direction:column;border-radius:16px;background:#FFFCF6;box-shadow:0 6px 12px -8px rgba(110,80,70,.22);overflow:hidden">
+            <div style="{{c.chip}}"></div>
+            <div style="padding:8px 10px 10px;display:flex;flex-direction:column;gap:1px">
+              <span style="font-weight:900;font-size:13px">{{c.name}}</span>
+              <span style="font-weight:800;font-size:12px;color:#8A6A6A">{{c.hex}}</span>
+              <span style="font-weight:700;font-size:11px;color:#B79F8A">{{c.use}}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const G = [
+      { title: 'Surfaces', note: 'base layers', items: [
+        ['Cream', '#F8F2E8', 'Screen background'],
+        ['Card', '#FFFCF6', 'Cards, pills, tiles'],
+        ['White', '#FFFFFF', 'Highlights only'],
+        ['Sand', '#EFE6D8', 'Tabs, disabled'],
+        ['Stone', '#E3DCD2', 'Locked / empty slots'],
+        ['Peach', '#FBE3C8', 'Hero panel, slots'] ] },
+      { title: 'Text & lines', note: 'no pure black anywhere', items: [
+        ['Plum brown', '#5A3B3B', 'Primary text, icons'],
+        ['Soft brown', '#8A6A6A', 'Secondary text'],
+        ['Faint', '#B79F8A', 'Hints, inactive'],
+        ['Slate', '#3F4D5E', 'Labels on blue hill'],
+        ['Logo outline', '#6B4C82', 'Logo letters only'],
+        ['Walnut', '#B98558', 'Active tab'] ] },
+      { title: 'Action (green)', note: 'Play / PUSH / Equip', items: [
+        ['Green', '#79D391', 'Button face'],
+        ['Green shade', '#5DB878', 'Inner bevel, check badge'],
+        ['Green deep', '#4A9A63', 'Button shelf'],
+        ['Green line', '#3E7A52', 'Label outline'],
+        ['Board mint', '#CFEBD0', 'Board cells'],
+        ['Board mint 2', '#C2E4C6', 'Board checker'] ] },
+      { title: 'Accents', note: 'pastel, used sparingly', items: [
+        ['Orange', '#F4A157', 'Cat skin, progress, bumpers'],
+        ['Orange deep', '#DB8238', 'Fur stripes'],
+        ['Butter', '#F8D468', 'Stat tiles, slots'],
+        ['Star gold', '#FFC845', 'Best score star'],
+        ['Pink', '#F6C2D3', 'Stat tile, logo'],
+        ['Periwinkle', '#8EA0FF', 'Marbles (currency)'] ] },
+      { title: 'Sky & hill', note: 'footer scenery', items: [
+        ['Hill top', '#B3DEF3', 'Footer hill'],
+        ['Hill base', '#9DD3EE', 'Hill gradient end'],
+        ['Silhouette', '#C4E7F7', 'Snake on hill'],
+        ['Sky stat', '#BCDDF4', 'Stat tile'],
+        ['Lavender', '#C6B0F5', 'Logo letter'],
+        ['Cyan', '#3CC6DA', 'Orb / water-style pickups'] ] },
+      { title: 'Characters', note: 'default snake + animal skins', items: [
+        ['Snake blue', '#6F93F5', 'Default body (mango leaf on head)'],
+        ['Snake shade', '#3F63D1', 'Body edge, spots'],
+        ['Snake belly', '#E4ECFF', 'Muzzle'],
+        ['Pup tile', '#FBE7B0', 'Picker background'],
+        ['Capy tile', '#D7EBD2', 'Picker background'],
+        ['Snake tile', '#DCE5FF', 'Picker background'] ] }
+    ];
+    const groups = G.map(g => ({
+      title: g.title,
+      note: g.note,
+      items: g.items.map(([name, hex, use]) => ({
+        name, hex, use,
+        chip: `height:56px;background:${hex};${hex === '#FFFFFF' || hex === '#FFFCF6' || hex === '#F8F2E8' ? 'box-shadow:inset 0 -1px 0 rgba(110,80,70,.12);' : ''}`
+      }))
+    }));
+    return { groups };
+  }
+}
+</script>
+</body>
+</html>

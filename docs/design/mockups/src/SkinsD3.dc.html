@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Skins D3</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap">
+<style>
+body{margin:0}
+button,a{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F8F2E8;font-family:'Nunito',system-ui,sans-serif;color:#5A3B3B;display:flex;flex-direction:column;padding:22px 16px 0;gap:14px;overflow:hidden">
+
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <a href="HomeD2.dc.html" aria-label="Back" style="width:44px;height:44px;border-radius:50%;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.16);display:flex;align-items:center;justify-content:center;text-decoration:none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 5l-7 7 7 7"/></svg>
+    </a>
+    <span style="font-weight:900;font-size:24px;color:#5A3B3B">Characters</span>
+    <div style="display:flex;align-items:center;gap:6px;height:36px;padding:0 14px 0 8px;border-radius:999px;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.16);font-weight:900;font-size:16px">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F8D468" stroke="#E5A82A" stroke-width="2"></circle><circle cx="12" cy="12" r="5.5" fill="none" stroke="#E5A82A" stroke-width="2"></circle></svg>
+      <span>120</span>
+    </div>
+  </div>
+
+  <div style="position:relative;box-sizing:border-box;border-radius:28px;background:#FFFCF6;box-shadow:0 12px 22px -12px rgba(110,80,70,.22);padding:14px 16px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;overflow:hidden">
+    <div style="position:absolute;left:0;right:0;top:0;height:128px;background:#DCE5FF"></div>
+    <div style="position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:112px">
+      <svg width="338" height="112" viewBox="0 0 338 112" aria-hidden="true" style="position:absolute;left:0;top:0">
+        <path d="M6 82 H70 Q86 82 86 66 V46 Q86 30 102 30 H150 Q166 30 166 46 V60" fill="none" stroke="#6F93F5" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>
+        <path d="M6 82 H70 Q86 82 86 66 V46 Q86 30 102 30 H150 Q166 30 166 46 V60" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".55" transform="translate(0 -5)"/>
+      </svg>
+      <div style="position:absolute;left:131px;top:30px"><dc-import name="PlayerHead" skin="snake" size="88" glow="true" stroke="none" sw="0" hint-size="88px,88px"></dc-import></div>
+      <div style="position:absolute;right:28px;bottom:12px"><dc-import name="FoodIcon" skin="snake" size="34" stroke="none" sw="0" hint-size="34px,34px"></dc-import></div>
+    </div>
+    <span style="position:relative;font-weight:900;font-size:22px">Mango Snake</span>
+    <span style="position:relative;font-weight:800;font-size:13px;color:#8A6A6A;text-align:center">Default · Eats mangoes · Eyes follow the food</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:10px">
+    <sc-for list="{{tiles}}" as="s" hint-placeholder-count="6">
+      <div style="{{s.cardStyle}}">
+        <sc-if value="{{s.isLock}}" hint-placeholder-val="{{ false }}"><a href="SkinBuyD2.dc.html" aria-label="{{s.name}}, locked. Open to buy" style="position:absolute;left:0;top:0;width:100%;height:100%;border-radius:20px"></a></sc-if>
+        <div style="{{s.bgStyle}}">
+          <sc-if value="{{s.isHead}}" hint-placeholder-val="{{ false }}"><dc-import name="PlayerHead" skin="{{s.skin}}" glow="false" size="54" stroke="none" sw="0" hint-size="54px,54px"></dc-import></sc-if>
+          <sc-if value="{{s.isMystery}}" hint-placeholder-val="{{ false }}"><span style="font-weight:900;font-size:34px;color:#8A6A6A">?</span></sc-if>
+        </div>
+        <span style="display:flex;align-items:center;gap:4px;font-weight:900;font-size:13px"><span>{{s.name}}</span><sc-if value="{{s.isHead}}" hint-placeholder-val="{{ true }}"><dc-import name="FoodIcon" skin="{{s.skin}}" size="14" stroke="none" sw="0" hint-size="14px,14px"></dc-import></sc-if></span>
+        <span style="{{s.tagStyle}}">{{s.tag}}</span>
+        <div style="{{s.checkStyle}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="position:absolute;left:20px;right:20px;bottom:30px">
+    <a href="HomeD2.dc.html" style="display:flex;align-items:center;justify-content:center;height:62px;border-radius:999px;background:#79D391;box-shadow:inset 0 -6px 0 #5DB878, 0 8px 14px -8px rgba(74,154,99,.6);text-decoration:none;color:#2F5B3F;font-weight:900;font-size:22px">Equip</a>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const raw = [
+      { name: 'Mango', kind: 'head', skin: 'snake', bg: '#DCE5FF', status: 'selected' },
+      { name: 'Ginger', kind: 'head', skin: 'cat', bg: '#FBE3C8', status: 'owned' },
+      { name: 'Pup', kind: 'head', skin: 'dog', bg: '#FBE7B0', status: 'owned' },
+      { name: 'Tuxedo', kind: 'head', skin: 'tux', bg: '#D9DDF5', status: 'lock', cost: 300 },
+      { name: 'Capy', kind: 'head', skin: 'capy', bg: '#D7EBD2', status: 'lock', cost: 800 },
+      { name: 'Coming', kind: 'mystery', bg: '#E3DCD2', status: 'soon' },
+      { name: 'Coming', kind: 'mystery', bg: '#E3DCD2', status: 'soon' },
+      { name: 'Coming', kind: 'mystery', bg: '#E3DCD2', status: 'soon' }
+    ];
+    const tiles = raw.map(r => {
+      const sel = r.status === 'selected';
+      const dim = r.status === 'soon';
+      return {
+        ...r,
+        isMeow: r.kind === 'meow',
+        isHead: r.kind === 'head',
+        isMystery: r.kind === 'mystery',
+        isLock: r.status === 'lock',
+        cardStyle: `position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px 8px;border-radius:20px;background:#FFFCF6;box-shadow:0 6px 12px -8px rgba(110,80,70,.22);${sel ? 'outline:3px solid #7FC98C;' : ''}${dim ? 'opacity:.75;' : ''}`,
+        bgStyle: `width:100%;height:74px;border-radius:14px;background:${r.bg};display:flex;align-items:center;justify-content:center;${r.status === 'lock' ? 'filter:grayscale(.35);' : ''}`,
+        tag: sel ? 'Equipped' : r.status === 'owned' ? 'Owned' : r.status === 'lock' ? String(r.cost) + ' coins' : 'Soon',
+        tagStyle: `font-weight:800;font-size:11px;color:${r.status === 'lock' ? '#8A5A00' : '#8A6A6A'}`,
+        checkStyle: `position:absolute;right:-6px;top:-6px;width:24px;height:24px;border-radius:50%;background:#5DB878;align-items:center;justify-content:center;display:${sel ? 'flex' : 'none'}`
+      };
+    });
+    return { tiles };
+  }
+}
+</script>
+</body>
+</html>

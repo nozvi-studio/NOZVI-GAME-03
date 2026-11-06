@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Results D2</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@700;800&display=swap">
+<style>
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+.lt{font-family:'Lilita One',sans-serif;-webkit-text-stroke:8px #6B4C82;paint-order:stroke fill;line-height:.95;display:inline-block}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F8F2E8;font-family:'Nunito',system-ui,sans-serif;color:#5A3B3B;display:flex;flex-direction:column;padding:22px 16px 0;gap:14px;overflow:hidden">
+
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <a href="HomeD2.dc.html" aria-label="Home" style="width:44px;height:44px;border-radius:50%;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.15);display:flex;align-items:center;justify-content:center;text-decoration:none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 5l-7 7 7 7"/></svg>
+    </a>
+    <div style="display:flex;gap:2px;filter:drop-shadow(0 5px 0 #6B4C82)">
+      <span class="lt" style="font-size:40px;color:#F79DBB;transform:rotate(-3deg)">G</span><span class="lt" style="font-size:40px;color:#F8D468;transform:rotate(2deg)">A</span><span class="lt" style="font-size:40px;color:#8CC9F0;transform:rotate(-2deg)">M</span><span class="lt" style="font-size:40px;color:#97DB9B;transform:rotate(3deg)">E</span>
+      <span style="width:10px"></span>
+      <span class="lt" style="font-size:40px;color:#C6B0F5;transform:rotate(-3deg)">O</span><span class="lt" style="font-size:40px;color:#F79DBB;transform:rotate(2deg)">V</span><span class="lt" style="font-size:40px;color:#F8D468;transform:rotate(-2deg)">E</span><span class="lt" style="font-size:40px;color:#8CC9F0;transform:rotate(3deg)">R</span>
+    </div>
+    <div style="width:44px"></div>
+  </div>
+
+  <div style="position:relative;margin-top:50px;box-sizing:border-box;padding:70px 16px 18px;border-radius:30px;background:#FFFCF6;box-shadow:0 14px 24px -10px rgba(110,80,70,.22);display:flex;flex-direction:column;align-items:center;gap:6px">
+    <div style="position:absolute;left:50%;top:-58px;transform:translateX(-50%)"><dc-import name="PlayerHead" skin="{{skin}}" size="112" glow="true" stroke="none" sw="0" hint-size="112px,112px"></dc-import></div>
+    <span style="font-weight:800;font-size:16px;color:#8A6A6A">Face-first into a fence.</span>
+    <span style="font-weight:800;font-size:13px;letter-spacing:.1em;color:#8A6A6A">SCORE</span>
+    <span style="font-weight:800;font-size:84px;line-height:.9;color:#5A3B3B">{{scoreText}}</span>
+    <div style="display:flex;align-items:center;gap:6px;height:32px;margin-top:6px;padding:0 16px 0 12px;border-radius:999px;background:{{bestBg}};font-weight:{{bestWeight}};font-size:15px">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.6.8-4.9 4.6 1.3 6.6L12 17.4l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" fill="#FFC845"/></svg>
+      <span>{{bestText}}</span>
+    </div>
+    <div style="width:100%;display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:8px;margin-top:12px">
+      <div style="display:flex;flex-direction:column;align-items:center;padding:10px 4px;border-radius:14px;background:#F6C2D3"><span style="font-weight:800;font-size:12px;letter-spacing:.08em">LEVEL</span><span style="font-weight:800;font-size:28px;line-height:1.1">{{levelText}}</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:10px 4px;border-radius:14px;background:#FBE19A"><span style="font-weight:800;font-size:12px;letter-spacing:.08em">EATEN</span><span style="display:flex;align-items:center;gap:4px;font-weight:800;font-size:28px;line-height:1.1"><dc-import name="FoodIcon" skin="{{skin}}" size="24" stroke="none" sw="0" hint-size="24px,24px"></dc-import><span>35</span></span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:10px 4px;border-radius:14px;background:#BCDDF4"><span style="font-weight:800;font-size:12px;letter-spacing:.08em">BIOME</span><span style="font-weight:800;font-size:28px;line-height:1.1">2/6</span></div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:14px;box-sizing:border-box;padding:12px 20px;border-radius:26px;background:#E8E1FF;box-shadow:0 8px 16px -8px rgba(110,80,70,.18)">
+    <svg width="44" height="44" viewBox="0 0 24 24" aria-hidden="true" style="flex:none"><circle cx="12" cy="12" r="10" fill="#8EA0FF"/><circle cx="8.5" cy="8.5" r="2.6" fill="#FFFFFF" fill-opacity=".85"/></svg>
+    <span style="flex:1;font-weight:800;font-size:17px;line-height:1.1">Marbles earned</span>
+    <span style="font-weight:800;font-size:40px;line-height:1">+41</span>
+  </div>
+
+  <sc-if value="{{isCheckpoint}}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="display:flex;align-items:center;gap:12px;box-sizing:border-box;padding:10px 16px;border-radius:22px;background:#D7EBD2;color:#234B35">
+      <span style="flex:none;width:40px;height:40px;border-radius:50%;background:#79D391;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#234B35" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 21V4M6 4h12l-3 4.5L18 13H6"/></svg></span>
+      <span style="flex:1;font-weight:900;font-size:19px;line-height:1.1">Next run starts at L4!</span>
+    </div>
+  </sc-if>
+
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="flex:1;height:18px;border-radius:999px;background:#FFFCF6;padding:4px;box-sizing:border-box"><div style="width:80%;height:100%;border-radius:999px;background:#F4A157"></div></div>
+    <div style="display:flex;align-items:center;gap:6px;height:32px;padding:0 14px 0 10px;border-radius:999px;background:#FFFCF6;font-weight:800;font-size:14px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 21V4M6 4h12l-3 4.5L18 13H6"/></svg>
+      <span>{{nextCp}}</span>
+    </div>
+  </div>
+
+  <div style="position:absolute;left:-70px;bottom:-110px;width:530px;height:270px;border-radius:50% 50% 0 0 / 90px 90px 0 0;background:linear-gradient(#B3DEF3, #9DD3EE)"></div>
+  <svg width="86" height="46" viewBox="0 0 86 46" aria-hidden="true" style="position:absolute;left:152px;bottom:142px"><path d="M2 46C8 34 18 32 26 38c6 5 12 4 15-3 4-10 14-15 25-11 9 3 14 11 14 22z" fill="#C4E7F7"/></svg>
+
+  <div style="position:absolute;left:20px;right:20px;bottom:30px;display:flex;align-items:center;gap:12px">
+    <a href="HomeD2.dc.html" aria-label="Home" style="flex:none;width:62px;height:62px;border-radius:50%;background:#FFFCF6;box-shadow:0 6px 0 rgba(80,140,180,.3);display:flex;align-items:center;justify-content:center;text-decoration:none">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7M6 9.5V20h12V9.5"/></svg>
+    </a>
+    <a href="LoadoutD2.dc.html" style="flex:1;display:flex;align-items:center;justify-content:center;height:70px;border-radius:999px;background:#79D391;box-shadow:inset 0 -7px 0 #5DB878, inset 0 4px 0 rgba(255,255,255,.4), 0 6px 0 #4A9A63;text-decoration:none"><span class="lt" style="font-size:32px;color:#FFFFFF;-webkit-text-stroke:7px #3E7A52">Play again</span></a>
+    <a href="MarbleMachineD2.dc.html" aria-label="Marble machine" style="flex:none;width:62px;height:62px;border-radius:50%;background:#FFFCF6;box-shadow:0 6px 0 rgba(80,140,180,.3);display:flex;align-items:center;justify-content:center;text-decoration:none">
+      <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#8EA0FF"/><circle cx="8.5" cy="8.5" r="2.6" fill="#FFFFFF" fill-opacity=".85"/></svg>
+    </a>
+  </div>
+
+  <sc-if value="{{isFirst}}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position:absolute;right:12px;bottom:114px;width:196px;box-sizing:border-box;padding:10px 14px;border-radius:16px;background:#5A3B3B;color:#FFFFFF;font-weight:800;font-size:15px;line-height:1.25;text-align:center;box-shadow:0 10px 18px -8px rgba(90,59,59,.55)">Spend your marbles in the Marble machine<div style="position:absolute;right:30px;bottom:-9px;width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-top:10px solid #5A3B3B"></div></div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"skin":{"editor":"enum","options":["snake","cat","dog","capy"],"default":"snake"},"state":{"editor":"enum","options":["normal","newBest","checkpointUnlocked","firstRun"],"default":"normal"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const state = this.props.state ?? 'normal';
+    const nb = state === 'newBest';
+    return {
+      skin: this.props.skin ?? 'snake',
+      scoreText: nb ? '68' : '44',
+      bestText: nb ? 'New best!' : state === 'firstRun' ? 'Best 44' : 'Best 61',
+      bestBg: nb ? '#F8D468' : '#FFF3D1',
+      bestWeight: nb ? 900 : 800,
+      isCheckpoint: state === 'checkpointUnlocked',
+      levelText: state === 'checkpointUnlocked' ? '10' : '8',
+      nextCp: state === 'checkpointUnlocked' ? 'L15' : 'L10',
+      isFirst: state === 'firstRun'
+    };
+  }
+}
+</script>
+</body>
+</html>

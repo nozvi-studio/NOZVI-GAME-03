@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Boot D2</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@700;800;900&display=swap">
+<style>
+body{margin:0}
+.lt{font-family:'Lilita One',sans-serif;-webkit-text-stroke:9px #6B4C82;paint-order:stroke fill;line-height:.95;display:inline-block}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F8F2E8;font-family:'Nunito',system-ui,sans-serif;color:#5A3B3B;display:flex;flex-direction:column;align-items:center;padding:96px 16px 0;gap:0;overflow:hidden">
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:0;filter:drop-shadow(0 6px 0 #6B4C82)">
+    <div style="display:flex;gap:1px"><sc-for list="{{line1}}" as="l" hint-placeholder-count="5"><span class="lt" style="{{l.style}}">{{l.ch}}</span></sc-for></div>
+    <div style="display:flex;gap:1px;margin-top:-4px"><sc-for list="{{line2}}" as="l" hint-placeholder-count="5"><span class="lt" style="{{l.style}}">{{l.ch}}</span></sc-for></div>
+  </div>
+
+  <div style="position:relative;width:240px;height:240px;margin-top:46px;border-radius:50%;background:#FBE3C8;display:flex;align-items:center;justify-content:center">
+    <svg width="240" height="240" viewBox="0 0 240 240" aria-hidden="true" style="position:absolute;left:0;top:0;filter:drop-shadow(0 4px 4px rgba(110,80,70,.18))">
+      <path d="M20 190 H92 Q108 190 108 174 V150" fill="none" stroke="#3F63D1" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M20 190 H92 Q108 190 108 174 V150" fill="none" stroke="#6F93F5" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M20 190 H92 Q108 190 108 174 V150" fill="none" stroke="#FFFFFF" stroke-opacity=".45" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" transform="translate(-3 -4)"/>
+    </svg>
+    <div style="position:absolute;left:62px;top:40px"><dc-import name="PlayerHead" skin="snake" size="116" glow="true" stroke="none" sw="0" hint-size="116px,116px"></dc-import></div>
+    <div style="position:absolute;right:22px;bottom:34px;filter:drop-shadow(0 4px 4px rgba(110,80,70,.18))"><dc-import name="FoodIcon" skin="snake" size="56" stroke="#FFFFFF" sw="3.4" hint-size="56px,56px"></dc-import></div>
+  </div>
+
+  <div style="margin-top:44px;width:260px;display:flex;flex-direction:column;align-items:center;gap:10px">
+    <div role="progressbar" aria-label="Loading" aria-valuemin="0" aria-valuemax="100" aria-valuenow="62" style="width:100%;height:20px;box-sizing:border-box;padding:4px;border-radius:999px;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.15)"><div style="width:62%;height:100%;border-radius:999px;background:#F4A157"></div></div>
+    <span style="font-weight:800;font-size:15px;color:#8A6A6A">Loading… 62%</span>
+  </div>
+
+  <div style="position:absolute;left:-70px;bottom:-110px;width:530px;height:300px;border-radius:50% 50% 0 0 / 90px 90px 0 0;background:linear-gradient(#B3DEF3, #9DD3EE)"></div>
+  <svg width="86" height="46" viewBox="0 0 86 46" aria-hidden="true" style="position:absolute;left:152px;bottom:140px"><path d="M2 46C8 34 18 32 26 38c6 5 12 4 15-3 4-10 14-15 25-11 9 3 14 11 14 22z" fill="#C4E7F7"/></svg>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const cols = ['#F79DBB', '#F8D468', '#8CC9F0', '#97DB9B', '#C6B0F5'];
+    const letters = (s, off, size) => s.split('').map((ch, i) => ({
+      ch,
+      style: `font-size:${size}px;color:${cols[(i + off) % cols.length]};transform:rotate(${i % 2 ? 3 : -3}deg) translateY(${i % 2 ? 2 : -2}px)`
+    }));
+    return { line1: letters('MANGO', 0, 66), line2: letters('SNAKE', 2, 66) };
+  }
+}
+</script>
+</body>
+</html>

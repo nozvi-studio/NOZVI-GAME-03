@@ -8,7 +8,8 @@
 - [ ] **RESUME HERE:** owner sends the P2 exit playtest log (normal runs, no ?debug=1; start from checkpoint L10; >= 30 runs, >= 10 reaching biome 4). Lead runs deathCauseReport + summarizeLog, writes the verdict in PLAYTEST, tunes if over40 (OQ-C5).
 
 - [x] P3c capy merged into version/v0.2 (e40a333, owner approved 2026-11-06): SVG capy face on the snake head + debug preview `?debug=1&artPreview=1`.
-- [ ] Next P3 part: P3a juice (§10.4) or P3b screens — owner to pick.
+- [x] D2 UI mockups imported (branch feat/p3-design-mockups, awaiting owner push approval): `docs/design/UI-MOCKUPS.md` + 32 board PNGs and sources. Source was a Claude Design artifact, not Figma.
+- [ ] Next P3 part: P3a juice (§10.4) or P3b screens (port Boot/Home/Loadout/Game HUD/Results to the mockups) — owner to pick; start from UI-MOCKUPS.md.
 
 ## Next (ordered, max 5)
 1. Owner playtest + 40% verdict; if over40 not empty: lead tunes (OQ-C5), re-playtest.

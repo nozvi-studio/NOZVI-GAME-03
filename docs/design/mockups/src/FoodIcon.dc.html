@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FoodIcon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="{{rootStyle}}">
+  <sc-if value="{{isMango}}" hint-placeholder-val="{{ true }}">
+    <svg width="{{px}}" height="{{px}}" viewBox="0 0 32 32" aria-hidden="true" style="display:block;overflow:visible">
+      <path d="M16 9c1-4.5 5.5-6.5 10-5.5-.6 4.6-5 7.2-10 5.5z" fill="#2E9E4F" stroke="{{stroke}}" stroke-width="{{sw}}" stroke-linejoin="round"/>
+      <ellipse cx="16" cy="18.5" rx="11.5" ry="10" fill="#FFA21A" stroke="{{stroke}}" stroke-width="{{sw}}" transform="rotate(-20 16 18.5)"/>
+      <path d="M8.5 16c1-3 3.2-5 6.2-5.6" fill="none" stroke="#FFD27A" stroke-width="2.4" stroke-linecap="round"/>
+    </svg>
+  </sc-if>
+  <sc-if value="{{isFish}}" hint-placeholder-val="{{ false }}">
+    <svg width="{{px}}" height="{{px}}" viewBox="0 0 32 32" aria-hidden="true" style="display:block;overflow:visible">
+      <path d="M22 16l9-8v16z" fill="#2E94C9" stroke="{{stroke}}" stroke-width="{{sw}}" stroke-linejoin="round"/>
+      <ellipse cx="14" cy="16" rx="12" ry="8" fill="#4DB6E8" stroke="{{stroke}}" stroke-width="{{sw}}"/>
+      <path d="M6 19.5c4.5 2.2 11 2.2 16 0" fill="none" stroke="#BFEAFB" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="8.5" cy="13.5" r="2.4" fill="#FFFFFF"/><circle cx="8.1" cy="13.5" r="1.2" fill="#17261B"/>
+    </svg>
+  </sc-if>
+  <sc-if value="{{isBone}}" hint-placeholder-val="{{ false }}">
+    <svg width="{{px}}" height="{{px}}" viewBox="0 0 32 32" aria-hidden="true" style="display:block;overflow:visible">
+      <g transform="rotate(-35 16 16)" fill="none" stroke="{{stroke}}" stroke-width="{{sw2}}" stroke-linejoin="round">
+        <rect x="6" y="12.5" width="20" height="7" rx="3.5"/>
+        <circle cx="6.5" cy="12" r="4"/><circle cx="6.5" cy="20" r="4"/><circle cx="25.5" cy="12" r="4"/><circle cx="25.5" cy="20" r="4"/>
+      </g>
+      <g transform="rotate(-35 16 16)" fill="#FFF1D6">
+        <rect x="6" y="12.5" width="20" height="7" rx="3.5"/>
+        <circle cx="6.5" cy="12" r="4"/><circle cx="6.5" cy="20" r="4"/><circle cx="25.5" cy="12" r="4"/><circle cx="25.5" cy="20" r="4"/>
+      </g>
+      <path d="M9 11.2h14" transform="rotate(-35 16 16)" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+    </svg>
+  </sc-if>
+  <sc-if value="{{isMelon}}" hint-placeholder-val="{{ false }}">
+    <svg width="{{px}}" height="{{px}}" viewBox="0 0 32 32" aria-hidden="true" style="display:block;overflow:visible">
+      <path d="M2.5 11a13.5 13.5 0 0 0 27 0z" fill="#FF5A6A" stroke="{{stroke}}" stroke-width="{{sw}}" stroke-linejoin="round"/>
+      <path d="M2.5 11a13.5 13.5 0 0 0 27 0" fill="none" stroke="#2E9E4F" stroke-width="3.4" stroke-linecap="round"/>
+      <ellipse cx="10" cy="15.5" rx="1" ry="1.7" fill="#17261B"/><ellipse cx="16" cy="18.5" rx="1" ry="1.7" fill="#17261B"/><ellipse cx="22" cy="15.5" rx="1" ry="1.7" fill="#17261B"/>
+    </svg>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"skin":{"editor":"text","default":"snake"},"size":{"editor":"text","default":"32"},"stroke":{"editor":"text","default":"none"},"sw":{"editor":"text","default":"0"},"$preview":{"width":120,"height":120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const skin = this.props.skin ?? 'snake';
+    const px = Number(this.props.size ?? 32) || 32;
+    const sw = Number(this.props.sw ?? 0) || 0;
+    return {
+      px,
+      sw,
+      sw2: sw * 2,
+      stroke: this.props.stroke ?? 'none',
+      rootStyle: `width:${px}px;height:${px}px;line-height:0`,
+      isMango: skin === 'snake',
+      isFish: skin === 'cat' || skin === 'tux',
+      isBone: skin === 'dog',
+      isMelon: skin === 'capy'
+    };
+  }
+}
+</script>
+</body>
+</html>

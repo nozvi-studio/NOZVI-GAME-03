@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Wheel bonus D2</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&amp;display=swap">
+<style>
+body{margin:0}
+a,button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F8F2E8;font-family:'Nunito',system-ui,sans-serif;color:#5A3B3B;overflow:hidden">
+
+  <div style="position:absolute;left:22px;top:170px;width:346px;height:346px;border-radius:50%;background:#FBE3C8"></div>
+
+  <div style="position:absolute;left:16px;right:16px;top:22px;display:flex;align-items:center;justify-content:space-between">
+    <a href="MarbleMachineD2.dc.html" aria-label="Back" style="width:44px;height:44px;border-radius:50%;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.16);display:flex;align-items:center;justify-content:center;text-decoration:none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 5l-7 7 7 7"></path></svg>
+    </a>
+    <span style="font-weight:900;font-size:24px">Wheel bonus</span>
+    <div style="width:44px"></div>
+  </div>
+
+  <div style="position:absolute;left:16px;right:16px;top:80px;height:58px;box-sizing:border-box;padding:0 16px;border-radius:20px;background:#FFFCF6;box-shadow:0 8px 16px -10px rgba(110,80,70,.25);display:flex;align-items:center;justify-content:space-between;z-index:2">
+    <div style="display:flex;flex-direction:column;gap:1px">
+      <span style="font-weight:800;font-size:11px;letter-spacing:.08em;color:#8A6A6A">BASE</span>
+      <span style="display:flex;align-items:center;gap:6px;font-weight:900;font-size:22px;line-height:1">
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F8D468" stroke="#E5A82A" stroke-width="2"></circle><circle cx="12" cy="12" r="5.5" fill="none" stroke="#E5A82A" stroke-width="2"></circle></svg>
+        <span>5</span>
+      </span>
+    </div>
+    <span style="font-weight:900;font-size:22px;color:#8A6A6A">×</span>
+    <div style="min-width:54px;height:36px;box-sizing:border-box;padding:0 12px;border-radius:999px;background:#FBE19A;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px">{{multText}}</div>
+    <span style="font-weight:900;font-size:22px;color:#8A6A6A">=</span>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">
+      <span style="font-weight:800;font-size:11px;letter-spacing:.08em;color:#8A6A6A">COINS</span>
+      <span style="font-weight:900;font-size:26px;line-height:1">{{totalText}}</span>
+    </div>
+  </div>
+
+  <div style="position:absolute;left:45px;top:193px;width:300px;height:300px;border-radius:50%;background:#B98558;box-shadow:0 14px 24px -12px rgba(110,80,70,.45)">
+    <div style="position:absolute;left:0;top:0;width:300px;height:300px;transform:{{wheelRot}}">
+      <div style="position:absolute;left:10px;top:10px;width:280px;height:280px;border-radius:50%;background:{{wheelBg}}"></div>
+      <sc-for list="{{labels}}" as="l" hint-placeholder-count="8"><span style="{{l.style}}">{{l.text}}</span></sc-for>
+    </div>
+    <div style="position:absolute;left:112px;top:112px;width:76px;height:76px;box-sizing:border-box;border-radius:50%;background:#FFFCF6;border:5px solid #B98558;display:flex;align-items:center;justify-content:center">
+      <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.2 6.6.8-4.9 4.6 1.3 6.6L12 17.4l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" fill="#FFC845"></path></svg>
+    </div>
+  </div>
+
+  <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true" style="position:absolute;left:173px;top:166px;filter:drop-shadow(0 4px 4px rgba(110,80,70,.3))"><path d="M6 6h32L22 38z" fill="#F4A157" stroke="#FFFCF6" stroke-width="4" stroke-linejoin="round"></path></svg>
+
+  <div style="position:absolute;left:16px;right:16px;top:520px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px">
+    <sc-for list="{{odds}}" as="o" hint-placeholder-count="4"><span style="height:30px;padding:0 12px;border-radius:999px;background:#FFFCF6;display:flex;align-items:center;font-weight:800;font-size:14px;color:#5A3B3B">{{o}}</span></sc-for>
+  </div>
+  <div style="position:absolute;left:24px;right:24px;top:562px;text-align:center;font-weight:700;font-size:13px;color:#8A6A6A">The result is decided when your marble lands in WHEEL. Spinning only shows it.</div>
+
+  <sc-if value="{{isReady}}" hint-placeholder-val="{{ true }}">
+    <button style="position:absolute;left:20px;right:20px;bottom:30px;display:flex;align-items:center;justify-content:center;height:66px;border:0;border-radius:999px;background:#79D391;box-shadow:inset 0 -6px 0 #5DB878, 0 8px 14px -8px rgba(74,154,99,.6);color:#2F5B3F;font-weight:900;font-size:26px">Tap to spin</button>
+  </sc-if>
+  <sc-if value="{{isResult}}" hint-placeholder-val="{{ false }}">
+    <a href="MarbleMachineD2.dc.html" style="position:absolute;left:20px;right:20px;bottom:30px;display:flex;align-items:center;justify-content:center;gap:10px;height:66px;border-radius:999px;background:#79D391;box-shadow:inset 0 -6px 0 #5DB878, 0 8px 14px -8px rgba(74,154,99,.6);text-decoration:none;color:#2F5B3F;font-weight:900;font-size:26px">
+      <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F8D468" stroke="#E5A82A" stroke-width="2"></circle><circle cx="12" cy="12" r="5.5" fill="none" stroke="#E5A82A" stroke-width="2"></circle></svg>
+      <span>Collect +25</span>
+    </a>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"state":{"editor":"enum","options":["ready","result"],"default":"ready"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const state = this.props.state ?? 'ready';
+    const result = state === 'result';
+    const segs = [
+      [1, 52, '#F6C2D3'], [2, 42, '#F8D468'], [1, 52, '#BCDDF4'], [3, 48, '#C6B0F5'],
+      [1, 52, '#CFEBD0'], [2, 42, '#FBE3C8'], [1, 52, '#BCDDF4'], [5, 20, '#F4A157']
+    ];
+    const R = 140, c = 140;
+    let a0 = 0;
+    const stops = [];
+    const labels = [];
+    const weight = {};
+    segs.forEach(([v, w, col]) => {
+      const a1 = a0 + w;
+      stops.push(`${col} ${a0}deg ${a1}deg`);
+      weight[v] = (weight[v] ?? 0) + w;
+      const mid = ((a0 + w / 2) * Math.PI) / 180;
+      const lx = c + Math.sin(mid) * R * 0.7, ly = c - Math.cos(mid) * R * 0.7;
+      labels.push({
+        text: '×' + v,
+        style: `position:absolute;left:${10 + lx}px;top:${10 + ly}px;transform:translate(-50%,-50%);font-weight:900;font-size:${v >= 5 ? 24 : 22}px;color:#5A3B3B;line-height:1`
+      });
+      a0 = a1;
+    });
+    const odds = Object.keys(weight).map(v => `×${v} ${Math.round((weight[v] / 360) * 100)}%`);
+    return {
+      isReady: !result,
+      isResult: result,
+      multText: result ? '5' : '?',
+      totalText: result ? '25' : '?',
+      wheelBg: `conic-gradient(${stops.join(', ')})`,
+      wheelRot: result ? 'rotate(10deg)' : 'rotate(0deg)',
+      labels,
+      odds
+    };
+  }
+}
+</script>
+</body>
+</html>

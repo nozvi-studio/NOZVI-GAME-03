@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings D2</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@700;800;900&display=swap">
+<style>
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F8F2E8;font-family:'Nunito',system-ui,sans-serif;color:#5A3B3B;display:flex;flex-direction:column;padding:22px 16px 0;gap:14px;overflow:hidden">
+
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <a href="HomeD2.dc.html" aria-label="Back to Home" style="width:44px;height:44px;border-radius:50%;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.15);display:flex;align-items:center;justify-content:center;text-decoration:none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 5l-7 7 7 7"/></svg></a>
+    <span style="font-weight:900;font-size:24px">Settings</span>
+    <div style="width:44px" aria-hidden="true"></div>
+  </div>
+
+  <div style="border-radius:26px;background:#FFFCF6;box-shadow:0 10px 22px -12px rgba(110,80,70,.22);overflow:hidden">
+      <button type="button" role="switch" aria-checked="{{soundAria}}" onClick="{{soundToggle}}" style="display:flex;align-items:center;gap:12px;width:100%;height:72px;box-sizing:border-box;padding:0 16px 0 14px;border:0;background:transparent;color:#5A3B3B;font-family:inherit;cursor:pointer;text-align:left">
+        <span style="flex:none;width:44px;height:44px;border-radius:14px;background:#BCDDF4;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg></span>
+        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-size:17px;line-height:1.1">Sound</span><span style="font-weight:800;font-size:13px;line-height:1.2;color:#8A6A6A">Music and effects</span></span>
+        <span style="flex:none;width:30px;text-align:right;font-weight:900;font-size:14px">{{soundText}}</span>
+        <span style="{{soundTrack}}"><span style="{{soundKnob}}"></span></span>
+      </button>
+      <button type="button" role="switch" aria-checked="{{hapticsAria}}" onClick="{{hapticsToggle}}" style="display:flex;align-items:center;gap:12px;width:100%;height:72px;box-sizing:border-box;padding:0 16px 0 14px;border:0;background:transparent;color:#5A3B3B;font-family:inherit;cursor:pointer;text-align:left;border-top:2px solid #F3EBDD">
+        <span style="flex:none;width:44px;height:44px;border-radius:14px;background:#F6C2D3;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="3.5" width="8" height="17" rx="2.5"/><path d="M4 8v8M20 8v8"/></svg></span>
+        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-size:17px;line-height:1.1">Haptics</span><span style="font-weight:800;font-size:13px;line-height:1.2;color:#8A6A6A">Buzz when you eat or crash</span></span>
+        <span style="flex:none;width:30px;text-align:right;font-weight:900;font-size:14px">{{hapticsText}}</span>
+        <span style="{{hapticsTrack}}"><span style="{{hapticsKnob}}"></span></span>
+      </button>
+      <button type="button" role="switch" aria-checked="{{dpadAria}}" onClick="{{dpadToggle}}" style="display:flex;align-items:center;gap:12px;width:100%;height:72px;box-sizing:border-box;padding:0 16px 0 14px;border:0;background:transparent;color:#5A3B3B;font-family:inherit;cursor:pointer;text-align:left;border-top:2px solid #F3EBDD">
+        <span style="flex:none;width:44px;height:44px;border-radius:14px;background:#CFEBD0;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 3.5h5v6h6v5h-6v6h-5v-6h-6v-5h6z"/></svg></span>
+        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-size:17px;line-height:1.1">On-screen D-pad</span><span style="font-weight:800;font-size:13px;line-height:1.2;color:#8A6A6A">Show arrows between the skill buttons</span></span>
+        <span style="flex:none;width:30px;text-align:right;font-weight:900;font-size:14px">{{dpadText}}</span>
+        <span style="{{dpadTrack}}"><span style="{{dpadKnob}}"></span></span>
+      </button>
+      <button type="button" role="switch" aria-checked="{{motionAria}}" onClick="{{motionToggle}}" style="display:flex;align-items:center;gap:12px;width:100%;height:72px;box-sizing:border-box;padding:0 16px 0 14px;border:0;background:transparent;color:#5A3B3B;font-family:inherit;cursor:pointer;text-align:left;border-top:2px solid #F3EBDD">
+        <span style="flex:none;width:44px;height:44px;border-radius:14px;background:#FBE19A;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>
+        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-size:17px;line-height:1.1">Reduced motion</span><span style="font-weight:800;font-size:13px;line-height:1.2;color:#8A6A6A">No shaking, softer flashes</span></span>
+        <span style="flex:none;width:30px;text-align:right;font-weight:900;font-size:14px">{{motionText}}</span>
+        <span style="{{motionTrack}}"><span style="{{motionKnob}}"></span></span>
+      </button>
+  </div>
+
+  <div style="box-sizing:border-box;padding:16px 14px 14px;border-radius:26px;background:#FFFCF6;box-shadow:0 10px 22px -12px rgba(110,80,70,.22);display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-size:17px;line-height:1.1">Board theme</span><span style="font-weight:800;font-size:13px;color:#8A6A6A">Changes the ground colours on every level</span></div>
+    <div role="radiogroup" aria-label="Board theme" style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:10px">
+        <button type="button" role="radio" aria-checked="{{lightAria}}" onClick="{{lightPick}}" style="{{lightStyle}}">
+          <span style="width:64px;height:64px;border-radius:14px;background:conic-gradient(#CFEBD0 25%, #C2E4C6 0 50%, #CFEBD0 0 75%, #C2E4C6 0) 0 0 / 32px 32px;position:relative;box-shadow:inset 0 0 0 2px rgba(90,59,59,.25)"><span style="position:absolute;left:12px;top:26px;width:32px;height:12px;border-radius:6px;background:#F4A157"></span><span style="position:absolute;left:36px;top:20px;width:20px;height:20px;border-radius:50%;background:#FFE98A;box-shadow:inset 0 0 0 2px rgba(90,59,59,.3)"></span></span>
+          <span style="font-weight:900;font-size:16px">Light</span>
+        </button>
+        <button type="button" role="radio" aria-checked="{{darkAria}}" onClick="{{darkPick}}" style="{{darkStyle}}">
+          <span style="width:64px;height:64px;border-radius:14px;background:conic-gradient(#3B4A5A 25%, #33414F 0 50%, #3B4A5A 0 75%, #33414F 0) 0 0 / 32px 32px;position:relative;box-shadow:inset 0 0 0 2px rgba(90,59,59,.25)"><span style="position:absolute;left:12px;top:26px;width:32px;height:12px;border-radius:6px;background:#F4A157"></span><span style="position:absolute;left:36px;top:20px;width:20px;height:20px;border-radius:50%;background:#FFE98A;box-shadow:inset 0 0 0 2px rgba(90,59,59,.3)"></span></span>
+          <span style="font-weight:900;font-size:16px">Dark</span>
+        </button>
+    </div>
+  </div>
+
+  <span style="text-align:center;font-weight:800;font-size:13px;color:#8A6A6A">Changes save automatically</span>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const v = { sound: st.sound !== false, haptics: st.haptics !== false, dpad: st.dpad === true, motion: st.motion === true };
+    const theme = st.theme === 'dark' ? 'dark' : 'light';
+    const out = {};
+    Object.keys(v).forEach((k) => {
+      const on = v[k];
+      out[k + 'Aria'] = on ? 'true' : 'false';
+      out[k + 'Text'] = on ? 'On' : 'Off';
+      out[k + 'Toggle'] = () => this.setState({ [k]: !on });
+      out[k + 'Track'] = `position:relative;flex:none;width:48px;height:28px;border-radius:14px;box-sizing:border-box;background:${on ? '#79D391' : '#EFE6D8'};box-shadow:inset 0 0 0 2px ${on ? '#4A9A63' : '#8A6A6A'}`;
+      out[k + 'Knob'] = `position:absolute;top:4px;left:${on ? 24 : 4}px;width:20px;height:20px;border-radius:50%;background:${on ? '#FFFFFF' : '#8A6A6A'};box-shadow:0 1px 2px rgba(90,59,59,.3)`;
+    });
+    ['light', 'dark'].forEach((k) => {
+      const sel = theme === k;
+      out[k + 'Aria'] = sel ? 'true' : 'false';
+      out[k + 'Pick'] = () => this.setState({ theme: k });
+      out[k + 'Style'] = `display:flex;flex-direction:column;align-items:center;gap:8px;min-height:44px;box-sizing:border-box;padding:10px 6px 10px;border-radius:20px;border:0;background:${sel ? '#FFF3D1' : '#F8F2E8'};color:#5A3B3B;font-family:inherit;cursor:pointer;box-shadow:${sel ? '0 0 0 3px #5A3B3B' : 'inset 0 0 0 2px #E3DCD2'}`;
+    });
+    return out;
+  }
+}
+</script>
+</body>
+</html>

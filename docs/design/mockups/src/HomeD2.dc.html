@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home D2</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@700;800&display=swap">
+<style>
+body{margin:0}
+button{font-family:inherit;cursor:pointer}
+.lt{font-family:'Lilita One',sans-serif;-webkit-text-stroke:9px #6B4C82;paint-order:stroke fill;line-height:.95;display:inline-block}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;box-sizing:border-box;background:#F8F2E8;font-family:'Nunito',system-ui,sans-serif;color:#5A3B3B;display:flex;flex-direction:column;padding:22px 16px 0;gap:12px;overflow:hidden">
+
+  <div style="display:flex;align-items:center;gap:8px">
+    <div style="display:flex;align-items:center;gap:8px;height:42px;padding:0 16px 0 10px;border-radius:999px;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.15);font-weight:800;font-size:19px">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#8EC5EE"/><circle cx="8.5" cy="8.5" r="2.6" fill="#FFFFFF" fill-opacity=".85"/></svg>
+      <span>41</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;height:42px;padding:0 16px 0 10px;border-radius:999px;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.15);font-weight:800;font-size:19px">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#F8D468"/><circle cx="12" cy="12" r="5.2" fill="none" stroke="#E5A82A" stroke-width="2.2"/></svg>
+      <span>120</span>
+    </div>
+    <div style="flex:1"></div>
+    <a href="SettingsD2.dc.html" aria-label="Settings" style="text-decoration:none;width:44px;height:44px;border-radius:50%;border:0;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.15);display:flex;align-items:center;justify-content:center;padding:0">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.4"/><circle cx="8" cy="17" r="2.4"/></svg>
+    </a>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:0;margin-top:2px;filter:drop-shadow(0 6px 0 #6B4C82)">
+    <div style="display:flex;gap:1px"><sc-for list="{{line1}}" as="l" hint-placeholder-count="5"><span class="lt" style="{{l.style}}">{{l.ch}}</span></sc-for></div>
+    <div style="display:flex;gap:1px;margin-top:-4px"><sc-for list="{{line2}}" as="l" hint-placeholder-count="5"><span class="lt" style="{{l.style}}">{{l.ch}}</span></sc-for></div>
+  </div>
+
+  <div style="position:relative;width:358px;height:270px;flex:none;align-self:center;margin-top:10px;border-radius:32px;overflow:hidden;background:linear-gradient(135deg, #F6C2D3 0 34%, #FBE19A 34% 67%, #BCDDF4 67% 100%);box-shadow:0 14px 24px -10px rgba(110,80,70,.22)">
+    <svg width="46" height="46" viewBox="0 0 24 24" aria-hidden="true" style="position:absolute;left:18px;top:150px;opacity:.55"><ellipse cx="12" cy="16" rx="5.6" ry="4.6" fill="#FFFFFF"/><circle cx="5.4" cy="10" r="2.2" fill="#FFFFFF"/><circle cx="9.4" cy="5.8" r="2.2" fill="#FFFFFF"/><circle cx="14.6" cy="5.8" r="2.2" fill="#FFFFFF"/><circle cx="18.6" cy="10" r="2.2" fill="#FFFFFF"/></svg>
+    <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="position:absolute;left:300px;top:190px;opacity:.55"><ellipse cx="12" cy="16" rx="5.6" ry="4.6" fill="#FFFFFF"/><circle cx="5.4" cy="10" r="2.2" fill="#FFFFFF"/><circle cx="9.4" cy="5.8" r="2.2" fill="#FFFFFF"/><circle cx="14.6" cy="5.8" r="2.2" fill="#FFFFFF"/><circle cx="18.6" cy="10" r="2.2" fill="#FFFFFF"/></svg>
+    <div style="position:absolute;left:26px;top:30px;filter:drop-shadow(0 4px 4px rgba(110,80,70,.18))"><dc-import name="FoodIcon" skin="{{skin}}" size="58" stroke="#FFFFFF" sw="3.4" hint-size="58px,58px"></dc-import></div>
+    <svg width="358" height="270" viewBox="0 0 358 270" aria-hidden="true" style="position:absolute;left:0;top:0;filter:drop-shadow(0 4px 4px rgba(110,80,70,.18))">
+      <path d="{{snakePath}}" fill="none" stroke="{{trailDark}}" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="{{snakePath}}" fill="none" stroke="{{trail}}" stroke-width="29" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="{{snakePath}}" fill="none" stroke="#FFFFFF" stroke-opacity=".45" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" transform="translate(-4 -5)"/>
+    </svg>
+    <div style="{{headStyle}}"><dc-import name="PlayerHead" skin="{{skin}}" size="124" glow="true" stroke="none" sw="0" hint-size="124px,124px"></dc-import></div>
+  </div>
+
+  <a href="LoadoutD2.dc.html" style="position:relative;z-index:2;display:flex;align-items:center;justify-content:{{playJustify}};height:{{playH}}px;box-sizing:border-box;padding:0 24px 0 34px;border-radius:999px;background:#79D391;box-shadow:inset 0 -7px 0 #5DB878, inset 0 4px 0 rgba(255,255,255,.4), 0 6px 0 #4A9A63;text-decoration:none">
+    <span class="lt" style="font-size:{{playFont}}px;color:#FFFFFF;-webkit-text-stroke:7px #3E7A52">Play</span>
+    <sc-if value="{{showExtras}}" hint-placeholder-val="{{ true }}">
+    <span style="display:flex;align-items:center;gap:8px;height:32px;padding:0 14px 0 10px;border-radius:999px;background:#FFFCF6;color:#5A3B3B;font-weight:800;font-size:14px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A3B3B" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 21V4M6 4h12l-3 4.5L18 13H6"/></svg>
+      <span>Start at L6</span>
+    </span>
+    </sc-if>
+  </a>
+  <sc-if value="{{showExtras}}" hint-placeholder-val="{{ true }}">
+    <div style="position:relative;z-index:2;align-self:center;display:flex;align-items:center;gap:8px">
+      <a href="LoadoutD2.dc.html" style="display:flex;align-items:center;justify-content:center;height:38px;padding:0 18px;border-radius:999px;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.15);color:#5A3B3B;text-decoration:none;font-weight:800;font-size:15px">Start from L1</a>
+      <span style="display:flex;align-items:center;gap:6px;height:38px;padding:0 14px 0 10px;border-radius:999px;background:#FFFCF6;box-shadow:0 4px 10px -3px rgba(110,80,70,.15);font-weight:800;font-size:15px"><svg width="16" height="16" viewBox="0 0 24 24" fill="#3CC6DA" aria-hidden="true"><path d="M13 2L5 13.5h6L10 22l9-12.5h-6.5L13 2z"/></svg><span>Start energy 25</span></span>
+    </div>
+  </sc-if>
+
+  <div style="position:absolute;left:-70px;bottom:-110px;width:530px;height:300px;border-radius:50% 50% 0 0 / 90px 90px 0 0;background:linear-gradient(#B3DEF3, #9DD3EE)"></div>
+  <svg width="86" height="46" viewBox="0 0 86 46" aria-hidden="true" style="position:absolute;left:152px;bottom:140px"><path d="M2 46C8 34 18 32 26 38c6 5 12 4 15-3 4-10 14-15 25-11 9 3 14 11 14 22z" fill="#C4E7F7"/></svg>
+  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="position:absolute;left:34px;bottom:150px;opacity:.55"><ellipse cx="12" cy="16" rx="5.6" ry="4.6" fill="#FFFFFF"/><circle cx="5.4" cy="10" r="2.2" fill="#FFFFFF"/><circle cx="9.4" cy="5.8" r="2.2" fill="#FFFFFF"/><circle cx="14.6" cy="5.8" r="2.2" fill="#FFFFFF"/><circle cx="18.6" cy="10" r="2.2" fill="#FFFFFF"/></svg>
+  <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="position:absolute;left:336px;bottom:166px;opacity:.55"><ellipse cx="12" cy="16" rx="5.6" ry="4.6" fill="#FFFFFF"/><circle cx="5.4" cy="10" r="2.2" fill="#FFFFFF"/><circle cx="9.4" cy="5.8" r="2.2" fill="#FFFFFF"/><circle cx="14.6" cy="5.8" r="2.2" fill="#FFFFFF"/><circle cx="18.6" cy="10" r="2.2" fill="#FFFFFF"/></svg>
+
+  <div style="position:absolute;left:0;right:0;bottom:26px;display:flex;align-items:flex-end;justify-content:center;gap:56px">
+    <a href="SkinsD3.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:#3F4D5E;font-weight:800;font-size:14px">
+      <span style="width:62px;height:62px;border-radius:50%;background:#FFFCF6;box-shadow:0 6px 0 rgba(80,140,180,.3);display:flex;align-items:center;justify-content:center"><dc-import name="PlayerHead" skin="{{skin}}" size="40" glow="false" stroke="none" sw="0" hint-size="40px,40px"></dc-import></span>
+      <span style="text-shadow:none">Skins</span>
+    </a>
+    <a href="MarbleMachineD2.dc.html" style="display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:#3F4D5E;font-weight:800;font-size:14px">
+      <span style="width:62px;height:62px;border-radius:50%;background:#FFFCF6;box-shadow:0 6px 0 rgba(80,140,180,.3);display:flex;align-items:center;justify-content:center"><svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#8EA0FF"/><circle cx="8.5" cy="8.5" r="2.6" fill="#FFFFFF" fill-opacity=".85"/></svg></span>
+      <span style="text-shadow:none">Marbles</span>
+    </a>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"skin":{"editor":"enum","options":["snake","cat","dog","capy"],"default":"snake"},"firstRun":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const skin = this.props.skin ?? 'snake';
+    const fur = skin;
+    const T = { snake: ['#6F93F5', '#3F63D1'], cat: ['#F4A157', '#DB8238'], dog: ['#E9B87F', '#C48A4F'], capy: ['#C79A6B', '#A8794D'] }[skin] ?? ['#6F93F5', '#3F63D1'];
+    const cols = ['#F79DBB', '#F8D468', '#8CC9F0', '#97DB9B', '#C6B0F5'];
+    const letters = (s, off, size) => s.split('').map((ch, i) => ({
+      ch,
+      style: `font-size:${size}px;color:${cols[(i + off) % cols.length]};transform:rotate(${i % 2 ? 3 : -3}deg) translateY(${i % 2 ? 2 : -2}px)`
+    }));
+    const smooth = (pts, r) => {
+      let d = `M${pts[0][0]} ${pts[0][1]}`;
+      for (let i = 1; i < pts.length - 1; i++) {
+        const [px, py] = pts[i - 1], [x, y] = pts[i], [nx, ny] = pts[i + 1];
+        const l1 = Math.hypot(px - x, py - y), l2 = Math.hypot(nx - x, ny - y);
+        const rr = Math.min(r, l1 / 2, l2 / 2);
+        d += ` L${x + (px - x) / l1 * rr} ${y + (py - y) / l1 * rr} Q${x} ${y} ${x + (nx - x) / l2 * rr} ${y + (ny - y) / l2 * rr}`;
+      }
+      const l = pts[pts.length - 1];
+      return d + ` L${l[0]} ${l[1]}`;
+    };
+    const pts = [[16, 232], [170, 232], [170, 168], [250, 168], [250, 112]];
+    const head = pts[pts.length - 1];
+    return {
+      fur,
+      skin,
+      showExtras: !(this.props.firstRun === true || this.props.firstRun === 'true'),
+      playJustify: (this.props.firstRun === true || this.props.firstRun === 'true') ? 'center' : 'space-between',
+      playH: (this.props.firstRun === true || this.props.firstRun === 'true') ? 96 : 74,
+      playFont: (this.props.firstRun === true || this.props.firstRun === 'true') ? 52 : 38,
+      trail: T[0],
+      trailDark: T[1],
+      line1: letters('MANGO', 0, 66),
+      line2: letters('SNAKE', 2, 66),
+      snakePath: smooth(pts, 34),
+      headStyle: `position:absolute;left:${head[0] - 62}px;top:${head[1] - 70}px`
+    };
+  }
+}
+</script>
+</body>
+</html>
