@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(game): capy face pose state machine (idle breath/blink, eat, dead droop; reduced motion) and `ui.capy` balance
 - feat(game): pure capy SVG rig (12 expressions, 2 body poses) on the ART-001 anchors
 - docs: P3c capy character design spec (layered SVG per Figma + outline, idle/eat/dead motion, preview page); ART-001 v3, ART-002 demoted to fallback; Figma capy reference added
 - docs: ART-002 capy master still brief and `assets/raw/master/capy/specs/` (body and head spec JSON for agent-sprite-forge via Codex CLI, acceptance checklist, Remotion motion test)
