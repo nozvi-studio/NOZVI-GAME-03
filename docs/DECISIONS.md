@@ -490,3 +490,9 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: accepted for P3a: (1) no checkpoint cue (flag/fanfare) when the full-clear of L30 unlocks a checkpoint; (2) a win waits `juice.death.totalMs` (1.4 s) before Results, same as a death, with no card. The death vignette is one cached white canvas texture tinted danger (smooth inset glow), replacing the stepped stroked rects.
 - Alternatives: a dedicated L30 cue; a shorter win delay.
 - Consequence: revisit with the P3 device pass (60 fps check) if either feels wrong.
+
+## 2026-11-07 - Owner rulings on the GDD/P2 question batch
+- Context: lead batched open owner questions (GDD §4/§8, OQ-B1..B6, OQ-C1..C5, tuning, strings).
+- Choice: (1) GDD §4 session targets confirmed (run 3-8 min, full clear ~12-18 min). (2) Reason to come back: owner wants leaderboard + daily streak, parked until core gameplay and UI are finished. (3) OQ-B1/B2/B3 (gate, spike, NPC numbers) approved as-is: owner playtest felt fine. (4) OQ-B4/B5 (bird steal cost, bird only when reachable) closed with current behavior, no further development for now. (5) Still open, reviewed together with the P3 UI pass: OQ-B6 strings, OQ-C1..C5, L30 rock weight, biome 4 coconut / biome 5 chicken tuning, P3 strings, P3b-3 C1-C10, derived dark theme.
+- Alternatives: none; owner decisions.
+- Consequence: "provisional" removed from MEC-014/015/016 for B1-B5; parking lot updated.

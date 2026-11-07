@@ -17,9 +17,9 @@
 Descriptor: `{key: 'bird', cause: null, capClass: 'modifier', maxActiveKey: 'bird.maxActive', breakable: false}`; never solid, BFS wall, reserved or `headHit`. Save fields: none.
 
 ## 4. Rules
-- **MEC-016-R1 Target condition.** `birdCanTarget(s, b)` is true only when: a mango exists, it is not golden, no target is set, a BFS path from head to mango exists, the sum of `baseTickMs(s, b)` along that path (scaled by the mud factor on mud path cells, §11 L3) plus `bird.marginMs ≤ bird.shadowMs`, and the mango's rot time left `> bird.shadowMs`. Otherwise `spawn` returns `null` and the director tries another option (TR-B6). **Provisional default (OQ-B5): the bird only spawns when the mango is reachable in time; no "impossible" shadow is ever shown — provisional, owner review at end of P2.**
+- **MEC-016-R1 Target condition.** `birdCanTarget(s, b)` is true only when: a mango exists, it is not golden, no target is set, a BFS path from head to mango exists, the sum of `baseTickMs(s, b)` along that path (scaled by the mud factor on mud path cells, §11 L3) plus `bird.marginMs ≤ bird.shadowMs`, and the mango's rot time left `> bird.shadowMs`. Otherwise `spawn` returns `null` and the director tries another option (TR-B6). **Default (OQ-B5, owner approved 2026-11-07): the bird only spawns when the mango is reachable in time; no "impossible" shadow is ever shown.**
 - **MEC-016-R2 Shadow.** On spawn, `target = {x, y, leftMs: bird.shadowMs}` on the mango cell. `leftMs` counts down 1 per ms (sim time). The mango's own rot timer keeps running under the shadow.
-- **MEC-016-R3 Steal.** When `leftMs` reaches 0 and the mango is still the target: emit `mangoStolen {x, y}`, clear the target, set `s.mango = null` and call `placeMango` (fresh rot timer). No rotten rock; eaten counters, quota progress, score and energy unchanged. If placement defers (MEC-003-R13), the deferred path applies unchanged. **Provisional default (OQ-B4): a stolen mango costs nothing besides the lost time — provisional, owner review at end of P2.**
+- **MEC-016-R3 Steal.** When `leftMs` reaches 0 and the mango is still the target: emit `mangoStolen {x, y}`, clear the target, set `s.mango = null` and call `placeMango` (fresh rot timer). No rotten rock; eaten counters, quota progress, score and energy unchanged. If placement defers (MEC-003-R13), the deferred path applies unchanged. **Default (OQ-B4, owner approved 2026-11-07): a stolen mango costs nothing besides the lost time.**
 - **MEC-016-R4 Leave on eat.** If the target mango is eaten, rots or otherwise changes (no mango or a mango at another cell), the target is cleared with no event.
 - **MEC-016-R5 Never lethal.** `cause: null`; no cell is ever solid, BFS wall, reserved or a head hit because of the bird.
 - **MEC-016-R6 Modifier cap.** `capClass: 'modifier'`: offered regardless of the small cap; at most `bird.maxActive` (1) target (`count` = 1 while a target is set).
@@ -69,5 +69,5 @@ Descriptor: `{key: 'bird', cause: null, capClass: 'modifier', maxActiveKey: 'bir
 - **L2** The director emits `hazardIncoming {family: 'bird'}` on spawn; the family does not emit it.
 - **L3** MEC-016-R1 reachable-in-time estimate scales the base tick by the mud factor on mud path cells. The director already skips spawns during the level-up slowdown, so that slowdown needs no additional factor in this estimate.
 ### Escalate to owner
-- OQ-B4 steal cost and OQ-B5 shadow visibility: provisional, owner review at end of P2.
+- OQ-B4 steal cost and OQ-B5 shadow visibility: closed 2026-11-07, current behavior kept, no further development for now.
 - OQ-B6 strings: provisional, owner review at end of P2.
