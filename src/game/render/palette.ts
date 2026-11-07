@@ -1,4 +1,4 @@
-import { defaultSettings, resolveDisplay, type Settings } from '../../meta';
+import { defaultSettings, resolveDisplay, type BoardTheme, type Settings } from '../../meta';
 export type Palette = Record<
   'bg' | 'boardA' | 'boardB' | 'snake' | 'belly' | 'food' | 'leaf' | 'rock' | 'rockHi' |
   'danger' | 'warn' | 'gold' | 'wood' | 'woodHi' | 'hedge' | 'hedgeHi' | 'earth' | 'earthSide' |
@@ -25,6 +25,8 @@ let saved: Settings | null = null;
 export const setDisplaySettings = (s: Settings | null): void => { saved = s; };
 const display = () => resolveDisplay(saved ?? defaultSettings(), osDisplay());
 export const currentPalette = (): Palette => display().theme === 'dark' ? DARK : LIGHT;
+/** P3b1-R1 the board theme that matches a palette. */
+export const themeOf = (p: Palette): BoardTheme => (p === DARK ? 'dark' : 'light');
 export const reduceMotion = (): boolean => display().reducedMotion;
 
 // MEC-003 §8 greybox ground tint per biome (1..6); game-layer colors, not config.
