@@ -7,7 +7,7 @@ import { HudScene } from '../../src/game/scenes/HudScene';
 import { bindKeyboard } from '../../src/game/input/keyboard';
 import { loadBalance } from '../support/balance';
 import { setDisplaySettings } from '../../src/game/render/palette';
-import { ui } from '../../src/game/ui/layout';
+import { bannerStripRect } from '../../src/game/hud/hudLayout';
 import { sceneHarness, Signals, type DrawObject } from '../support/scene';
 
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } },
@@ -125,10 +125,9 @@ describe('P1 HUD flow, audio and session wiring', () => {
     const h = setup();
     h.game.events.emit('sim-events', [{ type: 'shrunk', from: 9, to: b.snake.start.length },
       { type: 'levelUp', level: 2, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }]);
-    expect(h.last('banner-chip').text).toBe(`Your snake shrinks to ${b.snake.start.length} segments`);
-    const n = h.objects.filter(o => o.name === 'banner-chip').length;
+    expect(h.last('banner-subtitle').text).toBe(`Your snake shrinks to ${b.snake.start.length} segments`);
     h.game.events.emit('sim-events', [{ type: 'levelUp', level: 3, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }]);
-    expect(h.objects.filter(o => o.name === 'banner-chip')).toHaveLength(n);
+    expect(h.last('banner-subtitle').text).toBe('Fresh start!');
   });
   it('P3a-R8 banner enters with slide + scale normally and as a pure fade when reduced', () => {
     const lv = [{ type: 'levelUp', level: 3, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }];
@@ -144,26 +143,12 @@ describe('P1 HUD flow, audio and session wiring', () => {
     expect(h.last('banner-title').text).toBe('Level 5');
     h.flush(); expect(h.last('banner-title').text).toBe('Challenge: Rock rain!');
   });
-  it('P3b2-R10 level-up card stacks the subtitle below the measured Lilita title (no overlap)', () => {
-    const h = setup(); measureText(h);
-    h.game.events.emit('sim-events', [{ type: 'levelUp', level: 6, biome: 2, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }]);
-    const title = h.last('banner-title'), sub = h.last('banner-subtitle');
-    expect(title.height).toBeGreaterThan(ui(47.5)); expect(sub.y).toBeGreaterThanOrEqual(title.y + title.height);
-  });
-  it('P3b2-R10 biome card stacks tagline below the measured name', () => {
-    const h = setup(); measureText(h);
-    h.game.events.emit('sim-events', [{ type: 'levelUp', level: 6, biome: 2, challenge: false, biomeChanged: true, clearedLevelTimeMs: 1 }]);
-    h.flush();
-    const name = h.last('banner-title'), tag = h.last('banner-tagline');
-    expect(tag.y).toBeGreaterThanOrEqual(name.y + name.height);
-  });
-  it('P3b2-R10 a long challenge title scales down to fit inside the card', () => {
+  it('UIFIX-R1 strips never scale: a long challenge title is clipped, not shrunk', () => {
     const h = setup(); measureText(h, 700);
     h.game.events.emit('sim-events', [{ type: 'levelUp', level: 5, biome: 1, challenge: true, biomeChanged: false, clearedLevelTimeMs: 1 }]);
     h.flush();
-    const title = h.last('banner-title');
-    expect(title.text).toBe('Challenge: Rock rain!');
-    expect(title.width * title.scale).toBeLessThanOrEqual(ui(318 - 32) + 0.001); expect(title.scale).toBeLessThan(1);
+    expect(h.last('banner-title').scale).toBe(1);
+    expect(h.last('banner-title').width * h.last('banner-title').scale).toBeLessThanOrEqual(bannerStripRect(b.board.cols).w);
   });
   it('MEC-003 §8 a run that starts on a challenge level shows the challenge banner when the countdown ends', () => {
     const h = setup({ bestLevel: 12, unlockedCheckpoints: [4, 5] }, { startLevel: 5 });

@@ -7,7 +7,7 @@ import { pauseView } from '../../src/game/hud/overlayModel';
 import { HudTop } from '../../src/game/hud/HudTop';
 import { SkillButtons } from '../../src/game/hud/SkillButtons';
 import { hudView, type HudSnap } from '../../src/game/hud/hudModel';
-import { hudLayout } from '../../src/game/hud/hudLayout';
+import { bannerStripRect, hudLayout, STRIP_MOCK } from '../../src/game/hud/hudLayout';
 import { t } from '../../src/game/text';
 import { loadBalance } from '../support/balance';
 import { DrawObject, sceneHarness } from '../support/scene';
@@ -110,8 +110,21 @@ it('P3b2-R10 BannerLayer shows queued cards one after another for ui.bannerMs, t
   expect(h.find('banner').visible).toBe(true); expect(h.last('banner-title')!.text).toBe('Level 8');
   expect(h.delayed.at(-1)!.delay).toBe(b.ui.bannerMs);
   h.flush();
-  expect(h.last('banner-title')!.text).toBe('Frozen Pond'); expect(h.last('banner-label')!.text).toBe('BIOME 3');
+  expect(h.last('banner-title')!.text).toBe('Frozen Pond'); expect(h.last('banner-subtitle')!.text).toBe('Ice is slippery. Plan your turns.');
   h.flush(); expect(h.find('banner').visible).toBe(false);
+});
+it('UIFIX-R1 BannerLayer draws every banner as one strip inside the board top edge, alpha ~0.85, pills sit below it', () => {
+  vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const r = bannerStripRect(b.board.cols);
+  layer.show([{ kind: 'levelUp', title: 'Level 8', subtitle: 'Fresh start!', chip: null }]);
+  const rects = h.objects.flatMap(o => o.commands).filter(c => c[0] === 'fillRoundedRect');
+  expect(rects.some(c => c[1] === r.x && c[2] === r.y && c[3] === r.w && c[4] === r.h)).toBe(true);
+  const fills = h.objects.flatMap(o => o.commands).filter(c => c[0] === 'fillStyle');
+  expect(fills.some(c => c[2] === STRIP_MOCK.alpha)).toBe(true);
+  layer.setPills([{ slot: 0, skill: 'slowmo', text: 'Slow-mo · 3 s left' }]);
+  const pillRect = h.find('pill-0');
+  expect(pillRect.y).toBeGreaterThanOrEqual(r.y + r.h);
 });
 it('P3b2-R10 a new queue replaces the old one; hide() cancels pending cards', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
