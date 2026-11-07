@@ -155,6 +155,7 @@ export function createSession(deps: SessionDeps): Session {
           throw new RangeError('startRun: debug level ' + startLevel + ' is out of range');
       } else if (startLevel !== 1 && !data.unlockedCheckpoints.includes(startLevel))
         throw new RangeError('startRun: level ' + startLevel + ' is not an unlocked start');
+      if (run && !run.over) endRun('quit'); // P3b2-R2 an abandoned active run ends like a quit: run_end, R6 carry, flush
       const best = bestLevel();
       const loadout = currentLoadout();
       const startEnergy = data.carriedEnergy;

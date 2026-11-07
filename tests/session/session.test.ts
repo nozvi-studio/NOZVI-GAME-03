@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { processEvents } from '../../src/session/session';
 import { load, loadLog, LOG_KEY, SAVE_KEY, summarizeLog } from '../../src/meta';
 import type { SimEvent } from '../../src/core';
-import { rules, setup, WALL_DEATH_MS } from './support';
+import { b, rules, setup, WALL_DEATH_MS } from './support';
 
 const levelUp = (level: number, clearedLevelTimeMs = 1000): SimEvent =>
   ({ type: 'levelUp', level, biome: 0, challenge: false, biomeChanged: false, clearedLevelTimeMs });
@@ -235,5 +235,22 @@ describe('session debug skip', () => {
     const { s } = setup();
     s.startRun(10, 'home', true); expect(s.debugSkipTo(11)).toBe(true); s.quit();
     s.startRun(10, 'results'); s.frame(10); expect(s.save().bestLevel).toBe(0);
+  });
+  it('P3b2-R2 starting a run while another is active ends the old one as quit with the R6 carry', () => {
+    const { s, store } = setup({ carriedEnergy: 40 });
+    s.startRun(1); s.frame(100);
+    const energy = s.snapshot().energy;
+    s.startRun(1); s.pause(); // pause flushes the new run_start
+    const log = loadLog(store);
+    expect(log.entries.map(e => e.type)).toEqual(['run_start', 'run_end', 'run_start']);
+    expect(log.entries[1]).toMatchObject({ cause: 'quit', runId: 1, won: false });
+    expect(log.deathCounts).toEqual({});
+    expect(s.snapshot().energy).toBe(Math.min(b.checkpoints.carryMax, Math.floor(energy * b.checkpoints.carryRatio)));
+  });
+  it('P3b2-R2 an invalid start level throws before the active run is touched', () => {
+    const { s } = setup();
+    s.startRun(1);
+    expect(() => s.startRun(9)).toThrow(RangeError);
+    expect(s.summary()).toBeNull();
   });
 });

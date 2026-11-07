@@ -10,5 +10,5 @@ export type { Milestone, CheckpointsConfig, ProgressionConfig } from './progress
 export { sanitizeLoadout } from './loadout';
 export type { UnlockTable } from './loadout';
 export { emptyLog, loadLog, nextRun, appendRecord, flushLog, LOG_KEY } from './runLog';
-export { summarizeLog, deathCauseReport, PLAYER_CAUSES, NON_DEATH_CAUSES } from './runLog';
+export { summarizeLog, abandonedRuns, deathCauseReport, PLAYER_CAUSES, NON_DEATH_CAUSES } from './runLog';
 export type { LogRecord, RunLog, LogSummary, DeathCauseReport } from './runLog';

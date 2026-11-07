@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { load, memoryStore, SAVE_KEY } from '../../src/meta';
+import { deathCauseReport, load, loadLog, memoryStore, SAVE_KEY } from '../../src/meta';
 import { createSession } from '../../src/session';
 import { createFlow, flowPause, flowStart, flowTick } from '../../src/game/flow/runFlow';
 import { GameScene } from '../../src/game/scenes/GameScene';
@@ -65,6 +65,24 @@ describe('P1 HUD flow, audio and session wiring', () => {
     const h = setup(); h.play(); h.click('pause-button'); h.click('overlay-quit');
     expect(h.session.summary()).toMatchObject({ cause: 'quit' });
     h.flush(); expect(h.stopped).toEqual(['Game']); expect(h.started).toEqual(['Results']);
+  });
+  it('P3b2-R1 pause Quit stores run_end quit, applies the R6 carry, is not a death, then opens Results', () => {
+    const h = setup({ carriedEnergy: 40 }); h.play();
+    const energy = h.session.snapshot().energy;
+    h.click('pause-button'); h.click('overlay-quit');
+    const log = loadLog(h.store);
+    expect(log.entries.filter(e => e.type === 'run_end')).toHaveLength(1);
+    expect(log.entries.at(-1)).toMatchObject({ type: 'run_end', cause: 'quit', won: false });
+    expect(log.deathCounts).toEqual({});
+    expect(deathCauseReport(log, 600000).deaths).toBe(0); // quit stays out of the 40% gate
+    const carry = Math.min(b.checkpoints.carryMax, Math.floor(energy * b.checkpoints.carryRatio));
+    expect(load(h.store, rules).carriedEnergy).toBe(carry);
+    expect(h.session.summary()).toMatchObject({ cause: 'quit', carriedEnergy: carry });
+    h.flush(); expect(h.stopped).toEqual(['Game']); expect(h.started).toEqual(['Results']);
+  });
+  it('P3b2-R1 pressing Quit twice logs a single run_end', () => {
+    const h = setup(); h.play(); h.click('pause-button'); h.click('overlay-quit'); h.click('overlay-quit');
+    expect(loadLog(h.store).entries.filter(e => e.type === 'run_end')).toHaveLength(1);
   });
   it('GDD-13 M and sound button persist settings through the session', () => {
     const h = setup(); bindKeyboard(h.game);
