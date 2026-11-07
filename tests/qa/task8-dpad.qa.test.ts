@@ -2,8 +2,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type Phaser from 'phaser';
 import { createDpad } from '../../src/game/input/dpad';
-import { DPAD } from '../../src/game/layout';
+import { hudLayout } from '../../src/game/hud/hudLayout';
 import { sceneHarness } from '../support/scene';
+
+const DPAD = hudLayout(true).dpad!;
 
 afterEach(() => {
   vi.unstubAllGlobals();

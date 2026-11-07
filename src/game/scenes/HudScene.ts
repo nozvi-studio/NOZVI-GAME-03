@@ -6,6 +6,7 @@ import { createSynth, type SfxName, type Synth } from '../audio/synth';
 import { isDebug } from '../flow/debugFlag';
 import { homeView } from '../flow/homeModel';
 import { flowPause, flowResume, flowTogglePause, type FlowEffect } from '../flow/runFlow';
+import { hudLayout } from '../hud/hudLayout';
 import { createDpad } from '../input/dpad';
 import { acceptSkillInput, skillSlotForKey } from '../input/skillKeys';
 import { BOARD, DPAD, HEADER, LEVEL_BAR, WIDTH } from '../layout';
@@ -102,7 +103,7 @@ export class HudScene extends Phaser.Scene {
     this.count = this.label(BOARD.x + BOARD.size / 2, BOARD.y + BOARD.size / 2, '', 96, 'countdown').setOrigin(.5).setVisible(false);
     // MEC-001-R2 hint while the run waits for the first direction input (strings provisional, owner batch Q)
     this.waitHint = this.label(BOARD.x + BOARD.size / 2, BOARD.y + BOARD.size / 2, this.sys.game?.device?.input?.touch ? TEXT.waitHintTouch : TEXT.waitHintKeys, 28, 'wait-hint').setOrigin(.5).setAlign('center').setVisible(false);
-    this.pad = createDpad(this, DPAD, d => this.gameScene.turn(d.x, d.y));
+    this.pad = createDpad(this, hudLayout(true).dpad!, d => this.gameScene.turn(d.x, d.y));
     const flow = (e: FlowEffect): void => this.onFlow(e);
     const events = (e: SimEvent[]): void => this.onEvents(e);
     const over = (s: SimSnapshot): void => this.onOver(s);

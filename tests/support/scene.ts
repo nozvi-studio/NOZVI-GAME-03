@@ -19,12 +19,14 @@ export class DrawObject extends Signals {
   input: { enabled: boolean } | null = null;
   mask?: object;
   setName(v: string): this { this.name = v; return this; }
-  setText(v: string): this { this.text = v; return this; }
+  setText(v: string): this { this.text = v; this.width = v.length * 10; return this; }
   setVisible(v: boolean): this { this.visible = v; return this; }
   setAlpha(v: number): this { this.alpha = v; return this; }
   setPosition(x: number, y: number): this { this.x = x; this.y = y; return this; }
   setScale(v: number): this { this.scale = v; return this; }
   setSize(w: number, h: number): this { this.width = w; this.height = h; return this; }
+  setX(v: number): this { this.x = v; return this; }
+  setY(v: number): this { this.y = v; return this; }
   setOrigin(): this { return this; }
   setTexture(): this { return this; }
   setAngle(): this { return this; }
@@ -58,6 +60,23 @@ export class DrawObject extends Signals {
   fillPath(): this { return this; }
   strokePath(): this { return this; }
   arc(): this { return this; }
+  fillEllipse(...a: unknown[]): this { this.commands.push(['fillEllipse', ...a]); return this; }
+  strokeEllipse(...a: unknown[]): this { this.commands.push(['strokeEllipse', ...a]); return this; }
+  fillGradientStyle(...a: unknown[]): this { this.commands.push(['fillGradientStyle', ...a]); return this; }
+  lineBetween(...a: unknown[]): this { this.commands.push(['lineBetween', ...a]); return this; }
+  removeAll(..._a: unknown[]): this { return this; }
+  setStroke(..._a: unknown[]): this { return this; }
+  setShadow(..._a: unknown[]): this { return this; }
+  setFontFamily(..._a: unknown[]): this { return this; }
+  setFontSize(..._a: unknown[]): this { return this; }
+  setFontStyle(..._a: unknown[]): this { return this; }
+  setLineSpacing(..._a: unknown[]): this { return this; }
+  setStyle(..._a: unknown[]): this { return this; }
+  setDisplaySize(..._a: unknown[]): this { return this; }
+  setRotation(..._a: unknown[]): this { return this; }
+  setTint(..._a: unknown[]): this { return this; }
+  clearTint(..._a: unknown[]): this { return this; }
+  setScrollFactor(..._a: unknown[]): this { return this; }
   destroy(): void {}
 }
 export function sceneHarness() {
@@ -66,7 +85,9 @@ export function sceneHarness() {
   const make = (x = 0, y = 0): DrawObject => { const o = new DrawObject().setPosition(x, y); objects.push(o); return o; };
   const registry = new Map<string, unknown>();
   const scene = {
-    add: { graphics: () => make(), text: (x: number, y: number, text: string) => make(x, y).setText(text),
+    add: { graphics: () => make(), text: (x: number, y: number, text: string, _style?: unknown) => make(x, y).setText(text),
+      image: (x: number, y: number, key: string) => make(x, y).setName(key),
+      rectangle: (x: number, y: number, w: number, h: number) => { const o = make(x, y); o.width = w; o.height = h; return o; },
       zone: (x: number, y: number, w: number, h: number) => { const o = make(x, y); o.width = w; o.height = h; return o; },
       container: (x: number, y: number, children: DrawObject[] = []) => make(x, y).add(children) },
     sys: { isActive: () => true },
@@ -76,5 +97,6 @@ export function sceneHarness() {
     registry: { get: (k: string) => registry.get(k), set: (k: string, v: unknown) => registry.set(k, v) },
   };
   return { scene, objects, registry, delayed, find: (name: string) => objects.find(o => o.name === name)!,
+    last: (name: string) => [...objects].reverse().find(o => o.name === name)!,
     flush: () => { for (const t of delayed.splice(0)) if (!t.removed) t.fn(); } };
 }
