@@ -4,6 +4,7 @@ import { TOKENS, toInt, FONT_TITLE } from '../uiTokens';
 import { drawIcon, type IconId } from './icons';
 import { ui, type ColumnLayout } from './layout';
 import { logoLetters } from './menuLayout';
+import { MENU } from './menuMetrics';
 import { titleText } from './widgets';
 
 // Menu-only widgets (P3b3). Origin convention follows the P3-0 kit: pills and chips are centred, cards and bars are top-left.
@@ -28,7 +29,7 @@ export function tap(scene: Phaser.Scene, x: number, y: number, w: number, h: num
 export function roundIconButton(scene: Phaser.Scene, x: number, y: number, diameterMock: number, icon: IconId, name: string,
   action: () => void, shelf = false): Phaser.GameObjects.Container {
   const d = ui(diameterMock), g = scene.add.graphics();
-  if (shelf) g.fillStyle(toInt(TOKENS.sky.bottom), 0.6).fillCircle(0, ui(6), d / 2);
+  if (shelf) g.fillStyle(toInt(TOKENS.sky.bottom), 0.6).fillCircle(0, ui(MENU.widgets.shelfDy), d / 2);
   else g.fillStyle(toInt(TOKENS.shadow.card.color), TOKENS.shadow.card.alpha).fillCircle(0, ui(TOKENS.shadow.card.y), d / 2);
   g.fillStyle(toInt(TOKENS.surface.card)).fillCircle(0, 0, d / 2);
   const ic = scene.add.graphics(); drawIcon(ic, icon, d * 0.5, toInt(TOKENS.text.primary));
@@ -42,7 +43,7 @@ export function logoLine(scene: Phaser.Scene, cx: number, y: number, text: strin
   const letters = logoLetters(text, colorOffset);
   const objs = letters.map(l => l.ch === ' ' ? null : titleText(scene, 0, 0, l.ch, sizeMock, l.color)
     .setRotation(Phaser.Math.DegToRad(l.rotDeg)).setOrigin(0.5, 0.5));
-  const gap = ui(1), space = ui(sizeMock * 0.25);
+  const gap = ui(MENU.widgets.logoGap), space = ui(sizeMock * MENU.widgets.logoSpace);
   const widths = objs.map(o => o ? o.width : space);
   const total = widths.reduce((a, b) => a + b, 0) + gap * (letters.length - 1);
   let x = -total / 2;
@@ -53,8 +54,8 @@ export function logoLine(scene: Phaser.Scene, cx: number, y: number, text: strin
 /** Bottom sky hill (decor): a wide ellipse whose crest sits at `topY`. */
 export function hill(scene: Phaser.Scene, topY: number): Phaser.GameObjects.Graphics {
   const g = scene.add.graphics();
-  g.fillStyle(toInt(TOKENS.sky.top)).fillEllipse(WIDTH / 2, topY + ui(130), ui(530), ui(260));
-  g.fillStyle(toInt(TOKENS.sky.bottom)).fillEllipse(WIDTH / 2, topY + ui(150), ui(530), ui(240));
+  g.fillStyle(toInt(TOKENS.sky.top)).fillEllipse(WIDTH / 2, topY + ui(MENU.hill.topDy), ui(MENU.hill.w), ui(MENU.hill.topH));
+  g.fillStyle(toInt(TOKENS.sky.bottom)).fillEllipse(WIDTH / 2, topY + ui(MENU.hill.bottomDy), ui(MENU.hill.w), ui(MENU.hill.bottomH));
   return g.setDepth(-1);
 }
 
