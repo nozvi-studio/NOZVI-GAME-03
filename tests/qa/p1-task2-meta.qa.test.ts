@@ -19,6 +19,7 @@ import {
   save,
   SAVE_KEY,
   SAVE_VERSION,
+  defaultSettings,
   type KeyValueStore,
   type LogRecord,
   type ProgressionConfig,
@@ -71,7 +72,7 @@ describe('QA P1 Task 2: Meta Modules (Black-Box)', () => {
     const def = defaultSave();
     expect(def).toEqual({
       bestScore: 0,
-      settings: { sound: true },
+      settings: { ...defaultSettings(), sound: true },
       bestLevel: 0,
       fullClear: false,
       unlockedCheckpoints: [],
@@ -81,11 +82,11 @@ describe('QA P1 Task 2: Meta Modules (Black-Box)', () => {
   });
 
   it('QA-P1T2-02 MEC-008-R12 MIGRATIONS[1] maps valid v1 save object to v2 preserving bestScore & sound', () => {
-    const v1Data = { bestScore: 120, settings: { sound: false } };
+    const v1Data = { bestScore: 120, settings: { ...defaultSettings(), sound: false } };
     const migrated = MIGRATIONS[1](v1Data);
     expect(migrated).toEqual({
       bestScore: 120,
-      settings: { sound: false },
+      settings: { ...defaultSettings(), sound: false },
       bestLevel: 0,
       fullClear: false,
       unlockedCheckpoints: [],
@@ -105,13 +106,13 @@ describe('QA P1 Task 2: Meta Modules (Black-Box)', () => {
     const store = memoryStore({
       [SAVE_KEY]: JSON.stringify({
         version: 1,
-        data: { bestScore: 250, settings: { sound: false } },
+        data: { bestScore: 250, settings: { ...defaultSettings(), sound: false } },
       }),
     });
     const loaded = load(store, SAVE_RULES);
     expect(loaded).toEqual({
       bestScore: 250,
-      settings: { sound: false },
+      settings: { ...defaultSettings(), sound: false },
       bestLevel: 0,
       fullClear: false,
       unlockedCheckpoints: [],
@@ -247,7 +248,7 @@ describe('QA P1 Task 2: Meta Modules (Black-Box)', () => {
     const store = memoryStore();
     const saveState: SaveDataV2 = {
       bestScore: 99,
-      settings: { sound: false },
+      settings: { ...defaultSettings(), sound: false },
       bestLevel: 15,
       fullClear: false,
       unlockedCheckpoints: [4, 6],
@@ -259,7 +260,7 @@ describe('QA P1 Task 2: Meta Modules (Black-Box)', () => {
     const raw = store.get(SAVE_KEY);
     expect(raw).not.toBeNull();
     const parsed = JSON.parse(raw!);
-    expect(parsed.version).toBe(2);
+    expect(parsed.version).toBe(SAVE_VERSION);
     expect(parsed.data).toEqual(saveState);
 
     const throwingStore: KeyValueStore = {

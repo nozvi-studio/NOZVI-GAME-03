@@ -1,9 +1,11 @@
 import type { KeyValueStore } from './storage';
+import { defaultSettings, validSettings } from './settings';
+import type { Settings } from './settings';
 
 export const SAVE_KEY = 'mango-snake.save';
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 /** P0 save callers can still write the original fields during the staged P1 rollout. */
-export interface SaveData { bestScore: number; settings: { sound: boolean } }
+export interface SaveData { bestScore: number; settings: Settings }
 export interface SaveDataV2 extends SaveData {
   bestLevel: number;
   fullClear: boolean;
@@ -15,7 +17,7 @@ export interface SaveRules { skillIds: readonly string[]; maxLevel: number; carr
 export type Migration = (data: unknown) => unknown;
 
 // MEC-008-R12 each call owns its nested default values.
-export const defaultSave = (): SaveDataV2 => ({ bestScore: 0, settings: { sound: true },
+export const defaultSave = (): SaveDataV2 => ({ bestScore: 0, settings: defaultSettings(),
   bestLevel: 0, fullClear: false, unlockedCheckpoints: [], carriedEnergy: 0, lastLoadout: [null, null] });
 
 function object(value: unknown): value is Record<string, unknown> {
@@ -25,6 +27,7 @@ function object(value: unknown): value is Record<string, unknown> {
 /** MIGRATIONS[n] turns version n data into version n + 1 data. */
 export const MIGRATIONS: Record<number, Migration> = {
   1: d => object(d) ? { ...defaultSave(), bestScore: d.bestScore, settings: d.settings } : null,
+  2: d => object(d) ? { ...d, settings: validSettings(d.settings) } : null,
 };
 
 function bounded(value: unknown, max: number): number {
@@ -34,7 +37,7 @@ function bounded(value: unknown, max: number): number {
 function validated(data: Record<string, unknown>, rules?: SaveRules): SaveDataV2 {
   const out = defaultSave();
   if (Number.isInteger(data.bestScore) && (data.bestScore as number) >= 0) out.bestScore = data.bestScore as number;
-  if (object(data.settings) && typeof data.settings.sound === 'boolean') out.settings.sound = data.settings.sound;
+  out.settings = validSettings(data.settings);
   // Legacy P0 callers have no P1 config; they read only the original fields.
   if (!rules) return out;
   out.bestLevel = bounded(data.bestLevel, rules.maxLevel);
@@ -72,7 +75,7 @@ export function load(store: KeyValueStore, options?: SaveRules | Record<number, 
   } catch { return defaultSave(); }
 }
 
-// MEC-008-R12 writes the complete v2 envelope; storage errors are swallowed.
+// MEC-008-R12 writes the complete v3 envelope; storage errors are swallowed.
 export function save(store: KeyValueStore, data: SaveDataV2): boolean;
 export function save(store: KeyValueStore, data: SaveData): boolean;
 export function save(store: KeyValueStore, data: SaveData): boolean {

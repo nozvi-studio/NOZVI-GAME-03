@@ -1,6 +1,6 @@
 // tests/qa/task8-platform.qa.test.ts — black-box QA tests for localStore save adapter
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { defaultSave, load, save, SAVE_KEY, type SaveData, type SaveDataV2, type SaveRules } from '../../src/meta';
+import { defaultSave, defaultSettings, load, save, SAVE_KEY, type SaveData, type SaveDataV2, type SaveRules } from '../../src/meta';
 import { localStore } from '../../src/game/platform/localStore';
 
 afterEach(() => {
@@ -76,7 +76,7 @@ describe('QA Task 8: Platform LocalStore Adapter (Black-Box)', () => {
     };
     const data: SaveDataV2 = {
       bestScore: 99,
-      settings: { sound: false },
+      settings: { ...defaultSettings(), sound: false },
       bestLevel: 10,
       fullClear: false,
       unlockedCheckpoints: [4],
