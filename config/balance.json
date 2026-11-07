@@ -84,14 +84,14 @@
     "waveDelayMs": 260, "checkerSize": 4, "maxActive": 1
   },
   "director": { "firstSpawnMs": 2500, "intervalBaseMs": 5000, "intervalPerLevelMs": 120, "intervalMinMs": 1600, "capBase": 2, "capPerLevels": 3, "capMax": 10, "challengeIntervalFactor": 0.8, "challengeCapBonus": 2 },
-  "flow": { "countdownMs": 1500, "countdownDigits": 3, "maxFrameDeltaMs": 100, "deathCardDelayMs": 550 },
+  "flow": { "countdownMs": 1500, "countdownDigits": 3, "maxFrameDeltaMs": 100 },
   "ui": {
     "bannerMs": 1800, "swipeMinPx": 18, "swipeBoardFactor": 0.05, "fontLoadTimeoutMs": 2000, "minShrink": 0.85,
-    "haptics": { "eatMs": 12, "level": [15, 40, 15], "deathMs": 90 }, "terrainFadeInMs": 600, "hazardFlickerMs": 1500
+    "terrainFadeInMs": 600, "hazardFlickerMs": 1500
     , "capy": { "breathPeriodMs": 1600, "breathAmp": 0.03, "blinkMs": 120, "blinkMinGapMs": 2000, "blinkMaxGapMs": 4000,
     "eatOpenMs": 80, "eatChewMs": 120, "gulpScaleX": 1.12, "gulpScaleY": 0.9,
     "deadDroopMs": 300, "deadRotDeg": 12, "deadDropPx": 4, "headCellScale": 1.2 }
-    , "hud": { "rejectShakeMs": 200, "rejectShakeAmpPx": 6, "orbHapticMs": 8, "castHapticMs": 20, "tipFactor": 2, "bannerQueueMax": 4 }
+    , "hud": { "rejectShakeMs": 200, "rejectShakeAmpPx": 6, "tipFactor": 2, "bannerQueueMax": 4 }
   },
   "juice": {
     "bursts": {

@@ -8,6 +8,7 @@ import { hudIconKey } from './hudIcons';
 import { HUD_MOCK, statsRow, type HudLayout, type StatsRow } from './hudLayout';
 import type { HudView } from './hudModel';
 import { WIDTH } from '../layout';
+import type { HudTarget, Pt } from '../juice/types';
 
 // Mockup px of the stats / chip / pause drawing (GameD2); layout rects themselves come from HUD_MOCK / hudLayout.
 const M = { stat: 19, chip: 14, mango: 28, star: 20, bolt: 16, bar: 10, chipPadL: 12, chipIcon: 18, chipGap: 8, chipPadR: 16,
@@ -22,8 +23,10 @@ export class HudTop {
   private readonly score: Phaser.GameObjects.Text; private readonly energy: Phaser.GameObjects.Text;
   private readonly chipG: Phaser.GameObjects.Graphics; private readonly chipText: Phaser.GameObjects.Text; private readonly chipIcon: Phaser.GameObjects.Image;
   private readonly icons: Phaser.GameObjects.Image[]; private rowKey = ''; private chipKey = ''; private pauseKey = ''; private fill = -1;
+  /** Last drawn positions (set in drawRow, read by the juice adapter; never recomputed per frame). */
+  private readonly pos = { score: { x: 0, y: 0 }, energyBar: { x: 0, y: 0 }, levelBar: { x: 0, y: 0 } }; private readonly iconBase = new Map<Phaser.GameObjects.Image, number>(); private chipBase = 1;
 
-  constructor(scene: Phaser.Scene, private readonly l: HudLayout, onPause: () => void) {
+  constructor(private readonly scene: Phaser.Scene, private readonly l: HudLayout, onPause: () => void) {
     const ink = TOKENS.text.primary;
     this.g = scene.add.graphics();
     this.level = hudLabel(scene, WIDTH / 2, l.titleY, '', HUD_MOCK.titleSize, ink, 800, 'level').setOrigin(0.5, 0);
@@ -39,6 +42,7 @@ export class HudTop {
     this.chipG = scene.add.graphics();
     this.chipIcon = scene.add.image(0, 0, hudIconKey('flag', 'soft')).setDisplaySize(ui(M.chipIcon), ui(M.chipIcon));
     this.chipText = hudLabel(scene, 0, 0, '', M.chip, TOKENS.text.soft, 800, 'next-checkpoint');
+    this.chipBase = this.chipIcon.scaleX;
   }
 
   apply(v: HudView, paused: boolean, pauseEnabled: boolean): void {
@@ -65,6 +69,9 @@ export class HudTop {
     this.icons[0]!.setPosition(ui(r.quota.icon + M.mango / 2), cy).setDisplaySize(ui(M.mango), ui(M.mango));
     this.icons[1]!.setPosition(ui(r.score.icon + M.star / 2), cy).setDisplaySize(ui(M.star), ui(M.star));
     this.icons[2]!.setPosition(ui(r.energy.bolt + M.bolt / 2), cy).setDisplaySize(ui(M.bolt), ui(M.bolt));
+    for (const i of this.icons) this.iconBase.set(i, i.scaleX);
+    this.pos.score.x = ui(r.score.x + r.score.w / 2); this.pos.levelBar.x = ui(r.quota.x + r.quota.w / 2);
+    this.pos.score.y = this.pos.levelBar.y = this.pos.energyBar.y = cy; this.pos.energyBar.x = ui(r.energy.bar + r.energy.barW / 2);
     const bx = ui(r.energy.bar), bh = ui(M.bar), bw = ui(r.energy.barW);
     g.fillStyle(toInt(TOKENS.hud.energyTrack)).fillRoundedRect(bx, cy - bh / 2, bw, bh, bh / 2);
     if (fill > 0) g.fillStyle(toInt(TOKENS.sky.energy)).fillRoundedRect(bx, cy - bh / 2, Math.max(bh, bw * fill), bh, bh / 2);
@@ -86,5 +93,23 @@ export class HudTop {
     const hb = ui(M.pauseBarH) / 2;
     if (paused) g.fillTriangle(-ui(M.playBack), -ui(M.playHalf), -ui(M.playBack), ui(M.playHalf), ui(M.playTip), 0);
     else g.fillRoundedRect(-ui(M.pauseBarX), -hb, ui(M.pauseBarW), 2 * hb, ui(M.pauseRadius)).fillRoundedRect(ui(M.pauseGap), -hb, ui(M.pauseBarW), 2 * hb, ui(M.pauseRadius));
+  }
+
+  /** P3a juice adapter: centre of the score pill, the energy bar and the quota pill (JuiceHud.point). */
+  point(target: HudTarget): Pt { return this.pos[target]; }
+  /** P3a-R1/R2/R4: yoyo scale bump on a pill's icon and text, relative to their base scale (reduced motion is gated in the mapper). */
+  bump(target: HudTarget, scale: number, ms: number): void {
+    const parts = target === 'score' ? [this.icons[1]!, this.score] : target === 'levelBar' ? [this.icons[0]!, this.done, this.total] : [this.icons[2]!, this.energy];
+    for (const o of parts) {
+      const base = this.iconBase.get(o as Phaser.GameObjects.Image) ?? 1;
+      this.scene.tweens.killTweensOf(o); o.setScale(base);
+      this.scene.tweens.add({ targets: o, scaleX: base * scale, scaleY: base * scale, duration: ms / 2, yoyo: true, ease: 'Quad.easeOut' });
+    }
+  }
+  /** P3a-R6: the chip's flag icon pops in from zero; ms 0 (reduced motion) is a no-op. */
+  plantFlag(ms: number): void {
+    if (ms <= 0) return;
+    this.scene.tweens.killTweensOf(this.chipIcon); this.chipIcon.setScale(0);
+    this.scene.tweens.add({ targets: this.chipIcon, scaleX: this.chipBase, scaleY: this.chipBase, duration: ms, ease: 'Back.easeOut' });
   }
 }

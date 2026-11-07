@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(juice): JuicePlayer, ScreenFx, DeathCard wired into the HUD; death sequence (<= 1.4 s, tap skips), one buzz per event batch; removed ui.haptics, ui.hud haptic ms and flow.deathCardDelayMs (P3a-R1..R9)
 - feat(juice): death lines for every cause with a seeded pick (provisional strings, OQ-D1) and the RUN OVER title key (P3a-R10).
 - feat(juice): pure event-to-cue mapper with reduced motion and settings gating; Shield-only board tint (P3a-R1..R9).
 - feat(audio): P3a synth SFX: soft two-stage energy zap, distinct per-skill casts, biome jingle, checkpoint fanfare; `SFX_TONES` exported (P3a-R2, R3, R5, R6).

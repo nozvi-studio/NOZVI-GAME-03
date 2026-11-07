@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import { nextKeyLevel } from '../../core';
-import type { Balance, SimEvent, SimSnapshot, SkillId } from '../../core';
+import type { Balance, SimEvent, SimSnapshot } from '../../core';
 import type { Session } from '../../session';
-import { createSynth, type SfxName, type Synth } from '../audio/synth';
+import { createSynth, type Synth } from '../audio/synth';
 import { isDebug } from '../flow/debugFlag';
 import { homeView } from '../flow/homeModel';
 import { flowPause, flowResume, flowTogglePause, type FlowEffect } from '../flow/runFlow';
@@ -17,9 +17,15 @@ import { countdownCard, pauseView } from '../hud/overlayModel';
 import { PauseOverlay } from '../hud/PauseOverlay';
 import { SkillButtons } from '../hud/SkillButtons';
 import { createDpad } from '../input/dpad';
+import { DeathCard } from '../juice/DeathCard';
+import { deathSeed } from '../juice/deathLine';
+import { colorOf } from '../juice/colors';
+import { JuicePlayer } from '../juice/JuicePlayer';
+import { ScreenFx } from '../juice/ScreenFx';
+import type { JuiceInput } from '../juice/types';
 import { acceptSkillInput, skillSlotForKey } from '../input/skillKeys';
-import { BOARD, WIDTH } from '../layout';
-import { reduceMotion } from '../render/palette';
+import { BOARD, cellPx, WIDTH } from '../layout';
+import { currentPalette, reduceMotion } from '../render/palette';
 import { runStartLines } from '../hudText';
 import { FONT_UI, TOKENS } from '../uiTokens';
 import { pillButton } from '../ui/widgets';
@@ -28,7 +34,6 @@ import { incomingBanner, t, TEXT } from '../text';
 import type { GameScene } from './GameScene';
 
 type HudHint = ReturnType<typeof homeView>['hint'];
-const SKILL_SFX: Record<SkillId, SfxName> = { slowmo: 'skillSlowmo', tailSnip: 'skillSnip', shield: 'skillShield', mangoRain: 'skillRain' };
 // Mockup px of the wait hint and the ?debug=1 buttons (not in the D2 mockups).
 const M = { waitHint: 22, debugNextW: 56, debugKeyW: 70 } as const;
 
@@ -37,7 +42,7 @@ export class HudScene extends Phaser.Scene {
   private gameScene!: GameScene; private session!: Session; private balance!: Balance; private synth!: Synth;
   private top!: HudTop; private skills!: SkillButtons; private pause!: PauseOverlay; private count!: CountdownOverlay; private banners!: BannerLayer;
   private pad!: ReturnType<typeof createDpad>; private waitHint!: Phaser.GameObjects.Text;
-  private heading = ''; private hint: HudHint = null; private cpCount = 0; private bestLevelAtStart = 0; private orbTipShown = false; private leaving = false;
+  private heading = ''; private hint: HudHint = null; private cpCount = 0; private bestLevelAtStart = 0; private orbTipShown = false; private leaving = false; private juice!: JuicePlayer;
   private haptics = true; private startBanner: string[] = []; private shrunkTo: number | null = null; private overTimer?: Phaser.Time.TimerEvent;
   private debugKey: { c: Phaser.GameObjects.Container } | null = null; private debugNext: { c: Phaser.GameObjects.Container } | null = null;
 
@@ -56,6 +61,14 @@ export class HudScene extends Phaser.Scene {
     this.createDebugButtons(layout); // created before the banner layer and overlays so those sit above them
     this.pad = createDpad(this, layout.dpad!, d => this.gameScene.turn(d.x, d.y)); // MEC-001-R2: a turn during the countdown counts
     this.banners = new BannerLayer(this, layout, this.balance);
+    const hud = { point: (t: Parameters<HudTop['point']>[0]) => this.top.point(t), skillPoint: (s: 0 | 1) => this.skills.point(s),
+      bump: (t: Parameters<HudTop['bump']>[0], k: number, ms: number) => this.top.bump(t, k, ms), plantFlag: (_level: number, ms: number) => this.top.plantFlag(ms) };
+    this.juice = new JuicePlayer({ // P3a-R1..R9: sounds, haptics (through the gated buzz), board / screen visuals and the death sequence
+      balance: this.balance, synth: { play: n => this.synth.play(n), buzz: p => this.buzz(p) }, board: this.gameScene,
+      screen: new ScreenFx(this, hud, id => colorOf(id, currentPalette()), cellPx(this.balance), this.balance.juice.perf),
+      settings: () => this.session.save().settings, reduced: reduceMotion,
+      seed: () => { const s = this.gameScene.snapshot(); return s ? deathSeed(s.score, s.level, s.timeMs) : 0; },
+      makeCard: () => new DeathCard(this, this.balance, reduceMotion()), later: (ms, fn) => this.time.delayedCall(ms, fn), onDone: () => this.leave() });
     this.waitHint = this.add.text(WIDTH / 2, BOARD.y + BOARD.size / 2, this.sys.game?.device?.input?.touch ? TEXT.waitHintTouch : TEXT.waitHintKeys,
       { fontFamily: FONT_UI, fontSize: `${ui(M.waitHint)}px`, fontStyle: '800', color: TOKENS.text.primary, align: 'center' })
       .setName('wait-hint').setOrigin(0.5).setVisible(false);
@@ -85,7 +98,7 @@ export class HudScene extends Phaser.Scene {
       this.gameScene.events.off('run-over', over); this.gameScene.events.off('toggle-sound', toggle);
       this.game.events.off(SETTINGS_CLOSED, reread);
       keys?.off('keydown', onKey); window.removeEventListener('blur', pause); document.removeEventListener('visibilitychange', hidden);
-      this.overTimer?.remove(); this.banners.hide();
+      this.overTimer?.remove(); this.juice.destroy(); this.banners.hide();
     });
     this.refresh(); this.showRunStart();
   }
@@ -142,58 +155,56 @@ export class HudScene extends Phaser.Scene {
     this.pause.show(pauseView({ level: s.level, biome: s.biome, hint: homeView(this.session.homeModel()).hint, settingsAvailable: this.settingsAvailable() }, t));
   }
 
-  // P1 HUD event mapping (MEC-003/006/007/008 §8) with the P3b-2 banner/tip views.
+  // P1 HUD event mapping (MEC-003/006/007/008 §8) with the P3b-2 banner/tip views. Sounds, haptics and visuals come from the JuicePlayer (P3a).
   private onEvents(events: SimEvent[]): void {
-    const u = this.balance.ui;
-    for (const e of events) switch (e.type) {
-      case 'ate': this.synth.play(e.golden ? 'golden' : 'eat'); this.buzz(u.haptics.eatMs); break;
+    const batch: JuiceInput[] = [];
+    for (const e of events) { batch.push(e); switch (e.type) {
       case 'shrunk': this.shrunkTo = e.from > e.to ? e.to : null; break; // MEC-001-R4 chip only when the snake shrank
-      case 'levelUp': this.onLevelUp(e); break;
-      case 'runWon': this.synth.play('level'); this.time.delayedCall(u.bannerMs / 4, () => this.synth.play('level')); break;
+      case 'levelUp': this.onLevelUp(e, batch); break;
       case 'hazardIncoming':
         if (e.family === 'fence' || e.family === 'maze' || e.family === 'terrain') this.banners.tip(incomingBanner(e.family));
         break;
-      case 'landed': this.synth.play('land'); break;
-      case 'rotted': this.synth.play('rot'); break;
       case 'orbSpawned':
         if (!this.orbTipShown && this.bestLevelAtStart < 2) { this.orbTipShown = true; this.banners.tip(t('tip.orb.first')); }
         break;
-      case 'orbEaten': this.synth.play('orb'); this.buzz(u.hud.orbHapticMs); break;
-      case 'skillUsed': this.synth.play(SKILL_SFX[e.skill]); this.buzz(u.hud.castHapticMs); break;
       case 'skillRejected': {
         if (e.reason === 'empty') break;
-        this.synth.play('nope'); this.skills.shake(e.slot);
+        this.skills.shake(e.slot);
         this.banners.tip(t(`skill.reject.${e.reason}`, { cost: e.skill ? this.balance.skills[e.skill].cost : 0 }));
         break;
       }
-      case 'shieldBroke': this.synth.play('shieldBreak'); break;
-      case 'skillUnlocked': { const tip = skillTip(e, t); this.banners.tip(tip.text, tip.slot); this.synth.play('unlock'); break; }
+      case 'skillUnlocked': { const tip = skillTip(e, t); this.banners.tip(tip.text, tip.slot); break; }
       case 'slotUnlocked': this.banners.tip(t('tip.slotUnlocked')); break;
       case 'mangoStolen': this.banners.tip(t('toast.mangoStolen')); break; // MEC-016 §8 toast
-      case 'rampEnded': this.synth.play('go'); break;
-      case 'died': this.synth.play('die'); this.buzz(u.haptics.deathMs); break;
       default: break;
-    }
+    } }
+    this.juice.handleBatch(batch); // U4-4: one buzz per batch (the last haptic wins)
     this.refresh();
   }
-  private onLevelUp(e: Extract<SimEvent, { type: 'levelUp' }>): void {
+  private onLevelUp(e: Extract<SimEvent, { type: 'levelUp' }>, batch: JuiceInput[]): void {
     const cps = this.session.save().unlockedCheckpoints;
     let newCheckpoint: number | null = null;
     if (cps.length > this.cpCount) { // MEC-008 §8 checkpoint banner + first-unlock tip
       newCheckpoint = Math.max(...cps);
       if (this.cpCount === 0) this.banners.tip(t('tip.checkpoint'));
       this.cpCount = cps.length;
+      batch.push({ type: 'checkpointUnlocked', level: newCheckpoint }); // P3a-R6
     }
     this.banners.show(levelUpBanners(e, { shrunkTo: this.shrunkTo, newCheckpoint }, this.balance, t));
-    this.shrunkTo = null; this.synth.play('level'); this.buzz(this.balance.ui.haptics.level);
+    this.shrunkTo = null;
     this.readHint();
   }
   /** MEC-008-R11 chip hint: it only changes when a checkpoint is saved (level-up), so it is read here, not every frame. */
   private readHint(): void { this.hint = homeView(this.session.homeModel()).hint; }
 
-  private onOver(_s: SimSnapshot): void {
+  private onOver(s: SimSnapshot): void {
+    if (this.leaving) return; // the Quit path already left
     this.banners.hide(); this.count.hide(); this.waitHint.setVisible(false);
-    this.toResults(reduceMotion() ? 0 : this.balance.flow.deathCardDelayMs);
+    this.juice.runOver(s.outcome?.won ?? false); // P3a-R7 the death sequence was started by the `died` event; a win waits the same total
+  }
+  private leave(): void {
+    if (this.leaving) return;
+    this.leaving = true; this.scene.stop('Game'); this.scene.start('Results');
   }
   private toResults(delayMs: number): void {
     if (this.leaving) return;

@@ -183,7 +183,7 @@ it('P3-0-R3 balance.ui has font timeout and min shrink', () => {
 
 it('P3b2-R5 balance.ui.hud validates', () => {
   const b = parseBalance(structuredClone(json));
-  expect(b.ui.hud).toEqual({ rejectShakeMs: 200, rejectShakeAmpPx: 6, orbHapticMs: 8, castHapticMs: 20, tipFactor: 2, bannerQueueMax: 4 });
+  expect(b.ui.hud).toEqual({ rejectShakeMs: 200, rejectShakeAmpPx: 6, tipFactor: 2, bannerQueueMax: 4 });
   const bad = structuredClone(json) as any; bad.ui.hud.bannerQueueMax = 0;
   expect(() => parseBalance(bad)).toThrow(/ui.hud.bannerQueueMax/);
 });

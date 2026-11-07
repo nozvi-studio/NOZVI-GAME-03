@@ -73,14 +73,14 @@ export interface Balance {
   loadout: { slots: number; secondSlotLevel: number; order: import('./types').SkillId[] };
   checkpoints: { milestones: { reach: number; start: number; requiresClear?: boolean }[]; carryRatio: number; carryMax: number; rampMangoes: number };
   log: { maxEntries: number; sessionGapMs: number };
-  flow: { countdownMs: number; countdownDigits: number; maxFrameDeltaMs: number; deathCardDelayMs: number };
+  flow: { countdownMs: number; countdownDigits: number; maxFrameDeltaMs: number };
   ui: {
     bannerMs: number; swipeMinPx: number; swipeBoardFactor: number; fontLoadTimeoutMs: number; minShrink: number;
-    haptics: { eatMs: number; level: number[]; deathMs: number }; terrainFadeInMs: number; hazardFlickerMs: number;
+    terrainFadeInMs: number; hazardFlickerMs: number;
     capy: { breathPeriodMs: number; breathAmp: number; blinkMs: number; blinkMinGapMs: number; blinkMaxGapMs: number;
       eatOpenMs: number; eatChewMs: number; gulpScaleX: number; gulpScaleY: number;
       deadDroopMs: number; deadRotDeg: number; deadDropPx: number; headCellScale: number };
-    hud: { rejectShakeMs: number; rejectShakeAmpPx: number; orbHapticMs: number; castHapticMs: number; tipFactor: number; bannerQueueMax: number };
+    hud: { rejectShakeMs: number; rejectShakeAmpPx: number; tipFactor: number; bannerQueueMax: number };
   };
   juice: {
     bursts: Record<'eat' | 'golden' | 'rot' | 'dust' | 'death', { count: number; speed: number; lifeMs: number }>;
@@ -208,14 +208,14 @@ const SPEC: Spec = {
     if (isObj(v) && v.requiresClear !== undefined) check(v.requiresClear, 'bool', path + '.requiresClear');
   }), carryRatio: 'prob', carryMax: 'int0', rampMangoes: 'int+' },
   log: { maxEntries: 'int+', sessionGapMs: 'int+' },
-  flow: { countdownMs: 'int+', countdownDigits: 'int+', maxFrameDeltaMs: 'int+', deathCardDelayMs: 'int0' },
+  flow: { countdownMs: 'int+', countdownDigits: 'int+', maxFrameDeltaMs: 'int+' },
   ui: {
     bannerMs: 'int+', swipeMinPx: 'num+', swipeBoardFactor: 'prob', fontLoadTimeoutMs: 'int+', minShrink: 'prob',
-    haptics: { eatMs: 'int+', level: 'ints', deathMs: 'int+' }, terrainFadeInMs: 'int+', hazardFlickerMs: 'int+',
+    terrainFadeInMs: 'int+', hazardFlickerMs: 'int+',
     capy: { breathPeriodMs: 'int+', breathAmp: 'prob', blinkMs: 'int+', blinkMinGapMs: 'int+', blinkMaxGapMs: 'int+',
       eatOpenMs: 'int+', eatChewMs: 'int+', gulpScaleX: 'num+', gulpScaleY: 'num+',
       deadDroopMs: 'int+', deadRotDeg: 'num0', deadDropPx: 'num0', headCellScale: 'num+' },
-    hud: { rejectShakeMs: 'int+', rejectShakeAmpPx: 'num+', orbHapticMs: 'int+', castHapticMs: 'int+', tipFactor: 'int+', bannerQueueMax: 'int+' },
+    hud: { rejectShakeMs: 'int+', rejectShakeAmpPx: 'num+', tipFactor: 'int+', bannerQueueMax: 'int+' },
   },
   juice: {
     bursts: { eat: burst, golden: burst, rot: burst, dust: burst, death: burst },

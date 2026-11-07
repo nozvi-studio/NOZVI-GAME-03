@@ -44,6 +44,7 @@ function setup(saveData: object = {}, opts: { settings?: boolean; settingsActive
   const h = sceneHarness(), g = sceneHarness(), game = new GameScene(), hud = new HudScene();
   Object.assign(game, g.scene, { scene: { isActive: () => false } }); game.balance = b; game.session = session; game.flow = createFlow();
   vi.spyOn(game, 'startRun').mockImplementation(() => {});
+  vi.spyOn(game, 'playBoardFx').mockImplementation(() => {}); // the real GameScene is never create()d here (no effects)
   const started: string[] = [], stopped: string[] = [], launched: [string, unknown][] = [];
   const overlay = { active: opts.settingsActive ?? false };
   h.registry.set('session', session); h.registry.set('balance', b);
@@ -112,7 +113,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
     const h = setup();
     h.game.events.emit('sim-events', [{ type: 'ate', x: 1, y: 1, points: 2, golden: true },
       { type: 'levelUp', level: 6, biome: 2, challenge: false, biomeChanged: true, unlocked: 'fence', clearedLevelTimeMs: 1 }]);
-    expect(sound.play.mock.calls.map(c => c[0])).toEqual(['golden', 'level']);
+    expect(sound.play.mock.calls.map(c => c[0])).toEqual(['golden', 'biome']);
     expect(h.find('banner').visible).toBe(true);
     expect(h.last('banner-title').text).toBe('Level 6'); expect(h.last('banner-subtitle').text).toBe('Fresh start!');
     h.flush(); expect(h.last('banner-title').text).toBe('Rice Paddy');
@@ -212,8 +213,9 @@ describe('P1 HUD flow, audio and session wiring', () => {
   it('P1 death opens Results after the death delay; hidden pauses; shutdown removes listeners', () => {
     const h = setup(); h.play();
     h.document.hidden = true; h.doc.emit('visibilitychange'); expect(h.game.flow.status).toBe('paused');
+    h.game.events.emit('sim-events', [{ type: 'died', cause: 'wall', x: 1, y: 1 }]);
     h.game.events.emit('run-over', h.session.snapshot());
-    expect(h.delayed.at(-1)?.delay).toBe(b.flow.deathCardDelayMs);
+    expect(h.delayed.map(d => d.delay)).toEqual([b.juice.death.cardInMs, b.juice.death.totalMs]);
     h.flush(); expect(h.started).toEqual(['Results']);
     h.hud.events.emit('shutdown'); h.game.apply(flowStart(h.game.flow, b));
     h.browser.emit('blur'); expect(h.game.flow.status).toBe('countdown');
@@ -252,7 +254,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
     expect(sound.buzz).not.toHaveBeenCalled(); expect(sound.play).toHaveBeenCalledWith('eat');
     h.session.updateSettings({ haptics: true }); h.scene.game.events.emit('settings-closed');
     h.game.events.emit('sim-events', [{ type: 'ate', x: 1, y: 1, points: 1, golden: false }]);
-    expect(sound.buzz).toHaveBeenCalledWith(b.ui.haptics.eatMs);
+    expect(sound.buzz).toHaveBeenCalledWith(b.juice.haptics.eatMs);
     h.session.updateSettings({ haptics: false }); h.scene.game.events.emit('settings-closed'); sound.buzz.mockClear();
     h.game.events.emit('sim-events', [{ type: 'died', cause: 'wall', x: 1, y: 1 }]);
     expect(sound.buzz).not.toHaveBeenCalled();
