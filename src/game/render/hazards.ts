@@ -26,12 +26,11 @@ export function drawRock(g: Graphics, c: Cell, size: number, look: BoardLook, al
   g.restore();
   if (!crumble) return;
   const ox = c.x - m.d / 2, oy = c.y - m.d / 2, s = m.d / 20;
-  const crack: [number, number][] = [[11, 2], [8.5, 7.5], [12, 10.5], [9, 14.5], [11, 19]];
+  const crack = ROCK.crack;
   g.lineStyle(Math.max(1, size * ROCK.crackWidth), look.edge, a);
   for (let i = 0; i < crack.length - 1; i++) g.lineBetween(ox + crack[i]![0] * s, oy + crack[i]![1] * s, ox + crack[i + 1]![0] * s, oy + crack[i + 1]![1] * s);
-  const x0 = c.x - size / 2, y0 = c.y - size / 2, bd = Math.max(1, size * ROCK.crackWidth * 0.6);
-  boxed(g, x0 + size * 0.86, y0 + size * 0.66, size * 0.2, size * 0.2, size * 0.08, PART.rock.fill, look.edge, bd, a);
-  boxed(g, x0 + size * 0.02, y0 + size * 0.78, size * 0.15, size * 0.15, size * 0.06, PART.rock.fill, look.edge, bd, a);
+  const x0 = c.x - size / 2, y0 = c.y - size / 2, bd = Math.max(1, size * ROCK.crackWidth * ROCK.debris.borderShare);
+  for (const k of ROCK.debris.chips) boxed(g, x0 + size * k.x, y0 + size * k.y, size * k.size, size * k.size, size * k.radius, PART.rock.fill, look.edge, bd, a);
 }
 
 // P3b1-R5 MEC-004 accelerating pulse kept; the outline ring, dashes and the "!" / chevron shape never depend on colour alone.
@@ -41,7 +40,7 @@ export function drawWarn(g: Graphics, c: Cell, cell: number, ms: number, progres
   const x = c.x * cell + off, y = c.y * cell, ring = cell * WARN.ring, inset = cell * WARN.inset, size = cell - 2 * inset;
   const hazard = kind === 'hazard', mark = reduced ? 1 : 0.35 + 0.65 * pulse;
   g.lineStyle(ring, look.edge, 1).strokeRoundedRect(x - ring / 2, y - ring / 2, cell + ring, cell + ring, cell * WARN.radius + ring / 2);
-  g.fillStyle(hazard ? PART.warn.fill : PART.stone.warnFill, (WARN.fillBase + WARN.fillGain * progress) * pulse + (hazard ? 0 : 0.3))
+  g.fillStyle(hazard ? PART.warn.fill : PART.stone.warnFill, (WARN.fillBase + WARN.fillGain * progress) * pulse + (hazard ? 0 : WARN.riseFillFloor))
     .fillRoundedRect(x + inset, y + inset, size, size, cell * WARN.tileRadius);
   g.lineStyle(Math.max(1, cell * WARN.dashWidth), hazard ? PART.warn.dash : PART.stone.warnDash, mark);
   dashedRect(g, x + inset, y + inset, size, size, cell * WARN.dash);
@@ -71,7 +70,7 @@ function drawFence(g: Graphics, cells: readonly PopCell[], cell: number, look: B
 
 // P3b1-R6 BiomeBoardsD2 hedge maze: glowing bars with a white edge (edge pass, then fill pass so joins have no seam).
 function drawHedge(g: Graphics, cells: readonly PopCell[], cell: number, _look: BoardLook, alpha: number): void {
-  const bars = hedgeRects(cells, cell), glow = cell * HEDGE.glow, edge = cell * HEDGE.edge * 0.5, r = cell * HEDGE.radius;
+  const bars = hedgeRects(cells, cell), glow = cell * HEDGE.glow, edge = cell * HEDGE.edgeHalf, r = cell * HEDGE.radius;
   for (const q of bars) g.fillStyle(PART.hedge.glow, HEDGE.glowAlpha * alpha).fillRoundedRect(q.x - glow, q.y - glow, q.w + 2 * glow, q.h + 2 * glow, r + glow);
   for (const q of bars) g.fillStyle(PART.hedge.edge, alpha).fillRoundedRect(q.x, q.y, q.w, q.h, r);
   for (const q of bars) g.fillStyle(PART.hedge.fill, alpha).fillRoundedRect(q.x + edge, q.y + edge, q.w - 2 * edge, q.h - 2 * edge, Math.max(0, r - edge));
