@@ -3,6 +3,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 - feat(ui): UIFIX-R4 dark-theme text/card tokens with WCAG 4.5:1 gate
+- feat(ui): UIFIX-R4 dark theme applied to HUD title, Pause card and Settings
 - docs: P3 UI review (agy) in PLAYTEST + UI fixes design spec (UIFIX-R1..R15)
 - feat(art): Remotion POC - pre-rendered capy idle/eat/dead clip next to the tween capy on the debug art preview (owner approved 2026-11-07)
 - docs: ART-001 Q6 answered (owner Remotion repo location), Q7 deferred

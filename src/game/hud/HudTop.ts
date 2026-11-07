@@ -1,7 +1,7 @@
 import type Phaser from 'phaser';
-import { TOKENS, toInt } from '../uiTokens';
+import { TOKENS, toInt, uiTheme } from '../uiTokens';
 import { ui, UI_SCALE } from '../ui/layout';
-import { reduceMotion } from '../render/palette';
+import { currentPalette, reduceMotion, themeOf } from '../render/palette';
 import { bindPress } from '../scenes/ui';
 import { drawCard, hudLabel } from './draw';
 import { hudIconKey } from './hudIcons';
@@ -46,7 +46,8 @@ export class HudTop {
   }
 
   apply(v: HudView, paused: boolean, pauseEnabled: boolean): void {
-    this.level.setText(v.levelTitle); this.biome.setText(v.biomeName);
+    const th = uiTheme(themeOf(currentPalette()));
+    this.level.setText(v.levelTitle).setColor(th.title); this.biome.setText(v.biomeName).setColor(th.soft);
     this.done.setText(v.quota.done); this.total.setText(v.quota.total); this.score.setText(v.score); this.energy.setText(v.energy.text);
     const w = (t: Phaser.GameObjects.Text): number => t.width / UI_SCALE;
     const row = statsRow({ quota: w(this.done) + w(this.total), score: w(this.score), energy: w(this.energy) });

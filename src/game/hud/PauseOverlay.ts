@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { SETTINGS_CLOSED } from '../flow/settingsView';
 import { HEIGHT, WIDTH } from '../layout';
-import { FONT_TITLE, FONT_UI, TOKENS, toInt } from '../uiTokens';
+import { FONT_TITLE, FONT_UI, TOKENS, toInt, uiTheme } from '../uiTokens';
+import { currentPalette, themeOf } from '../render/palette';
 import { pillButton } from '../ui/widgets';
 import { ui } from '../ui/layout';
 import { drawCard, hudLabel } from './draw';
@@ -53,15 +54,16 @@ export class PauseOverlay {
   }
 
   show(v: PauseView): void {
+    const th = uiTheme(themeOf(currentPalette()));
     const m = PAUSE_MOCK, lay = pauseLayout(v), h = ui(lay.height), y0 = (HEIGHT - h) / 2;
-    this.card.clear(); drawCard(this.card, this.cardX, y0, this.cardW, h, ui(m.radius), TOKENS.surface.card, { shadowAlpha: TOKENS.hud.cardShadowAlpha, dy: M.shadowDy });
-    this.title.setText(v.title).setY(y0 + ui(lay.title)); this.subtitle.setText(v.subtitle).setY(y0 + ui(lay.subtitle));
+    this.card.clear(); drawCard(this.card, this.cardX, y0, this.cardW, h, ui(m.radius), th.card, { shadowAlpha: TOKENS.hud.cardShadowAlpha, dy: M.shadowDy });
+    this.title.setColor(th.ink).setText(v.title).setY(y0 + ui(lay.title)); this.subtitle.setColor(th.cardSoft).setText(v.subtitle).setY(y0 + ui(lay.subtitle));
     this.chipG.clear(); this.chipText.setVisible(v.chip !== null); this.chipIcon.setVisible(v.chip !== null);
     if (v.chip !== null && lay.chip !== null) {
-      this.chipText.setText(v.chip);
+      this.chipText.setColor(th.ink).setText(v.chip);
       const ch = ui(m.chip), ic = ui(M.chipIcon), pad = ui(M.chipPadL), gap = ui(M.chipGap);
       const cw = pad + ic + gap + ui(M.chipPadR) + this.chipText.width, cx = WIDTH / 2 - cw / 2, cy = y0 + ui(lay.chip);
-      this.chipG.fillStyle(toInt(TOKENS.surface.sand)).fillRoundedRect(cx, cy, cw, ch, ch / 2);
+      this.chipG.fillStyle(toInt(themeOf(currentPalette()) === 'dark' ? th.bg : TOKENS.surface.sand)).fillRoundedRect(cx, cy, cw, ch, ch / 2);
       this.chipIcon.setPosition(cx + pad + ic / 2, cy + ch / 2); this.chipText.setPosition(cx + pad + ic + gap, cy + ch / 2);
     }
     this.shown = new Set(lay.buttons.map(b => b.id));

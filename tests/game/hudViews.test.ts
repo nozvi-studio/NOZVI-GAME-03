@@ -10,7 +10,10 @@ import { hudView, type HudSnap } from '../../src/game/hud/hudModel';
 import { hudLayout } from '../../src/game/hud/hudLayout';
 import { t } from '../../src/game/text';
 import { loadBalance } from '../support/balance';
-import { sceneHarness } from '../support/scene';
+import { DrawObject, sceneHarness } from '../support/scene';
+import { setDisplaySettings } from '../../src/game/render/palette';
+import { defaultSettings } from '../../src/meta';
+import { toInt, uiTheme } from '../../src/game/uiTokens';
 
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } },
   Geom: { Rectangle: Object.assign(class { constructor(..._a: number[]) {} }, { Contains: () => false }) } } }));
@@ -156,4 +159,29 @@ it('P3b2-R15 HudTop redraws the pause icon only when paused or enabled changes',
   expect(clear).toHaveBeenCalledTimes(1);
   top.apply(v, true, true); expect(clear).toHaveBeenCalledTimes(2);
   top.apply(v, true, false); expect(clear).toHaveBeenCalledTimes(3); expect(h.find('pause-button').alpha).toBeLessThan(1);
+});
+
+it('UIFIX-R4 HudTop level and biome titles use the dark title colours in the dark theme and the D2 ink in light', () => {
+  const colours: string[] = [];
+  const spy = vi.spyOn(DrawObject.prototype, 'setColor').mockImplementation(function (this: DrawObject, c?: unknown) { colours.push(`${this.name}:${String(c)}`); return this; } as never);
+  try {
+    vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
+    setDisplaySettings({ ...defaultSettings(), boardTheme: 'dark' });
+    const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, hudLayout(false), () => {});
+    top.apply(hudView(snap(), null, b, t), false, true);
+    expect(colours).toContain(`level:${uiTheme('dark').title}`); expect(colours).toContain(`biome:${uiTheme('dark').soft}`);
+    colours.length = 0; setDisplaySettings({ ...defaultSettings(), boardTheme: 'light' });
+    top.apply(hudView(snap(), null, b, t), false, true);
+    expect(colours).toContain(`level:${uiTheme('light').title}`);
+  } finally { spy.mockRestore(); setDisplaySettings(null); }
+});
+it('UIFIX-R4 PauseOverlay draws a dark card in the dark theme', () => {
+  vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
+  setDisplaySettings({ ...defaultSettings(), boardTheme: 'dark' });
+  try {
+    const h = sceneHarness(), o = new PauseOverlay(h.scene as unknown as Phaser.Scene, { onResume() {}, onSettings() {}, onQuit() {} });
+    o.show(pauseView({ level: 7, biome: 2, hint: null, settingsAvailable: true }, t));
+    const fills = h.objects.flatMap(x => x.commands).filter(c => c[0] === 'fillStyle').map(c => c[1]);
+    expect(fills).toContain(toInt(uiTheme('dark').card));
+  } finally { setDisplaySettings(null); }
 });
