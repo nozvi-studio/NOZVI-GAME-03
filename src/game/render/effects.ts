@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import { BOARD } from '../layout';
 import type { Palette } from './palette';
+import { FONT_UI } from '../uiTokens';
 
 interface Particle {
   x: number; y: number; vx: number; vy: number; life: number; max: number; r: number; color: number;
@@ -44,7 +45,7 @@ export class Effects {
   floatText(gx: number, gy: number, points: number, big: boolean): void {
     const x = (gx + 0.5) * this.cell, y = (gy + 0.5) * this.cell;
     const label = this.scene.add.text(x, y, `+${points}`, {
-      fontFamily: '"Baloo 2", system-ui, sans-serif', fontStyle: 'bold',
+      fontFamily: FONT_UI, fontStyle: 'bold',
       fontSize: this.cell * (big ? 0.95 : 0.75), strokeThickness: this.cell * 0.14,
     }).setOrigin(0.5);
     this.board.add(label);

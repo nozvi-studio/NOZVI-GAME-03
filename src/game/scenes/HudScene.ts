@@ -13,6 +13,7 @@ import { currentPalette, P1_COLORS, reduceMotion, type Palette } from '../render
 import { levelLabel, levelUpLines, runStartLines } from '../hudText';
 import { incomingBanner, progressLabel, t, TEXT } from '../text';
 import type { GameScene } from './GameScene';
+import { FONT_UI } from '../uiTokens';
 
 const SKILL_SFX: Record<SkillId, SfxName> = { slowmo: 'skillSlowmo', tailSnip: 'skillSnip', shield: 'skillShield', mangoRain: 'skillRain' };
 const SKILL_LETTER: Record<SkillId, string> = { slowmo: 'S', tailSnip: 'T', shield: 'D', mangoRain: 'R' };
@@ -139,7 +140,7 @@ export class HudScene extends Phaser.Scene {
   }
 
   private label(x: number, y: number, text: string, size: number, name = ''): Phaser.GameObjects.Text {
-    const label = this.add.text(x, y, text, { fontFamily: '"Baloo 2", system-ui, sans-serif',
+    const label = this.add.text(x, y, text, { fontFamily: FONT_UI,
       fontSize: `${size}px`, fontStyle: 'bold', color: this.ink() }).setName(name);
     this.labels.push(label); return label;
   }
