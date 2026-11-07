@@ -1,5 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import type Phaser from 'phaser';
+import { BannerLayer } from '../../src/game/hud/BannerLayer';
 import { CountdownOverlay } from '../../src/game/hud/CountdownOverlay';
 import { PauseOverlay } from '../../src/game/hud/PauseOverlay';
 import { pauseView } from '../../src/game/hud/overlayModel';
@@ -97,4 +98,34 @@ it('P3b2-R13 CountdownOverlay shows the digit and the checkpoint card, hides bot
   expect(h.find('countdown-card-title').text).toBe('Starting at L6'); expect(h.find('countdown-card-title').visible).toBe(true);
   c.tick(2, null); expect(h.find('countdown').text).toBe('2'); expect(h.find('countdown-card-title').visible).toBe(false);
   c.hide(); expect(h.find('countdown').visible).toBe(false);
+});
+it('P3b2-R10 BannerLayer shows queued cards one after another for ui.bannerMs, then clears', () => {
+  vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  layer.show([{ kind: 'levelUp', title: 'Level 8', subtitle: 'Fresh start!', chip: 'Your snake shrinks to 4 segments' },
+    { kind: 'biome', label: 'BIOME 3', name: 'Frozen Pond', tagline: 'Ice is slippery. Plan your turns.' }]);
+  expect(h.find('banner').visible).toBe(true); expect(h.last('banner-title')!.text).toBe('Level 8');
+  expect(h.delayed.at(-1)!.delay).toBe(b.ui.bannerMs);
+  h.flush();
+  expect(h.last('banner-title')!.text).toBe('Frozen Pond'); expect(h.last('banner-label')!.text).toBe('BIOME 3');
+  h.flush(); expect(h.find('banner').visible).toBe(false);
+});
+it('P3b2-R10 a new queue replaces the old one; hide() cancels pending cards', () => {
+  vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  layer.show([{ kind: 'hint', text: 'Fences unlocked' }, { kind: 'hint', text: 'Second' }]);
+  layer.show([{ kind: 'challenge', title: 'Challenge: Rock rain!' }]);
+  expect(h.last('banner-title')!.text).toBe('Challenge: Rock rain!');
+  layer.hide(); h.flush(); expect(h.find('banner').visible).toBe(false);
+});
+it('P3b2-R11 tips last tipFactor x bannerMs; pills and the slow-mo tint follow the skill state', () => {
+  vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  layer.tip('Need 40 energy'); expect(h.find('tip').text).toBe('Need 40 energy'); expect(h.find('tip').visible).toBe(true);
+  expect(h.delayed.at(-1)!.delay).toBe(b.ui.bannerMs * b.ui.hud.tipFactor);
+  h.flush(); expect(h.find('tip').visible).toBe(false);
+  layer.setPills([{ slot: 0, skill: 'slowmo', text: 'Slow-mo · 3 s left' }]);
+  expect(h.find('pill-0').text).toBe('Slow-mo · 3 s left'); expect(h.find('pill-0').visible).toBe(true);
+  layer.setPills([]); expect(h.find('pill-0').visible).toBe(false);
+  layer.setSlowmo(true); expect(h.find('slowmo-tint').visible).toBe(true); layer.setSlowmo(false); expect(h.find('slowmo-tint').visible).toBe(false);
 });
