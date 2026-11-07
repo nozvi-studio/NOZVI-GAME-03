@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(audio): P3a synth SFX: soft two-stage energy zap, distinct per-skill casts, biome jingle, checkpoint fanfare; `SFX_TONES` exported (P3a-R2, R3, R5, R6).
 - feat(config): P3a `balance.juice` block (bursts, haptics, death <= 1.5 s, reduced-motion and perf caps) with validation (P3a-R7, R8, R11).
 - fix(hud): restore the design-pinned `pausedText` string (P0 design §7.5) and its test pins; banner reset clears the pop scale; MEC-003/MEC-007 text-key references and the DECISIONS 2026-11-07 P3b-2 ramp chip note updated.
 - fix(hud): P3b-2 final review: banner cards stack from the measured title height and long challenge titles shrink to fit; the Warming up chip shows only for checkpoint starts (MEC-008-R8); per-frame HUD redraws cached; banner hide() also hides the tip. The old level-up white flash overlay was removed with the greybox HUD (juice is owned by P3a).
