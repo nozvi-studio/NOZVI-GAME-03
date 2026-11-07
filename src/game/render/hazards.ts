@@ -1,7 +1,7 @@
 import type Phaser from 'phaser';
 import type { Balance, Cell, SimSnapshot } from '../../core';
 import type { BoardLook } from './biomePalette';
-import { bangGeometry, chevronPoints, PART, ROCK, rockMetrics, WARN, type RockKind } from './boardParts';
+import { bangGeometry, chevronPoints, FENCE, HEDGE, hedgeRects, PART, ROCK, rockMetrics, TILE, WARN, type RockKind } from './boardParts';
 import { dashedRect } from './movers';
 
 type Graphics = Phaser.GameObjects.Graphics;
@@ -55,25 +55,44 @@ export function drawWarn(g: Graphics, c: Cell, cell: number, ms: number, progres
   }
 }
 
-// P3b1-R4 Task 5 replaces these stubs with the fence and hedge art.
-function drawFence(_g: Graphics, _c: readonly PopCell[], _cell: number, _look: BoardLook, _alpha: number): void {}
-function drawHedge(_g: Graphics, _c: readonly PopCell[], _cell: number, _look: BoardLook, _alpha: number): void {}
+// P3b1-R6 FencePiece.dc: rails run from a post to the right/lower neighbour, posts are drawn after every rail.
+function drawFence(g: Graphics, cells: readonly PopCell[], cell: number, look: BoardLook, alpha: number): void {
+  const has = new Set(cells.map(c => `${c.x},${c.y}`)), bw = Math.max(1, cell * FENCE.edge), t = cell * FENCE.rail, r = cell * FENCE.railRadius;
+  for (const c of cells) {
+    const cx = (c.x + 0.5) * cell, cy = (c.y + 0.5) * cell;
+    if (has.has(`${c.x + 1},${c.y}`)) for (const dy of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx, cy + dy * cell, cell, t, r, PART.wood.rail, look.woodEdge, bw, alpha);
+    if (has.has(`${c.x},${c.y + 1}`)) for (const dx of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx + dx * cell, cy, t, cell, r, PART.wood.rail, look.woodEdge, bw, alpha);
+  }
+  for (const c of cells) {
+    const w = cell * FENCE.postW * c.k, h = cell * FENCE.postH * c.k;
+    boxed(g, (c.x + 0.5) * cell - w / 2, (c.y + 0.5) * cell - h / 2, w, h, cell * FENCE.postRadius, PART.wood.post, look.woodEdge, bw, alpha);
+  }
+}
 
-// MEC-004 draw rising-ground zone marks, warning and raised tiles.
+// P3b1-R6 BiomeBoardsD2 hedge maze: glowing bars with a white edge (edge pass, then fill pass so joins have no seam).
+function drawHedge(g: Graphics, cells: readonly PopCell[], cell: number, _look: BoardLook, alpha: number): void {
+  const bars = hedgeRects(cells, cell), glow = cell * HEDGE.glow, edge = cell * HEDGE.edge * 0.5, r = cell * HEDGE.radius;
+  for (const q of bars) g.fillStyle(PART.hedge.glow, HEDGE.glowAlpha * alpha).fillRoundedRect(q.x - glow, q.y - glow, q.w + 2 * glow, q.h + 2 * glow, r + glow);
+  for (const q of bars) g.fillStyle(PART.hedge.edge, alpha).fillRoundedRect(q.x, q.y, q.w, q.h, r);
+  for (const q of bars) g.fillStyle(PART.hedge.fill, alpha).fillRoundedRect(q.x + edge, q.y + edge, q.w - 2 * edge, q.h - 2 * edge, Math.max(0, r - edge));
+}
+
+// P3b1-R6 Tile.dc rise-warn / rise-up: grey-blue stone tiles; the warn tile reuses drawWarn('rise') (ring + dashes + chevron).
 export function drawTerrains(g: Graphics, terrains: SimSnapshot['terrains'], cell: number, look: BoardLook, b: Balance, reduced: boolean): void {
   for (const terrain of terrains) {
     const a = Math.min(1, terrain.t / b.ui.terrainFadeInMs) * (terrain.t > terrain.lifeMs
       ? Math.max(0, 1 - (terrain.t - terrain.lifeMs) / b.terrain.fadeOutMs) : 1);
     for (const c of terrain.cells) {
       const x = c.x * cell, y = c.y * cell;
-      g.fillStyle(look.edge, 0.4 * a).fillRoundedRect(x + cell * 0.1, y + cell * 0.1, cell * 0.8, cell * 0.8, cell * 0.15);
+      g.fillStyle(PART.stone.front, TILE.zoneAlpha * a).fillRoundedRect(x + cell * TILE.zoneInset, y + cell * TILE.zoneInset, cell * (1 - 2 * TILE.zoneInset), cell * (1 - 2 * TILE.zoneInset), cell * TILE.zoneRadius);
       if (c.vis === 'warn') {
         const downMs = b.terrain.periodMs - b.terrain.upMs - b.terrain.warnMs;
         const ct = Math.max(0, terrain.t - b.terrain.startDelayMs - c.delay) % b.terrain.periodMs - downMs;
         drawWarn(g, c, cell, Math.max(0, ct), Math.min(1, Math.max(0, ct) / b.terrain.warnMs), look, 'rise', true, reduced);
       } else if (c.vis === 'up') {
-        g.fillStyle(look.edge).fillRoundedRect(x + cell * 0.06, y + cell * 0.16, cell * 0.88, cell * 0.8, cell * 0.16);
-        g.fillStyle(PART.stone.front).fillRoundedRect(x + cell * 0.06, y + cell * 0.02, cell * 0.88, cell * 0.72, cell * 0.16);
+        const i = cell * TILE.inset, s = cell - 2 * i, bw = cell * TILE.border, r = cell * TILE.stoneRadius;
+        boxed(g, x + i, y + i + s * TILE.frontFrom, s, s * (1 - TILE.frontFrom), r, PART.stone.front, look.edge, bw, a);
+        boxed(g, x + i, y + i, s, s * TILE.topShare, r, PART.stone.top, look.edge, bw, a);
       }
     }
   }

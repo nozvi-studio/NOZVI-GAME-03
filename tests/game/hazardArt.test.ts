@@ -69,3 +69,44 @@ it('P3b1-R5 a warning rock also previews the rock faintly; a solid rock does not
   expect(solid.count('strokeRoundedRect')).toBe(0);
   expect(solid.count('rotateCanvas')).toBe(1);
 });
+
+const fenceHazard = (cells: { x: number; y: number }[]): SimSnapshot['hazards'] =>
+  [{ type: 'fence', state: 'solid', t: 100, warnMs: 2000, lifeMs: 10000, cells: cells.map(c => ({ ...c, on: true, ageMs: 400 })) }];
+
+it('P3b1-R6 a lone fence cell is one post; two horizontally joined cells add two rails; rails are drawn before posts', () => {
+  const look = boardLook(2, 'light');
+  const one = gfx(); drawHazards(one.g, fenceHazard([{ x: 1, y: 1 }]), 30, look, b, false);
+  expect(one.count('fillRoundedRect')).toBe(2);                              // post: edge + fill
+  const two = gfx(); drawHazards(two.g, fenceHazard([{ x: 1, y: 1 }, { x: 2, y: 1 }]), 30, look, b, false);
+  expect(two.count('fillRoundedRect')).toBe(8);                              // 2 rail boxes + 2 posts, each edge + fill
+  const rects = two.calls.filter(c => c[0] === 'fillRoundedRect');
+  const first = rects[0]!, last = rects.at(-1)!;
+  expect(first[3]).toBeCloseTo(30);                                          // first box is a full-length rail (w = cell)
+  expect(last[3]).toBeCloseTo(30 * 0.4 - 2 * 30 * 0.076);                    // last box is a post fill
+});
+
+it('P3b1-R6 fences use the biome wood edge: brown on light grounds, white on dark ones', () => {
+  const light = gfx(), dark = gfx();
+  drawHazards(light.g, fenceHazard([{ x: 1, y: 1 }]), 30, boardLook(2, 'light'), b, false);
+  drawHazards(dark.g, fenceHazard([{ x: 1, y: 1 }]), 30, boardLook(2, 'dark'), b, false);
+  expect(light.calls.find(c => c[0] === 'fillStyle')![1]).toBe(boardLook(2, 'light').woodEdge);
+  expect(dark.calls.find(c => c[0] === 'fillStyle')![1]).toBe(boardLook(2, 'dark').woodEdge);
+  expect(boardLook(2, 'light').woodEdge).not.toBe(boardLook(2, 'dark').woodEdge);
+});
+
+it('P3b1-R6 a maze hazard draws glow, edge and fill passes over every bar', () => {
+  const p = gfx();
+  drawHazards(p.g, [{ type: 'maze', state: 'solid', t: 100, warnMs: 2600, lifeMs: 10000,
+    cells: [{ x: 1, y: 1, on: true, ageMs: 400 }, { x: 2, y: 1, on: true, ageMs: 400 }] }], 30, boardLook(6, 'light'), b, false);
+  expect(p.count('fillRoundedRect')).toBe(3 * 3);                            // 2 bars + 1 connector, x (glow, edge, fill)
+});
+
+it('P3b1-R6 rising ground: warn tile has ring + chevron, up tile is a two-face stone with a look edge', () => {
+  const look = boardLook(3, 'light');
+  const mk = (vis: 'down' | 'warn' | 'up'): SimSnapshot['terrains'] => [{ t: 5000, lifeMs: 20000, cells: [{ x: 2, y: 2, vis, delay: 0 }] }];
+  const warn = gfx(); drawTerrains(warn.g, mk('warn'), 30, look, b, false);
+  expect(warn.count('strokeRoundedRect')).toBe(1);
+  const up = gfx(); drawTerrains(up.g, mk('up'), 30, look, b, false);
+  expect(up.calls.some(c => c[0] === 'fillStyle' && c[1] === look.edge)).toBe(true);
+  expect(up.count('fillRoundedRect')).toBe(1 + 2 * 2);                       // zone mark + (front, top) x (edge, fill)
+});

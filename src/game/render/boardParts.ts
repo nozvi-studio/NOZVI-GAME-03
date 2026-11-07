@@ -21,9 +21,9 @@ export const ROCK = { scale: { pebble: 0.5, rock: 0.82, boulder: 0.98 } as Recor
   crumbleAlpha: 0.65, previewAlpha: 0.35, crackWidth: 0.075 } as const;
 export const WARN = { ring: 0.1, inset: 0.05, radius: 0.3, tileRadius: 0.285, dash: 0.2, dashWidth: 0.095, chevronWidth: 0.13,
   fillBase: 0.3, fillGain: 0.4 } as const;
-export const FENCE = { rail: 0.2, railHigh: -0.28, railLow: 0.08, postW: 0.4, postH: 0.7, postRadius: 0.15, edge: 0.076 } as const;
-export const TILE = { inset: 1 / 21, radius: 1 / 3, border: 0.095, stoneRadius: 0.2, topShare: 0.68, frontFrom: 0.58 } as const;
-export const HEDGE = { bar: 0.8, edge: 0.11, glow: 0.12, glowAlpha: 0.22 } as const;
+export const FENCE = { rail: 0.2, railHigh: -0.28, railLow: 0.08, postW: 0.4, postH: 0.7, postRadius: 0.15, edge: 0.076, railRadius: 0.04 } as const;
+export const TILE = { inset: 1 / 21, radius: 1 / 3, border: 0.095, stoneRadius: 0.2, topShare: 0.68, frontFrom: 0.58, zoneAlpha: 0.3, zoneInset: 0.1, zoneRadius: 0.15 } as const;
+export const HEDGE = { bar: 0.8, edge: 0.11, glow: 0.12, glowAlpha: 0.22, radius: 0.22 } as const;
 export const GRID_LINE = 0.1;
 export const MANGO = { box: 32, fill: 0.92, body: { cx: 16, cy: 18.5, rx: 11.5, ry: 10, rotDeg: -20 },
   hi: { p: [[8.5, 16], [9.5, 13], [11.7, 11], [14.7, 10.4]] as readonly Pt[], width: 2.4 },
