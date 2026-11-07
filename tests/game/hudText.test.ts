@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { levelUpLines, levelLabel } from '../../src/game/hudText';
+import { levelUpLines, levelLabel, levelTitle, biomeName } from '../../src/game/hudText';
 import { t } from '../../src/game/text';
 
 describe('MEC-003 §8 challenge banner and HUD marker', () => {
@@ -33,5 +33,13 @@ describe('MEC-003 §8 run start banner', () => {
   });
   it('MEC-003 §8 run-start banner derives from the snapshot at HUD create, so every challenge level start shows exactly one banner', () => {
     for (const level of [5, 10, 15, 20, 25, 30]) expect(runStartLines({ level, challenge: true }, t)).toHaveLength(1);
+  });
+});
+
+describe('P3b2-R6 HUD header text', () => {
+  it('P3b2-R6 level title and biome name; star only on a challenge level', () => {
+    expect(levelTitle({ level: 7, challenge: false }, t)).toBe('Level 7');
+    expect(levelTitle({ level: 10, challenge: true }, t)).toBe('Level 10 ★');
+    expect(biomeName(2, t)).toBe('Rice Paddy');
   });
 });

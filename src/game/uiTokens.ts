@@ -9,6 +9,15 @@ export const TOKENS = {
   shadow: { card: { y: 4, blur: 10, spread: -3, color: '#6E5046', alpha: 0.15 } },
   title: { strokePx: 9, shadowY: 6 },
   screen: { w: 390, h: 844, sidePad: 16 },
+  hud: {
+    skillOffFace: '#E9F1F7', skillOffIcon: '#9DB1C2', skillActiveIcon: '#2E7F93', skillUsedFace: '#EFE6D8',
+    glow: '#FFE98A', glowAlpha: 0.85, shelf: '#508CB4', shelfAlpha: 0.3,
+    ring: '#3CC6DA', ringTrack: '#FFFFFF', ringTrackAlpha: 0.75, energyTrack: '#D9EEF3', quota: '#2E9E5B',
+    scrim: '#5A3B3B', pauseScrimAlpha: 0.5, countScrimAlpha: 0.28,
+    tooltip: '#5A3B3B', tooltipText: '#FFFFFF', mintCard: '#D7EBD2', mintInk: '#234B35',
+    slowTint: '#8CC8F0', slowTintAlpha: 0.2, slowBoardAlpha: 0.22,
+    countdown: '#F8D468', countdownStrokePx: 22, countdownShadowY: 12, countdownSizePx: 270, cardShadowAlpha: 0.45,
+  },
   menu: {
     logoColors: ['#F79DBB', '#F8D468', '#8CC9F0', '#97DB9B', '#C6B0F5'],
     heroBands: ['#F6C2D3', '#FBE19A', '#BCDDF4'], heroBandStops: [0.34, 0.67],

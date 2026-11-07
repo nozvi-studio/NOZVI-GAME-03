@@ -92,7 +92,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'hud.ramp': 'Warming up {n}',
   'side.left': 'left', 'side.right': 'right',
   'results.best': 'Best {best}', 'results.newBest': 'New best!', 'results.carryLabel': 'Energy saved',
-  'results.won': 'You cleared every level!', 'pause.quit': 'Quit',
+  'results.won': 'You cleared every level!', 'pause.quit': 'Quit run',
   'playAgain': TEXT.playAgain, 'resume': TEXT.resume, 'paused': TEXT.paused, 'pausedText': TEXT.pausedText,
   'skill.ready': 'Ready', 'loadout.picked': 'Slot {n}',
   ...Object.fromEntries(Object.entries(CAUSE_TEXT).map(([k, v]) => [`cause.${k}`, v])),
@@ -115,6 +115,16 @@ const KEYED: Readonly<Record<string, string>> = {
   'results.youWin': 'YOU WIN!', // provisional
   'logo.mango': 'MANGO', 'logo.snake': 'SNAKE', 'home.prev': '◀', 'home.next': '▶',
   'boot.loading': 'Loading… {n}%',
+  // P3b-2 HUD and overlay strings (provisional, owner-question batch)
+  'hud.levelTitle': 'Level {n}', 'hud.quotaMax': 'Max',
+  'pause.subtitle': 'Level {n} · {biome}', 'pause.settings': 'Settings',
+  'countdown.checkpoint': 'Starting at L{level}', 'countdown.ramp': 'Speed ramps up over {n} mangoes',
+  'banner.shrinks': 'Your snake shrinks to {n} segments', 'banner.biomeLabel': 'BIOME {n}',
+  'banner.checkpointSaved': 'Checkpoint saved', 'banner.skillNew': 'New skill: {skill}',
+  'banner.biomeTagline.1': 'Rocks drop from the trees.', 'banner.biomeTagline.2': 'Fences and mud. Mind the rows.',
+  'banner.biomeTagline.3': 'Ice is slippery. Plan your turns.', 'banner.biomeTagline.4': 'Coconuts roll and spikes pop.',
+  'banner.biomeTagline.5': 'Cats, chickens and bombs!', 'banner.biomeTagline.6': 'Everything at once. Good luck!',
+  'skill.pill.timed': '{skill} · {s} s left', 'skill.pill.wall': '{skill} · rock wall for {s} s',
 };
 
 /** Keyed text lookup with `{var}` substitution; an unknown key returns the key itself. */

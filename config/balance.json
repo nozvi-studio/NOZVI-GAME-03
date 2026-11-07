@@ -91,6 +91,7 @@
     , "capy": { "breathPeriodMs": 1600, "breathAmp": 0.03, "blinkMs": 120, "blinkMinGapMs": 2000, "blinkMaxGapMs": 4000,
     "eatOpenMs": 80, "eatChewMs": 120, "gulpScaleX": 1.12, "gulpScaleY": 0.9,
     "deadDroopMs": 300, "deadRotDeg": 12, "deadDropPx": 4, "headCellScale": 1.2 }
+    , "hud": { "rejectShakeMs": 200, "rejectShakeAmpPx": 6, "orbHapticMs": 8, "castHapticMs": 20, "tipFactor": 2, "bannerQueueMax": 4 }
   },
   "energy": { "max": 100, "orbGain": 15, "goldenGain": 10, "orbSpawnIntervalMs": 6000, "orbMax": 2, "orbLifeMs": 8000, "orbBlinkMs": 2000, "orbFromLevel": 2 },
   "skills": {

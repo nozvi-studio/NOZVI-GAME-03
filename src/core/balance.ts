@@ -80,6 +80,7 @@ export interface Balance {
     capy: { breathPeriodMs: number; breathAmp: number; blinkMs: number; blinkMinGapMs: number; blinkMaxGapMs: number;
       eatOpenMs: number; eatChewMs: number; gulpScaleX: number; gulpScaleY: number;
       deadDroopMs: number; deadRotDeg: number; deadDropPx: number; headCellScale: number };
+    hud: { rejectShakeMs: number; rejectShakeAmpPx: number; orbHapticMs: number; castHapticMs: number; tipFactor: number; bannerQueueMax: number };
   };
 }
 
@@ -199,6 +200,7 @@ const SPEC: Spec = {
     capy: { breathPeriodMs: 'int+', breathAmp: 'prob', blinkMs: 'int+', blinkMinGapMs: 'int+', blinkMaxGapMs: 'int+',
       eatOpenMs: 'int+', eatChewMs: 'int+', gulpScaleX: 'num+', gulpScaleY: 'num+',
       deadDroopMs: 'int+', deadRotDeg: 'num0', deadDropPx: 'num0', headCellScale: 'num+' },
+    hud: { rejectShakeMs: 'int+', rejectShakeAmpPx: 'num+', orbHapticMs: 'int+', castHapticMs: 'int+', tipFactor: 'int+', bannerQueueMax: 'int+' },
   },
 };
 

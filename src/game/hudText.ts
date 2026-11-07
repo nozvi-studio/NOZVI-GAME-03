@@ -22,3 +22,12 @@ export function levelLabel(s: { level: number; biome: number; challenge: boolean
 export function runStartLines(s: { level: number; challenge: boolean }, t: T): string[] {
   return s.challenge ? [t(`banner.challenge.${s.level}`)] : [];
 }
+
+/** P3b2-R6 HUD header "Level N", star only while the level is a challenge (MEC-003 §8). */
+export function levelTitle(s: { level: number; challenge: boolean }, t: T): string {
+  const base = t('hud.levelTitle', { n: s.level });
+  return s.challenge ? `${base} ${t('hud.challenge')}` : base;
+}
+
+/** P3b2-R6 biome name (1..6), same strings as the biome banner. */
+export const biomeName = (biome: number, t: T): string => t(`banner.biome.${biome}`);
