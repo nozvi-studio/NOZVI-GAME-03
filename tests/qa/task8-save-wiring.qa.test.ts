@@ -65,7 +65,7 @@ function createTestHud(initialBest = 10, soundEnabled = true) {
   const game = new GameScene();
   const hud = new HudScene();
 
-  Object.assign(game, g.scene);
+  Object.assign(game, g.scene, { scene: { isActive: () => false } });
   game.balance = b;
   game.session = session;
   game.flow = createFlow();
