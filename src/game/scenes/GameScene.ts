@@ -9,7 +9,9 @@ import { bindKeyboard } from '../input/keyboard';
 import { bindSwipe } from '../input/swipe';
 import { gameBackground } from '../hud/draw';
 import { BOARD_RADIUS, buildBoardTexture, drawBoardBorder } from '../render/board';
-import { Effects, PARTICLE_BURSTS } from '../render/effects';
+import { Effects } from '../render/effects';
+import { colorOf } from '../juice/colors';
+import type { BoardVisual } from '../juice/types';
 import { drawHazards, drawTerrains } from '../render/hazards';
 import { drawMango } from '../render/mango';
 import { boardLook, type BoardLook } from '../render/biomePalette';
@@ -61,7 +63,9 @@ export class GameScene extends Phaser.Scene {
     this.boardClip = this.add.graphics().setName('board-clip').setPosition(BOARD.x, BOARD.y).setVisible(false);
     this.boardClip.fillStyle(0xffffff).fillRoundedRect(0, 0, BOARD.size, BOARD.size, BOARD_RADIUS);
     this.board.setMask(this.boardClip.createGeometryMask());
-    this.effects = new Effects(this, this.board, cellPx(this.balance), this.reduced);
+    const juice = this.balance.juice;
+    this.effects = new Effects(this, this.board, cellPx(this.balance), this.reduced,
+      { maxParticles: juice.perf.maxParticles, maxFloats: juice.perf.maxFloats, gulpMs: juice.gulpMs });
     this.capy = new CapyHead(this, this.board, this.layers.snake, this.balance.ui.capy, cellPx(this.balance), this.reduced, this.time.now);
     this.flow = createFlow();
     // P1 scene flow: the session run already exists (Home/Loadout/Results); Game opens on the P0 countdown.
@@ -75,7 +79,7 @@ export class GameScene extends Phaser.Scene {
     this.game.events.on(Phaser.Core.Events.HIDDEN, hidden);
     const theme = window.matchMedia('(prefers-color-scheme: dark)');
     const recolor = (): void => {
-      this.palette = currentPalette(); this.reduced = reduceMotion(); this.lookStale = true; // texture rebuilt on the next draw
+      this.palette = currentPalette(); this.reduced = reduceMotion(); this.effects.setReduced(this.reduced); this.lookStale = true; // texture rebuilt on the next draw
       drawBoardBorder(this.border.clear(), this.palette);
       this.cameras.main.setBackgroundColor(gameBackground(this.palette));
     };
@@ -135,7 +139,7 @@ export class GameScene extends Phaser.Scene {
       events = this.session.frame(clockStep(this.clock, deltaMs, this.balance.flow.maxFrameDeltaMs));
     }
     const snapshot = this.snapshot()!;
-    this.handleEvents(events, snapshot);
+    this.handleEvents(events);
     this.events.emit('sim-events', events);
     if (snapshot.status === 'over' && this.flow.status !== 'over') {
       flowOver(this.flow);
@@ -145,44 +149,37 @@ export class GameScene extends Phaser.Scene {
     this.draw(snapshot, time);
   }
 
-  private handleEvents(events: SimEvent[], snapshot: SimSnapshot): void {
+  private handleEvents(events: SimEvent[]): void {
     for (const event of events) {
       switch (event.type) {
-        case 'ate':
-          this.capy.eat(this.time.now);
-          this.mangoBornAt = this.time.now;
-          this.effects.burst(event.x, event.y, event.golden ? this.palette.gold : this.palette.food,
-            ...(event.golden ? PARTICLE_BURSTS.golden : PARTICLE_BURSTS.eat));
-          this.effects.floatText(event.x, event.y, event.points, event.golden);
-          if (!this.reduced) this.effects.gulp = 1;
-          break;
-        case 'rotted':
-          this.mangoBornAt = this.time.now;
-          this.effects.burst(event.x, event.y, this.palette.rock, ...PARTICLE_BURSTS.rot);
-          break;
-        case 'dust': this.effects.burst(event.x, event.y, this.palette.rock, ...PARTICLE_BURSTS.dust); break;
-        case 'levelUp': this.effects.levelFlash = 1; break;
-        case 'died': {
-          this.capy.die(this.time.now);
-          this.effects.deathFlash = 1;
-          const head = snapshot.snake[0]!;
-          this.effects.burst(head.x, head.y, this.palette.snake, ...PARTICLE_BURSTS.death);
-          if (!this.reduced) this.shake();
-          break;
-        }
+        case 'ate': this.capy.eat(this.time.now); this.mangoBornAt = this.time.now; break;
+        case 'rotted': this.mangoBornAt = this.time.now; break;
+        case 'died': this.capy.die(this.time.now); break;
       }
     }
   }
 
-  private shake(): void {
+  // P3a-R1..R7 board-space juice arrives as plain visuals from the mapper (see juice/juiceMap.ts).
+  playBoardFx(list: readonly BoardVisual[]): void {
+    const p = this.palette;
+    for (const v of list) switch (v.kind) {
+      case 'burst': this.effects.burst(v.x, v.y, colorOf(v.color, p), v.count, v.speed, v.lifeMs); break;
+      case 'floatText': this.effects.floatText(v.x, v.y, v.points, v.big); break;
+      case 'gulp': this.effects.gulp = 1; break;
+      case 'snakePop': this.effects.snakePop(v.ms); break;
+      case 'levelGlow': this.effects.glow(v.alpha, v.ms); break;
+      case 'shake': this.shake(v.amplitudePx, v.ms); break;
+      case 'tint': this.effects.setTint(colorOf(v.color, p), v.alpha, v.fadeMs, v.ms); break;
+      case 'tintEnd': this.effects.clearTint(v.fadeMs); break;
+      case 'biomeSweep': this.effects.sweep(boardLook(v.biome, themeOf(p)).groundA, v.alpha, v.ms, v.sweep); break;
+    }
+  }
+
+  private shake(px: number, ms: number): void {
     this.tweens.killTweensOf(this.board);
-    this.tweens.chain({ targets: this.board, tweens: [
-      { x: BOARD.x - 6, y: BOARD.y + 2, duration: 80 },
-      { x: BOARD.x + 5, y: BOARD.y - 3, duration: 80 },
-      { x: BOARD.x - 3, y: BOARD.y + 1, duration: 80 },
-      { x: BOARD.x + 2, y: BOARD.y, duration: 80 },
-      { x: BOARD.x, y: BOARD.y, duration: 80 },
-    ] });
+    const k = [-1, 0.83, -0.5, 0.33, 0], dur = ms / k.length;
+    this.tweens.chain({ targets: this.board, tweens: k.map((f, i) => ({
+      x: BOARD.x + f * px, y: BOARD.y + (i % 2 ? -1 : 1) * px / 3 * Math.abs(f), duration: dur })) });
   }
 
   private draw(snapshot: SimSnapshot, time: number): void {
@@ -203,7 +200,7 @@ export class GameScene extends Phaser.Scene {
     drawShrink(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawMango(this.layers.mango, snapshot, cell, p, this.look, time, this.reduced, this.mangoBornAt);
     drawSkillObjects(this.layers.skills, snapshot, cell, p, this.look, this.balance, time);
-    drawSnake(this.layers.snake, snapshot, cell, p, this.effects.gulp, false);
+    drawSnake(this.layers.snake, snapshot, cell, p, Math.max(this.effects.gulp, this.effects.pop), false);
     this.capy.update(snapshot, time, cell);
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);
     drawIceArrow(this.layers.overlay, snapshot, cell, this.look);

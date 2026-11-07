@@ -84,14 +84,33 @@
     "waveDelayMs": 260, "checkerSize": 4, "maxActive": 1
   },
   "director": { "firstSpawnMs": 2500, "intervalBaseMs": 5000, "intervalPerLevelMs": 120, "intervalMinMs": 1600, "capBase": 2, "capPerLevels": 3, "capMax": 10, "challengeIntervalFactor": 0.8, "challengeCapBonus": 2 },
-  "flow": { "countdownMs": 1500, "countdownDigits": 3, "maxFrameDeltaMs": 100, "deathCardDelayMs": 550 },
+  "flow": { "countdownMs": 1500, "countdownDigits": 3, "maxFrameDeltaMs": 100 },
   "ui": {
     "bannerMs": 1800, "swipeMinPx": 18, "swipeBoardFactor": 0.05, "fontLoadTimeoutMs": 2000, "minShrink": 0.85,
-    "haptics": { "eatMs": 12, "level": [15, 40, 15], "deathMs": 90 }, "terrainFadeInMs": 600, "hazardFlickerMs": 1500
+    "terrainFadeInMs": 600, "hazardFlickerMs": 1500
     , "capy": { "breathPeriodMs": 1600, "breathAmp": 0.03, "blinkMs": 120, "blinkMinGapMs": 2000, "blinkMaxGapMs": 4000,
     "eatOpenMs": 80, "eatChewMs": 120, "gulpScaleX": 1.12, "gulpScaleY": 0.9,
     "deadDroopMs": 300, "deadRotDeg": 12, "deadDropPx": 4, "headCellScale": 1.2 }
-    , "hud": { "rejectShakeMs": 200, "rejectShakeAmpPx": 6, "orbHapticMs": 8, "castHapticMs": 20, "tipFactor": 2, "bannerQueueMax": 4 }
+    , "hud": { "rejectShakeMs": 200, "rejectShakeAmpPx": 6, "tipFactor": 2, "bannerQueueMax": 4 }
+  },
+  "juice": {
+    "bursts": {
+      "eat": { "count": 10, "speed": 0.007, "lifeMs": 480 }, "golden": { "count": 16, "speed": 0.007, "lifeMs": 480 },
+      "rot": { "count": 8, "speed": 0.004, "lifeMs": 420 }, "dust": { "count": 3, "speed": 0.004, "lifeMs": 320 },
+      "death": { "count": 18, "speed": 0.009, "lifeMs": 650 }
+    },
+    "gulpMs": 180,
+    "barBump": { "scale": 1.15, "ms": 160 },
+    "orb": { "sparkCount": 6, "sparkMs": 420, "sparkStaggerMs": 35, "barBumpScale": 1.08 },
+    "skill": { "flashAlpha": 0.35, "flashMs": 220, "iconPopScale": 1.35, "iconRingScale": 1.6, "iconPopMs": 260, "tintAlpha": 0.16, "tintFadeMs": 300 },
+    "level": { "glowAlpha": 0.65, "glowMs": 800, "popMs": 220 },
+    "biome": { "sweepAlpha": 0.35, "sweepMs": 700 },
+    "checkpoint": { "flagMs": 600 },
+    "banner": { "inMs": 220, "slidePx": 24, "scaleFrom": 0.9 },
+    "death": { "shakePx": 6, "shakeMs": 400, "flashAlpha": 0.6, "flashMs": 600, "cardInMs": 300, "totalMs": 1400, "skipLockMs": 250 },
+    "haptics": { "eatMs": 12, "orbMs": 8, "castMs": 20, "level": [15, 40, 15], "biomeMs": 30, "checkpointMs": 40, "deathMs": 90 },
+    "reduced": { "flashAlphaMax": 0.2, "softMs": 400, "deathTotalMs": 1000 },
+    "perf": { "maxParticles": 300, "maxFloats": 6, "maxSparks": 12 }
   },
   "energy": { "max": 100, "orbGain": 15, "goldenGain": 10, "orbSpawnIntervalMs": 6000, "orbMax": 2, "orbLifeMs": 8000, "orbBlinkMs": 2000, "orbFromLevel": 2 },
   "skills": {

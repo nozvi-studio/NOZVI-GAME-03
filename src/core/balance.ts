@@ -73,14 +73,28 @@ export interface Balance {
   loadout: { slots: number; secondSlotLevel: number; order: import('./types').SkillId[] };
   checkpoints: { milestones: { reach: number; start: number; requiresClear?: boolean }[]; carryRatio: number; carryMax: number; rampMangoes: number };
   log: { maxEntries: number; sessionGapMs: number };
-  flow: { countdownMs: number; countdownDigits: number; maxFrameDeltaMs: number; deathCardDelayMs: number };
+  flow: { countdownMs: number; countdownDigits: number; maxFrameDeltaMs: number };
   ui: {
     bannerMs: number; swipeMinPx: number; swipeBoardFactor: number; fontLoadTimeoutMs: number; minShrink: number;
-    haptics: { eatMs: number; level: number[]; deathMs: number }; terrainFadeInMs: number; hazardFlickerMs: number;
+    terrainFadeInMs: number; hazardFlickerMs: number;
     capy: { breathPeriodMs: number; breathAmp: number; blinkMs: number; blinkMinGapMs: number; blinkMaxGapMs: number;
       eatOpenMs: number; eatChewMs: number; gulpScaleX: number; gulpScaleY: number;
       deadDroopMs: number; deadRotDeg: number; deadDropPx: number; headCellScale: number };
-    hud: { rejectShakeMs: number; rejectShakeAmpPx: number; orbHapticMs: number; castHapticMs: number; tipFactor: number; bannerQueueMax: number };
+    hud: { rejectShakeMs: number; rejectShakeAmpPx: number; tipFactor: number; bannerQueueMax: number };
+  };
+  juice: {
+    bursts: Record<'eat' | 'golden' | 'rot' | 'dust' | 'death', { count: number; speed: number; lifeMs: number }>;
+    gulpMs: number; barBump: { scale: number; ms: number };
+    orb: { sparkCount: number; sparkMs: number; sparkStaggerMs: number; barBumpScale: number };
+    skill: { flashAlpha: number; flashMs: number; iconPopScale: number; iconRingScale: number; iconPopMs: number; tintAlpha: number; tintFadeMs: number };
+    level: { glowAlpha: number; glowMs: number; popMs: number };
+    biome: { sweepAlpha: number; sweepMs: number };
+    checkpoint: { flagMs: number };
+    banner: { inMs: number; slidePx: number; scaleFrom: number };
+    death: { shakePx: number; shakeMs: number; flashAlpha: number; flashMs: number; cardInMs: number; totalMs: number; skipLockMs: number };
+    haptics: { eatMs: number; orbMs: number; castMs: number; level: number[]; biomeMs: number; checkpointMs: number; deathMs: number };
+    reduced: { flashAlphaMax: number; softMs: number; deathTotalMs: number };
+    perf: { maxParticles: number; maxFloats: number; maxSparks: number };
   };
 }
 
@@ -131,6 +145,7 @@ const groundTiles: Spec = { ...timed, tries: 'int+', maxActive: 'int+', mirrorCh
   },
 };
 
+const burst = { count: 'int0', speed: 'num+', lifeMs: 'int+' } as const;
 const SPEC: Spec = {
   board: { cols: 'int+', rows: 'int+' },
   snake: { start: 'pairs', startDir: 'pair', maxQueuedTurns: 'int+' },
@@ -193,14 +208,26 @@ const SPEC: Spec = {
     if (isObj(v) && v.requiresClear !== undefined) check(v.requiresClear, 'bool', path + '.requiresClear');
   }), carryRatio: 'prob', carryMax: 'int0', rampMangoes: 'int+' },
   log: { maxEntries: 'int+', sessionGapMs: 'int+' },
-  flow: { countdownMs: 'int+', countdownDigits: 'int+', maxFrameDeltaMs: 'int+', deathCardDelayMs: 'int0' },
+  flow: { countdownMs: 'int+', countdownDigits: 'int+', maxFrameDeltaMs: 'int+' },
   ui: {
     bannerMs: 'int+', swipeMinPx: 'num+', swipeBoardFactor: 'prob', fontLoadTimeoutMs: 'int+', minShrink: 'prob',
-    haptics: { eatMs: 'int+', level: 'ints', deathMs: 'int+' }, terrainFadeInMs: 'int+', hazardFlickerMs: 'int+',
+    terrainFadeInMs: 'int+', hazardFlickerMs: 'int+',
     capy: { breathPeriodMs: 'int+', breathAmp: 'prob', blinkMs: 'int+', blinkMinGapMs: 'int+', blinkMaxGapMs: 'int+',
       eatOpenMs: 'int+', eatChewMs: 'int+', gulpScaleX: 'num+', gulpScaleY: 'num+',
       deadDroopMs: 'int+', deadRotDeg: 'num0', deadDropPx: 'num0', headCellScale: 'num+' },
-    hud: { rejectShakeMs: 'int+', rejectShakeAmpPx: 'num+', orbHapticMs: 'int+', castHapticMs: 'int+', tipFactor: 'int+', bannerQueueMax: 'int+' },
+    hud: { rejectShakeMs: 'int+', rejectShakeAmpPx: 'num+', tipFactor: 'int+', bannerQueueMax: 'int+' },
+  },
+  juice: {
+    bursts: { eat: burst, golden: burst, rot: burst, dust: burst, death: burst },
+    gulpMs: 'int+', barBump: { scale: 'num+', ms: 'int+' },
+    orb: { sparkCount: 'int0', sparkMs: 'int+', sparkStaggerMs: 'int0', barBumpScale: 'num+' },
+    skill: { flashAlpha: 'prob', flashMs: 'int+', iconPopScale: 'num+', iconRingScale: 'num+', iconPopMs: 'int+', tintAlpha: 'prob', tintFadeMs: 'int+' },
+    level: { glowAlpha: 'prob', glowMs: 'int+', popMs: 'int+' }, biome: { sweepAlpha: 'prob', sweepMs: 'int+' },
+    checkpoint: { flagMs: 'int+' }, banner: { inMs: 'int+', slidePx: 'num0', scaleFrom: 'prob' },
+    death: { shakePx: 'num0', shakeMs: 'int0', flashAlpha: 'prob', flashMs: 'int+', cardInMs: 'int0', totalMs: 'int+', skipLockMs: 'int0' },
+    haptics: { eatMs: 'int+', orbMs: 'int+', castMs: 'int+', level: 'ints', biomeMs: 'int+', checkpointMs: 'int+', deathMs: 'int+' },
+    reduced: { flashAlphaMax: 'prob', softMs: 'int+', deathTotalMs: 'int+' },
+    perf: { maxParticles: 'int+', maxFloats: 'int+', maxSparks: 'int+' },
   },
 };
 
@@ -312,6 +339,15 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (rain.mangoBlinkMs >= rain.mangoLifeMs) fail('skills.mangoRain.mangoBlinkMs', 'must be < mangoLifeMs');
   if (b.energy.orbBlinkMs >= b.energy.orbLifeMs) fail('energy.orbBlinkMs', 'must be < orbLifeMs');
   if (b.ui.capy.blinkMaxGapMs < b.ui.capy.blinkMinGapMs) fail('ui.capy.blinkMaxGapMs', 'must be >= blinkMinGapMs');
+  // P3a-R7 death sequence <= 1.5 s (GDD §10.4, spec §4) and reduced-motion limits (P3a-R8).
+  const jd = b.juice.death;
+  if (jd.totalMs > 1500) fail('juice.death.totalMs', 'must be <= 1500');
+  if (b.juice.reduced.deathTotalMs > 1500) fail('juice.reduced.deathTotalMs', 'must be <= 1500');
+  if (jd.cardInMs >= jd.totalMs) fail('juice.death.cardInMs', 'must be < totalMs');
+  if (b.juice.reduced.deathTotalMs <= jd.cardInMs) fail('juice.death.cardInMs', 'must be < reduced.deathTotalMs');
+  if (jd.cardInMs + jd.skipLockMs >= jd.totalMs) fail('juice.death.skipLockMs', 'cardInMs + skipLockMs must be < totalMs');
+  if (jd.cardInMs + jd.skipLockMs >= b.juice.reduced.deathTotalMs) fail('juice.death.skipLockMs', 'cardInMs + skipLockMs must be < reduced.deathTotalMs');
+  if (b.juice.reduced.flashAlphaMax > 0.25) fail('juice.reduced.flashAlphaMax', 'must be <= 0.25 (no big flashes)');
   // MEC-007 section 9 unlock ordering and level bounds.
   const inLevelRange = (n: number) => n >= 1 && n <= b.level.maxLevel;
   if (b.loadout.order.length !== 4 || new Set(b.loadout.order).size !== 4) fail('loadout.order', 'must list each skill exactly once');

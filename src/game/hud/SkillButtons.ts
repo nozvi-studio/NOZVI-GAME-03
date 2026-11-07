@@ -57,6 +57,8 @@ export class SkillButtons {
     s.costG.clear(); drawCard(s.costG, cx, r.costY, cw, r.costH, r.costH / 2, TOKENS.surface.card, { shadowAlpha: 0 });
     s.bolt.setPosition(cx + pad + bw / 2, r.costY + r.costH / 2); s.cost.setPosition(cx + pad + bw + gap, r.costY + r.costH / 2);
   }
+  /** P3a juice adapter: centre of a skill button (JuiceHud.skillPoint). */
+  point(slot: 0 | 1): { x: number; y: number } { const r = this.l.skills[slot]; return { x: r.cx, y: r.cy }; }
   /** MEC-006 §8 / GDD §10.4 "nope" shake on a rejected cast; skipped under reduced motion. */
   shake(slot: 0 | 1): void {
     if (reduceMotion()) return;

@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import type { Balance } from '../../core';
 import { BOARD, HEIGHT, WIDTH } from '../layout';
 import { reduceMotion } from '../render/palette';
+import { bannerMotion } from '../juice/juiceMap';
 import { FONT_TITLE, TOKENS, toInt } from '../uiTokens';
 import { ui, UI_SCALE } from '../ui/layout';
 import { drawCard, hudLabel } from './draw';
@@ -14,7 +15,7 @@ import { stack } from './stack';
 const TOP = { levelUp: 56, challenge: 56, biome: 66, checkpoint: 70, hint: 56, pill: 8 } as const;
 const W = { card: 318, checkpoint: 350, hint: 220, tipMax: 300 } as const;
 const M = {
-  radius: 26, hintRadius: 16, cardDy: 14, pop: 0.94, popMs: 140, shadowDy: 4,
+  radius: 26, hintRadius: 16, cardDy: 14, shadowDy: 4,
   levelUp: { title: 50, titleH: 47.5, subtitle: 22, subtitleH: 26.4, chipH: 34, chipMt: 6, stroke: 9, gap: 4, pad: 16 },
   challenge: { title: 34, stroke: 7, pad: 16 },
   biome: { icon: 34, label: 14, labelH: 16.8, name: 42, nameH: 39.9, nameStroke: 8, tagline: 14, taglineH: 16.8, gap: 4, pad: 18 },
@@ -32,7 +33,7 @@ export class BannerLayer {
   private readonly tipG: Phaser.GameObjects.Graphics; private readonly tipText: Phaser.GameObjects.Text;
   private readonly pills: { c: Phaser.GameObjects.Container; g: Phaser.GameObjects.Graphics; text: Phaser.GameObjects.Text; icon: Phaser.GameObjects.Image }[] = [];
   private readonly tint: Phaser.GameObjects.Graphics; private readonly pillKeys = ['', ''];
-  private queue: BannerSpec[] = []; private cardTimer?: Phaser.Time.TimerEvent; private tipTimer?: Phaser.Time.TimerEvent;
+  private readonly enter = { k: 0 }; private queue: BannerSpec[] = []; private cardTimer?: Phaser.Time.TimerEvent; private tipTimer?: Phaser.Time.TimerEvent;
 
   constructor(private readonly scene: Phaser.Scene, private readonly l: HudLayout, private readonly b: Balance) {
     this.tint = scene.add.graphics().setName('slowmo-tint').setVisible(false);
@@ -52,14 +53,24 @@ export class BannerLayer {
 
   show(queue: readonly BannerSpec[]): void { this.reset(); this.queue = [...queue]; this.next(); }
   /** Clears the cards, their timer and pop tween; the tip is left alone (a tip may be raised just before a queue). */
-  private reset(): void { this.cardTimer?.remove(); this.scene.tweens.killTweensOf(this.root); this.root.setScale(1); this.queue = []; this.clear(); this.root.setVisible(false); }
+  private reset(): void { this.cardTimer?.remove(); this.scene.tweens.killTweensOf(this.root); this.scene.tweens.killTweensOf(this.enter); this.root.setScale(1).setAlpha(1).setPosition(0, 0); this.queue = []; this.clear(); this.root.setVisible(false); }
   hide(): void { this.reset(); this.tipTimer?.remove(); this.showTip(false); }
   private next(): void {
     const spec = this.queue.shift();
     if (!spec) { this.clear(); this.root.setVisible(false); return; }
     this.clear(); this.render(spec); this.root.setVisible(true);
-    if (!reduceMotion()) { this.scene.tweens.killTweensOf(this.root); this.root.setScale(M.pop); this.scene.tweens.add({ targets: this.root, scale: 1, duration: M.popMs }); }
+    this.enterMotion(spec);
     this.cardTimer = this.scene.time.delayedCall(this.b.ui.bannerMs, () => this.next());
+  }
+  /** P3a-R8 slide + scale-in (soft fade when reduced); the root scales about (0,0), so the pivot is compensated to keep the card centred. */
+  private enterMotion(spec: BannerSpec): void {
+    const m = bannerMotion(this.b, reduceMotion()), px = WIDTH / 2, py = BOARD.y + ui(TOP[spec.kind]), st = this.enter;
+    const apply = (k: number): void => {
+      const s = m.scaleFrom + (1 - m.scaleFrom) * k;
+      this.root.setAlpha(k).setScale(s).setPosition(px * (1 - s), py * (1 - s) + m.slidePx * (1 - k));
+    };
+    this.scene.tweens.killTweensOf(st); st.k = 0; apply(0);
+    this.scene.tweens.add({ targets: st, k: 1, duration: m.inMs, ease: m.slidePx > 0 ? 'Back.easeOut' : 'Linear', onUpdate: () => apply(st.k), onComplete: () => apply(1) });
   }
   private clear(): void { this.root.removeAll(true); }
 

@@ -48,6 +48,9 @@ export class DrawObject extends Signals {
   fillStyle(...a: unknown[]): this { this.commands.push(['fillStyle', ...a]); return this; }
   lineStyle(...a: unknown[]): this { this.commands.push(['lineStyle', ...a]); return this; }
   fillRect(...a: unknown[]): this { this.commands.push(['fillRect', ...a]); return this; }
+  strokeRect(...a: unknown[]): this { this.commands.push(['strokeRect', ...a]); return this; }
+  setLetterSpacing(..._a: unknown[]): this { return this; }
+  setStrokeStyle(..._a: unknown[]): this { return this; }
   fillRoundedRect(...a: unknown[]): this { this.commands.push(['fillRoundedRect', ...a]); return this; }
   strokeRoundedRect(...a: unknown[]): this { this.commands.push(['strokeRoundedRect', ...a]); return this; }
   fillCircle(...a: unknown[]): this { this.commands.push(['fillCircle', ...a]); return this; }
@@ -87,9 +90,13 @@ export function sceneHarness() {
   const scene = {
     add: { graphics: () => make(), text: (x: number, y: number, text: string, _style?: unknown) => make(x, y).setText(text),
       image: (x: number, y: number, key: string) => make(x, y).setName(key),
+      circle: (x: number, y: number, r: number) => { const o = make(x, y); o.width = o.height = 2 * r; return o; },
       rectangle: (x: number, y: number, w: number, h: number) => { const o = make(x, y); o.width = w; o.height = h; return o; },
       zone: (x: number, y: number, w: number, h: number) => { const o = make(x, y); o.width = w; o.height = h; return o; },
       container: (x: number, y: number, children: DrawObject[] = []) => make(x, y).add(children) },
+    textures: (() => { const keys = new Set<string>(); return { exists: (k: string) => keys.has(k),
+      createCanvas: (k: string) => { keys.add(k); const ctx = new Proxy({} as Record<string, unknown>, { get: (t, p: string) => t[p] ?? (() => {}), set: (t, p: string, v) => { t[p] = v; return true; } });
+        return { getContext: () => ctx, refresh: () => {} }; } }; })(),
     sys: { isActive: () => true }, game: { events: new Signals() },
     events: new Signals(), input: Object.assign(new Signals(), { keyboard: new Signals(), setGlobalTopOnly: (_v: boolean) => {} }),
     time: { delayedCall: (delay: number, fn: () => void) => { const t = { fn, removed: false, delay }; delayed.push(t); return { remove: () => { t.removed = true; } }; } },
