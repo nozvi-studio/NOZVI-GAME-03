@@ -6,6 +6,7 @@ import { GameScene } from '../../src/game/scenes/GameScene';
 import { HudScene } from '../../src/game/scenes/HudScene';
 import { bindKeyboard } from '../../src/game/input/keyboard';
 import { loadBalance } from '../support/balance';
+import { setDisplaySettings } from '../../src/game/render/palette';
 import { ui } from '../../src/game/ui/layout';
 import { sceneHarness, Signals, type DrawObject } from '../support/scene';
 
@@ -13,7 +14,7 @@ vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTD
   Geom: { Rectangle: Object.assign(class { constructor(..._a: number[]) {} }, { Contains: () => false }) } } }));
 const sound = vi.hoisted(() => ({ unlock: vi.fn(), setOn: vi.fn(), play: vi.fn(), buzz: vi.fn() }));
 vi.mock('../../src/game/audio/synth', () => ({ createSynth: () => sound }));
-afterEach(() => { vi.unstubAllGlobals(); vi.clearAllMocks(); });
+afterEach(() => { vi.unstubAllGlobals(); vi.clearAllMocks(); setDisplaySettings(null); });
 
 const b = loadBalance();
 const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax };
@@ -128,6 +129,14 @@ describe('P1 HUD flow, audio and session wiring', () => {
     const n = h.objects.filter(o => o.name === 'banner-chip').length;
     h.game.events.emit('sim-events', [{ type: 'levelUp', level: 3, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }]);
     expect(h.objects.filter(o => o.name === 'banner-chip')).toHaveLength(n);
+  });
+  it('P3a-R8 banner enters with slide + scale normally and as a pure fade when reduced', () => {
+    const lv = [{ type: 'levelUp', level: 3, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }];
+    const normal = setup(); normal.game.events.emit('sim-events', lv);
+    const n = normal.find('banner'); expect(n.scale).toBeCloseTo(b.juice.banner.scaleFrom, 2); expect(n.alpha).toBe(0);
+    setDisplaySettings({ ...defaultSettings(), reducedMotion: true });
+    const calm = setup(); calm.game.events.emit('sim-events', lv);
+    const c = calm.find('banner'); expect(c.scale).toBe(1); expect(c.alpha).toBe(0); expect(c.y).toBe(0);
   });
   it('MEC-003 §8 challenge level up queues the challenge banner', () => {
     const h = setup();
