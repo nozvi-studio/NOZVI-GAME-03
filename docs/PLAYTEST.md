@@ -120,3 +120,10 @@ _pending_
 
 - Differences found: HUD/overlays drawn as Phaser objects (intentional, design D3/§7.1); 1 ms fixed-step timing (accepted, design §4); new save envelope (intentional, design §8). Bugs: none.
 - Verdict: P0 exit criteria (design §1) **met** (desktop + owner phone run); open: a visual check of levels 3–7 hazards (no level-skip hook; consider a dev-only start-level option in P1, which adds `startLevel` anyway).
+
+## 2026-11-07 P3b-3 visual QA (Playwright, cloud)
+
+- Screens checked at 540x960 and 360x640: Boot (fonts held, logo pending), Home (first-run, normal, 2 checkpoints), Loadout (1 slot, 2 slots, locked cards), Settings (all on / Light, all off / Dark), Results (normal, newBest, checkpoint, firstRun, won). Screenshots: `sdd/p3b-3/qa/` in the session scratchpad (not committed).
+- Flow walked with real input: Boot, Home, Settings, Home, Loadout, Go, death, Results, Play again, Home. No console errors.
+- Acceptable differences from the mockups: P4 marbles row and machine hidden; extra Home stepper; energy-saved card in the marbles slot; middle block shrink never below 0.85.
+- Open visual follow-ups: Settings knob shadow, theme tile selection ring, EATEN stat icon, Results title 34 vs mockup 40, Boot logo position.

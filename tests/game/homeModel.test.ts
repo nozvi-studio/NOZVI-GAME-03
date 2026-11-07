@@ -36,3 +36,20 @@ describe('homeModel', () => {
     expect(homeView({ ...base, carriedEnergy: 18 }).carry).toBe(18);
   });
 });
+
+describe('homeModel P3b3 menu flags', () => {
+  it('P3b3-R10 first-run Home is compact: big Play, no chips, no stepper', () => {
+    const v = homeView(base);
+    expect(v).toMatchObject({ compact: true, startAt: null, extras: false, showStepper: false });
+  });
+  it('P3b3-R10 carried energy alone keeps Play normal size and shows only the energy chip row', () => {
+    const v = homeView({ ...base, carriedEnergy: 25 });
+    expect(v).toMatchObject({ compact: false, startAt: null, extras: true, carry: 25, secondaryL1: false });
+  });
+  it('P3b3-R10 with checkpoints Home shows Start at Lx, Start from L1 and a stepper only for 2+ checkpoints (C1, C2)', () => {
+    const one = homeView({ ...base, checkpoints: [4], defaultStart: 4 });
+    expect(one).toMatchObject({ compact: false, startAt: 4, extras: true, showStepper: false, secondaryL1: true });
+    const two = homeView({ ...base, checkpoints: [4, 6], defaultStart: 6 }, 4);
+    expect(two).toMatchObject({ startAt: 4, showStepper: true });
+  });
+});

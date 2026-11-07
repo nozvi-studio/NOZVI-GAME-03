@@ -9,6 +9,13 @@ export const TOKENS = {
   shadow: { card: { y: 4, blur: 10, spread: -3, color: '#6E5046', alpha: 0.15 } },
   title: { strokePx: 9, shadowY: 6 },
   screen: { w: 390, h: 844, sidePad: 16 },
+  menu: {
+    logoColors: ['#F79DBB', '#F8D468', '#8CC9F0', '#97DB9B', '#C6B0F5'],
+    heroBands: ['#F6C2D3', '#FBE19A', '#BCDDF4'], heroBandStops: [0.34, 0.67],
+    statButter: '#FBE19A', bestSoft: '#FFF3D1', mintBanner: '#D7EBD2', mintBannerText: '#234B35',
+    slotRing: '#FFE98A', pickRing: '#7FC98C', costChip: '#E6F5F8', rowDivider: '#F3EBDD',
+    themeLight: ['#CFEBD0', '#C2E4C6'], themeDark: ['#3B4A5A', '#33414F'],
+  },
 } as const;
 export const FONT_UI = 'Nunito, system-ui, sans-serif';
 export const FONT_TITLE = '"Lilita One", Nunito, system-ui, sans-serif';

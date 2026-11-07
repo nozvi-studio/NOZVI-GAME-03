@@ -12,6 +12,7 @@ import { ui } from './layout';
  * Settings overlay contract (P3b-2 <-> P3b-3): Hud launches `scene.launch('Settings', { overlay: true })`;
  * Settings stops itself on Back and emits `settings-closed` on `game.events`;
  * Hud re-reads settings on that event and on Resume.
+ * While the Settings overlay is active, the window keyboard handler (input/keyboard.ts) ignores keys; HudScene's own skill-key handler must also check this (P3b-2).
  */
 
 export type PillTone = 'green' | 'orange' | 'cream';

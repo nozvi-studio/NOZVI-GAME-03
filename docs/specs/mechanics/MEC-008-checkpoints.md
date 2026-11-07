@@ -77,6 +77,7 @@ Unlocked skills are **not** stored: they are derived from `bestLevel` by MEC-007
 - Home: buttons `home.playCheckpoint` "Play from checkpoint L{s}", `home.playL1` "Play from L1", `home.play` "Play"; stepper arrows; a small line `home.carry` "Start energy: {e}" when `carriedEnergy > 0`.
 - In run: `banner.checkpoint` "Next run starts at L{s}!" with `tip.checkpoint` "Checkpoints are permanent. Your saved energy comes with you." on the first unlock (skill unlock tooltips are MEC-007's); HUD `hud.nextCheckpoint` per R11; while `rampActive`, HUD shows `hud.ramp` "Warming up {n}".
 - Sounds: reuse P0 `level` for checkpoint unlock and skill unlock; `rampEnded` reuses `go`.
+- P3b-3 restyle: see docs/superpowers/plans/2026-11-07-p3b-3-menus.md (copy and layout only; rules unchanged).
 
 ## 9. Tuning
 | Key | Value | Source |

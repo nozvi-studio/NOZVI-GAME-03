@@ -29,7 +29,7 @@ function setup(saveData: object = {}) {
   const session = createSession({ balance: b, store, newSeed: () => 7, now: () => 0 });
   session.startRun(1);
   const h = sceneHarness(), g = sceneHarness(), game = new GameScene(), hud = new HudScene();
-  Object.assign(game, g.scene); game.balance = b; game.session = session; game.flow = createFlow();
+  Object.assign(game, g.scene, { scene: { isActive: () => false } }); game.balance = b; game.session = session; game.flow = createFlow();
   vi.spyOn(game, 'startRun').mockImplementation(() => {});
   const started: string[] = [], stopped: string[] = [];
   h.registry.set('session', session); h.registry.set('balance', b);

@@ -4,6 +4,9 @@ import type { HomeModel } from '../../session';
 export interface HomeView {
   primary: { key: 'home.play' | 'home.playCheckpoint'; level: number }; secondaryL1: boolean;
   stepper: number[]; carry: number | null;
+  /** No checkpoint and no carried energy (mockup firstRun). */ compact: boolean;
+  /** Level for the "Start at Lx" chip, null without a checkpoint. */ startAt: number | null;
+  /** Chip row visible. */ extras: boolean; showStepper: boolean;
   hint: { key: 'hud.nextCheckpoint' | 'hud.nextCheckpointClear'; level: number } | null;
 }
 
@@ -19,6 +22,8 @@ export function homeView(m: HomeModel, selected: number = m.defaultStart): HomeV
     primary: { key: has ? 'home.playCheckpoint' : 'home.play', level },
     secondaryL1: has, stepper,
     carry: m.carriedEnergy > 0 ? m.carriedEnergy : null,
+    compact: !has && m.carriedEnergy <= 0, startAt: has ? level : null,
+    extras: has || m.carriedEnergy > 0, showStepper: stepper.length > 1,
     hint: nm ? { key: nm.requiresClear ? 'hud.nextCheckpointClear' : 'hud.nextCheckpoint', level: nm.reach } : null,
   };
 }

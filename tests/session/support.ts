@@ -8,10 +8,10 @@ export const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, ca
 export const baseSave = { bestScore: 0, settings: { sound: true }, bestLevel: 0, fullClear: false,
   unlockedCheckpoints: [] as number[], carriedEnergy: 0, lastLoadout: [null, null] as (string | null)[] };
 
-export function setup(saveData?: object) {
+export function setup(saveData?: object, balance = b) {
   const store = memoryStore(); let t = 1000;
   if (saveData) store.set(SAVE_KEY, JSON.stringify({ version: 2, data: { ...baseSave, ...saveData } }));
-  const s = createSession({ balance: b, store, newSeed: () => 7, now: () => (t += 10) });
+  const s = createSession({ balance, store, newSeed: () => 7, now: () => (t += 10) });
   return { s, store };
 }
 

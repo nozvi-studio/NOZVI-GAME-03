@@ -78,8 +78,8 @@ const KEYED: Readonly<Record<string, string>> = {
   'banner.challenge.25': 'Challenge: Pet chaos!', 'banner.challenge.30': 'Challenge: Final storm!',
   'hud.challenge': '★', // OQ-C2 provisional
   'toast.mangoStolen': 'The bird took your mango!', // OQ-B6 provisional
-  'loadout.title': 'Pick your skills', 'loadout.go': 'Go!', 'loadout.back': 'Back',
-  'loadout.slot1': 'Slot 1', 'loadout.slot2': 'Slot 2', 'loadout.locked': 'Reach L{level}',
+  'loadout.title': 'Pick 2 skills', 'loadout.go': 'Go!', 'loadout.back': 'Back',
+  'loadout.emptySlot': '-', 'loadout.slot1': 'Slot 1', 'loadout.slot2': 'Slot 2', 'loadout.locked': 'Reach L{level}',
   'tip.skillUnlocked.slot': '{skill} unlocked! Tap {side} to use it',
   'tip.skillUnlocked.next': '{skill} unlocked! Pick it before your next run',
   'tip.slotUnlocked': 'Second skill slot unlocked!',
@@ -91,13 +91,30 @@ const KEYED: Readonly<Record<string, string>> = {
   'hud.nextCheckpoint': 'Next checkpoint at L{level}', 'hud.nextCheckpointClear': 'Next checkpoint: clear L{level}',
   'hud.ramp': 'Warming up {n}',
   'side.left': 'left', 'side.right': 'right',
-  'results.level': 'Level {level}', 'results.cleared': 'Levels cleared: {n}', 'results.score': 'Score {score}',
-  'results.best': 'Best {best}', 'results.newBest': 'New best!', 'results.carry': 'Energy saved: {e}',
-  'results.won': 'You cleared every level!', 'results.home': 'Home', 'pause.quit': 'Quit',
+  'results.best': 'Best {best}', 'results.newBest': 'New best!', 'results.carryLabel': 'Energy saved',
+  'results.won': 'You cleared every level!', 'pause.quit': 'Quit',
   'playAgain': TEXT.playAgain, 'resume': TEXT.resume, 'paused': TEXT.paused, 'pausedText': TEXT.pausedText,
-  'home.soundOn': 'Sound: on', 'home.soundOff': 'Sound: off', 'skill.ready': 'Ready', 'loadout.picked': 'Slot {n}',
+  'skill.ready': 'Ready', 'loadout.picked': 'Slot {n}',
   ...Object.fromEntries(Object.entries(CAUSE_TEXT).map(([k, v]) => [`cause.${k}`, v])),
   'cause.quit': 'Quit', 'cause.clear': 'You cleared level 30!',
+  'loadout.titleOne': 'Pick a skill', 'loadout.unlocksAt': 'Unlocks at L{level}',
+  'skill.slowmo.desc': 'Slower snake {s} s · timers keep real time',
+  'skill.tailSnip.desc': 'Cut back half · rock wall for {s} s',
+  'skill.shield.desc': 'Breaks the next obstacle you hit · lasts {s} s', // provisional
+  'skill.mangoRain.desc': '{min} to {max} extra mangoes over {s} s', // provisional
+  'home.startAt': 'Start at L{level}', 'home.startL1': 'Start from L1', 'home.startEnergy': 'Start energy {e}',
+  'settings.title': 'Settings', 'settings.on': 'On', 'settings.off': 'Off',
+  'settings.sound': 'Sound', 'settings.sound.sub': 'Music and effects',
+  'settings.haptics': 'Haptics', 'settings.haptics.sub': 'Buzz when you eat or crash',
+  'settings.dpad': 'On-screen D-pad', 'settings.dpad.sub': 'Show arrows between the skill buttons',
+  'settings.motion': 'Reduced motion', 'settings.motion.sub': 'No shaking, softer flashes',
+  'settings.theme': 'Board theme', 'settings.theme.sub': 'Changes the ground colours on every level',
+  'settings.light': 'Light', 'settings.dark': 'Dark', 'settings.autosave': 'Changes save automatically',
+  'results.scoreLabel': 'SCORE', 'results.levelLabel': 'LEVEL', 'results.eatenLabel': 'EATEN', 'results.biomeLabel': 'BIOME',
+  'results.biomeOf': '{b}/{n}', 'results.nextCp': 'L{level}', 'results.nextCpClear': 'Clear L{level}', 'results.gameOver': 'GAME OVER',
+  'results.youWin': 'YOU WIN!', // provisional
+  'logo.mango': 'MANGO', 'logo.snake': 'SNAKE', 'home.prev': '◀', 'home.next': '▶',
+  'boot.loading': 'Loading… {n}%',
 };
 
 /** Keyed text lookup with `{var}` substitution; an unknown key returns the key itself. */
