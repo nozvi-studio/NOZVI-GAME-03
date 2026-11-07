@@ -48,7 +48,7 @@ it('P3b3 Results: the capy head overhang stays below the title for every column 
     const l = layoutColumn(resultsColumn({ banner, energy }, MIN));
     const headTop = l.middleY + ui(resultsCardTop() - R.card.headOverlap) * l.middleScale;
     expect(l.fits).toBe(true);
-    expect(headTop, JSON.stringify({ banner, energy })).toBeGreaterThanOrEqual(ui(R.titleY + R.titleSize / 2));
+    expect(headTop, JSON.stringify({ banner, energy })).toBeGreaterThanOrEqual(ui(R.titleY + R.titleSize) + ui(4));
     expect(headTop).toBeGreaterThanOrEqual(0);
   }
 });
