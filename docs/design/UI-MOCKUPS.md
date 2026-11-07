@@ -32,15 +32,15 @@ Rule of thumb: warm cream base, one strong colour per screen (green CTA), pastel
 Code column uses CODEMAP names. "planned" = no scene yet; check `docs/CODEMAP.md` before assuming.
 | Board (png/src base name) | Purpose | Target code | Phase |
 |---|---|---|---|
-| `BootD2` | Loading screen, logo, progress bar | `scenes/BootScene.ts` | P3b |
-| `HomeD2` (prop `firstRun`, `skin`) | Home: currencies, logo, hero panel, Play + Start at Lx / energy, Skins, Marbles | `scenes/HomeScene.ts`, `flow/homeModel.ts` | P3b |
-| `LoadoutD2` | Pick 2 skills | `scenes/LoadoutScene.ts` | P3b |
+| `BootD2` | Loading screen, logo, progress bar | `scenes/BootScene.ts`, `flow/bootView.ts` | done (P3b-3, P4 elements hidden) |
+| `HomeD2` (prop `firstRun`, `skin`) | Home: currencies, logo, hero panel, Play + Start at Lx / energy, Skins, Marbles | `scenes/HomeScene.ts`, `flow/homeModel.ts` | done (P3b-3, P4 elements hidden) |
+| `LoadoutD2` | Pick 2 skills | `scenes/LoadoutScene.ts`, `flow/loadoutView.ts` | done (P3b-3, P4 elements hidden) |
 | `GameD2`, `GameDpadD2` | In-run HUD (level, biome, mango x/y, score, energy, skill buttons, checkpoint chip), D-pad variant | `scenes/GameScene.ts`, `scenes/HudScene.ts`, `hudText.ts` | P3b |
 | `PauseD2`, `CountdownD2` | Pause menu, start countdown | planned (HudScene overlays) | P3b |
 | `BannersD2` (tweak `banner`), `SkillActiveD2` (tweak `skill`) | Level-up / event banners, active skill states | HudScene, `render/skills.ts` | P3a/P3b |
 | `DeathD2` | Death flash/shake (reduced-motion variant) | GameScene juice | P3a |
-| `ResultsD2` (prop `state`: normal/newBest/checkpointUnlocked/firstRun) | Game over | `scenes/ResultsScene.ts` | P3b |
-| `SettingsD2` | Settings | planned | P3b |
+| `ResultsD2` (prop `state`: normal/newBest/checkpointUnlocked/firstRun) | Game over | `scenes/ResultsScene.ts`, `flow/resultsView.ts` | done (P3b-3, P4 elements hidden) |
+| `SettingsD2` | Settings | `scenes/SettingsScene.ts`, `flow/settingsView.ts`, `flow/settingsApply.ts` | done (P3b-3, P4 elements hidden) |
 | `BiomeBoardsD2` | 6 biome board looks (tiles, fences, rocks per biome) | `render/tiles.ts`, GameScene board | P3b |
 | `SkinsD3`, `SkinBuyD2`, `DuplicateD2` | Character picker, buy skin, duplicate-skin result | planned (meta) | P4 |
 | `MarbleMachineD2`, `MarbleWheelD2`, `MarbleSkinDropD2`, `OddsD2` | Marble machine board, wheel bonus, skin drop, published odds | planned (meta) | P4 |
@@ -48,6 +48,8 @@ Code column uses CODEMAP names. "planned" = no scene yet; check `docs/CODEMAP.md
 | `PlayerHead`, `HeadRigD2`, `HeadIcon`, `MeowHead`, `ExpressionsD2`, `ExprHeadD2` | Head rig per skin, anchors, states, expressions (draft, not wired) | `src/game/art/` (capy rig exists; see ART-001) | P3c+ |
 | `Tile`, `Rock`, `FencePiece`, `FoodIcon` | Shared board parts (mud, pebble/rock/boulder/crumble/warn, fence, mango) | `render/tiles.ts` and board renderers | P3b |
 | `PaletteD2` | Colour tokens (section 3) | `src/game/uiTokens.ts` (done) | P3b |
+P3b-3 gameplay rulings C1-C10 (where mockups and specs disagree, spec wins) are listed in `docs/superpowers/plans/2026-11-07-p3b-3-menus.md`; the D2 screens above follow them.
+
 Board sizes and the canvas layout: `canvas.json` (`boards.<file>.w/h`).
 
 ## 5. Refreshing the snapshot
