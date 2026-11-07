@@ -6,170 +6,108 @@ import { createSynth, type SfxName, type Synth } from '../audio/synth';
 import { isDebug } from '../flow/debugFlag';
 import { homeView } from '../flow/homeModel';
 import { flowPause, flowResume, flowTogglePause, type FlowEffect } from '../flow/runFlow';
-import { hudLayout } from '../hud/hudLayout';
+import { SETTINGS_CLOSED } from '../flow/settingsView';
+import { BannerLayer } from '../hud/BannerLayer';
+import { levelUpBanners, skillPills, skillTip } from '../hud/banners';
+import { CountdownOverlay } from '../hud/CountdownOverlay';
+import { HudTop } from '../hud/HudTop';
+import { hudLayout, HUD_MOCK, type HudLayout } from '../hud/hudLayout';
+import { hudView } from '../hud/hudModel';
+import { countdownCard, pauseView } from '../hud/overlayModel';
+import { PauseOverlay } from '../hud/PauseOverlay';
+import { SkillButtons } from '../hud/SkillButtons';
 import { createDpad } from '../input/dpad';
 import { acceptSkillInput, skillSlotForKey } from '../input/skillKeys';
-import { BOARD, DPAD, HEADER, LEVEL_BAR, WIDTH } from '../layout';
-import { currentPalette, P1_COLORS, reduceMotion, type Palette } from '../render/palette';
-import { levelLabel, levelUpLines, runStartLines } from '../hudText';
-import { incomingBanner, progressLabel, t, TEXT } from '../text';
+import { BOARD, WIDTH } from '../layout';
+import { reduceMotion } from '../render/palette';
+import { runStartLines } from '../hudText';
+import { FONT_UI, TOKENS } from '../uiTokens';
+import { pillButton } from '../ui/widgets';
+import { ui } from '../ui/layout';
+import { incomingBanner, t, TEXT } from '../text';
 import type { GameScene } from './GameScene';
-import { bindPress } from './ui';
-import { FONT_UI } from '../uiTokens';
 
 const SKILL_SFX: Record<SkillId, SfxName> = { slowmo: 'skillSlowmo', tailSnip: 'skillSnip', shield: 'skillShield', mangoRain: 'skillRain' };
-const SKILL_LETTER: Record<SkillId, string> = { slowmo: 'S', tailSnip: 'T', shield: 'D', mangoRain: 'R' };
-/** MEC-006 §8 / GDD §10.4 greybox feedback timings (presentation only). */
-const FEEDBACK = { orbHapticMs: 8, castHapticMs: 20, rejectShakeMs: 200, tipFactor: 2 } as const;
-const ENERGY_ROW = { x: BOARD.x, y: BOARD.y + BOARD.size + 6, width: BOARD.size, height: 14 };
-const SKILL_SIZE = 96;
-const SKILL_X = [DPAD.x / 2, WIDTH - DPAD.x / 2] as const;
-const SKILL_Y = DPAD.y + 60;
+// Mockup px of the wait hint and the ?debug=1 buttons (not in the D2 mockups).
+const M = { waitHint: 22, debugNextW: 56, debugKeyW: 70 } as const;
 
-// GDD-13 + P1 HUD: score, level/biome, quota, energy, skill buttons, hints, banners, pause Resume/Quit.
+// P3b-2: wiring only. Models in src/game/hud/*, views draw them; this scene owns events, sounds, haptics, flow and session calls.
 export class HudScene extends Phaser.Scene {
-  private gameScene!: GameScene;
-  private session!: Session;
-  private balance!: Balance;
-  private synth!: Synth;
-  private p!: Palette;
-  private score!: Phaser.GameObjects.Text;
-  private best!: Phaser.GameObjects.Text;
-  private level!: Phaser.GameObjects.Text;
-  private progress!: Phaser.GameObjects.Text;
-  private energy!: Phaser.GameObjects.Text;
-  private ramp!: Phaser.GameObjects.Text;
-  private nextCp!: Phaser.GameObjects.Text;
-  private banner!: Phaser.GameObjects.Text;
-  private tip!: Phaser.GameObjects.Text;
-  private count!: Phaser.GameObjects.Text;
-  private waitHint!: Phaser.GameObjects.Text;
-  private overlay!: Phaser.GameObjects.Container;
-  private card!: Phaser.GameObjects.Graphics;
-  private pauseButton!: Phaser.GameObjects.Container;
-  private soundIcon!: Phaser.GameObjects.Graphics;
-  private pauseIcon!: Phaser.GameObjects.Graphics;
-  private bar!: Phaser.GameObjects.Graphics;
-  private flash!: Phaser.GameObjects.Graphics;
-  private skills: { c: Phaser.GameObjects.Container; g: Phaser.GameObjects.Graphics; text: Phaser.GameObjects.Text }[] = [];
-  private pad!: ReturnType<typeof createDpad>;
-  private heading = '';
-  private labels: Phaser.GameObjects.Text[] = [];
-  private buttons: { g: Phaser.GameObjects.Graphics; w: number; h: number }[] = [];
-  private bannerTimer?: Phaser.Time.TimerEvent;
-  private tipTimer?: Phaser.Time.TimerEvent;
-  private overTimer?: Phaser.Time.TimerEvent;
-  private cpCount = 0;
-  private bestLevelAtStart = 0;
-  private orbTipShown = false;
-  private leaving = false;
-  private debugKey: Phaser.GameObjects.Container | null = null;
-  private debugNext: Phaser.GameObjects.Container | null = null;
+  private gameScene!: GameScene; private session!: Session; private balance!: Balance; private synth!: Synth;
+  private top!: HudTop; private skills!: SkillButtons; private pause!: PauseOverlay; private count!: CountdownOverlay; private banners!: BannerLayer;
+  private pad!: ReturnType<typeof createDpad>; private waitHint!: Phaser.GameObjects.Text;
+  private heading = ''; private cpCount = 0; private bestLevelAtStart = 0; private orbTipShown = false; private leaving = false;
+  private haptics = true; private startBanner: string[] = []; private shrunkTo: number | null = null; private overTimer?: Phaser.Time.TimerEvent;
+  private debugKey: { c: Phaser.GameObjects.Container } | null = null; private debugNext: { c: Phaser.GameObjects.Container } | null = null;
 
   constructor() { super('Hud'); }
 
   create(): void {
     this.gameScene = this.scene.get('Game') as GameScene;
-    this.session = this.registry.get('session') as Session;
-    this.balance = this.registry.get('balance') as Balance;
-    const save = this.session.save();
+    this.session = this.registry.get('session') as Session; this.balance = this.registry.get('balance') as Balance;
+    const save = this.session.save(), layout = hudLayout(true); // pad geometry always computed; visibility follows settings.dpad
     this.cpCount = save.unlockedCheckpoints.length; this.bestLevelAtStart = save.bestLevel;
-    this.orbTipShown = false; this.leaving = false;
-    this.p = currentPalette(); this.labels = []; this.buttons = []; this.skills = []; this.heading = '';
-    this.synth = createSynth(); this.synth.setOn(save.settings.sound); this.synth.unlock();
+    this.orbTipShown = false; this.leaving = false; this.heading = ''; this.shrunkTo = null;
+    this.synth = createSynth(); this.synth.unlock();
     this.input.setGlobalTopOnly(true);
-    this.label(HEADER.x, 17, TEXT.header, 28); this.label(HEADER.x + 2, 53, TEXT.hard, 16);
-    this.label(250, 16, TEXT.score, 14).setOrigin(.5, 0);
-    this.label(330, 16, TEXT.best, 14).setOrigin(.5, 0);
-    this.score = this.label(250, 37, '0', 28, 'score').setOrigin(.5, 0);
-    this.best = this.label(330, 37, String(save.bestScore), 28, 'best').setOrigin(.5, 0);
-    const sound = this.button(420, 44, 48, 48, 'sound-button', () => this.toggleSound());
-    this.soundIcon = this.add.graphics(); sound.add(this.soundIcon);
-    this.pauseButton = this.button(494, 44, 48, 48, 'pause-button', () => this.gameScene.apply(flowTogglePause(this.gameScene.flow, this.balance)));
-    this.pauseIcon = this.add.graphics(); this.pauseButton.add(this.pauseIcon);
-    this.createDebugButtons();
-    this.bar = this.add.graphics();
-    this.level = this.label(LEVEL_BAR.x + 12, LEVEL_BAR.y + 3, '', 18, 'level');
-    this.progress = this.label(LEVEL_BAR.x + LEVEL_BAR.width - 12, LEVEL_BAR.y + 3, '', 18).setOrigin(1, 0);
-    this.energy = this.label(ENERGY_ROW.x + ENERGY_ROW.width / 2, ENERGY_ROW.y + ENERGY_ROW.height / 2, '', 12, 'energy').setOrigin(.5);
-    this.flash = this.add.graphics().setAlpha(0);
-    this.createSkillButtons();
-    this.ramp = this.label(SKILL_X[0], SKILL_Y + 70, '', 14, 'ramp').setOrigin(.5, 0).setWordWrapWidth(DPAD.x - 16).setAlign('center');
-    this.nextCp = this.label(SKILL_X[1], SKILL_Y + 70, '', 14, 'next-checkpoint').setOrigin(.5, 0).setWordWrapWidth(DPAD.x - 16).setAlign('center');
-    this.createPauseCard();
-    this.banner = this.label(BOARD.x + BOARD.size / 2, BOARD.y + 14, '', 20, 'banner').setOrigin(.5, 0).setAlign('center').setVisible(false);
-    this.tip = this.label(BOARD.x + BOARD.size / 2, BOARD.y + BOARD.size - 60, '', 17, 'tip')
-      .setOrigin(.5, 0).setWordWrapWidth(BOARD.size - 40).setAlign('center').setVisible(false);
-    this.count = this.label(BOARD.x + BOARD.size / 2, BOARD.y + BOARD.size / 2, '', 96, 'countdown').setOrigin(.5).setVisible(false);
-    // MEC-001-R2 hint while the run waits for the first direction input (strings provisional, owner batch Q)
-    this.waitHint = this.label(BOARD.x + BOARD.size / 2, BOARD.y + BOARD.size / 2, this.sys.game?.device?.input?.touch ? TEXT.waitHintTouch : TEXT.waitHintKeys, 28, 'wait-hint').setOrigin(.5).setAlign('center').setVisible(false);
-    this.pad = createDpad(this, hudLayout(true).dpad!, d => this.gameScene.turn(d.x, d.y));
-    const flow = (e: FlowEffect): void => this.onFlow(e);
-    const events = (e: SimEvent[]): void => this.onEvents(e);
-    const over = (s: SimSnapshot): void => this.onOver(s);
-    const toggle = (): void => this.toggleSound();
-    const pause = (): void => this.gameScene.apply(flowPause(this.gameScene.flow));
+    this.top = new HudTop(this, layout, () => this.gameScene.apply(flowTogglePause(this.gameScene.flow, this.balance)));
+    this.skills = new SkillButtons(this, layout, slot => this.useSkill(slot), this.balance);
+    this.pad = createDpad(this, layout.dpad!, d => this.gameScene.turn(d.x, d.y)); // MEC-001-R2: a turn during the countdown counts
+    this.banners = new BannerLayer(this, layout, this.balance);
+    this.waitHint = this.add.text(WIDTH / 2, BOARD.y + BOARD.size / 2, this.sys.game?.device?.input?.touch ? TEXT.waitHintTouch : TEXT.waitHintKeys,
+      { fontFamily: FONT_UI, fontSize: `${ui(M.waitHint)}px`, fontStyle: '800', color: TOKENS.text.primary, align: 'center' })
+      .setName('wait-hint').setOrigin(0.5).setVisible(false);
+    this.count = new CountdownOverlay(this);
+    this.pause = new PauseOverlay(this, {
+      onResume: () => { this.applySettings(); this.gameScene.apply(flowResume(this.gameScene.flow, this.balance)); },
+      onSettings: () => this.scene.launch('Settings', { overlay: true }),
+      onQuit: () => { this.session.quit(); this.toResults(0); }, // MEC-003-R20, MEC-008-R6
+    });
+    this.createDebugButtons(layout);
+    this.applySettings();
+    const flow = (e: FlowEffect): void => this.onFlow(e), events = (e: SimEvent[]): void => this.onEvents(e), over = (s: SimSnapshot): void => this.onOver(s);
+    const toggle = (): void => this.toggleSound(), pause = (): void => this.gameScene.apply(flowPause(this.gameScene.flow));
     const hidden = (): void => { if (document.hidden) { pause(); this.session.hidden(); } };
+    const reread = (): void => { this.applySettings(); this.refresh(); }; // handoff 3: settings changed in the overlay
     const keys = this.input.keyboard;
-    const onKey = (e: KeyboardEvent): void => { // MEC-007-R14/R15
-      const slot = skillSlotForKey(e.code, e.repeat);
-      if (slot === null) return;
+    const onKey = (e: KeyboardEvent): void => { // MEC-007-R14/R15; the Settings overlay owns the keyboard while open (handoff 1)
+      if (this.scene.isActive('Settings')) return;
+      const slot = skillSlotForKey(e.code, e.repeat); if (slot === null) return;
       e.preventDefault(); this.useSkill(slot);
     };
-    const theme = window.matchMedia('(prefers-color-scheme: dark)');
-    const recolor = (): void => { this.p = currentPalette(); this.heading = ''; this.drawChrome(); this.refresh(); };
     this.gameScene.events.on('flow', flow); this.gameScene.events.on('sim-events', events);
     this.gameScene.events.on('run-over', over); this.gameScene.events.on('toggle-sound', toggle);
-    keys?.on('keydown', onKey);
-    window.addEventListener('blur', pause); document.addEventListener('visibilitychange', hidden);
-    theme.addEventListener('change', recolor);
+    this.game.events.on(SETTINGS_CLOSED, reread);
+    keys?.on('keydown', onKey); window.addEventListener('blur', pause); document.addEventListener('visibilitychange', hidden);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.gameScene.events.off('flow', flow); this.gameScene.events.off('sim-events', events);
       this.gameScene.events.off('run-over', over); this.gameScene.events.off('toggle-sound', toggle);
-      keys?.off('keydown', onKey);
-      window.removeEventListener('blur', pause); document.removeEventListener('visibilitychange', hidden);
-      theme.removeEventListener('change', recolor);
-      this.bannerTimer?.remove(); this.tipTimer?.remove(); this.overTimer?.remove();
+      this.game.events.off(SETTINGS_CLOSED, reread);
+      keys?.off('keydown', onKey); window.removeEventListener('blur', pause); document.removeEventListener('visibilitychange', hidden);
+      this.overTimer?.remove(); this.banners.hide();
     });
-    this.drawChrome(); this.refresh();
-    this.showRunStart();
+    this.refresh(); this.showRunStart();
   }
 
-  // MEC-003 §8 run-start banner. Hud is (re)launched once per run start, after Game emitted newRun, so show it here.
-  private showRunStart(): void {
-    const start = runStartLines(this.gameScene.snapshot() ?? { level: 0, challenge: false }, t);
-    if (start.length) this.showBanner(start.join('\n'));
+  /** Settings that can change while paused (Settings overlay, P3b-3): sound, haptics and D-pad. Read on create, Resume and settings-closed. */
+  private applySettings(): void {
+    const s = this.session.save().settings;
+    this.synth.setOn(s.sound); this.haptics = s.haptics; this.pad.setVisible(s.dpad);
+  }
+  /** Handoff 2: every vibration goes through the haptics setting. */
+  private buzz(pattern: number | number[]): void { if (this.haptics) this.synth.buzz(pattern); }
+  private settingsAvailable(): boolean { const s = this.scene.get('Settings'); return s !== null && s !== undefined; }
+
+  // MEC-003 §8 run-start banner (challenge level at run start). Hud is (re)launched once per run start, after Game emitted newRun.
+  // Held until the countdown's 'go' so the card does not sit under the digit and expire during the countdown.
+  private showRunStart(): void { this.startBanner = runStartLines(this.gameScene.snapshot() ?? { level: 0, challenge: false }, t); }
+  private flushRunStart(): void {
+    if (this.startBanner.length) this.banners.show(this.startBanner.map(title => ({ kind: 'challenge' as const, title })));
+    this.startBanner = [];
   }
 
-  private label(x: number, y: number, text: string, size: number, name = ''): Phaser.GameObjects.Text {
-    const label = this.add.text(x, y, text, { fontFamily: FONT_UI,
-      fontSize: `${size}px`, fontStyle: 'bold', color: this.ink() }).setName(name);
-    this.labels.push(label); return label;
-  }
-  private ink(): string { return `#${this.p.ink.toString(16).padStart(6, '0')}`; }
-
-  private button(x: number, y: number, w: number, h: number, name: string, action: () => void): Phaser.GameObjects.Container {
-    const g = this.add.graphics(); this.buttons.push({ g, w, h });
-    const button = this.add.container(x, y, [g]).setName(name).setSize(w, h).setInteractive({ useHandCursor: true });
-    bindPress(button, () => { if (!reduceMotion()) button.setScale(.96); }, () => button.setScale(1), action, true);
-    return button;
-  }
-
-  // MEC-007-R14 skill buttons react on pointer down; drawn only for non-null slots.
-  private createSkillButtons(): void {
-    for (const slot of [0, 1] as const) {
-      const g = this.add.graphics();
-      const text = this.label(0, 0, '', 20).setOrigin(.5).setAlign('center');
-      const c = this.add.container(SKILL_X[slot], SKILL_Y, [g, text]).setName(`skill-${slot}`)
-        .setSize(SKILL_SIZE, SKILL_SIZE).setInteractive({ useHandCursor: true });
-      c.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event?: Phaser.Types.Input.EventData) => {
-        event?.stopPropagation(); this.useSkill(slot);
-      });
-      this.skills.push({ c, g, text });
-    }
-  }
   // MEC-003-R21 ?debug=1 only: "+1" and "Key" jump through the normal level-up path; the run becomes a debug run.
-  private createDebugButtons(): void {
+  private createDebugButtons(l: HudLayout): void {
     this.debugKey = this.debugNext = null;
     if (typeof window === 'undefined' || !isDebug(window.location?.search ?? '')) return;
     const skip = (key: boolean): void => {
@@ -178,148 +116,79 @@ export class HudScene extends Phaser.Scene {
       const to = key ? nextKeyLevel(cur, this.balance) : cur + 1;
       if (to !== null && to <= this.balance.level.maxLevel) this.session.debugSkipTo(to);
     };
-    this.debugNext = this.button(160, 76, 56, 24, 'debug-next', () => skip(false));
-    this.debugNext.add(this.label(0, 0, '+1', 15).setOrigin(.5));
-    this.debugKey = this.button(222, 76, 70, 24, 'debug-key', () => skip(true));
-    this.debugKey.add(this.label(0, 0, 'Key \u25B6', 15).setOrigin(.5));
+    const y = l.chip.y + l.chip.h / 2, side = ui(HUD_MOCK.sidePad);
+    this.debugNext = pillButton(this, side + ui(M.debugNextW) / 2, y, M.debugNextW, HUD_MOCK.chip, '+1', 'debug-next', () => skip(false), 'cream');
+    this.debugKey = pillButton(this, WIDTH - side - ui(M.debugKeyW) / 2, y, M.debugKeyW, HUD_MOCK.chip, 'Key ▶', 'debug-key', () => skip(true), 'cream');
   }
-  private useSkill(slot: 0 | 1): void {
-    if (acceptSkillInput(this.gameScene.flow.status)) this.session.useSkill(slot); // MEC-007-R15
-  }
-
-  private createPauseCard(): void {
-    this.card = this.add.graphics();
-    const title = this.label(0, -130, TEXT.paused, 28, 'overlay-title').setOrigin(.5, 0);
-    const text = this.label(0, -84, TEXT.pausedText, 19, 'overlay-text').setOrigin(.5, 0).setWordWrapWidth(384).setAlign('center');
-    const resume = this.button(0, 20, 200, 50, 'overlay-action', () => this.gameScene.apply(flowResume(this.gameScene.flow, this.balance)));
-    resume.add(this.label(0, 0, TEXT.resume, 22).setOrigin(.5));
-    // MEC-003-R20 Quit ends the run (cause quit) and opens Results.
-    const quit = this.button(0, 90, 200, 50, 'overlay-quit', () => { this.session.quit(); this.toResults(0); });
-    quit.add(this.label(0, 0, t('pause.quit'), 22).setOrigin(.5));
-    this.overlay = this.add.container(BOARD.x + BOARD.size / 2, BOARD.y + BOARD.size / 2,
-      [this.card, title, text, resume, quit]).setName('overlay').setVisible(false);
-  }
-
-  private drawChrome(): void {
-    for (const { g, w, h } of this.buttons) g.clear().fillStyle(this.p.panel).fillRoundedRect(-w / 2, -h / 2, w, h, 12)
-      .lineStyle(3, this.p.ink).strokeRoundedRect(-w / 2, -h / 2, w, h, 12);
-    for (const label of this.labels) label.setColor(this.ink());
-    this.card.clear().fillStyle(this.p.panel, .96).fillRoundedRect(-220, -160, 440, 320, 18)
-      .lineStyle(3, this.p.ink).strokeRoundedRect(-220, -160, 440, 320, 18);
-    this.flash.clear().fillStyle(this.p.gold).fillRoundedRect(LEVEL_BAR.x, LEVEL_BAR.y, LEVEL_BAR.width, LEVEL_BAR.height, 12);
-    const s = this.soundIcon.clear().fillStyle(this.p.ink).lineStyle(2, this.p.ink);
-    s.fillRect(-16, -5, 7, 10).fillTriangle(-9, -5, 0, -12, 0, 12);
-    if (this.session.save().settings.sound) {
-      s.beginPath().arc(0, 0, 8, -.8, .8).strokePath(); s.beginPath().arc(0, 0, 15, -.8, .8).strokePath();
-    } else s.beginPath().moveTo(5, -6).lineTo(16, 6).moveTo(16, -6).lineTo(5, 6).strokePath();
-    this.drawPause();
-  }
-  private drawPause(): void {
-    const status = this.gameScene.flow.status, active = status !== 'ready' && status !== 'over';
-    this.pauseButton.input!.enabled = active; this.pauseButton.setAlpha(active ? 1 : .4);
-    const p = this.pauseIcon.clear().fillStyle(this.p.ink);
-    if (status === 'paused') p.fillTriangle(-6, -10, -6, 10, 10, 0);
-    else p.fillRect(-9, -10, 6, 20).fillRect(3, -10, 6, 20);
-  }
-
-  private hideBanner(): void { this.bannerTimer?.remove(); this.banner.setVisible(false); }
-  private showBanner(text: string): void {
-    this.hideBanner(); this.banner.setText(text).setVisible(true);
-    this.bannerTimer = this.time.delayedCall(this.balance.ui.bannerMs, () => this.banner.setVisible(false));
-  }
-  private showTip(text: string): void {
-    this.tipTimer?.remove(); this.tip.setText(text).setVisible(true);
-    this.tipTimer = this.time.delayedCall(this.balance.ui.bannerMs * FEEDBACK.tipFactor, () => this.tip.setVisible(false));
-  }
+  private useSkill(slot: 0 | 1): void { if (acceptSkillInput(this.gameScene.flow.status)) this.session.useSkill(slot); } // MEC-007-R15
 
   private onFlow(effect: FlowEffect): void {
     switch (effect.type) {
-      case 'newRun': {
-        this.overTimer?.remove(); this.hideBanner(); this.synth.unlock();
-        const start = runStartLines(this.gameScene.snapshot() ?? { level: 0, challenge: false }, t); // MEC-003 §8
-        if (start.length) this.showBanner(start.join('\n'));
-        break;
+      case 'newRun': this.overTimer?.remove(); this.banners.hide(); this.synth.unlock(); this.showRunStart(); break; // MEC-003 §8
+      case 'hideOverlay': this.pause.hide(); this.count.hide(); this.waitHint.setVisible(false); break;
+      case 'showPaused': this.count.hide(); this.waitHint.setVisible(false); this.showPause(); break;
+      case 'tick': {
+        const s = this.gameScene.snapshot();
+        this.count.tick(effect.n, s ? countdownCard(s, !this.gameScene.flow.started, this.balance, t) : null); this.synth.play('tick'); break;
       }
-      case 'hideOverlay': this.overlay.setVisible(false); this.count.setVisible(false); this.waitHint.setVisible(false); break;
-      case 'showPaused': this.count.setVisible(false); this.waitHint.setVisible(false); this.overlay.setVisible(true); break;
-      case 'tick': this.count.setText(String(effect.n)).setVisible(true); this.synth.play('tick'); break;
-      case 'go': this.count.setVisible(false); this.waitHint.setVisible(this.gameScene.flow.status === 'waiting'); this.synth.play('go'); break;
+      case 'go': this.count.hide(); this.waitHint.setVisible(this.gameScene.flow.status === 'waiting'); this.synth.play('go'); this.flushRunStart(); break; // MEC-001-R2
       case 'begin': this.waitHint.setVisible(false); break;
     }
     this.refresh();
   }
+  private showPause(): void {
+    const s = this.gameScene.snapshot(); if (!s) return;
+    this.pause.show(pauseView({ level: s.level, biome: s.biome, hint: homeView(this.session.homeModel()).hint, settingsAvailable: this.settingsAvailable() }, t));
+  }
 
-  // P1 HUD event mapping (plan Task 9 table; MEC-003/006/007/008 §8).
+  // P1 HUD event mapping (MEC-003/006/007/008 §8) with the P3b-2 banner/tip views.
   private onEvents(events: SimEvent[]): void {
-    const ui = this.balance.ui;
+    const u = this.balance.ui;
     for (const e of events) switch (e.type) {
-      case 'ate':
-        this.synth.play(e.golden ? 'golden' : 'eat'); this.synth.buzz(ui.haptics.eatMs);
-        if (!reduceMotion()) {
-          this.tweens.killTweensOf(this.score); this.score.setScale(1.15);
-          this.tweens.add({ targets: this.score, scale: 1, duration: 160 });
-        }
-        break;
+      case 'ate': this.synth.play(e.golden ? 'golden' : 'eat'); this.buzz(u.haptics.eatMs); break;
+      case 'shrunk': this.shrunkTo = e.from > e.to ? e.to : null; break; // MEC-001-R4 chip only when the snake shrank
       case 'levelUp': this.onLevelUp(e); break;
-      case 'runWon': this.synth.play('level'); this.time.delayedCall(ui.bannerMs / 4, () => this.synth.play('level')); break;
+      case 'runWon': this.synth.play('level'); this.time.delayedCall(u.bannerMs / 4, () => this.synth.play('level')); break;
       case 'hazardIncoming':
-        if (e.family === 'fence' || e.family === 'maze' || e.family === 'terrain') this.showBanner(incomingBanner(e.family));
+        if (e.family === 'fence' || e.family === 'maze' || e.family === 'terrain') this.banners.tip(incomingBanner(e.family));
         break;
       case 'landed': this.synth.play('land'); break;
       case 'rotted': this.synth.play('rot'); break;
       case 'orbSpawned':
-        if (!this.orbTipShown && this.bestLevelAtStart < 2) { this.orbTipShown = true; this.showTip(t('tip.orb.first')); }
+        if (!this.orbTipShown && this.bestLevelAtStart < 2) { this.orbTipShown = true; this.banners.tip(t('tip.orb.first')); }
         break;
-      case 'orbEaten': this.synth.play('orb'); this.synth.buzz(FEEDBACK.orbHapticMs); break;
-      case 'skillUsed': this.synth.play(SKILL_SFX[e.skill]); this.synth.buzz(FEEDBACK.castHapticMs); break;
+      case 'orbEaten': this.synth.play('orb'); this.buzz(u.hud.orbHapticMs); break;
+      case 'skillUsed': this.synth.play(SKILL_SFX[e.skill]); this.buzz(u.hud.castHapticMs); break;
       case 'skillRejected': {
         if (e.reason === 'empty') break;
-        this.synth.play('nope'); this.shake(e.slot);
-        const cost = e.skill ? this.balance.skills[e.skill].cost : 0;
-        this.showTip(t(`skill.reject.${e.reason}`, { cost }));
+        this.synth.play('nope'); this.skills.shake(e.slot);
+        this.banners.tip(t(`skill.reject.${e.reason}`, { cost: e.skill ? this.balance.skills[e.skill].cost : 0 }));
         break;
       }
       case 'shieldBroke': this.synth.play('shieldBreak'); break;
-      case 'skillUnlocked': {
-        const skill = t(`skill.${e.skill}.name`);
-        this.showTip(e.slot === null ? t('tip.skillUnlocked.next', { skill })
-          : t('tip.skillUnlocked.slot', { skill, side: t(e.slot === 0 ? 'side.left' : 'side.right') }));
-        this.synth.play('unlock');
-        break;
-      }
-      case 'slotUnlocked': this.showTip(t('tip.slotUnlocked')); break;
-      case 'mangoStolen': this.showTip(t('toast.mangoStolen')); break; // MEC-016 §8 toast
+      case 'skillUnlocked': { const tip = skillTip(e, t); this.banners.tip(tip.text, tip.slot); this.synth.play('unlock'); break; }
+      case 'slotUnlocked': this.banners.tip(t('tip.slotUnlocked')); break;
+      case 'mangoStolen': this.banners.tip(t('toast.mangoStolen')); break; // MEC-016 §8 toast
       case 'rampEnded': this.synth.play('go'); break;
-      case 'died': this.synth.play('die'); this.synth.buzz(ui.haptics.deathMs); break;
+      case 'died': this.synth.play('die'); this.buzz(u.haptics.deathMs); break;
       default: break;
     }
     this.refresh();
   }
   private onLevelUp(e: Extract<SimEvent, { type: 'levelUp' }>): void {
-    const lines = levelUpLines(e, t); // MEC-003 §8 incl. challenge banner
     const cps = this.session.save().unlockedCheckpoints;
+    let newCheckpoint: number | null = null;
     if (cps.length > this.cpCount) { // MEC-008 §8 checkpoint banner + first-unlock tip
-      lines.push(t('banner.checkpoint', { level: Math.max(...cps) }));
-      if (this.cpCount === 0) this.showTip(t('tip.checkpoint'));
+      newCheckpoint = Math.max(...cps);
+      if (this.cpCount === 0) this.banners.tip(t('tip.checkpoint'));
       this.cpCount = cps.length;
     }
-    this.showBanner(lines.join('\n')); this.synth.play('level'); this.synth.buzz(this.balance.ui.haptics.level);
-    if (!reduceMotion()) {
-      this.tweens.killTweensOf(this.flash); this.flash.setAlpha(.65);
-      this.tweens.add({ targets: this.flash, alpha: 0, duration: 500 });
-    }
-  }
-  private shake(slot: 0 | 1): void {
-    const c = this.skills[slot]!.c;
-    if (reduceMotion()) return;
-    this.tweens.killTweensOf(c); c.setPosition(SKILL_X[slot], SKILL_Y);
-    this.tweens.add({ targets: c, x: SKILL_X[slot] + 6, duration: FEEDBACK.rejectShakeMs / 4, yoyo: true, repeat: 1,
-      onComplete: () => c.setPosition(SKILL_X[slot], SKILL_Y) });
+    this.banners.show(levelUpBanners(e, { shrunkTo: this.shrunkTo, newCheckpoint }, this.balance, t));
+    this.shrunkTo = null; this.synth.play('level'); this.buzz(this.balance.ui.haptics.level);
   }
 
   private onOver(_s: SimSnapshot): void {
-    this.hideBanner(); this.count.setVisible(false); this.waitHint.setVisible(false); this.drawPause();
-    this.best.setText(String(this.session.save().bestScore));
+    this.banners.hide(); this.count.hide(); this.waitHint.setVisible(false);
     this.toResults(reduceMotion() ? 0 : this.balance.flow.deathCardDelayMs);
   }
   private toResults(delayMs: number): void {
@@ -327,53 +196,21 @@ export class HudScene extends Phaser.Scene {
     this.leaving = true; this.overTimer?.remove();
     this.overTimer = this.time.delayedCall(delayMs, () => { this.scene.stop('Game'); this.scene.start('Results'); });
   }
-  private toggleSound(): void {
+  private toggleSound(): void { // M key (the HUD sound button moved to Settings, P3b-3)
     const on = !this.session.save().settings.sound;
-    this.session.setSound(on); this.synth.setOn(on); this.drawChrome();
-    if (on) this.synth.play('eat');
+    this.session.setSound(on); this.synth.setOn(on); if (on) this.synth.play('eat');
   }
 
   update(): void { this.refresh(); }
   private refresh(): void {
     const s = this.gameScene.snapshot(); if (!s) return;
-    this.score.setText(String(s.score));
-    this.level.setText(levelLabel(s, t)); // MEC-003 §8 star while challenge
-    const max = this.balance.level.maxLevel, full = s.level >= max;
-    this.debugNext?.setVisible(!full); this.debugKey?.setVisible(nextKeyLevel(s.level, this.balance) !== null);
-    this.progress.setText(progressLabel(s.progress, s.need, s.level, max));
-    const bar = this.bar.clear().fillStyle(this.p.panel).fillRoundedRect(LEVEL_BAR.x, LEVEL_BAR.y, LEVEL_BAR.width, LEVEL_BAR.height, 12);
-    bar.fillStyle(this.p.rock, .25).fillRoundedRect(LEVEL_BAR.x + 12, LEVEL_BAR.y + 31, LEVEL_BAR.width - 24, 7, 3);
-    const fill = full ? 1 : Math.min(1, s.progress / s.need);
-    if (fill > 0) bar.fillStyle(this.p.gold).fillRoundedRect(LEVEL_BAR.x + 12, LEVEL_BAR.y + 31, (LEVEL_BAR.width - 24) * fill, 7, 3);
-    // MEC-006 §8 energy bar energy/100.
-    const r = ENERGY_ROW;
-    bar.fillStyle(this.p.panel).fillRoundedRect(r.x, r.y, r.width, r.height, 6);
-    const ef = Math.min(1, s.energy / s.energyMax);
-    if (ef > 0) bar.fillStyle(P1_COLORS.orb).fillRoundedRect(r.x, r.y, r.width * ef, r.height, 6);
-    this.energy.setText(t('hud.energy', { energy: s.energy, max: s.energyMax }));
-    this.drawSkills(s);
-    this.ramp.setText(s.rampActive ? t('hud.ramp', { n: s.rampMangoesLeft }) : '');
-    const hint = homeView(this.session.homeModel()).hint; // MEC-008-R11
-    this.nextCp.setText(hint ? t(hint.key, { level: hint.level }) : '');
+    const status = this.gameScene.flow.status, hint = homeView(this.session.homeModel()).hint; // MEC-008-R11
+    const v = hudView(s, hint, this.balance, t);
+    this.top.apply(v, status === 'paused', status !== 'ready' && status !== 'over');
+    this.skills.apply(v.skills);
+    this.banners.setPills(skillPills(s.skills, this.balance, t)); this.banners.setSlowmo(s.slowmo !== null);
+    this.debugNext?.c.setVisible(s.level < this.balance.level.maxLevel); this.debugKey?.c.setVisible(nextKeyLevel(s.level, this.balance) !== null);
     const heading = `${s.heading.x},${s.heading.y}`;
     if (heading !== this.heading) { this.pad.setHeading(s.heading); this.heading = heading; }
-    this.drawPause();
-  }
-  // MEC-006 §8 letter + cost; glow when affordable, grey when not; ring of remaining time while active.
-  private drawSkills(s: SimSnapshot): void {
-    for (const k of s.skills) {
-      const b = this.skills[k.slot]!;
-      b.c.setVisible(k.id !== null);
-      if (!k.id) continue;
-      const half = SKILL_SIZE / 2;
-      b.g.clear().fillStyle(k.affordable ? this.p.gold : P1_COLORS.skillOff).fillCircle(0, 0, half)
-        .lineStyle(k.affordable ? 5 : 3, this.p.ink).strokeCircle(0, 0, half);
-      if (k.active && k.leftMs > 0) {
-        const total = k.id === 'tailSnip' ? k.leftMs : this.balance.skills[k.id].durationMs;
-        const end = -Math.PI / 2 + Math.PI * 2 * Math.min(1, k.leftMs / total);
-        b.g.lineStyle(6, P1_COLORS.shield).beginPath().arc(0, 0, half + 6, -Math.PI / 2, end, false).strokePath();
-      }
-      b.text.setText(`${SKILL_LETTER[k.id]}\n${k.cost}`);
-    }
   }
 }
