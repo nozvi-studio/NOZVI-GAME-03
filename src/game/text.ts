@@ -92,7 +92,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'hud.ramp': 'Warming up {n}',
   'side.left': 'left', 'side.right': 'right',
   'results.level': 'Level {level}', 'results.cleared': 'Levels cleared: {n}', 'results.score': 'Score {score}',
-  'results.best': 'Best {best}', 'results.newBest': 'New best!', 'results.carry': 'Energy saved: {e}',
+  'results.best': 'Best {best}', 'results.newBest': 'New best!', 'results.carry': 'Energy saved: {e}', 'results.carryLabel': 'Energy saved',
   'results.won': 'You cleared every level!', 'results.home': 'Home', 'pause.quit': 'Quit',
   'playAgain': TEXT.playAgain, 'resume': TEXT.resume, 'paused': TEXT.paused, 'pausedText': TEXT.pausedText,
   'home.soundOn': 'Sound: on', 'home.soundOff': 'Sound: off', 'skill.ready': 'Ready', 'loadout.picked': 'Slot {n}',

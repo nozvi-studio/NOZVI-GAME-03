@@ -4,7 +4,10 @@ export const MENU = {
   widgets: { shelfDy: 6, logoGap: 1, logoSpace: 0.25 },
   hill: { w: 530, topH: 260, topDy: 130, bottomH: 240, bottomDy: 150 },
   logo: { size: 66, lineH: 63, overlap: 4, shadowY: 6, height: 128 },
-  boot: { top: 96, heroGap: 46, hero: 240, barGap: 44, barW: 260, barH: 20, textGap: 10, textH: 18 },
+  boot: { top: 96, heroGap: 46, hero: 240, barGap: 44, barW: 260, barH: 20, textGap: 10, textH: 18,
+    barPad: 4, textFont: 15, hillH: 300,
+    trail: [[20, 190], [92, 190], [108, 174], [108, 150]], trailRadius: 16, trailStep: 3, shadeR: 15, bodyR: 12.5, hiR: 2, hiDx: -3, hiDy: -4, hiAlpha: 0.45,
+    capy: { x: 62, y: 40, size: 116 }, mango: { right: 22, bottom: 34, size: 56, outer: 0.42, inner: 0.36, leaf: { dx: 0.12, dy: -0.3, w: 0.36, h: 0.2 } } },
   home: {
     hero: { w: 358, h: 270, gap: 10, radius: 32 }, stepperH: 36, playH: 74, playHFirst: 96, chipH: 38, hintH: 16, hillPeek: 40,
     stepper: { btn: 36, chipGap: 8, font: 14, arrowFont: 16 },
@@ -29,5 +32,13 @@ export const MENU = {
     // SettingsD2 theme card: padding 16/14, tiles 113 high with a 64 px rounded swatch; edge = 2 px inset at 25% ink.
     theme: { padX: 14, titleY: 25, subY: 45, tilesY: 66, tileH: 113, gap: 10, r: 20, swatch: 64, swatchTop: 10, swatchR: 14, swatchLine: 2, swatchEdgeAlpha: 0.25, snake: { dx: 12, dy: 26, w: 32, h: 12, r: 6 }, ball: { dx: 46, dy: 30, r: 10 }, labelFont: 16, labelY: 93, line: 2, lineSel: 3 },
   },
-  results: { headH: 44, cardTop: 50, cardH: 332, bannerH: 60, energyH: 64, progressH: 32, btn: 62, againH: 70, bottom: 30 },
+  results: {
+    headH: 44, cardTop: 50, cardH: 332, bannerH: 60, energyH: 64, progressH: 32, btn: 62, againH: 70, bottom: 30,
+    titleSize: 34, titleY: 24, side: 20, btnGap: 12, againLabel: 32, againStroke: 7,
+    card: { w: 358, r: 30, pad: 16, headW: 112, headOverlap: 58, headline: 16, headlineY: 81, wrapLines: 1.6, scoreLabel: 13, scoreLabelY: 106, scoreLabelTrack: 1.3, score: 84, scoreY: 158,
+      chipY: 226, chipH: 32, chipFont: 15, chipPadL: 12, chipPadR: 16, chipGap: 6, chipIcon: 18, tilesY: 252, tileH: 62, tileGap: 8, tileR: 14, tileLabel: 12, tileLabelY: 14, tileValue: 28, tileValueY: 40 },
+    row: { r: 26, padX: 20, gap: 14, icon: 30, label: 17, value: 40 },
+    banner: { r: 20, pad: 12, disc: 36, icon: 20, gap: 12, font: 19 },
+    progress: { barH: 18, gap: 10, chipH: 32, chipFont: 14, chipPadL: 10, chipPadR: 14, chipIcon: 18, chipGap: 6 },
+  },
 } as const;
