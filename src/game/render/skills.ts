@@ -14,9 +14,9 @@ const blinkOff = (leftMs: number, windowMs: number, time: number): boolean =>
 export function drawSkillObjects(g: Graphics, s: SimSnapshot, cell: number, p: Palette, look: BoardLook, b: Balance, time: number): void {
   const c = (x: number): number => (x + 0.5) * cell;
   for (const w of s.snipWall) {
-    const alpha = w.state === 'crumble' ? 0.45 : 1;
-    drawRock(g, { x: c(w.x), y: c(w.y) }, cell, look, alpha, 'rock', w.state === 'crumble');
-    g.fillStyle(P1_COLORS.snipStripe, alpha).fillRect(c(w.x) - cell * 0.3, c(w.y) - cell * 0.06, cell * 0.6, cell * 0.12);
+    const crumble = w.state === 'crumble';
+    drawRock(g, { x: c(w.x), y: c(w.y) }, cell, look, 1, 'rock', crumble);   // drawRock owns the crumble fade
+    g.fillStyle(P1_COLORS.snipStripe, crumble ? 0.45 : 1).fillRect(c(w.x) - cell * 0.3, c(w.y) - cell * 0.06, cell * 0.6, cell * 0.12);
   }
   for (const r of s.rubble) {
     drawRock(g, { x: c(r.x), y: c(r.y) }, cell, look, 1, 'pebble', r.state === 'crumble');

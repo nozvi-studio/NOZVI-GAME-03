@@ -1,9 +1,13 @@
-import { expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { drawHazards, drawRock, drawTerrains, drawWarn } from '../../src/game/render/hazards';
 import { boardLook } from '../../src/game/render/biomePalette';
 import { loadBalance } from '../support/balance';
 import { gfx } from '../support/gfx';
-import type { SimSnapshot } from '../../src/core';
+import { createSim, type SimSnapshot } from '../../src/core';
+import { ROCK } from '../../src/game/render/boardParts';
+import { drawMango } from '../../src/game/render/mango';
+import { drawSkillObjects } from '../../src/game/render/skills';
+import { LIGHT } from '../../src/game/render/palette';
 
 const b = loadBalance();
 const themes = ['light', 'dark'] as const;
@@ -109,4 +113,30 @@ it('P3b1-R6 rising ground: warn tile has ring + chevron, up tile is a two-face s
   const up = gfx(); drawTerrains(up.g, mk('up'), 30, look, b, false);
   expect(up.calls.some(c => c[0] === 'fillStyle' && c[1] === look.edge)).toBe(true);
   expect(up.count('fillRoundedRect')).toBe(1 + 2 * 2);                       // zone mark + (front, top) x (edge, fill)
+});
+
+describe('P3b1-R4 crumble alpha is applied exactly once', () => {
+  const look = boardLook(2, 'light');
+  const ringAlpha = (calls: ReturnType<typeof gfx>['calls']) => calls.find(c => c[0] === 'fillStyle' && c[1] === look.edge && c[2] !== ROCK.dropAlpha * ROCK.crumbleAlpha)![2];
+  it('drawRock(alpha=1, crumble) fills at ROCK.crumbleAlpha', () => {
+    const p = gfx(); drawRock(p.g, { x: 50, y: 50 }, 30, look, 1, 'rock', true);
+    expect(ringAlpha(p.calls)).toBeCloseTo(ROCK.crumbleAlpha);
+  });
+  const snap = () => createSim(b, 1).snapshot();
+  it('a crumbling snip wall rock is drawn at ROCK.crumbleAlpha, its stripe keeps 0.45', () => {
+    const p = gfx(), s = { ...snap(), snipWall: [{ x: 2, y: 2, state: 'crumble' }] } as unknown as SimSnapshot;
+    drawSkillObjects(p.g, s, 30, LIGHT, look, b, 0);
+    expect(ringAlpha(p.calls)).toBeCloseTo(ROCK.crumbleAlpha);
+    expect(p.calls.some(c => c[0] === 'fillStyle' && c[2] === 0.45)).toBe(true);
+  });
+  it('a crumbling rubble rock is drawn at ROCK.crumbleAlpha', () => {
+    const p = gfx(), s = { ...snap(), rubble: [{ x: 2, y: 2, state: 'crumble' }] } as unknown as SimSnapshot;
+    drawSkillObjects(p.g, s, 30, LIGHT, look, b, 0);
+    expect(ringAlpha(p.calls)).toBeCloseTo(ROCK.crumbleAlpha);
+  });
+  it('a crumbling rotten rock is drawn at ROCK.crumbleAlpha', () => {
+    const p = gfx(), s = { ...snap(), mango: null, rottenRocks: [{ x: 2, y: 2, state: 'crumble' }] } as unknown as SimSnapshot;
+    drawMango(p.g, s, 30, LIGHT, look, 0, true, 0);
+    expect(ringAlpha(p.calls)).toBeCloseTo(ROCK.crumbleAlpha);
+  });
 });
