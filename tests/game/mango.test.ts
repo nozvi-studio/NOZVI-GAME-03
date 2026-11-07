@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import { describe, expect, it } from 'vitest';
 import { createSim } from '../../src/core';
 import { drawMango } from '../../src/game/render/mango';
+import { DEFAULT_LOOK } from '../../src/game/render/biomePalette';
 import { LIGHT } from '../../src/game/render/palette';
 import { loadBalance } from '../support/balance';
 
@@ -23,18 +24,18 @@ describe('MEC-002 mango presentation time', () => {
     const snapshot = sim.snapshot();
     expect(snapshot.mango?.ageMs).toBe(0);
     const { graphics, scales } = graphicsProbe();
-    drawMango(graphics, snapshot, 30, LIGHT, 500, false, 0);
+    drawMango(graphics, snapshot, 30, LIGHT, DEFAULT_LOOK, 500, false, 0);
     expect(scales).toEqual([[1, 1]]);
     expect(sim.snapshot().mango?.ageMs).toBe(0);
   });
   it('MEC-002 a newly appeared mango uses its own presentation birth time', () => {
     const { graphics, scales } = graphicsProbe();
-    drawMango(graphics, createSim(loadBalance(), 1).snapshot(), 30, LIGHT, 610, false, 500);
+    drawMango(graphics, createSim(loadBalance(), 1).snapshot(), 30, LIGHT, DEFAULT_LOOK, 610, false, 500);
     expect(scales).toEqual([[0.5, 0.5]]);
   });
   it('MEC-002 reduced motion shows the full mango immediately', () => {
     const { graphics, scales } = graphicsProbe();
-    drawMango(graphics, createSim(loadBalance(), 1).snapshot(), 30, LIGHT, 500, true, 500);
+    drawMango(graphics, createSim(loadBalance(), 1).snapshot(), 30, LIGHT, DEFAULT_LOOK, 500, true, 500);
     expect(scales).toEqual([[1, 1]]);
   });
 });

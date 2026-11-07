@@ -194,14 +194,14 @@ export class GameScene extends Phaser.Scene {
     const cell = cellPx(this.balance), p = this.palette;
     for (const layer of Object.values(this.layers)) layer.clear();
     drawTiles(this.layers.ground, snapshot.tiles, cell, time, this.reduced);
-    drawTerrains(this.layers.terrain, snapshot.terrains, cell, p, this.balance, this.reduced);
-    drawHazards(this.layers.hazards, snapshot.hazards, cell, p, this.balance, this.reduced);
+    drawTerrains(this.layers.terrain, snapshot.terrains, cell, this.look, this.balance, this.reduced);
+    drawHazards(this.layers.hazards, snapshot.hazards, cell, this.look, this.balance, this.reduced);
     drawCycles(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawMovers(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawBlasts(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawShrink(this.layers.hazards, snapshot, cell, time, this.reduced);
-    drawMango(this.layers.mango, snapshot, cell, p, time, this.reduced, this.mangoBornAt);
-    drawSkillObjects(this.layers.skills, snapshot, cell, p, this.balance, time);
+    drawMango(this.layers.mango, snapshot, cell, p, this.look, time, this.reduced, this.mangoBornAt);
+    drawSkillObjects(this.layers.skills, snapshot, cell, p, this.look, this.balance, time);
     drawSnake(this.layers.snake, snapshot, cell, p, this.effects.gulp, false);
     this.capy.update(snapshot, time, cell);
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);
