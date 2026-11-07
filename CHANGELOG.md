@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(art): Remotion POC - pre-rendered capy idle/eat/dead clip next to the tween capy on the debug art preview (branch only, not merged)
 - docs: ART-001 Q6 answered (owner Remotion repo location), Q7 deferred
 - docs: ART-003 skin production guide (draft, capy as template)
 - docs: owner rulings 2026-11-07 - GDD §4 session targets confirmed, leaderboard + streak parked, OQ-B1..B5 approved/closed (MEC-014/015/016)
