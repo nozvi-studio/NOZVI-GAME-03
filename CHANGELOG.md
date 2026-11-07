@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- P3b-2 in-run HUD and overlays: D2 HUD (level + biome, quota, score, energy pills, skill buttons, checkpoint chip), optional D-pad (Settings), pause (Resume / Settings / Quit run), countdown, banner queue, skill pills; haptics follow the Settings toggle; fix: starting a run while one is active logs it as quit; `abandonedRuns` helper.
 - P3b-3 menu screens: D2 Boot/Home/Loadout/Results, new Settings scene, settings saved immediately, balance-driven skill cards.
 - feat(game): P3b-1 board art: biome grounds (checker + grid), light/dark board themes, D2 rocks/crumble/warn tiles (ring + dashes + shape), fences, hedges, mud/ice/rising stone, mango icon; pure `biomePalette`/`boardParts`.
 - feat(game): P3-0 UI foundation: D2 tokens, mockup layout, self-hosted fonts (Nunito, Lilita One), settings in save v3, widget kit; palette follows the OS live while theme/motion settings are unset.

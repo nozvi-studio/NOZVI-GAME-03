@@ -35,9 +35,9 @@ Code column uses CODEMAP names. "planned" = no scene yet; check `docs/CODEMAP.md
 | `BootD2` | Loading screen, logo, progress bar | `scenes/BootScene.ts`, `flow/bootView.ts` | done (P3b-3, P4 elements hidden) |
 | `HomeD2` (prop `firstRun`, `skin`) | Home: currencies, logo, hero panel, Play + Start at Lx / energy, Skins, Marbles | `scenes/HomeScene.ts`, `flow/homeModel.ts` | done (P3b-3, P4 elements hidden) |
 | `LoadoutD2` | Pick 2 skills | `scenes/LoadoutScene.ts`, `flow/loadoutView.ts` | done (P3b-3, P4 elements hidden) |
-| `GameD2`, `GameDpadD2` | In-run HUD (level, biome, mango x/y, score, energy, skill buttons, checkpoint chip), D-pad variant | `scenes/GameScene.ts`, `scenes/HudScene.ts`, `hudText.ts` | P3b |
-| `PauseD2`, `CountdownD2` | Pause menu, start countdown | planned (HudScene overlays) | P3b |
-| `BannersD2` (tweak `banner`), `SkillActiveD2` (tweak `skill`) | Level-up / event banners, active skill states | HudScene, `render/skills.ts` | P3a/P3b |
+| `GameD2`, `GameDpadD2` | In-run HUD (level, biome, mango x/y, score, energy, skill buttons, checkpoint chip), D-pad variant | `src/game/hud/*` (`hudModel`, `hudLayout`, `HudTop`, `SkillButtons`), `input/dpad.ts`, `scenes/HudScene.ts` (wiring), `hudText.ts` | done (P3b-2; D-pad only when `settings.dpad`) |
+| `PauseD2`, `CountdownD2` | Pause menu, start countdown | `src/game/hud/*` (`overlayModel`, `PauseOverlay`, `CountdownOverlay`) | done (P3b-2; marbles line hidden, no tap-to-skip) |
+| `BannersD2` (tweak `banner`), `SkillActiveD2` (tweak `skill`) | Level-up / event banners, active skill states | `src/game/hud/*` (`banners`, `BannerLayer`), `render/skills.ts` | done (P3b-2; board-layer skill visuals P3a/P3b-1) |
 | `DeathD2` | Death flash/shake (reduced-motion variant) | GameScene juice | P3a |
 | `ResultsD2` (prop `state`: normal/newBest/checkpointUnlocked/firstRun) | Game over | `scenes/ResultsScene.ts`, `flow/resultsView.ts` | done (P3b-3, P4 elements hidden) |
 | `SettingsD2` | Settings | `scenes/SettingsScene.ts`, `flow/settingsView.ts`, `flow/settingsApply.ts` | done (P3b-3, P4 elements hidden) |
