@@ -19,12 +19,20 @@ const PREVIEW = {
   // P3-0-R7 widget row (mockup px via ui() inside the widgets); sits on the live panel margins, above the head.
   wRowY: 705, wPillW: 62, wPillH: 24, wPillXs: [50, 140, 230], wCardX: 285, wCardW: 44, wCardH: 28, wChipX: 410, wBarX: 380, wBarW: 60, wBarH: 10,
   wTitleX: 80, wTitleY: 752, wTitleSize: 13, wBarY: 748,
+  // Remotion POC (disposable, debug only): pre-rendered idle/eat/dead clip, 10 x 9 grid of 128 px frames at 30 fps.
+  rmKey: 'capy-remotion', rmUrl: 'art/capy-remotion.png', rmFrame: 128, rmFrames: 90, rmFps: 30,
+  rmX: 470, rmY: 828, rmSize: 120, rmLabelY: 900, rmLabel: 'Remotion',
 } as const;
 
 export class ArtPreviewScene extends Phaser.Scene {
   private live!: Phaser.GameObjects.Image;
   private state!: CapyAnimState;
   constructor() { super('ArtPreview'); }
+
+  preload(): void {
+    const P = PREVIEW;
+    this.load.spritesheet(P.rmKey, P.rmUrl, { frameWidth: P.rmFrame, frameHeight: P.rmFrame });
+  }
 
   // ART-001 every expression at 24 and 40 px on light and dark backgrounds, plus a live 256 px head and body poses.
   create(): void {
@@ -71,6 +79,7 @@ export class ArtPreviewScene extends Phaser.Scene {
     ];
     acts.forEach(([text, fn], i) => button(this, P.btnXs[i], P.btnY, P.btnW, P.btnH, text, `preview-${text.toLowerCase()}`, fn, P.btnSize));
     this.widgetRow();
+    this.remotionClip();
     const onUpdate = (now: number): void => {
       const { state, pose } = capyPose(this.state, now, cfg, reduced, Math.random);
       this.state = state;
@@ -79,6 +88,17 @@ export class ArtPreviewScene extends Phaser.Scene {
     };
     this.events.on(Phaser.Scenes.Events.UPDATE, onUpdate);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(Phaser.Scenes.Events.UPDATE, onUpdate));
+  }
+
+  // POC: compare a Remotion-rendered PNG sequence with the tween capy (not used in gameplay).
+  private remotionClip(): void {
+    const P = PREVIEW;
+    if (!this.textures.exists(P.rmKey)) return;
+    if (!this.anims.exists(P.rmKey)) {
+      this.anims.create({ key: P.rmKey, frames: this.anims.generateFrameNumbers(P.rmKey, { start: 0, end: P.rmFrames - 1 }), frameRate: P.rmFps, repeat: -1 });
+    }
+    this.add.sprite(P.rmX, P.rmY, P.rmKey).setDisplaySize(P.rmSize, P.rmSize).play(P.rmKey);
+    label(this, P.rmX, P.rmLabelY, P.rmLabel, P.labelSize);
   }
 
   private widgetRow(): void {
