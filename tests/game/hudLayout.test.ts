@@ -1,5 +1,7 @@
 import { expect, it } from 'vitest';
-import { hudLayout, statsRow, HUD_MOCK } from '../../src/game/hud/hudLayout';
+import { bannerStripRect, hudLayout, statsRow, stripRows, STRIP_MOCK, HUD_MOCK } from '../../src/game/hud/hudLayout';
+import { cellPx } from '../../src/game/layout';
+import { loadBalance } from '../support/balance';
 import { BOARD, HEIGHT, WIDTH } from '../../src/game/layout';
 import { ui } from '../../src/game/ui/layout';
 
@@ -51,4 +53,16 @@ it('P3b2-R8 stats row fits the side padding with a 4-digit score (derived width)
 it('P3b2-R8 stats row stays on screen even with a 5-char quota, 4-digit score and 3-digit energy', () => {
   const r = statsRow({ quota: 5 * DIGIT, score: 4 * DIGIT, energy: 3 * DIGIT });
   expect(r.quota.x).toBeGreaterThanOrEqual(0); expect(r.energy.x + r.energy.w).toBeLessThanOrEqual(390);
+});
+it('UIFIX-R1 banner strip is flush with the board top edge, board wide, ~1.5 cells high', () => {
+  const b = loadBalance(), r = bannerStripRect(b.board.cols);
+  expect(r.x).toBe(BOARD.x); expect(r.y).toBe(BOARD.y); expect(r.w).toBe(BOARD.size);
+  expect(r.h).toBeCloseTo(1.5 * cellPx(b), 5); expect(STRIP_MOCK.alpha).toBeCloseTo(0.85);
+});
+it('UIFIX-R1 strip rows (title + one sub line) fit inside the strip height', () => {
+  const r = bannerStripRect(loadBalance().board.cols);
+  const two = stripRows(true, r.h), one = stripRows(false, r.h);
+  expect(two.titleY).toBeGreaterThanOrEqual(0); expect(two.subY!).toBeGreaterThan(two.titleY);
+  expect(two.subY! + ui(STRIP_MOCK.sub)).toBeLessThanOrEqual(r.h);
+  expect(one.subY).toBeNull(); expect(one.titleY + ui(STRIP_MOCK.title)).toBeLessThanOrEqual(r.h);
 });
