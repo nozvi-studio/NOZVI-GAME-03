@@ -1,6 +1,6 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-07 by Claude (lead) **Milestone:** M1 - P2c merged into version/v0.2 (2026-11-06); P2 exit waits on owner playtest. **Version branch:** `version/v0.2`
+**Updated:** 2026-11-07 by Claude (lead, cloud) **Milestone:** M2 P3 on `version/v0.3` (branched from docs/p3-spec, owner 2026-11-07); P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
 
 ## Now (in progress)
 - [x] P2a, P2b merged into version/v0.2 (PLAYTEST 2026-11-05).
@@ -11,7 +11,11 @@
 - [x] D2 UI mockups imported (branch feat/p3-design-mockups, awaiting owner push approval): `docs/design/UI-MOCKUPS.md` + 32 board PNGs and sources. Source was a Claude Design artifact, not Figma.
 - [x] D2 mockups also exported as static HTML (primary reference, 8d0fd4e).
 - [x] P3 spec + 5 plans on branch docs/p3-spec (from feat/p3-design-mockups): spec docs/superpowers/specs/2026-11-07-p3-juice-screens-design.md; plans 2026-11-07-p3-0 / p3b-1 / p3b-2 / p3b-3 / p3a. Owner ruling 2026-11-07: Quit run = run end like a death (MEC-008-R6, already specced).
-- [ ] **P3 RESUME HERE:** owner reviews spec, then execute P3-0 (subagents), then P3b-1/2/3 in parallel worktrees (max 2 at once, RAM), then P3a. Expected merge conflicts between P3b plans in BootScene, text.ts, uiTokens.ts, balance.json, GameScene background.
+- [x] Owner approved P3 spec + plans (2026-11-07). Owner rules: lead decides technical/visual, asks only on important gameplay; push allowed; subagents with cheapest fitting model.
+- [x] P3-0 UI foundation merged into version/v0.3: tokens, ui()/layoutColumn, settings + save v3 (null = follow OS live), self-hosted Nunito/Lilita One + Boot font wait, widget kit (pill hit rect verified in browser), Baloo removed. 1215 pass, typecheck clean; Opus final review fixes applied.
+- [ ] **P3 RESUME HERE:** P3b-1 board art, P3b-2 HUD, P3b-3 menus (branches from version/v0.3), then P3a. Carry into plans: pill widgets need icon badge (P3b-2/3), `balance.juice` block (P3a), widget px literals -> TOKENS.radius/spacing, PillButton type, title stroke scaling.
+- Note: save v3 is not readable by v0.2 builds; back up `mango-snake.save` before the P2-exit playtest (DECISIONS 2026-11-07).
+- Strings to review with owner after P3 (agy pass by owner): death lines, Settings/Results/HUD copy, banners — provisional, from mockups.
 
 ## Next (ordered, max 5)
 1. Owner playtest + 40% verdict; if over40 not empty: lead tunes (OQ-C5), re-playtest.
@@ -39,6 +43,7 @@
 - Rubble family has no production source since Shield stopped leaving rubble (owner 2026-11-06); remove family + `skills.shield.rubbleLifeMs` in a cleanup task.
 
 ## Last session summary
+- 2026-11-07 (cloud, P3-0): version/v0.3 created; P3-0 executed via subagents (Haiku/Sonnet implementers + reviewers, Opus final review). Superpowers skills read from github obra/superpowers (plugin not loaded in cloud). Playwright replaces agy for browser checks here.
 - 2026-11-07 (P3 planning): owner pushed HTML mockups; lead wrote P3 spec + P3-0 plan, 4 Sonnet subagents wrote the other plans. No code changed, no tests run. Mockup-vs-spec conflicts resolved spec-first (listed in each plan); visible changes: D-pad hidden unless setting on, sound toggle moves to Settings.
 - 2026-11-06 (P3c): spec + plan in docs/superpowers/; 4 tasks via subagents (Haiku/Sonnet, Opus final review). Final review caught Phaser 3.90 decoding every data: URL as base64 -> fixed (base64 SVG URLs). Deferred minors in branch ledger (magic numbers in eye/mouth geometry, capyDie twice, preview label contrast).
 - 2026-11-06 (art prep): reviewed Figma D2 and agent-sprite-forge; wrote ART-001 v2 + ART-002 (docs/JSON only, no tests run); branch feat/capy-character-spec from version/v0.2, pushed, not merged.
