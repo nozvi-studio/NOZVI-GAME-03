@@ -77,3 +77,12 @@ for (const slot of [0, 1] as const) it(`UIFIX-R2 reject toast for slot ${slot} s
   const p = skillTipPlacement(l, slot, ui(200), ui(46), m);
   expect(p.y + ui(46) + m.tailGap).toBeLessThanOrEqual(l.skills[slot].groupTop + 0.001);  // above the button group when it fits
 });
+
+it('UIFIX-R2 reject toast bubble bottom stays above the skill group top when the board-to-skills gap fits the toast', () => {
+  const l = hudLayout(true), boardBottom = BOARD.y + BOARD.size, tail = ui(11), h = ui(46);
+  for (const slot of [0, 1] as const) {
+    const gap = l.skills[slot].groupTop - boardBottom, p = skillTipPlacement(l, slot, ui(200), h, { margin: ui(16), tailLeft: ui(50), tailGap: tail });
+    expect(p.y).toBeGreaterThanOrEqual(boardBottom);                                  // board clamp always wins
+    if (gap >= h + tail) expect(p.y + h).toBeLessThanOrEqual(l.skills[slot].groupTop); // no overlap with the button
+  }
+});

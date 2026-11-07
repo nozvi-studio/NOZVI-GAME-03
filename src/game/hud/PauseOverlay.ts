@@ -54,7 +54,7 @@ export class PauseOverlay {
   }
 
   show(v: PauseView): void {
-    const th = uiTheme(themeOf(currentPalette()));
+    const mode = themeOf(currentPalette()), th = uiTheme(mode);
     const m = PAUSE_MOCK, lay = pauseLayout(v), h = ui(lay.height), y0 = (HEIGHT - h) / 2;
     this.card.clear(); drawCard(this.card, this.cardX, y0, this.cardW, h, ui(m.radius), th.card, { shadowAlpha: TOKENS.hud.cardShadowAlpha, dy: M.shadowDy });
     this.title.setColor(th.ink).setText(v.title).setY(y0 + ui(lay.title)); this.subtitle.setColor(th.cardSoft).setText(v.subtitle).setY(y0 + ui(lay.subtitle));
@@ -63,7 +63,7 @@ export class PauseOverlay {
       this.chipText.setColor(th.ink).setText(v.chip);
       const ch = ui(m.chip), ic = ui(M.chipIcon), pad = ui(M.chipPadL), gap = ui(M.chipGap);
       const cw = pad + ic + gap + ui(M.chipPadR) + this.chipText.width, cx = WIDTH / 2 - cw / 2, cy = y0 + ui(lay.chip);
-      this.chipG.fillStyle(toInt(themeOf(currentPalette()) === 'dark' ? th.bg : TOKENS.surface.sand)).fillRoundedRect(cx, cy, cw, ch, ch / 2);
+      this.chipG.fillStyle(toInt(mode === 'dark' ? th.bg : TOKENS.surface.sand)).fillRoundedRect(cx, cy, cw, ch, ch / 2);
       this.chipIcon.setPosition(cx + pad + ic / 2, cy + ch / 2); this.chipText.setPosition(cx + pad + ic + gap, cy + ch / 2);
     }
     this.shown = new Set(lay.buttons.map(b => b.id));

@@ -168,7 +168,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
     expect(h.find('tip').text).toBe('Checkpoints are permanent. Your saved energy comes with you.');
     h.flush(); expect(h.last('banner-title').text).toBe('Next run starts at L4!');
   });
-  it('MEC-006 §8 skill feedback: cast, reject (not empty), orb tip once, unlock tips', () => {
+  it('MEC-006 UIFIX-R2 §8 skill feedback: cast, reject (not empty), orb tip once, unlock tips', () => {
     const h = setup();
     h.game.events.emit('sim-events', [{ type: 'orbSpawned', x: 1, y: 1 }, { type: 'orbEaten', x: 1, y: 1, gained: 15 }]);
     expect(h.find('tip').text).toBe('Energy orb! Fuel for skills');

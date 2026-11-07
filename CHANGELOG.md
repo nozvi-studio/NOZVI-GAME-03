@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(hud): UIFIX wave 1 final-review fixes (snake rim constants, wait chip without flag icon, skill-tip no-overlap test, pause theme computed once)
 - feat(hud): UIFIX-R3 waiting prompt in the chip row (touch: Swipe to steer!, keys: Press an arrow to go!); centre-of-board hint removed
 - feat(hud): UIFIX-R2 'Need X energy' toast above the tapped skill button, never over the board
 - feat(hud): UIFIX-R1 in-run banners draw as one strip at the board top edge; pills sit below it

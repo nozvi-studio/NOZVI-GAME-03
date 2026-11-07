@@ -142,7 +142,6 @@ export class HudScene extends Phaser.Scene {
         this.count.tick(effect.n, s ? countdownCard(s, !this.gameScene.flow.started, this.balance, t) : null); this.synth.play('tick'); break;
       }
       case 'go': this.count.hide(); this.synth.play('go'); this.flushRunStart(); break; // MEC-001-R2
-      case 'begin': break;
     }
     this.refresh();
   }
