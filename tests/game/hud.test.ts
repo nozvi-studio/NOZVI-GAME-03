@@ -61,12 +61,13 @@ function setup(saveData: object = {}, opts: { settings?: boolean; settingsActive
 }
 
 describe('P1 HUD flow, audio and session wiring', () => {
-  it('MEC-001-R2 HUD shows the wait hint after the countdown until the first non-reverse input', () => {
+  it('MEC-001-R2 UIFIX-R3 HUD shows the wait prompt in the chip after the countdown until the first non-reverse input', () => {
     const h = setup();
+    const chip = (): { text: string; visible: boolean } => h.find('next-checkpoint');
     h.game.apply(flowTick(h.game.flow, b, b.flow.countdownMs));
-    expect(h.game.flow.status).toBe('waiting'); expect(h.find('wait-hint').visible).toBe(true);
-    h.game.turn(-1, 0); expect(h.game.flow.status).toBe('waiting'); expect(h.find('wait-hint').visible).toBe(true);
-    h.game.turn(0, -1); expect(h.game.flow.status).toBe('playing'); expect(h.find('wait-hint').visible).toBe(false);
+    expect(h.game.flow.status).toBe('waiting'); expect(chip().visible).toBe(true); expect(chip().text).toBe('Press an arrow to go!');
+    h.game.turn(-1, 0); expect(h.game.flow.status).toBe('waiting'); expect(chip().text).toBe('Press an arrow to go!');
+    h.game.turn(0, -1); expect(h.game.flow.status).toBe('playing'); expect(chip().text).not.toBe('Press an arrow to go!');
   });
   it('P1 HUD has no Play card: Game opens on the countdown; pause shows Resume and Quit', () => {
     const h = setup();
@@ -285,6 +286,6 @@ describe('P1 HUD flow, audio and session wiring', () => {
   it('MEC-001-R2 a turn during the countdown counts: the run starts on go without a wait hint', () => {
     const h = setup(); h.game.turn(0, -1);
     h.game.apply(flowTick(h.game.flow, b, b.flow.countdownMs));
-    expect(h.game.flow.status).toBe('playing'); expect(h.find('wait-hint').visible).toBe(false);
+    expect(h.game.flow.status).toBe('playing'); expect(h.find('next-checkpoint').text).not.toBe('Press an arrow to go!');
   });
 });

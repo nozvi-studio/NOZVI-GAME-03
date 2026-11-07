@@ -9,15 +9,15 @@ export interface HudView {
   levelTitle: string; biomeName: string; quota: { done: string; total: string };
   score: string; energy: { text: string; fill: number };
   skills: readonly [SkillView | null, SkillView | null];
-  chip: { kind: 'ramp' | 'checkpoint'; text: string } | null;
+  chip: { kind: 'ramp' | 'checkpoint' | 'wait'; text: string } | null;
 }
 const clamp01 = (n: number): number => Math.min(1, Math.max(0, n));
 /** Total ms of a timed skill (ring denominator); Tail Snip is instant (its wall is shown by the pill), so no ring. */
 const timedMs = (id: SkillId, b: Balance): number | null =>
   id === 'slowmo' ? b.skills.slowmo.durationMs : id === 'shield' ? b.skills.shield.durationMs : id === 'mangoRain' ? b.skills.mangoRain.durationMs : null;
 
-/** P3b2-R7 MEC-003 §8 / MEC-006 §8 / MEC-007 §8 / MEC-008-R8, R11 (the ramp chip only for a checkpoint start, like countdownCard): everything the HUD shows, as plain data. */
-export function hudView(s: HudSnap, hint: { key: string; level: number } | null, b: Balance, t: T): HudView {
+/** UIFIX-R3: while `wait` is set (status 'waiting') the chip shows the touch / keyboard prompt instead of ramp or checkpoint. P3b2-R7 MEC-003 §8 / MEC-006 §8 / MEC-007 §8 / MEC-008-R8, R11 (the ramp chip only for a checkpoint start, like countdownCard): everything the HUD shows, as plain data. */
+export function hudView(s: HudSnap, hint: { key: string; level: number } | null, b: Balance, t: T, wait: { touch: boolean } | null = null): HudView {
   const skill = (slot: 0 | 1): SkillView | null => {
     const k = s.skills[slot];
     if (!k || k.id === null) return null;
@@ -31,7 +31,8 @@ export function hudView(s: HudSnap, hint: { key: string; level: number } | null,
     quota: max ? { done: t('hud.quotaMax'), total: '' } : { done: String(s.progress), total: `/${s.need}` },
     score: String(s.score), energy: { text: String(s.energy), fill: clamp01(s.energy / s.energyMax) },
     skills: [skill(0), skill(1)],
-    chip: s.rampActive && s.startLevel > 1 ? { kind: 'ramp', text: t('hud.ramp', { n: s.rampMangoesLeft }) }
+    chip: wait ? { kind: 'wait', text: t(wait.touch ? 'hud.wait.touch' : 'hud.wait.keys') }
+      : s.rampActive && s.startLevel > 1 ? { kind: 'ramp', text: t('hud.ramp', { n: s.rampMangoesLeft }) }
       : hint ? { kind: 'checkpoint', text: t(hint.key, { level: hint.level }) } : null,
   };
 }

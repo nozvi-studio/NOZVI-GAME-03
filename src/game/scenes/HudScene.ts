@@ -24,24 +24,23 @@ import { JuicePlayer } from '../juice/JuicePlayer';
 import { ScreenFx } from '../juice/ScreenFx';
 import type { JuiceInput } from '../juice/types';
 import { acceptSkillInput, skillSlotForKey } from '../input/skillKeys';
-import { BOARD, cellPx, WIDTH } from '../layout';
+import { cellPx, WIDTH } from '../layout';
 import { currentPalette, reduceMotion } from '../render/palette';
 import { runStartLines } from '../hudText';
-import { FONT_UI, TOKENS } from '../uiTokens';
 import { pillButton } from '../ui/widgets';
 import { ui } from '../ui/layout';
-import { incomingBanner, t, TEXT } from '../text';
+import { incomingBanner, t } from '../text';
 import type { GameScene } from './GameScene';
 
 type HudHint = ReturnType<typeof homeView>['hint'];
-// Mockup px of the wait hint and the ?debug=1 buttons (not in the D2 mockups).
-const M = { waitHint: 22, debugNextW: 56, debugKeyW: 70 } as const;
+// Mockup px of the ?debug=1 buttons (not in the D2 mockups).
+const M = { debugNextW: 56, debugKeyW: 70 } as const;
 
 // P3b-2: wiring only. Models in src/game/hud/*, views draw them; this scene owns events, sounds, haptics, flow and session calls.
 export class HudScene extends Phaser.Scene {
   private gameScene!: GameScene; private session!: Session; private balance!: Balance; private synth!: Synth;
   private top!: HudTop; private skills!: SkillButtons; private pause!: PauseOverlay; private count!: CountdownOverlay; private banners!: BannerLayer;
-  private pad!: ReturnType<typeof createDpad>; private waitHint!: Phaser.GameObjects.Text;
+  private pad!: ReturnType<typeof createDpad>; private touch = false;
   private heading = ''; private hint: HudHint = null; private cpCount = 0; private bestLevelAtStart = 0; private orbTipShown = false; private leaving = false; private juice!: JuicePlayer;
   private haptics = true; private startBanner: string[] = []; private shrunkTo: number | null = null; private overTimer?: Phaser.Time.TimerEvent;
   private debugKey: { c: Phaser.GameObjects.Container } | null = null; private debugNext: { c: Phaser.GameObjects.Container } | null = null;
@@ -53,7 +52,7 @@ export class HudScene extends Phaser.Scene {
     this.session = this.registry.get('session') as Session; this.balance = this.registry.get('balance') as Balance;
     const save = this.session.save(), layout = hudLayout(true); // pad geometry always computed; visibility follows settings.dpad
     this.cpCount = save.unlockedCheckpoints.length; this.bestLevelAtStart = save.bestLevel; this.readHint();
-    this.orbTipShown = false; this.leaving = false; this.heading = ''; this.shrunkTo = null;
+    this.touch = !!this.sys.game?.device?.input?.touch; this.orbTipShown = false; this.leaving = false; this.heading = ''; this.shrunkTo = null;
     this.synth = createSynth(); this.synth.unlock();
     this.input.setGlobalTopOnly(true);
     this.top = new HudTop(this, layout, () => this.gameScene.apply(flowTogglePause(this.gameScene.flow, this.balance)));
@@ -69,9 +68,6 @@ export class HudScene extends Phaser.Scene {
       settings: () => this.session.save().settings, reduced: reduceMotion,
       seed: () => { const s = this.gameScene.snapshot(); return s ? deathSeed(s.score, s.level, s.timeMs) : 0; },
       makeCard: () => new DeathCard(this, this.balance, reduceMotion()), later: (ms, fn) => this.time.delayedCall(ms, fn), onDone: () => this.leave() });
-    this.waitHint = this.add.text(WIDTH / 2, BOARD.y + BOARD.size / 2, this.sys.game?.device?.input?.touch ? TEXT.waitHintTouch : TEXT.waitHintKeys,
-      { fontFamily: FONT_UI, fontSize: `${ui(M.waitHint)}px`, fontStyle: '800', color: TOKENS.text.primary, align: 'center' })
-      .setName('wait-hint').setOrigin(0.5).setVisible(false);
     this.count = new CountdownOverlay(this);
     this.pause = new PauseOverlay(this, {
       onResume: () => { this.applySettings(); this.gameScene.apply(flowResume(this.gameScene.flow, this.balance)); },
@@ -139,14 +135,14 @@ export class HudScene extends Phaser.Scene {
   private onFlow(effect: FlowEffect): void {
     switch (effect.type) {
       case 'newRun': this.overTimer?.remove(); this.banners.hide(); this.synth.unlock(); this.showRunStart(); break; // MEC-003 §8
-      case 'hideOverlay': this.pause.hide(); this.count.hide(); this.waitHint.setVisible(false); break;
-      case 'showPaused': this.count.hide(); this.waitHint.setVisible(false); this.showPause(); break;
+      case 'hideOverlay': this.pause.hide(); this.count.hide(); break;
+      case 'showPaused': this.count.hide(); this.showPause(); break;
       case 'tick': {
         const s = this.gameScene.snapshot();
         this.count.tick(effect.n, s ? countdownCard(s, !this.gameScene.flow.started, this.balance, t) : null); this.synth.play('tick'); break;
       }
-      case 'go': this.count.hide(); this.waitHint.setVisible(this.gameScene.flow.status === 'waiting'); this.synth.play('go'); this.flushRunStart(); break; // MEC-001-R2
-      case 'begin': this.waitHint.setVisible(false); break;
+      case 'go': this.count.hide(); this.synth.play('go'); this.flushRunStart(); break; // MEC-001-R2
+      case 'begin': break;
     }
     this.refresh();
   }
@@ -200,7 +196,7 @@ export class HudScene extends Phaser.Scene {
 
   private onOver(s: SimSnapshot): void {
     if (this.leaving) return; // the Quit path already left
-    this.banners.hide(); this.count.hide(); this.waitHint.setVisible(false);
+    this.banners.hide(); this.count.hide();
     this.juice.runOver(s.outcome?.won ?? false); // P3a-R7 the death sequence was started by the `died` event; a win waits the same total
   }
   private leave(): void {
@@ -220,7 +216,7 @@ export class HudScene extends Phaser.Scene {
   update(): void { this.refresh(); }
   private refresh(): void {
     const s = this.gameScene.snapshot(); if (!s) return;
-    const status = this.gameScene.flow.status, v = hudView(s, this.hint, this.balance, t);
+    const status = this.gameScene.flow.status, v = hudView(s, this.hint, this.balance, t, status === 'waiting' ? { touch: this.touch } : null);
     this.top.apply(v, status === 'paused', status !== 'ready' && status !== 'over');
     this.skills.apply(v.skills);
     this.banners.setPills(skillPills(s.skills, this.balance, t)); this.banners.setSlowmo(s.slowmo !== null);

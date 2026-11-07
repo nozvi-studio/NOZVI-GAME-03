@@ -4,7 +4,6 @@ export const TEXT = {
   title: 'Mango Snake: Hard', header: 'Mango Snake', hard: 'hard', score: 'score', best: 'best',
   start: 'Fill the bar with mangoes to level up. Each level brings new obstacles.',
   play: 'Play', resume: 'Resume', playAgain: 'Play again', paused: 'Paused',
-  waitHintKeys: 'Press an arrow to go!', waitHintTouch: 'Swipe to go!', // owner batch Q provisional (2026-11-06)
   // pinned by P0 design §7.5; not shown by the D2 pause overlay
   pausedText: 'You get a short countdown when you resume.',
   landsSoon: 'Lands soon', groundRising: 'Ground rising', mangoRotting: 'Mango rotting',
@@ -107,6 +106,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'home.exportLog': 'Export log', 'home.exportDone': 'Log copied',
   'banner.checkpoint': 'Next run starts at L{level}!',
   'tip.checkpoint': 'Checkpoints are permanent. Your saved energy comes with you.',
+  'hud.wait.touch': 'Swipe to steer!', 'hud.wait.keys': 'Press an arrow to go!', // UIFIX-R3 provisional
   'hud.nextCheckpoint': 'Next checkpoint at L{level}', 'hud.nextCheckpointClear': 'Next checkpoint: clear L{level}',
   'hud.ramp': 'Warming up {n}',
   'results.best': 'Best {best}', 'results.newBest': 'New best!', 'results.carryLabel': 'Energy saved',
