@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(juice): pure event-to-cue mapper with reduced motion and settings gating; Shield-only board tint (P3a-R1..R9).
 - feat(audio): P3a synth SFX: soft two-stage energy zap, distinct per-skill casts, biome jingle, checkpoint fanfare; `SFX_TONES` exported (P3a-R2, R3, R5, R6).
 - feat(config): P3a `balance.juice` block (bursts, haptics, death <= 1.5 s, reduced-motion and perf caps) with validation (P3a-R7, R8, R11).
 - fix(hud): restore the design-pinned `pausedText` string (P0 design §7.5) and its test pins; banner reset clears the pop scale; MEC-003/MEC-007 text-key references and the DECISIONS 2026-11-07 P3b-2 ramp chip note updated.
