@@ -47,7 +47,7 @@ Code column uses CODEMAP names. "planned" = no scene yet; check `docs/CODEMAP.md
 | `FullClearD2` | Level 30 full-clear screen | planned | P4 |
 | `PlayerHead`, `HeadRigD2`, `HeadIcon`, `MeowHead`, `ExpressionsD2`, `ExprHeadD2` | Head rig per skin, anchors, states, expressions (draft, not wired) | `src/game/art/` (capy rig exists; see ART-001) | P3c+ |
 | `Tile`, `Rock`, `FencePiece`, `FoodIcon` | Shared board parts (mud, pebble/rock/boulder/crumble/warn, fence, mango) | `render/tiles.ts` and board renderers | P3b |
-| `PaletteD2` | Colour tokens (section 3) | token module | P3b |
+| `PaletteD2` | Colour tokens (section 3) | `src/game/uiTokens.ts` (done) | P3b |
 Board sizes and the canvas layout: `canvas.json` (`boards.<file>.w/h`).
 
 ## 5. Refreshing the snapshot

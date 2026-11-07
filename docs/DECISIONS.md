@@ -446,3 +446,9 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: commit PNG snapshots (2x) plus the `.dc.html` sources and `canvas.json` under `docs/design/mockups/`, with `docs/design/UI-MOCKUPS.md` as the map and token list. Runtime `support.js` is not committed.
 - Alternatives: link only (not reproducible offline); Figma export (no Figma file exists); PNGs only (loses exact numbers).
 - Consequence: about 6 MB added to the repo; refresh steps in UI-MOCKUPS section 5.
+
+## 2026-11-07 - P3-0 UI foundation: Phaser-native D2 port, self-hosted fonts, settings in save v3, P3 on version/v0.3
+- Context: P3-0 builds the shared UI base for the D2 mockups. The owner wants the screens in Phaser, not as an HTML/DOM overlay. Fonts must not depend on a runtime Google Fonts request. Display and sound options must survive restarts. The v0.2 P2 exit is still waiting on the owner playtest.
+- Choice: (1) P3 screens are a Phaser-native port of the D2 mockups (spec D1); a DOM overlay was rejected. (2) Fonts (Nunito, Lilita One) are self-hosted from the Fontsource CDN 5.1.0 as binary assets in `public/fonts`, not an npm dependency, with no runtime Google Fonts (D4). (3) Save v3 adds `settings` {sound, haptics, dpad, reducedMotion, boardTheme}; `null` means follow the OS (D7). (4) P3 work happens on `version/v0.3`, branched from `docs/p3-spec`, because the v0.2 P2 exit still waits on the owner playtest (owner 2026-11-07).
+- Alternatives: DOM overlay for menus (faster to build, rejected by D1); Google Fonts link (network dependency, rejected by D4); fonts from npm (extra dependency, rejected); keep P3 on `version/v0.2` until the playtest passes (blocks P3 on owner time).
+- Consequence: `src/game/uiTokens.ts`, `src/game/ui/` and `src/meta/settings.ts` are the new modules (CODEMAP); the P2 exit stays open in STATUS.
