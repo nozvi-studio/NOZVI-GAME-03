@@ -24,6 +24,7 @@ Only files listed here exist. Status: Draft / Approved / Deprecated.
 | ARCH | `docs/ARCHITECTURE.md` | Module boundaries, time model, Sim step order | Draft |
 | PLAYTEST | `docs/PLAYTEST.md` | Playtest evidence | — |
 | P3-UIFIX | `docs/superpowers/specs/2026-11-07-p3-ui-review-fixes-design.md` | P3 UI fixes from the agy review: banner strip, toasts, dark theme, layout, polish (UIFIX-R1..R15) | Approved |
+| P3-UIFIX-PLANS | `docs/superpowers/plans/2026-11-07-p3-uifix-wave1.md`, `-wave2.md`, `-wave3.md` | UI fix plans: wave 1 occlusion + color, wave 2 layout, wave 3 polish + agy re-review | Draft |
 | ART-001 | `docs/specs/art/ART-001-character-coordinate-system.md` | Character anchors, look rules, action list, asset folders and production routes (capy reference) | Draft |
 | ART-002 | `docs/specs/art/ART-002-capy-master-still.md` | Capy master still brief: spec files, Codex steps, acceptance checklist, motion test | Draft |
 | ART-003 | `docs/specs/art/ART-003-skin-production.md` | Skin production guide: steps from the capy template, acceptance checklist, refactor needed before the 2nd skin | Draft (not fully approved) |

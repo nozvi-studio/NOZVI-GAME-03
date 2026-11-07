@@ -20,7 +20,7 @@ Remove board occlusion, fix dark-theme readability and the clear layout/polish f
 - **UIFIX-R5 Snake rim (COL-02).** A per-biome optional snake outline color in the biome look (set for biome 6 only); body blocks and head get a bright outline. Skin-agnostic. Contrast of rim vs biome 6 ground >= 3:1 (tested).
 
 ## 5. Wave 2 — layout (UIFIX-R6..R11)
-- R6 D-pad raised ~24 mockup px and wider gap from the left skill button (LAY-02).
+- R6 D-pad raised and wider gap from the left skill button (LAY-02). Lead ruling 2026-11-08: a full 24 px raise would overlap the chip row; raise as far as the chip row allows (bottom margin >= 24 mockup px, wave 2 plan Task 1).
 - R7 Pause and Settings hit areas >= 48 px, inside the top safe area (LAY-06).
 - R8 Boot shows the title immediately with a system-font fallback, swapped when fonts load (LAY-05).
 - R9 Loadout skill cards compact on heights < 700 CSS px (LAY-07).
