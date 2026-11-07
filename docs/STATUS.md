@@ -13,9 +13,11 @@
 - [x] P3 spec + 5 plans on branch docs/p3-spec (from feat/p3-design-mockups): spec docs/superpowers/specs/2026-11-07-p3-juice-screens-design.md; plans 2026-11-07-p3-0 / p3b-1 / p3b-2 / p3b-3 / p3a. Owner ruling 2026-11-07: Quit run = run end like a death (MEC-008-R6, already specced).
 - [x] Owner approved P3 spec + plans (2026-11-07). Owner rules: lead decides technical/visual, asks only on important gameplay; push allowed; subagents with cheapest fitting model.
 - [x] P3-0 UI foundation merged into version/v0.3: tokens, ui()/layoutColumn, settings + save v3 (null = follow OS live), self-hosted Nunito/Lilita One + Boot font wait, widget kit (pill hit rect verified in browser), Baloo removed. 1215 pass, typecheck clean; Opus final review fixes applied.
-- [ ] **P3 RESUME HERE:** P3b-1 board art, P3b-2 HUD, P3b-3 menus (branches from version/v0.3), then P3a. Carry into plans: pill widgets need icon badge (P3b-2/3), `balance.juice` block (P3a), widget px literals -> TOKENS.radius/spacing, PillButton type, title stroke scaling.
+- [x] P3b-1 board art merged into version/v0.3 (biome grounds checker+grid, derived dark theme, D2 rocks/warn tiles/fences/hedges/mud/ice/rising stone/mango; Opus final review fixes). Owner-review items: derived dark board theme (no dark mockup), rock/pebble mapping. Follow-ups: coconut lane/bomb/NPC art (P3b-1b), ice arrow contrast in dark, rain mango icon, dead Palette keys.
+- [x] P3b-3 menus merged into version/v0.3 (D2 Boot/Home/Loadout/Results + new Settings scene, settings saved immediately, rulings C1-C10 in the plan; Playwright QA 540x960 + 360x640 in PLAYTEST). 1291 pass, typecheck clean after both merges.
+- [ ] **P3 RESUME HERE:** P3b-2 HUD (branch feat/p3b-2-hud from version/v0.3), then P3a juice. P3b-2 handoff: guard HudScene skill keys while Settings overlay is active; haptics toggle is unwired (gate synth.buzz on settings.haptics); Pause re-enables its buttons on `settings-closed`; use Session.updateSettings (no setDpad).
 - Note: save v3 is not readable by v0.2 builds; back up `mango-snake.save` before the P2-exit playtest (DECISIONS 2026-11-07).
-- Strings to review with owner after P3 (agy pass by owner): death lines, Settings/Results/HUD copy, banners — provisional, from mockups.
+- Strings to review with owner after P3 (agy pass by owner): death lines, Settings/Results/HUD copy, banners — provisional, from mockups. New provisional: Shield/Mango Rain card text, Settings labels, results.carryLabel 'Energy saved', results.youWin 'YOU WIN!'. Acknowledge P3b-3 rulings C1-C10 (plan). Known: firstRun = bestScore 0 (a 0-score first run shows first-run again).
 
 ## Next (ordered, max 5)
 1. Owner playtest + 40% verdict; if over40 not empty: lead tunes (OQ-C5), re-playtest.
