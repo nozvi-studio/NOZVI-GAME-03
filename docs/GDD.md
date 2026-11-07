@@ -243,6 +243,8 @@ Boot → Home (Play from checkpoint · Play from L1 · Marble machine · Skins �
 | Death | screen shake, red flash, X eyes, death line | sawtooth drop | 90 ms |
 | Marble machine | peg ticks, bumper glow, slot light-up, coin burst / skin reveal | ticks + win jingle | light per bump |
 
+Status: P3a done (2026-11-07): every row except Marble machine (P4); numbers in `balance.juice`; death lines per cause in `text.ts`.
+
 ## 11. Scope & phases [REQUIRED]
 Big phases; each phase gets **one spec set + one plan** (Superpowers `brainstorming` → `writing-plans`), and the plan is executed as **small tasks, one PR each** (AGENTS §6). The owner approves at two gates per phase: the spec and the exit criteria. Do not start a phase before the previous phase's exit criteria pass.
 | Phase | Milestone | In scope | Exit criteria | Out of scope |

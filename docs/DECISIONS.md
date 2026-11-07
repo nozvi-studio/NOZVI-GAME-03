@@ -478,3 +478,9 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Alternatives: change the sim so L1 never sets `rampActive` (gameplay/spec change, not approved).
 - Consequence: `HudSnap` gains `startLevel`; tests in `tests/game/hudModel.test.ts`.
 - Note (2026-11-07): the greybox HUD's level-up white flash was dropped with the D2 HUD rewrite; level-up juice belongs to P3a.
+
+## 2026-11-07 - P3a juice lead decisions
+- Context: P3a implements every GDD 10.4 row except Marble machine (P4), on top of the P3b-2 HUD split.
+- Choice: (1) Juice = pure mapper (`juiceMap.mapJuice`) + thin `JuicePlayer`; reduced motion and sound/haptics gating live in the mapper so they are unit-tested; the HUD is reached only through the `JuiceHud` interface. (2) Death sequence timing moved from `flow.deathCardDelayMs` to `juice.death.*` (total <= 1.5 s enforced in `parseBalance`). (3) `ui.haptics` replaced by `juice.haptics`; runWon plays one `biome` jingle instead of two `level` arpeggios. (4) Slow-mo tint stays with the HUD/board layers (`BannerLayer`); the mapper tints Shield only. (5) `JuicePlayer` batches haptics per event batch (last wins) because `navigator.vibrate` cancels the previous pattern. (6) Banner motion hook lives in `BannerLayer.next()`: its root container scales about (0,0), so the entrance is one counter tween k 0..1 with pivot compensation (`position = pivot * (1 - s)`) to keep the card centred; reduced motion = `scaleFrom` 1, `slidePx` 0, pure alpha fade of `juice.reduced.softMs`.
+- Alternatives: per-event haptic calls; moving the pivot of every banner child; a separate reduced-motion player.
+- Consequence: death lines are provisional strings (owner batch, OQ-D1); all feedback numbers are in `balance.juice`; see CODEMAP `src/game/juice/*`.

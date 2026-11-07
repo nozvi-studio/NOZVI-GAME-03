@@ -2,6 +2,8 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat: P3a juice - §10.4 feedback table (mapper, player, death card with lines per cause, new SFX, haptics behind setting, reduced motion, perf caps)
+- feat(hud): banner entrance uses juice motion (pivot-compensated slide + scale), pure soft fade when reduced (P3a-R8).
 - feat(juice): JuicePlayer, ScreenFx, DeathCard wired into the HUD; death sequence (<= 1.4 s, tap skips), one buzz per event batch; removed ui.haptics, ui.hud haptic ms and flow.deathCardDelayMs (P3a-R1..R9)
 - feat(juice): death lines for every cause with a seeded pick (provisional strings, OQ-D1) and the RUN OVER title key (P3a-R10).
 - feat(juice): pure event-to-cue mapper with reduced motion and settings gating; Shield-only board tint (P3a-R1..R9).
