@@ -35,6 +35,7 @@ export class DrawObject extends Signals {
   setInteractive(): this { this.input = { enabled: true }; return this; }
   disableInteractive(): this { if (this.input) this.input.enabled = false; return this; }
   setMask(mask: object): this { this.mask = mask; return this; }
+  clearMask(_destroy?: boolean): this { this.mask = undefined; return this; }
   createGeometryMask(): object { return {}; }
   saveTexture(): this { return this; }
   draw(): this { return this; }

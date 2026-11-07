@@ -41,12 +41,12 @@ Code column uses CODEMAP names. "planned" = no scene yet; check `docs/CODEMAP.md
 | `DeathD2` | Death flash/shake (reduced-motion variant) | GameScene juice | P3a |
 | `ResultsD2` (prop `state`: normal/newBest/checkpointUnlocked/firstRun) | Game over | `scenes/ResultsScene.ts`, `flow/resultsView.ts` | done (P3b-3, P4 elements hidden) |
 | `SettingsD2` | Settings | `scenes/SettingsScene.ts`, `flow/settingsView.ts`, `flow/settingsApply.ts` | done (P3b-3, P4 elements hidden) |
-| `BiomeBoardsD2` | 6 biome board looks (tiles, fences, rocks per biome) | `render/tiles.ts`, GameScene board | P3b |
+| `BiomeBoardsD2` | 6 biome board looks (tiles, fences, rocks per biome) | `render/tiles.ts`, GameScene board | P3b (P3b-1 done 2026-11-07; coconut lane, bomb and NPC art not ported) |
 | `SkinsD3`, `SkinBuyD2`, `DuplicateD2` | Character picker, buy skin, duplicate-skin result | planned (meta) | P4 |
 | `MarbleMachineD2`, `MarbleWheelD2`, `MarbleSkinDropD2`, `OddsD2` | Marble machine board, wheel bonus, skin drop, published odds | planned (meta) | P4 |
 | `FullClearD2` | Level 30 full-clear screen | planned | P4 |
 | `PlayerHead`, `HeadRigD2`, `HeadIcon`, `MeowHead`, `ExpressionsD2`, `ExprHeadD2` | Head rig per skin, anchors, states, expressions (draft, not wired) | `src/game/art/` (capy rig exists; see ART-001) | P3c+ |
-| `Tile`, `Rock`, `FencePiece`, `FoodIcon` | Shared board parts (mud, pebble/rock/boulder/crumble/warn, fence, mango) | `render/tiles.ts` and board renderers | P3b |
+| `Tile`, `Rock`, `FencePiece`, `FoodIcon` | Shared board parts (mud, pebble/rock/boulder/crumble/warn, fence, mango) | `render/tiles.ts` and board renderers | done (mango only; fish/bone/melon in P4) |
 | `PaletteD2` | Colour tokens (section 3) | `src/game/uiTokens.ts` (done) | P3b |
 P3b-3 gameplay rulings C1-C10 (where mockups and specs disagree, spec wins) are listed in `docs/superpowers/plans/2026-11-07-p3b-3-menus.md`; the D2 screens above follow them.
 

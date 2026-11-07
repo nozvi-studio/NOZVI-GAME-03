@@ -3,6 +3,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 - P3b-3 menu screens: D2 Boot/Home/Loadout/Results, new Settings scene, settings saved immediately, balance-driven skill cards.
+- feat(game): P3b-1 board art: biome grounds (checker + grid), light/dark board themes, D2 rocks/crumble/warn tiles (ring + dashes + shape), fences, hedges, mud/ice/rising stone, mango icon; pure `biomePalette`/`boardParts`.
 - feat(game): P3-0 UI foundation: D2 tokens, mockup layout, self-hosted fonts (Nunito, Lilita One), settings in save v3, widget kit; palette follows the OS live while theme/motion settings are unset.
 - docs: import D2 UI mockups (32 boards: static HTML primary, .dc.html source + canvas.json, PNG for reference only) and `docs/design/UI-MOCKUPS.md` (tokens, board-to-code map, agent rules) for P3 screens
 - fix(game): capy SVGs load as base64 data URLs (Phaser treats data: URLs as base64); body feet no longer clipped

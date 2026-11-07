@@ -11,9 +11,10 @@ import { BOARD_RADIUS, buildBoardTexture, drawBoardBorder } from '../render/boar
 import { Effects, PARTICLE_BURSTS } from '../render/effects';
 import { drawHazards, drawTerrains } from '../render/hazards';
 import { drawMango } from '../render/mango';
-import { currentPalette, reduceMotion, type Palette } from '../render/palette';
+import { boardLook, type BoardLook } from '../render/biomePalette';
+import { currentPalette, reduceMotion, themeOf, type Palette } from '../render/palette';
 import { drawSnake } from '../render/snake';
-import { drawGroundTint, drawSkillObjects, drawSkillOverlay } from '../render/skills';
+import { drawSkillObjects, drawSkillOverlay } from '../render/skills';
 import { drawTiles, drawIceArrow } from '../render/tiles';
 import { drawMovers } from '../render/movers';
 import { drawCycles } from '../render/cycles';
@@ -27,6 +28,8 @@ export class GameScene extends Phaser.Scene {
   private clock = createClock();
   private palette!: Palette;
   private reduced = false;
+  private look!: BoardLook;
+  private lookStale = true;
   private mangoBornAt = 0;
   private board!: Phaser.GameObjects.Container;
   private border!: Phaser.GameObjects.Graphics;
@@ -44,7 +47,8 @@ export class GameScene extends Phaser.Scene {
     this.palette = currentPalette();
     this.reduced = reduceMotion();
     this.cameras.main.setBackgroundColor(this.palette.bg);
-    const image = this.add.image(0, 0, buildBoardTexture(this, this.balance, this.palette)).setOrigin(0);
+    this.look = boardLook(1, themeOf(this.palette));
+    const image = this.add.image(0, 0, buildBoardTexture(this, this.balance, this.look)).setOrigin(0);
     this.board = this.add.container(BOARD.x, BOARD.y, [image]).setName('board');
     this.layers = {
       ground: this.add.graphics(), terrain: this.add.graphics(), hazards: this.add.graphics(), mango: this.add.graphics(),
@@ -70,16 +74,17 @@ export class GameScene extends Phaser.Scene {
     this.game.events.on(Phaser.Core.Events.HIDDEN, hidden);
     const theme = window.matchMedia('(prefers-color-scheme: dark)');
     const recolor = (): void => {
-      this.palette = currentPalette();
-      buildBoardTexture(this, this.balance, this.palette);
+      this.palette = currentPalette(); this.reduced = reduceMotion(); this.lookStale = true; // texture rebuilt on the next draw
       drawBoardBorder(this.border.clear(), this.palette);
       this.cameras.main.setBackgroundColor(this.palette.bg);
     };
     theme.addEventListener('change', recolor);
+    this.game.events.on('settings-closed', recolor);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.game.events.off(Phaser.Core.Events.BLUR, pause);
       this.game.events.off(Phaser.Core.Events.HIDDEN, hidden);
       theme.removeEventListener('change', recolor);
+      this.game.events.off('settings-closed', recolor);
       this.effects.reset();
       this.board.clearMask(true);
     });
@@ -182,22 +187,25 @@ export class GameScene extends Phaser.Scene {
   private draw(snapshot: SimSnapshot, time: number): void {
     this.boardClip.setPosition(this.board.x, this.board.y);
     this.border.setPosition(this.board.x, this.board.y);
+    if (this.lookStale || snapshot.biome !== this.look.biome) {
+      this.look = boardLook(snapshot.biome, themeOf(this.palette)); this.lookStale = false;
+      buildBoardTexture(this, this.balance, this.look);
+    }
     const cell = cellPx(this.balance), p = this.palette;
     for (const layer of Object.values(this.layers)) layer.clear();
-    drawGroundTint(this.layers.ground, snapshot, BOARD.size);
-    drawTiles(this.layers.ground, snapshot.tiles, cell, time, this.reduced);
-    drawTerrains(this.layers.terrain, snapshot.terrains, cell, p, this.balance, this.reduced);
-    drawHazards(this.layers.hazards, snapshot.hazards, cell, p, this.balance, this.reduced);
+    drawTiles(this.layers.ground, snapshot.tiles, cell, time, this.reduced, this.look);
+    drawTerrains(this.layers.terrain, snapshot.terrains, cell, this.look, this.balance, this.reduced);
+    drawHazards(this.layers.hazards, snapshot.hazards, cell, this.look, this.balance, this.reduced);
     drawCycles(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawMovers(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawBlasts(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawShrink(this.layers.hazards, snapshot, cell, time, this.reduced);
-    drawMango(this.layers.mango, snapshot, cell, p, time, this.reduced, this.mangoBornAt);
-    drawSkillObjects(this.layers.skills, snapshot, cell, p, this.balance, time);
+    drawMango(this.layers.mango, snapshot, cell, p, this.look, time, this.reduced, this.mangoBornAt);
+    drawSkillObjects(this.layers.skills, snapshot, cell, p, this.look, this.balance, time);
     drawSnake(this.layers.snake, snapshot, cell, p, this.effects.gulp, false);
     this.capy.update(snapshot, time, cell);
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);
-    drawIceArrow(this.layers.overlay, snapshot, cell);
+    drawIceArrow(this.layers.overlay, snapshot, cell, this.look);
     this.effects.draw(this.layers.effects, p);
   }
 }
