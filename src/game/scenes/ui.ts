@@ -14,11 +14,20 @@ export function label(scene: Phaser.Scene, x: number, y: number, text: string, s
 
 export interface Button { c: Phaser.GameObjects.Container; g: Phaser.GameObjects.Graphics; text: Phaser.GameObjects.Text; w: number; h: number }
 
-/** Shared press rule: `action` fires on pointerup only if the pointerdown started on this target. */
-export function bindPress(c: Phaser.GameObjects.Container, onPress: () => void, onRelease: () => void, action: () => void): void {
+type PressEvent = Phaser.Types.Input.EventData | undefined;
+type PressArgs = [pointer: Phaser.Input.Pointer, localX: number, localY: number, event?: Phaser.Types.Input.EventData];
+/**
+ * Shared press rule: `action` fires on pointerup only if the pointerdown started on this target.
+ * Handlers receive the Phaser event data; `stop` calls stopPropagation on down and up so objects below do not react.
+ */
+export function bindPress(c: Phaser.GameObjects.Container, onPress: (event?: PressEvent) => void,
+  onRelease: (event?: PressEvent) => void, action: (event?: PressEvent) => void, stop = false): void {
   let pressed = false;
-  c.on('pointerdown', () => { pressed = true; onPress(); });
-  c.on('pointerup', () => { const go = pressed; pressed = false; onRelease(); if (go) action(); });
+  c.on('pointerdown', (...[, , , event]: PressArgs) => { if (stop) event?.stopPropagation(); pressed = true; onPress(event); });
+  c.on('pointerup', (...[, , , event]: PressArgs) => {
+    if (stop) event?.stopPropagation();
+    const go = pressed; pressed = false; onRelease(event); if (go) action(event);
+  });
   c.on('pointerout', () => { pressed = false; onRelease(); });
 }
 
