@@ -1,19 +1,13 @@
 import type Phaser from 'phaser';
 import type { Balance, SimSnapshot } from '../../core';
 import { drawRock } from './hazards';
-import { BIOME_GROUND, P1_COLORS, type Palette } from './palette';
+import { P1_COLORS, type Palette } from './palette';
 
 type Graphics = Phaser.GameObjects.Graphics;
 /** Greybox blink half-period (presentation only; the blink window comes from balance). */
 const BLINK_HALF_PERIOD_MS = 200;
 const blinkOff = (leftMs: number, windowMs: number, time: number): boolean =>
   leftMs <= windowMs && Math.floor(time / BLINK_HALF_PERIOD_MS) % 2 === 1;
-
-// MEC-003 §8 biome ground tint, drawn under every board layer.
-export function drawGroundTint(g: Graphics, s: SimSnapshot, boardPx: number): void {
-  const tint = BIOME_GROUND[Math.min(BIOME_GROUND.length, Math.max(1, s.biome)) - 1]!;
-  g.fillStyle(tint, 0.18).fillRect(0, 0, boardPx, boardPx);
-}
 
 // MEC-006 §8 orbs, rain mangoes, snip walls and rubble (greybox shapes, blink = shape on/off).
 export function drawSkillObjects(g: Graphics, s: SimSnapshot, cell: number, p: Palette, b: Balance, time: number): void {

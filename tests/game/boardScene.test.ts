@@ -1,11 +1,34 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { GameScene } from '../../src/game/scenes/GameScene';
 import type { Effects } from '../../src/game/render/effects';
+import { DARK, currentPalette, setDisplaySettings } from '../../src/game/render/palette';
+import { defaultSettings } from '../../src/meta';
 import { loadBalance } from '../support/balance';
 import { DrawObject, sceneHarness, Signals } from '../support/scene';
 
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } }, Core: { Events: { BLUR: 'blur', HIDDEN: 'hidden' } } } }));
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => { vi.unstubAllGlobals(); setDisplaySettings(null); });
+function mounted() {
+  const h = sceneHarness(), game = new GameScene(), events = new Signals();
+  vi.stubGlobal('window', { addEventListener() {}, removeEventListener() {},
+    matchMedia: () => ({ matches: false, addEventListener() {}, removeEventListener() {} }) });
+  h.registry.set('balance', loadBalance());
+  Object.assign(game, h.scene, {
+    add: { ...h.scene.add, image: () => new DrawObject(), renderTexture: () => new DrawObject() },
+    children: { getByName: () => null }, textures: { exists: () => false },
+    cameras: { main: { setBackgroundColor() {} } },
+    game: { events, canvas: { addEventListener() {}, removeEventListener() {} } },
+  });
+  vi.spyOn(game, 'startRun').mockImplementation(() => {});
+  game.create();
+  return { game, events };
+}
+it('P3b1-R3 settings-closed re-reads the board theme and does not throw', () => {
+  const { events } = mounted();
+  setDisplaySettings({ ...defaultSettings(), boardTheme: 'dark' });
+  expect(() => events.emit('settings-closed')).not.toThrow();
+  expect(currentPalette()).toBe(DARK);
+});
 it('GDD-13 gameplay and floating scores clip inside rounded board while the outline stays above them', () => {
   const h = sceneHarness(), game = new GameScene(), native = new Signals();
   vi.stubGlobal('window', { addEventListener: native.on.bind(native), removeEventListener: native.off.bind(native),
