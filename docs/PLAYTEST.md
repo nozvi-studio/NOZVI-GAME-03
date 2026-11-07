@@ -127,3 +127,11 @@ _pending_
 - Flow walked with real input: Boot, Home, Settings, Home, Loadout, Go, death, Results, Play again, Home. No console errors.
 - Acceptable differences from the mockups: P4 marbles row and machine hidden; extra Home stepper; energy-saved card in the marbles slot; middle block shrink never below 0.85.
 - Open visual follow-ups: Settings knob shadow, theme tile selection ring, EATEN stat icon, Results title 34 vs mockup 40, Boot logo position.
+
+## 2026-11-07 - P3 UI review (agy, Playwright, independent)
+- Setup: agy with a strict brief (no docs read, evidence per finding, severity S1-S4, anchored 1-10 scores), dev server on version/v0.3 (7bdb66a), 360x640 + 540x960. Full report and screenshots kept outside the repo (lead scratchpad).
+- Scores: layout 6.5, color 5.0, feedback 6.5, gameplay 6.5, UI consistency 7.0; overall 6.3. Findings: 2 S1, 13 S2, 10 S3, 4 S4. No console errors.
+- Lead-verified by screenshot: COL-01 dark-theme HUD title unreadable; JUI-01 reject toast over the board; LAY-04 limited to the debug widget row.
+- Lead disputes: GAM-01 (new-hazard banners exist), GAM-03 (3 buffered turns is a GDD rule), LAY-03 likely a debug-run artifact (to re-check).
+- Owner 2026-11-07: phases 1, 2, 3, 5 accepted as mostly right; fixes in docs/superpowers/specs/2026-11-07-p3-ui-review-fixes-design.md. Phase 4 waits for the owner playtest log.
+

@@ -20,6 +20,7 @@
 - [ ] **P3 EXIT RESUME HERE (owner):** device/agy pass on version/v0.3: 60 fps on a mid-range phone (cloud has no GPU: v0.3 vs P3a both ~12 fps SwiftShader, not representative), 5" readability at 360x640, peak death vignette vs DeathD2, orb/skill-cast/checkpoint-flag juice not browser-verified in cloud, tap-skip feel. Then owner string batch + C1-C10 + derived dark theme review. After owner OK: merge version/v0.3 into dev (with P2 exit).
 - [x] ART-003 skin production guide written (Draft, owner not fully approved; open Q1-Q3).
 - [x] Remotion capy POC merged (owner approved 2026-11-07): pre-rendered idle/eat/dead clip on `?debug=1&artPreview=1`; board head stays tween (DECISIONS).
+- [ ] **UI fixes (UIFIX-R1..R15):** spec + 3 wave plans approved/written (docs/superpowers/plans/2026-11-07-p3-uifix-wave1..3.md). Next: execute wave 1 via subagents on feat/p3-uifix-wave1.
 - Note: save v3 is not readable by v0.2 builds; back up `mango-snake.save` before the P2-exit playtest (DECISIONS 2026-11-07).
 - Strings to review with owner after P3 (agy pass by owner): death lines, Settings/Results/HUD copy, banners — provisional, from mockups. New provisional: Shield/Mango Rain card text, Settings labels, results.carryLabel 'Energy saved', results.youWin 'YOU WIN!'. Acknowledge P3b-3 rulings C1-C10 (plan). Known: firstRun = bestScore 0 (a 0-score first run shows first-run again).
 
