@@ -102,7 +102,7 @@
     "gulpMs": 180,
     "barBump": { "scale": 1.15, "ms": 160 },
     "orb": { "sparkCount": 6, "sparkMs": 420, "sparkStaggerMs": 35, "barBumpScale": 1.08 },
-    "skill": { "flashAlpha": 0.35, "flashMs": 220, "iconPopScale": 1.35, "iconPopMs": 260, "tintAlpha": 0.16, "tintFadeMs": 300 },
+    "skill": { "flashAlpha": 0.35, "flashMs": 220, "iconPopScale": 1.35, "iconRingScale": 1.6, "iconPopMs": 260, "tintAlpha": 0.16, "tintFadeMs": 300 },
     "level": { "glowAlpha": 0.65, "glowMs": 800, "popMs": 220 },
     "biome": { "sweepAlpha": 0.35, "sweepMs": 700 },
     "checkpoint": { "flagMs": 600 },

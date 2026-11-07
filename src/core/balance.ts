@@ -86,7 +86,7 @@ export interface Balance {
     bursts: Record<'eat' | 'golden' | 'rot' | 'dust' | 'death', { count: number; speed: number; lifeMs: number }>;
     gulpMs: number; barBump: { scale: number; ms: number };
     orb: { sparkCount: number; sparkMs: number; sparkStaggerMs: number; barBumpScale: number };
-    skill: { flashAlpha: number; flashMs: number; iconPopScale: number; iconPopMs: number; tintAlpha: number; tintFadeMs: number };
+    skill: { flashAlpha: number; flashMs: number; iconPopScale: number; iconRingScale: number; iconPopMs: number; tintAlpha: number; tintFadeMs: number };
     level: { glowAlpha: number; glowMs: number; popMs: number };
     biome: { sweepAlpha: number; sweepMs: number };
     checkpoint: { flagMs: number };
@@ -221,7 +221,7 @@ const SPEC: Spec = {
     bursts: { eat: burst, golden: burst, rot: burst, dust: burst, death: burst },
     gulpMs: 'int+', barBump: { scale: 'num+', ms: 'int+' },
     orb: { sparkCount: 'int0', sparkMs: 'int+', sparkStaggerMs: 'int0', barBumpScale: 'num+' },
-    skill: { flashAlpha: 'prob', flashMs: 'int+', iconPopScale: 'num+', iconPopMs: 'int+', tintAlpha: 'prob', tintFadeMs: 'int+' },
+    skill: { flashAlpha: 'prob', flashMs: 'int+', iconPopScale: 'num+', iconRingScale: 'num+', iconPopMs: 'int+', tintAlpha: 'prob', tintFadeMs: 'int+' },
     level: { glowAlpha: 'prob', glowMs: 'int+', popMs: 'int+' }, biome: { sweepAlpha: 'prob', sweepMs: 'int+' },
     checkpoint: { flagMs: 'int+' }, banner: { inMs: 'int+', slidePx: 'num0', scaleFrom: 'prob' },
     death: { shakePx: 'num0', shakeMs: 'int0', flashAlpha: 'prob', flashMs: 'int+', cardInMs: 'int0', totalMs: 'int+', skipLockMs: 'int0' },

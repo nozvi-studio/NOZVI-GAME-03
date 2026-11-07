@@ -65,7 +65,7 @@ export class HudScene extends Phaser.Scene {
       bump: (t: Parameters<HudTop['bump']>[0], k: number, ms: number) => this.top.bump(t, k, ms), plantFlag: (_level: number, ms: number) => this.top.plantFlag(ms) };
     this.juice = new JuicePlayer({ // P3a-R1..R9: sounds, haptics (through the gated buzz), board / screen visuals and the death sequence
       balance: this.balance, synth: { play: n => this.synth.play(n), buzz: p => this.buzz(p) }, board: this.gameScene,
-      screen: new ScreenFx(this, hud, id => colorOf(id, currentPalette()), cellPx(this.balance), this.balance.juice.perf),
+      screen: new ScreenFx(this, hud, id => colorOf(id, currentPalette()), cellPx(this.balance), this.balance.juice.perf, this.balance.juice.skill.iconRingScale),
       settings: () => this.session.save().settings, reduced: reduceMotion,
       seed: () => { const s = this.gameScene.snapshot(); return s ? deathSeed(s.score, s.level, s.timeMs) : 0; },
       makeCard: () => new DeathCard(this, this.balance, reduceMotion()), later: (ms, fn) => this.time.delayedCall(ms, fn), onDone: () => this.leave() });
