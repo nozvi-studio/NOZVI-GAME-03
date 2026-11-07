@@ -48,7 +48,6 @@ describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
       start: 'Fill the bar with mangoes to level up. Each level brings new obstacles.',
       play: 'Play', resume: 'Resume', playAgain: 'Play again', paused: 'Paused',
       waitHintKeys: 'Press an arrow to go!', waitHintTouch: 'Swipe to go!',
-      pausedText: 'You get a short countdown when you resume.',
       landsSoon: 'Lands soon', groundRising: 'Ground rising', mangoRotting: 'Mango rotting',
       over: 'Game over', won: 'You filled the board!', wonWhy: 'No room left for mangoes.',
     });
@@ -66,12 +65,12 @@ describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
 describe('P1 text keys (MEC-003/006/007/008 §8)', () => {
   const keys = [
     'banner.levelUp', 'banner.freshStart', ...[1, 2, 3, 4, 5, 6].map(b => `banner.biome.${b}`),
-    ...['rock', 'rottenRock', 'fence', 'terrain', 'maze'].map(f => `banner.new.${f}`), 'hud.level',
-    'hud.energy', 'skill.slowmo.name', 'skill.tailSnip.name', 'skill.shield.name', 'skill.mangoRain.name',
+    ...['rock', 'rottenRock', 'fence', 'terrain', 'maze'].map(f => `banner.new.${f}`),
+    'skill.slowmo.name', 'skill.tailSnip.name', 'skill.shield.name', 'skill.mangoRain.name',
     'skill.reject.energy', 'skill.reject.active', 'skill.reject.noTarget', 'tip.orb.first',
     'death.snipWall', 'death.rubble',
     'loadout.title', 'loadout.go', 'loadout.back', 'loadout.slot1', 'loadout.slot2', 'loadout.locked',
-    'tip.skillUnlocked.slot', 'tip.skillUnlocked.next', 'tip.slotUnlocked',
+    'tip.skillUnlocked.next', 'tip.slotUnlocked',
     'home.playCheckpoint', 'home.playL1', 'home.play', 'home.carry', 'banner.checkpoint', 'tip.checkpoint',
     'hud.nextCheckpoint', 'hud.nextCheckpointClear', 'hud.ramp',
     ...['wall', 'self', 'rotten', 'rock', 'fence', 'maze', 'ground', 'snipWall', 'rubble', 'quit', 'clear'].map(c => `cause.${c}`),

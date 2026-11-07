@@ -27,7 +27,6 @@ export class SkillButtons {
       this.slots.push({ c, g, icon, cost, costG, bolt, key: '' });
     }
   }
-  get positions(): HudLayout['skills'] { return this.l.skills; }
   apply(skills: HudView['skills']): void {
     for (const slot of [0, 1] as const) this.draw(slot, skills[slot]);
   }

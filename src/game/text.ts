@@ -5,7 +5,6 @@ export const TEXT = {
   start: 'Fill the bar with mangoes to level up. Each level brings new obstacles.',
   play: 'Play', resume: 'Resume', playAgain: 'Play again', paused: 'Paused',
   waitHintKeys: 'Press an arrow to go!', waitHintTouch: 'Swipe to go!', // owner batch Q provisional (2026-11-06)
-  pausedText: 'You get a short countdown when you resume.',
   landsSoon: 'Lands soon', groundRising: 'Ground rising', mangoRotting: 'Mango rotting',
   over: 'Game over', won: 'You filled the board!', wonWhy: 'No room left for mangoes.',
 } as const;
@@ -57,7 +56,6 @@ const KEYED: Readonly<Record<string, string>> = {
   'death.context.mud': 'You were slowed by mud.',
   'banner.new.ice': "Ice! You slide straight until you're off it.",
   'death.context.ice': 'You were sliding on ice.',
-  'hud.level': 'L{n} · Biome {b}', 'hud.energy': 'Energy {energy}/{max}',
   'skill.slowmo.name': 'Slow-mo', 'skill.tailSnip.name': 'Tail Snip', 'skill.shield.name': 'Shield', 'skill.mangoRain.name': 'Mango Rain',
   'skill.reject.energy': 'Need {cost} energy', 'skill.reject.active': 'Already on!',
   'skill.reject.noTarget': 'Too short to snip',
@@ -80,7 +78,6 @@ const KEYED: Readonly<Record<string, string>> = {
   'toast.mangoStolen': 'The bird took your mango!', // OQ-B6 provisional
   'loadout.title': 'Pick 2 skills', 'loadout.go': 'Go!', 'loadout.back': 'Back',
   'loadout.emptySlot': '-', 'loadout.slot1': 'Slot 1', 'loadout.slot2': 'Slot 2', 'loadout.locked': 'Reach L{level}',
-  'tip.skillUnlocked.slot': '{skill} unlocked! Tap {side} to use it',
   'tip.skillUnlocked.next': '{skill} unlocked! Pick it before your next run',
   'tip.slotUnlocked': 'Second skill slot unlocked!',
   'home.playCheckpoint': 'Play from checkpoint L{level}', 'home.playL1': 'Play from L1', 'home.play': 'Play',
@@ -90,10 +87,9 @@ const KEYED: Readonly<Record<string, string>> = {
   'tip.checkpoint': 'Checkpoints are permanent. Your saved energy comes with you.',
   'hud.nextCheckpoint': 'Next checkpoint at L{level}', 'hud.nextCheckpointClear': 'Next checkpoint: clear L{level}',
   'hud.ramp': 'Warming up {n}',
-  'side.left': 'left', 'side.right': 'right',
   'results.best': 'Best {best}', 'results.newBest': 'New best!', 'results.carryLabel': 'Energy saved',
   'results.won': 'You cleared every level!', 'pause.quit': 'Quit run',
-  'playAgain': TEXT.playAgain, 'resume': TEXT.resume, 'paused': TEXT.paused, 'pausedText': TEXT.pausedText,
+  'playAgain': TEXT.playAgain, 'resume': TEXT.resume, 'paused': TEXT.paused,
   'skill.ready': 'Ready', 'loadout.picked': 'Slot {n}',
   ...Object.fromEntries(Object.entries(CAUSE_TEXT).map(([k, v]) => [`cause.${k}`, v])),
   'cause.quit': 'Quit', 'cause.clear': 'You cleared level 30!',
