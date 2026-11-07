@@ -496,3 +496,9 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: (1) GDD §4 session targets confirmed (run 3-8 min, full clear ~12-18 min). (2) Reason to come back: owner wants leaderboard + daily streak, parked until core gameplay and UI are finished. (3) OQ-B1/B2/B3 (gate, spike, NPC numbers) approved as-is: owner playtest felt fine. (4) OQ-B4/B5 (bird steal cost, bird only when reachable) closed with current behavior, no further development for now. (5) Still open, reviewed together with the P3 UI pass: OQ-B6 strings, OQ-C1..C5, L30 rock weight, biome 4 coconut / biome 5 chicken tuning, P3 strings, P3b-3 C1-C10, derived dark theme.
 - Alternatives: none; owner decisions.
 - Consequence: "provisional" removed from MEC-014/015/016 for B1-B5; parking lot updated.
+
+## 2026-11-07 - Remotion route for pre-rendered capy clips (POC approved)
+- Context: owner asked to try the Remotion setup (ART-001 Q6) for animation.
+- Choice: Remotion renders the game's own capy SVGs (exported from `capyRig.ts`) into a PNG sequence, packed as a 10 x 9 sheet of 128 px frames (`public/art/capy-remotion.png`, 428 KB) and shown only on the debug art preview next to the tween capy. Owner approved the look. Board head stays tween-driven (reactive, a few KB, sharp at any size); Remotion is for showcase clips (win, skin unlock, store video).
+- Alternatives: replace board tweens with sprite sheets (heavier, not reactive); raster AI frames (identity drift).
+- Consequence: Remotion sources live in the owner's repo `D:/Working/Agent/remotion-showcase/src/capy/` (entry `src/capy/index.ts`, not committed there); export frames with 10% margin. Production use needs its own plan (generated sheet pipeline, size budget).
