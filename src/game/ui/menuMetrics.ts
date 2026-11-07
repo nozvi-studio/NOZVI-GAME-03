@@ -9,9 +9,9 @@ export const MENU = {
   loadout: { headH: 44, slotsH: 156, slotCircle: 84, chipsH: 44, cardH: 80, cardGap: 10, cards: 4, goH: 78, goBottom: 30 },
   settings: {
     headH: 44, rowH: 72, rows: 4, divider: 2, themeCardH: 215, captionH: 16,
-    cardW: 358, radius: 26, gap: 14, pad: 16, tile: 44, tileR: 14, icon: 24, textGap: 12, subW: 170, titleFont: 17, subFont: 13, valueFont: 14, headFont: 24,
+    cardW: 358, radius: 26, tileInset: 2, titleDy: 14, subDy: 2, captionDy: 8, gap: 14, pad: 16, tile: 44, tileR: 14, icon: 24, textGap: 12, subW: 185, titleFont: 17, subFont: 13, valueFont: 14, headFont: 24,
     sw: { w: 48, h: 28, knob: 10, line: 2 },
-    theme: { titleY: 22, subY: 42, tilesY: 62, bottomPad: 16, gap: 10, r: 20, swatch: 32, labelFont: 16, labelY: 82, line: 2, lineSel: 3 },
+    theme: { swatchTop: 10, snake: { dx: 12, dy: 26, h: 12, r: 6 }, ball: { dx: 46, dy: 30, r: 10 }, titleY: 22, subY: 42, tilesY: 62, bottomPad: 16, gap: 10, r: 20, swatch: 32, labelFont: 16, labelY: 96, line: 2, lineSel: 3 },
   },
   results: { headH: 44, cardTop: 50, cardH: 332, bannerH: 60, energyH: 64, progressH: 32, btn: 62, againH: 70, bottom: 30 },
 } as const;

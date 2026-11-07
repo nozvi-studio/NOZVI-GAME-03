@@ -8,6 +8,7 @@ import { HomeScene } from './scenes/HomeScene';
 import { HudScene } from './scenes/HudScene';
 import { LoadoutScene } from './scenes/LoadoutScene';
 import { ResultsScene } from './scenes/ResultsScene';
+import { SettingsScene } from './scenes/SettingsScene';
 
 // GDD-13 portrait game bootstrap with a parallel HUD above the board.
 new Phaser.Game({
@@ -17,7 +18,7 @@ new Phaser.Game({
   height: HEIGHT,
   backgroundColor: currentPalette().bg,
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [BootScene, HomeScene, LoadoutScene, GameScene, HudScene, ResultsScene, ArtPreviewScene],
+  scene: [BootScene, HomeScene, LoadoutScene, GameScene, HudScene, ResultsScene, SettingsScene, ArtPreviewScene],
   input: { activePointers: 2 },
   render: { antialias: true },
 });
