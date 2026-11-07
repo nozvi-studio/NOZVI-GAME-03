@@ -42,6 +42,25 @@ export const progressLabel = (progress: number, need: number, level: number, max
 export const levelBanner = (level: number, unlocked?: IntroKey): string =>
   `${levelLabel(level)}: ${unlocked ? `${UNLOCK_NAMES[unlocked]} unlocked` : 'a bit faster'}`;
 export const incomingBanner = (family: UnlockKey): string => INCOMING[family];
+// P3a-R10 provisional death lines (owner string batch OQ-D1); one or more per cause, <= 40 chars. The fence line is the DeathD2 mockup copy.
+export const DEATH_LINES: Record<CauseKey, readonly string[]> = {
+  wall: ['Nice try. The edge won.', 'That wall was always there.'],
+  self: ['You ate your own tail. Rude.', 'Tail first, regret second.'],
+  rotten: ['That mango fought back.', 'Rotten luck. Literally.'],
+  rock: ['A rock dropped in. Uninvited.', 'Rock, meet head.'],
+  fence: ['Face-first into a fence.', 'Fences: 1. You: 0.'],
+  maze: ['Lost in the hedge.', 'The hedge keeps its secrets.'],
+  ground: ['The ground had other plans.', 'Hills happen. Watch your step.'],
+  snipWall: ['You cut it. You hit it.', 'Your own snip bit back.'],
+  rubble: ['Rubble does not move.', 'You bonked the rubble.'],
+  coconut: ['Bonked by a coconut.', 'Coconut incoming. Too late.'],
+  gate: ['The gate said no.', 'Closed just in time. Not yours.'],
+  spike: ['Spikes: pointy and rude.', 'Ouch. Spikes up.'],
+  cat: ['The cat is not impressed.', 'Cat 1, snake 0.'],
+  chicken: ['Cluck. You lost.', 'The chicken stood its ground.'],
+  bomb: ['Boom. You missed the cross.', 'Did not dodge the blast.'],
+  shrink: ['The edge closed in on you.', 'Squeezed by the shrinking board.'],
+};
 export const deathMessage = (won: boolean, cause: CauseKey | undefined, score: number, level: number): string =>
   `${won ? TEXT.wonWhy : cause ? CAUSE_TEXT[cause] : ''} Score ${score}, level ${level}.`;
 export const bestLine = (kind: 'start' | 'over', best: number, newBest = false, score = 0): string =>
@@ -63,6 +82,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'skill.reject.noTarget': 'Too short to snip',
   'tip.orb.first': 'Energy orb! Fuel for skills',
   'death.snipWall': CAUSE_TEXT.snipWall, 'death.rubble': CAUSE_TEXT.rubble,
+  'death.title': 'RUN OVER',
   'banner.new.coconut': 'Rolling coconuts! Watch the lanes', // OQ-B6 provisional
   'banner.new.gate': 'Gates open and close', // OQ-B6 provisional
   'banner.new.spike': 'Spikes pop up on the beat', // OQ-B6 provisional

@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(juice): death lines for every cause with a seeded pick (provisional strings, OQ-D1) and the RUN OVER title key (P3a-R10).
 - feat(juice): pure event-to-cue mapper with reduced motion and settings gating; Shield-only board tint (P3a-R1..R9).
 - feat(audio): P3a synth SFX: soft two-stage energy zap, distinct per-skill casts, biome jingle, checkpoint fanfare; `SFX_TONES` exported (P3a-R2, R3, R5, R6).
 - feat(config): P3a `balance.juice` block (bursts, haptics, death <= 1.5 s, reduced-motion and perf caps) with validation (P3a-R7, R8, R11).
