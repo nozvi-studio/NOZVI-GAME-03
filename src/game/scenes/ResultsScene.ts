@@ -29,7 +29,7 @@ export class ResultsScene extends Phaser.Scene {
     const balance = this.registry.get('balance') as Balance;
     const s = session.summary();
     bgCream(this);
-    hill(this, HEIGHT - ui(R.bottom + R.againH));
+    hill(this, HEIGHT - ui(R.hillPeek));
     const home = (): void => { this.scene.start('Home'); };
     roundIconButton(this, ui(MENU.side + MENU.round / 2), ui(MENU.padTop + MENU.round / 2), MENU.round, 'home', 'results-home-top', home);
     logoLine(this, WIDTH / 2, ui(R.titleY + R.titleSize / 2), t('results.gameOver'), 0, R.titleSize);

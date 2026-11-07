@@ -5,7 +5,7 @@ export const MENU = {
   hill: { w: 530, topH: 260, topDy: 130, bottomH: 240, bottomDy: 150 },
   logo: { size: 66, lineH: 63, overlap: 4, shadowY: 6, height: 128 },
   boot: { top: 96, heroGap: 46, hero: 240, barGap: 44, barW: 260, barH: 20, textGap: 10, textH: 18,
-    barPad: 4, textFont: 15, hillH: 300,
+    textFont: 15, hillPeek: 60,
     trail: [[20, 190], [92, 190], [108, 174], [108, 150]], trailRadius: 16, trailStep: 3, shadeR: 15, bodyR: 12.5, hiR: 2, hiDx: -3, hiDy: -4, hiAlpha: 0.45,
     capy: { x: 62, y: 40, size: 116 }, mango: { right: 22, bottom: 34, size: 56, outer: 0.42, inner: 0.36, leaf: { dx: 0.12, dy: -0.3, w: 0.36, h: 0.2 } } },
   home: {
@@ -34,7 +34,7 @@ export const MENU = {
   },
   results: {
     headH: 44, cardTop: 50, cardH: 332, bannerH: 60, energyH: 64, progressH: 32, btn: 62, againH: 70, bottom: 30,
-    titleSize: 34, titleY: 24, side: 20, btnGap: 12, againLabel: 32, againStroke: 7,
+    titleSize: 34, titleY: 24, hillPeek: 160, side: 20, btnGap: 12, againLabel: 32, againStroke: 7,
     card: { w: 358, r: 30, pad: 16, headW: 112, headOverlap: 58, headline: 16, headlineY: 81, wrapLines: 1.6, scoreLabel: 13, scoreLabelY: 106, scoreLabelTrack: 1.3, score: 84, scoreY: 158,
       chipY: 226, chipH: 32, chipFont: 15, chipPadL: 12, chipPadR: 16, chipGap: 6, chipIcon: 18, tilesY: 252, tileH: 62, tileGap: 8, tileR: 14, tileLabel: 12, tileLabelY: 14, tileValue: 28, tileValueY: 40 },
     row: { r: 26, padX: 20, gap: 14, icon: 30, label: 17, value: 40 },
