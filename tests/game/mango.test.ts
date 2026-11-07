@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createSim } from '../../src/core';
 import { drawMango } from '../../src/game/render/mango';
 import { DEFAULT_LOOK } from '../../src/game/render/biomePalette';
+import { PART } from '../../src/game/render/boardParts';
 import { LIGHT } from '../../src/game/render/palette';
 import { loadBalance } from '../support/balance';
 
@@ -37,5 +38,26 @@ describe('MEC-002 mango presentation time', () => {
     const { graphics, scales } = graphicsProbe();
     drawMango(graphics, createSim(loadBalance(), 1).snapshot(), 30, LIGHT, DEFAULT_LOOK, 500, true, 500);
     expect(scales).toEqual([[1, 1]]);
+  });
+});
+
+describe('P3b1-R8 mango art', () => {
+  const record = (golden: boolean) => {
+    const calls: [string, ...unknown[]][] = [];
+    const g = new Proxy({}, { get: (_o, name: string) => (...a: unknown[]) => { calls.push([name, ...a]); return g; } }) as unknown as Phaser.GameObjects.Graphics;
+    const sim = createSim(loadBalance(), 1), snap = { ...sim.snapshot(), mango: { ...sim.snapshot().mango!, golden } };
+    drawMango(g, snap, 30, LIGHT, DEFAULT_LOOK, 500, true, 0);
+    return calls;
+  };
+  it('P3b1-R8 draws the FoodIcon leaf polygon, a rotated body ellipse and the highlight stroke', () => {
+    const calls = record(false);
+    const leaf = calls.find(c => c[0] === 'fillPoints')!;
+    expect((leaf[1] as unknown[]).length).toBe(17);
+    expect(calls.filter(c => c[0] === 'rotateCanvas').some(c => Math.abs((c[1] as number) + 0.349) < 0.01)).toBe(true);
+    expect(calls.some(c => c[0] === 'fillStyle' && c[1] === PART.mango.body)).toBe(true);
+    expect(calls.some(c => c[0] === 'strokePoints')).toBe(true);
+  });
+  it('P3b1-R8 golden mango recolours the body to the gold token', () => {
+    expect(record(true).some(c => c[0] === 'fillStyle' && c[1] === LIGHT.gold)).toBe(true);
   });
 });

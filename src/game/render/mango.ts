@@ -2,8 +2,21 @@ import type Phaser from 'phaser';
 import type { SimSnapshot } from '../../core';
 import { drawRock } from './hazards';
 import type { BoardLook } from './biomePalette';
-import { ROCK } from './boardParts';
+import { cubic, MANGO, mangoLeaf, PART, ROCK, type Pt } from './boardParts';
 import type { Palette } from './palette';
+
+// Icon polygons are rebuilt only when the cell size changes, not every frame.
+interface IconPoints { cell: number; leaf: Phaser.Types.Math.Vector2Like[]; hi: Phaser.Types.Math.Vector2Like[]; body: Pt; u: number }
+let cached: IconPoints | null = null;
+function iconPoints(cell: number): IconPoints {
+  if (cached?.cell === cell) return cached;
+  const u = (cell * MANGO.fill) / MANGO.box;                       // px per icon unit; icon centre is (16, 16)
+  const pt = ([px, py]: Pt): Phaser.Types.Math.Vector2Like => ({ x: (px - MANGO.box / 2) * u, y: (py - MANGO.box / 2) * u });
+  const [h0, h1, h2, h3] = MANGO.hi.p as readonly [Pt, Pt, Pt, Pt];
+  const body = pt([MANGO.body.cx, MANGO.body.cy]) as { x: number; y: number };
+  cached = { cell, u, leaf: mangoLeaf().map(pt), hi: cubic(h0, h1, h2, h3, 6).map(pt), body: [body.x, body.y] };
+  return cached;
+}
 
 // MEC-002 prototype mango, leaf, ripeness arc and persistent rotten rocks.
 export function drawMango(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: number, p: Palette, look: BoardLook, time: number, reduced: boolean, bornAt: number): void {
@@ -15,12 +28,14 @@ export function drawMango(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: 
   const bob = reduced ? 0 : Math.sin(time / 260) * cell * 0.04;
   const x = (food.x + 0.5) * cell, y = (food.y + 0.5) * cell;
   g.save().translateCanvas(x, y + bob).scaleCanvas(grow, grow);
-  g.save().translateCanvas(0, cell * 0.04).rotateCanvas(-0.35);
-  g.fillStyle(food.golden ? p.gold : p.food).fillEllipse(0, 0, cell * 0.6, cell * 0.68);
+  const icon = iconPoints(cell), { u } = icon;
+  g.fillStyle(PART.mango.leaf).fillPoints(icon.leaf, true, true);
+  g.save().translateCanvas(icon.body[0], icon.body[1]).rotateCanvas((MANGO.body.rotDeg * Math.PI) / 180);
+  g.fillStyle(food.golden ? p.gold : PART.mango.body).fillEllipse(0, 0, MANGO.body.rx * 2 * u, MANGO.body.ry * 2 * u);
   g.restore();
-  g.save().translateCanvas(cell * 0.13, -cell * 0.3).rotateCanvas(-0.6);
-  g.fillStyle(p.leaf).fillEllipse(0, 0, cell * 0.28, cell * 0.12);
-  g.restore().restore();
+  g.lineStyle(MANGO.hi.width * u, PART.mango.hi);
+  g.strokePoints(icon.hi);
+  g.restore();
   const fraction = Math.max(0, food.leftMs / food.totalMs);
   const urgent = fraction < 0.3 && !reduced ? 1 + 0.5 * Math.abs(Math.sin(time / 110)) : 1;
   const width = Math.max(2, cell * 0.08) * urgent;
