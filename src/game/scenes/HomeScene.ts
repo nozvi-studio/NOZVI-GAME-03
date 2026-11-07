@@ -179,7 +179,7 @@ export class HomeScene extends Phaser.Scene {
       ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
       tex!.refresh();
     }
-    const back = this.add.graphics().fillStyle(toInt(sh.color), sh.alpha).fillRoundedRect(x, y + ui(sh.y * 3), w, h, r);
+    const back = this.add.graphics().fillStyle(toInt(sh.color), sh.alpha).fillRoundedRect(x, y + ui(sh.y * H.hero.shadowDepth), w, h, r);
     blk.add([back, this.add.image(x, y, HERO_KEY).setOrigin(0, 0)]);
     const at = (px: number, py: number) => ({ x: x + ui(px), y: y + ui(py) });
     const trail = smoothPath(H.trail.map(([px, py]) => ({ x: px!, y: py! })), H.trailRadius, H.trailStep);

@@ -25,9 +25,16 @@ export function settingsColumn(minShrink: number): Spec {
   const rows = s.rows * s.rowH; // each row box is rowH tall and includes its divider
   return { top: head, middle: g + rows + g + s.themeCardH + g + s.captionH, bottom: 0, minShrink };
 }
+/** Gap kept between the capy head overhang and whatever sits above the middle block (mockup px). */
+const HEAD_CLEARANCE = 4;
+/** Offset of the summary card inside the Results middle block: the capy head overhangs the card top, so the block reserves that room. */
+export function resultsCardTop(): number {
+  const r = MENU.results;
+  return r.cardTop + Math.max(0, r.card.headOverlap - r.cardTop) + HEAD_CLEARANCE;
+}
 export function resultsColumn(f: { banner: boolean; energy: boolean }, minShrink: number): Spec {
   const r = MENU.results, g = MENU.section;
-  const middle = r.cardTop + r.cardH + (f.energy ? g + r.energyH : 0) + (f.banner ? g + r.bannerH : 0) + g + r.progressH;
+  const middle = resultsCardTop() + r.cardH + (f.energy ? g + r.energyH : 0) + (f.banner ? g + r.bannerH : 0) + g + r.progressH;
   return { top: head, middle, bottom: r.bottom + r.againH + MENU.gap, minShrink };
 }
 export function bootColumn(minShrink: number): Spec {

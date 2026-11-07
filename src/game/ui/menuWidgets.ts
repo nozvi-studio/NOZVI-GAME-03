@@ -29,10 +29,10 @@ export function tap(scene: Phaser.Scene, x: number, y: number, w: number, h: num
 export function roundIconButton(scene: Phaser.Scene, x: number, y: number, diameterMock: number, icon: IconId, name: string,
   action: () => void, shelf = false): Phaser.GameObjects.Container {
   const d = ui(diameterMock), g = scene.add.graphics();
-  if (shelf) g.fillStyle(toInt(TOKENS.sky.bottom), 0.6).fillCircle(0, ui(MENU.widgets.shelfDy), d / 2);
+  if (shelf) g.fillStyle(toInt(TOKENS.sky.bottom), MENU.widgets.shelfAlpha).fillCircle(0, ui(MENU.widgets.shelfDy), d / 2);
   else g.fillStyle(toInt(TOKENS.shadow.card.color), TOKENS.shadow.card.alpha).fillCircle(0, ui(TOKENS.shadow.card.y), d / 2);
   g.fillStyle(toInt(TOKENS.surface.card)).fillCircle(0, 0, d / 2);
-  const ic = scene.add.graphics(); drawIcon(ic, icon, d * 0.5, toInt(TOKENS.text.primary));
+  const ic = scene.add.graphics(); drawIcon(ic, icon, d * MENU.widgets.iconRatio, toInt(TOKENS.text.primary));
   const c = scene.add.container(x, y, [g, ic]).setName(name);
   tap(scene, x, y, d, d, `${name}-hit`, action);
   return c;

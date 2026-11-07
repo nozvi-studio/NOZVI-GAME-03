@@ -84,8 +84,8 @@ export class LoadoutScene extends Phaser.Scene {
     view.slots.forEach((slot, i) => {
       const cx = centres[i]!, cy = y + ui(L.slotsPadTop + L.slotCircle / 2), r = ui(L.slotCircle / 2);
       const c = this.add.graphics(); blk.add(c);
-      if (slot.active) c.fillStyle(toInt(TOKENS.menu.slotRing), 0.85).fillCircle(cx, cy, r + ui(L.slotRing));
-      c.fillStyle(toInt(TOKENS.sky.bottom), 0.3).fillCircle(cx, cy + ui(L.slotShelf), r);
+      if (slot.active) c.fillStyle(toInt(TOKENS.menu.slotRing), L.ringAlpha).fillCircle(cx, cy, r + ui(L.slotRing));
+      c.fillStyle(toInt(TOKENS.sky.bottom), L.shelfAlpha).fillCircle(cx, cy + ui(L.slotShelf), r);
       c.fillStyle(toInt(TOKENS.surface.white)).fillCircle(cx, cy, r);
       if (slot.skill) { const ic = this.add.graphics().setPosition(cx, cy); blk.add(ic); drawIcon(ic, slot.skill, ui(L.slotIcon), toInt(TOKENS.text.slate)); }
       const ly = cy + r + ui(L.slotGap);

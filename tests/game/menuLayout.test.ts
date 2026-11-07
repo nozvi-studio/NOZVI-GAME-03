@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
-import { layoutColumn } from '../../src/game/ui/layout';
-import { bootColumn, homeColumn, loadoutColumn, logoLetters, resultsColumn, settingsColumn, smoothPath } from '../../src/game/ui/menuLayout';
+import { layoutColumn, ui } from '../../src/game/ui/layout';
+import { MENU } from '../../src/game/ui/menuMetrics';
+import { bootColumn, homeColumn, loadoutColumn, logoLetters, resultsCardTop, resultsColumn, settingsColumn, smoothPath } from '../../src/game/ui/menuLayout';
 const MIN = 0.85; // balance.ui.minShrink
 
 it('P3b3-R3 every Home variant fits at 540x960 without shrinking below minShrink', () => {
@@ -40,4 +41,14 @@ it('P3b3-R13 smoothPath keeps the end points and stays inside the control box', 
   expect(p[p.length - 1]).toEqual(pts[4]);
   for (const q of p) { expect(q.x).toBeGreaterThanOrEqual(16); expect(q.x).toBeLessThanOrEqual(250); expect(q.y).toBeGreaterThanOrEqual(112); expect(q.y).toBeLessThanOrEqual(232); }
   for (let i = 1; i < p.length; i++) expect(Math.hypot(p[i]!.x - p[i - 1]!.x, p[i]!.y - p[i - 1]!.y)).toBeLessThanOrEqual(6);
+});
+it('P3b3 Results: the capy head overhang stays below the title for every column variant', () => {
+  const R = MENU.results;
+  for (const banner of [true, false]) for (const energy of [true, false]) {
+    const l = layoutColumn(resultsColumn({ banner, energy }, MIN));
+    const headTop = l.middleY + ui(resultsCardTop() - R.card.headOverlap) * l.middleScale;
+    expect(l.fits).toBe(true);
+    expect(headTop, JSON.stringify({ banner, energy })).toBeGreaterThanOrEqual(ui(R.titleY + R.titleSize / 2));
+    expect(headTop).toBeGreaterThanOrEqual(0);
+  }
 });

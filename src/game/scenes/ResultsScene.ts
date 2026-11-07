@@ -7,8 +7,8 @@ import { resultsView, type ResultsView } from '../flow/resultsView';
 import { HEIGHT, WIDTH } from '../layout';
 import { t } from '../text';
 import { drawIcon, type IconId } from '../ui/icons';
-import { layoutColumn, ui } from '../ui/layout';
-import { resultsColumn } from '../ui/menuLayout';
+import { layoutColumn, ui, UI_SCALE } from '../ui/layout';
+import { resultsCardTop, resultsColumn } from '../ui/menuLayout';
 import { MENU } from '../ui/menuMetrics';
 import { bgCream, bigLabel, hill, logoLine, roundIconButton, scaledBlock } from '../ui/menuWidgets';
 import { card, pillButton, progressBar } from '../ui/widgets';
@@ -31,7 +31,7 @@ export class ResultsScene extends Phaser.Scene {
     bgCream(this);
     hill(this, HEIGHT - ui(R.hillPeek));
     const home = (): void => { this.scene.start('Home'); };
-    roundIconButton(this, ui(MENU.side + MENU.round / 2), ui(MENU.padTop + MENU.round / 2), MENU.round, 'home', 'results-home-top', home);
+    roundIconButton(this, ui(MENU.side + MENU.round / 2), ui(MENU.padTop + MENU.round / 2), MENU.round, 'back', 'results-home-top', home);
     logoLine(this, WIDTH / 2, ui(R.titleY + R.titleSize / 2), t('results.gameOver'), 0, R.titleSize);
     if (s) {
       const v = resultsView(s, session.homeModel().nextMilestone, biome(balance, balance.level.maxLevel));
@@ -43,7 +43,7 @@ export class ResultsScene extends Phaser.Scene {
   private summaryBlock(v: ResultsView, won: boolean, minShrink: number): void {
     const blk = scaledBlock(this, layoutColumn(resultsColumn({ banner: v.checkpointBanner !== null, energy: v.energySaved !== null }, minShrink)));
     const x0 = WIDTH / 2 - ui(C.w) / 2, g = ui(MENU.section);
-    let y = ui(R.cardTop);
+    let y = ui(resultsCardTop());
     this.summaryCard(blk, v, won, x0, y);
     y += ui(R.cardH);
     if (v.energySaved !== null) { y += g; this.row(blk, x0, y, 'bolt', t('results.carryLabel'), String(v.energySaved), TOKENS.menu.bestSoft); y += ui(R.energyH); }
@@ -68,7 +68,7 @@ export class ResultsScene extends Phaser.Scene {
     v.stats.forEach((st, i) => {
       const tx = x0 + ui(C.pad + i * (tw + C.tileGap)), ty = y0 + ui(C.tilesY);
       blk.add(this.add.graphics().fillStyle(toInt(TONE_FILL[st.tone])).fillRoundedRect(tx, ty, ui(tw), ui(C.tileH), ui(C.tileR)));
-      blk.add(this.add.text(tx + ui(tw) / 2, ty + ui(C.tileLabelY), t(st.labelKey), style(C.tileLabel, '800', TOKENS.text.primary)).setOrigin(0.5).setLetterSpacing(ui(0.96)));
+      blk.add(this.add.text(tx + ui(tw) / 2, ty + ui(C.tileLabelY), t(st.labelKey), style(C.tileLabel, '800', TOKENS.text.primary)).setOrigin(0.5).setLetterSpacing(ui(C.tileTrack)));
       blk.add(this.add.text(tx + ui(tw) / 2, ty + ui(C.tileValueY), st.value, style(C.tileValue, '800', TOKENS.text.primary)).setOrigin(0.5));
     });
   }
@@ -107,7 +107,7 @@ export class ResultsScene extends Phaser.Scene {
     const q = R.progress, label = t(next.chip.key, { level: next.chip.level });
     const tx = this.add.text(0, 0, label, style(q.chipFont, '800', TOKENS.text.primary)).setOrigin(0, 0.5);
     const ico = ui(q.chipIcon), cw = ui(q.chipPadL) + ico + ui(q.chipGap) + tx.width + ui(q.chipPadR), ch = ui(q.chipH), cy = y + ui(R.progressH) / 2;
-    const barW = (ui(C.w) - cw - ui(q.gap)) / ui(1);
+    const barW = (ui(C.w) - cw - ui(q.gap)) / UI_SCALE;
     const bar = progressBar(this, x, cy - ui(q.barH) / 2, barW, q.barH, TOKENS.accent.orange); bar.set(next.fill, 1);
     const cx = x + ui(C.w) - cw;
     const bg = this.add.graphics().fillStyle(toInt(TOKENS.surface.card)).fillRoundedRect(cx, cy - ch / 2, cw, ch, ch / 2);
@@ -123,7 +123,7 @@ export class ResultsScene extends Phaser.Scene {
     const last = session.lastStartLevel();
     if (last === null) return;
     const left = ui(R.side + R.btn + R.btnGap), w = WIDTH - left - ui(R.side);
-    const b = pillButton(this, left + w / 2, cy, w / ui(1), R.againH, t('playAgain'), 'results-again', () => beginRun(this, last, 'results'));
+    const b = pillButton(this, left + w / 2, cy, w / UI_SCALE, R.againH, t('playAgain'), 'results-again', () => beginRun(this, last, 'results'));
     bigLabel(b, R.againLabel, R.againStroke);
   }
 }
