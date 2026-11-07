@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): UIFIX-R4 dark-theme text/card tokens with WCAG 4.5:1 gate
 - docs: P3 UI review (agy) in PLAYTEST + UI fixes design spec (UIFIX-R1..R15)
 - feat(art): Remotion POC - pre-rendered capy idle/eat/dead clip next to the tween capy on the debug art preview (owner approved 2026-11-07)
 - docs: ART-001 Q6 answered (owner Remotion repo location), Q7 deferred

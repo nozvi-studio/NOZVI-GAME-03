@@ -26,6 +26,14 @@ export const TOKENS = {
     themeLight: ['#CFEBD0', '#C2E4C6'], themeDark: ['#3B4A5A', '#33414F'],
   },
 } as const;
+export type UiThemeName = 'light' | 'dark';
+export interface UiTheme { bg: string; title: string; soft: string; card: string; ink: string; cardSoft: string }
+/** UIFIX-R4 text/card colours per resolved theme. Dark: light ink on a raised dark-green card (contrast >= 4.5:1, tested). */
+export const UI_THEME: Record<UiThemeName, UiTheme> = {
+  light: { bg: TOKENS.surface.cream, title: TOKENS.text.primary, soft: TOKENS.text.soft, card: TOKENS.surface.card, ink: TOKENS.text.primary, cardSoft: TOKENS.text.soft },
+  dark: { bg: '#131D15', title: '#F3EFE4', soft: '#C9C2B0', card: '#2B3A2F', ink: '#F3EFE4', cardSoft: '#C9C2B0' },
+};
+export const uiTheme = (name: UiThemeName): UiTheme => UI_THEME[name];
 export const FONT_UI = 'Nunito, system-ui, sans-serif';
 export const FONT_TITLE = '"Lilita One", Nunito, system-ui, sans-serif';
 export function toInt(hex: string): number {
