@@ -484,3 +484,9 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: (1) Juice = pure mapper (`juiceMap.mapJuice`) + thin `JuicePlayer`; reduced motion and sound/haptics gating live in the mapper so they are unit-tested; the HUD is reached only through the `JuiceHud` interface. (2) Death sequence timing moved from `flow.deathCardDelayMs` to `juice.death.*` (total <= 1.5 s enforced in `parseBalance`). (3) `ui.haptics` replaced by `juice.haptics`; runWon plays one `biome` jingle instead of two `level` arpeggios. (4) Slow-mo tint stays with the HUD/board layers (`BannerLayer`); the mapper tints Shield only. (5) `JuicePlayer` batches haptics per event batch (last wins) because `navigator.vibrate` cancels the previous pattern. (6) Banner motion hook lives in `BannerLayer.next()`: its root container scales about (0,0), so the entrance is one counter tween k 0..1 with pivot compensation (`position = pivot * (1 - s)`) to keep the card centred; reduced motion = `scaleFrom` 1, `slidePx` 0, pure alpha fade of `juice.reduced.softMs`.
 - Alternatives: per-event haptic calls; moving the pivot of every banner child; a separate reduced-motion player.
 - Consequence: death lines are provisional strings (owner batch, OQ-D1); all feedback numbers are in `balance.juice`; see CODEMAP `src/game/juice/*`.
+
+## 2026-11-07 - P3a known limits
+- Context: P3a final review.
+- Choice: accepted for P3a: (1) no checkpoint cue (flag/fanfare) when the full-clear of L30 unlocks a checkpoint; (2) a win waits `juice.death.totalMs` (1.4 s) before Results, same as a death, with no card. The death vignette is one cached white canvas texture tinted danger (smooth inset glow), replacing the stepped stroked rects.
+- Alternatives: a dedicated L30 cue; a shorter win delay.
+- Consequence: revisit with the P3 device pass (60 fps check) if either feels wrong.

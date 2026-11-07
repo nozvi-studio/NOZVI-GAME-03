@@ -157,6 +157,7 @@ export class HudScene extends Phaser.Scene {
 
   // P1 HUD event mapping (MEC-003/006/007/008 §8) with the P3b-2 banner/tip views. Sounds, haptics and visuals come from the JuicePlayer (P3a).
   private onEvents(events: SimEvent[]): void {
+    if (events.length === 0) return; // nothing happened this frame: no batch, no settings read, no refresh
     const batch: JuiceInput[] = [];
     for (const e of events) { batch.push(e); switch (e.type) {
       case 'shrunk': this.shrunkTo = e.from > e.to ? e.to : null; break; // MEC-001-R4 chip only when the snake shrank

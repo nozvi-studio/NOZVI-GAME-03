@@ -94,6 +94,9 @@ export function sceneHarness() {
       rectangle: (x: number, y: number, w: number, h: number) => { const o = make(x, y); o.width = w; o.height = h; return o; },
       zone: (x: number, y: number, w: number, h: number) => { const o = make(x, y); o.width = w; o.height = h; return o; },
       container: (x: number, y: number, children: DrawObject[] = []) => make(x, y).add(children) },
+    textures: (() => { const keys = new Set<string>(); return { exists: (k: string) => keys.has(k),
+      createCanvas: (k: string) => { keys.add(k); const ctx = new Proxy({} as Record<string, unknown>, { get: (t, p: string) => t[p] ?? (() => {}), set: (t, p: string, v) => { t[p] = v; return true; } });
+        return { getContext: () => ctx, refresh: () => {} }; } }; })(),
     sys: { isActive: () => true }, game: { events: new Signals() },
     events: new Signals(), input: Object.assign(new Signals(), { keyboard: new Signals(), setGlobalTopOnly: (_v: boolean) => {} }),
     time: { delayedCall: (delay: number, fn: () => void) => { const t = { fn, removed: false, delay }; delayed.push(t); return { remove: () => { t.removed = true; } }; } },

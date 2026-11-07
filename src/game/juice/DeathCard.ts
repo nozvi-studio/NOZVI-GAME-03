@@ -28,7 +28,7 @@ export class DeathCard implements DeathCardView {
     title.setPosition(0, -h / 2 + ui(M.padY)); text.setPosition(0, -h / 2 + ui(M.padY) + ui(M.titleH) + ui(M.gap));
     const mo = bannerMotion(this.balance, this.reduced);
     this.root = this.scene.add.container(WIDTH / 2, top + h / 2, [g, title, text]).setName('death-card').setDepth(M.depth).setAlpha(0).setScale(mo.scaleFrom);
-    this.scene.tweens.add({ targets: this.root, alpha: 1, scale: 1, duration: mo.inMs, ease: 'Back.easeOut' });
+    this.scene.tweens.add({ targets: this.root, alpha: 1, scale: 1, duration: mo.inMs, ease: mo.slidePx === 0 ? 'Linear' : 'Back.easeOut' });
   }
   /** Tap anywhere skips to Results; the zone covers the whole HUD scene. */
   armSkip(onSkip: () => void): void {

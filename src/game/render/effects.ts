@@ -78,13 +78,15 @@ export class Effects {
   }
 
   update(dt: number): void {
+    let n = 0; // compact in place: no per-frame array allocation
     for (const p of this.particles) {
       p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt;
       p.vy += this.cell * 0.00002 * dt; p.vx *= 0.985;
+      if (p.life > 0) this.particles[n++] = p;
     }
-    this.particles = this.particles.filter(p => p.life > 0);
-    for (const f of this.floats) { f.life -= dt; if (f.life <= 0) f.label.destroy(); }
-    this.floats = this.floats.filter(f => f.life > 0);
+    this.particles.length = n; n = 0;
+    for (const f of this.floats) { f.life -= dt; if (f.life <= 0) f.label.destroy(); else this.floats[n++] = f; }
+    this.floats.length = n;
     this.gulp = Math.max(0, this.gulp - dt / this.caps.gulpMs);
     this.pop = Math.max(0, this.pop - dt * this.popRate);
     this.levelFlash = Math.max(0, this.levelFlash - dt * this.levelFlashRate);
