@@ -253,4 +253,17 @@ describe('session debug skip', () => {
     expect(() => s.startRun(9)).toThrow(RangeError);
     expect(s.summary()).toBeNull();
   });
+  for (const how of ['death', 'quit'] as const) it(`P3b2-R2 a run already finished by ${how} then startRun writes exactly one run_end and carries once`, () => {
+    const { s, store } = setup({ carriedEnergy: 40 });
+    s.startRun(1);
+    if (how === 'death') s.frame(WALL_DEATH_MS); else { s.frame(100); s.quit(); }
+    const carried = s.save().carriedEnergy, ends = (): number => loadLog(store).entries.filter(e => e.type === 'run_end').length;
+    expect(ends()).toBe(1);
+    s.startRun(1);
+    expect(s.snapshot().energy).toBe(carried); // the stored carry is consumed once, not re-carried from the finished run
+    expect(s.save().carriedEnergy).toBe(0);
+    s.pause(); // pause flushes the new run_start
+    expect(ends()).toBe(1);
+    expect(loadLog(store).entries.map(e => e.type)).toEqual(['run_start', 'run_end', 'run_start']);
+  });
 });

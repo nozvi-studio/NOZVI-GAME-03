@@ -2,7 +2,7 @@ import type { Balance, SimSnapshot, SkillId } from '../../core';
 import { biomeName, levelTitle } from '../hudText';
 
 export type T = (k: string, v?: Record<string, string | number>) => string;
-export type HudSnap = Pick<SimSnapshot, 'level' | 'biome' | 'challenge' | 'progress' | 'need' | 'score' | 'energy' | 'energyMax' | 'skills' | 'rampActive' | 'rampMangoesLeft'>;
+export type HudSnap = Pick<SimSnapshot, 'level' | 'biome' | 'challenge' | 'progress' | 'need' | 'score' | 'energy' | 'energyMax' | 'skills' | 'rampActive' | 'rampMangoesLeft' | 'startLevel'>;
 export type SkillState = 'off' | 'ready' | 'active';
 export interface SkillView { slot: 0 | 1; id: SkillId; cost: number; state: SkillState; ring: number | null }
 export interface HudView {
@@ -16,7 +16,7 @@ const clamp01 = (n: number): number => Math.min(1, Math.max(0, n));
 const timedMs = (id: SkillId, b: Balance): number | null =>
   id === 'slowmo' ? b.skills.slowmo.durationMs : id === 'shield' ? b.skills.shield.durationMs : id === 'mangoRain' ? b.skills.mangoRain.durationMs : null;
 
-/** P3b2-R7 MEC-003 §8 / MEC-006 §8 / MEC-007 §8 / MEC-008-R8, R11: everything the HUD shows, as plain data. */
+/** P3b2-R7 MEC-003 §8 / MEC-006 §8 / MEC-007 §8 / MEC-008-R8, R11 (the ramp chip only for a checkpoint start, like countdownCard): everything the HUD shows, as plain data. */
 export function hudView(s: HudSnap, hint: { key: string; level: number } | null, b: Balance, t: T): HudView {
   const skill = (slot: 0 | 1): SkillView | null => {
     const k = s.skills[slot];
@@ -31,7 +31,7 @@ export function hudView(s: HudSnap, hint: { key: string; level: number } | null,
     quota: max ? { done: t('hud.quotaMax'), total: '' } : { done: String(s.progress), total: `/${s.need}` },
     score: String(s.score), energy: { text: String(s.energy), fill: clamp01(s.energy / s.energyMax) },
     skills: [skill(0), skill(1)],
-    chip: s.rampActive ? { kind: 'ramp', text: t('hud.ramp', { n: s.rampMangoesLeft }) }
+    chip: s.rampActive && s.startLevel > 1 ? { kind: 'ramp', text: t('hud.ramp', { n: s.rampMangoesLeft }) }
       : hint ? { kind: 'checkpoint', text: t(hint.key, { level: hint.level }) } : null,
   };
 }

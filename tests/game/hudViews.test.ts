@@ -17,7 +17,7 @@ vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTD
 afterEach(() => vi.unstubAllGlobals());
 const b = loadBalance();
 const snap = (o: Partial<HudSnap> = {}): HudSnap => ({ level: 7, biome: 2, challenge: false, progress: 3, need: 6, score: 44, energy: 35, energyMax: 100,
-  rampActive: false, rampMangoesLeft: 0,
+  rampActive: false, rampMangoesLeft: 0, startLevel: 1,
   skills: [{ slot: 0, id: 'slowmo', cost: 40, affordable: false, active: false, leftMs: 0 }, { slot: 1, id: 'tailSnip', cost: 30, affordable: true, active: false, leftMs: 0 }], ...o });
 
 it('P3b2-R15 HudTop shows level, biome, quota, score, energy and the checkpoint chip; pause button is enabled only while a run is live', () => {

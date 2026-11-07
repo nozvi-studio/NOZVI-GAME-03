@@ -7,7 +7,7 @@ import { loadBalance } from '../support/balance';
 const b = loadBalance();
 const snap = (o: Partial<HudSnap> = {}): HudSnap => ({
   level: 7, biome: 2, challenge: false, progress: 3, need: 6, score: 44, energy: 35, energyMax: 100,
-  rampActive: false, rampMangoesLeft: 0,
+  rampActive: false, rampMangoesLeft: 0, startLevel: 1,
   skills: [{ slot: 0, id: 'slowmo', cost: 40, affordable: false, active: false, leftMs: 0 },
     { slot: 1, id: 'tailSnip', cost: 30, affordable: true, active: false, leftMs: 0 }], ...o });
 const hint = { key: 'hud.nextCheckpoint', level: 10 };
@@ -33,8 +33,12 @@ it('P3b2-R7 timed skills show a countdown ring from balance durations, Tail Snip
 });
 it('P3b2-R7 energy fill clamps; ramp chip replaces the checkpoint chip while the ramp is active', () => {
   expect(hudView(snap({ energy: 140, energyMax: 100 }), null, b, t).energy.fill).toBe(1);
-  expect(hudView(snap({ rampActive: true, rampMangoesLeft: 3 }), hint, b, t).chip).toEqual({ kind: 'ramp', text: 'Warming up 3' });
+  expect(hudView(snap({ rampActive: true, rampMangoesLeft: 3, startLevel: 6 }), hint, b, t).chip).toEqual({ kind: 'ramp', text: 'Warming up 3' });
   expect(hudView(snap(), { key: 'hud.nextCheckpointClear', level: 12 }, b, t).chip?.text).toBe('Next checkpoint: clear L12');
+});
+it('P3b2-R7 MEC-008-R8 an L1 start has no ramp effect: no Warming up chip, the checkpoint hint shows instead', () => {
+  expect(hudView(snap({ rampActive: true, rampMangoesLeft: 5, startLevel: 1 }), hint, b, t).chip).toEqual({ kind: 'checkpoint', text: 'Next checkpoint at L10' });
+  expect(hudView(snap({ rampActive: true, rampMangoesLeft: 5, startLevel: 1 }), null, b, t).chip).toBeNull();
 });
 it('P3b2-R9 stack places items with gap, margins and padding', () => {
   const r = stack([{ h: 37.4 }, { h: 19 }, { h: 34, mt: 6 }, { h: 66, mt: 16 }, { h: 52, mt: 8 }, { h: 52 }], { gap: 6, padTop: 26, padBottom: 20 });

@@ -1,6 +1,8 @@
 import { expect, it } from 'vitest';
 import { countdownCard, pauseLayout, pauseView } from '../../src/game/hud/overlayModel';
+import { HEIGHT, WIDTH } from '../../src/game/layout';
 import { t } from '../../src/game/text';
+import { ui } from '../../src/game/ui/layout';
 import { loadBalance } from '../support/balance';
 
 const b = loadBalance();
@@ -20,6 +22,7 @@ it('P3b2-R12 pause dialog layout matches PauseD2 heights (mockup px) and stays o
   const full = pauseLayout(pauseView(ctx, t));
   expect(full.w).toBe(310); expect(full.height).toBeCloseTo(366.4, 5);
   expect(full.buttons.map(x => x.h)).toEqual([66, 52, 52]);
+  expect(ui(full.height)).toBeLessThanOrEqual(HEIGHT); expect(ui(full.w)).toBeLessThanOrEqual(WIDTH); // fits the 540x960 screen
   const slim = pauseLayout(pauseView({ ...ctx, settingsAvailable: false, hint: null }, t));
   expect(slim.chip).toBeNull(); expect(slim.height).toBeLessThan(full.height);
   expect(full.buttons[1]!.y).toBeGreaterThan(full.buttons[0]!.y + 66);
