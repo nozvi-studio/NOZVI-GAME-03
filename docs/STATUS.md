@@ -9,7 +9,6 @@
 
 - [x] P3c capy merged into version/v0.2 (e40a333, owner approved 2026-11-06): SVG capy face on the snake head + debug preview `?debug=1&artPreview=1`.
 - [x] D2 UI mockups imported (branch feat/p3-design-mockups, awaiting owner push approval): `docs/design/UI-MOCKUPS.md` + 32 board PNGs and sources. Source was a Claude Design artifact, not Figma.
-- [x] D2 mockups also exported as static HTML (primary reference, 8d0fd4e).
 - [x] P3 spec + 5 plans on branch docs/p3-spec (from feat/p3-design-mockups): spec docs/superpowers/specs/2026-11-07-p3-juice-screens-design.md; plans 2026-11-07-p3-0 / p3b-1 / p3b-2 / p3b-3 / p3a. Owner ruling 2026-11-07: Quit run = run end like a death (MEC-008-R6, already specced).
 - [x] Owner approved P3 spec + plans (2026-11-07). Owner rules: lead decides technical/visual, asks only on important gameplay; push allowed; subagents with cheapest fitting model.
 - [x] P3-0 UI foundation merged into version/v0.3: tokens, ui()/layoutColumn, settings + save v3 (null = follow OS live), self-hosted Nunito/Lilita One + Boot font wait, widget kit (pill hit rect verified in browser), Baloo removed. 1215 pass, typecheck clean; Opus final review fixes applied.
