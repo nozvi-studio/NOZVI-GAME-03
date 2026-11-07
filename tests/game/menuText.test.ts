@@ -1,0 +1,32 @@
+import { expect, it } from 'vitest';
+import { t } from '../../src/game/text';
+it('P3b3-R2 menu strings use mockup copy', () => {
+  expect(t('settings.title')).toBe('Settings');
+  expect(t('settings.sound')).toBe('Sound');
+  expect(t('settings.sound.sub')).toBe('Music and effects');
+  expect(t('settings.haptics.sub')).toBe('Buzz when you eat or crash');
+  expect(t('settings.dpad')).toBe('On-screen D-pad');
+  expect(t('settings.dpad.sub')).toBe('Show arrows between the skill buttons');
+  expect(t('settings.motion')).toBe('Reduced motion');
+  expect(t('settings.motion.sub')).toBe('No shaking, softer flashes');
+  expect(t('settings.theme')).toBe('Board theme');
+  expect(t('settings.theme.sub')).toBe('Changes the ground colours on every level');
+  expect(t('settings.autosave')).toBe('Changes save automatically');
+  expect(t('home.startAt', { level: 6 })).toBe('Start at L6');
+  expect(t('home.startL1')).toBe('Start from L1');
+  expect(t('home.startEnergy', { e: 25 })).toBe('Start energy 25');
+  expect(t('loadout.title')).toBe('Pick 2 skills');
+  expect(t('loadout.titleOne')).toBe('Pick a skill');
+  expect(t('loadout.unlocksAt', { level: 11 })).toBe('Unlocks at L11');
+  expect(t('skill.slowmo.desc', { s: 4 })).toBe('Slower snake 4 s · timers keep real time');
+  expect(t('skill.tailSnip.desc', { s: 3 })).toBe('Cut back half · rock wall for 3 s');
+  expect(t('results.scoreLabel')).toBe('SCORE');
+  expect(t('results.biomeOf', { b: 2, n: 6 })).toBe('2/6');
+  expect(t('results.nextCp', { level: 15 })).toBe('L15');
+  expect(t('results.nextCpClear', { level: 30 })).toBe('Clear L30');
+  expect(t('boot.loading', { n: 62 })).toBe('Loading… 62%');
+});
+it('P3b3-R2 existing keys that other tests rely on are unchanged', () => {
+  expect(t('loadout.locked', { level: 6 })).toBe('Reach L6');
+  expect(t('banner.checkpoint', { level: 4 })).toBe('Next run starts at L4!');
+});
