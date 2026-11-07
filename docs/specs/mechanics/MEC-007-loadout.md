@@ -91,7 +91,7 @@ sanitizeLoadout(saved: unknown, bestLevel: number, table: UnlockTable): Loadout;
 - New `LoadoutScene`: title, 1–2 slot boxes on top (active slot outlined), 2×2 grid of skill cards, big "Go!" button bottom, small "Back" top left. Flat greybox rectangles and text; no art.
 - Card states: picked (thick outline + slot number), unlocked (normal), locked (grey + lock glyph + "Reach L{n}"; not color only).
 - In-game buttons: left/right bottom corners, as MEC-006 §8.
-- Text keys: `loadout.title` ("Pick your skills"), `loadout.go` ("Go!"), `loadout.back`, `loadout.slot1`, `loadout.slot2`, `loadout.locked` ("Reach L{level}"), `tip.skillUnlocked.slot` ("{skill} unlocked! Tap {side} to use it"), `tip.skillUnlocked.next` ("{skill} unlocked! Pick it before your next run"), `tip.slotUnlocked` ("Second skill slot unlocked!").
+- Text keys: `loadout.title` ("Pick your skills"), `loadout.go` ("Go!"), `loadout.back`, `loadout.slot1`, `loadout.slot2`, `loadout.locked` ("Reach L{level}"), `banner.skillNew` ("New skill: {skill}"), `tip.skillUnlocked.next` ("{skill} unlocked! Pick it before your next run"), `tip.slotUnlocked` ("Second skill slot unlocked!").
 - Sounds: `uiTap` on card/slot tap, `uiGo` on confirm, `unlock` jingle on `skillUnlocked`.
 - P3b-3 restyle: see docs/superpowers/plans/2026-11-07-p3b-3-menus.md (copy and layout only; rules unchanged).
 

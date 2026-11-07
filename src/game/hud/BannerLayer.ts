@@ -52,7 +52,7 @@ export class BannerLayer {
 
   show(queue: readonly BannerSpec[]): void { this.reset(); this.queue = [...queue]; this.next(); }
   /** Clears the cards, their timer and pop tween; the tip is left alone (a tip may be raised just before a queue). */
-  private reset(): void { this.cardTimer?.remove(); this.scene.tweens.killTweensOf(this.root); this.queue = []; this.clear(); this.root.setVisible(false); }
+  private reset(): void { this.cardTimer?.remove(); this.scene.tweens.killTweensOf(this.root); this.root.setScale(1); this.queue = []; this.clear(); this.root.setVisible(false); }
   hide(): void { this.reset(); this.tipTimer?.remove(); this.showTip(false); }
   private next(): void {
     const spec = this.queue.shift();

@@ -23,6 +23,7 @@ describe('QA Task 8: Text and String Table (Black-Box)', () => {
     expect(TEXT.resume).toBe('Resume');
     expect(TEXT.playAgain).toBe('Play again');
     expect(TEXT.paused).toBe('Paused');
+    expect(TEXT.pausedText).toBe('You get a short countdown when you resume.');
     expect(TEXT.landsSoon).toBe('Lands soon');
     expect(TEXT.groundRising).toBe('Ground rising');
     expect(TEXT.mangoRotting).toBe('Mango rotting');
