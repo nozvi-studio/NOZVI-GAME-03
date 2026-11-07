@@ -21,7 +21,7 @@ export class HudTop {
   private readonly done: Phaser.GameObjects.Text; private readonly total: Phaser.GameObjects.Text;
   private readonly score: Phaser.GameObjects.Text; private readonly energy: Phaser.GameObjects.Text;
   private readonly chipG: Phaser.GameObjects.Graphics; private readonly chipText: Phaser.GameObjects.Text; private readonly chipIcon: Phaser.GameObjects.Image;
-  private readonly icons: Phaser.GameObjects.Image[]; private rowKey = ''; private chipKey = ''; private fill = -1;
+  private readonly icons: Phaser.GameObjects.Image[]; private rowKey = ''; private chipKey = ''; private pauseKey = ''; private fill = -1;
 
   constructor(scene: Phaser.Scene, private readonly l: HudLayout, onPause: () => void) {
     const ink = TOKENS.text.primary;
@@ -49,6 +49,9 @@ export class HudTop {
     const key = JSON.stringify(row);
     if (key !== this.rowKey || v.energy.fill !== this.fill) { this.rowKey = key; this.fill = v.energy.fill; this.drawRow(row, v.energy.fill); }
     this.drawChip(v.chip?.text ?? null);
+    const pk = `${paused}|${pauseEnabled}`;
+    if (pk === this.pauseKey) return;
+    this.pauseKey = pk;
     if (this.pauseButton.input) this.pauseButton.input.enabled = pauseEnabled;
     this.pauseButton.setAlpha(pauseEnabled ? 1 : M.disabledAlpha); this.drawPause(paused);
   }

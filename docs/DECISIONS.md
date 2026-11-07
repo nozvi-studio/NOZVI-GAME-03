@@ -477,3 +477,4 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: the HUD shows the ramp chip only when `rampActive && startLevel > 1` (the same rule as the countdown checkpoint card); an L1 start shows the checkpoint hint instead. Display rule only, no gameplay change.
 - Alternatives: change the sim so L1 never sets `rampActive` (gameplay/spec change, not approved).
 - Consequence: `HudSnap` gains `startLevel`; tests in `tests/game/hudModel.test.ts`.
+- Note (2026-11-07): the greybox HUD's level-up white flash was dropped with the D2 HUD rewrite; level-up juice belongs to P3a.

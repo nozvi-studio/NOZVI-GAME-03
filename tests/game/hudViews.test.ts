@@ -129,3 +129,31 @@ it('P3b2-R11 tips last tipFactor x bannerMs; pills and the slow-mo tint follow t
   layer.setPills([]); expect(h.find('pill-0').visible).toBe(false);
   layer.setSlowmo(true); expect(h.find('slowmo-tint').visible).toBe(true); layer.setSlowmo(false); expect(h.find('slowmo-tint').visible).toBe(false);
 });
+it('P3b2-R10 BannerLayer.hide() also hides the tip and kills the pop tween; show() keeps a tip that was just raised', () => {
+  vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
+  const h = sceneHarness(), killed: unknown[] = [], layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  h.scene.tweens.killTweensOf = (v: unknown) => { killed.push(v); };
+  layer.tip('Need 40 energy'); layer.show([{ kind: 'hint', text: 'Fences unlocked' }]);
+  expect(h.find('tip').visible).toBe(true);
+  killed.length = 0; layer.hide();
+  expect(h.find('tip').visible).toBe(false); expect(h.find('banner').visible).toBe(false); expect(killed).toContain(h.find('banner'));
+});
+it('P3b2-R10 setPills redraws a slot only when its content changes (per-frame calls are cheap)', () => {
+  vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const text = h.find('pill-0'), set = vi.spyOn(text, 'setText');
+  const pills = [{ slot: 0 as const, skill: 'slowmo' as const, text: 'Slow-mo · 3 s left' }];
+  layer.setPills(pills); layer.setPills([...pills]); layer.setPills([...pills]);
+  expect(set).toHaveBeenCalledTimes(1);
+  layer.setPills([{ ...pills[0]!, text: 'Slow-mo · 2 s left' }]); expect(set).toHaveBeenCalledTimes(2);
+  layer.setPills([]); expect(text.visible).toBe(false); layer.setPills(pills); expect(set).toHaveBeenCalledTimes(3);
+});
+it('P3b2-R15 HudTop redraws the pause icon only when paused or enabled changes', () => {
+  vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
+  const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, hudLayout(false), () => {});
+  const clear = vi.spyOn(h.find('pause-button').list[0]!, 'clear'), v = hudView(snap(), null, b, t);
+  top.apply(v, false, true); top.apply(v, false, true); top.apply(v, false, true);
+  expect(clear).toHaveBeenCalledTimes(1);
+  top.apply(v, true, true); expect(clear).toHaveBeenCalledTimes(2);
+  top.apply(v, true, false); expect(clear).toHaveBeenCalledTimes(3); expect(h.find('pause-button').alpha).toBeLessThan(1);
+});

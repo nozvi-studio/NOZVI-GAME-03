@@ -187,6 +187,13 @@ describe('P1 HUD flow, audio and session wiring', () => {
     h.game.events.emit('sim-events', [{ type: 'skillUnlocked', skill: 'shield', slot: null }]);
     expect(h.find('tip').text).toBe('Shield unlocked! Pick it before your next run');
   });
+  it('MEC-008-R11 the checkpoint hint is computed on create and level-up, not every frame', () => {
+    const h = setup(), spy = vi.spyOn(h.session, 'homeModel');
+    for (let i = 0; i < 5; i++) h.hud.update();
+    expect(spy).not.toHaveBeenCalled();
+    h.game.events.emit('sim-events', [{ type: 'levelUp', level: 2, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }]);
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
   it('MEC-007-R14/R15 skill keys cast only while playing; buttons hide for empty slots', () => {
     const h = setup({ bestLevel: 3, carriedEnergy: 50 });
     const spy = vi.spyOn(h.session, 'useSkill');

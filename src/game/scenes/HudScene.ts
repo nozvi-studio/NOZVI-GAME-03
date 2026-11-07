@@ -27,6 +27,7 @@ import { ui } from '../ui/layout';
 import { incomingBanner, t, TEXT } from '../text';
 import type { GameScene } from './GameScene';
 
+type HudHint = ReturnType<typeof homeView>['hint'];
 const SKILL_SFX: Record<SkillId, SfxName> = { slowmo: 'skillSlowmo', tailSnip: 'skillSnip', shield: 'skillShield', mangoRain: 'skillRain' };
 // Mockup px of the wait hint and the ?debug=1 buttons (not in the D2 mockups).
 const M = { waitHint: 22, debugNextW: 56, debugKeyW: 70 } as const;
@@ -36,7 +37,7 @@ export class HudScene extends Phaser.Scene {
   private gameScene!: GameScene; private session!: Session; private balance!: Balance; private synth!: Synth;
   private top!: HudTop; private skills!: SkillButtons; private pause!: PauseOverlay; private count!: CountdownOverlay; private banners!: BannerLayer;
   private pad!: ReturnType<typeof createDpad>; private waitHint!: Phaser.GameObjects.Text;
-  private heading = ''; private cpCount = 0; private bestLevelAtStart = 0; private orbTipShown = false; private leaving = false;
+  private heading = ''; private hint: HudHint = null; private cpCount = 0; private bestLevelAtStart = 0; private orbTipShown = false; private leaving = false;
   private haptics = true; private startBanner: string[] = []; private shrunkTo: number | null = null; private overTimer?: Phaser.Time.TimerEvent;
   private debugKey: { c: Phaser.GameObjects.Container } | null = null; private debugNext: { c: Phaser.GameObjects.Container } | null = null;
 
@@ -46,12 +47,13 @@ export class HudScene extends Phaser.Scene {
     this.gameScene = this.scene.get('Game') as GameScene;
     this.session = this.registry.get('session') as Session; this.balance = this.registry.get('balance') as Balance;
     const save = this.session.save(), layout = hudLayout(true); // pad geometry always computed; visibility follows settings.dpad
-    this.cpCount = save.unlockedCheckpoints.length; this.bestLevelAtStart = save.bestLevel;
+    this.cpCount = save.unlockedCheckpoints.length; this.bestLevelAtStart = save.bestLevel; this.readHint();
     this.orbTipShown = false; this.leaving = false; this.heading = ''; this.shrunkTo = null;
     this.synth = createSynth(); this.synth.unlock();
     this.input.setGlobalTopOnly(true);
     this.top = new HudTop(this, layout, () => this.gameScene.apply(flowTogglePause(this.gameScene.flow, this.balance)));
     this.skills = new SkillButtons(this, layout, slot => this.useSkill(slot), this.balance);
+    this.createDebugButtons(layout); // created before the banner layer and overlays so those sit above them
     this.pad = createDpad(this, layout.dpad!, d => this.gameScene.turn(d.x, d.y)); // MEC-001-R2: a turn during the countdown counts
     this.banners = new BannerLayer(this, layout, this.balance);
     this.waitHint = this.add.text(WIDTH / 2, BOARD.y + BOARD.size / 2, this.sys.game?.device?.input?.touch ? TEXT.waitHintTouch : TEXT.waitHintKeys,
@@ -63,7 +65,6 @@ export class HudScene extends Phaser.Scene {
       onSettings: () => this.scene.launch('Settings', { overlay: true }),
       onQuit: () => { this.session.quit(); this.toResults(0); }, // MEC-003-R20, MEC-008-R6
     });
-    this.createDebugButtons(layout);
     this.applySettings();
     const flow = (e: FlowEffect): void => this.onFlow(e), events = (e: SimEvent[]): void => this.onEvents(e), over = (s: SimSnapshot): void => this.onOver(s);
     const toggle = (): void => this.toggleSound(), pause = (): void => this.gameScene.apply(flowPause(this.gameScene.flow));
@@ -185,7 +186,10 @@ export class HudScene extends Phaser.Scene {
     }
     this.banners.show(levelUpBanners(e, { shrunkTo: this.shrunkTo, newCheckpoint }, this.balance, t));
     this.shrunkTo = null; this.synth.play('level'); this.buzz(this.balance.ui.haptics.level);
+    this.readHint();
   }
+  /** MEC-008-R11 chip hint: it only changes when a checkpoint is saved (level-up), so it is read here, not every frame. */
+  private readHint(): void { this.hint = homeView(this.session.homeModel()).hint; }
 
   private onOver(_s: SimSnapshot): void {
     this.banners.hide(); this.count.hide(); this.waitHint.setVisible(false);
@@ -204,8 +208,7 @@ export class HudScene extends Phaser.Scene {
   update(): void { this.refresh(); }
   private refresh(): void {
     const s = this.gameScene.snapshot(); if (!s) return;
-    const status = this.gameScene.flow.status, hint = homeView(this.session.homeModel()).hint; // MEC-008-R11
-    const v = hudView(s, hint, this.balance, t);
+    const status = this.gameScene.flow.status, v = hudView(s, this.hint, this.balance, t);
     this.top.apply(v, status === 'paused', status !== 'ready' && status !== 'over');
     this.skills.apply(v.skills);
     this.banners.setPills(skillPills(s.skills, this.balance, t)); this.banners.setSlowmo(s.slowmo !== null);

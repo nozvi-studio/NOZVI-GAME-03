@@ -31,7 +31,7 @@ export class BannerLayer {
   private readonly root: Phaser.GameObjects.Container; private readonly tipBox: Phaser.GameObjects.Container;
   private readonly tipG: Phaser.GameObjects.Graphics; private readonly tipText: Phaser.GameObjects.Text;
   private readonly pills: { c: Phaser.GameObjects.Container; g: Phaser.GameObjects.Graphics; text: Phaser.GameObjects.Text; icon: Phaser.GameObjects.Image }[] = [];
-  private readonly tint: Phaser.GameObjects.Graphics;
+  private readonly tint: Phaser.GameObjects.Graphics; private readonly pillKeys = ['', ''];
   private queue: BannerSpec[] = []; private cardTimer?: Phaser.Time.TimerEvent; private tipTimer?: Phaser.Time.TimerEvent;
 
   constructor(private readonly scene: Phaser.Scene, private readonly l: HudLayout, private readonly b: Balance) {
@@ -50,8 +50,10 @@ export class BannerLayer {
     this.drawTint();
   }
 
-  show(queue: readonly BannerSpec[]): void { this.hide(); this.queue = [...queue]; this.next(); }
-  hide(): void { this.cardTimer?.remove(); this.queue = []; this.clear(); this.root.setVisible(false); }
+  show(queue: readonly BannerSpec[]): void { this.reset(); this.queue = [...queue]; this.next(); }
+  /** Clears the cards, their timer and pop tween; the tip is left alone (a tip may be raised just before a queue). */
+  private reset(): void { this.cardTimer?.remove(); this.scene.tweens.killTweensOf(this.root); this.queue = []; this.clear(); this.root.setVisible(false); }
+  hide(): void { this.reset(); this.tipTimer?.remove(); this.showTip(false); }
   private next(): void {
     const spec = this.queue.shift();
     if (!spec) { this.clear(); this.root.setVisible(false); return; }
@@ -146,10 +148,13 @@ export class BannerLayer {
     const m = M.pill;
     for (const slot of [0, 1] as const) {
       const p = this.pills[slot]!, spec = pills.find(x => x.slot === slot) ?? null;
+      const key = spec ? `${spec.skill}|${spec.text}|${pills.indexOf(spec)}` : '';
+      if (key === this.pillKeys[slot]) continue;
+      this.pillKeys[slot] = key;
       p.c.setVisible(spec !== null); p.text.setVisible(spec !== null); if (!spec) continue;
       p.text.setText(spec.text); p.icon.setTexture(hudIconKey(spec.skill, spec.skill === 'tailSnip' || spec.skill === 'mangoRain' ? 'ink' : 'active'));
       const h = ui(m.h), w = ui(m.padL + m.icon + m.gap + m.padR) + p.text.width;
-      const y = BOARD.y + ui(TOP.pill) + pills.findIndex(x => x.slot === slot) * (h + ui(m.rowGap)), x = (WIDTH - w) / 2;
+      const y = BOARD.y + ui(TOP.pill) + pills.indexOf(spec) * (h + ui(m.rowGap)), x = (WIDTH - w) / 2;
       p.g.clear(); drawCard(p.g, x, y, w, h, h / 2, TOKENS.surface.card, { dy: M.shadowDy });
       p.icon.setPosition(x + ui(m.padL + m.icon / 2), y + h / 2); p.text.setPosition(x + ui(m.padL + m.icon + m.gap), y + h / 2);
     }
