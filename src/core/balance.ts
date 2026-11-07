@@ -345,6 +345,7 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (b.juice.reduced.deathTotalMs > 1500) fail('juice.reduced.deathTotalMs', 'must be <= 1500');
   if (jd.cardInMs >= jd.totalMs) fail('juice.death.cardInMs', 'must be < totalMs');
   if (b.juice.reduced.deathTotalMs <= jd.cardInMs) fail('juice.death.cardInMs', 'must be < reduced.deathTotalMs');
+  if (jd.cardInMs + jd.skipLockMs >= jd.totalMs) fail('juice.death.skipLockMs', 'cardInMs + skipLockMs must be < totalMs');
   if (jd.cardInMs + jd.skipLockMs >= b.juice.reduced.deathTotalMs) fail('juice.death.skipLockMs', 'cardInMs + skipLockMs must be < reduced.deathTotalMs');
   if (b.juice.reduced.flashAlphaMax > 0.25) fail('juice.reduced.flashAlphaMax', 'must be <= 0.25 (no big flashes)');
   // MEC-007 section 9 unlock ordering and level bounds.

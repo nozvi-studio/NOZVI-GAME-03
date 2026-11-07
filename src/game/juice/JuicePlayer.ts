@@ -60,7 +60,7 @@ export class JuicePlayer {
     const line = pickDeathLine(cause, this.d.seed());
     this.timers.push(this.d.later(tl.cardInMs, () => {
       this.card = this.d.makeCard(); this.card.show(line);
-      this.timers.push(this.d.later(tl.cardInMs + tl.skipLockMs, () => this.card?.armSkip(() => this.finish())));
+      this.timers.push(this.d.later(tl.skipLockMs, () => this.card?.armSkip(() => this.finish())));
     }));
     this.timers.push(this.d.later(tl.totalMs, () => this.finish()));
   }

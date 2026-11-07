@@ -3,17 +3,27 @@ import { JuicePlayer, type JuiceDeps } from '../../src/game/juice/JuicePlayer';
 import { loadBalance } from '../support/balance';
 const b = loadBalance(), j = b.juice;
 function make(over: Partial<JuiceDeps> = {}, reduced = false) {
-  const timers: { ms: number; fn: () => void; removed: boolean }[] = [];
+  const timers: { ms: number; at: number; fn: () => void; removed: boolean }[] = [];
+  let now = 0; // cumulative clock: later(ms) fires at now + ms, like Phaser's time.delayedCall
   const log = { play: [] as string[], buzz: [] as unknown[], board: [] as string[], screen: [] as string[], card: [] as string[], done: 0, skip: null as null | (() => void) };
   const deps: JuiceDeps = {
     balance: b, synth: { play: n => { log.play.push(n); }, buzz: p => { log.buzz.push(p); } },
     board: { playBoardFx: l => log.board.push(...l.map(v => v.kind)) }, screen: { play: v => { log.screen.push(v.kind); } },
     settings: () => ({ sound: true, haptics: true }), reduced: () => reduced, seed: () => 7,
     makeCard: () => ({ show: l => { log.card.push(l); }, armSkip: cb => { log.skip = cb; }, destroy: () => { log.card.push('destroyed'); } }),
-    later: (ms, fn) => { const t = { ms, fn, removed: false }; timers.push(t); return { remove: () => { t.removed = true; } }; },
+    later: (ms, fn) => { const t = { ms, at: now + ms, fn, removed: false }; timers.push(t); return { remove: () => { t.removed = true; } }; },
     onDone: () => { log.done++; }, ...over };
   const run = (ms: number) => timers.filter(t => t.ms === ms && !t.removed).forEach(t => t.fn());
-  return { p: new JuicePlayer(deps), log, timers, run };
+  /** Advance the clock to absolute time `to`, firing due timers in order (timers they schedule fire too). */
+  const advance = (to: number) => {
+    for (;;) {
+      const due = timers.filter(t => !t.removed && t.at <= to).sort((a, c) => a.at - c.at)[0];
+      if (!due) break;
+      now = due.at; due.removed = true; due.fn();
+    }
+    now = to;
+  };
+  return { p: new JuicePlayer(deps), log, timers, run, advance };
 }
 describe('P3a player', () => {
   it('P3a-R1 eat plays sound, haptic, board and screen visuals from one cue', () => {
@@ -38,13 +48,22 @@ describe('P3a player', () => {
     m.run(j.death.cardInMs); expect(m.log.card.length).toBe(1); expect(m.log.card[0]).toMatch(/\S/);
     m.run(j.death.totalMs); expect(m.log.done).toBe(1); expect(j.death.totalMs).toBeLessThanOrEqual(1500);
   });
+  it('P3a-R7 skip arms exactly at cardInMs + skipLockMs (normal and reduced)', () => {
+    for (const reduced of [false, true]) {
+      const m = make({}, reduced); m.p.handle({ type: 'died', cause: 'wall', x: 0, y: 0 });
+      const armAt = j.death.cardInMs + j.death.skipLockMs;
+      m.advance(armAt - 1); expect(m.log.skip, `reduced=${reduced} early`).toBeNull();
+      m.advance(armAt); expect(m.log.skip, `reduced=${reduced} armed`).not.toBeNull();
+      expect(m.log.done).toBe(0);
+    }
+  });
   it('P3a-R7 the run-over event right after a death does not start a second timer', () => {
     const m = make(); m.p.handle({ type: 'died', cause: 'wall', x: 0, y: 0 }); const n = m.timers.length;
     m.p.runOver(false); expect(m.timers.length).toBe(n);
   });
   it('P3a-R7 tap skips: once armed, the skip leaves immediately and exactly once', () => {
     const m = make(); m.p.handle({ type: 'died', cause: 'wall', x: 0, y: 0 });
-    m.run(j.death.cardInMs); m.run(j.death.cardInMs + j.death.skipLockMs); // lock timer arms the skip
+    m.advance(j.death.cardInMs + j.death.skipLockMs); // lock timer arms the skip
     m.log.skip?.(); m.log.skip?.(); expect(m.log.done).toBe(1);
     m.run(j.death.totalMs); expect(m.log.done).toBe(1);
   });
