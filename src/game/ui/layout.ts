@@ -5,7 +5,10 @@ export const UI_SCALE = WIDTH / TOKENS.screen.w;
 export const ui = (px: number): number => px * UI_SCALE;
 export interface ColumnSpec { top: number; middle: number; bottom: number; height?: number; minShrink: number }
 export interface ColumnLayout { topY: number; middleY: number; middleScale: number; bottomY: number; fits: boolean }
-/** P3-0-R2 top anchored, bottom anchored, middle centred and shrunk to fit (spec D2). */
+/**
+ * P3-0-R2 top anchored, bottom anchored, middle centred and shrunk to fit (spec D2).
+ * middleY is the top edge of the scaled middle block; callers centre it horizontally with an x offset of WIDTH * (1 - middleScale) / 2.
+ */
 export function layoutColumn(s: ColumnSpec): ColumnLayout {
   const height = s.height ?? HEIGHT;
   const top = ui(s.top), bottom = ui(s.bottom), middle = ui(s.middle);
