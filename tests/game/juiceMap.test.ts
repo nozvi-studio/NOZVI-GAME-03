@@ -101,6 +101,8 @@ describe('P3a-R8 reduced motion is applied inside the mapper', () => {
     const events = [ate(false), ate(true), { type: 'orbEaten', x: 1, y: 1, gained: 15 },
       { type: 'skillUsed', slot: 0, skill: 'slowmo', level: 3, energyBefore: 80, energyAfter: 40 },
       { type: 'levelUp', level: 7, biome: 2, challenge: false, biomeChanged: true, clearedLevelTimeMs: 1 },
+      { type: 'levelUp', level: 3, biome: 0, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 },
+      { type: 'checkpointUnlocked', level: 10 },
       { type: 'died', cause: 'wall', x: 0, y: 0 }, { type: 'rotted', x: 1, y: 1, leftRock: true }, { type: 'dust', x: 1, y: 1 }] as const;
     for (const e of events) {
       const c = mapJuice(e, red);
@@ -111,6 +113,11 @@ describe('P3a-R8 reduced motion is applied inside the mapper', () => {
       }
     }
     expect(mapJuice(ate(false), red).board.map(v => v.kind)).toEqual(['floatText']); // info stays, motion goes
+    const flag = mapJuice({ type: 'checkpointUnlocked', level: 10 }, red).screen.find(v => v.kind === 'flagPlant');
+    expect(flag && flag.kind === 'flagPlant' ? flag.ms : -1).toBe(0); // planted instantly, no motion
+    const plain = mapJuice({ type: 'levelUp', level: 3, biome: 0, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }, red);
+    expect(kinds(plain)).toEqual(['levelGlow']); // no snakePop, no barBump, no sweep
+    expect(plain.board[0]).toMatchObject({ alpha: j.reduced.flashAlphaMax });
     const death = mapJuice({ type: 'died', cause: 'wall', x: 0, y: 0 }, red);
     expect(death.screen).toEqual([{ kind: 'deathFlash', alpha: j.reduced.flashAlphaMax, ms: j.reduced.softMs, vignette: false }]);
     expect(death.sounds).toEqual(['die']); expect(death.haptic).toBe(90); // sound and haptics are not motion
