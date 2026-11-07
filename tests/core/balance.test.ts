@@ -173,3 +173,10 @@ it('MEC-003-R16 parseBalance rejects a table that introduces a family on a chall
   expect(() => loadBalance(j => { j.level.table.find((r: { from: number }) => r.from === 25).weights.maze = 1; }))
     .toThrow(/challenge level 25 introduces maze/);
 });
+
+it('P3-0-R3 balance.ui has font timeout and min shrink', () => {
+  const b = parseBalance(structuredClone(json));
+  expect(b.ui.fontLoadTimeoutMs).toBe(2000);
+  expect(b.ui.minShrink).toBe(0.85);
+  expect(() => parseBalance(mutate(j => { j.ui.minShrink = 1.5; }))).toThrow(/ui.minShrink/);
+});
