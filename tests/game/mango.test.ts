@@ -57,7 +57,12 @@ describe('P3b1-R8 mango art', () => {
     expect(calls.some(c => c[0] === 'fillStyle' && c[1] === PART.mango.body)).toBe(true);
     expect(calls.some(c => c[0] === 'strokePoints')).toBe(true);
   });
-  it('P3b1-R8 golden mango recolours the body to the gold token', () => {
-    expect(record(true).some(c => c[0] === 'fillStyle' && c[1] === LIGHT.gold)).toBe(true);
+  it('P3b1-R8 golden mango recolours the body to the gold token, normal mango keeps the body token', () => {
+    const bodyFill = (golden: boolean) => {
+      const calls = record(golden), i = calls.findIndex(c => c[0] === 'fillEllipse');
+      return calls.slice(0, i).reverse().find(c => c[0] === 'fillStyle')![1];
+    };
+    expect(bodyFill(true)).toBe(LIGHT.gold);
+    expect(bodyFill(false)).toBe(PART.mango.body);
   });
 });
