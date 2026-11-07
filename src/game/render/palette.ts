@@ -30,5 +30,5 @@ export const themeOf = (p: Palette): BoardTheme => (p === DARK ? 'dark' : 'light
 export const reduceMotion = (): boolean => display().reducedMotion;
 
 // MEC-006 §8 greybox colors for orbs, skills, slow-mo and shield.
-export const P1_COLORS = { orb: 0x29d3e6, orbLine: 0x0b6b78, slowmo: 0x3d6dff, shield: 0x29d3e6, rubble: 0x4a4a4a,
+export const P1_COLORS = { orb: 0x29d3e6, orbLine: 0x0b6b78, slowmo: 0x3d6dff, shield: 0x29d3e6,
   snipStripe: 0x2b3a8f, droplet: 0x3d9bff, skillOff: 0x9a9a9a } as const;
