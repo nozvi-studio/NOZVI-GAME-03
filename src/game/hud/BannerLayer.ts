@@ -8,7 +8,7 @@ import { ui } from '../ui/layout';
 import { drawCard, hudLabel } from './draw';
 import { bannerStrip, type BannerSpec, type SkillPill } from './banners';
 import { hudIconKey } from './hudIcons';
-import { bannerStripRect, STRIP_MOCK, stripRows, type HudLayout } from './hudLayout';
+import { bannerStripRect, STRIP_MOCK, skillTipPlacement, stripRows, type HudLayout } from './hudLayout';
 
 // SkillActiveD2 / tip metrics in mockup px; the banner strip geometry lives in hudLayout (STRIP_MOCK).
 const W = { tipMax: 300 } as const;
@@ -85,7 +85,7 @@ export class BannerLayer {
     let x: number, y: number;
     if (tailSlot === null) { x = (WIDTH - w) / 2; y = BOARD.y + BOARD.size - ui(m.floor) - h; }
     else {
-      const s = this.l.skills[tailSlot]; x = Math.min(WIDTH - ui(m.margin) - w, Math.max(ui(m.margin), s.cx - ui(m.tailLeft))); y = s.groupTop - ui(m.tailGap) - h;
+      ({ x, y } = skillTipPlacement(this.l, tailSlot, w, h, { margin: ui(m.margin), tailLeft: ui(m.tailLeft), tailGap: ui(m.tailGap) }));
     }
     g.fillStyle(toInt(TOKENS.hud.tooltip)).fillRoundedRect(x, y, w, h, ui(m.radius));
     if (tailSlot !== null) { const tx = this.l.skills[tailSlot].cx; g.fillTriangle(tx - ui(m.tailHalf), y + h, tx + ui(m.tailHalf), y + h, tx, y + h + ui(m.tailH)); }

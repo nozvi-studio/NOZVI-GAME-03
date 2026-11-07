@@ -8,6 +8,7 @@ import { bindKeyboard } from '../../src/game/input/keyboard';
 import { loadBalance } from '../support/balance';
 import { setDisplaySettings } from '../../src/game/render/palette';
 import { bannerStripRect } from '../../src/game/hud/hudLayout';
+import { BOARD } from '../../src/game/layout';
 import { sceneHarness, Signals, type DrawObject } from '../support/scene';
 
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } },
@@ -176,6 +177,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
     expect(sound.buzz.mock.calls.map(c => c[0])).toEqual([8, 20]);
     h.game.events.emit('sim-events', [{ type: 'skillRejected', slot: 0, skill: 'slowmo', reason: 'energy' }]);
     expect(sound.play).toHaveBeenLastCalledWith('nope'); expect(h.find('tip').text).toBe('Need 40 energy');
+    expect(h.find('tip').y).toBeGreaterThanOrEqual(BOARD.y + BOARD.size); // UIFIX-R2 toast above the skill button, not over the board
     h.game.events.emit('sim-events', [{ type: 'skillUnlocked', skill: 'slowmo', slot: 0 }]);
     expect(h.find('tip').text).toBe('New skill: Slow-mo'); // tail points at the slot (Findings 5)
     expect(sound.play).toHaveBeenLastCalledWith('unlock');

@@ -171,7 +171,7 @@ export class HudScene extends Phaser.Scene {
       case 'skillRejected': {
         if (e.reason === 'empty') break;
         this.skills.shake(e.slot);
-        this.banners.tip(t(`skill.reject.${e.reason}`, { cost: e.skill ? this.balance.skills[e.skill].cost : 0 }));
+        this.banners.tip(t(`skill.reject.${e.reason}`, { cost: e.skill ? this.balance.skills[e.skill].cost : 0 }), e.slot);
         break;
       }
       case 'skillUnlocked': { const tip = skillTip(e, t); this.banners.tip(tip.text, tip.slot); break; }

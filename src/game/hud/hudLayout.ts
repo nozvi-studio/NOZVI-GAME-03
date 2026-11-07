@@ -60,3 +60,9 @@ export function stripRows(hasSub: boolean, h: number): { titleY: number; subY: n
   const top = (h - (t + s)) / 2;
   return { titleY: top, subY: top + t };
 }
+
+/** UIFIX-R2 bubble top-left for a tip whose tail points at a skill button; clamped so it never covers the board (UIFIX-R2). */
+export function skillTipPlacement(l: HudLayout, slot: 0 | 1, w: number, h: number, m: { margin: number; tailLeft: number; tailGap: number }): { x: number; y: number } {
+  const s = l.skills[slot];
+  return { x: Math.min(WIDTH - m.margin - w, Math.max(m.margin, s.cx - m.tailLeft)), y: Math.max(BOARD.y + BOARD.size, s.groupTop - m.tailGap - h) };
+}
