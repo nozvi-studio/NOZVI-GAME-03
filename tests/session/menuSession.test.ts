@@ -48,8 +48,10 @@ it('P3b3-R5 newCheckpoints reports a milestone unlocked during the run', () => {
   s.quit();
   expect(s.summary()!.newCheckpoints).toEqual([4]);
 });
-it('P3b3-R5 newCheckpoints lists several unlocked milestones in ascending order', () => {
-  const { s } = setup({ bestLevel: 20, unlockedCheckpoints: [] });
+it('P3b3-R5 newCheckpoints sorts milestones that unlock out of config order', () => {
+  // Reversed config: the run unlocks 8, 6, 4 in that order, so only the sort yields ascending output.
+  const reversed = loadBalance(j => { j.checkpoints.milestones = [...j.checkpoints.milestones].reverse(); });
+  const { s } = setup({ bestLevel: 20, unlockedCheckpoints: [] }, reversed);
   s.startRun(1);
   s.quit();
   expect(s.summary()!.newCheckpoints).toEqual([4, 6, 8]);
