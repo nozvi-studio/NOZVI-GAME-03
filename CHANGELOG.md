@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(render): UIFIX-R5 bright snake rim in biome 6 (contrast >= 3:1)
 - feat(ui): UIFIX-R4 dark-theme text/card tokens with WCAG 4.5:1 gate
 - feat(ui): UIFIX-R4 dark theme applied to HUD title, Pause card and Settings
 - docs: P3 UI review (agy) in PLAYTEST + UI fixes design spec (UIFIX-R1..R15)

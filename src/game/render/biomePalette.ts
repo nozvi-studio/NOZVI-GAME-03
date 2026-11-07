@@ -5,6 +5,7 @@ import { toInt } from '../uiTokens';
 export interface BoardLook {
   biome: number; theme: BoardTheme; groundA: number; groundB: number;
   grid: number; gridAlpha: number; edge: number; woodEdge: number;
+  snakeRim: number | null; // UIFIX-R5 bright snake outline, biome 6 only
 }
 // BiomeBoardsD2 light grounds, one pair per biome (GDD §5.1 order).
 const LIGHT_GROUNDS: readonly (readonly [string, string])[] = [
@@ -12,6 +13,7 @@ const LIGHT_GROUNDS: readonly (readonly [string, string])[] = [
   ['#EBDDBC', '#DCC79B'], ['#F8D2A6', '#F0BF8A'], ['#3B3363', '#332C58'],
 ];
 const STORM = 6;
+const STORM_RIM = '#7CF2D4';
 const NAVY_EDGE = '#2B3248', WHITE = '#FFFFFF', WOOD_EDGE = '#4A2E1B';
 const DARK_BASE = '#131D15', DARK_MIX = 0.7;                 // lead decision 1
 const GRID = { light: { color: '#FFFFFF', alpha: 0.5 }, dark: { color: '#FFFFFF', alpha: 0.1 }, storm: { color: '#7CF2D4', alpha: 0.28 } } as const;
@@ -36,6 +38,6 @@ export function boardLook(biome: number, theme: BoardTheme): BoardLook {
   const grid = storm ? GRID.storm : theme === 'dark' ? GRID.dark : GRID.light;
   const edge = toInt(storm || theme === 'dark' ? WHITE : NAVY_EDGE);
   return { biome: n, theme, groundA, groundB, grid: toInt(grid.color), gridAlpha: grid.alpha, edge,
-    woodEdge: storm || theme === 'dark' ? edge : toInt(WOOD_EDGE) };
+    woodEdge: storm || theme === 'dark' ? edge : toInt(WOOD_EDGE), snakeRim: storm ? toInt(STORM_RIM) : null };
 }
 export const DEFAULT_LOOK: BoardLook = boardLook(1, 'light');

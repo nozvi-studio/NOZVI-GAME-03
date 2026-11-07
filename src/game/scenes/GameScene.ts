@@ -200,7 +200,7 @@ export class GameScene extends Phaser.Scene {
     drawShrink(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawMango(this.layers.mango, snapshot, cell, p, this.look, time, this.reduced, this.mangoBornAt);
     drawSkillObjects(this.layers.skills, snapshot, cell, p, this.look, this.balance, time);
-    drawSnake(this.layers.snake, snapshot, cell, p, Math.max(this.effects.gulp, this.effects.pop), false);
+    drawSnake(this.layers.snake, snapshot, cell, p, Math.max(this.effects.gulp, this.effects.pop), false, this.look.snakeRim);
     this.capy.update(snapshot, time, cell);
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);
     drawIceArrow(this.layers.overlay, snapshot, cell, this.look);
