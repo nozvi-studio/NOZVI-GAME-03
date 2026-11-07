@@ -8,7 +8,7 @@ const fake = () => {
   return { g: g as never, calls };
 };
 it('P3b3-R14 every icon id draws something', () => {
-  expect(ICON_IDS).toEqual(['back', 'gear', 'lock', 'bolt', 'flag', 'home', 'slowmo', 'tailSnip', 'shield', 'mangoRain', 'sound', 'haptics', 'dpad', 'motion']);
+  expect(ICON_IDS).toEqual(['back', 'sliders', 'lock', 'bolt', 'flag', 'home', 'slowmo', 'tailSnip', 'shield', 'mangoRain', 'sound', 'haptics', 'dpad', 'motion']);
   for (const id of ICON_IDS) {
     const { g, calls } = fake();
     drawIcon(g, id, 24, 0x5a3b3b);

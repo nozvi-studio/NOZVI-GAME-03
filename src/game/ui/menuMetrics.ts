@@ -23,10 +23,11 @@ export const MENU = {
     badgeH: 26, badgeFont: 12, badgePad: 10, badgeReserve: 70, lockIcon: 13, lockGap: 5, goW: 350, goLabel: 46, goStroke: 8,
   },
   settings: {
-    headH: 44, rowH: 72, rows: 4, divider: 2, themeCardH: 215, captionH: 16,
+    headH: 44, rowH: 72, rows: 4, divider: 2, themeCardH: 194, captionH: 16,
     cardW: 358, radius: 26, tileInset: 2, titleDy: 14, subDy: 2, captionDy: 8, gap: 14, pad: 16, tile: 44, tileR: 14, icon: 24, textGap: 12, subW: 185, titleFont: 17, subFont: 13, valueFont: 14, headFont: 24,
     sw: { w: 48, h: 28, knob: 10, line: 2 },
-    theme: { swatchTop: 10, snake: { dx: 12, dy: 26, h: 12, r: 6 }, ball: { dx: 46, dy: 30, r: 10 }, titleY: 22, subY: 42, tilesY: 62, bottomPad: 16, gap: 10, r: 20, swatch: 32, labelFont: 16, labelY: 96, line: 2, lineSel: 3 },
+    // SettingsD2 theme card: padding 16/14, tiles 113 high with a 64 px rounded swatch; edge = 2 px inset at 25% ink.
+    theme: { padX: 14, titleY: 25, subY: 45, tilesY: 66, tileH: 113, gap: 10, r: 20, swatch: 64, swatchTop: 10, swatchR: 14, swatchLine: 2, swatchEdgeAlpha: 0.25, snake: { dx: 12, dy: 26, w: 32, h: 12, r: 6 }, ball: { dx: 46, dy: 30, r: 10 }, labelFont: 16, labelY: 93, line: 2, lineSel: 3 },
   },
   results: { headH: 44, cardTop: 50, cardH: 332, bannerH: 60, energyH: 64, progressH: 32, btn: 62, againH: 70, bottom: 30 },
 } as const;

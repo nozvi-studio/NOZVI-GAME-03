@@ -25,7 +25,7 @@ export function tap(scene: Phaser.Scene, x: number, y: number, w: number, h: num
   return z;
 }
 
-/** Round white icon button (back, gear, home), optional blue shelf for the footer variant. */
+/** Round white icon button (back, sliders, home), optional blue shelf for the footer variant. */
 export function roundIconButton(scene: Phaser.Scene, x: number, y: number, diameterMock: number, icon: IconId, name: string,
   action: () => void, shelf = false): Phaser.GameObjects.Container {
   const d = ui(diameterMock), g = scene.add.graphics();

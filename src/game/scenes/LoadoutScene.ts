@@ -91,7 +91,7 @@ export class LoadoutScene extends Phaser.Scene {
       const ly = cy + r + ui(L.slotGap);
       const cap = this.add.text(cx, ly, t(i === 0 ? 'loadout.slot1' : 'loadout.slot2').toUpperCase(), text(L.slotLabel, '800', TOKENS.text.soft)).setOrigin(0.5, 0);
       cap.setLetterSpacing(ui(L.slotLabelTrack)); blk.add(cap);
-      blk.add(this.add.text(cx, ly + cap.height, slot.skill ? t(`skill.${slot.skill}.name`) : '-', text(L.slotName, '900', TOKENS.text.primary)).setOrigin(0.5, 0));
+      blk.add(this.add.text(cx, ly + cap.height, slot.skill ? t(`skill.${slot.skill}.name`) : t('loadout.emptySlot'), text(L.slotName, '900', TOKENS.text.primary)).setOrigin(0.5, 0));
       blk.add(tap(this, cx, y + ui(L.slotsH / 2), ui(L.slotCol), ui(L.slotsH), `loadout-slot${slot.index + 1}`, () => this.pick(() => tapSlot(this.edit, slot.index))));
     });
     y += ui(L.slotsH + MENU.gap);

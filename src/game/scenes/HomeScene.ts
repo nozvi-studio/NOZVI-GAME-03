@@ -36,7 +36,7 @@ export class HomeScene extends Phaser.Scene {
     this.synth = createSynth(); this.synth.setOn(this.session.save().settings.sound);
     bgCream(this);
     this.selected = this.session.homeModel().defaultStart;
-    roundIconButton(this, WIDTH - ui(MENU.side + MENU.round / 2), ui(MENU.padTop + MENU.round / 2), MENU.round, 'gear', 'home-settings',
+    roundIconButton(this, WIDTH - ui(MENU.side + MENU.round / 2), ui(MENU.padTop + MENU.round / 2), MENU.round, 'sliders', 'home-settings',
       () => { this.synth.play('uiTap'); this.scene.start('Settings', { returnTo: 'Home' }); });
     const logoY = ui(MENU.padTop + MENU.round + MENU.gap + MENU.logo.lineH / 2);
     logoLine(this, WIDTH / 2, logoY, 'MANGO', 0, MENU.logo.size);

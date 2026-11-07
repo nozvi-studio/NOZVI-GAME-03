@@ -22,7 +22,7 @@ export function loadoutColumn(minShrink: number): Spec {
 }
 export function settingsColumn(minShrink: number): Spec {
   const s = MENU.settings, g = MENU.section;
-  const rows = s.rows * s.rowH + (s.rows - 1) * s.divider;
+  const rows = s.rows * s.rowH; // each row box is rowH tall and includes its divider
   return { top: head, middle: g + rows + g + s.themeCardH + g + s.captionH, bottom: 0, minShrink };
 }
 export function resultsColumn(f: { banner: boolean; energy: boolean }, minShrink: number): Spec {

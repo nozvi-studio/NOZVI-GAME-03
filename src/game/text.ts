@@ -79,7 +79,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'hud.challenge': '★', // OQ-C2 provisional
   'toast.mangoStolen': 'The bird took your mango!', // OQ-B6 provisional
   'loadout.title': 'Pick 2 skills', 'loadout.go': 'Go!', 'loadout.back': 'Back',
-  'loadout.slot1': 'Slot 1', 'loadout.slot2': 'Slot 2', 'loadout.locked': 'Reach L{level}',
+  'loadout.emptySlot': '-', 'loadout.slot1': 'Slot 1', 'loadout.slot2': 'Slot 2', 'loadout.locked': 'Reach L{level}',
   'tip.skillUnlocked.slot': '{skill} unlocked! Tap {side} to use it',
   'tip.skillUnlocked.next': '{skill} unlocked! Pick it before your next run',
   'tip.slotUnlocked': 'Second skill slot unlocked!',
