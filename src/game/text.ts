@@ -91,11 +91,10 @@ const KEYED: Readonly<Record<string, string>> = {
   'hud.nextCheckpoint': 'Next checkpoint at L{level}', 'hud.nextCheckpointClear': 'Next checkpoint: clear L{level}',
   'hud.ramp': 'Warming up {n}',
   'side.left': 'left', 'side.right': 'right',
-  'results.level': 'Level {level}', 'results.cleared': 'Levels cleared: {n}', 'results.score': 'Score {score}',
-  'results.best': 'Best {best}', 'results.newBest': 'New best!', 'results.carry': 'Energy saved: {e}', 'results.carryLabel': 'Energy saved',
-  'results.won': 'You cleared every level!', 'results.home': 'Home', 'pause.quit': 'Quit',
+    'results.best': 'Best {best}', 'results.newBest': 'New best!', 'results.carryLabel': 'Energy saved',
+  'results.won': 'You cleared every level!', 'pause.quit': 'Quit',
   'playAgain': TEXT.playAgain, 'resume': TEXT.resume, 'paused': TEXT.paused, 'pausedText': TEXT.pausedText,
-  'home.soundOn': 'Sound: on', 'home.soundOff': 'Sound: off', 'skill.ready': 'Ready', 'loadout.picked': 'Slot {n}',
+  'skill.ready': 'Ready', 'loadout.picked': 'Slot {n}',
   ...Object.fromEntries(Object.entries(CAUSE_TEXT).map(([k, v]) => [`cause.${k}`, v])),
   'cause.quit': 'Quit', 'cause.clear': 'You cleared level 30!',
   'loadout.titleOne': 'Pick a skill', 'loadout.unlocksAt': 'Unlocks at L{level}',
@@ -113,6 +112,8 @@ const KEYED: Readonly<Record<string, string>> = {
   'settings.light': 'Light', 'settings.dark': 'Dark', 'settings.autosave': 'Changes save automatically',
   'results.scoreLabel': 'SCORE', 'results.levelLabel': 'LEVEL', 'results.eatenLabel': 'EATEN', 'results.biomeLabel': 'BIOME',
   'results.biomeOf': '{b}/{n}', 'results.nextCp': 'L{level}', 'results.nextCpClear': 'Clear L{level}', 'results.gameOver': 'GAME OVER',
+  'results.youWin': 'YOU WIN!', // provisional (P3b-3 final review)
+  'logo.mango': 'MANGO', 'logo.snake': 'SNAKE', 'home.prev': '◀', 'home.next': '▶',
   'boot.loading': 'Loading… {n}%',
 };
 

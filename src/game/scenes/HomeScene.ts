@@ -39,8 +39,8 @@ export class HomeScene extends Phaser.Scene {
     roundIconButton(this, WIDTH - ui(MENU.side + MENU.round / 2), ui(MENU.padTop + MENU.round / 2), MENU.round, 'sliders', 'home-settings',
       () => { this.synth.play('uiTap'); this.scene.start('Settings', { returnTo: 'Home' }); });
     const logoY = ui(MENU.padTop + MENU.round + MENU.gap + MENU.logo.lineH / 2);
-    logoLine(this, WIDTH / 2, logoY, 'MANGO', 0, MENU.logo.size);
-    logoLine(this, WIDTH / 2, logoY + ui(MENU.logo.lineH - MENU.logo.overlap), 'SNAKE', 2, MENU.logo.size);
+    logoLine(this, WIDTH / 2, logoY, t('logo.mango'), 0, MENU.logo.size);
+    logoLine(this, WIDTH / 2, logoY + ui(MENU.logo.lineH - MENU.logo.overlap), t('logo.snake'), 2, MENU.logo.size);
     hill(this, HEIGHT - ui(H.hillPeek));
     if (isDebug(window.location.search)) this.setupDebug();
     this.build();
@@ -100,8 +100,8 @@ export class HomeScene extends Phaser.Scene {
       y += g;
       const cy = y + ui(H.stepperH) / 2, mid = chip(this, WIDTH / 2, cy, t('home.startAt', { level: v.startAt }), TOKENS.surface.card);
       const off = mid.width / 2 + ui(H.stepper.chipGap + H.stepper.btn / 2);
-      const prev = pillButton(this, WIDTH / 2 - off, cy, H.stepper.btn, H.stepper.btn, '◀', 'home-prev', () => this.step(-1), 'cream');
-      const next = pillButton(this, WIDTH / 2 + off, cy, H.stepper.btn, H.stepper.btn, '▶', 'home-next', () => this.step(1), 'cream');
+      const prev = pillButton(this, WIDTH / 2 - off, cy, H.stepper.btn, H.stepper.btn, t('home.prev'), 'home-prev', () => this.step(-1), 'cream');
+      const next = pillButton(this, WIDTH / 2 + off, cy, H.stepper.btn, H.stepper.btn, t('home.next'), 'home-next', () => this.step(1), 'cream');
       blk.add([mid, prev.c, next.c]);
       y += ui(H.stepperH);
     }

@@ -43,3 +43,11 @@ it('P3b3-R11 win and quit headlines, mud context, energy saved, clear milestone,
   expect(resultsView(base, null, 6).next).toBeNull();
   expect(resultsView({ ...base, level: 40 }, next, 6).next!.fill).toBe(1);
 });
+it('P3b3-R11 the title key is results.youWin for a won run and results.gameOver otherwise', () => {
+  expect(resultsView({ ...base, won: true, cause: 'clear' }, null, 6).titleKey).toBe('results.youWin');
+  expect(resultsView(base, null, 6).titleKey).toBe('results.gameOver');
+  expect(resultsView({ ...base, cause: 'quit' }, null, 6).titleKey).toBe('results.gameOver');
+});
+it('P3b3-R11 the biome stat reads "n/total" through the text table', () => {
+  expect(resultsView(base, null, 6).stats[2]!.value).toBe('2/6');
+});

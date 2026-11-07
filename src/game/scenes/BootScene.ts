@@ -66,8 +66,8 @@ export class BootScene extends Phaser.Scene {
     const logoY = ui(B.top + MENU.logo.lineH / 2);
     void waitForFonts(typeof document === 'undefined' ? undefined : document.fonts, UI_FONT_SPECS, json.ui.fontLoadTimeoutMs).then(() => {
       if (!this.sys?.isActive()) return;
-      logoLine(this, cx, logoY, 'MANGO', 0, MENU.logo.size);
-      logoLine(this, cx, logoY + ui(MENU.logo.lineH - MENU.logo.overlap), 'SNAKE', 2, MENU.logo.size);
+      logoLine(this, cx, logoY, t('logo.mango'), 0, MENU.logo.size);
+      logoLine(this, cx, logoY + ui(MENU.logo.lineH - MENU.logo.overlap), t('logo.snake'), 2, MENU.logo.size);
     });
   }
   // The capy head texture exists only after loading, so it is added from create().

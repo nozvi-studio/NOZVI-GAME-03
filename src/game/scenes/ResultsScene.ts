@@ -32,9 +32,9 @@ export class ResultsScene extends Phaser.Scene {
     hill(this, HEIGHT - ui(R.hillPeek));
     const home = (): void => { this.scene.start('Home'); };
     roundIconButton(this, ui(MENU.side + MENU.round / 2), ui(MENU.padTop + MENU.round / 2), MENU.round, 'back', 'results-home-top', home);
-    logoLine(this, WIDTH / 2, ui(R.titleY + R.titleSize / 2), t('results.gameOver'), 0, R.titleSize);
-    if (s) {
-      const v = resultsView(s, session.homeModel().nextMilestone, biome(balance, balance.level.maxLevel));
+    const v = s ? resultsView(s, session.homeModel().nextMilestone, biome(balance, balance.level.maxLevel)) : null;
+    logoLine(this, WIDTH / 2, ui(R.titleY + R.titleSize / 2), t(v?.titleKey ?? 'results.gameOver'), 0, R.titleSize);
+    if (s && v) {
       this.summaryBlock(v, s.won, balance.ui.minShrink);
     }
     this.footer(session, home);
