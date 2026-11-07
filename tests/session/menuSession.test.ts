@@ -42,3 +42,15 @@ it('P3b3-R5 starting a run at an unlocked checkpoint reports no new checkpoints;
   s.quit();
   expect(s.summary()).toMatchObject({ cause: 'quit', newCheckpoints: [], biome: 2 });
 });
+it('P3b3-R5 newCheckpoints reports a milestone unlocked during the run', () => {
+  const { s } = setup({ bestLevel: 14, unlockedCheckpoints: [] });
+  s.startRun(1);
+  s.quit();
+  expect(s.summary()!.newCheckpoints).toEqual([4]);
+});
+it('P3b3-R5 newCheckpoints lists several unlocked milestones in ascending order', () => {
+  const { s } = setup({ bestLevel: 20, unlockedCheckpoints: [] });
+  s.startRun(1);
+  s.quit();
+  expect(s.summary()!.newCheckpoints).toEqual([4, 6, 8]);
+});
