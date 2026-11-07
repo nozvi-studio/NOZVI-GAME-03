@@ -66,12 +66,12 @@ describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
 describe('P1 text keys (MEC-003/006/007/008 §8)', () => {
   const keys = [
     'banner.levelUp', 'banner.freshStart', ...[1, 2, 3, 4, 5, 6].map(b => `banner.biome.${b}`),
-    ...['rock', 'rottenRock', 'fence', 'terrain', 'maze'].map(f => `banner.new.${f}`), 'hud.level',
-    'hud.energy', 'skill.slowmo.name', 'skill.tailSnip.name', 'skill.shield.name', 'skill.mangoRain.name',
+    ...['rock', 'rottenRock', 'fence', 'terrain', 'maze'].map(f => `banner.new.${f}`),
+    'skill.slowmo.name', 'skill.tailSnip.name', 'skill.shield.name', 'skill.mangoRain.name',
     'skill.reject.energy', 'skill.reject.active', 'skill.reject.noTarget', 'tip.orb.first',
     'death.snipWall', 'death.rubble',
     'loadout.title', 'loadout.go', 'loadout.back', 'loadout.slot1', 'loadout.slot2', 'loadout.locked',
-    'tip.skillUnlocked.slot', 'tip.skillUnlocked.next', 'tip.slotUnlocked',
+    'tip.skillUnlocked.next', 'tip.slotUnlocked',
     'home.playCheckpoint', 'home.playL1', 'home.play', 'home.carry', 'banner.checkpoint', 'tip.checkpoint',
     'hud.nextCheckpoint', 'hud.nextCheckpointClear', 'hud.ramp',
     ...['wall', 'self', 'rotten', 'rock', 'fence', 'maze', 'ground', 'snipWall', 'rubble', 'quit', 'clear'].map(c => `cause.${c}`),
@@ -103,4 +103,20 @@ it('MEC-003 §8 every P2b family has a banner and every P2b cause has a death te
 it('MEC-018-R11 shrink has a banner and a death text', () => {
   expect(t('banner.new.shrink')).toBe('The board shrinks! The edge closes for a while.');
   expect(t('death.shrink')).toBe('You hit the closed edge.');
+});
+
+it('P3b2-R6 HUD keys resolve and substitute', () => {
+  const keys = ['hud.levelTitle', 'hud.quotaMax', 'pause.subtitle', 'pause.settings', 'pause.quit', 'countdown.checkpoint',
+    'countdown.ramp', 'banner.shrinks', 'banner.biomeLabel', 'banner.checkpointSaved', 'banner.skillNew',
+    'skill.pill.timed', 'skill.pill.wall', ...[1, 2, 3, 4, 5, 6].map(n => `banner.biomeTagline.${n}`)];
+  for (const k of keys) expect(t(k), k).not.toBe(k);
+  expect(t('hud.levelTitle', { n: 7 })).toBe('Level 7');
+  expect(t('pause.subtitle', { n: 7, biome: 'Rice Paddy' })).toBe('Level 7 · Rice Paddy');
+  expect(t('pause.quit')).toBe('Quit run');
+  expect(t('countdown.checkpoint', { level: 6 })).toBe('Starting at L6');
+  expect(t('countdown.ramp', { n: 5 })).toBe('Speed ramps up over 5 mangoes');
+  expect(t('banner.shrinks', { n: 4 })).toBe('Your snake shrinks to 4 segments');
+  expect(t('banner.biomeLabel', { n: 3 })).toBe('BIOME 3');
+  expect(t('skill.pill.timed', { skill: 'Slow-mo', s: 3 })).toBe('Slow-mo · 3 s left');
+  expect(t('skill.pill.wall', { skill: 'Tail Snip', s: 3 })).toBe('Tail Snip · rock wall for 3 s');
 });

@@ -78,6 +78,17 @@ const bump = <K extends string | number>(m: Record<K, number>, k: K) => { m[k] =
 // MEC-003-R21 runs started through the debug start level are marked on their run_start.
 const debugRunIds = (log: RunLog) => new Set(log.entries.flatMap(r => ((r.type === 'run_start' && r.debug === true) || r.type === 'debug_skip' ? [r.runId] : [])));
 
+// P3b2-R3 runs that logged a start but never an end (tab closed, reload, app killed). Read-only; the log schema is unchanged.
+export function abandonedRuns(log: RunLog): number[] {
+  const dbg = debugRunIds(log), ended = new Set<number>(), started: number[] = [];
+  for (const r of log.entries) {
+    if (dbg.has(r.runId)) continue;
+    if (r.type === 'run_end') ended.add(r.runId);
+    else if (r.type === 'run_start' && !started.includes(r.runId)) started.push(r.runId);
+  }
+  return started.filter(id => !ended.has(id)).sort((a, c) => a - c);
+}
+
 // P1 design §11 pure playtest summary of an exported run log.
 export function summarizeLog(log: RunLog, sessionGapMs: number): LogSummary {
   const s: LogSummary = { runs: 0, runsFromResults: 0, runsFromHome: 0, checkpointStarts: 0, levelsReached: {}, causes: {},

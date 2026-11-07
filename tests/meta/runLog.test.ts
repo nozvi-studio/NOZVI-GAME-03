@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { emptyLog, loadLog, nextRun, appendRecord, flushLog, memoryStore, LOG_KEY, deathCauseReport } from '../../src/meta';
+import { emptyLog, loadLog, nextRun, appendRecord, flushLog, memoryStore, LOG_KEY, deathCauseReport, abandonedRuns } from '../../src/meta';
 import type { LogRecord, KeyValueStore } from '../../src/meta';
 const end = (runId: number, cause = 'rock'): LogRecord => ({ type: 'run_end', t: runId, runId, level: 3, score: 8, cause, durationMs: 100, startLevel: 1, levelsCleared: 2, won: cause === 'clear' });
 it('MEC-003-R18 run log keeps the last 500 entries and cumulative deathCounts', () => {
@@ -117,4 +117,10 @@ it('MEC-003-R21 a debug_skip record marks its run debug for stats and validates 
   expect(summarizeLog(log, 600000).runs).toBe(0); expect(deathCauseReport(log, 600000).deaths).toBe(0);
   const store = memoryStore(); store.set(LOG_KEY, JSON.stringify(log));
   expect(loadLog(store).entries).toHaveLength(3);
+});
+it('P3b2-R3 abandonedRuns lists started runs that never ended, ignoring debug runs', () => {
+  const log = logOf([sStart(1, 1, 'home'), sEnd(1, 2, 'wall'), sStart(2, 3, 'results'),
+    { type: 'run_start', t: 4, runId: 3, startLevel: 1, startEnergy: 0, loadout: [null, null], entry: 'home', debug: true }, sStart(4, 5, 'home'), sEnd(4, 6, 'quit')]);
+  expect(abandonedRuns(log)).toEqual([2]);
+  expect(abandonedRuns(emptyLog())).toEqual([]);
 });

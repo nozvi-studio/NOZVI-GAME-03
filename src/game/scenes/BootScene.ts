@@ -4,6 +4,7 @@ import { parseBalance } from '../../core';
 import { createSession } from '../../session';
 import { capyHeadKey } from '../art/capyRig';
 import { preloadCapy } from '../art/capyTextures';
+import { preloadHudIcons } from '../hud/hudIcons';
 import { bootView } from '../flow/bootView';
 import { isArtPreview } from '../flow/debugFlag';
 import { HEIGHT, WIDTH } from '../layout';
@@ -28,7 +29,7 @@ export class BootScene extends Phaser.Scene {
   constructor() { super('Boot'); }
   // ART-001 capy textures are ready before any scene draws.
   preload(): void {
-    preloadCapy(this.load);
+    preloadCapy(this.load); preloadHudIcons(this.load);
     this.buildView(); // P3b3-R12 logo, hero and progress bar are drawn while assets load
     this.load.on('progress', (p: number) => this.setProgress(p));
   }

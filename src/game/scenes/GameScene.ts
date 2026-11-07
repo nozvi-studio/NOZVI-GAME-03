@@ -7,6 +7,7 @@ import { clockStep, createClock } from '../flow/clock';
 import { createFlow, flowKey, flowOver, flowPause, flowStart, flowTick, flowTurn, type FlowEffect, type FlowState } from '../flow/runFlow';
 import { bindKeyboard } from '../input/keyboard';
 import { bindSwipe } from '../input/swipe';
+import { gameBackground } from '../hud/draw';
 import { BOARD_RADIUS, buildBoardTexture, drawBoardBorder } from '../render/board';
 import { Effects, PARTICLE_BURSTS } from '../render/effects';
 import { drawHazards, drawTerrains } from '../render/hazards';
@@ -46,7 +47,7 @@ export class GameScene extends Phaser.Scene {
     this.session = this.registry.get('session') as Session;
     this.palette = currentPalette();
     this.reduced = reduceMotion();
-    this.cameras.main.setBackgroundColor(this.palette.bg);
+    this.cameras.main.setBackgroundColor(gameBackground(this.palette));
     this.look = boardLook(1, themeOf(this.palette));
     const image = this.add.image(0, 0, buildBoardTexture(this, this.balance, this.look)).setOrigin(0);
     this.board = this.add.container(BOARD.x, BOARD.y, [image]).setName('board');
@@ -76,7 +77,7 @@ export class GameScene extends Phaser.Scene {
     const recolor = (): void => {
       this.palette = currentPalette(); this.reduced = reduceMotion(); this.lookStale = true; // texture rebuilt on the next draw
       drawBoardBorder(this.border.clear(), this.palette);
-      this.cameras.main.setBackgroundColor(this.palette.bg);
+      this.cameras.main.setBackgroundColor(gameBackground(this.palette));
     };
     theme.addEventListener('change', recolor);
     this.game.events.on('settings-closed', recolor);

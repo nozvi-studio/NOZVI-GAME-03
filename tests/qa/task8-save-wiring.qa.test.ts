@@ -10,7 +10,8 @@ import { bindKeyboard } from '../../src/game/input/keyboard';
 import { sceneHarness, Signals } from '../support/scene';
 
 vi.mock('phaser', () => ({
-  default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } } },
+  default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } },
+    Geom: { Rectangle: Object.assign(class { constructor(..._a: number[]) {} }, { Contains: () => false }) } },
 }));
 
 const mockSound = vi.hoisted(() => ({
@@ -122,20 +123,10 @@ describe('QA Task 8: Save Wiring & Best Score (Black-Box)', () => {
     () => {},
   );
 
-  // updated for P1 DECISIONS P1-D1: session owns sound saves; HUD reads 'session' from the registry
-  it('QA-T8-33 P0-Design §7.1, §8 sound button persists toggle state to store', () => {
-    const env = createTestHud(10, true);
-    expect(env.session.save().settings.sound).toBe(true);
-
-    env.click('sound-button');
-    expect(env.session.save().settings.sound).toBe(false);
-    expect(load(env.store, env.rules).settings.sound).toBe(false);
-
-    env.click('sound-button');
-    expect(env.session.save().settings.sound).toBe(true);
-    expect(load(env.store, env.rules).settings.sound).toBe(true);
-    expect(mockSound.play).toHaveBeenCalledWith('eat');
-  });
+  it.skip(
+    'QA-T8-33 P0-Design §7.1, §8 sound button persists toggle state to store (superseded by P3b-2: the HUD sound button moved to Settings, P3b-3; M key covered by QA-T8-34)',
+    () => {},
+  );
 
   // updated for P1 DECISIONS P1-D1: session owns sound saves; HUD reads 'session' from the registry
   it('QA-T8-34 P0-Design §7.1, §8 KeyM shortcut toggles and persists sound setting', () => {

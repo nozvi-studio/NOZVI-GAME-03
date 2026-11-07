@@ -2,6 +2,9 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(hud): restore the design-pinned `pausedText` string (P0 design §7.5) and its test pins; banner reset clears the pop scale; MEC-003/MEC-007 text-key references and the DECISIONS 2026-11-07 P3b-2 ramp chip note updated.
+- fix(hud): P3b-2 final review: banner cards stack from the measured title height and long challenge titles shrink to fit; the Warming up chip shows only for checkpoint starts (MEC-008-R8); per-frame HUD redraws cached; banner hide() also hides the tip. The old level-up white flash overlay was removed with the greybox HUD (juice is owned by P3a).
+- P3b-2 in-run HUD and overlays: D2 HUD (level + biome, quota, score, energy pills, skill buttons, checkpoint chip), optional D-pad (Settings), pause (Resume / Settings / Quit run), countdown, banner queue, skill pills; haptics follow the Settings toggle; fix: starting a run while one is active logs it as quit; `abandonedRuns` helper.
 - P3b-3 menu screens: D2 Boot/Home/Loadout/Results, new Settings scene, settings saved immediately, balance-driven skill cards.
 - feat(game): P3b-1 board art: biome grounds (checker + grid), light/dark board themes, D2 rocks/crumble/warn tiles (ring + dashes + shape), fences, hedges, mud/ice/rising stone, mango icon; pure `biomePalette`/`boardParts`.
 - feat(game): P3-0 UI foundation: D2 tokens, mockup layout, self-hosted fonts (Nunito, Lilita One), settings in save v3, widget kit; palette follows the OS live while theme/motion settings are unset.
