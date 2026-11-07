@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: owner rulings 2026-11-07 - GDD §4 session targets confirmed, leaderboard + streak parked, OQ-B1..B5 approved/closed (MEC-014/015/016)
 - fix(juice): final-review wave - skip arms at cardInMs + skipLockMs, smooth pre-rendered death vignette texture, `juice.skill.iconRingScale`, linear card fade when reduced, perf (empty HUD frames, in-place particle compaction)
 - feat: P3a juice - §10.4 feedback table (mapper, player, death card with lines per cause, new SFX, haptics behind setting, reduced motion, perf caps)
 - feat(hud): banner entrance uses juice motion (pivot-compensated slide + scale), pure soft fade when reduced (P3a-R8).

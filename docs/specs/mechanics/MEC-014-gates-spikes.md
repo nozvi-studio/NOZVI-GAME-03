@@ -24,12 +24,12 @@ Save fields: none.
 ## 4. Rules
 ### Gate
 - **MEC-014-R1 Gate shape.** Shape from `gate.shapePool` (`rng.pick`): `line` of length in `gate.lineLen` (5-7) with 1-2 middle cells as gate cells, or the gate-owned `U` in `gate.shapes.U`: a 4 x 4 boundary around a 2 x 2 interior, with a two-cell-wide mouth. The shape includes both mouth cells, tagged by `gateCells`. With two gate cells, both mouth cells cycle; with one gate cell, one mouth cell cycles and the other is fence. The P0 fence U is unchanged. The whole shape is transformed and placed with origin tries like P0 fences, up to `gate.tries`. Valid per `candidateValid` with d = `fairness.nearHeadDist` and `wallCells` = fence cells only.
-- **MEC-014-R2 Gate cycle.** Lifecycle: `warn` for `gate.landWarnMs` (1500; fence cells warn, gate cells shown open) → `live` for `lifeMs = gate.lifeMs + rng.next() × gate.lifeRandMs` → `crumble` for `hazard.crumbleMs` → removed. In `live`, gate cells cycle with `CyclePhases = {downMs: gate.openMs, warnMs: gate.warnMs, upMs: gate.closedMs}` ("down" = open), time `t − landWarnMs − delay`. `closedMs < openMs` (checked by `parseBalance`). **Provisional default (OQ-B1): open 2400 ms, warn 900 ms, closed 1500 ms, life 14000 + rand 4000 ms — provisional, owner review at end of P2.**
+- **MEC-014-R2 Gate cycle.** Lifecycle: `warn` for `gate.landWarnMs` (1500; fence cells warn, gate cells shown open) → `live` for `lifeMs = gate.lifeMs + rng.next() × gate.lifeRandMs` → `crumble` for `hazard.crumbleMs` → removed. In `live`, gate cells cycle with `CyclePhases = {downMs: gate.openMs, warnMs: gate.warnMs, upMs: gate.closedMs}` ("down" = open), time `t − landWarnMs − delay`. `closedMs < openMs` (checked by `parseBalance`). **Default (OQ-B1, owner approved 2026-11-07): open 2400 ms, warn 900 ms, closed 1500 ms, life 14000 + rand 4000 ms.**
 - **MEC-014-R3 Gate waits for snake.** A gate cell turns `up` (closed) only when no snake cell is on it; until then it stays `warn`. Fence cells turn solid only when free (TimedCells rule).
 - **MEC-014-R4 Gate BFS / reserved.** Fence cells: cause `fence` (via `causeAt`), BFS walls in every state. Closed gate cells: solid, cause `gate`, never BFS walls. All gate-instance cells are `reserved` in every state. `solidCauseAt` and the collision death cause prefer `causeAt` over `cause` when present (§11 L4).
 ### Spike
 - **MEC-014-R5 Spike shape.** Group shape from `spike.shapePool` (`single`, `pairH`, `pairV`), placed like mud (MEC-012-R1 RNG order) with `candidateValid` d = `fairness.nearHeadDist`, `wallCells: []` (spikes are not BFS walls). Life `spike.lifeMs + rng.next() × spike.lifeRandMs`.
-- **MEC-014-R6 Global beat.** Every spike uses `cyclePhase({downMs, warnMs, upMs}, s.levelTimeMs)` (delay 0), so all groups rise together. A new group stays `down` until it has been shown for `spike.showMs` (1500 ≥ MEC-004-R13), even if the beat says `up`. After `lifeMs` the group is `ending` and is removed at the first beat `down`, never mid-`up`. `levelTimeMs` restarts at a level up; a group alive across it follows the new beat from 0 (which is `down`), so nothing pops up without warning. **Provisional default (OQ-B2): down 1800, warn 900, up 900 (beat 3600 ms), life 12000 + rand 4000 ms — provisional, owner review at end of P2.**
+- **MEC-014-R6 Global beat.** Every spike uses `cyclePhase({downMs, warnMs, upMs}, s.levelTimeMs)` (delay 0), so all groups rise together. A new group stays `down` until it has been shown for `spike.showMs` (1500 ≥ MEC-004-R13), even if the beat says `up`. After `lifeMs` the group is `ending` and is removed at the first beat `down`, never mid-`up`. `levelTimeMs` restarts at a level up; a group alive across it follows the new beat from 0 (which is `down`), so nothing pops up without warning. **Default (OQ-B2, owner approved 2026-11-07): down 1800, warn 900, up 900 (beat 3600 ms), life 12000 + rand 4000 ms.**
 - **MEC-014-R7 Spike waits.** A spike cell turns `up` only when no snake cell is on it; until then it stays `warn`. Up spikes are solid (cause `spike`), not BFS walls; all group cells are `reserved`.
 ### Both
 - **MEC-014-R8 Shield.** The head entering a closed gate cell, a solid fence cell or an up spike with Shield breaks that one cell (`onBreak`): it stays removed for the rest of its instance's life. Bonk per MEC-006-R27; no rubble (R28).
@@ -61,14 +61,14 @@ Save fields: none.
 | Key | Value | Source |
 |---|---|---|
 | `gate.landWarnMs` | 1500 | lead |
-| `gate.openMs` / `warnMs` / `closedMs` | 2400 / 900 / 1500 | OQ-B1 provisional |
-| `gate.lifeMs` / `lifeRandMs` | 14000 / 4000 | OQ-B1 provisional |
+| `gate.openMs` / `warnMs` / `closedMs` | 2400 / 900 / 1500 | OQ-B1 approved 2026-11-07 |
+| `gate.lifeMs` / `lifeRandMs` | 14000 / 4000 | OQ-B1 approved 2026-11-07 |
 | `gate.maxActive` / `tries` | 1 / 40 | lead |
 | `gate.lineLen` / `shapePool` | `[5, 7]` / `["line", "U"]` | P2 design §10 |
 | `gate.shapes.U` | Configured boundary and two tagged mouth cells; 2 x 2 interior | Lead Task 5 review ruling |
-| `spike.downMs` / `warnMs` / `upMs` | 1800 / 900 / 900 | OQ-B2 provisional |
+| `spike.downMs` / `warnMs` / `upMs` | 1800 / 900 / 900 | OQ-B2 approved 2026-11-07 |
 | `spike.showMs` | 1500 | lead (rule 1) |
-| `spike.lifeMs` / `lifeRandMs` | 12000 / 4000 | OQ-B2 provisional |
+| `spike.lifeMs` / `lifeRandMs` | 12000 / 4000 | OQ-B2 approved 2026-11-07 |
 | `spike.maxActive` / `tries` | 2 / 40 | lead |
 | `spike.shapePool` / `shapes` | `["single","pairH","pairV"]` / single `[[0,0]]` · pairH `[[0,0],[1,0]]` · pairV `[[0,0],[0,1]]` | P2 design §10 |
 | table weights | `gate: 2` L17…30, `spike: 2` L18…30 | P2 design §11 |
@@ -104,5 +104,5 @@ Save fields: none.
 - **L5** The director emits `hazardIncoming`; families do not emit it themselves.
 - **L6** Task 5 review: gates own their U shape, including both mouth cells around the 2 x 2 interior. One selected mouth cell leaves the other as fence; two selected mouth cells both cycle. Post tops are fence. Gate warnings share the MEC-004-R13 fairness minimum; snapshots expose `GateView`.
 ### Escalate to owner
-- OQ-B1 gate rhythm and OQ-B2 spike beat: provisional, owner review at end of P2.
+- OQ-B1 gate rhythm and OQ-B2 spike beat: owner approved 2026-11-07 (playtest felt fine).
 - OQ-B6 strings: provisional, owner review at end of P2.

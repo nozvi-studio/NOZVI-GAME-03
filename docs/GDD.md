@@ -70,7 +70,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 - **Fail (death):** head hits the board edge, the snake's own body, or any solid obstacle (unless a skill prevents it, §6.3).
 - **After a death:** the run is over (results + marbles). The next run starts at the highest unlocked checkpoint by default, or at L1 by choice (MEC-008, §6.4).
 - **Run win:** clear level 30. The full clear shows a celebration and a big marble bonus.
-- **Target session length:** typical run 3–8 min; full 30-level clear ~12–18 min (estimate, measure in playtests). **OPEN (owner)** confirm targets.
+- **Target session length:** typical run 3–8 min; full 30-level clear ~12–18 min (owner confirmed 2026-11-07; measure in playtests).
 - **Restart cost:** ≤ 1 tap, ≤ 1 s (plus the 1.5 s countdown).
 
 ## 5. Run structure, levels & difficulty [REQUIRED]
@@ -271,5 +271,6 @@ Big phases; each phase gets **one spec set + one plan** (Superpowers `brainstorm
 - The current `prototype/mango-snake-hard.html` remains as a reference until P0 reaches parity, then it is frozen.
 
 ## Parking lot (ideas not in scope)
+- **Owner wants (2026-11-07), after core gameplay + UI are done:** leaderboard and play streak (daily streak) as the reason to come back (§8). Not scheduled; needs brainstorming + a GDD change when picked up.
 - Wrap zones (MEC-005), teleport portals, one-way arrow tiles, rival AI snake competing for mangoes, fake mango with a learnable tell, banana peel, lawnmower sweep.
 - Endless mode after L30, daily seeded run, online leaderboard, seasonal skin sets, voiced death lines, Vietnamese localization.

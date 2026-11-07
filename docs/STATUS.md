@@ -25,7 +25,7 @@
 1. Owner playtest + 40% verdict; if over40 not empty: lead tunes (OQ-C5), re-playtest.
 2. Full fuzz matrix 200 x 120 s overnight (`npm run test:fuzz`).
 3. P2 exit pass -> merge version/v0.2 into dev; start P3 planning.
-4. Owner GDD questions batch (below).
+4. Remaining owner questions (below) with the P3 UI pass.
 5. Tech debt: P2c deferred minors (shrink fade crumble visual, hudText test cleanups, level%5 in tests, MEC-003 R21 heading "Debug tools").
 
 ## Workers and QA process
@@ -33,9 +33,10 @@
 - Lead verifies every merge with full test + typecheck.
 
 ## Owner questions batched for the END of P2 (provisional defaults in use)
+- Answered 2026-11-07 (DECISIONS): GDD §4 confirmed; leaderboard + streak parked; OQ-B1..B5 closed. Rest below stays open, review with the P3 UI pass.
 - P3 provisional strings: death lines (P3a plan Task 3), Settings/Results/HUD copy, Shield + Mango Rain card text (P3b-3 C10).
 - Task 9 player-facing strings ("Back", "Not now!", "Fresh start!", Results/Sound labels); GDD §4 session length; §8.3 reason to come back.
-- P2b OQ-B1..B6 and P2c OQ-C1..C5 (top of each plan). P2c rulings to confirm: shrink cooldown 20000 / weight 2; banner "Challenge: <name>!" + star; challenge changes only interval/cap; L30 rock weight 3; shrink strings per MEC-018 §8; shrink waits while another hazard holds a ring cell.
+- P2b OQ-B6 (strings) and P2c OQ-C1..C5 (top of each plan). P2c rulings to confirm: shrink cooldown 20000 / weight 2; banner "Challenge: <name>!" + star; challenge changes only interval/cap; L30 rock weight 3; shrink strings per MEC-018 §8; shrink waits while another hazard holds a ring cell.
 - Biome 4 coconut = 100% of bot deaths (12 of 22 on L20, clear 8/20): options L20 coconut 4 -> 2 or coconut params, if playtest confirms. Biome 5 chicken 39.6%.
 
 ## Known issues / tech debt

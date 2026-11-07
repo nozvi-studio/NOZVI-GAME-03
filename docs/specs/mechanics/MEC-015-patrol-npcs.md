@@ -17,10 +17,10 @@
 Descriptor: `{key: 'npc', cause: 'cat', capClass: 'small', maxActiveKey: 'npc.maxActive', breakable: true}` with `causeAt` → the instance variant (`cat` | `chicken`). Save fields: none.
 
 ## 4. Rules
-- **MEC-015-R1 Variant pick.** `pickWeighted` over `npc.variants.<v>.weight`. **Provisional default (OQ-B3): cat weight 1, chicken weight 1 — provisional, owner review at end of P2.**
+- **MEC-015-R1 Variant pick.** `pickWeighted` over `npc.variants.<v>.weight`. **Default (OQ-B3, owner approved 2026-11-07): cat weight 1, chicken weight 1.**
 - **MEC-015-R2 Route.** `len = rng.int(max − min + 1) + min` from the variant's `routeLen` (cat 5…8, chicken 3…5); `bend = rng.next() < 0.5 || len < 4 ? null : 2 + rng.int(len − 3)` (no bend draw for a straight route); start `rng.int(cols)`, `rng.int(rows)`; direction and turn from `rng.int(4)`; `routeCells(start, len, bend, dir, turn)` builds a straight or L route. An L keeps both legs at least 2 cells long (bend in [2, len − 2]); a draw whose turn is not perpendicular to the direction is rejected and retried within the same attempt budget. Up to `npc.tries` attempts. Valid when no route cell is solid and the route passes `candidateValid` with d = `fairness.nearHeadDist` (rule 2 for the whole route, TR-B3) and `wallCells: [route[0]]` (rule 3).
 - **MEC-015-R3 Telegraph.** The route is shown with arrows for `npc.warnMs` (1500 ≥ MEC-004-R13) before the NPC enters cell 0. The whole route is `reserved` for the NPC's life.
-- **MEC-015-R4 Ping-pong.** The NPC advances one cell per variant `cellMs`; at a route end it reverses. **Provisional default (OQ-B3): cat `cellMs` 400, chicken `cellMs` 220 — provisional, owner review at end of P2.**
+- **MEC-015-R4 Ping-pong.** The NPC advances one cell per variant `cellMs`; at a route end it reverses. **Default (OQ-B3, owner approved 2026-11-07): cat `cellMs` 400, chicken `cellMs` 220.**
 - **MEC-015-R5 Wait rule.** If the next cell is solid or holds a body cell (index > 0), the NPC waits and retries each ms (Mover `wait` mode); it never enters the body. The NPC cell is a BFS wall; it is not solid.
 - **MEC-015-R6 Leave.** `lifeMs = npc.lifeMs + rng.next() × npc.lifeRandMs` (15000…20000), counted per move interval from the first move (waiting consumes life). After it has elapsed, the NPC is removed when it sits at route end 0 or the last cell.
 - **MEC-015-R7 Head hit / Shield.** Head moving into the NPC cell is `headHit = 'mover'`; the NPC moving onto the head calls `ctx.hitHead('npc', x, y, 'mover', moverDir)`. Without Shield: death with cause = variant (`cat` / `chicken`, via `causeAt`). With Shield: Shield consumed, NPC removed (`onBreak`), `shieldBroke.family = 'npc'`, bonk per MEC-006-R27; no rubble.
@@ -52,8 +52,8 @@ Descriptor: `{key: 'npc', cause: 'cat', capClass: 'small', maxActiveKey: 'npc.ma
 | `npc.warnMs` | 1500 | P2 design §10 |
 | `npc.lifeMs` / `lifeRandMs` | 15000 / 5000 | P2 design §10 (15–20 s) |
 | `npc.maxActive` / `tries` | 1 / 40 | lead |
-| `npc.variants.cat` | weight 1, cellMs 400, routeLen [5, 8] | OQ-B3 provisional; route P2 design |
-| `npc.variants.chicken` | weight 1, cellMs 220, routeLen [3, 5] | OQ-B3 provisional; route P2 design |
+| `npc.variants.cat` | weight 1, cellMs 400, routeLen [5, 8] | OQ-B3 approved 2026-11-07; route P2 design |
+| `npc.variants.chicken` | weight 1, cellMs 220, routeLen [3, 5] | OQ-B3 approved 2026-11-07; route P2 design |
 | table weight `npc` | 2 on L21…30 | P2 design §11 |
 
 ## 10. Acceptance tests
@@ -75,5 +75,5 @@ Descriptor: `{key: 'npc', cause: 'cat', capClass: 'small', maxActiveKey: 'npc.ma
 - **L3** Waiting consumes life (simpler; fixed by the mover test).
 - **L4** Director emits `hazardIncoming`.
 ### Escalate to owner
-- OQ-B3 speeds and weights: provisional, owner review at end of P2.
+- OQ-B3 speeds and weights: owner approved 2026-11-07 (playtest felt fine).
 - OQ-B6 strings: provisional, owner review at end of P2.
