@@ -1,12 +1,11 @@
 import Phaser from 'phaser';
 import json from '../../../config/balance.json';
 import { parseBalance } from '../../core';
-import { resolveDisplay } from '../../meta';
 import { createSession } from '../../session';
 import { preloadCapy } from '../art/capyTextures';
 import { isArtPreview } from '../flow/debugFlag';
 import { localStore } from '../platform/localStore';
-import { osDisplay, setDisplayPrefs } from '../render/palette';
+import { setDisplaySettings } from '../render/palette';
 import { UI_FONT_SPECS, waitForFonts } from '../ui/fonts';
 
 export class BootScene extends Phaser.Scene {
@@ -25,7 +24,7 @@ export class BootScene extends Phaser.Scene {
     this.registry.set('session', session);
     const save = session.save();
     this.registry.set('save', save);
-    setDisplayPrefs(resolveDisplay(save.settings, osDisplay())); // P3-0-R5
+    setDisplaySettings(save.settings); // P3-0-R5
     const search = typeof location === 'undefined' ? '' : location.search;
     const next = isArtPreview(search) ? 'ArtPreview' : 'Home';
     const fontSet = typeof document === 'undefined' ? undefined : document.fonts;
