@@ -6,7 +6,8 @@ import { GameScene } from '../../src/game/scenes/GameScene';
 import { HudScene } from '../../src/game/scenes/HudScene';
 import { bindKeyboard } from '../../src/game/input/keyboard';
 import { loadBalance } from '../support/balance';
-import { sceneHarness, Signals } from '../support/scene';
+import { ui } from '../../src/game/ui/layout';
+import { sceneHarness, Signals, type DrawObject } from '../support/scene';
 
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } },
   Geom: { Rectangle: Object.assign(class { constructor(..._a: number[]) {} }, { Contains: () => false }) } } }));
@@ -18,6 +19,17 @@ const b = loadBalance();
 const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax };
 const base = { bestScore: 5, settings: { sound: true }, bestLevel: 0, fullClear: false,
   unlockedCheckpoints: [] as number[], carriedEnergy: 0, lastLoadout: [null, null] };
+
+/** Text double that reports a Lilita-like measured height (taller than the CSS line box) and an optional fixed width. */
+function measureText(h: ReturnType<typeof setup>, width?: number): void {
+  const add = h.scene.add as { text: (x: number, y: number, t: string, st?: { fontFamily?: string; fontSize?: string }) => DrawObject };
+  const orig = add.text;
+  add.text = (x, y, text, st) => {
+    const o = orig(x, y, text, st), px = parseFloat(st?.fontSize ?? '0');
+    if (st?.fontFamily?.includes('Lilita')) { o.height = px * 1.4; if (width !== undefined) o.width = width; }
+    return o;
+  };
+}
 
 function setup(saveData: object = {}, opts: { settings?: boolean; settingsActive?: boolean; startLevel?: number } = {}) {
   const browser = new Signals(), doc = new Signals(), media = new Signals();
@@ -122,6 +134,27 @@ describe('P1 HUD flow, audio and session wiring', () => {
     expect(h.last('banner-title').text).toBe('Level 5');
     h.flush(); expect(h.last('banner-title').text).toBe('Challenge: Rock rain!');
   });
+  it('P3b2-R10 level-up card stacks the subtitle below the measured Lilita title (no overlap)', () => {
+    const h = setup(); measureText(h);
+    h.game.events.emit('sim-events', [{ type: 'levelUp', level: 6, biome: 2, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }]);
+    const title = h.last('banner-title'), sub = h.last('banner-subtitle');
+    expect(title.height).toBeGreaterThan(ui(47.5)); expect(sub.y).toBeGreaterThanOrEqual(title.y + title.height);
+  });
+  it('P3b2-R10 biome card stacks tagline below the measured name', () => {
+    const h = setup(); measureText(h);
+    h.game.events.emit('sim-events', [{ type: 'levelUp', level: 6, biome: 2, challenge: false, biomeChanged: true, clearedLevelTimeMs: 1 }]);
+    h.flush();
+    const name = h.last('banner-title'), tag = h.last('banner-tagline');
+    expect(tag.y).toBeGreaterThanOrEqual(name.y + name.height);
+  });
+  it('P3b2-R10 a long challenge title scales down to fit inside the card', () => {
+    const h = setup(); measureText(h, 700);
+    h.game.events.emit('sim-events', [{ type: 'levelUp', level: 5, biome: 1, challenge: true, biomeChanged: false, clearedLevelTimeMs: 1 }]);
+    h.flush();
+    const title = h.last('banner-title');
+    expect(title.text).toBe('Challenge: Rock rain!');
+    expect(title.width * title.scale).toBeLessThanOrEqual(ui(318 - 32) + 0.001); expect(title.scale).toBeLessThan(1);
+  });
   it('MEC-003 §8 a run that starts on a challenge level shows the challenge banner when the countdown ends', () => {
     const h = setup({ bestLevel: 12, unlockedCheckpoints: [4, 5] }, { startLevel: 5 });
     expect(h.find('banner').visible).toBe(false);
@@ -149,7 +182,8 @@ describe('P1 HUD flow, audio and session wiring', () => {
     h.game.events.emit('sim-events', [{ type: 'skillRejected', slot: 0, skill: 'slowmo', reason: 'energy' }]);
     expect(sound.play).toHaveBeenLastCalledWith('nope'); expect(h.find('tip').text).toBe('Need 40 energy');
     h.game.events.emit('sim-events', [{ type: 'skillUnlocked', skill: 'slowmo', slot: 0 }]);
-    expect(h.find('tip').text).toBe('New skill: Slow-mo'); // tail points at the slot (Findings 5) expect(sound.play).toHaveBeenLastCalledWith('unlock');
+    expect(h.find('tip').text).toBe('New skill: Slow-mo'); // tail points at the slot (Findings 5)
+    expect(sound.play).toHaveBeenLastCalledWith('unlock');
     h.game.events.emit('sim-events', [{ type: 'skillUnlocked', skill: 'shield', slot: null }]);
     expect(h.find('tip').text).toBe('Shield unlocked! Pick it before your next run');
   });

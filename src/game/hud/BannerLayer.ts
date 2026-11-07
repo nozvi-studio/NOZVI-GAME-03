@@ -3,7 +3,7 @@ import type { Balance } from '../../core';
 import { BOARD, HEIGHT, WIDTH } from '../layout';
 import { reduceMotion } from '../render/palette';
 import { FONT_TITLE, TOKENS, toInt } from '../uiTokens';
-import { ui } from '../ui/layout';
+import { ui, UI_SCALE } from '../ui/layout';
 import { drawCard, hudLabel } from './draw';
 import type { BannerSpec, SkillPill } from './banners';
 import { hudIconKey } from './hudIcons';
@@ -72,27 +72,29 @@ export class BannerLayer {
     const lilita = (y: number, text: string, size: number, fill: string, stroke: string, strokePx: number, name: string): Phaser.GameObjects.Text =>
       add(this.scene.add.text(cx, y, text, { fontFamily: FONT_TITLE, fontSize: `${ui(size)}px`, color: fill, stroke, strokeThickness: ui(strokePx) }).setName(name).setOrigin(0.5, 0)
         .setShadow(0, ui(M.shadowDy), stroke, 0, true, true));
+    /** Mockup-px row height: the measured Lilita text (stroke + font metrics make it taller than the CSS line box) or the mockup height if larger. */
+    const measured = (t: Phaser.GameObjects.Text, mock: number): number => Math.max(mock, t.height / UI_SCALE);
     switch (s.kind) {
       case 'levelUp': {
-        const m = M.levelUp, rows = stack([{ h: m.titleH }, { h: m.subtitleH }, ...(s.chip ? [{ h: m.chipH, mt: m.chipMt }] : [])], { gap: m.gap, padTop: m.pad, padBottom: m.pad });
-        put(g, ui(W.card), ui(rows.height), TOKENS.surface.card);
-        lilita(y0 + ui(rows.ys[0]!), s.title, m.title, TOKENS.accent.butter, TOKENS.text.logoOutline, m.stroke, 'banner-title');
+        const m = M.levelUp, title = lilita(y0, s.title, m.title, TOKENS.accent.butter, TOKENS.text.logoOutline, m.stroke, 'banner-title');
+        const rows = stack([{ h: measured(title, m.titleH) }, { h: m.subtitleH }, ...(s.chip ? [{ h: m.chipH, mt: m.chipMt }] : [])], { gap: m.gap, padTop: m.pad, padBottom: m.pad });
+        put(g, ui(W.card), ui(rows.height), TOKENS.surface.card); title.setY(y0 + ui(rows.ys[0]!));
         add(hudLabel(this.scene, cx, y0 + ui(rows.ys[1]!), s.subtitle, m.subtitle, TOKENS.text.primary, 900, 'banner-subtitle').setOrigin(0.5, 0));
         if (s.chip) this.chip(add, cx, y0 + ui(rows.ys[2]!), s.chip, 'shrink', 'banner-chip');
         break;
       }
       case 'challenge': {
-        const m = M.challenge;
-        put(g, ui(W.card), ui(m.pad + m.title + m.pad), TOKENS.surface.card);
-        lilita(y0 + ui(m.pad), s.title, m.title, TOKENS.accent.orange, TOKENS.text.logoOutline, m.stroke, 'banner-title');
+        const m = M.challenge, title = lilita(y0 + ui(m.pad), s.title, m.title, TOKENS.accent.orange, TOKENS.text.logoOutline, m.stroke, 'banner-title');
+        const room = ui(W.card - 2 * m.pad); if (title.width > room) title.setScale(room / title.width); // a long title shrinks to fit the card
+        put(g, ui(W.card), ui(m.pad + measured(title, m.title) + m.pad), TOKENS.surface.card);
         break;
       }
       case 'biome': {
-        const m = M.biome, rows = stack([{ h: m.icon }, { h: m.labelH }, { h: m.nameH }, { h: m.taglineH }], { gap: m.gap, padTop: m.pad, padBottom: m.pad });
-        put(g, ui(W.card), ui(rows.height), TOKENS.sky.stat);
+        const m = M.biome, name = lilita(y0, s.name, m.name, TOKENS.surface.white, TOKENS.text.slate, m.nameStroke, 'banner-title');
+        const rows = stack([{ h: m.icon }, { h: m.labelH }, { h: measured(name, m.nameH) }, { h: m.taglineH }], { gap: m.gap, padTop: m.pad, padBottom: m.pad });
+        put(g, ui(W.card), ui(rows.height), TOKENS.sky.stat); name.setY(y0 + ui(rows.ys[2]!));
         add(this.scene.add.image(cx, y0 + ui(rows.ys[0]! + m.icon / 2), hudIconKey('biome')).setDisplaySize(ui(m.icon), ui(m.icon)));
         add(hudLabel(this.scene, cx, y0 + ui(rows.ys[1]!), s.label, m.label, TOKENS.text.slate, 900, 'banner-label').setOrigin(0.5, 0));
-        lilita(y0 + ui(rows.ys[2]!), s.name, m.name, TOKENS.surface.white, TOKENS.text.slate, m.nameStroke, 'banner-title');
         add(hudLabel(this.scene, cx, y0 + ui(rows.ys[3]!), s.tagline, m.tagline, TOKENS.text.slate, 800, 'banner-tagline').setOrigin(0.5, 0));
         break;
       }
