@@ -8,6 +8,7 @@ import { keyAction } from './keyMap';
 export function bindKeyboard(scene: GameScene): void {
   const onKey = (event: KeyboardEvent): void => {
     if (!scene.sys.isActive()) return;
+    if (scene.scene.isActive('Settings')) return; // the Settings overlay owns the keyboard while it is open
     const action = keyAction(event.code);
     if (!action) return;
     event.preventDefault();

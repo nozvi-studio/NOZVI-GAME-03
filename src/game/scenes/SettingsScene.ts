@@ -27,10 +27,12 @@ export class SettingsScene extends Phaser.Scene {
   private session!: Session;
   private synth!: Synth;
   private body?: Phaser.GameObjects.Container;
+  private closing = false;
   constructor() { super('Settings'); }
   init(data: SettingsEntry): void { this.entry = data ?? {}; }
 
   create(): void {
+    this.closing = false;
     this.session = this.registry.get('session') as Session;
     this.synth = createSynth(); this.synth.setOn(this.session.save().settings.sound);
     bgCream(this);
@@ -47,6 +49,8 @@ export class SettingsScene extends Phaser.Scene {
   }
 
   private back(): void {
+    if (this.closing) return; // a double tap or Escape plus tap must close once
+    this.closing = true;
     this.synth.play('uiTap');
     const x = settingsExit(this.entry);
     if (x.action === 'start') this.scene.start(x.scene);

@@ -12,6 +12,7 @@ import { ui } from './layout';
  * Settings overlay contract (P3b-2 <-> P3b-3): Hud launches `scene.launch('Settings', { overlay: true })`;
  * Settings stops itself on Back and emits `settings-closed` on `game.events`;
  * Hud re-reads settings on that event and on Resume.
+ * While the Settings overlay is active, game keyboard input is ignored (bindKeyboard checks the scene manager).
  */
 
 export type PillTone = 'green' | 'orange' | 'cream';
