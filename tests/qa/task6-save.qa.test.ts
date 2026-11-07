@@ -7,6 +7,7 @@ import {
   save,
   SAVE_KEY,
   SAVE_VERSION,
+  defaultSettings,
   type KeyValueStore,
   type Migration,
   type SaveData,
@@ -27,7 +28,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
     const def = defaultSave();
     expect(def).toEqual({
       bestScore: 0,
-      settings: { sound: true },
+      settings: { ...defaultSettings(), sound: true },
       bestLevel: 0,
       fullClear: false,
       unlockedCheckpoints: [],
@@ -70,7 +71,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
     };
     const data: SaveDataV2 = {
       bestScore: 42,
-      settings: { sound: false },
+      settings: { ...defaultSettings(), sound: false },
       bestLevel: 15,
       fullClear: false,
       unlockedCheckpoints: [4, 6],
@@ -88,16 +89,16 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
     const data: SaveDataV2 = {
       ...defaultSave(),
       bestScore: 100,
-      settings: { sound: true },
+      settings: { ...defaultSettings(), sound: true },
     };
     save(store, data);
     expect(SAVE_KEY).toBe('mango-snake.save');
-    expect(SAVE_VERSION).toBe(2);
+    expect(SAVE_VERSION).toBe(3);
     const raw = store.get(SAVE_KEY);
     expect(raw).not.toBeNull();
     const parsed = JSON.parse(raw!);
     expect(parsed).toEqual({
-      version: 2,
+      version: SAVE_VERSION,
       data,
     });
   });
@@ -106,7 +107,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
     const store = memoryStore({
       [SAVE_KEY]: JSON.stringify({
         version: 99,
-        data: { bestScore: 999, settings: { sound: false } },
+        data: { bestScore: 999, settings: { ...defaultSettings(), sound: false } },
       }),
     });
     expect(load(store)).toEqual(defaultSave());
@@ -117,7 +118,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
       const store = memoryStore({
         [SAVE_KEY]: JSON.stringify({
           version: badVersion,
-          data: { bestScore: 10, settings: { sound: true } },
+          data: { bestScore: 10, settings: { ...defaultSettings(), sound: true } },
         }),
       });
       expect(load(store)).toEqual(defaultSave());
@@ -135,13 +136,13 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
     const migrations: Record<number, Migration> = {
       0: (d: unknown) => {
         const legacy = d as { legacyScore: number };
-        return { bestScore: legacy.legacyScore, settings: { sound: true } };
+        return { bestScore: legacy.legacyScore, settings: { ...defaultSettings(), sound: true } };
       },
     };
     expect(load(store, migrations)).toEqual({
       ...defaultSave(),
       bestScore: 55,
-      settings: { sound: true },
+      settings: { ...defaultSettings(), sound: true },
     });
   });
 
@@ -158,7 +159,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
     expect(load(throwingStore, throwingMigrations)).toEqual(defaultSave());
 
     const badShapeMigrations: Record<number, Migration> = {
-      0: () => ({ bestScore: 'not-a-number', settings: { sound: true } }),
+      0: () => ({ bestScore: 'not-a-number', settings: { ...defaultSettings(), sound: true } }),
     };
     expect(load(throwingStore, badShapeMigrations)).toEqual(defaultSave());
   });
@@ -167,7 +168,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
     const store = memoryStore({
       [SAVE_KEY]: JSON.stringify({
         version: 0,
-        data: { bestScore: 50, settings: { sound: true } },
+        data: { bestScore: 50, settings: { ...defaultSettings(), sound: true } },
       }),
     });
     expect(load(store, {})).toEqual(defaultSave());
@@ -194,7 +195,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
   it('QA-T6-13 P0-Design §8, §9 missing data or version envelope falls back to defaultSave', () => {
     const badEnvelopes = [
       JSON.stringify({ version: 1 }),
-      JSON.stringify({ data: { bestScore: 10, settings: { sound: true } } }),
+      JSON.stringify({ data: { bestScore: 10, settings: { ...defaultSettings(), sound: true } } }),
       JSON.stringify({ version: 1, data: null }),
       JSON.stringify({ version: 1, data: 123 }),
       JSON.stringify({ version: 1, data: 'string' }),
@@ -218,13 +219,13 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
       const store = memoryStore({
         [SAVE_KEY]: JSON.stringify({
           version: 2,
-          data: { ...defaultSave(), bestScore: score, settings: { sound: false } },
+          data: { ...defaultSave(), bestScore: score, settings: { ...defaultSettings(), sound: false } },
         }),
       });
       expect(load(store, rules)).toEqual({
         ...defaultSave(),
         bestScore: 0,
-        settings: { sound: false },
+        settings: { ...defaultSettings(), sound: false },
       });
     }
 
@@ -240,7 +241,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
       expect(load(store, rules)).toEqual({
         ...defaultSave(),
         bestScore: 42,
-        settings: { sound: true },
+        settings: { ...defaultSettings(), sound: true },
       });
     }
 
@@ -250,7 +251,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
         version: 2,
         data: {
           bestScore: 88,
-          settings: { sound: false },
+          settings: { ...defaultSettings(), sound: false },
           bestLevel: 14.9,
           fullClear: 'not-bool',
           carriedEnergy: 999,
@@ -261,7 +262,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
     });
     expect(load(storeCorrupt, rules)).toEqual({
       bestScore: 88,
-      settings: { sound: false },
+      settings: { ...defaultSettings(), sound: false },
       bestLevel: 14,
       fullClear: false,
       carriedEnergy: 50,

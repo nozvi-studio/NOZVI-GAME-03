@@ -5,6 +5,8 @@ import { capyDie, capyEat, capyPose, createCapyAnim, type CapyAnimState } from '
 import { HEIGHT, WIDTH } from '../layout';
 import { reduceMotion } from '../render/palette';
 import { button, label } from './ui';
+import { card, chip, pillButton, progressBar, titleText, type PillTone } from '../ui/widgets';
+import { TOKENS } from '../uiTokens';
 
 // Debug-only layout for the owner's phone check (ART-001 sizes 24 / 40 / 124 / 256 CSS px, each on light and dark).
 const PREVIEW = {
@@ -13,7 +15,10 @@ const PREVIEW = {
   titleY: 20, titleSize: 20, btnY: 60, btnW: 100, btnH: 40, btnSize: 18, btnXs: [70, 190, 310, 430],
   headRowY: 410, homeSize: 124, headSwatch: 130, headDx: 70, bodyRowY: 548, bodyW: 80, bodySwatchW: 90, bodySwatchH: 130,
   bodyDx: 50, bodyCols: 4, bodyPad: 5,
-  bigSize: 256, liveTop: 680, liveY: 808,
+  bigSize: 256, liveTop: 680, liveY: 828,
+  // P3-0-R7 widget row (mockup px via ui() inside the widgets); sits on the live panel margins, above the head.
+  wRowY: 705, wPillW: 62, wPillH: 24, wPillXs: [50, 140, 230], wCardX: 285, wCardW: 44, wCardH: 28, wChipX: 410, wBarX: 380, wBarW: 60, wBarH: 10,
+  wTitleX: 80, wTitleY: 752, wTitleSize: 13, wBarY: 748,
 } as const;
 
 export class ArtPreviewScene extends Phaser.Scene {
@@ -65,6 +70,7 @@ export class ArtPreviewScene extends Phaser.Scene {
       ['BG', () => { lightBg = !lightBg; liveBg.setFillStyle(lightBg ? P.light : P.dark); }],
     ];
     acts.forEach(([text, fn], i) => button(this, P.btnXs[i], P.btnY, P.btnW, P.btnH, text, `preview-${text.toLowerCase()}`, fn, P.btnSize));
+    this.widgetRow();
     const onUpdate = (now: number): void => {
       const { state, pose } = capyPose(this.state, now, cfg, reduced, Math.random);
       this.state = state;
@@ -73,5 +79,15 @@ export class ArtPreviewScene extends Phaser.Scene {
     };
     this.events.on(Phaser.Scenes.Events.UPDATE, onUpdate);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off(Phaser.Scenes.Events.UPDATE, onUpdate));
+  }
+
+  private widgetRow(): void {
+    const P = PREVIEW;
+    const tones: PillTone[] = ['green', 'orange', 'cream'];
+    tones.forEach((tone, i) => pillButton(this, P.wPillXs[i], P.wRowY, P.wPillW, P.wPillH, tone, `preview-pill-${tone}`, () => {}, tone));
+    card(this, P.wCardX, P.wRowY - 14, P.wCardW, P.wCardH, 10);
+    chip(this, P.wChipX, P.wRowY, '1,250', TOKENS.accent.butter, 'preview-chip');
+    titleText(this, P.wTitleX, P.wTitleY, 'MANGO SNAKE', P.wTitleSize);
+    progressBar(this, P.wBarX, P.wBarY, P.wBarW, P.wBarH, TOKENS.green.face).set(60, 100);
   }
 }

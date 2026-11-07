@@ -1,3 +1,4 @@
+import { defaultSettings, resolveDisplay, type Settings } from '../../meta';
 export type Palette = Record<
   'bg' | 'boardA' | 'boardB' | 'snake' | 'belly' | 'food' | 'leaf' | 'rock' | 'rockHi' |
   'danger' | 'warn' | 'gold' | 'wood' | 'woodHi' | 'hedge' | 'hedgeHi' | 'earth' | 'earthSide' |
@@ -17,8 +18,14 @@ export const DARK: Palette = {
 };
 
 // GDD-13 follow the prototype's system theme and accessibility preferences.
-export const currentPalette = (): Palette => window.matchMedia('(prefers-color-scheme: dark)').matches ? DARK : LIGHT;
-export const reduceMotion = (): boolean => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const media = (q: string): boolean => typeof window !== 'undefined' && !!window.matchMedia?.(q).matches;
+export const osDisplay = () => ({ dark: media('(prefers-color-scheme: dark)'), reducedMotion: media('(prefers-reduced-motion: reduce)') });
+let saved: Settings | null = null;
+/** P3-0-R5 Boot and Settings push the saved settings; null values keep following the OS, resolved on every call. */
+export const setDisplaySettings = (s: Settings | null): void => { saved = s; };
+const display = () => resolveDisplay(saved ?? defaultSettings(), osDisplay());
+export const currentPalette = (): Palette => display().theme === 'dark' ? DARK : LIGHT;
+export const reduceMotion = (): boolean => display().reducedMotion;
 
 // MEC-003 §8 greybox ground tint per biome (1..6); game-layer colors, not config.
 export const BIOME_GROUND: readonly number[] = [0x8fd16a, 0xd9e58a, 0xbfe3f2, 0xd2a86b, 0xe8915a, 0x6b4fa3];

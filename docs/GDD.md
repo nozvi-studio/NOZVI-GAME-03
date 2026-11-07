@@ -216,7 +216,7 @@ Best level, best score, unlocked checkpoints, carried energy, marbles, coins, ow
 
 ## 10. Art, audio & UI direction [REQUIRED]
 ### 10.1 Style (owner decision, 2026-11-03: hybrid)
-- **UI, characters, marble machine:** chunky cartoon — thick dark outlines, saturated colors, glossy rounded buttons, big readable numbers, rounded "Baloo 2" font. This is where the "wow" is (marble machine, skins, results).
+- **UI, characters, marble machine:** chunky cartoon — thick dark outlines, saturated colors, glossy rounded buttons, big readable numbers, Nunito (UI) and Lilita One (titles), self-hosted (D2 mockups, owner 2026-11-07). This is where the "wow" is (marble machine, skins, results).
 - **Game board:** flat and low-detail so play stays readable. Plain ground with a subtle checker, high-contrast obstacles with outlines, warnings use color + blink + icon.
 - **Biomes:** each biome has its own palette and ground tile (§5.1) — the cheapest way to show progress.
 - **Inspiration, not copying:** take the chunky-cartoon *feel* from reference screenshots, but design our own layout, icons and characters.

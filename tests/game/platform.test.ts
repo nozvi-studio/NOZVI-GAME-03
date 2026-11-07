@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { defaultSave, load, save } from '../../src/meta';
+import { defaultSave, defaultSettings, load, save } from '../../src/meta';
 import { localStore } from '../../src/game/platform/localStore';
 import { createSynth } from '../../src/game/audio/synth';
 
@@ -8,8 +8,8 @@ describe('GDD-8.4 browser save adapter', () => {
   it('GDD-8.4 best score and sound survive a fresh adapter using only the versioned key', () => {
     const data = new Map<string, string>();
     vi.stubGlobal('window', { localStorage: { getItem: (k: string) => data.get(k) ?? null, setItem: (k: string, v: string) => data.set(k, v) } });
-    save(localStore(), { bestScore: 12, settings: { sound: false } });
-    expect(load(localStore())).toEqual({ ...defaultSave(), bestScore: 12, settings: { sound: false } });
+    save(localStore(), { bestScore: 12, settings: { ...defaultSettings(), sound: false } });
+    expect(load(localStore())).toEqual({ ...defaultSave(), bestScore: 12, settings: { ...defaultSettings(), sound: false } });
     expect([...data.keys()]).toEqual(['mango-snake.save']);
   });
   it('GDD-8.4 blocked storage is safe on every access', () => {

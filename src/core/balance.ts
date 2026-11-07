@@ -75,7 +75,7 @@ export interface Balance {
   log: { maxEntries: number; sessionGapMs: number };
   flow: { countdownMs: number; countdownDigits: number; maxFrameDeltaMs: number; deathCardDelayMs: number };
   ui: {
-    bannerMs: number; swipeMinPx: number; swipeBoardFactor: number;
+    bannerMs: number; swipeMinPx: number; swipeBoardFactor: number; fontLoadTimeoutMs: number; minShrink: number;
     haptics: { eatMs: number; level: number[]; deathMs: number }; terrainFadeInMs: number; hazardFlickerMs: number;
     capy: { breathPeriodMs: number; breathAmp: number; blinkMs: number; blinkMinGapMs: number; blinkMaxGapMs: number;
       eatOpenMs: number; eatChewMs: number; gulpScaleX: number; gulpScaleY: number;
@@ -194,7 +194,7 @@ const SPEC: Spec = {
   log: { maxEntries: 'int+', sessionGapMs: 'int+' },
   flow: { countdownMs: 'int+', countdownDigits: 'int+', maxFrameDeltaMs: 'int+', deathCardDelayMs: 'int0' },
   ui: {
-    bannerMs: 'int+', swipeMinPx: 'num+', swipeBoardFactor: 'prob',
+    bannerMs: 'int+', swipeMinPx: 'num+', swipeBoardFactor: 'prob', fontLoadTimeoutMs: 'int+', minShrink: 'prob',
     haptics: { eatMs: 'int+', level: 'ints', deathMs: 'int+' }, terrainFadeInMs: 'int+', hazardFlickerMs: 'int+',
     capy: { breathPeriodMs: 'int+', breathAmp: 'prob', blinkMs: 'int+', blinkMinGapMs: 'int+', blinkMaxGapMs: 'int+',
       eatOpenMs: 'int+', eatChewMs: 'int+', gulpScaleX: 'num+', gulpScaleY: 'num+',

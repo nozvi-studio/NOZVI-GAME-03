@@ -13,6 +13,8 @@ import { currentPalette, P1_COLORS, reduceMotion, type Palette } from '../render
 import { levelLabel, levelUpLines, runStartLines } from '../hudText';
 import { incomingBanner, progressLabel, t, TEXT } from '../text';
 import type { GameScene } from './GameScene';
+import { bindPress } from './ui';
+import { FONT_UI } from '../uiTokens';
 
 const SKILL_SFX: Record<SkillId, SfxName> = { slowmo: 'skillSlowmo', tailSnip: 'skillSnip', shield: 'skillShield', mangoRain: 'skillRain' };
 const SKILL_LETTER: Record<SkillId, string> = { slowmo: 'S', tailSnip: 'T', shield: 'D', mangoRain: 'R' };
@@ -139,7 +141,7 @@ export class HudScene extends Phaser.Scene {
   }
 
   private label(x: number, y: number, text: string, size: number, name = ''): Phaser.GameObjects.Text {
-    const label = this.add.text(x, y, text, { fontFamily: '"Baloo 2", system-ui, sans-serif',
+    const label = this.add.text(x, y, text, { fontFamily: FONT_UI,
       fontSize: `${size}px`, fontStyle: 'bold', color: this.ink() }).setName(name);
     this.labels.push(label); return label;
   }
@@ -148,12 +150,7 @@ export class HudScene extends Phaser.Scene {
   private button(x: number, y: number, w: number, h: number, name: string, action: () => void): Phaser.GameObjects.Container {
     const g = this.add.graphics(); this.buttons.push({ g, w, h });
     const button = this.add.container(x, y, [g]).setName(name).setSize(w, h).setInteractive({ useHandCursor: true });
-    let pressed = false;
-    button.on('pointerdown', (_p: Phaser.Input.Pointer, _x: number, _y: number, event?: Phaser.Types.Input.EventData) => {
-      event?.stopPropagation(); pressed = true; if (!reduceMotion()) button.setScale(.96);
-    });
-    button.on('pointerup', () => { const activate = pressed; pressed = false; button.setScale(1); if (activate) action(); });
-    button.on('pointerout', () => { pressed = false; button.setScale(1); });
+    bindPress(button, () => { if (!reduceMotion()) button.setScale(.96); }, () => button.setScale(1), action, true);
     return button;
   }
 
