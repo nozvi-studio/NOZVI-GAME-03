@@ -73,6 +73,6 @@ Answered by the owner 2026-11-06:
 - Q3 scope: head and body.
 - Q4 frame size/fps: agent's choice (section 5).
 - Q5 tools: Codex CLI installed; a Remotion-based video setup works on the owner's laptop.
-Still open:
-- Q6. Name/location of the owner's Remotion repo (it is not in this session's GitHub scope) and whether it can take a PNG master and export a PNG sequence.
-- Q7. Update the Figma D2 heads with the outline now, or after the capy master is approved?
+Answered 2026-11-07:
+- Q6. Remotion repo: `D:\Working\Agentemotion-showcase` (owner's machine, outside this repo; Remotion 4.0.538). PNG input (`public/` + `<Img src={staticFile()}>`) and PNG-sequence export (`npx remotion render --sequence`) are standard Remotion features but not yet tried in that repo; verify on the first motion task.
+- Q7. Deferred by the owner (update the Figma D2 heads later).
