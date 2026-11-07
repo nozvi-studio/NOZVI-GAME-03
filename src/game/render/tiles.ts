@@ -1,6 +1,5 @@
 import type Phaser from 'phaser';
 import type { SimSnapshot } from '../../core';
-import { boxed } from './hazards';
 import { PART, TILE } from './boardParts';
 import { DEFAULT_LOOK, type BoardLook } from './biomePalette';
 
@@ -36,18 +35,19 @@ export function drawTiles(g: Phaser.GameObjects.Graphics, tiles: SimSnapshot['ti
           .fillTriangle(x + cellPx * 0.36, y + cellPx * 0.57, x + cellPx * 0.5, y + cellPx * 0.27, x + cellPx * 0.64, y + cellPx * 0.57);
       } else {
         const alpha = tile.state === 'fade' ? 0.25 : 0.85;
+        const i = cellPx * TILE.inset, m = cellPx - 2 * i, r = cellPx * TILE.radius;
         if (tile.family === 'ice') {
-          g.fillStyle(PART.ice.fill, alpha).fillRect(x + inset, y + inset, size, size);
+          g.fillStyle(PART.ice.fill, alpha).fillRoundedRect(x + i, y + i, m, m, r);
+          g.lineStyle(cellPx * TILE.border, look.edge, alpha).strokeRoundedRect(x + i, y + i, m, m, r);
           g.lineStyle(Math.max(1, cellPx * 0.05), PART.ice.shine, alpha);
           g.lineBetween(x + cellPx * 0.2, y + cellPx * 0.65, x + cellPx * 0.65, y + cellPx * 0.2);
           g.lineBetween(x + cellPx * 0.4, y + cellPx * 0.8, x + cellPx * 0.8, y + cellPx * 0.4);
         } else {
-          const i = cellPx * TILE.inset, m = cellPx - 2 * i;
-          boxed(g, x + i, y + i, m, m, cellPx * TILE.radius, PART.mud.fill, look.woodEdge, cellPx * TILE.border, alpha);
-          g.fillStyle(PART.mud.puddle, alpha).fillEllipse(x + i + m * 0.5, y + i + m * 0.5, m * 0.56, m * 0.4);
-          g.fillStyle(PART.mud.fill, alpha)
-            .fillCircle(x + i + m * 0.3 + cellPx * 0.0715, y + i + m * 0.36 + cellPx * 0.0715, cellPx * 0.0715)
-            .fillCircle(x + i + m * 0.55 + cellPx * 0.0475, y + i + m * 0.48 + cellPx * 0.0475, cellPx * 0.0475);
+          // Tile.html mud: plain rounded fill, no wood ring (warn states keep the wood edge).
+          g.fillStyle(PART.mud.fill, alpha).fillRoundedRect(x + i, y + i, m, m, r);
+          g.fillStyle(PART.mud.puddle, alpha).fillEllipse(x + i + m * 0.5, y + i + m * 0.5, m * TILE.mud.puddle.w, m * TILE.mud.puddle.h);
+          g.fillStyle(PART.mud.fill, alpha);
+          for (const q of TILE.mud.bubbles) g.fillCircle(x + i + m * q.x + cellPx * q.r, y + i + m * q.y + cellPx * q.r, cellPx * q.r);
         }
       }
     }
