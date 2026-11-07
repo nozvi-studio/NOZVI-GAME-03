@@ -3,11 +3,12 @@ import { expect, it } from 'vitest';
 import { drawTiles, drawIceArrow } from '../../src/game/render/tiles';
 import { t } from '../../src/game/text';
 import type { SimSnapshot } from '../../src/core';
+import { boardLook } from '../../src/game/render/biomePalette';
 
 function graphics() {
   const calls: string[] = [];
   const g: Record<string, (...args: unknown[]) => unknown> = {};
-  for (const method of ['fillStyle', 'fillRect', 'fillCircle', 'fillTriangle', 'lineStyle', 'strokeRect', 'lineBetween']) {
+  for (const method of ['fillStyle', 'fillRect', 'fillRoundedRect', 'fillEllipse', 'fillCircle', 'fillTriangle', 'lineStyle', 'strokeRect', 'lineBetween']) {
     g[method] = () => { calls.push(method); return g; };
   }
   return { g: g as unknown as Phaser.GameObjects.Graphics, calls };
@@ -16,14 +17,24 @@ const tile = (state: 'warn' | 'active' | 'fade', on = true): SimSnapshot['tiles'
   { family: 'mud', id: 1, state, leftMs: 100, cells: [{ x: 1, y: 2, on }] },
 ];
 
-it('MEC-012-R2 mud renderer draws active cells with three dots and skips inactive cells', () => {
+it('MEC-012-R2 / P3b1-R7 mud renderer draws a bordered tile, a puddle and two bubbles; inactive cells are skipped', () => {
   const { g, calls } = graphics();
   drawTiles(g, tile('active'), 20, 0);
-  expect(calls.filter(c => c === 'fillRect')).toHaveLength(1);
-  expect(calls.filter(c => c === 'fillCircle')).toHaveLength(3);
+  expect(calls.filter(c => c === 'fillRoundedRect')).toHaveLength(2);   // edge + fill
+  expect(calls.filter(c => c === 'fillEllipse')).toHaveLength(1);
+  expect(calls.filter(c => c === 'fillCircle')).toHaveLength(2);
   calls.length = 0;
   drawTiles(g, tile('active', false), 20, 0);
   expect(calls).toEqual([]);
+});
+
+it('P3b1-R7 mud and ice take their edge colour from the board look in both themes', () => {
+  for (const theme of ['light', 'dark'] as const) {
+    const look = boardLook(2, theme), styles: unknown[][] = [];
+    const g = new Proxy({}, { get: (_o, n: string) => (...a: unknown[]): unknown => { if (n === 'fillStyle') styles.push(a); return g; } }) as unknown as Phaser.GameObjects.Graphics;
+    drawTiles(g, tile('active'), 20, 0, false, look);
+    expect(styles[0]![0]).toBe(look.woodEdge);
+  }
 });
 
 it('MEC-012-R2 mud warning blinks every 250 ms with dashed edges and a drop icon', () => {

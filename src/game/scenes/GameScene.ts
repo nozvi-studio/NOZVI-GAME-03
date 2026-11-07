@@ -193,7 +193,7 @@ export class GameScene extends Phaser.Scene {
     }
     const cell = cellPx(this.balance), p = this.palette;
     for (const layer of Object.values(this.layers)) layer.clear();
-    drawTiles(this.layers.ground, snapshot.tiles, cell, time, this.reduced);
+    drawTiles(this.layers.ground, snapshot.tiles, cell, time, this.reduced, this.look);
     drawTerrains(this.layers.terrain, snapshot.terrains, cell, this.look, this.balance, this.reduced);
     drawHazards(this.layers.hazards, snapshot.hazards, cell, this.look, this.balance, this.reduced);
     drawCycles(this.layers.hazards, snapshot, cell, time, this.reduced);
@@ -205,7 +205,7 @@ export class GameScene extends Phaser.Scene {
     drawSnake(this.layers.snake, snapshot, cell, p, this.effects.gulp, false);
     this.capy.update(snapshot, time, cell);
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);
-    drawIceArrow(this.layers.overlay, snapshot, cell);
+    drawIceArrow(this.layers.overlay, snapshot, cell, this.look);
     this.effects.draw(this.layers.effects, p);
   }
 }
