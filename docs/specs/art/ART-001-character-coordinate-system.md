@@ -74,5 +74,5 @@ Answered by the owner 2026-11-06:
 - Q4 frame size/fps: agent's choice (section 5).
 - Q5 tools: Codex CLI installed; a Remotion-based video setup works on the owner's laptop.
 Answered 2026-11-07:
-- Q6. Remotion repo: `D:\Working\Agentemotion-showcase` (owner's machine, outside this repo; Remotion 4.0.538). PNG input (`public/` + `<Img src={staticFile()}>`) and PNG-sequence export (`npx remotion render --sequence`) are standard Remotion features but not yet tried in that repo; verify on the first motion task.
+- Q6. Remotion repo: `D:/Working/Agent/remotion-showcase` (owner's machine, outside this repo; Remotion 4.0.538). PNG input (`public/` + `<Img src={staticFile()}>`) and PNG-sequence export (`npx remotion render --sequence`) are standard Remotion features but not yet tried in that repo; verify on the first motion task.
 - Q7. Deferred by the owner (update the Figma D2 heads later).
