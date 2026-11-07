@@ -2,10 +2,10 @@
 import { createSim, unlockedSkills, slotCount, unlockTable } from '../core/index';
 import type { Balance, CauseKey, Loadout, Sim, SimEvent, SimSnapshot, SkillId, TileKind } from '../core/index';
 import {
-  load, save as writeSave, applyLevelReached, applyRunWon, carryEnergy, nextMilestone, sanitizeLoadout,
+  load, save as writeSave, validSettings, applyLevelReached, applyRunWon, carryEnergy, nextMilestone, sanitizeLoadout,
   loadLog, nextRun, appendRecord, flushLog,
 } from '../meta/index';
-import type { KeyValueStore, LogRecord, RunLog, SaveDataV2 } from '../meta/index';
+import type { KeyValueStore, LogRecord, RunLog, SaveDataV2, Settings } from '../meta/index';
 
 export interface SessionDeps { balance: Balance; store: KeyValueStore; newSeed(): number; now(): number }
 export interface HomeModel {
@@ -17,6 +17,8 @@ export interface RunSummary {
   won: boolean; cause: CauseKey | 'clear' | 'quit'; level: number; startLevel: number;
   levelsCleared: number; score: number; bestScore: number; newBest: boolean; carriedEnergy: number;
   context?: TileKind;
+  /** Mangos eaten this run, the biome reached, checkpoint starts unlocked during this run (ascending), and whether no best score was stored yet. */
+  eaten: number; biome: number; newCheckpoints: number[]; firstRun: boolean;
 }
 export interface Session {
   homeModel(): HomeModel;
@@ -34,6 +36,8 @@ export interface Session {
   summary(): RunSummary | null;
   save(): Readonly<SaveDataV2>;
   setSound(on: boolean): void;
+  /** P3b3-R4 merge, validate field by field and persist immediately. */
+  updateSettings(patch: Partial<Settings>): void;
   exportLog(): string;
 }
 
@@ -42,6 +46,8 @@ interface RunState {
   over: boolean; summary: RunSummary | null; turns: number;
   /** MEC-003-R21 debug start: no checkpoint or best-level progress is written during this run. */
   debug: boolean;
+  /** Checkpoint starts unlocked during this run. */
+  newCps: number[];
 }
 
 type RecordBody = LogRecord extends infer R ? R extends LogRecord ? Omit<R, 't' | 'runId'> : never : never;
@@ -77,6 +83,7 @@ export function createSession(deps: SessionDeps): Session {
     if (run?.debug) return; // MEC-003-R21 debug runs never unlock progress
     const r = applyLevelReached(data, level, b);
     if (r.data.bestLevel !== data.bestLevel || r.newCheckpoints.length > 0) persist(r.data);
+    if (run) run.newCps.push(...r.newCheckpoints);
     for (const cp of r.newCheckpoints) record({ type: 'checkpoint_unlocked', level: cp, reachedLevel: level });
   };
 
@@ -88,6 +95,7 @@ export function createSession(deps: SessionDeps): Session {
     if (won && !run.debug) persist(applyRunWon(data, b).data);
     const carried = carryEnergy(snap.energy, b);
     const newBest = snap.score > data.bestScore;
+    const firstRun = data.bestScore === 0;
     persist({ ...data, carriedEnergy: carried, bestScore: Math.max(data.bestScore, snap.score) });
     record({ type: 'run_end', level: snap.level, score: snap.score, cause, durationMs: snap.timeMs,
       startLevel: snap.startLevel, levelsCleared: snap.levelsCleared, won, turns: run.turns,
@@ -96,6 +104,7 @@ export function createSession(deps: SessionDeps): Session {
     run.over = true;
     run.summary = { won, cause, level: snap.level, startLevel: snap.startLevel, levelsCleared: snap.levelsCleared,
       score: snap.score, bestScore: data.bestScore, newBest, carriedEnergy: carried,
+      eaten: snap.eatenInRun, biome: snap.biome, newCheckpoints: [...run.newCps].sort((x, y) => x - y), firstRun,
       ...(context === undefined ? {} : { context }) };
   };
 
@@ -152,7 +161,7 @@ export function createSession(deps: SessionDeps): Session {
       persist({ ...data, carriedEnergy: 0 });
       const sim = createSim(b, deps.newSeed(), { startLevel, startEnergy, loadout, bestLevel: best });
       const n = nextRun(log); log = n.log;
-      run = { sim, runId: n.runId, startLevel, startEnergy, loadout, over: false, summary: null, turns: 0, debug: dbg };
+      run = { sim, runId: n.runId, startLevel, startEnergy, loadout, over: false, summary: null, turns: 0, debug: dbg, newCps: [] };
       lastStart = startLevel; lastDebug = dbg;
       reached(startLevel);
       record({ type: 'run_start', startLevel, startEnergy, loadout: [loadout[0], loadout[1]], entry, ...(dbg ? { debug: true } : {}) });
@@ -183,6 +192,7 @@ export function createSession(deps: SessionDeps): Session {
     quit() { endRun('quit'); }, // MEC-003-R20
     summary: () => run?.summary ?? null,
     save: () => data,
+    updateSettings(patch) { persist({ ...data, settings: validSettings({ ...data.settings, ...patch }) }); },
     setSound(on) { persist({ ...data, settings: { ...data.settings, sound: on } }); },
     exportLog: () => JSON.stringify(log),
   };
