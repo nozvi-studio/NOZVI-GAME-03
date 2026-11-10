@@ -1,6 +1,6 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-07 by Claude (lead, cloud) **Milestone:** M2 P3 on `version/v0.3` (branched from docs/p3-spec, owner 2026-11-07); P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
+**Updated:** 2026-11-10 by Claude (lead, local) **Milestone:** M2 P3 on `version/v0.3` (branched from docs/p3-spec, owner 2026-11-07); P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
 
 ## Now (in progress)
 - [x] P2a, P2b merged into version/v0.2 (PLAYTEST 2026-11-05).
@@ -19,8 +19,8 @@
 - [ ] **P3 EXIT RESUME HERE (owner):** device/agy pass on version/v0.3: 60 fps on a mid-range phone (cloud has no GPU: v0.3 vs P3a both ~12 fps SwiftShader, not representative), 5" readability at 360x640, peak death vignette vs DeathD2, orb/skill-cast/checkpoint-flag juice not browser-verified in cloud, tap-skip feel. Then owner string batch + C1-C10 + derived dark theme review. After owner OK: merge version/v0.3 into dev (with P2 exit).
 - [x] ART-003 skin production guide written (Draft, owner not fully approved; open Q1-Q3).
 - [x] Remotion capy POC merged (owner approved 2026-11-07): pre-rendered idle/eat/dead clip on `?debug=1&artPreview=1`; board head stays tween (DECISIONS).
-- [ ] **UI fixes (UIFIX-R1..R15):** spec + 3 wave plans approved/written (docs/superpowers/plans/2026-11-07-p3-uifix-wave1..3.md). Next: execute wave 1 via subagents on feat/p3-uifix-wave1.
-- Note: save v3 is not readable by v0.2 builds; back up `mango-snake.save` before the P2-exit playtest (DECISIONS 2026-11-07).
+- [x] UIFIX wave 1 (R1 banner strip, R2 reject toast, R3 waiting prompt, R4 dark tokens, R5 snake rim) merged into version/v0.3; browser visual check (plan Task 8 step 3) not run yet. [ ] **Next:** wave 2 plan (R6..R11), then wave 3 (docs/superpowers/plans/2026-11-07-p3-uifix-wave2.md, wave3.md). New provisional string `hud.wait.touch` 'Swipe to steer!'.
+- [x] Save compat (2026-11-10): `save()` never overwrites a newer-version envelope; older saves get a one-time `mango-snake.save.v<N>.bak`. Ported to version/v0.2 (b74e878), so v0.2 builds from that commit no longer destroy v3 saves; older v0.2 builds still do (back up `mango-snake.save`).
 - Strings to review with owner after P3 (agy pass by owner): death lines, Settings/Results/HUD copy, banners — provisional, from mockups. New provisional: Shield/Mango Rain card text, Settings labels, results.carryLabel 'Energy saved', results.youWin 'YOU WIN!'. Acknowledge P3b-3 rulings C1-C10 (plan). Known: firstRun = bestScore 0 (a 0-score first run shows first-run again).
 
 ## Next (ordered, max 5)
@@ -45,11 +45,11 @@
 - Full family fuzz matrix not run (host RAM); reduced matrix passes.
 - Windows: Vitest needs --configLoader native --pool threads --maxWorkers 2. Host RAM low: agy browser QA gets killed when fuzz/bot run at the same time.
 - 4 skipped QA (reasons in files). Single 1.28 MB JS chunk.
-- Quitting mid-run does not log run_end (seen in phone log).
 - Checkpoints only reach L12; for QA use `?debug=1&level=N` or the debug HUD buttons "+1" / "Key ▶".
 - Rubble family and `skills.shield.rubbleLifeMs` removed (chore/remove-rubble-family, 2026-11-10).
 
 ## Last session summary
+- 2026-11-10 (local): save compat guard (v0.3 + v0.2), Rubble family removed (subagent, 1395 pass), v0.2 merged into v0.3, UIFIX wave 1 merged. Tech debt left: shrink fade crumble visual, hudText test cleanups, level%5 in tests, MEC-003 R21 heading, stale rubble mentions in MEC-004 L7/MEC-006 §7/MEC-013, single 1.28 MB chunk. Not pushed.
 - 2026-11-07 (local): owner rulings (GDD §4 ok, leaderboard+streak parked, OQ-B1..B5 closed); ART-003 skin guide (draft); ART-001 Q6/Q7; Remotion capy POC approved + merged. 1395 pass, typecheck clean. Not pushed.
 - 2026-11-07 (cloud, P3b-1/2/3 + P3a): all via subagents (Haiku/Sonnet implementers+reviewers, Opus final review per sub-phase, one fix wave each). Two interruptions (5h usage limit, container restart) without loss — commit+push per step.
 - 2026-11-07 (cloud, P3-0): version/v0.3 created; P3-0 executed via subagents (Haiku/Sonnet implementers + reviewers, Opus final review). Superpowers skills read from github obra/superpowers (plugin not loaded in cloud). Playwright replaces agy for browser checks here.

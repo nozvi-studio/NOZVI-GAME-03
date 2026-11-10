@@ -49,3 +49,13 @@ it('P3b1-R1 contrastRatio is the WCAG ratio', () => {
   expect(contrastRatio(0xffffff, 0x000000)).toBeCloseTo(21, 1);
   expect(contrastRatio(0x808080, 0x808080)).toBeCloseTo(1, 5);
 });
+
+it('UIFIX-R5 only biome 6 has a snake rim and it is >= 3:1 against both biome 6 grounds in both themes', () => {
+  for (const theme of themes) {
+    for (const n of [1, 2, 3, 4, 5]) expect(boardLook(n, theme).snakeRim).toBeNull();
+    const look = boardLook(6, theme);
+    expect(look.snakeRim).not.toBeNull();
+    expect(contrastRatio(look.snakeRim!, look.groundA)).toBeGreaterThanOrEqual(3);
+    expect(contrastRatio(look.snakeRim!, look.groundB)).toBeGreaterThanOrEqual(3);
+  }
+});

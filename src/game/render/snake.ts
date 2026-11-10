@@ -9,20 +9,30 @@ export function snakeHeadPoint(s: SimSnapshot, cell: number): { x: number; y: nu
   return { x: (lerp(s.headFrom.x, head.x) + 0.5) * cell, y: (lerp(s.headFrom.y, head.y) + 0.5) * cell };
 }
 
+export const SNAKE_BODY_CELL = 0.78; // body width as a fraction of a cell
+export const SNAKE_HEAD_CELL = 0.46; // head radius as a fraction of a cell
+export const SNAKE_RIM_CELL = 0.1; // UIFIX-R5 rim width as a fraction of a cell
+
 // MEC-001 interpolate the head and tail; rounded joints match the canvas stroke.
-export function drawSnake(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: number, p: Palette, gulp: number, drawFace = true): void {
+export function drawSnake(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: number, p: Palette, gulp: number, drawFace = true, rim: number | null = null): void {
   const last = s.snake[s.snake.length - 1]!;
   const lerp = (a: number, b: number): number => a + (b - a) * s.tickAlpha;
   const center = (x: number, y: number): { x: number; y: number } => ({ x: (x + 0.5) * cell, y: (y + 0.5) * cell });
   const headPt = snakeHeadPoint(s, cell);
   const tailPt = center(lerp(s.tailFrom.x, last.x), lerp(s.tailFrom.y, last.y));
   const points = [headPt, ...s.snake.slice(1).map(c => center(c.x, c.y)), tailPt];
-  for (const [color, width] of [[p.snake, cell * 0.78], [p.belly, cell * 0.26]]) {
+  if (rim !== null) { // UIFIX-R5 bright outline under body and head (skin-agnostic: the capy face is a separate image)
+    const w = cell * SNAKE_BODY_CELL + 2 * cell * SNAKE_RIM_CELL;
+    g.lineStyle(w, rim).strokePoints(points, false); g.fillStyle(rim);
+    for (const pt of points) g.fillCircle(pt.x, pt.y, w / 2);
+    g.fillCircle(headPt.x, headPt.y, cell * SNAKE_HEAD_CELL * (1 + 0.18 * gulp) + cell * SNAKE_RIM_CELL);
+  }
+  for (const [color, width] of [[p.snake, cell * SNAKE_BODY_CELL], [p.belly, cell * 0.26]]) {
     g.lineStyle(width, color).strokePoints(points, false);
     g.fillStyle(color);
     for (const pt of points) g.fillCircle(pt.x, pt.y, width / 2);
   }
-  g.fillStyle(p.snake).fillCircle(headPt.x, headPt.y, cell * 0.46 * (1 + 0.18 * gulp));
+  g.fillStyle(p.snake).fillCircle(headPt.x, headPt.y, cell * SNAKE_HEAD_CELL * (1 + 0.18 * gulp));
   const fx = s.dir.x, fy = s.dir.y, px = -fy, py = fx;
   if (drawFace) for (const side of [-1, 1]) {
     const ex = headPt.x + fx * cell * 0.14 + px * side * cell * 0.2;

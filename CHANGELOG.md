@@ -2,6 +2,14 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(hud): UIFIX wave 1 final-review fixes (snake rim constants, wait chip without flag icon, skill-tip no-overlap test, pause theme computed once)
+- feat(hud): UIFIX-R3 waiting prompt in the chip row (touch: Swipe to steer!, keys: Press an arrow to go!); centre-of-board hint removed
+- feat(hud): UIFIX-R2 'Need X energy' toast above the tapped skill button, never over the board
+- feat(hud): UIFIX-R1 in-run banners draw as one strip at the board top edge; pills sit below it
+- feat(hud): UIFIX-R1 banner strip model and geometry (pure)
+- feat(render): UIFIX-R5 bright snake rim in biome 6 (contrast >= 3:1)
+- feat(ui): UIFIX-R4 dark-theme text/card tokens with WCAG 4.5:1 gate
+- feat(ui): UIFIX-R4 dark theme applied to HUD title, Pause card and Settings
 - fix(save): `save()` no longer overwrites a newer-version envelope; loading an older save keeps a one-time raw backup `mango-snake.save.v<N>.bak` (MEC-008-R12)
 - chore: remove the dead `rubble` hazard family and `skills.shield.rubbleLifeMs` (no production source since 2026-11-06); no save-format change
 - docs: P3 UI review (agy) in PLAYTEST + UI fixes design spec (UIFIX-R1..R15)

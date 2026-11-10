@@ -40,6 +40,12 @@ it('P3b2-R7 MEC-008-R8 an L1 start has no ramp effect: no Warming up chip, the c
   expect(hudView(snap({ rampActive: true, rampMangoesLeft: 5, startLevel: 1 }), hint, b, t).chip).toEqual({ kind: 'checkpoint', text: 'Next checkpoint at L10' });
   expect(hudView(snap({ rampActive: true, rampMangoesLeft: 5, startLevel: 1 }), null, b, t).chip).toBeNull();
 });
+it('UIFIX-R3 the waiting prompt takes the chip slot (over ramp and checkpoint) with touch or keyboard text', () => {
+  expect(hudView(snap(), hint, b, t, { touch: true }).chip).toEqual({ kind: 'wait', text: 'Swipe to steer!' });
+  expect(hudView(snap(), hint, b, t, { touch: false }).chip).toEqual({ kind: 'wait', text: 'Press an arrow to go!' });
+  expect(hudView(snap({ rampActive: true, rampMangoesLeft: 3, startLevel: 5 }), null, b, t, { touch: true }).chip?.kind).toBe('wait');
+  expect(hudView(snap(), hint, b, t, null).chip?.kind).toBe('checkpoint'); // back to the checkpoint chip after the first input
+});
 it('P3b2-R9 stack places items with gap, margins and padding', () => {
   const r = stack([{ h: 37.4 }, { h: 19 }, { h: 34, mt: 6 }, { h: 66, mt: 16 }, { h: 52, mt: 8 }, { h: 52 }], { gap: 6, padTop: 26, padBottom: 20 });
   expect(r.height).toBeCloseTo(366.4, 5); expect(r.ys[0]).toBe(26); expect(r.ys[2]).toBeCloseTo(100.4, 5);

@@ -1,7 +1,7 @@
 import type Phaser from 'phaser';
-import { TOKENS, toInt } from '../uiTokens';
+import { TOKENS, toInt, uiTheme } from '../uiTokens';
 import { ui, UI_SCALE } from '../ui/layout';
-import { reduceMotion } from '../render/palette';
+import { currentPalette, reduceMotion, themeOf } from '../render/palette';
 import { bindPress } from '../scenes/ui';
 import { drawCard, hudLabel } from './draw';
 import { hudIconKey } from './hudIcons';
@@ -13,6 +13,9 @@ import type { HudTarget, Pt } from '../juice/types';
 // Mockup px of the stats / chip / pause drawing (GameD2); layout rects themselves come from HUD_MOCK / hudLayout.
 const M = { stat: 19, chip: 14, mango: 28, star: 20, bolt: 16, bar: 10, chipPadL: 12, chipIcon: 18, chipGap: 8, chipPadR: 16,
   pauseBarW: 5, pauseBarH: 16, pauseBarX: 7, pauseGap: 2, pauseRadius: 2, playHalf: 9, playBack: 6, playTip: 9, pressScale: 0.94, disabledAlpha: 0.4 } as const;
+
+/** UIFIX-R3: the wait prompt has no icon (no arrow icon exists); ramp / checkpoint chips keep the flag. */
+export const chipHasIcon = (kind: 'ramp' | 'checkpoint' | 'wait' | undefined): boolean => kind !== 'wait';
 
 // P3b2-R15 GameD2 header (level + biome + pause), stats pills (mango x/y, score, energy) and the checkpoint / ramp chip.
 export class HudTop {
@@ -46,13 +49,14 @@ export class HudTop {
   }
 
   apply(v: HudView, paused: boolean, pauseEnabled: boolean): void {
-    this.level.setText(v.levelTitle); this.biome.setText(v.biomeName);
+    const th = uiTheme(themeOf(currentPalette()));
+    this.level.setText(v.levelTitle).setColor(th.title); this.biome.setText(v.biomeName).setColor(th.soft);
     this.done.setText(v.quota.done); this.total.setText(v.quota.total); this.score.setText(v.score); this.energy.setText(v.energy.text);
     const w = (t: Phaser.GameObjects.Text): number => t.width / UI_SCALE;
     const row = statsRow({ quota: w(this.done) + w(this.total), score: w(this.score), energy: w(this.energy) });
     const key = JSON.stringify(row);
     if (key !== this.rowKey || v.energy.fill !== this.fill) { this.rowKey = key; this.fill = v.energy.fill; this.drawRow(row, v.energy.fill); }
-    this.drawChip(v.chip?.text ?? null);
+    this.drawChip(v.chip);
     const pk = `${paused}|${pauseEnabled}`;
     if (pk === this.pauseKey) return;
     this.pauseKey = pk;
@@ -76,12 +80,14 @@ export class HudTop {
     g.fillStyle(toInt(TOKENS.hud.energyTrack)).fillRoundedRect(bx, cy - bh / 2, bw, bh, bh / 2);
     if (fill > 0) g.fillStyle(toInt(TOKENS.sky.energy)).fillRoundedRect(bx, cy - bh / 2, Math.max(bh, bw * fill), bh, bh / 2);
   }
-  private drawChip(text: string | null): void {
-    this.chipText.setVisible(text !== null); this.chipIcon.setVisible(text !== null);
-    if (text === null) { this.chipG.clear(); this.chipKey = ''; return; }
-    if (text === this.chipKey) return;
-    this.chipKey = text; this.chipText.setText(text);
-    const { cx, y, h } = this.l.chip, tw = this.chipText.width, pad = ui(M.chipPadL), ic = ui(M.chipIcon), gap = ui(M.chipGap);
+  private drawChip(chip: HudView['chip']): void {
+    const text = chip?.text ?? null, icon = chipHasIcon(chip?.kind);
+    this.chipText.setVisible(text !== null); this.chipIcon.setVisible(text !== null && icon);
+    if (chip === null || text === null) { this.chipG.clear(); this.chipKey = ''; return; }
+    const key = `${chip.kind}|${text}`;
+    if (key === this.chipKey) return;
+    this.chipKey = key; this.chipText.setText(text);
+    const { cx, y, h } = this.l.chip, tw = this.chipText.width, pad = ui(M.chipPadL), ic = icon ? ui(M.chipIcon) : 0, gap = icon ? ui(M.chipGap) : 0;
     const w = pad + ic + gap + tw + ui(M.chipPadR), x = cx - w / 2;
     this.chipG.clear(); drawCard(this.chipG, x, y, w, h, h / 2, TOKENS.surface.card);
     this.chipIcon.setPosition(x + pad + ic / 2, y + h / 2); this.chipText.setPosition(x + pad + ic + gap, y + h / 2).setOrigin(0, 0.5);

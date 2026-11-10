@@ -7,7 +7,8 @@ import { HudScene } from '../../src/game/scenes/HudScene';
 import { bindKeyboard } from '../../src/game/input/keyboard';
 import { loadBalance } from '../support/balance';
 import { setDisplaySettings } from '../../src/game/render/palette';
-import { ui } from '../../src/game/ui/layout';
+import { bannerStripRect } from '../../src/game/hud/hudLayout';
+import { BOARD } from '../../src/game/layout';
 import { sceneHarness, Signals, type DrawObject } from '../support/scene';
 
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } },
@@ -60,12 +61,13 @@ function setup(saveData: object = {}, opts: { settings?: boolean; settingsActive
 }
 
 describe('P1 HUD flow, audio and session wiring', () => {
-  it('MEC-001-R2 HUD shows the wait hint after the countdown until the first non-reverse input', () => {
+  it('MEC-001-R2 UIFIX-R3 HUD shows the wait prompt in the chip after the countdown until the first non-reverse input', () => {
     const h = setup();
+    const chip = (): { text: string; visible: boolean } => h.find('next-checkpoint');
     h.game.apply(flowTick(h.game.flow, b, b.flow.countdownMs));
-    expect(h.game.flow.status).toBe('waiting'); expect(h.find('wait-hint').visible).toBe(true);
-    h.game.turn(-1, 0); expect(h.game.flow.status).toBe('waiting'); expect(h.find('wait-hint').visible).toBe(true);
-    h.game.turn(0, -1); expect(h.game.flow.status).toBe('playing'); expect(h.find('wait-hint').visible).toBe(false);
+    expect(h.game.flow.status).toBe('waiting'); expect(chip().visible).toBe(true); expect(chip().text).toBe('Press an arrow to go!');
+    h.game.turn(-1, 0); expect(h.game.flow.status).toBe('waiting'); expect(chip().text).toBe('Press an arrow to go!');
+    h.game.turn(0, -1); expect(h.game.flow.status).toBe('playing'); expect(chip().text).not.toBe('Press an arrow to go!');
   });
   it('P1 HUD has no Play card: Game opens on the countdown; pause shows Resume and Quit', () => {
     const h = setup();
@@ -125,10 +127,9 @@ describe('P1 HUD flow, audio and session wiring', () => {
     const h = setup();
     h.game.events.emit('sim-events', [{ type: 'shrunk', from: 9, to: b.snake.start.length },
       { type: 'levelUp', level: 2, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }]);
-    expect(h.last('banner-chip').text).toBe(`Your snake shrinks to ${b.snake.start.length} segments`);
-    const n = h.objects.filter(o => o.name === 'banner-chip').length;
+    expect(h.last('banner-subtitle').text).toBe(`Your snake shrinks to ${b.snake.start.length} segments`);
     h.game.events.emit('sim-events', [{ type: 'levelUp', level: 3, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }]);
-    expect(h.objects.filter(o => o.name === 'banner-chip')).toHaveLength(n);
+    expect(h.last('banner-subtitle').text).toBe('Fresh start!');
   });
   it('P3a-R8 banner enters with slide + scale normally and as a pure fade when reduced', () => {
     const lv = [{ type: 'levelUp', level: 3, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }];
@@ -144,26 +145,12 @@ describe('P1 HUD flow, audio and session wiring', () => {
     expect(h.last('banner-title').text).toBe('Level 5');
     h.flush(); expect(h.last('banner-title').text).toBe('Challenge: Rock rain!');
   });
-  it('P3b2-R10 level-up card stacks the subtitle below the measured Lilita title (no overlap)', () => {
-    const h = setup(); measureText(h);
-    h.game.events.emit('sim-events', [{ type: 'levelUp', level: 6, biome: 2, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }]);
-    const title = h.last('banner-title'), sub = h.last('banner-subtitle');
-    expect(title.height).toBeGreaterThan(ui(47.5)); expect(sub.y).toBeGreaterThanOrEqual(title.y + title.height);
-  });
-  it('P3b2-R10 biome card stacks tagline below the measured name', () => {
-    const h = setup(); measureText(h);
-    h.game.events.emit('sim-events', [{ type: 'levelUp', level: 6, biome: 2, challenge: false, biomeChanged: true, clearedLevelTimeMs: 1 }]);
-    h.flush();
-    const name = h.last('banner-title'), tag = h.last('banner-tagline');
-    expect(tag.y).toBeGreaterThanOrEqual(name.y + name.height);
-  });
-  it('P3b2-R10 a long challenge title scales down to fit inside the card', () => {
+  it('UIFIX-R1 strips never scale: a long challenge title is clipped, not shrunk', () => {
     const h = setup(); measureText(h, 700);
     h.game.events.emit('sim-events', [{ type: 'levelUp', level: 5, biome: 1, challenge: true, biomeChanged: false, clearedLevelTimeMs: 1 }]);
     h.flush();
-    const title = h.last('banner-title');
-    expect(title.text).toBe('Challenge: Rock rain!');
-    expect(title.width * title.scale).toBeLessThanOrEqual(ui(318 - 32) + 0.001); expect(title.scale).toBeLessThan(1);
+    expect(h.last('banner-title').scale).toBe(1);
+    expect(h.last('banner-title').width * h.last('banner-title').scale).toBeLessThanOrEqual(bannerStripRect(b.board.cols).w);
   });
   it('MEC-003 §8 a run that starts on a challenge level shows the challenge banner when the countdown ends', () => {
     const h = setup({ bestLevel: 12, unlockedCheckpoints: [4, 5] }, { startLevel: 5 });
@@ -181,7 +168,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
     expect(h.find('tip').text).toBe('Checkpoints are permanent. Your saved energy comes with you.');
     h.flush(); expect(h.last('banner-title').text).toBe('Next run starts at L4!');
   });
-  it('MEC-006 §8 skill feedback: cast, reject (not empty), orb tip once, unlock tips', () => {
+  it('MEC-006 UIFIX-R2 §8 skill feedback: cast, reject (not empty), orb tip once, unlock tips', () => {
     const h = setup();
     h.game.events.emit('sim-events', [{ type: 'orbSpawned', x: 1, y: 1 }, { type: 'orbEaten', x: 1, y: 1, gained: 15 }]);
     expect(h.find('tip').text).toBe('Energy orb! Fuel for skills');
@@ -191,6 +178,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
     expect(sound.buzz.mock.calls.map(c => c[0])).toEqual([8, 20]);
     h.game.events.emit('sim-events', [{ type: 'skillRejected', slot: 0, skill: 'slowmo', reason: 'energy' }]);
     expect(sound.play).toHaveBeenLastCalledWith('nope'); expect(h.find('tip').text).toBe('Need 40 energy');
+    expect(h.find('tip').y).toBeGreaterThanOrEqual(BOARD.y + BOARD.size); // UIFIX-R2 toast above the skill button, not over the board
     h.game.events.emit('sim-events', [{ type: 'skillUnlocked', skill: 'slowmo', slot: 0 }]);
     expect(h.find('tip').text).toBe('New skill: Slow-mo'); // tail points at the slot (Findings 5)
     expect(sound.play).toHaveBeenLastCalledWith('unlock');
@@ -298,6 +286,6 @@ describe('P1 HUD flow, audio and session wiring', () => {
   it('MEC-001-R2 a turn during the countdown counts: the run starts on go without a wait hint', () => {
     const h = setup(); h.game.turn(0, -1);
     h.game.apply(flowTick(h.game.flow, b, b.flow.countdownMs));
-    expect(h.game.flow.status).toBe('playing'); expect(h.find('wait-hint').visible).toBe(false);
+    expect(h.game.flow.status).toBe('playing'); expect(h.find('next-checkpoint').text).not.toBe('Press an arrow to go!');
   });
 });

@@ -1,5 +1,7 @@
 import { expect, it } from 'vitest';
-import { levelUpBanners, skillPills, skillTip, type LevelUpEvent } from '../../src/game/hud/banners';
+import { bannerStrip, clipLine, levelUpBanners, skillPills, skillTip, STRIP_SUB_MAX, STRIP_TITLE_MAX, type LevelUpEvent } from '../../src/game/hud/banners';
+import { contrastRatio } from '../../src/game/render/biomePalette';
+import { toInt } from '../../src/game/uiTokens';
 import { t } from '../../src/game/text';
 import { loadBalance } from '../support/balance';
 
@@ -37,4 +39,30 @@ it('P3b2-R11 SkillActiveD2 pills use balance durations: timed skills count down,
 it('P3b2-R11 skill unlocked tip: tail slot when placed, existing next-run text when no slot (MEC-007-R12)', () => {
   expect(skillTip({ skill: 'slowmo', slot: 0 }, t)).toEqual({ text: 'New skill: Slow-mo', slot: 0 });
   expect(skillTip({ skill: 'shield', slot: null }, t)).toEqual({ text: 'Shield unlocked! Pick it before your next run', slot: null });
+});
+it('UIFIX-R1 clipLine keeps short text and cuts long text to one line with an ellipsis', () => {
+  expect(clipLine('Fresh start!', 36)).toBe('Fresh start!');
+  const cut = clipLine('Checkpoints are permanent. Your saved energy comes with you.', 36);
+  expect(cut).toHaveLength(36); expect(cut.endsWith('…')).toBe(true);
+});
+it('UIFIX-R1 bannerStrip: icon + title + at most one sub line for every banner kind', () => {
+  const lv = bannerStrip({ kind: 'levelUp', title: 'Level 8', subtitle: 'Fresh start!', chip: null });
+  expect(lv).toMatchObject({ icon: 'star', title: 'Level 8', sub: 'Fresh start!' });
+  expect(bannerStrip({ kind: 'levelUp', title: 'Level 8', subtitle: 'Fresh start!', chip: 'Your snake shrinks to 4 segments' }).sub).toBe('Your snake shrinks to 4 segments');
+  expect(bannerStrip({ kind: 'challenge', title: 'Challenge: Rock rain!' })).toMatchObject({ icon: 'bolt', sub: null });
+  expect(bannerStrip({ kind: 'biome', label: 'BIOME 3', name: 'Frozen Pond', tagline: 'Ice is slippery. Plan your turns.' }))
+    .toMatchObject({ icon: 'biome', title: 'Frozen Pond', sub: 'Ice is slippery. Plan your turns.' });
+  expect(bannerStrip({ kind: 'checkpoint', title: 'Next run starts at L6!', subtitle: 'Checkpoint saved' })).toMatchObject({ icon: 'flag', sub: 'Checkpoint saved' });
+  expect(bannerStrip({ kind: 'hint', text: 'Fences unlocked' })).toMatchObject({ icon: 'bolt', title: 'Fences unlocked', sub: null });
+});
+it('UIFIX-R1 bannerStrip cuts a long hint and a long sub to one line', () => {
+  const s = bannerStrip({ kind: 'hint', text: 'Mud! You slow down while your head is in it. Really long extra words here.' });
+  expect(s.title.length).toBeLessThanOrEqual(STRIP_TITLE_MAX);
+  const b2 = bannerStrip({ kind: 'biome', label: 'BIOME 6', name: 'Storm Garden', tagline: 'Everything at once. Good luck! And then some more words.' });
+  expect(b2.sub!.length).toBeLessThanOrEqual(STRIP_SUB_MAX);
+});
+it('UIFIX-R1 every strip ink/fill pair is readable (>= 4.5:1)', () => {
+  const specs = [{ kind: 'levelUp' as const, title: 'a', subtitle: 'b', chip: null }, { kind: 'challenge' as const, title: 'a' },
+    { kind: 'biome' as const, label: 'a', name: 'b', tagline: 'c' }, { kind: 'checkpoint' as const, title: 'a', subtitle: 'b' }, { kind: 'hint' as const, text: 'a' }];
+  for (const sp of specs) { const v = bannerStrip(sp); expect(contrastRatio(toInt(v.ink), toInt(v.fill)), sp.kind).toBeGreaterThanOrEqual(4.5); }
 });

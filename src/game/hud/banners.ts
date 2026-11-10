@@ -1,4 +1,5 @@
 import type { Balance, SimEvent, SkillId } from '../../core';
+import { TOKENS } from '../uiTokens';
 import { biomeName } from '../hudText';
 import type { HudSnap, T } from './hudModel';
 
@@ -10,6 +11,12 @@ export type BannerSpec =
   | { kind: 'hint'; text: string };
 export type LevelUpEvent = Extract<SimEvent, { type: 'levelUp' }>;
 
+export const STRIP_TITLE_MAX = 28, STRIP_SUB_MAX = 36;
+export type StripIcon = 'star' | 'bolt' | 'biome' | 'flag';
+export interface StripView { icon: StripIcon; title: string; sub: string | null; fill: string; ink: string }
+/** UIFIX-R1 one-line cut: keeps text that fits, else `max - 1` characters plus an ellipsis. */
+export function clipLine(text: string, max: number): string { return text.length <= max ? text : `${text.slice(0, max - 1)}…`; }
+
 /** P3b2-R10 MEC-003 §8 + MEC-008 §8 + MEC-001-R4: ordered banner queue for one level-up (BannersD2). */
 export function levelUpBanners(e: LevelUpEvent, ctx: { shrunkTo: number | null; newCheckpoint: number | null }, b: Balance, t: T): BannerSpec[] {
   const out: BannerSpec[] = [{ kind: 'levelUp', title: t('banner.levelUp', { n: e.level }), subtitle: t('banner.freshStart'),
@@ -19,6 +26,20 @@ export function levelUpBanners(e: LevelUpEvent, ctx: { shrunkTo: number | null; 
   if (ctx.newCheckpoint !== null) out.push({ kind: 'checkpoint', title: t('banner.checkpoint', { level: ctx.newCheckpoint }), subtitle: t('banner.checkpointSaved') });
   if (e.unlocked) out.push({ kind: 'hint', text: t(`banner.new.${e.unlocked}`) });
   return out.slice(0, b.ui.hud.bannerQueueMax);
+}
+
+/** UIFIX-R1 (COL-03, JUI-02) every queued banner as one compact strip: icon + title + at most one sub line. */
+export function bannerStrip(s: BannerSpec): StripView {
+  const card: string = TOKENS.surface.card, ink: string = TOKENS.text.primary;
+  const v = (icon: StripIcon, title: string, sub: string | null, fill: string = card, color: string = ink): StripView =>
+    ({ icon, title: clipLine(title, STRIP_TITLE_MAX), sub: sub === null ? null : clipLine(sub, STRIP_SUB_MAX), fill, ink: color });
+  switch (s.kind) {
+    case 'levelUp': return v('star', s.title, s.chip ?? s.subtitle);
+    case 'challenge': return v('bolt', s.title, null);
+    case 'biome': return v('biome', s.name, s.tagline, TOKENS.sky.stat, TOKENS.text.slate);
+    case 'checkpoint': return v('flag', s.title, s.subtitle, TOKENS.hud.mintCard, TOKENS.hud.mintInk);
+    case 'hint': return v('bolt', s.text, null, TOKENS.hud.tooltip, TOKENS.hud.tooltipText);
+  }
 }
 
 export interface SkillPill { slot: 0 | 1; skill: SkillId; text: string }
