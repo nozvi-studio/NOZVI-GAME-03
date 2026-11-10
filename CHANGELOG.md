@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(hud): MOT-4 skill ready pop, spend dip and eased charge gauge; skill shake via motion adapter
 - feat(hud): MOT-4 score tick-up, quota bar, energy easing and cues, title and chip transitions via motion API
 - feat(hud): MOT-4 pure HUD motion helpers and score/quota view fields
 - feat(motion): MOT-4 hit beat on warn-to-live edges and bomb digit pop (HitBeats, GameScene wiring)
