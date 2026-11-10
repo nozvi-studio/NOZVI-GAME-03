@@ -66,6 +66,8 @@ export function load(store: KeyValueStore, options?: SaveRules | Record<number, 
     const rules = options && 'skillIds' in options ? options as SaveRules : undefined;
     const migrations = rules ? MIGRATIONS : { ...MIGRATIONS, ...options };
     let version = env.version as number, data: unknown = env.data;
+    // MEC-008-R12 keep one raw copy of an older envelope before it is migrated and rewritten.
+    if (version < SAVE_VERSION) backup(store, raw, version);
     while (version < SAVE_VERSION) {
       const migrate = migrations[version];
       if (!migrate) return defaultSave();
@@ -75,10 +77,24 @@ export function load(store: KeyValueStore, options?: SaveRules | Record<number, 
   } catch { return defaultSave(); }
 }
 
+function backup(store: KeyValueStore, raw: string, version: number): void {
+  try { const key = `${SAVE_KEY}.v${version}.bak`; if (store.get(key) === null) store.set(key, raw); } catch { /* best effort */ }
+}
+
+/** True when the stored envelope was written by a newer build; it must not be overwritten. */
+function newerOnDisk(store: KeyValueStore): boolean {
+  try {
+    const raw = store.get(SAVE_KEY);
+    const env: unknown = raw === null ? null : JSON.parse(raw);
+    return object(env) && Number.isInteger(env.version) && (env.version as number) > SAVE_VERSION;
+  } catch { return false; }
+}
+
 // MEC-008-R12 writes the complete v3 envelope; storage errors are swallowed.
 export function save(store: KeyValueStore, data: SaveDataV2): boolean;
 export function save(store: KeyValueStore, data: SaveData): boolean;
 export function save(store: KeyValueStore, data: SaveData): boolean {
+  if (newerOnDisk(store)) return false;
   try { store.set(SAVE_KEY, JSON.stringify({ version: SAVE_VERSION, data: { ...defaultSave(), ...data } })); return true; }
   catch { return false; }
 }

@@ -40,3 +40,20 @@ it('MEC-008-R12 validates each field independently and returns fresh defaults', 
   const a = defaultSave(); a.settings.sound = false; a.unlockedCheckpoints.push(4);
   expect(defaultSave().settings.sound).toBe(true); expect(defaultSave().unlockedCheckpoints).toEqual([]);
 });
+it('MEC-008-R12 save never overwrites a newer-version envelope', () => {
+  const raw = JSON.stringify({ version: SAVE_VERSION + 1, data: { bestScore: 99 } });
+  const st = memoryStore({ [SAVE_KEY]: raw });
+  expect(save(st, defaultSave())).toBe(false); expect(st.dump()[SAVE_KEY]).toBe(raw);
+});
+it('MEC-008-R12 loading an older save keeps a one-time backup of the raw envelope', () => {
+  const raw = JSON.stringify({ version: 2, data: { ...defaultSave(), bestLevel: 9 } });
+  const st = memoryStore({ [SAVE_KEY]: raw });
+  expect(load(st, rules).bestLevel).toBe(9);
+  expect(st.dump()[`${SAVE_KEY}.v2.bak`]).toBe(raw);
+  st.set(SAVE_KEY, JSON.stringify({ version: 2, data: { bestLevel: 1 } })); load(st, rules);
+  expect(st.dump()[`${SAVE_KEY}.v2.bak`]).toBe(raw);
+});
+it('MEC-008-R12 a current-version or corrupt save writes no backup', () => {
+  const st = memoryStore(); save(st, defaultSave()); load(st, rules); load(memoryStore({ [SAVE_KEY]: '{' }), rules);
+  expect(Object.keys(st.dump())).toEqual([SAVE_KEY]);
+});
