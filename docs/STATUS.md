@@ -3,7 +3,8 @@
 **Updated:** 2026-11-10 by Claude (MOT-4 agent) **Milestone:** M2 P3 on `version/v0.3` (branched from docs/p3-spec, owner 2026-11-07); P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
 
 ## Now (in progress)
-- [x] MOT-1 widget feedback implemented on feat/motion-1 (not merged; lead merges): one wrapper for pill/round/card/switch/hud buttons, navigate delay, Pause disabled state, Settings knob slide, Loadout reject + badge pop. [ ] Owner browser eye-check of Tasks 4-9 (list in the MOT-1 plan).
+- [x] MOT-2 menu flow implemented on `feat/motion-2` (not merged; lead merges): `goTo` for every menu change, Home/Loadout/Settings entrances, Home idle, Results sequence + skip, `?debug=1&motion=off`. [ ] Owner browser eye-check list in PLAYTEST (2026-11-10 MOT-2). Next after merge: nothing queued in MOT.
+- [x] MOT-1 widget feedback (merged into version/v0.3). [ ] Owner browser eye-check of Tasks 4-9 (list in the MOT-1 plan).
 - [ ] **RESUME HERE:** owner sends the P2 exit playtest log (normal runs, no ?debug=1; start from checkpoint L10; >= 30 runs, >= 10 reaching biome 4). Lead runs deathCauseReport + summarizeLog, writes the verdict in PLAYTEST, tunes if over40 (OQ-C5).
 
 - [x] P3c capy merged into version/v0.2 (e40a333, owner approved 2026-11-06): SVG capy face on the snake head + debug preview `?debug=1&artPreview=1`.
@@ -48,7 +49,7 @@
 - Rubble family and `skills.shield.rubbleLifeMs` removed (chore/remove-rubble-family, 2026-11-10).
 
 ## Last session summary
-- 2026-11-10 (MOT-1): executed the MOT-1 plan Tasks 1-10 on feat/motion-1 (TDD, one commit per task); full suite and typecheck pass. Merge into version/v0.3 left to the lead.
+- 2026-11-10 (MOT-1, MOT-2): MOT-1 Tasks 1-10 and MOT-2 Tasks 1-8 executed on feat/motion-1 and feat/motion-2 (TDD, one commit per task); full suite and typecheck pass. Merges left to the lead.
 - 2026-11-10 (local): save compat guard (v0.3 + v0.2), Rubble family removed (subagent, 1395 pass), v0.2 merged into v0.3, UIFIX waves 1-3 merged via Sonnet subagents. Tech debt left: shrink fade crumble visual, hudText test cleanups, level%5 in tests, MEC-003 R21 heading, stale rubble mentions in MEC-004 L7/MEC-006 §7/MEC-013, single 1.28 MB chunk. Not pushed.
 - 2026-11-07 (local): owner rulings (GDD §4 ok, leaderboard+streak parked, OQ-B1..B5 closed); ART-003 skin guide (draft); ART-001 Q6/Q7; Remotion capy POC approved + merged. 1395 pass, typecheck clean. Not pushed.
 - 2026-11-07 (cloud, P3b-1/2/3 + P3a): all via subagents (Haiku/Sonnet implementers+reviewers, Opus final review per sub-phase, one fix wave each). Two interruptions (5h usage limit, container restart) without loss — commit+push per step.

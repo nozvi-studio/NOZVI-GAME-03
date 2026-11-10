@@ -137,3 +137,11 @@ _pending_
 - Lead disputes: GAM-01 (new-hazard banners exist), GAM-03 (3 buffered turns is a GDD rule), LAY-03 likely a debug-run artifact (to re-check).
 - Owner 2026-11-07: phases 1, 2, 3, 5 accepted as mostly right; fixes in docs/superpowers/specs/2026-11-07-p3-ui-review-fixes-design.md. Phase 4 waits for the owner playtest log.
 
+
+## 2026-11-10 - MOT-2 menu flow eye-check (PENDING, browser not run by the implementing agent)
+Run `npm run dev`, light mode, console open. Record pass/fail per item; failures go to a follow-up.
+- Slide directions: Home to Loadout and Settings from the right, back from the left, run end (Results) from below; Boot to Home and run start fade only. Scene change feels <= 360 ms, no wrong-colour flash, no empty board during the quit fade.
+- Home: entrance order (gear, logo, hero, stepper, Play, chips, hint) with a visible 50 ms stagger; stepper tap pops only the start-at chip; capy breath calm; Play pulse starts ~1.2 s after the entrance, stops on tap, resumes after ~4 s.
+- Loadout with a long list (later cards share the cap), pick and resize re-render instantly; Settings entrance, toggles and theme rebuild with no re-entrance, knob slide still correct; Settings overlay from Pause shows only the veil fade, Escape and double tap close once.
+- Results (normal, new best, checkpoint unlocked, first run): sequence <= ~1.5 s, score ends on the exact number, best star pulses twice and is visible, tap anywhere skips to rest, Home and Play again work from frame 0.
+- Reduced motion: single fade, no idle, count-up jumps. `?debug=1&level=N`, `?debug=1&artPreview=1`, `?debug=1&motion=off` (all at rest at once). 60 fps on a phone.

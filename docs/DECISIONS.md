@@ -565,3 +565,14 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: Add presentation-only `warnLeftMs` (via `cycleWarnLeft`) to both cell views; `HazardFamily.snapshot` now receives the balance.
 - Alternatives: Infer remaining time in the renderer from frame diffs (rejected: not replay-safe).
 - Consequence: No rule, state or determinism change; the field is derived.
+
+## 2026-11-10 - MOT-2 menu flow
+- Context: MOT-2 routes every menu change through one transition style (`goTo`) with entrances and a Results sequence on the MOT-0 adapter.
+- `goTo` takes optional `before`/`after` hooks: Hud stops Game at the end of the fade (no empty board during it); `beginRun` launches Hud after `start('Game')`.
+- Boot to Home uses kind `'start'` (fade only), not `'forward'`; ArtPreview gets the same fade.
+- Game and Hud both run the camera `fadeIn` through `enter()` instead of a Hud layer alpha tween (R11); same cream colour, no per-object alpha.
+- Home breath is computed in `update` from `pulseScale` (no tween API for an anti-phase squash); the Play pulse uses `motion.pulse`.
+- Capy head, card and chips use `popIn` (Back.easeOut) for the "drop"; `captureGroup` nests QA-named objects one container level deeper (names unchanged).
+- Settings groups use the origin as anchor (they only slide and fade), because the switch slide sets absolute knob x each frame; Loadout MOT-1 badge pops run after the groups moved their children.
+- Results skip uses `tweens.killTweensOf` and local rest snapshots (the one allowed direct tween call); the best star gets its alpha restored when its pulse starts (pulse never touches alpha).
+- Consequence: BootScene is exempt from the "calls enter" guard (runs once). During a pop entrance the group's hit area scales with it (about 240 ms); slide entrances keep hit areas final.
