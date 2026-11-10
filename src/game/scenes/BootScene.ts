@@ -11,7 +11,7 @@ import { HEIGHT, WIDTH } from '../layout';
 import { localStore } from '../platform/localStore';
 import { setDisplaySettings } from '../render/palette';
 import { t } from '../text';
-import { UI_FONT_SPECS, waitForFonts } from '../ui/fonts';
+import { UI_FONT_SPECS, drawThenSwap, waitForFonts } from '../ui/fonts';
 import { layoutColumn, ui } from '../ui/layout';
 import { bootColumn, smoothPath } from '../ui/menuLayout';
 import { MENU } from '../ui/menuMetrics';
@@ -35,7 +35,7 @@ export class BootScene extends Phaser.Scene {
   }
   private setProgress = (p: number): void => { this.view?.(bootView(p)); };
 
-  // P3b3-R12 BootD2: peach hero disc with snake and mango, progress bar, "Loading… N%"; the logo needs Lilita, so it waits for the fonts.
+  // P3b3-R12 BootD2: peach hero disc with snake and mango, progress bar, "Loading… N%"; the logo draws at once and swaps to Lilita when the fonts load (UIFIX-R8).
   private buildView(): void {
     bgCream(this);
     const l = layoutColumn(bootColumn(json.ui.minShrink));
@@ -65,11 +65,13 @@ export class BootScene extends Phaser.Scene {
     this.setProgress(0);
     hill(this, HEIGHT - ui(B.hillPeek));
     const logoY = ui(B.top + MENU.logo.lineH / 2);
-    void waitForFonts(typeof document === 'undefined' ? undefined : document.fonts, UI_FONT_SPECS, json.ui.fontLoadTimeoutMs).then(() => {
-      if (!this.sys?.isActive()) return;
-      logoLine(this, cx, logoY, t('logo.mango'), 0, MENU.logo.size);
-      logoLine(this, cx, logoY + ui(MENU.logo.lineH - MENU.logo.overlap), t('logo.snake'), 2, MENU.logo.size);
-    });
+    const drawLogo = () => {
+      const a = logoLine(this, cx, logoY, t('logo.mango'), 0, MENU.logo.size);
+      const b = logoLine(this, cx, logoY + ui(MENU.logo.lineH - MENU.logo.overlap), t('logo.snake'), 2, MENU.logo.size);
+      return { destroy: () => { a.destroy(); b.destroy(); } };
+    };
+    const ready = waitForFonts(typeof document === 'undefined' ? undefined : document.fonts, UI_FONT_SPECS, json.ui.fontLoadTimeoutMs);
+    drawThenSwap(drawLogo, ready, () => this.sys?.isActive() ?? false); // UIFIX-R8
   }
   // The capy head texture exists only after loading, so it is added from create().
   private drawHead(): void {
