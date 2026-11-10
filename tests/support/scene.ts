@@ -14,7 +14,7 @@ export class Signals {
   }
 }
 export class DrawObject extends Signals {
-  name = ''; text = ''; visible = true; alpha = 1; x = 0; y = 0; scale = 1;
+  name = ''; text = ''; visible = true; alpha = 1; x = 0; y = 0; scale = 1; scaleX = 1; scaleY = 1;
   width = 0; height = 0; list: DrawObject[] = []; commands: [string, ...unknown[]][] = [];
   input: { enabled: boolean } | null = null;
   mask?: object;
@@ -23,7 +23,7 @@ export class DrawObject extends Signals {
   setVisible(v: boolean): this { this.visible = v; return this; }
   setAlpha(v: number): this { this.alpha = v; return this; }
   setPosition(x: number, y: number): this { this.x = x; this.y = y; return this; }
-  setScale(v: number): this { this.scale = v; return this; }
+  setScale(x: number, y = x): this { this.scale = x; this.scaleX = x; this.scaleY = y; return this; }
   setSize(w: number, h: number): this { this.width = w; this.height = h; return this; }
   setX(v: number): this { this.x = v; return this; }
   setY(v: number): this { this.y = v; return this; }
@@ -98,7 +98,7 @@ export function sceneHarness() {
     textures: (() => { const keys = new Set<string>(); return { exists: (k: string) => keys.has(k),
       createCanvas: (k: string) => { keys.add(k); const ctx = new Proxy({} as Record<string, unknown>, { get: (t, p: string) => t[p] ?? (() => {}), set: (t, p: string, v) => { t[p] = v; return true; } });
         return { getContext: () => ctx, refresh: () => {} }; } }; })(),
-    sys: { isActive: () => true }, game: { events: new Signals() },
+    sys: { isActive: () => true, game: { device: { input: { touch: false } } } }, game: { events: new Signals() },
     events: new Signals(), input: Object.assign(new Signals(), { keyboard: new Signals(), setGlobalTopOnly: (_v: boolean) => {} }),
     time: { delayedCall: (delay: number, fn: () => void) => { const t = { fn, removed: false, delay }; delayed.push(t); return { remove: () => { t.removed = true; } }; } },
     tweens: { add: (_v: unknown) => {}, killTweensOf: (_v: unknown) => {} },

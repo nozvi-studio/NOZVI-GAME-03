@@ -23,6 +23,9 @@ import { drawMovers } from '../render/movers';
 import { drawCycles } from '../render/cycles';
 import { drawBlasts } from '../render/blasts';
 import { drawShrink } from '../render/shrink';
+import { motionFor } from '../motion';
+import { HitBeats, telegraphEdges } from '../render/hitBeat';
+import { telegraphCtx, type TelegraphCtx } from '../render/telegraph';
 
 export class GameScene extends Phaser.Scene {
   balance!: Balance;
@@ -31,6 +34,9 @@ export class GameScene extends Phaser.Scene {
   private clock = createClock();
   private palette!: Palette;
   private reduced = false;
+  private beats!: HitBeats;
+  private tel!: TelegraphCtx;
+  private prev: SimSnapshot | null = null;
   private look!: BoardLook;
   private lookStale = true;
   private mangoBornAt = 0;
@@ -49,6 +55,7 @@ export class GameScene extends Phaser.Scene {
     this.session = this.registry.get('session') as Session;
     this.palette = currentPalette();
     this.reduced = reduceMotion();
+    this.prev = null; this.beats = new HitBeats(motionFor(this), this.balance.motion); this.tel = telegraphCtx(this.balance, key => this.beats.scale(key));
     this.cameras.main.setBackgroundColor(gameBackground(this.palette));
     this.look = boardLook(1, themeOf(this.palette));
     const image = this.add.image(0, 0, buildBoardTexture(this, this.balance, this.look)).setOrigin(0);
@@ -91,6 +98,7 @@ export class GameScene extends Phaser.Scene {
       theme.removeEventListener('change', recolor);
       this.game.events.off('settings-closed', recolor);
       this.effects.reset();
+      this.beats.clear();
       this.board.clearMask(true);
     });
   }
@@ -139,6 +147,7 @@ export class GameScene extends Phaser.Scene {
       events = this.session.frame(clockStep(this.clock, deltaMs, this.balance.flow.maxFrameDeltaMs));
     }
     const snapshot = this.snapshot()!;
+    this.beats.play(telegraphEdges(this.prev, snapshot)); this.prev = snapshot;
     this.handleEvents(events);
     this.events.emit('sim-events', events);
     if (snapshot.status === 'over' && this.flow.status !== 'over') {
@@ -191,13 +200,13 @@ export class GameScene extends Phaser.Scene {
     }
     const cell = cellPx(this.balance), p = this.palette;
     for (const layer of Object.values(this.layers)) layer.clear();
-    drawTiles(this.layers.ground, snapshot.tiles, cell, time, this.reduced, this.look);
-    drawTerrains(this.layers.terrain, snapshot.terrains, cell, this.look, this.balance, this.reduced);
-    drawHazards(this.layers.hazards, snapshot.hazards, cell, this.look, this.balance, this.reduced);
-    drawCycles(this.layers.hazards, snapshot, cell, time, this.reduced);
-    drawMovers(this.layers.hazards, snapshot, cell, time, this.reduced);
-    drawBlasts(this.layers.hazards, snapshot, cell, time, this.reduced);
-    drawShrink(this.layers.hazards, snapshot, cell, time, this.reduced);
+    drawTiles(this.layers.ground, snapshot.tiles, cell, this.tel, this.reduced, this.look);
+    drawTerrains(this.layers.terrain, snapshot.terrains, cell, this.look, this.balance, this.reduced, this.tel);
+    drawHazards(this.layers.hazards, snapshot.hazards, cell, this.look, this.balance, this.reduced, this.tel);
+    drawCycles(this.layers.hazards, snapshot, cell, this.tel, this.reduced);
+    drawMovers(this.layers.hazards, snapshot, cell, this.tel, this.reduced);
+    drawBlasts(this.layers.hazards, snapshot, cell, this.tel, this.reduced);
+    drawShrink(this.layers.hazards, snapshot, cell, time, this.tel, this.reduced);
     drawMango(this.layers.mango, snapshot, cell, p, this.look, time, this.reduced, this.mangoBornAt);
     drawSkillObjects(this.layers.skills, snapshot, cell, p, this.look, this.balance, time);
     drawSnake(this.layers.snake, snapshot, cell, p, Math.max(this.effects.gulp, this.effects.pop), false, this.look.snakeRim);
