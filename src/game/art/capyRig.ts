@@ -45,7 +45,9 @@ export const ART = {
   noseY: 30.6, nostrils: [20.6, 27.4], nostrilRx: 1.6, nostrilRy: 1.2,
   muzzle: { x: 24, y: 34, rx: 12.6, ry: 8.4 }, mouthY: 37.6, mouthHalfW: 3.5, cx: 24,
   body: { cx: 24, cy: 56, rx: 17, ry: 14, feetY: 68, feetDx: 9, footRx: 6, footRy: 3, armY: 50, armWinY: 40, armDx: 18, armRx: 4, armRy: 3 },
-  snakeHeadR: 17.4, // ART-003 snake head: same box, fully rounded (flat pill)
+  // ART-003 snake head: an egg-shaped skull (wide at the eyes, narrower snout), no ears, no capy muzzle.
+  snake: { top: 9.6, bottom: 44.4, left: 3.6, right: 44.4, snoutInset: 11, jawY: 36.4, nostrilY: 31, nostrilDx: 2.4, nostrilR: 1, diamondY: 14.6, diamondR: 3.2,
+    tongueStem: 4.8, tongueFork: 2.4, tongueSpread: 1.7, tongueStroke: 1.9, body: { coilY: 64, coilRx: 20, coilRy: 8, tailX: 41, tailY: 62 } },
 } as const;
 
 const n = (v: number): string => String(+v.toFixed(2));
@@ -84,22 +86,40 @@ function mouth(v: MouthVariant, P: SkinPalette): string {
 
 // ART-003 forked red tongue, drawn just below the mouth ('out') or hanging from the mouth corner ('side').
 function tongue(v: TongueVariant, P: SkinPalette): string {
-  const x = ART.cx, y = ART.mouthY;
+  const x = ART.cx, y = ART.mouthY, k = ART.snake, end = y + 1.2 + k.tongueStem;
   const d = v === 'out'
-    ? `M${n(x)} ${n(y + 1.2)} L${n(x)} ${n(y + 6)} M${n(x)} ${n(y + 6)} L${n(x - 1.6)} ${n(y + 8.4)} M${n(x)} ${n(y + 6)} L${n(x + 1.6)} ${n(y + 8.4)}`
+    ? `M${n(x)} ${n(y + 1.2)} L${n(x)} ${n(end)} M${n(x)} ${n(end)} L${n(x - k.tongueSpread)} ${n(end + k.tongueFork)} M${n(x)} ${n(end)} L${n(x + k.tongueSpread)} ${n(end + k.tongueFork)}`
     : `M${n(x + 3.4)} ${n(y + 0.6)} Q${n(x + 6)} ${n(y + 3.4)} ${n(x + 5.2)} ${n(y + 6.4)} M${n(x + 5.2)} ${n(y + 6.4)} L${n(x + 3.8)} ${n(y + 8.4)} M${n(x + 5.2)} ${n(y + 6.4)} L${n(x + 6.8)} ${n(y + 8.2)}`;
-  return `<g data-layer="tongue"><path data-part="tongue" d="${d}" fill="none" stroke="${P.tongue}" stroke-width="${P.featureStroke}" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+  return `<g data-layer="tongue"><path data-part="tongue" d="${d}" fill="none" stroke="${P.tongue}" stroke-width="${ART.snake.tongueStroke}" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+}
+
+/** ART-003 egg-shaped snake skull inside the 48-unit head box: wide at the eyes, narrower rounded snout. */
+function snakeHeadPath(): string {
+  const k = ART.snake, cx = ART.cx;
+  return `M${n(cx)} ${k.top} C${n(k.right - 6)} ${k.top} ${k.right} ${n(k.top + 6)} ${k.right} ${n(k.top + 16)} C${k.right} ${n(k.bottom - 6)} ${n(k.right - k.snoutInset)} ${k.bottom} ${n(cx)} ${k.bottom}`
+    + ` C${n(k.left + k.snoutInset)} ${k.bottom} ${k.left} ${n(k.bottom - 6)} ${k.left} ${n(k.top + 16)} C${k.left} ${n(k.top + 6)} ${n(k.left + 6)} ${k.top} ${n(cx)} ${k.top} Z`;
 }
 
 // ART-003 per-skin ears + head shape (the layers that differ). Capy output is byte-identical to the pre-skin rig.
 function earsAndHead(skin: SkinId, P: SkinPalette): string {
   const h = ART.head, o = P.outline;
   if (skin === 'snake') {
+    const k = ART.snake;
     return '<g data-layer="ears"></g>'
-      + `<g data-layer="head"><rect data-part="face" x="${h.x}" y="${h.y}" width="${n(h.w)}" height="${n(h.h)}" rx="${ART.snakeHeadR}" fill="url(#face)" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/></g>`;
+      + `<g data-layer="head"><path data-part="face" d="${snakeHeadPath()}" fill="url(#face)" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/>`
+      + `<path data-part="diamond" d="M${n(ART.cx)} ${n(k.diamondY - k.diamondR)} L${n(ART.cx + k.diamondR * 0.8)} ${n(k.diamondY)} L${n(ART.cx)} ${n(k.diamondY + k.diamondR)} L${n(ART.cx - k.diamondR * 0.8)} ${n(k.diamondY)} Z" fill="${o}" opacity="0.35"/></g>`;
   }
   return `<g data-layer="ears">${ART.ears.map(x => `<circle data-part="ear" cx="${n(x)}" cy="${n(ART.earY)}" r="${ART.earR}" fill="${P.ears}" stroke="${o}" stroke-width="${P.stroke}"/>`).join('')}</g>`
     + `<g data-layer="head"><rect data-part="face" x="${h.x}" y="${h.y}" width="${n(h.w)}" height="${n(h.h)}" rx="${h.r}" fill="url(#face)" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/></g>`;
+}
+
+/** ART-003 snake muzzle layer = the light lower jaw (clipped to the skull, no capy oval), nose layer = two close nostril dots. */
+function snakeJawAndNostrils(P: SkinPalette): string {
+  const k = ART.snake;
+  return `<g data-layer="muzzle"><clipPath id="skull"><path d="${snakeHeadPath()}"/></clipPath>`
+    + `<rect data-part="muzzle" x="${k.left}" y="${k.jawY}" width="${n(k.right - k.left)}" height="${n(k.bottom - k.jawY + 2)}" fill="${P.muzzle}" clip-path="url(#skull)"/>`
+    + `<path d="${snakeHeadPath()}" fill="none" stroke="${P.outline}" stroke-width="${P.stroke}" stroke-linejoin="round"/></g>`
+    + `<g data-layer="nose">${[-1, 1].map(sx => `<circle data-part="nostril" cx="${n(ART.cx + sx * k.nostrilDx)}" cy="${k.nostrilY}" r="${k.nostrilR}" fill="${P.nose}"/>`).join('')}</g>`;
 }
 
 // ART-001 head layers back to front: ears, head, blush, muzzle, nose, eyes, (tongue), mouth.
@@ -109,8 +129,8 @@ function headLayers(skin: SkinId, e: CapyExpression): string {
   return `<defs><linearGradient id="face" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${P.faceTop}"/><stop offset="1" stop-color="${P.faceBottom}"/></linearGradient></defs>`
     + earsAndHead(skin, P)
     + `<g data-layer="blush">${[-1, 1].map(s => `<ellipse cx="${n(ART.cx + s * ART.cheekDx)}" cy="${ART.cheekY}" rx="${ART.cheekRx}" ry="${ART.cheekRy}" fill="${P.blush}" opacity="0.8"/>`).join('')}</g>`
-    + `<g data-layer="muzzle"><ellipse data-part="muzzle" cx="${m.x}" cy="${m.y}" rx="${m.rx}" ry="${m.ry}" fill="${P.muzzle}" stroke="${o}" stroke-width="${P.innerStroke}"/></g>`
-    + `<g data-layer="nose">${ART.nostrils.map(nx => `<ellipse data-part="nostril" cx="${n(nx)}" cy="${n(ART.noseY)}" rx="${ART.nostrilRx}" ry="${ART.nostrilRy}" fill="${P.nose}"/>`).join('')}</g>`
+    + (skin === 'snake' ? snakeJawAndNostrils(P) : `<g data-layer="muzzle"><ellipse data-part="muzzle" cx="${m.x}" cy="${m.y}" rx="${m.rx}" ry="${m.ry}" fill="${P.muzzle}" stroke="${o}" stroke-width="${P.innerStroke}"/></g>`
+    + `<g data-layer="nose">${ART.nostrils.map(nx => `<ellipse data-part="nostril" cx="${n(nx)}" cy="${n(ART.noseY)}" rx="${ART.nostrilRx}" ry="${ART.nostrilRy}" fill="${P.nose}"/>`).join('')}</g>`)
     + eyes(x.eyes, P) + (t ? tongue(t, P) : '') + mouth(x.mouth, P);
 }
 
@@ -128,8 +148,12 @@ export function bodySvg(skin: SkinId, p: CapyBodyPose): string {
   const armY = p === 'win' ? b.armWinY : b.armY;
   const blob = (cx: number, cy: number, rx: number, ry: number): string =>
     `<ellipse cx="${n(cx)}" cy="${n(cy)}" rx="${rx}" ry="${ry}" fill="${P.ears}" stroke="${o}" stroke-width="${st}"/>`;
-  const body = `<g data-layer="body">${blob(b.cx - b.feetDx, b.feetY, b.footRx, b.footRy)}${blob(b.cx + b.feetDx, b.feetY, b.footRx, b.footRy)}`
-    + `${blob(b.cx - b.armDx, armY, b.armRx, b.armRy)}${blob(b.cx + b.armDx, armY, b.armRx, b.armRy)}`
+  const k = ART.snake.body;
+  // ART-003 snake body: a coil under the belly and a tail tip instead of capy arms and feet ('win' lifts the tail).
+  const coil = `${blob(b.cx, k.coilY, k.coilRx, k.coilRy)}${blob(k.tailX, p === 'win' ? k.tailY - 8 : k.tailY, 3.4, 5)}`;
+  const limbs = `${blob(b.cx - b.feetDx, b.feetY, b.footRx, b.footRy)}${blob(b.cx + b.feetDx, b.feetY, b.footRx, b.footRy)}`
+    + `${blob(b.cx - b.armDx, armY, b.armRx, b.armRy)}${blob(b.cx + b.armDx, armY, b.armRx, b.armRy)}`;
+  const body = `<g data-layer="body">${skin === 'snake' ? coil : limbs}`
     + `<ellipse cx="${b.cx}" cy="${b.cy}" rx="${b.rx}" ry="${b.ry}" fill="url(#face)" stroke="${o}" stroke-width="${st}"/></g>`;
   const head = headLayers(skin, p === 'win' ? 'win' : 'idle');
   // defs come from headLayers; body is drawn first so the head overlaps it.

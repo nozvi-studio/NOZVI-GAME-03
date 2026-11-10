@@ -588,3 +588,8 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: `art/skins.ts` holds `SkinId` ('snake' | 'capy'), palettes and `activeSkin()` (returns 'snake'; P4 reads the save later). `capyRig.ts` keeps the shared anchors, eyes, mouth and expression table and builds per-skin ears/head. Snake: no ears, pill head, blue family of the snake body (outline = body colour so the edge merges), plus a forked tongue part and three tongue expressions (`idle_tongue`, `eat_tongue`, `dead_tongue`). Texture keys are `${skin}/head/${expr}/${size}`; capy SVGs are unchanged (hash regression test). Tongue timings live in `ui.capy` (tongueMs, tongueMinGapMs, tongueMaxGapMs).
 - Why: keeps capy as the reference skin for ART-003 acceptance and avoids a rewrite at the 2nd skin; ART-003 says skins change shapes and colours, never anchors.
 - Consequence: file names `capy*.ts` and `ui.capy` stay for now (renaming is churn); only the active skin is preloaded, except `?debug=1&artPreview=1` which preloads all skins.
+
+## 2026-11-10 - Snake head look: do not reuse the capy muzzle
+- Context: the first snake skin reused the capy oval muzzle and nostril pair and read as a blue hippo in headless-Chrome screenshots (no subagent could view it).
+- Choice: the snake skin has its own skull path, lower-jaw patch (clipped), two close nostril dots, forehead diamond, longer tongue (stroke 1.9) and a coil body. Eyes and mouth stay the shared ART-001 anchors; nostrils and muzzle belong to the skin (ART-003 only fixes eyes and mouth).
+- Consequence: visual checks of art need a screenshot pass (dev server + headless Chrome over DevTools, see the 2026-11-10 stale-camera entry).
