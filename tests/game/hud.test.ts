@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { deathCauseReport, defaultSettings, load, loadLog, memoryStore, SAVE_KEY } from '../../src/meta';
 import { createSession } from '../../src/session';
+import { processEvents } from '../../src/session/session';
+import type { SimEvent } from '../../src/core';
 import { createFlow, flowPause, flowStart, flowTick } from '../../src/game/flow/runFlow';
 import { GameScene } from '../../src/game/scenes/GameScene';
 import { HudScene } from '../../src/game/scenes/HudScene';
@@ -167,6 +169,16 @@ describe('P1 HUD flow, audio and session wiring', () => {
     h.game.events.emit('sim-events', [{ type: 'levelUp', level: 4, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }]);
     expect(h.find('tip').text).toBe('Checkpoints are permanent. Your saved energy comes with you.');
     h.flush(); expect(h.last('banner-title').text).toBe('Next run starts at L4!');
+  });
+  it('UIFIX-R15 HUD chip updates to L15 after L10 is reached in a normal run', () => {
+    const h = setup();
+    h.play();
+    const chip = (): { text: string } => h.find('next-checkpoint');
+    expect(chip().text).toBe('Next checkpoint at L10');
+    const up = (level: number): SimEvent => ({ type: 'levelUp', level, biome: 0, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 });
+    for (let lv = 2; lv <= 10; lv++) processEvents(h.session, [up(lv)]); // the session saves checkpoint 4 at L10
+    h.game.events.emit('sim-events', [up(10)]);
+    expect(chip().text).toBe('Next checkpoint at L15');
   });
   it('MEC-006 UIFIX-R2 §8 skill feedback: cast, reject (not empty), orb tip once, unlock tips', () => {
     const h = setup();

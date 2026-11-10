@@ -16,7 +16,7 @@ it('P3b2-R7 GameD2 default state: level+biome, quota, score, energy, skills, che
   expect(hudView(snap(), hint, b, t)).toEqual({
     levelTitle: 'Level 7', biomeName: 'Rice Paddy', quota: { done: '3', total: '/6' }, score: '44',
     energy: { text: '35', fill: 0.35 },
-    skills: [{ slot: 0, id: 'slowmo', cost: 40, state: 'off', ring: null }, { slot: 1, id: 'tailSnip', cost: 30, state: 'ready', ring: null }],
+    skills: [{ slot: 0, id: 'slowmo', cost: 40, state: 'off', ring: null, costShort: true }, { slot: 1, id: 'tailSnip', cost: 30, state: 'ready', ring: null, costShort: false }],
     chip: { kind: 'checkpoint', text: 'Next checkpoint at L10' } });
 });
 it('P3b2-R7 empty slot is null; challenge level shows the star; max level shows Max', () => {
@@ -50,4 +50,12 @@ it('P3b2-R9 stack places items with gap, margins and padding', () => {
   const r = stack([{ h: 37.4 }, { h: 19 }, { h: 34, mt: 6 }, { h: 66, mt: 16 }, { h: 52, mt: 8 }, { h: 52 }], { gap: 6, padTop: 26, padBottom: 20 });
   expect(r.height).toBeCloseTo(366.4, 5); expect(r.ys[0]).toBe(26); expect(r.ys[2]).toBeCloseTo(100.4, 5);
   expect(stack([], { gap: 6, padTop: 3, padBottom: 4 })).toEqual({ ys: [], height: 7 });
+});
+it('UIFIX-R12 cost is flagged short only when the skill is idle and not affordable', () => {
+  const v = hudView(snap(), hint, b, t);
+  expect(v.skills[0]).toMatchObject({ state: 'off', costShort: true });
+  expect(v.skills[1]).toMatchObject({ state: 'ready', costShort: false });
+  const active = hudView(snap({ skills: [{ slot: 0, id: 'slowmo', cost: 40, affordable: false, active: true, leftMs: 1000 },
+    { slot: 1, id: null, cost: 0, affordable: false, active: false, leftMs: 0 }] }), null, b, t);
+  expect(active.skills[0]).toMatchObject({ state: 'active', costShort: false });
 });

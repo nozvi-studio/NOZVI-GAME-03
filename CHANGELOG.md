@@ -2,6 +2,10 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- test(session): UIFIX-R15 guards the next-checkpoint hint after a normal run; LAY-03 not reproducible.
+- feat(ui): Settings toggle tracks and cards share one edge; Quit run gets a soft red accent (UIFIX-R14).
+- feat(input): all D-pad buttons share one border style (UIFIX-R13).
+- feat(hud): skill cost text turns red when the skill is not affordable (UIFIX-R12).
 - docs: Wave 2 (UIFIX-R6..R11) CODEMAP, DECISIONS, STATUS
 - fix(art-preview): UIFIX-R11 widget row moved to the live panel margin so the live capy no longer overlaps it (debug only)
 - fix(menus): UIFIX-R10 Home "Start from L1" is a secondary text link; Results duplicate top-left back removed

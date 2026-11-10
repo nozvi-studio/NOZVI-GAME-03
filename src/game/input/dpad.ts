@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import type { Dir } from '../../core';
 import { TOKENS, toInt } from '../uiTokens';
 import { ui } from '../ui/layout';
+import { dpadStyle, type DpadState } from './dpadStyle';
 
 const DIRECTIONS: { name: string; dir: Dir; col: number; row: number }[] = [
   { name: 'up', dir: { x: 0, y: -1 }, col: 1, row: 0 },
@@ -10,7 +11,7 @@ const DIRECTIONS: { name: string; dir: Dir; col: number; row: number }[] = [
   { name: 'down', dir: { x: 0, y: 1 }, col: 1, row: 2 },
 ];
 // Mockup px of the button drawing (GameDpadD2).
-const M = { icon: 26, iconBox: 24, stroke: 3, back: 3, side: 5, tip: 2, shelf: 5, glow: 4, glowGap: 2, press: 0.94, idle: 0.85, blocked: 0.35 } as const;
+const M = { icon: 26, iconBox: 24, stroke: 3, back: 3, side: 5, tip: 2, shelf: 5, glow: 4, glowGap: 2, press: 0.94 } as const;
 
 // GameDpadD2: four round buttons on a grid, chevron icon, shelf shadow; GDD §3 optional D-pad (settings.dpad); pointer-down turns, buffered heading, reverse hint.
 export function createDpad(scene: Phaser.Scene, spec: { x: number; y: number; btn: number; step: number },
@@ -25,21 +26,23 @@ export function createDpad(scene: Phaser.Scene, spec: { x: number; y: number; bt
     button.on('pointerup', release); button.on('pointerout', release);
     return { button, g, dir };
   });
-  const paint = (g: Phaser.GameObjects.Graphics, d: Dir, heading: boolean): void => {
-    const p = { x: -d.y, y: d.x };
+  const paint = (g: Phaser.GameObjects.Graphics, d: Dir, state: DpadState): void => {
+    const p = { x: -d.y, y: d.x }, st = dpadStyle(state);
     g.clear().fillStyle(toInt(TOKENS.hud.shelf), TOKENS.hud.shelfAlpha).fillCircle(0, ui(M.shelf), r);
-    if (heading) g.lineStyle(ui(M.glow), toInt(TOKENS.hud.glow), TOKENS.hud.glowAlpha).strokeCircle(0, 0, r + ui(M.glowGap));
+    if (st.glow) g.lineStyle(ui(M.glow), toInt(TOKENS.hud.glow), TOKENS.hud.glowAlpha).strokeCircle(0, 0, r + ui(M.glowGap));
     g.fillStyle(toInt(TOKENS.surface.card)).fillCircle(0, 0, r);
+    g.lineStyle(ui(st.border.widthMock), toInt(st.border.color)).strokeCircle(0, 0, r - ui(st.border.widthMock) / 2); // UIFIX-R13
     g.lineStyle(M.stroke * k, toInt(TOKENS.text.primary)).beginPath()
       .moveTo((-M.back * d.x + M.side * p.x) * k, (-M.back * d.y + M.side * p.y) * k).lineTo(M.tip * d.x * k, M.tip * d.y * k)
       .lineTo((-M.back * d.x - M.side * p.x) * k, (-M.back * d.y - M.side * p.y) * k).strokePath();
   };
-  for (const { g, dir } of buttons) paint(g, dir, false);
+  for (const { g, dir } of buttons) paint(g, dir, 'idle');
   return {
     setHeading: d => {
       for (const { button, g, dir } of buttons) {
         const heading = dir.x === d.x && dir.y === d.y, blocked = dir.x === -d.x && dir.y === -d.y;
-        button.setAlpha(blocked ? M.blocked : heading ? 1 : M.idle); paint(g, dir, heading);
+        const state: DpadState = heading ? 'heading' : blocked ? 'blocked' : 'idle';
+        button.setAlpha(dpadStyle(state).alpha); paint(g, dir, state);
       }
     },
     setVisible: v => { for (const { button } of buttons) { button.setVisible(v); if (button.input) button.input.enabled = v; } },
