@@ -5,24 +5,9 @@ import { capyDie, capyEat, capyPose, createCapyAnim, type CapyAnimState } from '
 import { HEIGHT, WIDTH } from '../layout';
 import { reduceMotion } from '../render/palette';
 import { button, label } from './ui';
-import { card, chip, pillButton, progressBar, titleText, type PillTone } from '../ui/widgets';
+import { PREVIEW } from '../ui/artPreviewLayout';
+import { card, chip, pillButton, progressBar, titleText } from '../ui/widgets';
 import { TOKENS } from '../uiTokens';
-
-// Debug-only layout for the owner's phone check (ART-001 sizes 24 / 40 / 124 / 256 CSS px, each on light and dark).
-const PREVIEW = {
-  page: 0xcfcfcf, light: 0xf6eedc, dark: 0x1f2433, cols: 3, cellW: 180, gridTop: 100, rowH: 76,
-  swatchW: 84, swatchH: 56, swatchGap: 4, small: 24, mid: 40, smallDx: -18, midDx: 18, swatchDy: 28, labelDy: 66, labelSize: 13,
-  titleY: 20, titleSize: 20, btnY: 60, btnW: 100, btnH: 40, btnSize: 18, btnXs: [70, 190, 310, 430],
-  headRowY: 410, homeSize: 124, headSwatch: 130, headDx: 70, bodyRowY: 548, bodyW: 80, bodySwatchW: 90, bodySwatchH: 130,
-  bodyDx: 50, bodyCols: 4, bodyPad: 5,
-  bigSize: 256, liveTop: 680, liveY: 828,
-  // P3-0-R7 widget row (mockup px via ui() inside the widgets); sits on the live panel margins, above the head.
-  wRowY: 705, wPillW: 62, wPillH: 24, wPillXs: [50, 140, 230], wCardX: 285, wCardW: 44, wCardH: 28, wChipX: 410, wBarX: 380, wBarW: 60, wBarH: 10,
-  wTitleX: 80, wTitleY: 752, wTitleSize: 13, wBarY: 748,
-  // Remotion POC (disposable, debug only): pre-rendered idle/eat/dead clip, 10 x 9 grid of 128 px frames at 30 fps.
-  rmKey: 'capy-remotion', rmUrl: 'art/capy-remotion.png', rmFrame: 128, rmFrames: 90, rmFps: 30,
-  rmX: 470, rmY: 828, rmSize: 120, rmLabelY: 900, rmLabel: 'Remotion',
-} as const;
 
 export class ArtPreviewScene extends Phaser.Scene {
   private live!: Phaser.GameObjects.Image;
@@ -101,12 +86,12 @@ export class ArtPreviewScene extends Phaser.Scene {
     label(this, P.rmX, P.rmLabelY, P.rmLabel, P.labelSize);
   }
 
+  // UIFIX-R11 widget column sits in the left margin of the live panel, clear of the live capy.
   private widgetRow(): void {
     const P = PREVIEW;
-    const tones: PillTone[] = ['green', 'orange', 'cream'];
-    tones.forEach((tone, i) => pillButton(this, P.wPillXs[i], P.wRowY, P.wPillW, P.wPillH, tone, `preview-pill-${tone}`, () => {}, tone));
-    card(this, P.wCardX, P.wRowY - 14, P.wCardW, P.wCardH, 10);
-    chip(this, P.wChipX, P.wRowY, '1,250', TOKENS.accent.butter, 'preview-chip');
+    P.wPills.forEach(p => pillButton(this, p.x, p.y, P.wPillW, P.wPillH, p.tone, `preview-pill-${p.tone}`, () => {}, p.tone));
+    card(this, P.wCardX, P.wCardY, P.wCardW, P.wCardH, 10);
+    chip(this, P.wChipX, P.wChipY, '1,250', TOKENS.accent.butter, 'preview-chip');
     titleText(this, P.wTitleX, P.wTitleY, 'MANGO SNAKE', P.wTitleSize);
     progressBar(this, P.wBarX, P.wBarY, P.wBarW, P.wBarH, TOKENS.green.face).set(60, 100);
   }
