@@ -1,3 +1,4 @@
+import { loadBalance } from './balance';
 // Minimal rendering/input boundary double: tests execute real game/HUD handlers without a browser.
 export class Signals {
   private listeners = new Map<string, { fn: (...args: any[]) => void; once: boolean }[]>();
@@ -87,7 +88,8 @@ export function sceneHarness() {
   const objects: DrawObject[] = [];
   const delayed: { fn: () => void; removed: boolean; delay: number }[] = [];
   const make = (x = 0, y = 0): DrawObject => { const o = new DrawObject().setPosition(x, y); objects.push(o); return o; };
-  const registry = new Map<string, unknown>();
+  const registry = new Map<string, unknown>([['balance', loadBalance()]]);
+  const adds: Record<string, unknown>[] = [];
   const scene = {
     add: { graphics: () => make(), text: (x: number, y: number, text: string, _style?: unknown) => make(x, y).setText(text),
       image: (x: number, y: number, key: string) => make(x, y).setName(key),
@@ -101,10 +103,10 @@ export function sceneHarness() {
     sys: { isActive: () => true, game: { device: { input: { touch: false } } } }, game: { events: new Signals() },
     events: new Signals(), input: Object.assign(new Signals(), { keyboard: new Signals(), setGlobalTopOnly: (_v: boolean) => {} }),
     time: { delayedCall: (delay: number, fn: () => void) => { const t = { fn, removed: false, delay }; delayed.push(t); return { remove: () => { t.removed = true; } }; } },
-    tweens: { add: (_v: unknown) => {}, killTweensOf: (_v: unknown) => {} },
+    tweens: { add: (v: Record<string, unknown>) => { adds.push(v); return { stop: () => {} }; }, killTweensOf: (_v: unknown) => {} },
     registry: { get: (k: string) => registry.get(k), set: (k: string, v: unknown) => registry.set(k, v) },
   };
-  return { scene, objects, registry, delayed, find: (name: string) => objects.find(o => o.name === name)!,
+  return { scene, objects, registry, delayed, adds, find: (name: string) => objects.find(o => o.name === name)!,
     last: (name: string) => [...objects].reverse().find(o => o.name === name)!,
     flush: () => { for (const t of delayed.splice(0)) if (!t.removed) t.fn(); } };
 }

@@ -18,6 +18,8 @@ export interface Motion {
   popIn(t: MotionTarget, index?: number): void; slideIn(t: MotionTarget, from: 'left' | 'right' | 'up' | 'down', index?: number): void;
   fadeIn(t: MotionTarget): void; fadeOut(t: MotionTarget): void; shake(t: MotionTarget): void;
   pulse(t: MotionTarget): () => void; countUp(t: TextTarget, from: number, to: number, fmt?: (n: number) => string): void;
+  /** MOT-4: after a layout move, make the current x/y the rest position (scale and alpha rest untouched). */
+  rebase(t: MotionTarget): void;
   liveCount(): number; dispose(): void;
 }
 
@@ -126,6 +128,7 @@ export function createMotion(d: MotionDeps): Motion {
       play(t, { motionP: 1, duration: cfg.countUpMs, ease: 'Linear', onUpdate: () => t.setText(fmt(countUpValue(from, to, host.motionP))) },
         () => t.setText(fmt(to)));
     },
+    rebase(t) { const r = rests.get(t); if (r) { r.x = t.x; r.y = t.y; } },
     liveCount: () => live.size,
     dispose() { live.clear(); },
   };

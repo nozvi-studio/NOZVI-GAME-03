@@ -92,3 +92,12 @@ it('MOT-4-R9 ease with ms 0, reduced motion or a full budget jumps to the target
   const n = full.h.adds.length, w = { v: 0 }; full.m.ease(w, 3, 220, v => { last = v; });
   expect(full.h.adds.length).toBe(n); expect(w.v).toBe(3); expect(last).toBe(3);
 });
+
+it('MOT-4-R7 rebase moves only the rest position: a snap after a relayout settles at the NEW position and the old scale', () => {
+  const { m, h } = make(); const t = target();
+  m.snap(t, 1.1, 100); (h.adds[0]!.onComplete as () => void)(); (h.adds[1]!.onComplete as () => void)();   // caches rest at (10, 20)
+  t.setPosition(50, 60); m.rebase(t);
+  m.snap(t, 1.1, 100); (h.adds[2]!.onComplete as () => void)(); (h.adds[3]!.onComplete as () => void)();
+  expect(t.x).toBe(50); expect(t.y).toBe(60); expect(t.scaleX).toBe(1);
+  m.rebase(target());                                                                                         // untracked target: harmless
+});
