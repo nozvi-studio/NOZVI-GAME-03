@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): adaptive canvas height from the viewport aspect, live HEIGHT, page band colour (D3-R7); guard test against module-level HEIGHT constants; layout tests at 960 and 1170; agy browser pass at three sizes
 - docs(ui): D3 U1 codemap rows (skin kit, touch feedback), playtest screenshot record, status
 - feat(ui): tap burst (pooled ring + sparks) and denied shake with reduced-motion rules, pure interactionModel (D3-R23, R24, R28)
 - feat(ui): widget kit painted with D3 skins - pill, card, chip, bar, round button (D3-R6, R21, R22); touchFx stubs for U1 Task 6

@@ -9,8 +9,10 @@ import { HudScene } from './scenes/HudScene';
 import { LoadoutScene } from './scenes/LoadoutScene';
 import { ResultsScene } from './scenes/ResultsScene';
 import { SettingsScene } from './scenes/SettingsScene';
+import { initViewport } from './viewport';
 
 // GDD-13 portrait game bootstrap with a parallel HUD above the board.
+initViewport();
 new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',

@@ -5,6 +5,12 @@
 ## How to capture
 Headless screenshots with `tools/qa/shot.mjs` (no dependency; uses the local Chrome, or `CHROME_PATH`). Start `npm run dev`, then run: `node tools/qa/shot.mjs size:360,640 media:light "go:http://localhost:5173/" wait:3500 shot:tmp/qa/home-360.png`. The three standard sizes are 360x640, 390x844 and 412x915. Use `media:dark` for the OS dark-mode check. Keys use DOM names (`ArrowUp`, not `Up`). Steps: `size:W,H[,DPR]`, `media:`, `go:URL`, `wait:MS`, `tap:X,Y`, `swipe:X1,Y1,X2,Y2`, `key:Name`, `shot:FILE`, `eval:JS`; any failed step exits 1.
 
+## 2026-11-10 — D3 U2 viewport browser pass (agy, headless; lead reviewed)
+- Branch `feat/ui-d3-u2-viewport`. agy captured Home, in-run, Pause, Settings (from Pause), Results (after Quit run) at 360x640, 390x844, 412x915 DPR 1 into `tmp/qa/u2/` (report `tmp/qa/u2/REPORT.md`).
+- Canvas buffer measured: 540x960, 540x1169, 540x1199; canvas fills the full window height at 390x844 and 412x915 (no bands). 15/15 PASS for no cut-off and no overlap; 0 console errors.
+- Lead spot-checked run-390x844 and home-412x915: agree. Old layouts leave empty space below the board on tall screens (expected, rebuilt in U3..U6). Results first-run buttons missing in headless (known, U5).
+- agy needed 2 sessions (first hit the 15 min print timeout after 11 images).
+
 ## 2026-11-10 — D3 U1 skin kit screenshot record (lead, headless)
 - Branch `feat/ui-d3-u1-skin-kit`. Tests: full suite 1694 pass (7 skipped, 12 todo), typecheck clean (`--maxWorkers 1`).
 - Captured with `tools/qa/shot.mjs` (DPR 1) into `tmp/qa/u1/`: Home, in-run (countdown), Pause, Settings (from Pause), Results (after Quit run) at 360x640, 390x844 and 412x915.
