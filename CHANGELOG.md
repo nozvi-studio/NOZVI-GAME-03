@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(juice): MOT-3 JuicePlayer shield slot, head cell and per-batch bump dedupe
 - feat(juice): MOT-3-R9/R11/R12 rows for landing dust, spawn puff and turn tilt
 - feat(juice): MOT-3-R6/R7/R8/R10 visuals for shield break, unlock, win and GO
 - feat(juice): MOT-3 derived input helpers and new board visuals/inputs
