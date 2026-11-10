@@ -3,7 +3,7 @@ import type { Balance } from '../../core';
 import { biome } from '../../core';
 import type { Session } from '../../session';
 import { capyHeadKey } from '../art/capyRig';
-import { resultsView, type ResultsView } from '../flow/resultsView';
+import { RESULTS_BUTTONS, resultsView, type ResultsView } from '../flow/resultsView';
 import { HEIGHT, WIDTH } from '../layout';
 import { t } from '../text';
 import { drawIcon, type IconId } from '../ui/icons';
@@ -31,7 +31,6 @@ export class ResultsScene extends Phaser.Scene {
     bgCream(this);
     hill(this, HEIGHT - ui(R.hillPeek));
     const home = (): void => { this.scene.start('Home'); };
-    roundIconButton(this, ui(MENU.side + MENU.round / 2), ui(MENU.padTop + MENU.round / 2), MENU.round, 'back', 'results-home-top', home);
     const v = s ? resultsView(s, session.homeModel().nextMilestone, biome(balance, balance.level.maxLevel)) : null;
     logoLine(this, WIDTH / 2, ui(R.titleY + R.titleSize / 2), t(v?.titleKey ?? 'results.gameOver'), 0, R.titleSize);
     if (s && v) {
@@ -119,11 +118,11 @@ export class ResultsScene extends Phaser.Scene {
   // Home round button and Play again pill, anchored to the bottom (marble-machine button hidden until P4, D8).
   private footer(session: Session, home: () => void): void {
     const cy = HEIGHT - ui(R.bottom + R.againH / 2);
-    roundIconButton(this, ui(R.side + R.btn / 2), cy, R.btn, 'home', 'results-home', home, true);
+    roundIconButton(this, ui(R.side + R.btn / 2), cy, R.btn, 'home', RESULTS_BUTTONS.home, home, true);
     const last = session.lastStartLevel();
     if (last === null) return;
     const left = ui(R.side + R.btn + R.btnGap), w = WIDTH - left - ui(R.side);
-    const b = pillButton(this, left + w / 2, cy, w / UI_SCALE, R.againH, t('playAgain'), 'results-again', () => beginRun(this, last, 'results'));
+    const b = pillButton(this, left + w / 2, cy, w / UI_SCALE, R.againH, t('playAgain'), RESULTS_BUTTONS.again, () => beginRun(this, last, 'results'));
     bigLabel(b, R.againLabel, R.againStroke);
   }
 }

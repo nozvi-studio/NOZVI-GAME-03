@@ -14,6 +14,7 @@ export const MENU = {
     play: { label: 38, labelFirst: 52, stroke: 7, strokeFirst: 7, chipH: 32, chipPadL: 10, chipPadR: 14, chipFont: 14, chipIcon: 18, chipRight: 24, labelLeft: 34 },
     chips: { font: 15, padL: 10, padR: 14, padX: 18, gap: 8, icon: 18, iconGap: 6 },
     hintFont: 13,
+    l1: { font: 14, underline: 1.5, underlineDy: 2 }, // UIFIX-R10 "Start from L1" text link
     trail: [[16, 232], [170, 232], [170, 168], [250, 168], [250, 112]], trailRadius: 34, trailStep: 3, shadeR: 17, bodyR: 14.5, hiR: 2.5, hiDx: -4, hiDy: -5, hiAlpha: 0.45,
     mango: { x: 26, y: 30, size: 58, outer: 0.42, inner: 0.36, leaf: { dx: 0.12, dy: -0.3, w: 0.36, h: 0.2 } },
     capy: { x: 188, y: 42, size: 124 },

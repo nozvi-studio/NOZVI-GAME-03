@@ -10,9 +10,9 @@ import { HEIGHT, WIDTH } from '../layout';
 import { t } from '../text';
 import { drawIcon } from '../ui/icons';
 import { layoutColumn, ui, UI_SCALE } from '../ui/layout';
-import { headerButton, homeColumn, smoothPath } from '../ui/menuLayout';
+import { headerButton, homeColumn, l1Link, smoothPath } from '../ui/menuLayout';
 import { MENU } from '../ui/menuMetrics';
-import { bgCream, bigLabel, hill, logoLine, roundIconButton, scaledBlock } from '../ui/menuWidgets';
+import { bgCream, bigLabel, hill, logoLine, roundIconButton, scaledBlock, tap } from '../ui/menuWidgets';
 import { chip, pillButton } from '../ui/widgets';
 import { FONT_UI, TOKENS, toInt } from '../uiTokens';
 import { beginRun, button, label } from './ui';
@@ -134,16 +134,17 @@ export class HomeScene extends Phaser.Scene {
     }
   }
 
-  // "Start from L1" pill (when a checkpoint exists) and the carried-energy chip, centred together.
+  // "Start from L1" text link (when a checkpoint exists) and the carried-energy chip, centred together.
   private chipRow(blk: Phaser.GameObjects.Container, v: ReturnType<HomeScene['homeView']>, y: number): void {
     const cy = y + ui(H.chipH) / 2, gap = ui(H.chips.gap), C = H.chips;
     const items: { w: number; make: (cx: number) => Phaser.GameObjects.GameObject }[] = [];
     if (v.secondaryL1) {
-      const label = t('home.startL1'), tw = this.measure(label, C.font);
-      const wMock = tw / UI_SCALE + 2 * C.padX;
-      items.push({ w: ui(wMock), make: cx => {
-        const b = pillButton(this, cx, cy, wMock, H.chipH, label, 'home-l1', () => this.play(1), 'cream');
-        b.text.setFontSize(ui(C.font)); return b.c;
+      const label = t('home.startL1'), K = H.l1, link = l1Link(this.measure(label, K.font) / UI_SCALE);
+      items.push({ w: ui(link.w), make: cx => {
+        const tx = this.add.text(cx, cy, label, style(K.font, '800', TOKENS.text.soft)).setOrigin(0.5);
+        const ly = cy + tx.height / 2 + ui(K.underlineDy);
+        const line = this.add.graphics().lineStyle(ui(K.underline), toInt(TOKENS.text.soft)).lineBetween(cx - tx.width / 2, ly, cx + tx.width / 2, ly);
+        return this.add.container(0, 0, [line, tx, tap(this, cx, cy, ui(link.w), ui(link.h), 'home-l1', () => this.play(1))]);
       } });
     }
     if (v.carry !== null) {

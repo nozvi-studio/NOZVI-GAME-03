@@ -3,6 +3,11 @@ import { hitSize, ui, type ColumnSpec } from './layout';
 import { TOKENS } from '../uiTokens';
 import { MENU } from './menuMetrics';
 
+/** UIFIX-R10 hit box of the "Start from L1" text link (mockup px): padded like a chip, same height as the chip row. */
+export function l1Link(textWidthMock: number): { w: number; h: number } {
+  return { w: textWidthMock + 2 * MENU.home.chips.padX, h: MENU.home.chipH };
+}
+
 export interface HeaderButton { cx: number; cy: number; hit: number }
 /** UIFIX-R7 round header button (Settings gear on the right, back on the left): mockup centre, >= 48 CSS px hit area. */
 export function headerButton(side: 'left' | 'right'): HeaderButton {
