@@ -86,3 +86,16 @@ it('UIFIX-R2 reject toast bubble bottom stays above the skill group top when the
     if (gap >= h + tail) expect(p.y + h).toBeLessThanOrEqual(l.skills[slot].groupTop); // no overlap with the button
   }
 });
+
+it('UIFIX-R6 D-pad is raised, keeps clear of the chip row and has a wider gap from the left skill button', () => {
+  const l = hudLayout(true), d = l.dpad!, left = l.skills[0], right = l.skills[1];
+  expect(HEIGHT - (d.y + d.size)).toBeGreaterThanOrEqual(ui(24));          // bottom margin was 16 mockup px
+  expect(d.y).toBeGreaterThanOrEqual(l.chip.y + l.chip.h);                   // never over the chip / prompt row
+  const gapL = d.x - (left.cx + left.r), gapR = (right.cx - right.r) - (d.x + d.size);
+  expect(gapL).toBeGreaterThanOrEqual(ui(16));
+  expect(gapL).toBeGreaterThan(gapR);
+  expect(gapR).toBeGreaterThanOrEqual(ui(6));                                // still clear of the right skill
+  expect(d.btn).toBeGreaterThanOrEqual(66);                                  // >= 44 CSS px at 360 wide
+  expect(d.step).toBeGreaterThanOrEqual(d.btn);
+  expect(2 * d.step + d.btn).toBeCloseTo(d.size);                            // grid spans the declared size
+});
