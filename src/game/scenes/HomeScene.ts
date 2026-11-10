@@ -10,7 +10,7 @@ import { HEIGHT, WIDTH } from '../layout';
 import { t } from '../text';
 import { drawIcon } from '../ui/icons';
 import { layoutColumn, ui, UI_SCALE } from '../ui/layout';
-import { homeColumn, smoothPath } from '../ui/menuLayout';
+import { headerButton, homeColumn, smoothPath } from '../ui/menuLayout';
 import { MENU } from '../ui/menuMetrics';
 import { bgCream, bigLabel, hill, logoLine, roundIconButton, scaledBlock } from '../ui/menuWidgets';
 import { chip, pillButton } from '../ui/widgets';
@@ -36,7 +36,8 @@ export class HomeScene extends Phaser.Scene {
     this.synth = createSynth(); this.synth.setOn(this.session.save().settings.sound);
     bgCream(this);
     this.selected = this.session.homeModel().defaultStart;
-    roundIconButton(this, WIDTH - ui(MENU.side + MENU.round / 2), ui(MENU.padTop + MENU.round / 2), MENU.round, 'sliders', 'home-settings',
+    const gear = headerButton('right');
+    roundIconButton(this, gear.cx, gear.cy, MENU.round, 'sliders', 'home-settings',
       () => { this.synth.play('uiTap'); this.scene.start('Settings', { returnTo: 'Home' }); });
     const logoY = ui(MENU.padTop + MENU.round + MENU.gap + MENU.logo.lineH / 2);
     logoLine(this, WIDTH / 2, logoY, t('logo.mango'), 0, MENU.logo.size);

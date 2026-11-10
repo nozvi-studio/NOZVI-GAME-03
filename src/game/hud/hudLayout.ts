@@ -1,5 +1,5 @@
 import { BOARD, HEIGHT, WIDTH } from '../layout';
-import { ui } from '../ui/layout';
+import { hitSize, ui } from '../ui/layout';
 
 /** UIFIX-R6: D-pad raised (bottom 16 -> 25) as far as the chip row allows; left gap 18, right gap 8.
  * P3b2-R8 GameD2 / GameDpadD2 sizes in mockup px. Vertical gaps are compacted (top pad 8, row gap 8) so the header and stats fit above the fixed BOARD at 540x960. */
@@ -25,7 +25,7 @@ export function hudLayout(dpad: boolean): HudLayout {
   const skill = (cx: number): SkillRect => ({ cx, cy: groupTop + r, r, groupTop, costY: groupTop + ui(m.skill + m.skillGap), costH: ui(m.skillCost) });
   return {
     headerCy, titleY, biomeY: titleY + ui(m.titleSize + m.titleGap),
-    pause: { cx: WIDTH - ui(m.sidePad) - ui(m.header) / 2, cy: headerCy, r: ui(m.header) / 2, hit: ui(m.pauseHit) },
+    pause: { cx: WIDTH - ui(m.sidePad) - ui(m.header) / 2, cy: headerCy, r: ui(m.header) / 2, hit: hitSize(ui(m.pauseHit)) },
     statsY: top + ui(m.header + m.rowGap), statsH: ui(m.stats),
     chip: { cx: WIDTH / 2, y: BOARD.y + BOARD.size + ui(m.boardPad + m.chipGap), h: ui(m.chip) },
     skills: [skill(ui(m.skillSide) + r), skill(WIDTH - ui(m.skillSide) - r)],

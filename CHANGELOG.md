@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(ui): UIFIX-R7 Pause and header buttons (Settings gear, back) have >= 48 CSS px hit areas inside the top safe area
 - fix(hud): UIFIX-R6 D-pad raised and wider gap from the left skill button (chip row limits the raise to +9 mockup px)
 - fix(hud): UIFIX wave 1 final-review fixes (snake rim constants, wait chip without flag icon, skill-tip no-overlap test, pause theme computed once)
 - feat(hud): UIFIX-R3 waiting prompt in the chip row (touch: Swipe to steer!, keys: Press an arrow to go!); centre-of-board hint removed

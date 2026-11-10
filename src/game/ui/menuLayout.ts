@@ -1,6 +1,14 @@
-import type { ColumnSpec } from './layout';
+import { WIDTH } from '../layout';
+import { hitSize, ui, type ColumnSpec } from './layout';
 import { TOKENS } from '../uiTokens';
 import { MENU } from './menuMetrics';
+
+export interface HeaderButton { cx: number; cy: number; hit: number }
+/** UIFIX-R7 round header button (Settings gear on the right, back on the left): mockup centre, >= 48 CSS px hit area. */
+export function headerButton(side: 'left' | 'right'): HeaderButton {
+  const off = ui(MENU.side + MENU.round / 2);
+  return { cx: side === 'left' ? off : WIDTH - off, cy: ui(MENU.padTop + MENU.round / 2), hit: hitSize(ui(MENU.round)) };
+}
 
 type Spec = ColumnSpec;
 const head = MENU.padTop + MENU.round; // 66

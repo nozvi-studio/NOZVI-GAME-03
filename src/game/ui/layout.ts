@@ -3,6 +3,11 @@ import { TOKENS } from '../uiTokens';
 // P3-0-R2 mockup px (390 wide) -> game px (540 wide).
 export const UI_SCALE = WIDTH / TOKENS.screen.w;
 export const ui = (px: number): number => px * UI_SCALE;
+/** UIFIX-R7 minimum touch target: 48 CSS px on the 360 px wide reference phone, in game px (72). */
+export const REF_PHONE_CSS_W = 360;
+export const MIN_HIT_CSS = 48;
+export const MIN_HIT = MIN_HIT_CSS * WIDTH / REF_PHONE_CSS_W;
+export const hitSize = (visual: number): number => Math.max(visual, MIN_HIT);
 export interface ColumnSpec { top: number; middle: number; bottom: number; height?: number; minShrink: number }
 export interface ColumnLayout { topY: number; middleY: number; middleScale: number; bottomY: number; fits: boolean }
 /**
