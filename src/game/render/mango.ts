@@ -19,15 +19,15 @@ function iconPoints(cell: number): IconPoints {
 }
 
 // MEC-002 prototype mango, leaf, ripeness arc and persistent rotten rocks.
-export function drawMango(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: number, p: Palette, look: BoardLook, time: number, reduced: boolean, bornAt: number): void {
+export function drawMango(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: number, p: Palette, look: BoardLook, time: number, reduced: boolean, grow: number): void {
   // MEC-002 crumbling rotten rocks fade (greybox).
   for (const r of s.rottenRocks) drawRock(g, { x: (r.x + 0.5) * cell, y: (r.y + 0.5) * cell }, cell, look, 1, 'rock', r.state === 'crumble');
   const food = s.mango;
   if (!food) return;
-  const grow = reduced ? 1 : Math.min(1, Math.max(0, time - bornAt) / 220);
+  const scale = reduced ? 1 : grow; // MOT-3-R11 the scene computes `grow` with mangoGrow (balance.motion popInMs/popFromScale/overshoot)
   const bob = reduced ? 0 : Math.sin(time / 260) * cell * 0.04;
   const x = (food.x + 0.5) * cell, y = (food.y + 0.5) * cell;
-  g.save().translateCanvas(x, y + bob).scaleCanvas(grow, grow);
+  g.save().translateCanvas(x, y + bob).scaleCanvas(scale, scale);
   const icon = iconPoints(cell), { u } = icon;
   g.fillStyle(PART.mango.leaf).fillPoints(icon.leaf, true, true);
   g.save().translateCanvas(icon.body[0], icon.body[1]).rotateCanvas((MANGO.body.rotDeg * Math.PI) / 180);

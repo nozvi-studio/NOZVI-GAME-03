@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(motion): MOT-3-R11 mangoGrow and turnTilt curves, mango pop uses balance.motion
 - feat(balance): MOT-3 balance.juice.events block and validator
 - feat(motion): MOT-0 motion foundation (curves, balance.motion, adapter)
 - feat(motion): MOT-0 adapter core with kill-by-target, budget and reduced motion

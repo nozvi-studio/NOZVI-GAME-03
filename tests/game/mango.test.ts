@@ -2,6 +2,7 @@ import type Phaser from 'phaser';
 import { describe, expect, it } from 'vitest';
 import { createSim } from '../../src/core';
 import { drawMango } from '../../src/game/render/mango';
+import { mangoGrow } from '../../src/game/motion/curves';
 import { DEFAULT_LOOK } from '../../src/game/render/biomePalette';
 import { PART } from '../../src/game/render/boardParts';
 import { LIGHT } from '../../src/game/render/palette';
@@ -25,18 +26,20 @@ describe('MEC-002 mango presentation time', () => {
     const snapshot = sim.snapshot();
     expect(snapshot.mango?.ageMs).toBe(0);
     const { graphics, scales } = graphicsProbe();
-    drawMango(graphics, snapshot, 30, LIGHT, DEFAULT_LOOK, 500, false, 0);
+    drawMango(graphics, snapshot, 30, LIGHT, DEFAULT_LOOK, 500, false, 1);
     expect(scales).toEqual([[1, 1]]);
     expect(sim.snapshot().mango?.ageMs).toBe(0);
   });
-  it('MEC-002 a newly appeared mango uses its own presentation birth time', () => {
-    const { graphics, scales } = graphicsProbe();
-    drawMango(graphics, createSim(loadBalance(), 1).snapshot(), 30, LIGHT, DEFAULT_LOOK, 610, false, 500);
-    expect(scales).toEqual([[0.5, 0.5]]);
+  it('MOT-3-R11 a newly appeared mango starts at popFromScale and is drawn at the grow the scene computes', () => {
+    const m = loadBalance().motion, { graphics, scales } = graphicsProbe();
+    const grow = mangoGrow(500, 500, m.popInMs, m.overshoot, m.popFromScale);
+    drawMango(graphics, createSim(loadBalance(), 1).snapshot(), 30, LIGHT, DEFAULT_LOOK, 500, false, grow);
+    expect(scales[0]![0]).toBeCloseTo(m.popFromScale, 10);
+    expect(scales[0]![1]).toBeCloseTo(m.popFromScale, 10);
   });
   it('MEC-002 reduced motion shows the full mango immediately', () => {
     const { graphics, scales } = graphicsProbe();
-    drawMango(graphics, createSim(loadBalance(), 1).snapshot(), 30, LIGHT, DEFAULT_LOOK, 500, true, 500);
+    drawMango(graphics, createSim(loadBalance(), 1).snapshot(), 30, LIGHT, DEFAULT_LOOK, 500, true, 0.5);
     expect(scales).toEqual([[1, 1]]);
   });
 });
@@ -46,7 +49,7 @@ describe('P3b1-R8 mango art', () => {
     const calls: [string, ...unknown[]][] = [];
     const g = new Proxy({}, { get: (_o, name: string) => (...a: unknown[]) => { calls.push([name, ...a]); return g; } }) as unknown as Phaser.GameObjects.Graphics;
     const sim = createSim(loadBalance(), 1), snap = { ...sim.snapshot(), mango: { ...sim.snapshot().mango!, golden } };
-    drawMango(g, snap, 30, LIGHT, DEFAULT_LOOK, 500, true, 0);
+    drawMango(g, snap, 30, LIGHT, DEFAULT_LOOK, 500, true, 1);
     return calls;
   };
   it('P3b1-R8 draws the FoodIcon leaf polygon, a rotated body ellipse and the highlight stroke', () => {

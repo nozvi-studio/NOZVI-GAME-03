@@ -14,6 +14,7 @@ import { colorOf } from '../juice/colors';
 import type { BoardVisual } from '../juice/types';
 import { drawHazards, drawTerrains } from '../render/hazards';
 import { drawMango } from '../render/mango';
+import { mangoGrow } from '../motion/curves';
 import { boardLook, type BoardLook } from '../render/biomePalette';
 import { currentPalette, reduceMotion, themeOf, type Palette } from '../render/palette';
 import { drawSnake } from '../render/snake';
@@ -198,7 +199,8 @@ export class GameScene extends Phaser.Scene {
     drawMovers(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawBlasts(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawShrink(this.layers.hazards, snapshot, cell, time, this.reduced);
-    drawMango(this.layers.mango, snapshot, cell, p, this.look, time, this.reduced, this.mangoBornAt);
+    const mo = this.balance.motion;
+    drawMango(this.layers.mango, snapshot, cell, p, this.look, time, this.reduced, mangoGrow(time, this.mangoBornAt, mo.popInMs, mo.overshoot, mo.popFromScale));
     drawSkillObjects(this.layers.skills, snapshot, cell, p, this.look, this.balance, time);
     drawSnake(this.layers.snake, snapshot, cell, p, Math.max(this.effects.gulp, this.effects.pop), false, this.look.snakeRim);
     this.capy.update(snapshot, time, cell);

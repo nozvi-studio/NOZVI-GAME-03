@@ -11,3 +11,8 @@ export const staggerDelay = (index: number, stepMs: number, capMs: number): numb
 export const countUpValue = (from: number, to: number, t: number): number => t >= 1 ? to : Math.round(lerp(from, to, cubicOut(t)));
 /** MOT-0-R3 attention pulse scale: 1 +/- amp, one full period per periodMs. */
 export const pulseScale = (timeMs: number, periodMs: number, amp: number): number => 1 + amp * Math.sin(2 * Math.PI * timeMs / periodMs);
+/** MOT-3-R11 mango pop-in scale: `from` -> 1 with a back overshoot over `ms`; clamps before birth and after the end. */
+export const mangoGrow = (timeMs: number, bornAt: number, ms: number, s: number, from: number): number =>
+  lerp(from, 1, backOut((timeMs - bornAt) / ms, s));
+/** MOT-3-R12 head tilt in degrees: starts at `deg` (signed) and eases to 0 over `ms`; the back undershoot is the bounce. */
+export const turnTilt = (elapsedMs: number, ms: number, deg: number, s: number): number => deg * (1 - backOut(elapsedMs / ms, s));
