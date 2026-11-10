@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { WIDTH } from '../layout';
 import { TOKENS, toInt, FONT_TITLE } from '../uiTokens';
 import { drawIcon, type IconId } from './icons';
-import { ui, type ColumnLayout } from './layout';
+import { hitSize, ui, type ColumnLayout } from './layout';
 import { logoLetters } from './menuLayout';
 import { MENU } from './menuMetrics';
 import { titleText } from './widgets';
@@ -34,7 +34,8 @@ export function roundIconButton(scene: Phaser.Scene, x: number, y: number, diame
   g.fillStyle(toInt(TOKENS.surface.card)).fillCircle(0, 0, d / 2);
   const ic = scene.add.graphics(); drawIcon(ic, icon, d * MENU.widgets.iconRatio, toInt(TOKENS.text.primary));
   const c = scene.add.container(x, y, [g, ic]).setName(name);
-  tap(scene, x, y, d, d, `${name}-hit`, action);
+  const hit = hitSize(d); // UIFIX-R7
+  tap(scene, x, y, hit, hit, `${name}-hit`, action);
   return c;
 }
 

@@ -1,6 +1,9 @@
 import type { RunSummary } from '../../session';
 import { t } from '../text';
 
+/** P3b3-R11 / UIFIX-R10 scene object names kept for QA; Home lives in the footer only. */
+export const RESULTS_BUTTONS = { again: 'results-again', home: 'results-home' } as const;
+
 export type ResultsState = 'normal' | 'newBest' | 'checkpointUnlocked' | 'firstRun';
 export interface ResultsView {
   state: ResultsState;

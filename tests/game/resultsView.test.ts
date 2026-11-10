@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { resultsView } from '../../src/game/flow/resultsView';
+import { RESULTS_BUTTONS, resultsView } from '../../src/game/flow/resultsView';
 import type { RunSummary } from '../../src/session';
 const base: RunSummary = { won: false, cause: 'fence', level: 8, startLevel: 1, levelsCleared: 7, score: 44, bestScore: 61, newBest: false,
   carriedEnergy: 0, eaten: 35, biome: 2, newCheckpoints: [], firstRun: false };

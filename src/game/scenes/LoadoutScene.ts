@@ -8,7 +8,7 @@ import { HEIGHT, WIDTH } from '../layout';
 import { t } from '../text';
 import { drawIcon, type IconId } from '../ui/icons';
 import { layoutColumn, ui } from '../ui/layout';
-import { loadoutColumn } from '../ui/menuLayout';
+import { headerButton, isCompactHeight, loadoutCards, loadoutColumn } from '../ui/menuLayout';
 import { MENU } from '../ui/menuMetrics';
 import { bgCream, bigLabel, roundIconButton, scaledBlock, tap } from '../ui/menuWidgets';
 import { pillButton } from '../ui/widgets';
@@ -40,8 +40,8 @@ export class LoadoutScene extends Phaser.Scene {
     this.synth = createSynth(); this.synth.setOn(this.session.save().settings.sound);
     bgCream(this);
     this.edit = initEdit(this.session.loadoutModel());
-    const headY = ui(MENU.padTop + MENU.round / 2);
-    roundIconButton(this, ui(MENU.side + MENU.round / 2), headY, MENU.round, 'back', 'loadout-back', () => this.back());
+    const back = headerButton('left'), headY = back.cy;
+    roundIconButton(this, back.cx, back.cy, MENU.round, 'back', 'loadout-back', () => this.back());
     this.title = this.add.text(WIDTH / 2, headY, '', text(L.titleFont, '900', TOKENS.text.primary)).setOrigin(0.5).setName('loadout-title');
     const goY = HEIGHT - ui(L.goBottom + L.goH / 2 + MENU.widgets.shelfDy);
     bigLabel(pillButton(this, WIDTH / 2, goY, L.goW, L.goH, t('loadout.go'), 'loadout-go', () => this.go()), L.goLabel, L.goStroke);
@@ -53,6 +53,9 @@ export class LoadoutScene extends Phaser.Scene {
     keys?.on('keydown', onKey);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => keys?.off('keydown', onKey));
     this.render();
+    const onResize = (): void => this.render(); // UIFIX-R9 re-evaluate compact mode when the canvas size changes
+    this.scale.on(Phaser.Scale.Events.RESIZE, onResize);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off(Phaser.Scale.Events.RESIZE, onResize));
   }
   private title!: Phaser.GameObjects.Text;
 
@@ -71,7 +74,8 @@ export class LoadoutScene extends Phaser.Scene {
     this.body?.destroy(true);
     const view = loadoutView(this.edit, this.balance, { level: this.level, carried: this.session.homeModel().carriedEnergy });
     this.title.setText(t(view.titleKey));
-    const blk = (this.body = scaledBlock(this, layoutColumn(loadoutColumn(this.balance.ui.minShrink))));
+    const cards = loadoutCards(isCompactHeight(this.scale.displaySize.height)); // UIFIX-R9
+    const blk = (this.body = scaledBlock(this, layoutColumn(loadoutColumn(this.balance.ui.minShrink, cards.cardH < L.cardH))));
     const g = ui(MENU.gap), cardW = ui(L.cardW), cardX = WIDTH / 2 - cardW / 2;
     let y = g;
     // Slots panel.
@@ -100,7 +104,7 @@ export class LoadoutScene extends Phaser.Scene {
     if (view.energy !== null) chips.push({ text: t('home.startEnergy', { e: view.energy }), icon: 'bolt' });
     chips.forEach((c, i) => this.infoChip(blk, c.text, c.icon, chips.length === 1 ? 'mid' : i === 0 ? 'left' : 'right', cardX, cardW, y));
     y += ui(L.chipsH + MENU.gap);
-    for (const card of view.cards) { this.skillCard(blk, card, cardX, y); y += ui(L.cardH + L.cardGap); }
+    for (const card of view.cards) { this.skillCard(blk, card, cardX, y, cards.cardH); y += ui(cards.cardH + cards.cardGap); }
   }
 
   private infoChip(blk: Phaser.GameObjects.Container, label: string, icon: IconId, at: 'left' | 'mid' | 'right', cardX: number, cardW: number, y: number): void {
@@ -118,8 +122,8 @@ export class LoadoutScene extends Phaser.Scene {
     blk.add([g, ic, tx]);
   }
 
-  private skillCard(blk: Phaser.GameObjects.Container, c: SkillCardView, x: number, y: number): void {
-    const w = ui(L.cardW), h = ui(L.cardH), pad = ui(L.padX), disc = ui(L.disc), r = ui(L.cardR);
+  private skillCard(blk: Phaser.GameObjects.Container, c: SkillCardView, x: number, y: number, cardH: number): void {
+    const w = ui(L.cardW), h = ui(cardH), pad = ui(L.padX), disc = ui(L.disc), r = ui(L.cardR);
     const g = this.add.graphics(); blk.add(g);
     const textX = x + pad + disc + ui(L.textGap), cy = y + h / 2;
     if (c.locked) g.fillStyle(toInt(TOKENS.surface.sand)).fillRoundedRect(x, y, w, h, r);

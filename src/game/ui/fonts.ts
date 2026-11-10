@@ -7,3 +7,9 @@ export function waitForFonts(fonts: { load: (spec: string) => Promise<unknown> }
   const timeout = new Promise<boolean>(r => setTimeout(() => r(false), timeoutMs));
   return Promise.race([all, timeout]);
 }
+/** UIFIX-R8 draw at once with the fallback font stack; redraw once when the fonts are ready (a Phaser Text keeps its first rasterised glyphs). */
+export function drawThenSwap<T extends { destroy(): void }>(draw: () => T, fontsReady: Promise<boolean>, alive: () => boolean): { current(): T | null } {
+  let obj: T | null = draw();
+  void fontsReady.then(ok => { if (ok && alive()) { obj?.destroy(); obj = draw(); } });
+  return { current: () => obj };
+}

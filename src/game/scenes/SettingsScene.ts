@@ -9,7 +9,7 @@ import { currentPalette, osDisplay, themeOf } from '../render/palette';
 import { t } from '../text';
 import { drawIcon } from '../ui/icons';
 import { layoutColumn, ui } from '../ui/layout';
-import { settingsColumn } from '../ui/menuLayout';
+import { headerButton, settingsColumn } from '../ui/menuLayout';
 import { MENU } from '../ui/menuMetrics';
 import { roundIconButton, scaledBlock, tap } from '../ui/menuWidgets';
 import { FONT_UI, TOKENS, toInt, uiTheme, type UiTheme } from '../uiTokens';
@@ -38,8 +38,8 @@ export class SettingsScene extends Phaser.Scene {
     this.synth = createSynth(); this.synth.setOn(this.session.save().settings.sound);
     // Overlay: a full-screen rect (theme background) that swallows taps on the paused board underneath.
     if (this.entry.overlay) this.veil = this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, toInt(this.theme().bg)).setInteractive();
-    const headY = ui(MENU.padTop + MENU.round / 2);
-    roundIconButton(this, ui(MENU.side + MENU.round / 2), headY, MENU.round, 'back', 'settings-back', () => this.back());
+    const back = headerButton('left'), headY = back.cy;
+    roundIconButton(this, back.cx, back.cy, MENU.round, 'back', 'settings-back', () => this.back());
     this.head = this.add.text(WIDTH / 2, headY, t('settings.title'), label(M.headFont, '900', TOKENS.text.primary)).setOrigin(0.5);
     const keys = this.input.keyboard;
     const onKey = (e: KeyboardEvent): void => { if (e.code === 'Escape') { e.preventDefault(); this.back(); } };

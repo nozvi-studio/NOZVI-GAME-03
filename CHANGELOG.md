@@ -2,6 +2,12 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(art-preview): UIFIX-R11 widget row moved to the live panel margin so the live capy no longer overlaps it (debug only)
+- fix(menus): UIFIX-R10 Home "Start from L1" is a secondary text link; Results duplicate top-left back removed
+- fix(loadout): UIFIX-R9 skill cards compact on canvases shorter than 700 CSS px
+- fix(boot): UIFIX-R8 Boot logo draws immediately with the fallback font stack and swaps when fonts load
+- fix(ui): UIFIX-R7 Pause and header buttons (Settings gear, back) have >= 48 CSS px hit areas inside the top safe area
+- fix(hud): UIFIX-R6 D-pad raised and wider gap from the left skill button (chip row limits the raise to +9 mockup px)
 - fix(hud): UIFIX wave 1 final-review fixes (snake rim constants, wait chip without flag icon, skill-tip no-overlap test, pause theme computed once)
 - feat(hud): UIFIX-R3 waiting prompt in the chip row (touch: Swipe to steer!, keys: Press an arrow to go!); centre-of-board hint removed
 - feat(hud): UIFIX-R2 'Need X energy' toast above the tapped skill button, never over the board
