@@ -512,3 +512,8 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: delete `src/core/hazards/rubble.ts`, `Rubble` type, `CauseKey` `rubble`, `families.rubble`, snapshot `rubble`, `skills.shield.rubbleLifeMs`, rubble strings and drawing. `breakable` stays (still used by 9 other families).
 - Why: Shield stopped leaving rubble on 2026-11-06, so nothing creates it; dead code and a dead balance key.
 - Consequence: saves never persisted rubble, so no migration; tests that used rubble as a solid now use a snip wall.
+
+## 2026-11-07 - UIFIX wave 2 (R6, R7, R9) sizing rules
+- Context: wave 2 fixes D-pad placement, tap targets and the compact Loadout.
+- Choice: (1) UIFIX-R6: the D-pad raise is capped at the chip row; final `dpadBottom` = 25 mockup px (the full +24 raise needs the chip row moved: owner choice, open). (2) UIFIX-R7: 48 px = 48 CSS px at the 360 px reference = 72 game px (`MIN_HIT`). (3) UIFIX-R9: the compact Loadout threshold uses the canvas CSS height (`scale.displaySize`), not the window height.
+- Consequence: layout tests in `tests/game/hudLayout.test.ts`, `uiMinHit.test.ts`, `menuLayout.test.ts`.

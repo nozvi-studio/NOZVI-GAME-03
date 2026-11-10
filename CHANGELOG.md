@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: Wave 2 (UIFIX-R6..R11) CODEMAP, DECISIONS, STATUS
 - fix(art-preview): UIFIX-R11 widget row moved to the live panel margin so the live capy no longer overlaps it (debug only)
 - fix(menus): UIFIX-R10 Home "Start from L1" is a secondary text link; Results duplicate top-left back removed
 - fix(loadout): UIFIX-R9 skill cards compact on canvases shorter than 700 CSS px

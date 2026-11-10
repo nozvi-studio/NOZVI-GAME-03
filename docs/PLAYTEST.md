@@ -129,6 +129,7 @@ _pending_
 - Open visual follow-ups: Settings knob shadow, theme tile selection ring, EATEN stat icon, Results title 34 vs mockup 40, Boot logo position.
 
 ## 2026-11-07 - P3 UI review (agy, Playwright, independent)
+- 2026-11-10: UIFIX wave 1 (R1..R5) and wave 2 (R6..R11) done; pending agy re-run after wave 3. Browser checks of waves 1-2 not run yet.
 - Setup: agy with a strict brief (no docs read, evidence per finding, severity S1-S4, anchored 1-10 scores), dev server on version/v0.3 (7bdb66a), 360x640 + 540x960. Full report and screenshots kept outside the repo (lead scratchpad).
 - Scores: layout 6.5, color 5.0, feedback 6.5, gameplay 6.5, UI consistency 7.0; overall 6.3. Findings: 2 S1, 13 S2, 10 S3, 4 S4. No console errors.
 - Lead-verified by screenshot: COL-01 dark-theme HUD title unreadable; JUI-01 reject toast over the board; LAY-04 limited to the debug widget row.
