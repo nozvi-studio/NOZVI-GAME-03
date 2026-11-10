@@ -30,7 +30,7 @@ No gameplay rule, tuning number or save format changes. Player-facing strings st
 | Secondary button (butter) | face `#FFF6D6` -> `#FFE08A`, outline `#A86A10`, lip `#7D4D08`, text `#6B3F05` |
 | Danger button | face `#FF8A8A` -> `#F04B4B`, outline `#9C1F3F`, lip `#7A1430` |
 | Ribbon | face `#FF5A7A`, outline `#9C1F3F` |
-| Mango / progress fill | `#FFE36B` -> `#FFAB1A`, outline `#A85A00` |
+| Mango / progress fill | `#FFE36B` -> `#FFAB1A`, outline `#8A4500` |
 | Energy fill | `#8FF0FF` -> `#22B8E6` |
 | Bar track | `#0F4578`, outline `#0B3560` |
 | Skill A / Skill B | purple `#B48CFF` -> `#7A47E6`, outline `#3B1F7A`, lip `#2A1459`; orange `#FFC457` -> `#FF8A1F`, outline `#8A4A12`, lip `#6E390B` |
