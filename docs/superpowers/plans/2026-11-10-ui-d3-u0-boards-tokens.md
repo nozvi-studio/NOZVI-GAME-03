@@ -295,6 +295,7 @@ One board per item, each at 360x640; content is fixed by the spec sections in br
 | `Loadout` | two slots on top (one selected with the yellow ring), skill cards with icon, name, cost chip, pick state; Back button [D3-R19, R21] |
 | `Settings` | Back, title, one panel with Sound, Haptics, On-screen D-pad, Reduced motion rows (icon tile, label, hint, toggle); no Board theme card [D3-R19, R3] |
 | `States` | one primary, secondary, light, danger, round and skill button in each state: rest, pressed, disabled, selected, attention; a tap burst frame; a denied frame with the red cost badge [D3-R21..R24] |
+| `MarbleMachine`, `MarbleWheel` | already drawn in `docs/design/mockups/d3/marble.html` (owner request 2026-11-10; P4 feature, mockup only, no code in U1..U7); move their shared rules into `d3.css` and link the file from `boards.html` |
 | `Biomes` | six 170 px mini boards with their screen background, frame, cells, snake, mango, rock and warn tile from the spec table [D3-R4] |
 
 Rules while drawing: every tappable element at least 48x48 CSS px; text never under 12 px; primary actions in the lower 45%; use only token colours; real strings from `src/game/text.ts` (grep the key, do not invent copy).
