@@ -685,7 +685,7 @@ describe('QA P1 Task 5: Energy, Orbs & Speed Ramp (MEC-006, MEC-008 Black-Box)',
   // --------------------------------------------------------------------------
 
   it.todo(
-    'QA-P1T5-todo-01 MEC-006-R6: Does the orb candidate set exclude cells with crumbling snip-walls and rubble, ' +
+    'QA-P1T5-todo-01 MEC-006-R6: Does the orb candidate set exclude cells with crumbling snip-walls, ' +
     'or are crumbling cells strictly non-reserved for orb placement?'
   );
 

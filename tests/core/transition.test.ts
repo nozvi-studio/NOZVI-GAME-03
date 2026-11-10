@@ -105,7 +105,7 @@ describe('MEC-003 level up', () => {
   });
 
   it('MEC-003-R8 obstacles survive a level up, also families not enabled in the new level, and keep their own lifetimes', () => {
-    const sim = simFromAscii(b, ['.....M', '#FwRSu'], {
+    const sim = simFromAscii(b, ['.....M', '#FwRS.'], {
       snake: [[4, 0], [3, 0], [2, 0], [1, 0]], quiet: true, extraState: {
         progress: 3, families: { terrain: [{ family: 'terrain', t: 1, lifeMs: 10000, cells: [{ x: 9, y: 9, delay: 0, up: true, vis: 'up' }] }] },
       },
@@ -119,7 +119,6 @@ describe('MEC-003 level up', () => {
     expect(cellSolidCause(s, 1, 1)).not.toBeNull();
     expect(s.families.rottenRock[0]).toMatchObject({ state: 'solid', leftMs: b.mango.rottenRockLifeMs - 140 });
     expect(s.families.snipWall[0]).toMatchObject({ state: 'solid', leftMs: b.skills.tailSnip.wallLifeMs - 140 });
-    expect(s.families.rubble[0]).toMatchObject({ state: 'solid', leftMs: b.skills.shield.rubbleLifeMs - 140 });
     expect(s.families.terrain).toHaveLength(1);
     expect(s.families.terrain[0]!.t).toBeLessThan(s.families.terrain[0]!.lifeMs);
   });

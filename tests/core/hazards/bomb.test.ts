@@ -110,7 +110,7 @@ it('MEC-017-R3 blast is active for exactly one base tick at activation, also dur
   expect(headHitAt(s, 8, 8)).toBeNull();
 });
 
-it('MEC-017-R4 shield absorbs one blast without bonk or rubble', () => {
+it('MEC-017-R4 shield absorbs one blast without bonk', () => {
   const { b, sim, s } = fixture();
   s.snake = [{ x: 9, y: 8 }, { x: 10, y: 8 }, { x: 11, y: 8 }, { x: 12, y: 8 }];
   s.shield = { leftMs: 5000 };
@@ -119,7 +119,6 @@ it('MEC-017-R4 shield absorbs one blast without bonk or rubble', () => {
   sim.advance(200);
   expect(s.status).toBe('playing');
   expect(s.shield).toBeNull();
-  expect(s.families.rubble).toEqual([]);
   expect(sim.drainEvents().find(e => e.type === 'shieldBroke')).toMatchObject({ family: 'bomb' });
   expect(s.acc).toBeGreaterThanOrEqual(acc);
 });

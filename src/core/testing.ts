@@ -23,7 +23,7 @@ export function simFromAscii(b: Balance, rows: string[], o: AsciiOpts): Sim {
   s.dir = { x, y } as Dir;
   s.headFrom = { ...s.snake[0]! };
   s.tailFrom = { ...s.snake[s.snake.length - 1]! };
-  replaceTimedHazards(s, []); s.families.terrain = []; s.families.rottenRock = []; s.families.snipWall = []; s.families.rubble = []; s.rainMangoes = []; s.mango = null;
+  replaceTimedHazards(s, []); s.families.terrain = []; s.families.rottenRock = []; s.families.snipWall = []; s.rainMangoes = []; s.mango = null;
   if (o.quiet) s.spawnInMs = 1e9; // P0 timer counts down (plan's -1e9 is for an elapsed timer).
   for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y]!.length; x++) {
     const c = rows[y]![x]!;
@@ -38,8 +38,6 @@ export function simFromAscii(b: Balance, rows: string[], o: AsciiOpts): Sim {
       s.families.rottenRock.push({ family: 'rottenRock', x, y, state: 'solid', leftMs: b.mango.rottenRockLifeMs });
     } else if (c === 'm') {
       s.rainMangoes.push({ x, y, ageMs: 0, castId: 1 });
-    } else if (c === 'u') {
-      s.families.rubble.push({ family: 'rubble', x, y, state: 'solid', leftMs: b.skills.shield.rubbleLifeMs });
     } else if (c === 'S') {
       s.families.snipWall.push({ family: 'snipWall', cells: [{ x, y }], state: 'solid', leftMs: b.skills.tailSnip.wallLifeMs });
     } else if (c === '#' || c === 'w' || c === 'F') {

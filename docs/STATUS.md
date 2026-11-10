@@ -47,7 +47,7 @@
 - 4 skipped QA (reasons in files). Single 1.28 MB JS chunk.
 - Quitting mid-run does not log run_end (seen in phone log).
 - Checkpoints only reach L12; for QA use `?debug=1&level=N` or the debug HUD buttons "+1" / "Key ▶".
-- Rubble family has no production source since Shield stopped leaving rubble (owner 2026-11-06); remove family + `skills.shield.rubbleLifeMs` in a cleanup task.
+- Rubble family and `skills.shield.rubbleLifeMs` removed (chore/remove-rubble-family, 2026-11-10).
 
 ## Last session summary
 - 2026-11-07 (local): owner rulings (GDD §4 ok, leaderboard+streak parked, OQ-B1..B5 closed); ART-003 skin guide (draft); ART-001 Q6/Q7; Remotion capy POC approved + merged. 1395 pass, typecheck clean. Not pushed.

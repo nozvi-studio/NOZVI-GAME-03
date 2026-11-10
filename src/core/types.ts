@@ -21,8 +21,8 @@ export interface LevelRow {
   from: number; to: number; weights: Partial<Record<FamilyKey, number>>;
   rockShapes: string[]; fenceShapes: string[]; rottenRocks: boolean;
 }
-export type CauseKey = 'wall' | 'self' | 'rotten' | 'rock' | 'fence' | 'maze' | 'ground' | 'snipWall' | 'rubble' | 'coconut' | 'gate' | 'spike' | 'cat' | 'chicken' | 'bomb' | 'shrink';
-export type FamilyKey = TableFamily | 'rottenRock' | 'snipWall' | 'rubble' | 'coconut' | 'gate' | 'spike' | 'npc' | 'bird' | 'bomb';
+export type CauseKey = 'wall' | 'self' | 'rotten' | 'rock' | 'fence' | 'maze' | 'ground' | 'snipWall' | 'coconut' | 'gate' | 'spike' | 'cat' | 'chicken' | 'bomb' | 'shrink';
+export type FamilyKey = TableFamily | 'rottenRock' | 'snipWall' | 'coconut' | 'gate' | 'spike' | 'npc' | 'bird' | 'bomb';
 export type TileKind = 'mud' | 'ice';
 export type HitKind = 'mover' | 'area';
 export interface HitCtx { hitHead(family: FamilyKey, x: number, y: number, kind: HitKind, dir: Dir): void }
@@ -44,8 +44,7 @@ export interface TerrainHazard { family: 'terrain'; t: number; lifeMs: number; c
 export interface LevelUpSlow { factor: number; easeMs: number; leftMs: number }
 export interface RottenRock { family: 'rottenRock'; x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }
 export interface SnipWall { family: 'snipWall'; cells: Cell[]; state: 'solid' | 'crumble'; leftMs: number }
-export interface Rubble { family: 'rubble'; x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }
-export type HazardInstance = TimedHazard | TerrainHazard | RottenRock | SnipWall | Rubble;
+export type HazardInstance = TimedHazard | TerrainHazard | RottenRock | SnipWall;
 export interface RainState { castId: number; leftMs: number; elapsedMs: number; drops: number; dropped: number }
 export interface RainMango { x: number; y: number; ageMs: number; castId: number }
 
@@ -86,7 +85,7 @@ export type SimEvent =
 
 /** All Sim state. Plain JSON data only: no closures, Map/Set or class instances. */
 export interface SimState {
-  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; rubble: Rubble[]; mud: { patches: TilePatch[]; nextId: number }; ice: { patches: TilePatch[]; nextId: number }; coconut: { rolls: { id: number; lane: 'row' | 'col'; index: number; mover: MoverState }[]; nextId: number }; gate: { gates: GateInstance[]; nextId: number }; spike: { groups: SpikeGroup[]; nextId: number }; npc: { npcs: { id: number; variant: 'cat' | 'chicken'; mover: MoverState }[]; nextId: number }; bird: { target: BirdTarget | null }; bomb: { bombs: BombInstance[]; nextId: number }; shrink: ShrinkState };
+  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; mud: { patches: TilePatch[]; nextId: number }; ice: { patches: TilePatch[]; nextId: number }; coconut: { rolls: { id: number; lane: 'row' | 'col'; index: number; mover: MoverState }[]; nextId: number }; gate: { gates: GateInstance[]; nextId: number }; spike: { groups: SpikeGroup[]; nextId: number }; npc: { npcs: { id: number; variant: 'cat' | 'chicken'; mover: MoverState }[]; nextId: number }; bird: { target: BirdTarget | null }; bomb: { bombs: BombInstance[]; nextId: number }; shrink: ShrinkState };
   nextHazardSeq: number;
   snake: Cell[];               // head first
   dir: Dir;
@@ -171,7 +170,6 @@ export interface SimSnapshot {
   levelUpSlow: LevelUpSlow | null;
   snipWall: readonly { x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }[];
   shield: { leftMs: number } | null;
-  rubble: readonly Omit<Rubble, 'family'>[];
   rain: { leftMs: number; dropsLeft: number } | null;
   rainMangoes: readonly { x: number; y: number; leftMs: number }[];
   energy: number;
@@ -251,7 +249,7 @@ export interface InstanceRules<S extends { family: FamilyKey }> {
   bfsWallAt(state: S, x: number, y: number): boolean;  // reachability walls
   reservedAt(state: S, x: number, y: number): boolean; // placement reserved
   onBreak?(s: SimState, x: number, y: number): void;    // MEC-006-R26 removes one broken solid cell
-  breakable: boolean;                                  // MEC-006-R24 Shield can break it; false only for rubble
+  breakable: boolean;                                  // MEC-006-R24 Shield can break it; false for mud, ice, bird, shrink
 }
 
 // MEC-004-R2 state-level family contract; descriptors never retain simulation state.
