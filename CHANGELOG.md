@@ -3,6 +3,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 
 ## [Unreleased]
 - fix(save): `save()` no longer overwrites a newer-version envelope; loading an older save keeps a one-time raw backup `mango-snake.save.v<N>.bak` (MEC-008-R12)
+- chore: remove the dead `rubble` hazard family and `skills.shield.rubbleLifeMs` (no production source since 2026-11-06); no save-format change
 - docs: P3 UI review (agy) in PLAYTEST + UI fixes design spec (UIFIX-R1..R15)
 - feat(art): Remotion POC - pre-rendered capy idle/eat/dead clip next to the tween capy on the debug art preview (owner approved 2026-11-07)
 - docs: ART-001 Q6 answered (owner Remotion repo location), Q7 deferred

@@ -161,7 +161,7 @@ it('MEC-004-R17 snapshot projections own all nested values and remain stable whi
   s.families.terrain = [{ family: 'terrain', t: 5, lifeMs: 9000,
     cells: [{ x: 2, y: 2, delay: 0, up: false, vis: 'warn' }] }];
   s.families.snipWall = [{ family: 'snipWall', cells: [{ x: 1, y: 1 }], state: 'solid', leftMs: 1000 }];
-  s.families.rubble = [{ family: 'rubble', x: 1, y: 2, state: 'solid', leftMs: 1000 }];
+  s.families.snipWall.push({ family: 'snipWall', cells: [{ x: 1, y: 2 }], state: 'solid', leftMs: 1000 });
   s.rain = { castId: 1, leftMs: 1000, elapsedMs: 0, drops: 3, dropped: 0 };
   s.rainMangoes = [{ x: 4, y: 3, ageMs: 10, castId: 1 }];
   const sim = restoreSim(b, s), before = structuredClone(stateOf(sim)), snapshot = sim.snapshot();

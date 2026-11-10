@@ -32,7 +32,7 @@ describe('GDD-13 strings verbatim from the prototype (design §7.5)', () => {
       wall: 'You hit the edge of the board.', self: 'You bit your own tail.',
       rotten: 'You hit a rock left by a rotten mango.', rock: 'A falling rock got you.',
       fence: 'You ran into a fence.', maze: 'You ran into a hedge.', ground: 'The ground rose in front of you.',
-      snipWall: 'You hit your discarded tail.', rubble: 'You hit the rubble.',
+      snipWall: 'You hit your discarded tail.',
       coconut: 'Hit by a coconut.', gate: 'Crushed by a gate.', spike: 'Spiked.',
       cat: 'Ran into the cat.', chicken: 'Ran into the chicken.', bomb: 'Caught in the blast.', shrink: 'You hit the closed edge.',
     });
@@ -69,12 +69,12 @@ describe('P1 text keys (MEC-003/006/007/008 §8)', () => {
     ...['rock', 'rottenRock', 'fence', 'terrain', 'maze'].map(f => `banner.new.${f}`),
     'skill.slowmo.name', 'skill.tailSnip.name', 'skill.shield.name', 'skill.mangoRain.name',
     'skill.reject.energy', 'skill.reject.active', 'skill.reject.noTarget', 'tip.orb.first',
-    'death.snipWall', 'death.rubble',
+    'death.snipWall',
     'loadout.title', 'loadout.go', 'loadout.back', 'loadout.slot1', 'loadout.slot2', 'loadout.locked',
     'tip.skillUnlocked.next', 'tip.slotUnlocked',
     'home.playCheckpoint', 'home.playL1', 'home.play', 'home.carry', 'banner.checkpoint', 'tip.checkpoint',
     'hud.nextCheckpoint', 'hud.nextCheckpointClear', 'hud.ramp',
-    ...['wall', 'self', 'rotten', 'rock', 'fence', 'maze', 'ground', 'snipWall', 'rubble', 'quit', 'clear'].map(c => `cause.${c}`),
+    ...['wall', 'self', 'rotten', 'rock', 'fence', 'maze', 'ground', 'snipWall', 'quit', 'clear'].map(c => `cause.${c}`),
   ];
   it('P1 text: every MEC §8 key, every CauseKey and quit/clear resolve to a string', () => {
     for (const k of keys) expect(t(k), k).not.toBe(k);

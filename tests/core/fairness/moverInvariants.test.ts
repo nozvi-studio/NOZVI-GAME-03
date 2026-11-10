@@ -42,7 +42,7 @@ it('MEC-013-R2 fuzz keeps reservations from other coconut rolls and other hazard
     mover: newMover(Array.from({ length: b.board.rows }, (_, y) => ({ x: 4, y })), b.coconut.warnMs, b.coconut.cellMs, false, 0) });
   expect(tracker.mangoReserved(s)).toBe(true);
   s.families.coconut.rolls.pop();
-  s.families.rubble.push({ family: 'rubble', x: 4, y: 0, state: 'solid', leftMs: 5000 });
+  s.families.snipWall.push({ family: 'snipWall', cells: [{ x: 4, y: 0 }], state: 'solid', leftMs: 5000 });
   expect(tracker.mangoReserved(s)).toBe(true);
 });
 

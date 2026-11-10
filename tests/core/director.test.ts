@@ -41,13 +41,13 @@ describe('MEC-004 director', () => {
   });
   it('MEC-004-R9 small cap counts all small families; modifier not counted; one big family at a time', () => {
     const s = due(1), balance = structuredClone(b);
-    Object.assign(balance.level.table[0]!.weights, { rock: 3, fence: 2, terrain: 2, maze: 2, rubble: 1 });
+    Object.assign(balance.level.table[0]!.weights, { rock: 3, fence: 2, terrain: 2, maze: 2, snipWall: 1 });
     const fams = [fakeFamily({ key: 'rock', capClass: 'small', count: 1 }),
       fakeFamily({ key: 'fence', capClass: 'small', count: 1 }),
       fakeFamily({ key: 'terrain', capClass: 'big', count: 1 }),
       fakeFamily({ key: 'maze', capClass: 'big' }),
-      fakeFamily({ key: 'rubble', capClass: 'modifier' })];
-    expect(directorOptions(s, balance, fams).map(o => o.family.key)).toEqual(['rubble']);
+      fakeFamily({ key: 'snipWall', capClass: 'modifier' })];
+    expect(directorOptions(s, balance, fams).map(o => o.family.key)).toEqual(['snipWall']);
   });
   it('MEC-004-R9 options follow registry order and table weights', () => {
     expect(directorOptions(due(11), b).map(o => [o.family.key, o.weight])).toEqual([['rock', 3], ['fence', 1], ['terrain', 2], ['mud', 2]]);
@@ -72,7 +72,7 @@ describe('MEC-004 director', () => {
     rock.state = 'solid'; rock.cells[0]!.on = true; addTimedHazards(s, rock);
     s.families.terrain.push(terrain());
     const previous = FAMILIES;
-    __setFamiliesForTest([...previous, fakeFamily({ key: 'rubble', tile: { kind: 'mud', cells: [[2, 2]] } })]);
+    __setFamiliesForTest([...previous, fakeFamily({ key: 'snipWall', tile: { kind: 'mud', cells: [[2, 2]] } })]);
     const answers = () => Array.from({ length: 289 }, (_, i) => [solidCauseAt(s, i % 17, Math.floor(i / 17)), tileAt(s, i % 17, Math.floor(i / 17))]);
     try {
       const before = JSON.stringify(s.families), queries = answers();

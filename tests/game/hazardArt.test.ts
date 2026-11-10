@@ -129,11 +129,6 @@ describe('P3b1-R4 crumble alpha is applied exactly once', () => {
     expect(ringAlpha(p.calls)).toBeCloseTo(ROCK.crumbleAlpha);
     expect(p.calls.some(c => c[0] === 'fillStyle' && c[2] === 0.45)).toBe(true);
   });
-  it('a crumbling rubble rock is drawn at ROCK.crumbleAlpha', () => {
-    const p = gfx(), s = { ...snap(), rubble: [{ x: 2, y: 2, state: 'crumble' }] } as unknown as SimSnapshot;
-    drawSkillObjects(p.g, s, 30, LIGHT, look, b, 0);
-    expect(ringAlpha(p.calls)).toBeCloseTo(ROCK.crumbleAlpha);
-  });
   it('a crumbling rotten rock is drawn at ROCK.crumbleAlpha', () => {
     const p = gfx(), s = { ...snap(), mango: null, rottenRocks: [{ x: 2, y: 2, state: 'crumble' }] } as unknown as SimSnapshot;
     drawMango(p.g, s, 30, LIGHT, look, 0, true, 0);

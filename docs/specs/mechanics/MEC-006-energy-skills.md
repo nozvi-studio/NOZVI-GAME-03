@@ -20,7 +20,7 @@ Core state (added to the sim, all integers in sim ms unless noted):
 - `energy` (0…`energy.max`), `orbs: {x, y, ageMs}[]`, `orbSpawnMs` (time since the last orb spawn attempt; starts counting when the run first reaches the orb level).
 - `loadout: [SkillId | null, SkillId | null]` (from createSim options, MEC-007). `SkillId = 'slowmo' | 'tailSnip' | 'shield' | 'mangoRain'`.
 - `slowmo: {leftMs} | null`, `shield: {leftMs} | null`.
-- `snipWalls: {cells: {x, y}[], state: 'solid' | 'crumble', leftMs}[]` (at most one in `solid`, R14) and `rubble: {x, y, state: 'solid' | 'crumble', leftMs}[]` (a list: a recast Shield can break again while older rubble exists). After their solid life they crumble for `hazard.crumbleMs` (450) like MEC-004 hazards: in every state they are `reserved` (MEC-002-R2) and BFS walls; only `solid` cells kill. Implementation: two HazardFamily entries `snipWall` and `rubble` with no warn phase, not director-spawned, excluded from the director cap (P1 design §4); the state shapes above are their family state.
+- `snipWalls: {cells: {x, y}[], state: 'solid' | 'crumble', leftMs}[]` (at most one in `solid`, R14). After its solid life it crumbles for `hazard.crumbleMs` (450) like MEC-004 hazards: in every state it is `reserved` (MEC-002-R2) and BFS walls; only `solid` cells kill. Implementation: one HazardFamily entry `snipWall` with no warn phase, not director-spawned, excluded from the director cap (P1 design §4); the state shapes above are their family state.
 - `rain: {castId, leftMs, elapsedMs, drops, dropped} | null`, `rainMangoes: {x, y, ageMs, castId}[]`, `rainBudgets: {castId, left}[]` (a budget is removed when its cast has ended and no mango of that cast is left).
 - `bonkMs` is not stored: the bonk pause is done through the tick accumulator (R27).
 Save fields: none owned here. Start energy and carry-over are MEC-008; unlocks and last loadout are MEC-007.
@@ -44,7 +44,7 @@ Save fields: none owned here. Start energy and carry-over are MEC-008; unlocks a
 - MEC-006-R13: Checks in this order; the first failure emits `skillRejected {slot, skill, reason}` and spends nothing: `empty` (slot has no skill) → `active` (an effect of the same skill is active, R14) → `energy` (`energy < cost`) → `noTarget` (skill precondition fails, R20).
 - MEC-006-R14: "Active" means: Slow-mo while `slowmo` ≠ null; Shield while `shield` ≠ null; Tail Snip while a snip wall is in `solid` state; Mango Rain while `rain` ≠ null. Different skills may be active at the same time.
 - MEC-006-R15: On success: `energy -= cost`, emit `energyChanged {delta: -cost, source: 'skill'}` then `skillUsed {slot, skill, level, energyBefore, energyAfter}`, then apply the effect in the same call.
-- MEC-006-R16: Effect timers (`slowmo.leftMs`, `shield.leftMs`, each snip wall's and rubble cell's `leftMs`, `rain`, rain mango `ageMs`) count sim ms and keep counting through a MEC-003 level up. When a timer reaches 0 the effect ends and emits `skillEnded {skill, reason: 'timeout'}` (Shield may also end with `'consumed'`).
+- MEC-006-R16: Effect timers (`slowmo.leftMs`, `shield.leftMs`, each snip wall's `leftMs`, `rain`, rain mango `ageMs`) count sim ms and keep counting through a MEC-003 level up. When a timer reaches 0 the effect ends and emits `skillEnded {skill, reason: 'timeout'}` (Shield may also end with `'consumed'`).
 
 **Slow-mo**
 - MEC-006-R17: Effective tick = `round(baseTickMs × max(slowmo ? skills.slowmo.tickFactor : 1, curFactor) × tileFactor)` (tickFactor 1.6), where `curFactor` is the MEC-003-R22 level-up slowdown factor (1 when none); the two slowdowns never stack, and `baseTickMs` is the tick MEC-003/MEC-008 give for this step (level tick or speed-ramp tick). `tileFactor` is the MEC-012 head-tile factor (mud's `mud.tickFactor`, otherwise 1); it multiplies the maximum slowdown per MEC-004-R7 (lead ruling FB-1; P2 design §20 item 9). It is recomputed every step, so a level-up, ramp or tile change during Slow-mo applies at once. `snapshot.tickMs` shows the effective tick.
@@ -58,11 +58,11 @@ Save fields: none owned here. Start energy and carry-over are MEC-008; unlocks a
 - MEC-006-R23: Snip-wall cells are solid: entering one kills the snake with cause `snipWall` (unless Shield, R26). In every state they are walls for BFS and `reserved` for all placement (§3). They appear without a warning and are exempt from GDD §5.3 rules 1–3 (lead decision, §11: GDD §6.3 names the wall as the skill's price).
 
 **Shield (Headbutt)**
-- MEC-006-R24: Duration `skills.shield.durationMs` (5000). Breakable = the registry `breakable` flag (P2 design §20 item 10): rock/pebble, fence, terrain raised cell (`up`), maze hedge, rotten rock, snip-wall cell, rolling coconut, and gate-instance solid fence or closed gate cell. Breaking one gate-instance cell removes it for the rest of that instance's life (MEC-014-R8). Never breakable: board edge (`wall`), own body (`self`), rubble; mud and ice are nonlethal and not breakable. Gate cycles keep running in sim time during Slow-mo (R19).
+- MEC-006-R24: Duration `skills.shield.durationMs` (5000). Breakable = the registry `breakable` flag (P2 design §20 item 10): rock/pebble, fence, terrain raised cell (`up`), maze hedge, rotten rock, snip-wall cell, rolling coconut, and gate-instance solid fence or closed gate cell. Breaking one gate-instance cell removes it for the rest of that instance's life (MEC-014-R8). Never breakable: board edge (`wall`), own body (`self`); mud and ice are nonlethal and not breakable. Gate cycles keep running in sim time during Slow-mo (R19).
 - MEC-006-R25: The MEC-001 collision order is unchanged: `wall` → `self` → solid cell. At the solid-cell stage, check the solid family first, then `headHit` (MEC-004-R6). Shield also applies to mover and area hits during family updates (MEC-004-R8). A cell in warning state is not solid and does not consume the shield.
 - MEC-006-R26: When the new head cell is a breakable solid cell and Shield is active: that one cell is removed (rotten rock removed; hazard cell removed from its hazard; terrain cell removed from its terrain for the rest of the terrain's life; snip-wall cell removed); the head moves into it normally (eating rules apply, growth none since no mango can be there); the shield is consumed (`shield = null`, `skillEnded {skill: 'shield', reason: 'consumed'}`); emits `shieldBroke {x, y, family}`. P2 extension (approved P2 design §20 item 11): a breakable mover hit follows the same rules through the family's `onBreak`, with bonk (R27) and no rubble (R28); the family's `onBreak` removes the mover (MEC-004-R6/R8). An area hit consumes Shield and emits the same events, without `onBreak` or bonk, regardless of the family's `breakable` flag.
 - MEC-006-R27: Bonk: after the break the tick accumulator is set to `−skills.shield.bonkPauseTicks × effectiveTick` (3 ticks), so the next snake step happens 4 ticks after the break. Turns may be queued during the bonk. Skills may also be used during the bonk, under the normal `useSkill` rules (owner, 2026-11-04).
-- MEC-006-R28: Shield leaves no rubble (owner 2026-11-06, supersedes the 2026-11-03 rule that placed rubble in the cell beyond the break; playtest: rubble ahead of the head killed on a straight run, so the skill hurt more than it helped). The bonk pause (R27) stays. The `rubble` family (solid for `skills.shield.rubbleLifeMs` (1500), cause `rubble`, not breakable, BFS wall and reserved in every state) is kept as an inert, unchanged family; no skill path creates it now.
+- MEC-006-R28: Shield leaves no rubble (owner 2026-11-06, supersedes the 2026-11-03 rule that placed rubble in the cell beyond the break; playtest: rubble ahead of the head killed on a straight run, so the skill hurt more than it helped). The bonk pause (R27) stays. The `rubble` family and `skills.shield.rubbleLifeMs` were removed (2026-11-10, tech-debt cleanup; no production source remained).
 
 **Mango Rain**
 - MEC-006-R29: On cast: `drops = dropsMin + rng.int(dropsMax − dropsMin + 1)` (6–10). Drop `i` (0-based) happens when `rain.elapsedMs ≥ i × floor(durationMs / drops)` (first drop in the cast call itself). The rain ends at `durationMs` (6000); undropped drops are impossible by construction.
@@ -83,14 +83,14 @@ Save fields: none owned here. Start energy and carry-over are MEC-008; unlocks a
 5. Snake in a tight loop, head about to enter the old tail cell: that cell is the head's next cell, so it is dropped from the wall (R22); no instant death.
 6. Head loops back into its own snip wall: death, cause `snipWall` (or Shield breaks it).
 7. Shield active, head hits the board edge or itself: death with the normal cause; shield is not consumed (run is over).
-8. Shield active, head hits rubble from an earlier shield: death, cause `rubble`.
+8. (removed 2026-11-10: the rubble family no longer exists.)
 9. Shield breaks a fence cell and the cell beyond is the regular mango: no rubble (R28), the mango stays.
 10. Shield breaks the last cell before the edge: no rubble (R28).
 11. Shield expires during the bonk pause (cannot happen: it was consumed by the break). Shield expires with no hit: `skillEnded {reason: 'timeout'}`.
 12. Slow-mo ends during the bonk pause: the negative accumulator is kept; R18 clamp does not raise it.
 13. Mango Rain on a nearly full board: some drops are skipped; energy is not refunded.
 14. Level-up during Slow-mo: the effective tick uses the larger of the Slow-mo and slowdown factors (R17), never their product; the Slow-mo timer keeps running.
-15. Level up while a snip wall or rubble exists: snip walls and rubble survive a level up and end by their own lifetime.
+15. Level up while a snip wall exists: it survives a level up and ends by its own lifetime.
 16. A skill press right after a level up is accepted like any other press (no `busy` reason).
 17. Death with effects active: everything freezes with `status: 'over'`; `snapshot.energy` at death is what MEC-008 carries over.
 18. P1 has no permanent level layouts (MEC-003-R15), so orbs and rain mangoes are never displaced in P1. If P2 adds layouts, the P2 spec defines displacement.
@@ -100,7 +100,7 @@ Save fields: none owned here. Start energy and carry-over are MEC-008; unlocks a
 - **MEC-001 snake:** eating a rain mango uses the normal grow step; an orb uses the normal move step. Tail Snip shortens without changing direction or queue. The length reset on level-up (MEC-001) also applies to a snake grown by rain.
 - **MEC-002 mango:** MEC-002-R2 is the single `reserved` list (it includes orbs, rain mangoes, snip walls and rubble). Golden mango gives +10 energy (R9). Rain mangoes are separate objects and do not affect rot time or golden gating (R33, MEC-002-R11).
 - **MEC-003 levels:** rain progress counts toward the quota. Orb, rain and effect timers keep running through a level up, skill presses are accepted, snip wall and rubble survive. Energy is never reset by a level-up.
-- **MEC-004 obstacles:** hazard placement uses the MEC-002-R2 `reserved` list; BFS `reachable` adds snip walls and rubble (every state) as walls (orbs and rain mangoes are not walls). Fairness rule 3 still targets the regular mango only. New cause keys: `snipWall`, `rubble`.
+- **MEC-004 obstacles:** hazard placement uses the MEC-002-R2 `reserved` list; BFS `reachable` adds snip walls (every state) as walls (orbs and rain mangoes are not walls). Fairness rule 3 still targets the regular mango only. New cause key: `snipWall`.
 - **MEC-008 checkpoints:** provides `startEnergy`; reads `snapshot.energy` at death. Base tick (incl. speed ramp) comes from MEC-008 and is multiplied per R17 (Slow-mo and the MEC-003-R22 slowdown, larger factor wins). Whether rain mangoes advance the speed ramp is MEC-008's rule; the `ate` event carries `source` for it.
 - **MEC-007 loadout:** provides `loadout`; mid-run unlocks may fill an empty slot (MEC-007).
 
@@ -110,7 +110,7 @@ type SkillId = 'slowmo' | 'tailSnip' | 'shield' | 'mangoRain';
 interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 ```
 - `createSim` and `SimOptions`: defined once in MEC-003 §7; this spec owns the `startEnergy` validation (R1) and the `SkillId` type.
-- `CauseKey` adds `snipWall | rubble`.
+- `CauseKey` adds `snipWall`.
 - `SimEvent` adds: `energyChanged {energy, delta, source: 'orb' | 'golden' | 'skill'}`, `orbSpawned {x, y}`, `orbEaten {x, y, gained}`, `orbExpired {x, y}`, `skillUsed {slot, skill, level, energyBefore, energyAfter}`, `skillRejected {slot, skill: SkillId | null, reason: 'empty' | 'active' | 'energy' | 'noTarget'}`, `skillEnded {skill, reason: 'timeout' | 'consumed'}`, `tailSnipped {cut, cells}`, `shieldBroke {x, y, family, rubble: {x, y} | null}`, `rainDrop {x, y}`, `rainDropSkipped {}`, `rainMangoExpired {x, y}`. The `ate` event shape (incl. `source`) is defined in MEC-002 §7.
 - `SimSnapshot` adds: `energy`, `energyMax`, `orbs: {x, y, leftMs}[]`, `skills: {slot, id: SkillId | null, cost, affordable, active, leftMs}[2]` (`leftMs` of the active effect, else 0), `snipWall: {x, y, state: 'solid' | 'crumble', leftMs}[]` (cells of all snip walls), `rubble: {x, y, state: 'solid' | 'crumble', leftMs}[]`, `rainMangoes: {x, y, leftMs}[]`, `rain: {leftMs, dropsLeft} | null`, `slowmo: {leftMs} | null`, `shield: {leftMs} | null`.
 - Main functions carry `// MEC-006` comments (`src/core/energy.ts`, `src/core/skills.ts`).
@@ -118,7 +118,7 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 ## 8. Feedback in P1 (greybox only)
 - Orb: cyan circle with outline; blinks (shape on/off, not color only) when `leftMs ≤ 2000`. Rain mango: normal mango shape with a small droplet mark; blinks the same way.
 - Energy bar in the HUD under the level bar, number `energy/100`. Skill buttons: icon letter + cost; glow when affordable; grey when not; ring of remaining time while active.
-- Snip wall: rock tile with a tail-stripe mark. Rubble: small dark grey tile. Slow-mo: blue board tint. Shield: outline ring on the head.
+- Snip wall: rock tile with a tail-stripe mark. Slow-mo: blue board tint. Shield: outline ring on the head.
 - Text keys: `hud.energy`, `skill.slowmo.name`, `skill.tailSnip.name`, `skill.shield.name`, `skill.mangoRain.name`, `skill.reject.energy` ("Need {cost} energy"), `skill.reject.active` ("Already on!"), `skill.reject.noTarget` ("Too short to snip"), `tip.orb.first` ("Energy orb! Fuel for skills"), `death.snipWall`, `death.rubble`.
 - Sounds (synth): `orb` soft zap; `skillSlowmo`, `skillSnip`, `skillShield`, `skillRain` one cast tone each; `shieldBreak` crack; `nope` short low buzz. Haptics: orb 8 ms, cast 20 ms (GDD §10.4).
 - "Nope": on `skillRejected` with reason `active | energy | noTarget`, the button shakes 200 ms and plays `nope`; reason `empty` gives no feedback (no button is drawn for an empty slot). The orb tooltip shows once, on the first `orbSpawned` when the saved best level was < 2.
@@ -136,13 +136,13 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 | `energy.orbFromLevel` | 2 | GDD §3b |
 | `skills.slowmo.cost` / `.durationMs` / `.tickFactor` | 40 / 4000 / 1.6 | GDD §6.3 |
 | `skills.tailSnip.cost` / `.minLength` / `.wallLifeMs` | 30 / 3 / 3000 | GDD §6.3 |
-| `skills.shield.cost` / `.durationMs` / `.rubbleLifeMs` | 50 / 5000 / 1500 | GDD §6.3 |
+| `skills.shield.cost` / `.durationMs` | 50 / 5000 | GDD §6.3 |
 | `skills.shield.bonkPauseTicks` | 3 | lead decision (with the hit tick = 4 ticks, GDD §5.3 rule 1) |
 | `skills.mangoRain.cost` / `.durationMs` | 80 / 6000 | GDD §6.3 |
 | `skills.mangoRain.dropsMin` / `.dropsMax` | 6 / 10 | GDD §6.3 |
 | `skills.mangoRain.barCapFraction` | 0.5 | GDD §6.3 |
 | `skills.mangoRain.mangoLifeMs` / `.mangoBlinkMs` | 8000 / 2000 | lead decision (= base rot time / orb blink, GDD §7, §6.1) |
-`parseBalance` checks: all values positive integers except `tickFactor` (> 1) and `barCapFraction` (0 < x ≤ 1); `dropsMin ≤ dropsMax`; `orbBlinkMs < orbLifeMs`; `mangoBlinkMs < mangoLifeMs`. Snip wall / rubble crumble reuse `hazard.crumbleMs`.
+`parseBalance` checks: all values positive integers except `tickFactor` (> 1) and `barCapFraction` (0 < x ≤ 1); `dropsMin ≤ dropsMax`; `orbBlinkMs < orbLifeMs`; `mangoBlinkMs < mangoLifeMs`. Snip wall crumble reuse `hazard.crumbleMs`.
 
 ## 10. Acceptance tests
 - MEC-006-R1 start energy from options; non-integer or > max throws
@@ -167,7 +167,7 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 - MEC-006-R25 shield never saves from wall or self; warning cells do not consume it
 - MEC-006-R26 shield breaks each breakable family once and is consumed
 - MEC-006-R27 next step 4 ticks after the break
-- MEC-006-R28 shield break (rock and mover) leaves no rubble and the bonk pause still applies (owner 2026-11-06); a seeded rubble cell still kills with cause rubble
+- MEC-006-R28 shield break (rock and mover) leaves no rubble and the bonk pause still applies (owner 2026-11-06)
 - MEC-006-R29 drop count 6–10 and schedule over 6000 ms, deterministic per seed
 - MEC-006-R31 rain mango vanishes at 8000 ms without rock
 - MEC-006-R32 rain progress capped at floor(need × 0.5) per cast; extras give score only
@@ -179,7 +179,7 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 - Orbs appear from level 2 in every run, not only the first run (one rule; L1 stays the teaching level).
 - Orb attempts every 6 s are skipped when 2 orbs exist or no cell is fair; no catch-up (simple, predictable rate).
 - Orbs and rain drops use the MEC-002 "good" cell set with no fallback (never in pockets or at the head).
-- Orbs, rain mangoes, snip wall and rubble are `reserved` for all placement; snip wall and rubble are BFS walls (consistent with how rocks work).
+- Orbs, rain mangoes and snip wall are `reserved` for all placement; the snip wall is a BFS wall (consistent with how rocks work).
 - Skill presses are evaluated at once, never buffered; a press right after a level up is evaluated like any other (no hidden delayed spends).
 - Tail Snip is "active" while its wall is solid (one wall at a time; matches the GDD "same skill active" rule).
 - Cut size = keep `max(3, ceil(L/2))` (back half rounded down, min length 3); length ≤ 3 is `noTarget` with no spend.
@@ -192,7 +192,7 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 - Rain mangoes do not change MEC-002 eaten counters (the regular mango's rot pace is not affected by a skill).
 - Effect timers keep running through a level up (nothing is frozen, MEC-003-R9).
 - Effective tick is rounded to whole ms and the accumulator is clamped on change (determinism, no double steps).
-- Snip walls and rubble use the MEC-004 hazard state rules (reserved and BFS wall in every state, solid only in `solid`), and rubble is a list (a recast Shield can leave a second rubble cell).
+- Snip walls use the MEC-004 hazard state rules (reserved and BFS wall in every state, solid only in `solid`).
 - (lead, 2026-11-03) **Snip wall and Shield rubble are exempt from GDD §5.3 fairness rules 1–3.** GDD §6.3 is the more specific rule: they are the skill's price. The 3-tick bonk pause (R27) stays as specified. Replaces the former owner escalation. **Superseded for Shield by owner 2026-11-06:** Shield now leaves no rubble (R28), so only the snip wall keeps this exemption; snip wall behavior is unchanged.
 - Lead review 2026-11-03: orbs from L2 in every run and Slow-mo `round(base × 1.6)` accepted.
 **(b) Escalate to owner**

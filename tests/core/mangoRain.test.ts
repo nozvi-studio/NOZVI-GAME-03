@@ -127,12 +127,11 @@ describe('MEC-006 Mango Rain', () => {
     sim.advance(141);
     expect(sim.snapshot()).toMatchObject({ rampMangoesLeft: 4, tickMs: 136 });
   });
-  it('MEC-006-EC15 snip wall and rubble survive a level up', () => {
+  it('MEC-006-EC15 snip wall survives a level up', () => {
     const sim = levelUpRain({ mango: { ...FAR },
-      families: { snipWall: [{ family: 'snipWall', cells: [{ x: 9, y: 9 }], state: 'solid', leftMs: 3000 }],
-      rubble: [{ family: 'rubble', x: 8, y: 8, state: 'solid', leftMs: 1500 }] } });
+      families: { snipWall: [{ family: 'snipWall', cells: [{ x: 9, y: 9 }], state: 'solid', leftMs: 3000 }] } });
     sim.advance(140);
     expect(sim.snapshot()).toMatchObject({
-      snipWall: [{ x: 9, y: 9, state: 'solid', leftMs: 2860 }], rubble: [{ x: 8, y: 8, state: 'solid', leftMs: 1360 }] });
+      snipWall: [{ x: 9, y: 9, state: 'solid', leftMs: 2860 }] });
   });
 });

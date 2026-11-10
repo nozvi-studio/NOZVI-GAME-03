@@ -96,7 +96,7 @@ it.each(['body', 'solid'] as const)('MEC-013-R4 coconut shatters on a %s cell wi
   const { b, sim, s } = fixture();
   s.snake[0] = { x: 5, y: 2 };
   if (obstacle === 'body') s.snake[1] = { x: 5, y: 3 };
-  else s.families.rubble.push({ family: 'rubble', x: 5, y: 3, state: 'solid', leftMs: 5000 });
+  else s.families.snipWall.push({ family: 'snipWall', cells: [{ x: 5, y: 3 }], state: 'solid', leftMs: 5000 });
   const roll = s.families.coconut.rolls[0]!;
   sim.advance(b.coconut.warnMs + b.coconut.cellMs * 5);
   expect(s.status).toBe('playing');
@@ -115,7 +115,6 @@ it.each([false, true])('MEC-013-R5 shield breaks a coconut with non-zero moverDi
   expect(s.shield).toBeNull();
   expect(s.families.coconut.rolls).toEqual([]);
   expect(sim.drainEvents()).toContainEqual({ type: 'shieldBroke', family: 'coconut', x: 5, y: 3 });
-  expect(s.families.rubble).toEqual([]);
   expect(s.acc).toBeLessThan(0);
 });
 

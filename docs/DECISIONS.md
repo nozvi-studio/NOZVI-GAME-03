@@ -508,3 +508,7 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: `save()` refuses to write while the stored envelope is a newer version; `load()` keeps a one-time raw backup `mango-snake.save.v<N>.bak` before migrating an older envelope. No schema change.
 - Alternatives: new storage key per version (orphans progress, needs a copy step); backup on every load (rewrites the backup with already migrated data).
 - Consequence: the guard only protects builds that contain it. v0.2 builds do not have it until it is ported; keep backing up the key or use a different port for v0.2 until then.
+## 2026-11-10 Remove the rubble hazard family
+- Choice: delete `src/core/hazards/rubble.ts`, `Rubble` type, `CauseKey` `rubble`, `families.rubble`, snapshot `rubble`, `skills.shield.rubbleLifeMs`, rubble strings and drawing. `breakable` stays (still used by 9 other families).
+- Why: Shield stopped leaving rubble on 2026-11-06, so nothing creates it; dead code and a dead balance key.
+- Consequence: saves never persisted rubble, so no migration; tests that used rubble as a solid now use a snip wall.

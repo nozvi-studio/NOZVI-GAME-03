@@ -49,7 +49,7 @@ function steer(sim: Sim, s: SimState, b: Balance, input: Rng): void {
 function shallow(s: SimState): SimState {
   return { ...s, snake: s.snake.map(c => ({ ...c })), dir: { ...s.dir }, orbs: [...s.orbs], rainMangoes: [...s.rainMangoes],
     families: { npc: { ...s.families.npc, npcs: [...s.families.npc.npcs] }, spike: { ...s.families.spike, groups: [...s.families.spike.groups] }, gate: { ...s.families.gate, gates: [...s.families.gate.gates] }, coconut: { ...s.families.coconut, rolls: [...s.families.coconut.rolls] }, ice: { ...s.families.ice, patches: [...s.families.ice.patches] }, mud: { ...s.families.mud, patches: [...s.families.mud.patches] }, rock: [...s.families.rock], fence: [...s.families.fence], maze: [...s.families.maze],
-      terrain: [...s.families.terrain], rottenRock: [...s.families.rottenRock], snipWall: [...s.families.snipWall], rubble: [...s.families.rubble], bird: { target: s.families.bird.target && { ...s.families.bird.target } }, bomb: { ...s.families.bomb, bombs: [...s.families.bomb.bombs] }, shrink: { ...s.families.shrink } } };
+      terrain: [...s.families.terrain], rottenRock: [...s.families.rottenRock], snipWall: [...s.families.snipWall], bird: { target: s.families.bird.target && { ...s.families.bird.target } }, bomb: { ...s.families.bomb, bombs: [...s.families.bomb.bombs] }, shrink: { ...s.families.shrink } } };
 }
 
 export function p1FuzzSeed(b: Balance, seed: number, simMs: number): P1Report {
@@ -119,9 +119,8 @@ function checkPlacements(b: Balance, before: SimState, s: SimState, mango: SimSt
     if (isReserved(before, c.x, c.y)) bad(`t=${t}: ${h.family} on reserved (${c.x},${c.y})`);
   for (const T of fresh(s.families.terrain, before.families.terrain)) for (const c of T.cells)
     if (isReserved(before, c.x, c.y)) bad(`t=${t}: terrain on reserved (${c.x},${c.y})`);
-  const newRubble = fresh(s.families.rubble, before.families.rubble);
   // State at placement time: the snake has not moved yet; later placements of this step are excluded.
-  const mid = (): SimState => ({ ...shallow(s), snake: before.snake, dir: before.dir, families: { ...s.families, rubble: s.families.rubble.filter(r => !newRubble.includes(r)) } });
+  const mid = (): SimState => ({ ...shallow(s), snake: before.snake, dir: before.dir });
   for (const o of fresh(s.orbs, before.orbs)) {
     const m = mid(); m.orbs = m.orbs.filter(x => x !== o);
     if (isReserved(m, o.x, o.y) || !goodCells(m, b).some(c => c.x === o.x && c.y === o.y)) bad(`t=${t}: unfair orb (${o.x},${o.y})`);
@@ -129,10 +128,6 @@ function checkPlacements(b: Balance, before: SimState, s: SimState, mango: SimSt
   for (const r of fresh(s.rainMangoes, before.rainMangoes)) {
     const m = mid(); m.rainMangoes = m.rainMangoes.filter(x => x !== r);
     if (isReserved(m, r.x, r.y) || !goodCells(m, b).some(c => c.x === r.x && c.y === r.y)) bad(`t=${t}: unfair rain mango (${r.x},${r.y})`);
-  }
-  for (const r of newRubble) {
-    const m = { ...mid(), families: { ...s.families, rubble: before.families.rubble } };
-    if (isReserved(m, r.x, r.y)) bad(`t=${t}: rubble on reserved (${r.x},${r.y})`);
   }
   if (s.mango && s.mango !== mango && isReserved({ ...s, mango: null }, s.mango.x, s.mango.y)) bad(`t=${t}: mango on reserved`);
 }
