@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(balance): MOT-0 balance.motion block and validator
 - feat(motion): MOT-0 pure curves (clamp, easings, stagger, count-up, pulse)
 - docs: DECISIONS P4 return hook = challenges + skins (Capy skin is the skin platform)
 - docs: motion specs MOT-0..4 (visual feedback system for menus and in-run events), bouncy cartoon style

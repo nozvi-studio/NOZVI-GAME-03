@@ -112,6 +112,15 @@
     "reduced": { "flashAlphaMax": 0.2, "softMs": 400, "deathTotalMs": 1000 },
     "perf": { "maxParticles": 300, "maxFloats": 6, "maxSparks": 12 }
   },
+  "motion": {
+    "tapDownMs": 80, "tapUpMs": 180, "pressScale": 0.94, "releaseOvershoot": 1.06, "hoverScale": 1.03, "reducedPressAlpha": 0.85,
+    "popInMs": 240, "popFromScale": 0.85, "slideInMs": 260, "slidePx": 28, "fadeMs": 180, "staggerMs": 50, "staggerCapMs": 300,
+    "countUpMs": 900, "pulsePeriodMs": 900, "pulseAmp": 0.04, "overshoot": 1.7, "maxTweens": 40,
+    "toggleSlideMs": 160, "disabledAlpha": 0.45,
+    "idleBreathAmp": 0.02, "idleStartMs": 1200, "idlePauseMs": 4000, "resultsSeqMs": 1500,
+    "telegraphHzStart": 2.0, "telegraphHzEnd": 6.0, "telegraphAlphaMin": 0.55, "telegraphScaleAmp": 0.05, "telegraphUrgentMs": 300,
+    "telegraphSnapScale": 1.12, "telegraphSnapMs": 120, "digitPopMs": 160, "hudTickMs": 360, "barEaseMs": 220, "barSpendMs": 160, "energyLowFrac": 0.2
+  },
   "energy": { "max": 100, "orbGain": 15, "goldenGain": 10, "orbSpawnIntervalMs": 6000, "orbMax": 2, "orbLifeMs": 8000, "orbBlinkMs": 2000, "orbFromLevel": 2 },
   "skills": {
     "slowmo": { "cost": 40, "durationMs": 4000, "tickFactor": 1.6, "unlockLevel": 3 },

@@ -16,6 +16,17 @@ interface GroundTileBalance {
   shapePool: string[]; shapes: Record<string, Pair[]>;
 }
 
+/** MOT-0 motion tokens (all tuned by feel; see docs/superpowers/specs/2026-11-10-motion-0-foundation-design.md section 4). */
+export interface MotionBalance {
+  tapDownMs: number; tapUpMs: number; pressScale: number; releaseOvershoot: number; hoverScale: number; reducedPressAlpha: number;
+  popInMs: number; popFromScale: number; slideInMs: number; slidePx: number; fadeMs: number; staggerMs: number; staggerCapMs: number;
+  countUpMs: number; pulsePeriodMs: number; pulseAmp: number; overshoot: number; maxTweens: number;
+  toggleSlideMs: number; disabledAlpha: number;
+  idleBreathAmp: number; idleStartMs: number; idlePauseMs: number; resultsSeqMs: number;
+  telegraphHzStart: number; telegraphHzEnd: number; telegraphAlphaMin: number; telegraphScaleAmp: number; telegraphUrgentMs: number;
+  telegraphSnapScale: number; telegraphSnapMs: number; digitPopMs: number; hudTickMs: number; barEaseMs: number; barSpendMs: number; energyLowFrac: number;
+}
+
 export interface Balance {
   board: { cols: number; rows: number };
   snake: { start: Pair[]; startDir: Pair; maxQueuedTurns: number };
@@ -96,6 +107,7 @@ export interface Balance {
     reduced: { flashAlphaMax: number; softMs: number; deathTotalMs: number };
     perf: { maxParticles: number; maxFloats: number; maxSparks: number };
   };
+  motion: MotionBalance;
 }
 
 /** MEC-018-R11 first level of the shrink hazard (biome 6 big event). */
@@ -229,6 +241,15 @@ const SPEC: Spec = {
     reduced: { flashAlphaMax: 'prob', softMs: 'int+', deathTotalMs: 'int+' },
     perf: { maxParticles: 'int+', maxFloats: 'int+', maxSparks: 'int+' },
   },
+  motion: {
+    tapDownMs: 'int+', tapUpMs: 'int+', pressScale: 'num+', releaseOvershoot: 'num+', hoverScale: 'num+', reducedPressAlpha: 'prob',
+    popInMs: 'int+', popFromScale: 'num+', slideInMs: 'int+', slidePx: 'num+', fadeMs: 'int+', staggerMs: 'int+', staggerCapMs: 'int+',
+    countUpMs: 'int+', pulsePeriodMs: 'int+', pulseAmp: 'num+', overshoot: 'num+', maxTweens: 'int+',
+    toggleSlideMs: 'int+', disabledAlpha: 'prob',
+    idleBreathAmp: 'num+', idleStartMs: 'int+', idlePauseMs: 'int+', resultsSeqMs: 'int+',
+    telegraphHzStart: 'num+', telegraphHzEnd: 'num+', telegraphAlphaMin: 'prob', telegraphScaleAmp: 'num+', telegraphUrgentMs: 'int+',
+    telegraphSnapScale: 'num+', telegraphSnapMs: 'int+', digitPopMs: 'int+', hudTickMs: 'int+', barEaseMs: 'int+', barSpendMs: 'int+', energyLowFrac: 'prob',
+  },
 };
 
 function check(v: unknown, c: Check, path: string): void {
@@ -339,6 +360,18 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (rain.mangoBlinkMs >= rain.mangoLifeMs) fail('skills.mangoRain.mangoBlinkMs', 'must be < mangoLifeMs');
   if (b.energy.orbBlinkMs >= b.energy.orbLifeMs) fail('energy.orbBlinkMs', 'must be < orbLifeMs');
   if (b.ui.capy.blinkMaxGapMs < b.ui.capy.blinkMinGapMs) fail('ui.capy.blinkMaxGapMs', 'must be >= blinkMinGapMs');
+  // MOT-0 motion token cross-field rules (spec section 4).
+  const mo = b.motion;
+  if (mo.pressScale >= 1) fail('motion.pressScale', 'must be < 1');
+  if (mo.releaseOvershoot <= 1) fail('motion.releaseOvershoot', 'must be > 1');
+  if (mo.hoverScale <= 1) fail('motion.hoverScale', 'must be > 1');
+  if (mo.popFromScale >= 1) fail('motion.popFromScale', 'must be < 1');
+  if (mo.staggerCapMs < mo.staggerMs) fail('motion.staggerCapMs', 'must be >= staggerMs');
+  if (mo.telegraphHzEnd <= mo.telegraphHzStart) fail('motion.telegraphHzEnd', 'must be > telegraphHzStart');
+  if (mo.telegraphSnapScale <= 1 || mo.telegraphSnapScale >= 2) fail('motion.telegraphSnapScale', 'must be in (1, 2)');
+  if (mo.disabledAlpha >= 1) fail('motion.disabledAlpha', 'must be < 1');
+  if (mo.idleBreathAmp >= mo.pulseAmp) fail('motion.idleBreathAmp', 'must be < pulseAmp');
+  if (mo.resultsSeqMs < 200 + mo.countUpMs + mo.popInMs) fail('motion.resultsSeqMs', 'must be >= 200 + countUpMs + popInMs');
   // P3a-R7 death sequence <= 1.5 s (GDD §10.4, spec §4) and reduced-motion limits (P3a-R8).
   const jd = b.juice.death;
   if (jd.totalMs > 1500) fail('juice.death.totalMs', 'must be <= 1500');

@@ -59,6 +59,7 @@ All values are starting points; tune by feel.
 | `hudTickMs` | 360 | MOT-4 score tick-up |
 | `barEaseMs` / `barSpendMs` | 220 / 160 | MOT-4 bar fill ease / spend |
 | `energyLowFrac` | 0.2 | MOT-4 low-energy cue threshold |
+| `reducedPressAlpha` | 0.85 | MOT-0-R6 flat alpha dip on press in reduced motion |
 Validator: every value finite and > 0; scales in (0, 2); `releaseOvershoot` > 1 > `pressScale`; `staggerCapMs` >= `staggerMs`; `telegraphHzEnd` > `telegraphHzStart`; `0 < telegraphAlphaMin < 1`; `disabledAlpha` < 1; `idleBreathAmp` < `pulseAmp`; `resultsSeqMs` >= 200 + `countUpMs` + `popInMs`. MOT-3 run-event numbers live in a separate `balance.juice.events` block (see MOT-3), not here. Reduced motion reuses `juice.reduced.softMs` (400) as the single fade length.
 
 ## 5. Modules
