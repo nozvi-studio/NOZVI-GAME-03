@@ -6,11 +6,14 @@ import { countUpValue, staggerDelay } from './curves';
 export interface MotionTarget { x: number; y: number; alpha: number; scaleX: number; scaleY: number;
   setScale(x: number, y?: number): unknown; setAlpha(a: number): unknown; setPosition(x: number, y?: number): unknown }
 export interface TextTarget { setText(s: string): unknown }
+export interface EaseTarget { v: number }
 export interface TweenHandle { stop(): unknown }
 export interface TweenHost { add(cfg: Record<string, unknown>): TweenHandle; killTweensOf(t: object): unknown }
 export interface MotionDeps { tweens: TweenHost; cfg: MotionBalance; softMs: number; reduced: () => boolean; finePointer: boolean;
   ui: (mockPx: number) => number; shake: { ampPx: number; ms: number } }
 export interface Motion {
+  snap(t: MotionTarget, peak: number, ms: number, onDone?: () => void): void;
+  ease(t: EaseTarget, to: number, ms: number, onUpdate: (v: number) => void): void;
   pressDown(t: MotionTarget): void; release(t: MotionTarget): void; hover(t: MotionTarget, on: boolean): void;
   popIn(t: MotionTarget, index?: number): void; slideIn(t: MotionTarget, from: 'left' | 'right' | 'up' | 'down', index?: number): void;
   fadeIn(t: MotionTarget): void; fadeOut(t: MotionTarget): void; shake(t: MotionTarget): void;
@@ -65,6 +68,20 @@ export function createMotion(d: MotionDeps): Motion {
         play(t, { scaleX: r.sx, scaleY: r.sy, duration: cfg.tapUpMs - upMs, ease: 'Sine.easeInOut' }, () => snapRest(t));
       };
       play(t, { scaleX: r.sx * cfg.releaseOvershoot, scaleY: r.sy * cfg.releaseOvershoot, duration: upMs, ease: 'Quad.easeOut' }, phase2);
+    },
+    /** MOT-4-R5 one scale snap rest -> peak -> rest (half the time each); kill-by-target; no-op under reduced motion. */
+    snap(t, peak, ms, onDone) {
+      if (d.reduced()) { onDone?.(); return; }
+      const r = rest(t), upMs = Math.round(ms / 2);
+      const settle = (): void => {
+        play(t, { scaleX: r.sx, scaleY: r.sy, duration: ms - upMs, ease: 'Sine.easeInOut' }, () => { snapRest(t); onDone?.(); });
+      };
+      play(t, { scaleX: r.sx * peak, scaleY: r.sy * peak, duration: upMs, ease: 'Quad.easeOut' }, settle);
+    },
+    /** MOT-4-R7/R9 tween a plain number (bars, score). The caller draws from onUpdate; the end value is always exact. */
+    ease(t, to, ms, onUpdate) {
+      if (d.reduced() || ms <= 0) { d.tweens.killTweensOf(t); live.delete(t); t.v = to; onUpdate(to); return; }
+      play(t, { v: to, duration: ms, ease: 'Cubic.easeOut', onUpdate: () => onUpdate(t.v) }, () => { t.v = to; onUpdate(to); });
     },
     hover(t, on) {
       if (d.reduced() || !d.finePointer) return;
