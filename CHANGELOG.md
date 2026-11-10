@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(motion): MOT-0 adapter core with kill-by-target, budget and reduced motion
 - feat(balance): MOT-0 balance.motion block and validator
 - feat(motion): MOT-0 pure curves (clamp, easings, stagger, count-up, pulse)
 - docs: DECISIONS P4 return hook = challenges + skins (Capy skin is the skin platform)
