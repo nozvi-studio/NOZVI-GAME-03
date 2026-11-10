@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
 import { WIDTH } from '../layout';
 import { TOKENS, toInt, FONT_TITLE } from '../uiTokens';
+import type { MotionTarget } from '../motion/motionCore';
+import { attachFeedback } from './feedback';
+import type { FeedbackKind } from './feedbackModel';
 import { drawIcon, type IconId } from './icons';
 import { hitSize, ui, type ColumnLayout } from './layout';
 import { logoLetters } from './menuLayout';
@@ -15,19 +18,24 @@ export function scaledBlock(scene: Phaser.Scene, l: ColumnLayout): Phaser.GameOb
 }
 export function bgCream(scene: Phaser.Scene): void { scene.cameras.main.setBackgroundColor(toInt(TOKENS.surface.cream)); }
 
+/** MOT-1-R6 optional feedback for a zone widget: the visual is animated, the zone (hit area) never is. */
+export interface TapFx { visual: MotionTarget | MotionTarget[]; kind: FeedbackKind; navigates?: boolean }
+
 /** Press-and-release hit zone (same rule as the greybox `button`): fires only if the press started on it. */
-export function tap(scene: Phaser.Scene, x: number, y: number, w: number, h: number, name: string, action: () => void): Phaser.GameObjects.Zone {
+export function tap(scene: Phaser.Scene, x: number, y: number, w: number, h: number, name: string, action: () => void,
+  fx?: TapFx): Phaser.GameObjects.Zone {
   const z = scene.add.zone(x, y, w, h).setName(name).setInteractive({ useHandCursor: true });
+  const fb = fx ? attachFeedback(scene, fx.visual, fx.kind, { source: z, navigates: fx.navigates }) : undefined;
   let down = false;
-  z.on('pointerdown', () => { down = true; });
-  z.on('pointerup', () => { const go = down; down = false; if (go) action(); });
-  z.on('pointerout', () => { down = false; });
+  z.on('pointerdown', () => { down = true; fb?.press(); });
+  z.on('pointerup', () => { const go = down; down = false; fb?.release(); if (go) { if (fb) fb.fire(action); else action(); } });
+  z.on('pointerout', () => { down = false; fb?.release(); });
   return z;
 }
 
 /** Round white icon button (back, sliders, home), optional blue shelf for the footer variant. */
 export function roundIconButton(scene: Phaser.Scene, x: number, y: number, diameterMock: number, icon: IconId, name: string,
-  action: () => void, shelf = false): Phaser.GameObjects.Container {
+  action: () => void, shelf = false, opts: { navigates?: boolean } = {}): Phaser.GameObjects.Container {
   const d = ui(diameterMock), g = scene.add.graphics();
   if (shelf) g.fillStyle(toInt(TOKENS.sky.bottom), MENU.widgets.shelfAlpha).fillCircle(0, ui(MENU.widgets.shelfDy), d / 2);
   else g.fillStyle(toInt(TOKENS.shadow.card.color), TOKENS.shadow.card.alpha).fillCircle(0, ui(TOKENS.shadow.card.y), d / 2);
@@ -35,7 +43,7 @@ export function roundIconButton(scene: Phaser.Scene, x: number, y: number, diame
   const ic = scene.add.graphics(); drawIcon(ic, icon, d * MENU.widgets.iconRatio, toInt(TOKENS.text.primary));
   const c = scene.add.container(x, y, [g, ic]).setName(name);
   const hit = hitSize(d); // UIFIX-R7
-  tap(scene, x, y, hit, hit, `${name}-hit`, action);
+  tap(scene, x, y, hit, hit, `${name}-hit`, action, { visual: c, kind: 'round', navigates: opts.navigates });
   return c;
 }
 
