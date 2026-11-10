@@ -1,5 +1,6 @@
+import type { Balance } from '../balance';
 import type { Cell, HazardFamily, SimState, SpikeView } from '../types';
-import { cyclePhase, stepCycleCell, type CycleCell } from './blocks/cycleCells';
+import { cyclePhase, cycleWarnLeft, stepCycleCell, type CycleCell } from './blocks/cycleCells';
 import { transform } from './shapes';
 
 export interface SpikeGroup { id: number; t: number; lifeMs: number; cells: CycleCell[]; ending: boolean }
@@ -8,9 +9,9 @@ const groups = (s: SimState) => s.families.spike.groups;
 const at = (c: Cell, x: number, y: number) => c.x === x && c.y === y;
 
 // MEC-004-R2 expose snapshot-owned presentation data, without the internal collision flag.
-export function spikeSnapshot(s: SimState): SpikeView[] {
+export function spikeSnapshot(s: SimState, b: Balance): SpikeView[] {
   return groups(s).map(({ id, t, lifeMs, ending, cells }) => ({ id, t, lifeMs, ending,
-    cells: cells.map(({ x, y, delay, vis }) => ({ x, y, delay, vis })),
+    cells: cells.map(({ x, y, delay, vis }) => ({ x, y, delay, vis, warnLeftMs: cycleWarnLeft(b.spike, s.levelTimeMs) })),
   }));
 }
 

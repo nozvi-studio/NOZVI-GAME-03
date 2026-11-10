@@ -542,3 +542,26 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Context: hazard landing cells, snake turns and mango respawns are not sim events; the sim, its RNG and `session.turn` timing must not change (MOT-3-R5).
 - Choice: `GameScene`/`HudScene` derive them from snapshot changes with pure helpers in `src/game/juice/derived.ts` and feed them through `JuicePlayer.handleBatch` as extra `JuiceInput` members (`landedAt`, `turned`, `mangoSpawned`). Rulings A1-A8 of the MOT-3 plan: `juice.events.landShakeFamilies` flags `rock` only; `mangoGrow` takes a fifth `from` parameter; `drawMango` takes the ready `grow` scale; `drawSnake` gets a `bulge` argument; `JuiceDeps.headCell` supplies the head for the win burst; extra config keys (`shieldBurstLifeMs`, `spawnPuffLifeMs`, `sparkleRingRadius`, `sparkleThickness`).
 - Consequence: no new sim events and no new tween path; all numbers live in `balance.juice.events`.
+## 2026-11-10 - MOT-4 two extra motion keys
+- Context: The MOT-4 spec prose uses a bomb digit pop scale (1.2) and an 80 ms skill-ready alpha dip that its key table omitted.
+- Choice: Add `balance.motion.digitPopScale` and `readyDipMs` with validators (pop scale in (1, 2), alpha floor in (0, 1)).
+- Alternatives: Magic numbers in the draw code (rejected by the no-magic-numbers rule).
+- Consequence: All MOT-4 numbers are tunable in `config/balance.json`.
+
+## 2026-11-10 - MOT-4 score tick through motion.ease
+- Context: `motion.countUp` writes the Text directly, and the P3a `HudTop.bump` kills tweens on that Text, which would freeze a count mid-way.
+- Choice: Tick a proxy number with `motion.ease` (same cubicOut curve) and write the rounded value; `HudTop.bump` moves onto `motion.snap`; `Motion.rebase` keeps tween rest positions current after a HUD relayout.
+- Alternatives: `motion.countUp` on the Text (rejected: kill-by-target conflict).
+- Consequence: Every HUD motion on a target obeys kill-by-target; `countUpValue` and its tests are unchanged.
+
+## 2026-11-10 - MOT-4 hit-beat key and snap primitive
+- Context: `HazardView` has no id and MOT-0 has no generic "scale up and back" or "tween a number" primitive.
+- Choice: Beat key = type + first cell (unique among live hazards); add `Motion.snap`, `Motion.ease` and `Motion.rebase` to the adapter.
+- Alternatives: Add ids to the sim snapshot (rejected: sim change for a presentation need).
+- Consequence: `HitBeats` plays one proxy per key through `motion.snap`; reduced motion plays none.
+
+## 2026-11-10 - MOT-4 additive warnLeftMs on gate and spike cells
+- Context: Gate and spike cell views exposed only `vis`, so a remaining-time pulse could not be derived from the snapshot.
+- Choice: Add presentation-only `warnLeftMs` (via `cycleWarnLeft`) to both cell views; `HazardFamily.snapshot` now receives the balance.
+- Alternatives: Infer remaining time in the renderer from frame diffs (rejected: not replay-safe).
+- Consequence: No rule, state or determinism change; the field is derived.

@@ -15,3 +15,10 @@ export function stepCycleCell(c: CycleCell, p: CyclePhases, t: number, snakeOn: 
   c.vis = target === 'up' && snakeOn(c.x, c.y) ? 'warn' : target;
   c.up = c.vis === 'up';
 }
+
+// MOT-4-R1 presentation helper: remaining ms of the warn phase at cycle time t (0 when not in warn; a snake-held cell reads 0 = at the hit).
+export function cycleWarnLeft(p: CyclePhases, t: number): number {
+  if (t < 0) return 0;
+  const m = t % (p.downMs + p.warnMs + p.upMs);
+  return m >= p.downMs && m < p.downMs + p.warnMs ? p.downMs + p.warnMs - m : 0;
+}

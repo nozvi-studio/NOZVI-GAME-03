@@ -24,3 +24,23 @@ describe('MOT-0 balance.motion', () => {
     expect(() => loadBalance(withMotion({ tapUpMs: 0 }))).toThrow(/motion\.tapUpMs/);
   });
 });
+
+describe('MOT-4 balance.motion', () => {
+  it('MOT-4 config exposes the telegraph and HUD keys', () => {
+    const m = loadBalance().motion;
+    expect(m.telegraphHzStart).toBe(2); expect(m.telegraphHzEnd).toBe(6); expect(m.telegraphAlphaMin).toBe(0.55);
+    expect(m.telegraphUrgentMs).toBe(300); expect(m.hudTickMs).toBe(360); expect(m.energyLowFrac).toBe(0.2);
+    expect(m.digitPopScale).toBe(1.2); expect(m.readyDipMs).toBe(80);
+  });
+  it('MOT-4 rejects telegraphAlphaMin outside (0, 1), digitPopScale outside (1, 2), telegraphSnapScale outside (1, 2)', () => {
+    expect(() => loadBalance(withMotion({ telegraphAlphaMin: 0 }))).toThrow(/motion\.telegraphAlphaMin/);
+    expect(() => loadBalance(withMotion({ telegraphAlphaMin: 1 }))).toThrow(/motion\.telegraphAlphaMin/);
+    expect(() => loadBalance(withMotion({ digitPopScale: 1 }))).toThrow(/motion\.digitPopScale/);
+    expect(() => loadBalance(withMotion({ digitPopScale: 2 }))).toThrow(/motion\.digitPopScale/);
+    expect(() => loadBalance(withMotion({ telegraphSnapScale: 1 }))).toThrow(/motion\.telegraphSnapScale/);
+  });
+  it('MOT-4 rejects non-positive telegraph and HUD durations', () => {
+    for (const k of ['telegraphHzStart', 'telegraphUrgentMs', 'telegraphSnapMs', 'digitPopMs', 'hudTickMs', 'barEaseMs', 'barSpendMs', 'readyDipMs'])
+      expect(() => loadBalance(withMotion({ [k]: 0 }))).toThrow(new RegExp(`motion\\.${k}`));
+  });
+});

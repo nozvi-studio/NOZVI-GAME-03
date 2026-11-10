@@ -3,8 +3,10 @@ import type { Balance, Cell, SimSnapshot } from '../../core';
 import type { BoardLook } from './biomePalette';
 import { bangGeometry, chevronPoints, FENCE, HEDGE, hedgeRects, PART, ROCK, rockMetrics, TILE, WARN, type RockKind } from './boardParts';
 import { dashedRect } from './movers';
+import { newPulse, telegraphPulse, hazardKey, type TelegraphCfg, type TelegraphCtx } from './telegraph';
 
 type Graphics = Phaser.GameObjects.Graphics;
+const SCRATCH = newPulse();
 type PopCell = { x: number; y: number; k: number };
 
 // P3b1-R4 two-layer rounded box: edge colour underneath, fill inset by the border width (CSS border-box look).
@@ -33,24 +35,27 @@ export function drawRock(g: Graphics, c: Cell, size: number, look: BoardLook, al
   for (const k of ROCK.debris.chips) boxed(g, x0 + size * k.x, y0 + size * k.y, size * k.size, size * k.size, size * k.radius, PART.rock.fill, look.edge, bd, a);
 }
 
-// P3b1-R5 MEC-004 accelerating pulse kept; the outline ring, dashes and the "!" / chevron shape never depend on colour alone.
-export function drawWarn(g: Graphics, c: Cell, cell: number, ms: number, progress: number, look: BoardLook, kind: 'hazard' | 'rise', jitter: boolean, reduced: boolean): void {
-  const pulse = reduced ? 1 : 0.5 + 0.5 * Math.abs(Math.sin(ms * (0.006 + 0.014 * progress)));
+// P3b1-R5 outline ring, dashes and the "!" / chevron never depend on colour or blink alone; MOT-4-R1/R2/R6 the rhythm now comes from the shared
+// telegraphPulse(remaining, warnMs): it tightens toward the hit, only alpha/scale move, the symbol is always drawn, and the last
+// telegraphUrgentMs steps to the hard colour at full alpha. `ms` is ELAPSED warn ms.
+export function drawWarn(g: Graphics, c: Cell, cell: number, ms: number, warnMs: number, look: BoardLook, kind: 'hazard' | 'rise', jitter: boolean, reduced: boolean, cfg: TelegraphCfg): void {
+  const p = telegraphPulse(warnMs - ms, warnMs, cfg, reduced, SCRATCH);
   const off = jitter && !reduced ? Math.sin(ms / 28) * cell * 0.04 : 0;
   const x = c.x * cell + off, y = c.y * cell, ring = cell * WARN.ring, inset = cell * WARN.inset, size = cell - 2 * inset;
-  const hazard = kind === 'hazard', mark = reduced ? 1 : 0.35 + 0.65 * pulse;
+  const hazard = kind === 'hazard', a = p.urgent ? 1 : p.alpha, hard = hazard ? PART.warn.dash : PART.stone.warnDash;
   g.lineStyle(ring, look.edge, 1).strokeRoundedRect(x - ring / 2, y - ring / 2, cell + ring, cell + ring, cell * WARN.radius + ring / 2);
-  g.fillStyle(hazard ? PART.warn.fill : PART.stone.warnFill, (WARN.fillBase + WARN.fillGain * progress) * pulse + (hazard ? 0 : WARN.riseFillFloor))
+  g.fillStyle(p.urgent ? hard : hazard ? PART.warn.fill : PART.stone.warnFill, (WARN.fillBase + WARN.fillGain * p.progress) * a + (hazard ? 0 : WARN.riseFillFloor))
     .fillRoundedRect(x + inset, y + inset, size, size, cell * WARN.tileRadius);
-  g.lineStyle(Math.max(1, cell * WARN.dashWidth), hazard ? PART.warn.dash : PART.stone.warnDash, mark);
+  g.lineStyle(Math.max(1, cell * WARN.dashWidth), hard, a);
   dashedRect(g, x + inset, y + inset, size, size, cell * WARN.dash);
+  const s = p.scale, sc = (v: number): number => cell / 2 + (v - cell / 2) * s;   // scale the symbol about the cell centre
   if (hazard) {
     const k = bangGeometry(cell);
-    g.fillStyle(PART.warn.bang, mark).fillRoundedRect(x + k.bar.x, y + k.bar.y, k.bar.w, k.bar.h, k.bar.r).fillCircle(x + k.dot.x, y + k.dot.y, k.dot.r);
+    g.fillStyle(PART.warn.bang, a).fillRoundedRect(x + sc(k.bar.x), y + sc(k.bar.y), k.bar.w * s, k.bar.h * s, k.bar.r * s).fillCircle(x + sc(k.dot.x), y + sc(k.dot.y), k.dot.r * s);
   } else {
-    const [a, apex, e] = chevronPoints(cell);
-    g.lineStyle(cell * WARN.chevronWidth, PART.stone.chevron, mark);
-    g.lineBetween(x + a[0], y + a[1], x + apex[0], y + apex[1]).lineBetween(x + apex[0], y + apex[1], x + e[0], y + e[1]);
+    const [pa, apex, e] = chevronPoints(cell);
+    g.lineStyle(cell * WARN.chevronWidth, PART.stone.chevron, a);
+    g.lineBetween(x + sc(pa[0]), y + sc(pa[1]), x + sc(apex[0]), y + sc(apex[1])).lineBetween(x + sc(apex[0]), y + sc(apex[1]), x + sc(e[0]), y + sc(e[1]));
   }
 }
 
@@ -77,7 +82,7 @@ function drawHedge(g: Graphics, cells: readonly PopCell[], cell: number, _look: 
 }
 
 // P3b1-R6 Tile.dc rise-warn / rise-up: grey-blue stone tiles; the warn tile reuses drawWarn('rise') (ring + dashes + chevron).
-export function drawTerrains(g: Graphics, terrains: SimSnapshot['terrains'], cell: number, look: BoardLook, b: Balance, reduced: boolean): void {
+export function drawTerrains(g: Graphics, terrains: SimSnapshot['terrains'], cell: number, look: BoardLook, b: Balance, reduced: boolean, tel: TelegraphCtx): void {
   for (const terrain of terrains) {
     const a = Math.min(1, terrain.t / b.ui.terrainFadeInMs) * (terrain.t > terrain.lifeMs
       ? Math.max(0, 1 - (terrain.t - terrain.lifeMs) / b.terrain.fadeOutMs) : 1);
@@ -87,7 +92,7 @@ export function drawTerrains(g: Graphics, terrains: SimSnapshot['terrains'], cel
       if (c.vis === 'warn') {
         const downMs = b.terrain.periodMs - b.terrain.upMs - b.terrain.warnMs;
         const ct = Math.max(0, terrain.t - b.terrain.startDelayMs - c.delay) % b.terrain.periodMs - downMs;
-        drawWarn(g, c, cell, Math.max(0, ct), Math.min(1, Math.max(0, ct) / b.terrain.warnMs), look, 'rise', true, reduced);
+        drawWarn(g, c, cell, Math.min(b.terrain.warnMs, Math.max(0, ct)), b.terrain.warnMs, look, 'rise', true, reduced, tel.cfg);
       } else if (c.vis === 'up') {
         const i = cell * TILE.inset, s = cell - 2 * i, bw = cell * TILE.border, r = cell * TILE.stoneRadius;
         boxed(g, x + i, y + i + s * TILE.frontFrom, s, s * (1 - TILE.frontFrom), r, PART.stone.front, look.edge, bw, a);
@@ -98,21 +103,21 @@ export function drawTerrains(g: Graphics, terrains: SimSnapshot['terrains'], cel
 }
 
 // P3b1-R4 MEC-004 warnings, landing pop, expiry flicker and crumble stay cosmetic; art follows BiomeBoardsD2.
-export function drawHazards(g: Graphics, hazards: SimSnapshot['hazards'], cell: number, look: BoardLook, b: Balance, reduced: boolean): void {
+export function drawHazards(g: Graphics, hazards: SimSnapshot['hazards'], cell: number, look: BoardLook, b: Balance, reduced: boolean, tel: TelegraphCtx): void {
   for (const h of hazards) {
     const crumble = h.state === 'crumble';
     let alpha = 1, crumbleK = 1;
     if (crumble) { alpha = Math.max(0, 1 - h.t / b.hazard.crumbleMs); crumbleK = Math.max(0.15, alpha); }
     else if (h.lifeMs - h.t < b.ui.hazardFlickerMs && !reduced) alpha = 0.55 + 0.45 * Math.abs(Math.sin(h.t / 90));
-    const solid: PopCell[] = [];
+    const solid: PopCell[] = [], key = hazardKey(h);
     for (const c of h.cells) {
       if (h.state === 'warn' || (h.state === 'solid' && !c.on)) {
         const ms = h.state === 'warn' ? h.t : h.warnMs;
         if (h.type === 'rock') drawRock(g, { x: (c.x + 0.5) * cell, y: (c.y + 0.5) * cell }, cell, look, ROCK.previewAlpha);
-        drawWarn(g, c, cell, ms, Math.min(1, ms / h.warnMs), look, 'hazard', false, reduced);
+        drawWarn(g, c, cell, ms, h.warnMs, look, 'hazard', false, reduced, tel.cfg);
         continue;
       }
-      solid.push({ x: c.x, y: c.y, k: crumble ? crumbleK : reduced ? 1 : Math.min(1, 0.6 + c.ageMs / 250) });
+      solid.push({ x: c.x, y: c.y, k: (crumble ? crumbleK : reduced ? 1 : Math.min(1, 0.6 + c.ageMs / 250)) * (crumble ? 1 : tel.beat(key)) });
     }
     if (h.type === 'rock') for (const c of solid) drawRock(g, { x: (c.x + 0.5) * cell, y: (c.y + 0.5) * cell }, cell * c.k, look, alpha, 'rock', crumble);
     else if (h.type === 'fence') drawFence(g, solid, cell, look, alpha);

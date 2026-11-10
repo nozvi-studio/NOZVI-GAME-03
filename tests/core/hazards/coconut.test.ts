@@ -181,7 +181,7 @@ it('MEC-013-R2 coconut snapshots expose the warning path and rolling cell withou
   expect(before.families.coconut).toEqual([{ id: 1, path: row(3), cell: null, state: 'warn', t: 0, warnMs: b.coconut.warnMs }]);
   sim.advance(b.coconut.warnMs);
   expect(sim.snapshot().families.coconut[0]!.cell).toEqual({ x: 0, y: 3 });
-  expect(coconut.snapshot(s)).toEqual(sim.snapshot().families.coconut);
+  expect(coconut.snapshot(s, loadBalance())).toEqual(sim.snapshot().families.coconut);
   s.families.coconut.rolls[0]!.mover.path[0]!.x = 99;
   expect(before.families.coconut[0]!.path[0]).toEqual({ x: 0, y: 3 });
 });

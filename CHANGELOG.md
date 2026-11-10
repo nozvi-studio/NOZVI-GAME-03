@@ -22,6 +22,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - feat(juice): MOT-3 derived input helpers and new board visuals/inputs
 - feat(motion): MOT-3-R11 mangoGrow and turnTilt curves, mango pop uses balance.motion
 - feat(balance): MOT-3 balance.juice.events block and validator
+- docs: MOT-4 CODEMAP, decisions, MEC section 8 pointers
+- feat(hud): MOT-4 skill ready pop, spend dip and eased charge gauge; skill shake via motion adapter
+- feat(hud): MOT-4 score tick-up, quota bar, energy easing and cues, title and chip transitions via motion API
+- feat(hud): MOT-4 pure HUD motion helpers and score/quota view fields
+- feat(motion): MOT-4 hit beat on warn-to-live edges and bomb digit pop (HitBeats, GameScene wiring)
+- feat(motion): MOT-4 gate, spike, bomb and shrinking ring warn pulses, hit-beat and digit-pop scale hooks
+- feat(motion): MOT-4 ground tile and coconut/NPC lane warn pulses
+- feat(motion): MOT-4 rock/fence/maze/rise warn pulse from remaining time (tightening rhythm, alpha floor, urgent colour)
+- feat(core): additive warnLeftMs on gate and spike cell snapshot views (presentation only, MOT-4)
+- feat(motion): MOT-4 Motion.snap (scale beat) and Motion.ease (number tween) on the MOT-0 adapter
+- feat(motion): MOT-4 pure telegraphPulse (remaining-time rhythm, alpha floor, urgent window) and TelegraphCtx
+- feat(balance): MOT-4 digitPopScale and readyDipMs motion keys, alpha-min and pop-scale validators
+- test(motion): MOT-4 characterize warn-time direction for telegraph pulses
 - feat(motion): MOT-0 motion foundation (curves, balance.motion, adapter)
 - feat(motion): MOT-0 adapter core with kill-by-target, budget and reduced motion
 - feat(balance): MOT-0 balance.motion block and validator

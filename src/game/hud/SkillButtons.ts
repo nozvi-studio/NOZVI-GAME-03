@@ -1,23 +1,27 @@
 import type Phaser from 'phaser';
 import type { Balance } from '../../core';
-import { reduceMotion } from '../render/palette';
+import { motionFor, type Motion } from '../motion';
+import { easeMsFor, skillReadyEdge } from './hudMotion';
 import { TOKENS, toInt } from '../uiTokens';
 import { ui } from '../ui/layout';
 import { chargeSegment } from './gaugeGeometry';
 import { drawCard, hudLabel } from './draw';
 import { hudIconKey, type IconTone } from './hudIcons';
 import type { HudLayout } from './hudLayout';
-import type { HudView, SkillView } from './hudModel';
+import type { HudView, SkillState, SkillView } from './hudModel';
 
 // Mockup px of the skill button drawing (GameD2 / SkillActiveD2).
 const M = { icon: 38, boltIcon: 12, costFont: 14, pressed: 4, shelfUp: 3, shelfDown: 7, glow: 7, ring: 46, ringW: 6, chipPadL: 8, chipPadR: 10, chipGap: 4, chargeSteps: 24, chargeArc: 48 } as const;
 
-interface Slot { c: Phaser.GameObjects.Container; g: Phaser.GameObjects.Graphics; icon: Phaser.GameObjects.Image; cost: Phaser.GameObjects.Text; costG: Phaser.GameObjects.Graphics; bolt: Phaser.GameObjects.Image; key: string }
+interface Slot { c: Phaser.GameObjects.Container; g: Phaser.GameObjects.Graphics; icon: Phaser.GameObjects.Image; cost: Phaser.GameObjects.Text; costG: Phaser.GameObjects.Graphics; bolt: Phaser.GameObjects.Image; key: string;
+  state: SkillState | null; view: SkillView | null; chargeTarget: number; shownCharge: number; charge: { v: number }; dip: { v: number } }
 
 // P3b2-R15 GameD2 / SkillActiveD2 skill buttons: off (greyed), ready (glow ring), active (pressed, countdown ring); cost chip under each.
 export class SkillButtons {
   private readonly slots: Slot[] = [];
+  private readonly motion: Motion;
   constructor(private readonly scene: Phaser.Scene, private readonly l: HudLayout, onUse: (slot: 0 | 1) => void, private readonly b: Balance) {
+    this.motion = motionFor(scene);
     for (const slot of [0, 1] as const) {
       const r = l.skills[slot];
       const g = scene.add.graphics().setName(`skill-${slot}-face`), icon = scene.add.image(0, 0, hudIconKey('slowmo')).setDisplaySize(ui(M.icon), ui(M.icon));
@@ -25,18 +29,30 @@ export class SkillButtons {
       c.on('pointerdown', (_p: unknown, _x: number, _y: number, e?: Phaser.Types.Input.EventData) => { e?.stopPropagation(); onUse(slot); }); // MEC-007-R14 reacts on pointer down
       const costG = scene.add.graphics(), bolt = scene.add.image(0, 0, hudIconKey('bolt')).setDisplaySize(ui(M.boltIcon), ui(M.boltIcon));
       const cost = hudLabel(scene, 0, 0, '', M.costFont, TOKENS.text.primary, 800, `skill-${slot}-cost`).setOrigin(0, 0.5);
-      this.slots.push({ c, g, icon, cost, costG, bolt, key: '' });
+      this.slots.push({ c, g, icon, cost, costG, bolt, key: '', state: null, view: null, chargeTarget: -1, shownCharge: 0, charge: { v: 0 }, dip: { v: 1 } });
     }
   }
   apply(skills: HudView['skills']): void {
     for (const slot of [0, 1] as const) this.draw(slot, skills[slot]);
   }
   private draw(slot: 0 | 1, k: SkillView | null): void {
-    const s = this.slots[slot]!, r = this.l.skills[slot];
+    const s = this.slots[slot]!, cfg = this.b.motion;
     for (const o of [s.c, s.costG, s.cost, s.bolt]) o.setVisible(k !== null);
+    const edge = skillReadyEdge(s.state, k?.state ?? null); s.state = k?.state ?? null; s.view = k;
     if (!k) { s.key = ''; return; }
+    if (edge === 'pop') this.motion.release(s.c);                                         // 1 -> releaseOvershoot -> 1 over tapUpMs (MOT-4-R11)
+    else if (edge === 'dip') { s.c.setAlpha(cfg.reducedPressAlpha); s.dip.v = cfg.reducedPressAlpha; this.motion.ease(s.dip, 1, cfg.readyDipMs, v => { s.c.setAlpha(v); }); }   // 80 ms alpha dip, no scale
+    if (k.charge !== s.chargeTarget) {                                                    // eased charge between the quantised gauge steps
+      const first = s.chargeTarget < 0, ms = first ? 0 : easeMsFor(s.chargeTarget, k.charge, cfg); s.chargeTarget = k.charge;
+      this.motion.ease(s.charge, k.charge, ms, v => { s.shownCharge = v; this.paint(slot); });
+    }
+    this.paint(slot);
+  }
+  private paint(slot: 0 | 1): void {
+    const s = this.slots[slot]!, k = s.view, r = this.l.skills[slot];
+    if (!k) return;
     s.cost.setText(String(k.cost));
-    const fill = k.state === 'active' ? 0 : Math.round(k.charge * M.chargeSteps); // UIFIX-R12 quantised gauge steps
+    const fill = k.state === 'active' ? 0 : Math.round(Math.min(1, Math.max(0, s.shownCharge)) * M.chargeSteps); // UIFIX-R12 quantised gauge steps
     const key = `${k.id}|${k.state}|${k.ring === null ? 'n' : k.ring.toFixed(2)}|${k.cost}|${fill}`;
     if (key === s.key) return;
     s.key = key;
@@ -66,10 +82,5 @@ export class SkillButtons {
   /** P3a juice adapter: centre of a skill button (JuiceHud.skillPoint). */
   point(slot: 0 | 1): { x: number; y: number } { const r = this.l.skills[slot]; return { x: r.cx, y: r.cy }; }
   /** MEC-006 §8 / GDD §10.4 "nope" shake on a rejected cast; skipped under reduced motion. */
-  shake(slot: 0 | 1): void {
-    if (reduceMotion()) return;
-    const c = this.slots[slot]!.c, x = this.l.skills[slot].cx, y = this.l.skills[slot].cy, amp = this.b.ui.hud.rejectShakeAmpPx;
-    this.scene.tweens.killTweensOf(c); c.setPosition(x, y);
-    this.scene.tweens.add({ targets: c, x: x + amp, duration: this.b.ui.hud.rejectShakeMs / 4, yoyo: true, repeat: 1, onComplete: () => c.setPosition(x, y) });
-  }
+  shake(slot: 0 | 1): void { this.motion.shake(this.slots[slot]!.c); }
 }

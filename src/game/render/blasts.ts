@@ -1,8 +1,10 @@
 import type Phaser from 'phaser';
 import type { SimSnapshot } from '../../core';
-import { blinkOn, dashedRect } from './movers';
+import { dashedRect } from './movers';
+import { newPulse, telegraphPulse, type TelegraphCtx } from './telegraph';
 
 type Graphics = Phaser.GameObjects.Graphics;
+const SCRATCH = newPulse();
 
 // Presentation constants.
 const BOMB = { body: 0x161616, fuse: 0xf0c040, warn: 0x7a7a7a, outline: 0xd1352f, blast: 0xd1352f, digit: 0xffffff } as const;
@@ -22,21 +24,21 @@ const DIGIT_SEGS = ['abcdef', 'bc', 'abged', 'abgcd', 'fgbc', 'afgcd', 'afgedc',
 export const digitSegments = (digit: number): [number, number, number, number][] =>
   [...(DIGIT_SEGS[Math.min(9, Math.max(0, digit))] ?? '')].map(k => SEG[k]!);
 
-function drawDigit(g: Graphics, digit: number, cx: number, cy: number, cellPx: number): void {
-  const w = cellPx * 0.22, h = w * 2;
-  g.lineStyle(Math.max(1.5, cellPx * 0.07), BOMB.digit);
+function drawDigit(g: Graphics, digit: number, cx: number, cy: number, cellPx: number, k = 1): void {
+  const w = cellPx * 0.22 * k, h = w * 2;
+  g.lineStyle(Math.max(1.5, cellPx * 0.07 * k), BOMB.digit);
   for (const [x1, y1, x2, y2] of digitSegments(digit)) g.lineBetween(cx - w / 2 + x1 * w, cy - h / 2 + y1 * w, cx - w / 2 + x2 * w, cy - h / 2 + y2 * w);
 }
 
 // MEC-017 section 8 greybox bombs: warn like a rock, landed = black circle + digit + dashed area, active = filled area.
-export function drawBlasts(g: Graphics, snap: SimSnapshot, cellPx: number, timeMs: number, reducedMotion = false): void {
+export function drawBlasts(g: Graphics, snap: SimSnapshot, cellPx: number, tel: TelegraphCtx, reducedMotion = false): void {
   for (const b of snap.families.bomb) {
     const x = b.x * cellPx, y = b.y * cellPx, cx = x + cellPx / 2, cy = y + cellPx / 2, inset = cellPx * 0.12, size = cellPx - inset * 2;
     if (b.state === 'warn') {
-      if (!blinkOn(timeMs, reducedMotion)) continue;
-      g.fillStyle(BOMB.warn, 0.55).fillCircle(cx, cy, cellPx * 0.34);
-      g.lineStyle(Math.max(1, cellPx * 0.06), BOMB.outline);
-      if (reducedMotion) g.strokeRect(x + inset, y + inset, size, size);       // solid outline, no blink
+      const p = telegraphPulse(b.leftMs, tel.warnMs.bomb, tel.cfg, reducedMotion, SCRATCH), a = p.urgent ? 1 : p.alpha;   // MOT-4-R3: never skipped
+      g.fillStyle(BOMB.warn, 0.55 * a).fillCircle(cx, cy, cellPx * 0.34 * p.scale);
+      g.lineStyle(Math.max(1, cellPx * 0.06), BOMB.outline, a);
+      if (reducedMotion) g.strokeRect(x + inset, y + inset, size, size);       // solid outline under reduced motion
       else dashedRect(g, x + inset, y + inset, size, size, cellPx * 0.12);
       continue;
     }
@@ -45,9 +47,10 @@ export function drawBlasts(g: Graphics, snap: SimSnapshot, cellPx: number, timeM
       for (const c of b.area) g.fillRect(c.x * cellPx, c.y * cellPx, cellPx, cellPx);
       continue;
     }
-    g.lineStyle(Math.max(1, cellPx * 0.05), BOMB.outline);
+    const p = telegraphPulse(b.leftMs, tel.warnMs.bombCount, tel.cfg, reducedMotion, SCRATCH);
+    g.lineStyle(Math.max(1, cellPx * 0.05), BOMB.outline, p.urgent ? 1 : p.alpha);
     for (const c of b.area) dashedRect(g, c.x * cellPx + 1, c.y * cellPx + 1, cellPx - 2, cellPx - 2, cellPx * 0.14);
-    g.fillStyle(BOMB.body).fillCircle(cx, cy, cellPx * 0.4);
-    drawDigit(g, bombDigit(b.leftMs), cx, cy, cellPx);
+    g.fillStyle(BOMB.body).fillCircle(cx, cy, cellPx * 0.4 * tel.beat(`b:${b.id}`));
+    drawDigit(g, bombDigit(b.leftMs), cx, cy, cellPx, tel.beat(`bd:${b.id}`));
   }
 }

@@ -97,3 +97,5 @@ Save fields: none.
 - **L4** One shared reopen deadline: late cells are closed for less time, never longer (TR-C3).
 ### Escalations (owner)
 - **OQ-C1** Shrink frequency: provisional `cooldownMs` 20000 and weight 2 from L27; the owner confirms or changes after the P2c bot and playtest report.
+
+Telegraph rhythm, alpha floor and hit beat are presentation only and live in docs/superpowers/specs/2026-11-10-motion-4-telegraph-hud-feedback-design.md (MOT-4); no rule change.

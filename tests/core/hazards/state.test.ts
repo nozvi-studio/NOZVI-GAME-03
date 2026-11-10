@@ -33,7 +33,7 @@ it('MEC-004-R2 spawn returns cells, counts every phase and snapshots without ali
   expect(cells).not.toBeNull();
   expect(cells).toEqual(s.families.rock[0]!.cells.map(({ x, y }) => ({ x, y })));
   expect(ROCK.count!(s)).toBe(1);
-  const copy = ROCK.snapshot(s);
+  const copy = ROCK.snapshot(s, loadBalance());
   s.families.rock[0]!.state = 'crumble';
   expect(ROCK.count!(s)).toBe(1);
   expect(copy).toMatchObject([{ state: 'warn' }]);

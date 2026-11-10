@@ -90,3 +90,5 @@ Save fields: none.
 - **L5** The director emits `hazardIncoming`; the family does not emit it itself (avoids a duplicate event; DECISIONS 2026-11-05 P2b Task 1).
 ### Escalate to owner
 - Player-facing strings (OQ-B6): provisional, owner review at end of P2.
+
+Telegraph rhythm, alpha floor and hit beat are presentation only and live in docs/superpowers/specs/2026-11-10-motion-4-telegraph-hud-feedback-design.md (MOT-4); no rule change.

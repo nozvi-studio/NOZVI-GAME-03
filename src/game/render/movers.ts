@@ -1,7 +1,10 @@
 import type Phaser from 'phaser';
 import type { Cell, Dir, NpcView, SimSnapshot } from '../../core';
 
+import { newPulse, telegraphPulse, type TelegraphCtx } from './telegraph';
+
 type Graphics = Phaser.GameObjects.Graphics;
+const SCRATCH = newPulse();
 
 // Presentation constants; gameplay timing stays in balance.
 const WARN_BLINK_MS = 250;
@@ -23,8 +26,8 @@ export function pathDirs(path: readonly Cell[]): Dir[] {
 }
 
 /** MEC-013 §8 triangle vertices [x1,y1,x2,y2,x3,y3] of an arrow centred in a cell, pointing along dir. */
-export function arrowTriangle(c: Cell, d: Dir, cellPx: number): [number, number, number, number, number, number] {
-  const cx = (c.x + 0.5) * cellPx, cy = (c.y + 0.5) * cellPx, len = cellPx * 0.24, wing = cellPx * 0.16;
+export function arrowTriangle(c: Cell, d: Dir, cellPx: number, scale = 1): [number, number, number, number, number, number] {
+  const cx = (c.x + 0.5) * cellPx, cy = (c.y + 0.5) * cellPx, len = cellPx * 0.24 * scale, wing = cellPx * 0.16 * scale;
   return [cx + d.x * len, cy + d.y * len, cx - d.x * len - d.y * wing, cy - d.y * len + d.x * wing,
     cx - d.x * len + d.y * wing, cy - d.y * len - d.x * wing];
 }
@@ -50,15 +53,16 @@ export function dashedRect(g: Graphics, x: number, y: number, w: number, h: numb
     ...dashedSegments(x + w, y + h, x, y + h, dashPx), ...dashedSegments(x, y + h, x, y, dashPx)]) g.lineBetween(ax, ay, bx, by);
 }
 
-function drawLane(g: Graphics, path: readonly Cell[], cellPx: number, timeMs: number, reducedMotion: boolean, warn: boolean): void {
-  if (warn && !blinkOn(timeMs, reducedMotion)) return;
+// MOT-4-R4 lane warn: fill + arrows pulse with the shared tightening rhythm (remaining = warnMs - t); never hidden, outline kept under reduced motion.
+function drawLane(g: Graphics, path: readonly Cell[], cellPx: number, tel: TelegraphCtx, reducedMotion: boolean, warn: boolean, t: number, warnMs: number): void {
+  const p = warn ? telegraphPulse(warnMs - t, warnMs, tel.cfg, reducedMotion, SCRATCH) : null, a = p ? (p.urgent ? 1 : p.alpha) : 1, k = p ? p.scale : 1;
   const inset = cellPx * 0.08, size = cellPx - inset * 2, dirs = pathDirs(path);
   g.lineStyle(Math.max(1, cellPx * 0.06), LANE.line);
   path.forEach((c, i) => {
-    g.fillStyle(LANE.fill, warn ? 0.45 : 0.18).fillRect(c.x * cellPx + inset, c.y * cellPx + inset, size, size);
-    if (warn && reducedMotion) g.strokeRect(c.x * cellPx + inset, c.y * cellPx + inset, size, size);   // solid outline, no blink
-    const [x1, y1, x2, y2, x3, y3] = arrowTriangle(c, dirs[i]!, cellPx);
-    g.fillStyle(LANE.line, warn ? 0.9 : 0.5).fillTriangle(x1, y1, x2, y2, x3, y3);
+    g.fillStyle(LANE.fill, warn ? 0.45 * a : 0.18).fillRect(c.x * cellPx + inset, c.y * cellPx + inset, size, size);
+    if (warn && reducedMotion) g.strokeRect(c.x * cellPx + inset, c.y * cellPx + inset, size, size);   // solid outline under reduced motion
+    const [x1, y1, x2, y2, x3, y3] = arrowTriangle(c, dirs[i]!, cellPx, k);
+    g.fillStyle(LANE.line, warn ? 0.9 * a : 0.5).fillTriangle(x1, y1, x2, y2, x3, y3);
   });
 }
 
@@ -80,17 +84,17 @@ function drawNpc(g: Graphics, n: NpcView, cellPx: number): void {
 }
 
 // MEC-013 / MEC-015 / MEC-016 section 8 greybox: lanes, rolling coconuts, patrol routes, NPCs and the bird shadow.
-export function drawMovers(g: Graphics, snap: SimSnapshot, cellPx: number, timeMs: number, reducedMotion = false): void {
+export function drawMovers(g: Graphics, snap: SimSnapshot, cellPx: number, tel: TelegraphCtx, reducedMotion = false): void {
   const { coconut, npc, bird } = snap.families;
   for (const c of coconut) {
-    drawLane(g, c.path, cellPx, timeMs, reducedMotion, c.state === 'warn');
+    drawLane(g, c.path, cellPx, tel, reducedMotion, c.state === 'warn', c.t, c.warnMs);
     if (c.cell && c.state !== 'warn') {
       const cx = (c.cell.x + 0.5) * cellPx, cy = (c.cell.y + 0.5) * cellPx;
       g.fillStyle(LANE.coconut).fillCircle(cx, cy, cellPx * 0.36).fillStyle(LANE.coconutHi).fillCircle(cx - cellPx * 0.1, cy - cellPx * 0.1, cellPx * 0.1);
     }
   }
   for (const n of npc) {
-    drawLane(g, n.path, cellPx, timeMs, reducedMotion, n.state === 'warn');
+    drawLane(g, n.path, cellPx, tel, reducedMotion, n.state === 'warn', n.t, n.warnMs);
     drawNpc(g, n, cellPx);
   }
   if (bird) {

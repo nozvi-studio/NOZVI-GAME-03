@@ -1,6 +1,6 @@
-import type { Pair } from '../balance';
+import type { Balance, Pair } from '../balance';
 import type { Cell, GateView, HazardFamily, SimState, TimedCell } from '../types';
-import { stepCycleCell, type CycleCell } from './blocks/cycleCells';
+import { cycleWarnLeft, stepCycleCell, type CycleCell } from './blocks/cycleCells';
 import { transform } from './shapes';
 
 export interface GateInstance {
@@ -11,9 +11,11 @@ const at = (c: Cell, x: number, y: number) => c.x === x && c.y === y;
 const gates = (s: SimState) => s.families.gate.gates;
 
 // MEC-004-R2 snapshot-owned views omit the cycle block's internal collision flag.
-export function gateSnapshot(s: SimState): GateView[] {
+export function gateSnapshot(s: SimState, b: Balance): GateView[] {
+  const g = b.gate, phases = { downMs: g.openMs, warnMs: g.warnMs, upMs: g.closedMs };
   return gates(s).map(({ id, t, lifeMs, state, fence, gate: cells }) => ({ id, t, lifeMs, state,
-    fence: fence.map(c => ({ ...c })), gate: cells.map(({ x, y, delay, vis }) => ({ x, y, delay, vis })),
+    fence: fence.map(c => ({ ...c })),
+    gate: cells.map(({ x, y, delay, vis }) => ({ x, y, delay, vis, warnLeftMs: cycleWarnLeft(phases, t - g.landWarnMs - delay) })),
   }));
 }
 

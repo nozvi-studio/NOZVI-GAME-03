@@ -1,6 +1,6 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-10 by Claude (lead, local) **Milestone:** M2 P3 on `version/v0.3` (branched from docs/p3-spec, owner 2026-11-07); P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
+**Updated:** 2026-11-10 by Claude (MOT-4 agent) **Milestone:** M2 P3 on `version/v0.3` (branched from docs/p3-spec, owner 2026-11-07); P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
 
 ## Now (in progress)
 - [x] MOT-1 widget feedback implemented on feat/motion-1 (not merged; lead merges): one wrapper for pill/round/card/switch/hud buttons, navigate delay, Pause disabled state, Settings knob slide, Loadout reject + badge pop. [ ] Owner browser eye-check of Tasks 4-9 (list in the MOT-1 plan).
@@ -57,4 +57,3 @@
 - 2026-11-06 (P3c): spec + plan in docs/superpowers/; 4 tasks via subagents (Haiku/Sonnet, Opus final review). Final review caught Phaser 3.90 decoding every data: URL as base64 -> fixed (base64 SVG URLs). Deferred minors in branch ledger (magic numbers in eye/mouth geometry, capyDie twice, preview label contrast).
 - 2026-11-06 (art prep): reviewed Figma D2 and agent-sprite-forge; wrote ART-001 v2 + ART-002 (docs/JSON only, no tests run); branch feat/capy-character-spec from version/v0.2, pushed, not merged.
 - 2026-11-06: owner accepted (nghiem thu) version/v0.2 with P2c, Shield without rubble, debug skip buttons, run start waits for first input (MEC-001-R2). First owner log (69 runs, 37 normal): over40 empty, wall 77% (review), max L13, biome 4 not reached; 7 runs died at 1260 ms with 0 turns -> fixed by the waiting phase.
-- P2c executed via subagent-driven development (Sonnet implementers + reviewers, Opus final review, agy browser QA). Fuzz found and fixed shrink-on-reserved-cell; QA found and fixed run-start banner race.

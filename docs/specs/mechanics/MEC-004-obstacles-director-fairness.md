@@ -182,3 +182,5 @@ Fuzz seed counts (50 / 200) and the bot settings are test/tool constants, not ba
 - **L8** `died.context` only for ground tiles; other attribution comes from `cause`.
 ### Escalate to owner
 - None (FYIs are listed in the P2 design §21).
+
+Telegraph rhythm, alpha floor and hit beat are presentation only and live in docs/superpowers/specs/2026-11-10-motion-4-telegraph-hud-feedback-design.md (MOT-4); no rule change.

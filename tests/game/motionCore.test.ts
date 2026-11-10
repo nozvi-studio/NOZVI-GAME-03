@@ -59,3 +59,45 @@ it('MOT-0-R5 countUp tweens a progress value and ends exactly on the target numb
   (c.onUpdate as () => void)(); (c.onComplete as () => void)(); expect(txt.v).toBe('1234');
 });
 it('MOT-0 dispose clears the live set', () => { const { m } = make(); m.pressDown(target()); m.dispose(); expect(m.liveCount()).toBe(0); });
+
+it('MOT-4-R5 snap goes rest -> peak -> rest in two phases, ends exactly at rest and calls onDone', () => {
+  const { m, h } = make(); const t = target(); let done = 0;
+  m.snap(t, cfg.telegraphSnapScale, cfg.telegraphSnapMs, () => { done++; });
+  expect(h.adds[0]).toMatchObject({ targets: t, scaleX: cfg.telegraphSnapScale, duration: cfg.telegraphSnapMs / 2 });
+  (h.adds[0]!.onComplete as () => void)();
+  expect(h.adds[1]).toMatchObject({ scaleX: 1, duration: cfg.telegraphSnapMs / 2 });
+  (h.adds[1]!.onComplete as () => void)();
+  expect(t.scaleX).toBe(1); expect(t.scaleY).toBe(1); expect(done).toBe(1); expect(m.liveCount()).toBe(0);
+});
+it('MOT-4-R5 snap kills the previous motion on the same target (kill-by-target) and does nothing under reduced motion', () => {
+  const a = make(); const t = target(); a.m.snap(t, 1.1, 100); a.m.snap(t, 1.1, 100);
+  expect(a.h.kills.filter(k => k === t).length).toBeGreaterThanOrEqual(2);
+  const r = make({ reduced: () => true }); let done = 0; const u = target();
+  r.m.snap(u, 1.1, 100, () => { done++; });
+  expect(r.h.adds.length).toBe(0); expect(u.scaleX).toBe(1); expect(done).toBe(1);
+});
+it('MOT-4-R7 ease tweens a plain number with onUpdate and finishes exactly on the target', () => {
+  const { m, h } = make(); const p = { v: 0 }; const seen: number[] = [];
+  m.ease(p, 10, 200, v => { seen.push(v); });
+  expect(h.adds[0]).toMatchObject({ targets: p, v: 10, duration: 200 });
+  p.v = 4; (h.adds[0]!.onUpdate as () => void)(); (h.adds[0]!.onComplete as () => void)();
+  expect(seen).toEqual([4, 10]); expect(p.v).toBe(10); expect(m.liveCount()).toBe(0);
+});
+it('MOT-4-R9 ease with ms 0, reduced motion or a full budget jumps to the target without a tween', () => {
+  const z = make(); const p = { v: 0 }; let last = -1;
+  z.m.ease(p, 5, 0, v => { last = v; }); expect(z.h.adds.length).toBe(0); expect(p.v).toBe(5); expect(last).toBe(5);
+  const r = make({ reduced: () => true }); const q = { v: 0 };
+  r.m.ease(q, 7, 220, v => { last = v; }); expect(r.h.adds.length).toBe(0); expect(q.v).toBe(7); expect(last).toBe(7);
+  const full = make(); for (const t of Array.from({ length: cfg.maxTweens }, target)) full.m.pressDown(t);
+  const n = full.h.adds.length, w = { v: 0 }; full.m.ease(w, 3, 220, v => { last = v; });
+  expect(full.h.adds.length).toBe(n); expect(w.v).toBe(3); expect(last).toBe(3);
+});
+
+it('MOT-4-R7 rebase moves only the rest position: a snap after a relayout settles at the NEW position and the old scale', () => {
+  const { m, h } = make(); const t = target();
+  m.snap(t, 1.1, 100); (h.adds[0]!.onComplete as () => void)(); (h.adds[1]!.onComplete as () => void)();   // caches rest at (10, 20)
+  t.setPosition(50, 60); m.rebase(t);
+  m.snap(t, 1.1, 100); (h.adds[2]!.onComplete as () => void)(); (h.adds[3]!.onComplete as () => void)();
+  expect(t.x).toBe(50); expect(t.y).toBe(60); expect(t.scaleX).toBe(1);
+  m.rebase(target());                                                                                         // untracked target: harmless
+});

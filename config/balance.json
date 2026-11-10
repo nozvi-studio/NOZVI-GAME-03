@@ -128,7 +128,8 @@
     "toggleSlideMs": 160, "disabledAlpha": 0.45,
     "idleBreathAmp": 0.02, "idleStartMs": 1200, "idlePauseMs": 4000, "resultsSeqMs": 1500,
     "telegraphHzStart": 2.0, "telegraphHzEnd": 6.0, "telegraphAlphaMin": 0.55, "telegraphScaleAmp": 0.05, "telegraphUrgentMs": 300,
-    "telegraphSnapScale": 1.12, "telegraphSnapMs": 120, "digitPopMs": 160, "hudTickMs": 360, "barEaseMs": 220, "barSpendMs": 160, "energyLowFrac": 0.2
+    "telegraphSnapScale": 1.12, "telegraphSnapMs": 120, "digitPopMs": 160, "hudTickMs": 360, "barEaseMs": 220, "barSpendMs": 160, "energyLowFrac": 0.2,
+    "digitPopScale": 1.2, "readyDipMs": 80
   },
   "energy": { "max": 100, "orbGain": 15, "goldenGain": 10, "orbSpawnIntervalMs": 6000, "orbMax": 2, "orbLifeMs": 8000, "orbBlinkMs": 2000, "orbFromLevel": 2 },
   "skills": {
