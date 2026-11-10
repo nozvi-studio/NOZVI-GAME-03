@@ -15,7 +15,7 @@ const ROWS: { id: SettingsToggle; icon: IconId; key: string }[] = [
   { id: 'dpad', icon: 'dpad', key: 'dpad' }, { id: 'reducedMotion', icon: 'motion', key: 'motion' },
 ];
 
-// P3b3-R6 Settings rows; reduced motion and theme show the resolved display value (null = follows the OS).
+// P3b3-R6 Settings rows; reduced motion shows the resolved display value (null = follows the OS).
 export function settingsView(s: Settings, d: DisplayPrefs): SettingsView {
   const on = (id: SettingsToggle): boolean => id === 'reducedMotion' ? d.reducedMotion : s[id];
   return {

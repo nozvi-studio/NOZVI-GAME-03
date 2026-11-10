@@ -10,9 +10,9 @@ import { DrawObject, sceneHarness, Signals } from '../support/scene';
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } }, Core: { Events: { BLUR: 'blur', HIDDEN: 'hidden' } } } }));
 afterEach(() => { vi.unstubAllGlobals(); setDisplaySettings(null); });
 function mounted() {
-  const h = sceneHarness(), game = new GameScene(), events = new Signals(), background = vi.fn();
+  const h = sceneHarness(), game = new GameScene(), events = new Signals(), background = vi.fn(), queries: string[] = [];
   vi.stubGlobal('window', { addEventListener() {}, removeEventListener() {},
-    matchMedia: () => ({ matches: false, addEventListener() {}, removeEventListener() {} }) });
+    matchMedia: (q: string) => { queries.push(q); return { matches: false, addEventListener() {}, removeEventListener() {} }; } });
   h.registry.set('balance', loadBalance());
   Object.assign(game, h.scene, {
     add: { ...h.scene.add, image: () => new DrawObject(), renderTexture: () => new DrawObject() },
@@ -22,10 +22,14 @@ function mounted() {
   });
   vi.spyOn(game, 'startRun').mockImplementation(() => {});
   game.create();
-  return { game, events, background, scene: h.scene as unknown as { events: Signals } };
+  return { game, events, background, queries, scene: h.scene as unknown as { events: Signals } };
 }
 // The listener's observable effect: recolor() pushes the resolved palette bg to the camera.
 const darkSettings = (): void => setDisplaySettings({ ...defaultSettings(), boardTheme: 'dark' });
+it('D3-R3 GameScene never queries or subscribes to prefers-color-scheme', () => {
+  const { queries } = mounted();
+  expect(queries.filter(q => q.includes('color-scheme'))).toEqual([]);
+});
 it('P3b1-R3 D3-R3 settings-closed re-reads the palette: the listener recolors the camera light even with a saved dark theme', () => {
   const { events, background } = mounted();
   darkSettings();

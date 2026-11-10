@@ -90,18 +90,15 @@ export class GameScene extends Phaser.Scene {
     const hidden = (): void => { pause(); this.session.hidden(); }; // MEC-008-R7 provisional carry
     this.game.events.on(Phaser.Core.Events.BLUR, pause);
     this.game.events.on(Phaser.Core.Events.HIDDEN, hidden);
-    const theme = window.matchMedia('(prefers-color-scheme: dark)');
     const recolor = (): void => {
       this.palette = currentPalette(); this.reduced = reduceMotion(); this.effects.setReduced(this.reduced); this.lookStale = true; // texture rebuilt on the next draw
       drawBoardBorder(this.border.clear(), this.palette);
       this.cameras.main.setBackgroundColor(gameBackground(this.palette));
     };
-    theme.addEventListener('change', recolor);
     this.game.events.on('settings-closed', recolor);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.game.events.off(Phaser.Core.Events.BLUR, pause);
       this.game.events.off(Phaser.Core.Events.HIDDEN, hidden);
-      theme.removeEventListener('change', recolor);
       this.game.events.off('settings-closed', recolor);
       this.effects.reset();
       this.beats.clear();
