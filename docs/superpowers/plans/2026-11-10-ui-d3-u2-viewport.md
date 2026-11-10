@@ -35,7 +35,7 @@
 **Interfaces:**
 - Produces: `VIEW = { minH: 960, maxH: 1200 }`, `export let HEIGHT: number` (default 960), `setHeight(h: number): void` (layout.ts); `viewHeight(vw: number, vh: number): number`, `initViewport(win?: { innerWidth: number; innerHeight: number }): number`, `setBandColor(hex: string): void` (viewport.ts).
 
-- [ ] **Step 1: Write the failing test** `tests/game/viewport.test.ts`
+- [x] **Step 1: Write the failing test** `tests/game/viewport.test.ts`
 
 ```ts
 import { afterEach, describe, expect, it } from 'vitest';
@@ -66,11 +66,11 @@ describe('D3-R7 viewport height', () => {
 });
 ```
 
-- [ ] **Step 2: Run it, expect FAIL** (`setHeight`/`viewport` missing)
+- [x] **Step 2: Run it, expect FAIL** (`setHeight`/`viewport` missing)
 
 Run: `npx vitest run --configLoader native --pool threads --maxWorkers 1 tests/game/viewport.test.ts`
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `src/game/layout.ts` — replace `export const HEIGHT = 960;` with:
 
@@ -112,9 +112,9 @@ export function setBandColor(hex: string): void {
 
 `index.html`: change `background: #F8F2E8;` to `background: #1F86D8;` (biome 1 outer stop, `TOKENS.d3.biomes[0].bg[2]`).
 
-- [ ] **Step 4: Run the test, expect PASS**; then `npm run typecheck`.
+- [x] **Step 4: Run the test, expect PASS**; then `npm run typecheck`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/game/layout.ts src/game/viewport.ts src/game/main.ts index.html tests/game/viewport.test.ts
@@ -129,7 +129,7 @@ git commit -m "feat(ui): adaptive canvas height from the viewport aspect (D3-R7)
 **Interfaces:**
 - Consumes: `HEIGHT` as a live binding (Task 1).
 
-- [ ] **Step 1: Write the test** (same raw-glob style as `tests/game/navGuard.test.ts`)
+- [x] **Step 1: Write the test** (same raw-glob style as `tests/game/navGuard.test.ts`)
 
 ```ts
 import { describe, expect, it } from 'vitest';
@@ -164,9 +164,9 @@ describe('D3-R7 HEIGHT guard', () => {
 });
 ```
 
-- [ ] **Step 2: Run it, expect PASS** (audit found no offender). If it lists a line, move that value into a function evaluated at scene create and re-run.
+- [x] **Step 2: Run it, expect PASS** (audit found no offender). If it lists a line, move that value into a function evaluated at scene create and re-run.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/game/heightGuard.test.ts
@@ -182,7 +182,7 @@ git commit -m "test(ui): guard against module-level HEIGHT constants (D3-R7)"
 **Interfaces:**
 - Consumes: `setHeight`, `VIEW`, `HEIGHT` (Task 1); existing `hudLayout(dpad)`, `layoutColumn`, `homeColumn`, `loadoutColumn`, `settingsColumn`, `resultsColumn`, `bootColumn`, `previewRects`.
 
-- [ ] **Step 1: Write the test**
+- [x] **Step 1: Write the test**
 
 ```ts
 import { afterEach, describe, expect, it } from 'vitest';
@@ -239,12 +239,12 @@ describe.each([960, 1170])('D3-R7 layouts at HEIGHT %i', (h) => {
 });
 ```
 
-- [ ] **Step 2: Run it**
+- [x] **Step 2: Run it**
 
 Run: `npx vitest run --configLoader native --pool threads --maxWorkers 1 tests/game/twoHeights.test.ts`
 Expected: PASS. If a case fails, fix the layout function so spare height goes to spacing (never move content off-canvas, never grow `BOARD`), re-run, and note the fix in the commit body.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/game/twoHeights.test.ts
@@ -256,10 +256,10 @@ git commit -m "test(ui): layouts fit at canvas heights 960 and 1170 (D3-R7)"
 **Files:**
 - Modify: `docs/PLAYTEST.md` (entry written by the lead from agy's report)
 
-- [ ] **Step 1: Lead starts `npm run dev` in the background**, after no test run is active.
-- [ ] **Step 2: Delegate to agy** (skill `delegate-workers`). Brief: "Black-box browser QA on http://localhost:5173/ at 360x640, 390x844, 412x915 (DPR 1). Use `tools/qa/shot.mjs` (usage in docs/PLAYTEST.md 'How to capture'). Capture Home, in-run after the countdown, Pause (key Escape), Settings from Pause, Results after Quit run into `tmp/qa/u2/<screen>-<WxH>.png`. Report per image: the canvas fills the full height at 390x844 and 412x915 (no page bands), nothing cut off at the bottom, nothing overlapping, and any console error/warning (read with an `eval:` step on a `window.onerror` hook installed before navigation, or a manual browser session). Do not edit any file under src/ or tests/." Tap coordinates must be computed by agy from the canvas scale (`min(vw/540, vh/HEIGHT)`).
-- [ ] **Step 3: Lead reviews the 15 images** and agy's report. Code defects → a fix task for a Claude subagent, then repeat Step 2 for the affected screens. Known and accepted: Results first-run buttons missing in headless (U5), old layouts with extra space (U3..U6).
-- [ ] **Step 4: PLAYTEST entry** (date, branch, sizes, defects, verdict) and commit:
+- [x] **Step 1: Lead starts `npm run dev` in the background**, after no test run is active.
+- [x] **Step 2: Delegate to agy** (skill `delegate-workers`). Brief: "Black-box browser QA on http://localhost:5173/ at 360x640, 390x844, 412x915 (DPR 1). Use `tools/qa/shot.mjs` (usage in docs/PLAYTEST.md 'How to capture'). Capture Home, in-run after the countdown, Pause (key Escape), Settings from Pause, Results after Quit run into `tmp/qa/u2/<screen>-<WxH>.png`. Report per image: the canvas fills the full height at 390x844 and 412x915 (no page bands), nothing cut off at the bottom, nothing overlapping, and any console error/warning (read with an `eval:` step on a `window.onerror` hook installed before navigation, or a manual browser session). Do not edit any file under src/ or tests/." Tap coordinates must be computed by agy from the canvas scale (`min(vw/540, vh/HEIGHT)`).
+- [x] **Step 3: Lead reviews the 15 images** and agy's report. Code defects → a fix task for a Claude subagent, then repeat Step 2 for the affected screens. Known and accepted: Results first-run buttons missing in headless (U5), old layouts with extra space (U3..U6).
+- [x] **Step 4: PLAYTEST entry** (date, branch, sizes, defects, verdict) and commit:
 
 ```bash
 git add docs/PLAYTEST.md
@@ -287,10 +287,10 @@ git commit -m "docs(ui): D3-R7b render scale spike result, owner decision pendin
 **Files:**
 - Modify: `docs/CODEMAP.md`, `docs/STATUS.md`, `CHANGELOG.md`
 
-- [ ] **Step 1: Maps.** `docs/CODEMAP.md`: add a row for `src/game/viewport.ts` (`viewHeight`, `initViewport`, `setBandColor`; D3-R7; tests `viewport.test.ts`, `heightGuard.test.ts`, `twoHeights.test.ts`); in the `src/game/` row note "`layout.ts` HEIGHT is a live value set at boot".
-- [ ] **Step 2: CHANGELOG** lines for Tasks 1-3 and 5 under `[Unreleased]`; STATUS "Now" D3 line: U2 merged, spike decision pending with owner, U3 next (waits for "D3 boards approved").
-- [ ] **Step 3: Full verification:** `npm run typecheck`, then `npx vitest run --configLoader native --pool threads --maxWorkers 1`. Both must pass.
-- [ ] **Step 4: Merge**
+- [x] **Step 1: Maps.** `docs/CODEMAP.md`: add a row for `src/game/viewport.ts` (`viewHeight`, `initViewport`, `setBandColor`; D3-R7; tests `viewport.test.ts`, `heightGuard.test.ts`, `twoHeights.test.ts`); in the `src/game/` row note "`layout.ts` HEIGHT is a live value set at boot".
+- [x] **Step 2: CHANGELOG** lines for Tasks 1-3 and 5 under `[Unreleased]`; STATUS "Now" D3 line: U2 merged, spike decision pending with owner, U3 next (waits for "D3 boards approved").
+- [x] **Step 3: Full verification:** `npm run typecheck`, then `npx vitest run --configLoader native --pool threads --maxWorkers 1`. Both must pass.
+- [x] **Step 4: Merge**
 
 ```bash
 git add -A
