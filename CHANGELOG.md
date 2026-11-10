@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(motion): MOT-4 pure telegraphPulse (remaining-time rhythm, alpha floor, urgent window) and TelegraphCtx
 - feat(balance): MOT-4 digitPopScale and readyDipMs motion keys, alpha-min and pop-scale validators
 - test(motion): MOT-4 characterize warn-time direction for telegraph pulses
 - feat(motion): MOT-0 motion foundation (curves, balance.motion, adapter)
