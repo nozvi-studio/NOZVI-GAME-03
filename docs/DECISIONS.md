@@ -538,3 +538,7 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Reject only covers cases the code can detect: `tapCard` on a locked card and `tapSlot` beyond `slotCount` (same state object). "Not enough energy" is not a Loadout edit concept.
 - The Home `home-l1` link also gets `navigates: true` (it starts a scene like Play).
 - Tests that build real HUD scenes (`hud.test.ts`, `task8-save-wiring.qa.test.ts`) now stub `ui/feedback` like `hudViews.test.ts` does, since the harness scene has no `sys.game.device`.
+## 2026-11-10 - MOT-3 run-event feedback is derived render-side
+- Context: hazard landing cells, snake turns and mango respawns are not sim events; the sim, its RNG and `session.turn` timing must not change (MOT-3-R5).
+- Choice: `GameScene`/`HudScene` derive them from snapshot changes with pure helpers in `src/game/juice/derived.ts` and feed them through `JuicePlayer.handleBatch` as extra `JuiceInput` members (`landedAt`, `turned`, `mangoSpawned`). Rulings A1-A8 of the MOT-3 plan: `juice.events.landShakeFamilies` flags `rock` only; `mangoGrow` takes a fifth `from` parameter; `drawMango` takes the ready `grow` scale; `drawSnake` gets a `bulge` argument; `JuiceDeps.headCell` supplies the head for the win burst; extra config keys (`shieldBurstLifeMs`, `spawnPuffLifeMs`, `sparkleRingRadius`, `sparkleThickness`).
+- Consequence: no new sim events and no new tween path; all numbers live in `balance.juice.events`.

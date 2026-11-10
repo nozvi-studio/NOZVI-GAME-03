@@ -131,7 +131,7 @@ describe('P3b1-R4 crumble alpha is applied exactly once', () => {
   });
   it('a crumbling rotten rock is drawn at ROCK.crumbleAlpha', () => {
     const p = gfx(), s = { ...snap(), mango: null, rottenRocks: [{ x: 2, y: 2, state: 'crumble' }] } as unknown as SimSnapshot;
-    drawMango(p.g, s, 30, LIGHT, look, 0, true, 0);
+    drawMango(p.g, s, 30, LIGHT, look, 0, true, 1);
     expect(ringAlpha(p.calls)).toBeCloseTo(ROCK.crumbleAlpha);
   });
 });

@@ -2,8 +2,8 @@
 import type { Balance } from '../../core';
 import type { Synth } from '../audio/synth';
 import { pickDeathLine } from './deathLine';
-import { deathTimeline, mapJuice } from './juiceMap';
-import type { BoardVisual, JuiceInput, ScreenVisual } from './types';
+import { dedupeBumps, deathTimeline, mapJuice } from './juiceMap';
+import type { BoardVisual, JuiceInput, Pt, ScreenVisual } from './types';
 
 export interface BoardFxSink { playBoardFx(list: readonly BoardVisual[]): void }
 export interface ScreenSink { play(v: ScreenVisual): void }
@@ -13,6 +13,8 @@ export interface JuiceDeps {
   board: BoardFxSink; screen: ScreenSink;
   settings: () => { sound: boolean; haptics: boolean };
   reduced: () => boolean;
+  /** MOT-3-R8 snake head in cell coords, read only when a run is won (HudScene backs it with the Game snapshot). */
+  headCell?: () => Pt | null;
   seed: () => number;
   makeCard: () => DeathCardView;
   later: (ms: number, fn: () => void) => { remove(): void };
@@ -24,6 +26,7 @@ export class JuicePlayer {
   private dying = false;
   private done = false;
   private card: DeathCardView | null = null;
+  private shieldSlot: 0 | 1 | null = null;
   constructor(private d: JuiceDeps) {}
 
   handle(ev: JuiceInput): void { this.handleBatch([ev]); }
@@ -36,14 +39,18 @@ export class JuicePlayer {
     if (this.done) return;
     const s = this.d.settings(), reduced = this.d.reduced();
     let haptic: number | number[] | null = null, dying: Parameters<typeof pickDeathLine>[0] | null = null;
+    const screens: ScreenVisual[] = [];
     for (const ev of list) {
-      const cue = mapJuice(ev, { balance: this.d.balance, sound: s.sound, haptics: s.haptics, reduced });
+      const head = ev.type === 'runWon' ? this.d.headCell?.() ?? null : null; // only a win needs the head
+      const cue = mapJuice(ev, { balance: this.d.balance, sound: s.sound, haptics: s.haptics, reduced, shieldSlot: this.shieldSlot, head });
+      if (ev.type === 'skillUsed' && ev.skill === 'shield') this.shieldSlot = ev.slot; // MOT-3-R6 remembered for the later break
       for (const n of cue.sounds) this.d.synth.play(n);
       if (cue.haptic !== null) haptic = cue.haptic;
       if (cue.board.length) this.d.board.playBoardFx(cue.board);
-      for (const v of cue.screen) this.d.screen.play(v);
+      screens.push(...cue.screen);
       if (cue.death && !this.dying && dying === null) dying = cue.death.cause;
     }
+    for (const v of dedupeBumps(screens)) this.d.screen.play(v); // MOT-3: one bump per HUD target per batch
     if (haptic !== null) this.d.synth.buzz(haptic);
     if (dying !== null) this.startDeath(dying);
   }

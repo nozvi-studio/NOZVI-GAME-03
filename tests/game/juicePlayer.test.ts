@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { JuicePlayer, type JuiceDeps } from '../../src/game/juice/JuicePlayer';
+import type { BoardVisual, ScreenVisual } from '../../src/game/juice/types';
 import { loadBalance } from '../support/balance';
 const b = loadBalance(), j = b.juice;
 function make(over: Partial<JuiceDeps> = {}, reduced = false) {
@@ -78,5 +79,40 @@ describe('P3a player', () => {
   it('destroy cancels pending timers', () => {
     const m = make(); m.p.handle({ type: 'died', cause: 'wall', x: 0, y: 0 }); m.p.destroy();
     m.run(j.death.totalMs); expect(m.log.done).toBe(0);
+  });
+});
+
+describe('MOT-3 JuicePlayer', () => {
+  const cast = { type: 'skillUsed', slot: 1, skill: 'shield', level: 3, energyBefore: 90, energyAfter: 40 } as const;
+  it('MOT-3-R6 the shield slot of the last cast is used by the later shield break (even in a later batch)', () => {
+    const seen: ScreenVisual[] = [];
+    const m = make({ screen: { play: v => { seen.push(v); } } });
+    m.p.handleBatch([cast]); seen.length = 0;
+    m.p.handleBatch([{ type: 'shieldBroke', x: 1, y: 1, family: 'rock' }]);
+    expect(seen).toEqual([{ kind: 'iconPop', slot: 1, color: 'shield', scale: j.skill.iconPopScale, ms: j.skill.iconPopMs }]);
+  });
+  it('MOT-3-R6 a break with no remembered cast plays no icon pop', () => {
+    const seen: ScreenVisual[] = [];
+    make({ screen: { play: v => { seen.push(v); } } }).p.handleBatch([{ type: 'shieldBroke', x: 1, y: 1, family: 'rock' }]);
+    expect(seen).toEqual([]);
+  });
+  it('MOT-3-R8 the head burst uses headCell(); a null head skips it', () => {
+    const seen: BoardVisual[] = [];
+    const won = { type: 'runWon', score: 1, timeMs: 1 } as const;
+    make({ board: { playBoardFx: l => { seen.push(...l); } }, headCell: () => ({ x: 7, y: 8 }) }).p.handleBatch([won]);
+    expect(seen.filter(v => v.kind === 'burst').length).toBe(5); expect(seen[1]).toMatchObject({ kind: 'burst', x: 7, y: 8, color: 'gold' });
+    seen.length = 0;
+    make({ board: { playBoardFx: l => { seen.push(...l); } }, headCell: () => null }).p.handleBatch([won]);
+    expect(seen.filter(v => v.kind === 'burst').length).toBe(4);
+  });
+  it('MOT-3 one level-bar bump per batch: rampEnded + levelUp', () => {
+    const m = make();
+    m.p.handleBatch([{ type: 'rampEnded', level: 3 }, { type: 'levelUp', level: 3, biome: 0, biomeChanged: false } as never]);
+    expect(m.log.screen.filter(k => k === 'barBump').length).toBe(1);
+  });
+  it('MOT-3-R9/R12 derived inputs enter through handleBatch like any event', () => {
+    const m = make();
+    m.p.handleBatch([{ type: 'turned', dx: 1, dy: 0 }, { type: 'landedAt', hazardType: 'rock', cells: [{ x: 1, y: 1 }] }, { type: 'mangoSpawned', x: 2, y: 2, golden: false }]);
+    expect(m.log.board).toEqual(['turnTilt', 'burst', 'shake', 'burst']);
   });
 });

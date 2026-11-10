@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { backOut, clamp01, countUpValue, cubicOut, lerp, pulseScale, sineInOut, staggerDelay } from '../../src/game/motion/curves';
+import { backOut, clamp01, countUpValue, cubicOut, lerp, mangoGrow, pulseScale, sineInOut, staggerDelay, turnTilt } from '../../src/game/motion/curves';
 
 describe('MOT-0 curves', () => {
   it('MOT-0-R1 easings hit 0 at t=0 and 1 at t=1 and clamp outside', () => {
@@ -27,5 +27,22 @@ describe('MOT-0 curves', () => {
     expect(pulseScale(225, 900, 0.04)).toBeCloseTo(1.04, 10);
     expect(pulseScale(900, 900, 0.04)).toBeCloseTo(1, 10);
     expect(lerp(2, 4, 0.5)).toBe(3); expect(clamp01(2)).toBe(1);
+  });
+});
+
+describe('MOT-3 curves', () => {
+  it('MOT-3-R11 mangoGrow is 0.85 at birth, overshoots 1 and is exactly 1 at the end', () => {
+    expect(mangoGrow(500, 500, 240, 1.7, 0.85)).toBeCloseTo(0.85, 10);
+    expect(Math.max(...[0.5, 0.6, 0.7, 0.8].map(k => mangoGrow(500 + 240 * k, 500, 240, 1.7, 0.85)))).toBeGreaterThan(1);
+    expect(mangoGrow(740, 500, 240, 1.7, 0.85)).toBeCloseTo(1, 10);
+    expect(mangoGrow(9999, 500, 240, 1.7, 0.85)).toBeCloseTo(1, 10);
+    expect(mangoGrow(100, 500, 240, 1.7, 0.85)).toBeCloseTo(0.85, 10); // clamps before birth
+  });
+  it('MOT-3-R12 turnTilt starts at +-deg and returns to 0 at turnMs', () => {
+    expect(turnTilt(0, 140, 10, 1.7)).toBeCloseTo(10, 10);
+    expect(turnTilt(0, 140, -10, 1.7)).toBeCloseTo(-10, 10);
+    expect(turnTilt(140, 140, 10, 1.7)).toBeCloseTo(0, 10);
+    expect(turnTilt(999, 140, 10, 1.7)).toBeCloseTo(0, 10);
+    expect(turnTilt(70, 140, 10, 1.7)).toBeLessThan(10);
   });
 });

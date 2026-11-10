@@ -110,7 +110,16 @@
     "death": { "shakePx": 6, "shakeMs": 400, "flashAlpha": 0.6, "flashMs": 600, "cardInMs": 300, "totalMs": 1400, "skipLockMs": 250 },
     "haptics": { "eatMs": 12, "orbMs": 8, "castMs": 20, "level": [15, 40, 15], "biomeMs": 30, "checkpointMs": 40, "deathMs": 90 },
     "reduced": { "flashAlphaMax": 0.2, "softMs": 400, "deathTotalMs": 1000 },
-    "perf": { "maxParticles": 300, "maxFloats": 6, "maxSparks": 12 }
+    "perf": { "maxParticles": 300, "maxFloats": 6, "maxSparks": 12 },
+    "events": {
+      "shieldBreakBurst": 14, "shieldBurstLifeMs": 480, "ringScale": 2.2, "ringMs": 320, "ringMax": 4,
+      "shieldShakeFactor": 0.4, "shieldShakeMs": 160, "unlockPopFactor": 1.2, "unlockExtraMs": 140,
+      "winGlowMs": 1200, "winBurstCount": 24, "winCornerBurst": 6,
+      "landDust": 4, "landCellsMax": 4, "landShakePx": 2, "landShakeMs": 120, "landShakeFamilies": { "rock": true, "fence": false, "maze": false },
+      "goFlashAlpha": 0.2, "goFlashMs": 260, "spawnPuffCount": 5, "spawnPuffLifeMs": 300,
+      "turnTiltDeg": 10, "turnMs": 140, "turnBodyBulge": 1.06,
+      "sparkleEveryMs": 700, "sparkleLifeMs": 420, "sparkleRadius": 0.2, "sparkleRingRadius": 0.47, "sparkleThickness": 0.06, "sparkleMax": 3
+    }
   },
   "motion": {
     "tapDownMs": 80, "tapUpMs": 180, "pressScale": 0.94, "releaseOvershoot": 1.06, "hoverScale": 1.03, "reducedPressAlpha": 0.85,

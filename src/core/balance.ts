@@ -106,6 +106,15 @@ export interface Balance {
     haptics: { eatMs: number; orbMs: number; castMs: number; level: number[]; biomeMs: number; checkpointMs: number; deathMs: number };
     reduced: { flashAlphaMax: number; softMs: number; deathTotalMs: number };
     perf: { maxParticles: number; maxFloats: number; maxSparks: number };
+    events: {
+      shieldBreakBurst: number; shieldBurstLifeMs: number; ringScale: number; ringMs: number; ringMax: number;
+      shieldShakeFactor: number; shieldShakeMs: number; unlockPopFactor: number; unlockExtraMs: number;
+      winGlowMs: number; winBurstCount: number; winCornerBurst: number;
+      landDust: number; landCellsMax: number; landShakePx: number; landShakeMs: number; landShakeFamilies: Record<'rock' | 'fence' | 'maze', boolean>;
+      goFlashAlpha: number; goFlashMs: number; spawnPuffCount: number; spawnPuffLifeMs: number;
+      turnTiltDeg: number; turnMs: number; turnBodyBulge: number;
+      sparkleEveryMs: number; sparkleLifeMs: number; sparkleRadius: number; sparkleRingRadius: number; sparkleThickness: number; sparkleMax: number;
+    };
   };
   motion: MotionBalance;
 }
@@ -240,6 +249,15 @@ const SPEC: Spec = {
     haptics: { eatMs: 'int+', orbMs: 'int+', castMs: 'int+', level: 'ints', biomeMs: 'int+', checkpointMs: 'int+', deathMs: 'int+' },
     reduced: { flashAlphaMax: 'prob', softMs: 'int+', deathTotalMs: 'int+' },
     perf: { maxParticles: 'int+', maxFloats: 'int+', maxSparks: 'int+' },
+    events: {
+      shieldBreakBurst: 'int0', shieldBurstLifeMs: 'int+', ringScale: 'num+', ringMs: 'int+', ringMax: 'int+',
+      shieldShakeFactor: 'prob', shieldShakeMs: 'int+', unlockPopFactor: 'num+', unlockExtraMs: 'int0',
+      winGlowMs: 'int+', winBurstCount: 'int0', winCornerBurst: 'int0',
+      landDust: 'int0', landCellsMax: 'int+', landShakePx: 'num0', landShakeMs: 'int+', landShakeFamilies: { rock: 'bool', fence: 'bool', maze: 'bool' },
+      goFlashAlpha: 'prob', goFlashMs: 'int+', spawnPuffCount: 'int0', spawnPuffLifeMs: 'int+',
+      turnTiltDeg: 'num0', turnMs: 'int+', turnBodyBulge: 'num+',
+      sparkleEveryMs: 'int+', sparkleLifeMs: 'int+', sparkleRadius: 'prob', sparkleRingRadius: 'prob', sparkleThickness: 'prob', sparkleMax: 'int+',
+    },
   },
   motion: {
     tapDownMs: 'int+', tapUpMs: 'int+', pressScale: 'num+', releaseOvershoot: 'num+', hoverScale: 'num+', reducedPressAlpha: 'prob',
@@ -381,6 +399,16 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (jd.cardInMs + jd.skipLockMs >= jd.totalMs) fail('juice.death.skipLockMs', 'cardInMs + skipLockMs must be < totalMs');
   if (jd.cardInMs + jd.skipLockMs >= b.juice.reduced.deathTotalMs) fail('juice.death.skipLockMs', 'cardInMs + skipLockMs must be < reduced.deathTotalMs');
   if (b.juice.reduced.flashAlphaMax > 0.25) fail('juice.reduced.flashAlphaMax', 'must be <= 0.25 (no big flashes)');
+  // MOT-3-R2 event feedback stays inside the particle budget and the run-over hold.
+  const ev = b.juice.events, pf = b.juice.perf;
+  if (ev.winGlowMs > jd.totalMs) fail('juice.events.winGlowMs', 'must be <= juice.death.totalMs');
+  if (ev.shieldBreakBurst > pf.maxParticles) fail('juice.events.shieldBreakBurst', 'must be <= juice.perf.maxParticles');
+  if (ev.winBurstCount + 4 * ev.winCornerBurst > pf.maxParticles) fail('juice.events.winBurstCount', 'head + 4 corner bursts must be <= juice.perf.maxParticles');
+  if (ev.landDust * ev.landCellsMax > pf.maxParticles) fail('juice.events.landDust', 'landDust * landCellsMax must be <= juice.perf.maxParticles');
+  if (ev.sparkleMax > pf.maxParticles) fail('juice.events.sparkleMax', 'must be <= juice.perf.maxParticles');
+  if (ev.ringScale <= 1) fail('juice.events.ringScale', 'must be > 1');
+  if (ev.turnBodyBulge <= 1) fail('juice.events.turnBodyBulge', 'must be > 1');
+  if (ev.unlockPopFactor < 1) fail('juice.events.unlockPopFactor', 'must be >= 1');
   // MEC-007 section 9 unlock ordering and level bounds.
   const inLevelRange = (n: number) => n >= 1 && n <= b.level.maxLevel;
   if (b.loadout.order.length !== 4 || new Set(b.loadout.order).size !== 4) fail('loadout.order', 'must list each skill exactly once');

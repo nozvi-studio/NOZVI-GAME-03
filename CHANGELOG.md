@@ -12,6 +12,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - feat(ui): MOT-1 attachFeedback wrapper, feedbackOf registry, pivotAt helper
 - feat(ui): MOT-1 feedback core (press, hover, navigate latch, reject, disabled) and slide driver
 - feat(ui): MOT-1 pure feedback model (scales, knob x, track colour)
+- docs: MOT-3 GDD 10.4 rows, CODEMAP, DECISIONS, STATUS
+- feat(render): MOT-3-R12 capy head tilt and first-segment bulge on a turn
+- feat(game): MOT-3 wire derived landing, turn, spawn and golden sparkle feedback
+- feat(render): MOT-3 Effects ring pulse, golden sparkle and turn tilt state
+- feat(juice): MOT-3 JuicePlayer shield slot, head cell and per-batch bump dedupe
+- feat(juice): MOT-3-R9/R11/R12 rows for landing dust, spawn puff and turn tilt
+- feat(juice): MOT-3-R6/R7/R8/R10 visuals for shield break, unlock, win and GO
+- feat(juice): MOT-3 derived input helpers and new board visuals/inputs
+- feat(motion): MOT-3-R11 mangoGrow and turnTilt curves, mango pop uses balance.motion
+- feat(balance): MOT-3 balance.juice.events block and validator
 - feat(motion): MOT-0 motion foundation (curves, balance.motion, adapter)
 - feat(motion): MOT-0 adapter core with kill-by-target, budget and reduced motion
 - feat(balance): MOT-0 balance.motion block and validator

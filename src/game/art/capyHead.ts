@@ -24,13 +24,13 @@ export class CapyHead {
   die(now: number): void { this.state = capyDie(this.state, now); }
   reset(now: number): void { this.state = createCapyAnim(now, this.cfg, rnd); }
 
-  update(s: SimSnapshot, now: number, cell: number): void {
+  update(s: SimSnapshot, now: number, cell: number, tiltDeg = 0): void {
     const { state, pose } = capyPose(this.state, now, this.cfg, this.reduced, rnd);
     this.state = state;
     const pt = snakeHeadPoint(s, cell);
     this.image.setTexture(capyHeadKey(pose.expression, 'board'))
       .setPosition(pt.x, pt.y + pose.dy)
       .setScale(this.base * pose.scaleX, this.base * pose.scaleY)
-      .setAngle(pose.rotationDeg);
+      .setAngle(pose.rotationDeg + tiltDeg); // MOT-3-R12 turn tilt (0 when reduced: Effects never sets it)
   }
 }

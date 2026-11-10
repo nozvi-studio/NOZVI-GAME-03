@@ -14,7 +14,7 @@ export const SNAKE_HEAD_CELL = 0.46; // head radius as a fraction of a cell
 export const SNAKE_RIM_CELL = 0.1; // UIFIX-R5 rim width as a fraction of a cell
 
 // MEC-001 interpolate the head and tail; rounded joints match the canvas stroke.
-export function drawSnake(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: number, p: Palette, gulp: number, drawFace = true, rim: number | null = null): void {
+export function drawSnake(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: number, p: Palette, gulp: number, drawFace = true, rim: number | null = null, bulge = 0): void {
   const last = s.snake[s.snake.length - 1]!;
   const lerp = (a: number, b: number): number => a + (b - a) * s.tickAlpha;
   const center = (x: number, y: number): { x: number; y: number } => ({ x: (x + 0.5) * cell, y: (y + 0.5) * cell });
@@ -33,6 +33,8 @@ export function drawSnake(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: 
     for (const pt of points) g.fillCircle(pt.x, pt.y, width / 2);
   }
   g.fillStyle(p.snake).fillCircle(headPt.x, headPt.y, cell * SNAKE_HEAD_CELL * (1 + 0.18 * gulp));
+  // MOT-3-R12 one extra disc on the first body point behind the head (render-only; the head cell does not move)
+  if (bulge > 0 && points.length > 2) g.fillStyle(p.snake).fillCircle(points[1]!.x, points[1]!.y, cell * SNAKE_BODY_CELL / 2 * (1 + bulge));
   const fx = s.dir.x, fy = s.dir.y, px = -fy, py = fx;
   if (drawFace) for (const side of [-1, 1]) {
     const ex = headPt.x + fx * cell * 0.14 + px * side * cell * 0.2;

@@ -11,9 +11,11 @@ import { gameBackground } from '../hud/draw';
 import { BOARD_RADIUS, buildBoardTexture, drawBoardBorder } from '../render/board';
 import { Effects } from '../render/effects';
 import { colorOf } from '../juice/colors';
-import type { BoardVisual } from '../juice/types';
+import type { BoardVisual, JuiceInput } from '../juice/types';
+import { isTurn, mangoSpawnInput, newSparkleClock, sparkleStep } from '../juice/derived';
 import { drawHazards, drawTerrains } from '../render/hazards';
 import { drawMango } from '../render/mango';
+import { mangoGrow } from '../motion/curves';
 import { boardLook, type BoardLook } from '../render/biomePalette';
 import { currentPalette, reduceMotion, themeOf, type Palette } from '../render/palette';
 import { drawSnake } from '../render/snake';
@@ -34,6 +36,8 @@ export class GameScene extends Phaser.Scene {
   private look!: BoardLook;
   private lookStale = true;
   private mangoBornAt = 0;
+  private hadMango = false;
+  private sparkle = newSparkleClock();
   private board!: Phaser.GameObjects.Container;
   private border!: Phaser.GameObjects.Graphics;
   private boardClip!: Phaser.GameObjects.Graphics;
@@ -65,7 +69,9 @@ export class GameScene extends Phaser.Scene {
     this.board.setMask(this.boardClip.createGeometryMask());
     const juice = this.balance.juice;
     this.effects = new Effects(this, this.board, cellPx(this.balance), this.reduced,
-      { maxParticles: juice.perf.maxParticles, maxFloats: juice.perf.maxFloats, gulpMs: juice.gulpMs });
+      { maxParticles: juice.perf.maxParticles, maxFloats: juice.perf.maxFloats, gulpMs: juice.gulpMs,
+        ringMax: juice.events.ringMax, sparkleMax: juice.events.sparkleMax, overshoot: this.balance.motion.overshoot,
+        sparkleRadius: juice.events.sparkleRadius, sparkleThickness: juice.events.sparkleThickness });
     this.capy = new CapyHead(this, this.board, this.layers.snake, this.balance.ui.capy, cellPx(this.balance), this.reduced, this.time.now);
     this.flow = createFlow();
     // P1 scene flow: the session run already exists (Home/Loadout/Results); Game opens on the P0 countdown.
@@ -98,6 +104,7 @@ export class GameScene extends Phaser.Scene {
   // Resets presentation for a new session run (the run itself is started by the menu scenes).
   startRun(): void {
     this.mangoBornAt = this.time.now;
+    this.hadMango = false; this.sparkle = newSparkleClock(); // MOT-3-R11 the first mango of a run pops with a puff
     this.effects.reset();
     this.capy.reset(this.time.now);
     this.clock = createClock();
@@ -112,7 +119,11 @@ export class GameScene extends Phaser.Scene {
   turn(dx: Step, dy: Step): void {
     const result = flowTurn(this.flow, this.balance, dx, dy); // MEC-001-R2
     this.apply(result.effects);
-    if (result.forward) this.session.turn(dx, dy);
+    if (result.forward) {
+      const s = this.snapshot(); // MOT-3-R12 render-only cue; session.turn timing is untouched
+      if (s && isTurn(s.dir, dx, dy)) this.events.emit('derived-juice', { type: 'turned', dx, dy } satisfies JuiceInput);
+      this.session.turn(dx, dy);
+    }
   }
 
   // P1: keys only pause/resume; a run never starts from ready/over here.
@@ -140,6 +151,7 @@ export class GameScene extends Phaser.Scene {
     }
     const snapshot = this.snapshot()!;
     this.handleEvents(events);
+    this.derive(snapshot, events, dt);
     this.events.emit('sim-events', events);
     if (snapshot.status === 'over' && this.flow.status !== 'over') {
       flowOver(this.flow);
@@ -152,11 +164,21 @@ export class GameScene extends Phaser.Scene {
   private handleEvents(events: SimEvent[]): void {
     for (const event of events) {
       switch (event.type) {
-        case 'ate': this.capy.eat(this.time.now); this.mangoBornAt = this.time.now; break;
-        case 'rotted': this.mangoBornAt = this.time.now; break;
+        case 'ate': this.capy.eat(this.time.now); this.mangoBornAt = this.time.now; this.effects.clearSparkles(); break;
+        case 'rotted': this.mangoBornAt = this.time.now; this.effects.clearSparkles(); break;
         case 'died': this.capy.die(this.time.now); break;
       }
     }
+  }
+
+  /** MOT-3-R11/R13 feedback derived from snapshot changes: mango (re)spawn puff + pop clock, golden sparkle driver. Render-side only. */
+  private derive(s: SimSnapshot, events: readonly SimEvent[], dt: number): void {
+    const spawn = mangoSpawnInput(this.hadMango, events, s.mango);
+    this.hadMango = s.mango !== null;
+    if (spawn) { this.mangoBornAt = this.time.now; this.events.emit('derived-juice', spawn); }
+    const e = this.balance.juice.events, live = !this.reduced && this.flow.status === 'playing';
+    const pt = sparkleStep(this.sparkle, dt, e.sparkleEveryMs, live && s.mango?.golden === true, s.mango, e.sparkleRingRadius);
+    if (pt) this.playBoardFx([{ kind: 'sparkle', x: pt.x, y: pt.y, color: 'gold', lifeMs: e.sparkleLifeMs }]);
   }
 
   // P3a-R1..R7 board-space juice arrives as plain visuals from the mapper (see juice/juiceMap.ts).
@@ -172,6 +194,9 @@ export class GameScene extends Phaser.Scene {
       case 'tint': this.effects.setTint(colorOf(v.color, p), v.alpha, v.fadeMs, v.ms); break;
       case 'tintEnd': this.effects.clearTint(v.fadeMs); break;
       case 'biomeSweep': this.effects.sweep(boardLook(v.biome, themeOf(p)).groundA, v.alpha, v.ms, v.sweep); break;
+      case 'ringPulse': this.effects.ringPulse(v.x, v.y, colorOf(v.color, p), v.scale, v.ms); break;
+      case 'sparkle': this.effects.sparkle(v.x, v.y, colorOf(v.color, p), v.lifeMs); break;
+      case 'turnTilt': this.effects.turnTilt(v.dx, v.dy, v.deg, v.ms); break;
     }
   }
 
@@ -198,10 +223,12 @@ export class GameScene extends Phaser.Scene {
     drawMovers(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawBlasts(this.layers.hazards, snapshot, cell, time, this.reduced);
     drawShrink(this.layers.hazards, snapshot, cell, time, this.reduced);
-    drawMango(this.layers.mango, snapshot, cell, p, this.look, time, this.reduced, this.mangoBornAt);
+    const mo = this.balance.motion;
+    drawMango(this.layers.mango, snapshot, cell, p, this.look, time, this.reduced, mangoGrow(time, this.mangoBornAt, mo.popInMs, mo.overshoot, mo.popFromScale));
     drawSkillObjects(this.layers.skills, snapshot, cell, p, this.look, this.balance, time);
-    drawSnake(this.layers.snake, snapshot, cell, p, Math.max(this.effects.gulp, this.effects.pop), false, this.look.snakeRim);
-    this.capy.update(snapshot, time, cell);
+    drawSnake(this.layers.snake, snapshot, cell, p, Math.max(this.effects.gulp, this.effects.pop), false, this.look.snakeRim,
+      this.effects.turnBulge * (this.balance.juice.events.turnBodyBulge - 1));
+    this.capy.update(snapshot, time, cell, this.effects.turnDeg);
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);
     drawIceArrow(this.layers.overlay, snapshot, cell, this.look);
     this.effects.draw(this.layers.effects, p);

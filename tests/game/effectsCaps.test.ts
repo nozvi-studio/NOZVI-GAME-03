@@ -21,7 +21,7 @@ describe('P3a-R11 caps and colours', () => {
 describe('P3a-R11 Effects behaviour', () => {
   const make = () => {
     const h = sceneHarness();
-    return new Effects(h.scene as never, new DrawObject() as never, 20, false, { maxParticles: 5, maxFloats: 2, gulpMs: 100 });
+    return new Effects(h.scene as never, new DrawObject() as never, 20, false, { maxParticles: 5, maxFloats: 2, gulpMs: 100, ringMax: 4, sparkleMax: 3, overshoot: 1.7, sparkleRadius: 0.2, sparkleThickness: 0.06 });
   };
   it('P3a-R11 particles stay under maxParticles', () => {
     const fx = make();
