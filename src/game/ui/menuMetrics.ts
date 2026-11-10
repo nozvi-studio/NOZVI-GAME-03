@@ -24,6 +24,7 @@ export const MENU = {
     slotLabel: 12, slotName: 15, slotLabelTrack: 1, titleFont: 24, chipFont: 15, chipPad: 14, chipIcon: 20, chipIconGap: 8,
     pickRing: 3, disc: 52, discIcon: 28, padX: 14, textGap: 12, nameFont: 17, nameGap: 3, descFont: 13, costH: 22, costFont: 13, costPadL: 6, costPadR: 8, costGap: 8, costIcon: 12,
     badgeH: 26, badgeFont: 12, badgePad: 10, badgeReserve: 70, lockIcon: 13, lockGap: 5, goW: 350, goLabel: 46, goStroke: 8,
+    compactBelowCssH: 700, compact: { cardH: 64, cardGap: 8 }, // UIFIX-R9 compact skill cards on short screens
   },
   settings: {
     rowH: 72, rows: 4, divider: 2, themeCardH: 194, captionH: 16,

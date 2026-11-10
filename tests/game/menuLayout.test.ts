@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
 import { layoutColumn, ui } from '../../src/game/ui/layout';
 import { MENU } from '../../src/game/ui/menuMetrics';
-import { bootColumn, homeColumn, loadoutColumn, logoLetters, resultsCardTop, resultsColumn, settingsColumn, smoothPath } from '../../src/game/ui/menuLayout';
+import { bootColumn, homeColumn, isCompactHeight, loadoutCards, loadoutColumn, logoLetters, resultsCardTop, resultsColumn, settingsColumn, smoothPath } from '../../src/game/ui/menuLayout';
 const MIN = 0.85; // balance.ui.minShrink
 
 it('P3b3-R3 every Home variant fits at 540x960 without shrinking below minShrink', () => {
@@ -51,4 +51,21 @@ it('P3b3 Results: the capy head overhang stays below the title for every column 
     expect(headTop, JSON.stringify({ banner, energy })).toBeGreaterThanOrEqual(ui(R.titleY + R.titleSize) + ui(4));
     expect(headTop).toBeGreaterThanOrEqual(0);
   }
+});
+
+it('UIFIX-R9 compact mode starts below 700 CSS px of canvas height', () => {
+  expect(isCompactHeight(640)).toBe(true);
+  expect(isCompactHeight(699)).toBe(true);
+  expect(isCompactHeight(700)).toBe(false);
+  expect(isCompactHeight(960)).toBe(false);
+});
+it('UIFIX-R9 compact cards are shorter but still hold the icon disc, and the column scales up', () => {
+  const full = loadoutCards(false), small = loadoutCards(true);
+  expect(full).toEqual({ cardH: MENU.loadout.cardH, cardGap: MENU.loadout.cardGap });
+  expect(small.cardH).toBeLessThan(full.cardH);
+  expect(small.cardH).toBeGreaterThanOrEqual(MENU.loadout.disc + 8);     // 4 px margin above and below the disc
+  expect(small.cardGap).toBeLessThanOrEqual(full.cardGap);
+  const a = layoutColumn(loadoutColumn(MIN)), b = layoutColumn(loadoutColumn(MIN, true));
+  expect(b.fits).toBe(true);
+  expect(b.middleScale).toBeGreaterThan(a.middleScale);                  // text is larger on short phones
 });

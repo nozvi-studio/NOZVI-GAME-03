@@ -22,10 +22,16 @@ export function homeColumn(f: { compact: boolean; stepper: boolean; extras: bool
     + (f.extras ? g + h.chipH : 0) + (f.hint ? g + h.hintH : 0);
   return { top: head + g + MENU.logo.height, middle, bottom: h.hillPeek, minShrink };
 }
-/** P3b3-R3 Loadout: header on top, Go! pinned bottom; slots, chips and the 4 cards in the middle (the mockup note line is dropped, C9). */
-export function loadoutColumn(minShrink: number): Spec {
-  const l = MENU.loadout, g = MENU.gap;
-  const middle = g + l.slotsH + g + l.chipsH + g + l.cards * l.cardH + (l.cards - 1) * l.cardGap;
+/** UIFIX-R9 canvas CSS height below which Loadout cards use the compact metrics. */
+export const isCompactHeight = (cssHeight: number): boolean => cssHeight < MENU.loadout.compactBelowCssH;
+export function loadoutCards(compact: boolean): { cardH: number; cardGap: number } {
+  const l = MENU.loadout;
+  return compact ? l.compact : { cardH: l.cardH, cardGap: l.cardGap };
+}
+/** P3b3-R3 Loadout: header on top, Go! pinned bottom; slots, chips and the 4 cards in the middle (the mockup note line is dropped, C9). UIFIX-R9: compact cards. */
+export function loadoutColumn(minShrink: number, compact = false): Spec {
+  const l = MENU.loadout, g = MENU.gap, c = loadoutCards(compact);
+  const middle = g + l.slotsH + g + l.chipsH + g + l.cards * c.cardH + (l.cards - 1) * c.cardGap;
   return { top: head, middle, bottom: l.goBottom + l.goH + g, minShrink };
 }
 export function settingsColumn(minShrink: number): Spec {
