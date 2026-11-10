@@ -2,6 +2,16 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: MOT-1 CODEMAP, DECISIONS and STATUS
+- feat(loadout): MOT-1 card and slot press feedback, picked-badge pop, reject shake for refused taps
+- feat(settings): MOT-1 switch knob slide with track colour lerp, tile press feedback and selection pop
+- feat(ui): MOT-1 confirm-before-navigate delay on Home play/link, Loadout go, Results, Pause quit; Pause buttons grey while Settings is open
+- feat(ui): MOT-1 greybox button and HUD pause button use the feedback wrapper (no hard-coded press scale)
+- feat(ui): MOT-1 tap() optional visual feedback; roundIconButton press and release
+- feat(ui): MOT-1 pillButton press dip, scale and overshoot through the feedback wrapper
+- feat(ui): MOT-1 attachFeedback wrapper, feedbackOf registry, pivotAt helper
+- feat(ui): MOT-1 feedback core (press, hover, navigate latch, reject, disabled) and slide driver
+- feat(ui): MOT-1 pure feedback model (scales, knob x, track colour)
 - feat(motion): MOT-0 motion foundation (curves, balance.motion, adapter)
 - feat(motion): MOT-0 adapter core with kill-by-target, budget and reduced motion
 - feat(balance): MOT-0 balance.motion block and validator

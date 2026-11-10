@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest';
-import { SettingsScene } from '../../src/game/scenes/SettingsScene';
+import { SettingsScene, slideFrom, tileChanged } from '../../src/game/scenes/SettingsScene';
 import { SETTINGS_CLOSED } from '../../src/game/flow/settingsView';
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } } } }));
 
@@ -11,4 +11,17 @@ it('P3b3-R7 a double Back tap on the overlay emits settings-closed and stops the
   back(); back();
   expect(emit.mock.calls.filter(c => c[0] === SETTINGS_CLOSED)).toHaveLength(1);
   expect(stop).toHaveBeenCalledTimes(1);
+});
+
+it('MOT-1-R8 slideFrom animates only switches whose value differs from the previous build', () => {
+  const prev = new Map<string, boolean>([['sound', true], ['haptics', false]]);
+  expect(slideFrom(prev, 'sound', true)).toBe(true);    // unchanged -> same start state (no slide)
+  expect(slideFrom(prev, 'haptics', true)).toBe(false); // changed -> starts from previous value
+  expect(slideFrom(prev, 'dpad', true)).toBe(true);     // first build -> no slide
+});
+it('MOT-1-R10 tileChanged is true only for the newly selected tile after the first build', () => {
+  expect(tileChanged(null, 'light', 'light')).toBe(false); // first build
+  expect(tileChanged('light', 'dark', 'dark')).toBe(true);
+  expect(tileChanged('light', 'dark', 'light')).toBe(false);
+  expect(tileChanged('dark', 'dark', 'dark')).toBe(false);
 });

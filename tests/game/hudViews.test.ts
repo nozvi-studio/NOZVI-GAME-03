@@ -17,6 +17,9 @@ import { toInt, uiTheme } from '../../src/game/uiTokens';
 
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } },
   Geom: { Rectangle: Object.assign(class { constructor(..._a: number[]) {} }, { Contains: () => false }) } } }));
+const disabled: boolean[] = [];
+const stubFb = { press() {}, release() {}, over() {}, out() {}, fire: (a: () => void) => a(), pop() {}, reject() {}, setDisabled: (on: boolean) => { disabled.push(on); }, destroy() {} };
+vi.mock('../../src/game/ui/feedback', () => ({ attachFeedback: () => stubFb, feedbackOf: () => stubFb, pivotAt: () => ({ pivot: {}, inner: {} }) }));
 afterEach(() => vi.unstubAllGlobals());
 const b = loadBalance();
 const snap = (o: Partial<HudSnap> = {}): HudSnap => ({ level: 7, biome: 2, challenge: false, progress: 3, need: 6, score: 44, energy: 35, energyMax: 100,
@@ -91,6 +94,16 @@ it('P3b2-R12 PauseOverlay locks its buttons while Settings is open and re-enable
   p.show(pauseView({ level: 7, biome: 2, hint: null, settingsAvailable: false }, t));
   expect(h.find('overlay-settings').input?.enabled).toBe(false);   // hidden row stays disabled after a closed event
   h.scene.game.events.emit('settings-closed'); expect(h.find('overlay-settings').input?.enabled).toBe(false);
+});
+it('MOT-1-R12 PauseOverlay greys its three buttons while Settings is open and restores them on close', () => {
+  vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
+  const h = sceneHarness();
+  const p = new PauseOverlay(h.scene as unknown as Phaser.Scene, { onResume() {}, onSettings() {}, onQuit() {} });
+  p.show(pauseView({ level: 7, biome: 2, hint: null, settingsAvailable: true }, t)); disabled.length = 0;
+  h.find('overlay-settings').emit('pointerdown'); h.find('overlay-settings').emit('pointerup');
+  expect(disabled).toEqual([true, true, true]);
+  disabled.length = 0; h.scene.game.events.emit('settings-closed');
+  expect(disabled).toEqual([false, false, false]);
 });
 it('P3b2-R13 CountdownOverlay shows the digit and the checkpoint card, hides both', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });

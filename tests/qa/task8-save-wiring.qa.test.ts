@@ -21,6 +21,8 @@ const mockSound = vi.hoisted(() => ({
   buzz: vi.fn(),
 }));
 
+const stubFb = { press() {}, release() {}, over() {}, out() {}, fire: (a: () => void) => a(), pop() {}, reject() {}, setDisabled() {}, destroy() {} };
+vi.mock('../../src/game/ui/feedback', () => ({ attachFeedback: () => stubFb, feedbackOf: () => stubFb, pivotAt: () => ({ pivot: {}, inner: {} }) }));
 vi.mock('../../src/game/audio/synth', () => ({
   createSynth: () => mockSound,
 }));

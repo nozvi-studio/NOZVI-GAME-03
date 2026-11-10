@@ -1,7 +1,10 @@
 // tests/game/loadoutEdit.test.ts
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { initEdit, tapCard, tapSlot } from '../../src/game/flow/loadoutEdit';
 import type { LoadoutModel } from '../../src/session';
+import { badgeIsNew } from '../../src/game/scenes/LoadoutScene';
+import { isRejected } from '../../src/game/ui/feedbackModel';
+vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } }, Scale: { Events: { RESIZE: 'resize' } } } }));
 const m: LoadoutModel = { unlocked: ['slowmo', 'tailSnip', 'shield'], slotCount: 2, selection: ['slowmo', 'tailSnip'] };
 describe('loadoutEdit', () => {
   it('MEC-007-R7 tapping a card in the other slot swaps the slots', () => {
@@ -26,5 +29,18 @@ describe('loadoutEdit', () => {
       expect(s.selection.every(x => x !== null)).toBe(true);
       expect(new Set(s.selection).size).toBe(2);
     }
+  });
+  it('MOT-1-R11 a locked card or a slot beyond slotCount returns the same state object (rejected)', () => {
+    const one = initEdit({ unlocked: ['slowmo'], slotCount: 1, selection: ['slowmo', null] });
+    expect(isRejected(one, tapCard(one, 'mangoRain'))).toBe(true);
+    expect(isRejected(one, tapSlot(one, 1))).toBe(true);
+    expect(isRejected(one, tapSlot(one, 0))).toBe(false);
+  });
+  it('MOT-1-R10 badgeIsNew is true when a card gains or changes its picked slot after the first render', () => {
+    expect(badgeIsNew(null, 'slowmo', 0)).toBe(false);                      // first render: no pop
+    const prev = new Map<string, number | null>([['slowmo', null], ['shield', 0]]);
+    expect(badgeIsNew(prev, 'slowmo', 1)).toBe(true);
+    expect(badgeIsNew(prev, 'shield', 0)).toBe(false);
+    expect(badgeIsNew(prev, 'shield', null)).toBe(false);
   });
 });

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { Session } from '../../session';
-import { currentPalette, reduceMotion, type Palette } from '../render/palette';
+import { currentPalette, type Palette } from '../render/palette';
+import { attachFeedback } from '../ui/feedback';
 import { FONT_UI } from '../uiTokens';
 
 // Shared greybox widgets for the P1 menu scenes (Home, Loadout, Results).
@@ -37,7 +38,8 @@ export function button(scene: Phaser.Scene, x: number, y: number, w: number, h: 
   const g = scene.add.graphics();
   const t = label(scene, 0, 0, text, size);
   const c = scene.add.container(x, y, [g, t]).setName(name).setSize(w, h).setInteractive({ useHandCursor: true });
-  bindPress(c, () => { if (!reduceMotion()) c.setScale(.96); }, () => c.setScale(1), action);
+  const fb = attachFeedback(scene, [g, t], 'hudButton', { source: c });
+  bindPress(c, () => fb.press(), () => fb.release(), () => fb.fire(action));
   const b = { c, g, text: t, w, h };
   paintButton(b, currentPalette());
   return b;

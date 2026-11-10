@@ -16,6 +16,8 @@ import { sceneHarness, Signals, type DrawObject } from '../support/scene';
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } },
   Geom: { Rectangle: Object.assign(class { constructor(..._a: number[]) {} }, { Contains: () => false }) } } }));
 const sound = vi.hoisted(() => ({ unlock: vi.fn(), setOn: vi.fn(), play: vi.fn(), buzz: vi.fn() }));
+const stubFb = { press() {}, release() {}, over() {}, out() {}, fire: (a: () => void) => a(), pop() {}, reject() {}, setDisabled() {}, destroy() {} };
+vi.mock('../../src/game/ui/feedback', () => ({ attachFeedback: () => stubFb, feedbackOf: () => stubFb, pivotAt: () => ({ pivot: {}, inner: {} }) }));
 vi.mock('../../src/game/audio/synth', () => ({ createSynth: () => sound }));
 afterEach(() => { vi.unstubAllGlobals(); vi.clearAllMocks(); setDisplaySettings(null); });
 

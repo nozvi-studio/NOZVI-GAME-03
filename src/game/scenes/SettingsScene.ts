@@ -5,8 +5,11 @@ import type { Session } from '../../session';
 import { createSynth, type Synth } from '../audio/synth';
 import { applySettings, settingsCardEdge, settingsExit, settingsView, SETTINGS_CLOSED, themePatch, toggleTrackStyle, togglePatch, type SettingsEntry, type SettingsToggle } from '../flow/settingsView';
 import { HEIGHT, WIDTH } from '../layout';
-import { currentPalette, osDisplay, themeOf } from '../render/palette';
+import { currentPalette, osDisplay, reduceMotion, themeOf } from '../render/palette';
 import { t } from '../text';
+import { feedbackOf, pivotAt } from '../ui/feedback';
+import { runSlide } from '../ui/feedbackCore';
+import { borderColor, knobX, trackColor } from '../ui/feedbackModel';
 import { drawIcon } from '../ui/icons';
 import { layoutColumn, ui } from '../ui/layout';
 import { headerButton, settingsColumn } from '../ui/menuLayout';
@@ -20,6 +23,11 @@ const TILE: Record<SettingsToggle, string> = { sound: TOKENS.sky.stat, haptics: 
 const label = (size: number, weight: '800' | '900', color: string): Phaser.Types.GameObjects.Text.TextStyle =>
   ({ fontFamily: FONT_UI, fontStyle: weight, fontSize: `${ui(size)}px`, color });
 
+/** MOT-1-R8 start state of a switch on rebuild: the previous value when known, else the current one (no slide). */
+export const slideFrom = (prev: ReadonlyMap<string, boolean>, id: string, on: boolean): boolean => prev.get(id) ?? on;
+/** MOT-1-R10 the tile `opt` plays a selection pop when it is the selected tile and the selection changed since the last build. */
+export const tileChanged = (prevTheme: string | null, theme: string, opt: string): boolean => prevTheme !== null && prevTheme !== theme && opt === theme;
+
 // P3b3-R6/R7 SettingsD2: four switch rows and a Light/Dark board theme choice; every change saves at once.
 // Overlay contract (P3b-2 Hud): scene.launch('Settings', { overlay: true }); Back stops this scene and emits SETTINGS_CLOSED on game.events.
 export class SettingsScene extends Phaser.Scene {
@@ -28,8 +36,10 @@ export class SettingsScene extends Phaser.Scene {
   private synth!: Synth;
   private body?: Phaser.GameObjects.Container;
   private closing = false;
+  private prev = new Map<string, boolean>(); private prevTheme: string | null = null; private slides: (() => void)[] = [];
   private head!: Phaser.GameObjects.Text; private veil?: Phaser.GameObjects.Rectangle;
   constructor() { super('Settings'); }
+  private cancelSlides(): void { for (const stop of this.slides.splice(0)) stop(); }
   init(data: SettingsEntry): void { this.entry = data ?? {}; }
 
   create(): void {
@@ -45,6 +55,7 @@ export class SettingsScene extends Phaser.Scene {
     const onKey = (e: KeyboardEvent): void => { if (e.code === 'Escape') { e.preventDefault(); this.back(); } };
     keys?.on('keydown', onKey);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => keys?.off('keydown', onKey));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cancelSlides());
     this.build();
   }
 
@@ -71,8 +82,9 @@ export class SettingsScene extends Phaser.Scene {
   // Rebuilds the middle block from the view model (cheap: 5 rows).
   private build(): void {
     this.applyTheme(); const th = this.theme();
-    this.body?.destroy(true);
+    this.body?.destroy(true); this.cancelSlides();
     const minShrink = (this.registry.get('balance') as Balance).ui.minShrink;
+    const slideMs = (this.registry.get('balance') as Balance).motion.toggleSlideMs;
     const blk = (this.body = scaledBlock(this, layoutColumn(settingsColumn(minShrink))));
     const s = this.session.save().settings, d = resolveDisplay(s, osDisplay());
     const v = settingsView(s, d), g = ui(M.gap), pad = ui(M.pad);
@@ -95,14 +107,20 @@ export class SettingsScene extends Phaser.Scene {
       blk.add(this.add.text(tx, cy - ui(M.subDy), t(r.subKey), { ...label(M.subFont, '800', th.cardSoft), wordWrap: { width: ui(M.subW) } }).setOrigin(0, 0));
       const swW = ui(M.sw.w), swH = ui(M.sw.h), swX = cardX + cardW - pad - swW / 2;
       blk.add(this.add.text(swX - swW / 2 - ui(M.textGap), cy, t(r.valueKey), label(M.valueFont, '900', th.ink)).setOrigin(1, 0.5));
-      // Track: green when on, sand when off; the 2 px outline is inset and coloured per state (SettingsD2).
+      // Track and knob are separate objects so the knob can slide and squash (MOT-1-R8). Track: green on / sand off; 2 px inset outline per state (SettingsD2).
       const sw = this.add.graphics().setPosition(swX, cy); blk.add(sw);
-      const lw = ui(M.sw.line), iw = swW - lw, ih = swH - lw;
-      const ts = toggleTrackStyle(r.on, v.theme); // UIFIX-R14 POL-02
-      sw.fillStyle(toInt(ts.fill)).fillRoundedRect(-swW / 2, -swH / 2, swW, swH, swH / 2);
-      sw.lineStyle(lw, toInt(ts.border)).strokeRoundedRect(-iw / 2, -ih / 2, iw, ih, ih / 2);
-      sw.fillStyle(toInt(ts.knob)).fillCircle(ui(r.on ? M.sw.knob : -M.sw.knob), 0, ui(M.sw.knob));
-      blk.add(tap(this, WIDTH / 2, cy, cardW, ui(M.rowH), `settings-${r.id}`, () => this.change(togglePatch(s, d, r.id))));
+      const lw = ui(M.sw.line), iw = swW - lw, ih = swH - lw, kpx = ui(M.sw.knob);
+      const ts = toggleTrackStyle(r.on, v.theme), fts = toggleTrackStyle(slideFrom(this.prev, r.id, r.on), v.theme); // UIFIX-R14 POL-02
+      const kg = this.add.graphics(), kc = this.add.container(swX + knobX(r.on, 1, kpx), cy, [kg]); blk.add(kc);
+      const paint = (p: number): void => { // p = slide progress 0..1; 1 is the final look
+        kc.x = swX + knobX(r.on, p, kpx);
+        sw.clear().fillStyle(trackColor(toInt(fts.fill), toInt(ts.fill), p)).fillRoundedRect(-swW / 2, -swH / 2, swW, swH, swH / 2)
+          .lineStyle(lw, borderColor(toInt(fts.border), toInt(ts.border), p)).strokeRoundedRect(-iw / 2, -ih / 2, iw, ih, ih / 2);
+        kg.clear().fillStyle(toInt(p < 0.5 ? fts.knob : ts.knob)).fillCircle(0, 0, kpx);
+      };
+      if (slideFrom(this.prev, r.id, r.on) !== r.on && !reduceMotion()) this.slides.push(runSlide(this, slideMs, paint));
+      else paint(1); // unchanged switches and reduced motion draw once at rest
+      blk.add(tap(this, WIDTH / 2, cy, cardW, ui(M.rowH), `settings-${r.id}`, () => this.change(togglePatch(s, d, r.id)), { visual: kg, kind: 'switch' }));
     });
     y += ui(rowsH) + g;
     // Board theme card: title, sub line, two swatch tiles (Light / Dark).
@@ -112,26 +130,32 @@ export class SettingsScene extends Phaser.Scene {
     blk.add(this.add.text(cardX + padX, y + ui(T.titleY), t('settings.theme'), label(M.titleFont, '900', th.ink)).setOrigin(0, 0.5));
     blk.add(this.add.text(cardX + padX, y + ui(T.subY), t('settings.theme.sub'), label(M.subFont, '800', th.cardSoft)).setOrigin(0, 0.5));
     (['light', 'dark'] as const).forEach((opt, i) => {
-      const w = (cardW - 2 * padX - ui(T.gap)) / 2, x0 = cardX + padX + i * (w + ui(T.gap));
-      const y0 = y + ui(T.tilesY), h = ui(T.tileH), r = ui(T.r);
+      const w = (cardW - 2 * padX - ui(T.gap)) / 2, ax = cardX + padX + i * (w + ui(T.gap)), ay = y + ui(T.tilesY);
+      const h = ui(T.tileH), r = ui(T.r), x0 = 0, y0 = 0; // x0, y0: local to tg
       const sel = v.theme === opt, cols = opt === 'light' ? TOKENS.menu.themeLight : TOKENS.menu.themeDark;
-      tc.fillStyle(toInt(sel ? TOKENS.menu.bestSoft : TOKENS.surface.cream)).fillRoundedRect(x0, y0, w, h, r);
-      tc.lineStyle(ui(sel ? T.lineSel : T.line), toInt(sel ? TOKENS.text.primary : TOKENS.surface.stone)).strokeRoundedRect(x0, y0, w, h, r);
+      // MOT-1-R10 the tile draws inside a pivot at its centre so press, hover and the selection pop scale about it.
+      const { pivot } = pivotAt(this, blk, ax + w / 2, ay + h / 2);
+      const tg = this.add.graphics().setPosition(-w / 2, -h / 2); pivot.add(tg);
+      tg.fillStyle(toInt(sel ? TOKENS.menu.bestSoft : TOKENS.surface.cream)).fillRoundedRect(x0, y0, w, h, r);
+      tg.lineStyle(ui(sel ? T.lineSel : T.line), toInt(sel ? TOKENS.text.primary : TOKENS.surface.stone)).strokeRoundedRect(x0, y0, w, h, r);
       // Rounded swatch: a 2x2 checker whose outer corner cell carries the swatch radius.
       const sq = ui(T.swatch), half = sq / 2, sr = ui(T.swatchR), sx = x0 + w / 2 - half, sy = y0 + ui(T.swatchTop);
       for (let q = 0; q < 4; q++) {
         const col = q % 2, row = q >> 1, corner = (c: number, rr: number) => (c === col && rr === row ? sr : 0);
-        tc.fillStyle(toInt(cols[(q + (q >> 1)) % 2]!))
+        tg.fillStyle(toInt(cols[(q + (q >> 1)) % 2]!))
           .fillRoundedRect(sx + half * col, sy + half * row, half, half, { tl: corner(0, 0), tr: corner(1, 0), bl: corner(0, 1), br: corner(1, 1) });
       }
       const lw = ui(T.swatchLine);
-      tc.lineStyle(lw, toInt(TOKENS.text.primary), T.swatchEdgeAlpha).strokeRoundedRect(sx + lw / 2, sy + lw / 2, sq - lw, sq - lw, sr - lw / 2);
-      tc.fillStyle(toInt(TOKENS.accent.orange)).fillRoundedRect(sx + ui(T.snake.dx), sy + ui(T.snake.dy), ui(T.snake.w), ui(T.snake.h), ui(T.snake.r));
-      tc.fillStyle(toInt(TOKENS.menu.slotRing)).fillCircle(sx + ui(T.ball.dx), sy + ui(T.ball.dy), ui(T.ball.r));
-      blk.add(this.add.text(x0 + w / 2, y0 + ui(T.labelY), t(opt === 'light' ? 'settings.light' : 'settings.dark'), label(T.labelFont, '900', TOKENS.text.primary)).setOrigin(0.5));
-      blk.add(tap(this, x0 + w / 2, y0 + h / 2, w, h, `settings-theme-${opt}`, () => this.change(themePatch(opt))));
+      tg.lineStyle(lw, toInt(TOKENS.text.primary), T.swatchEdgeAlpha).strokeRoundedRect(sx + lw / 2, sy + lw / 2, sq - lw, sq - lw, sr - lw / 2);
+      tg.fillStyle(toInt(TOKENS.accent.orange)).fillRoundedRect(sx + ui(T.snake.dx), sy + ui(T.snake.dy), ui(T.snake.w), ui(T.snake.h), ui(T.snake.r));
+      tg.fillStyle(toInt(TOKENS.menu.slotRing)).fillCircle(sx + ui(T.ball.dx), sy + ui(T.ball.dy), ui(T.ball.r));
+      pivot.add(this.add.text(0, -h / 2 + ui(T.labelY), t(opt === 'light' ? 'settings.light' : 'settings.dark'), label(T.labelFont, '900', TOKENS.text.primary)).setOrigin(0.5));
+      const zone = tap(this, ax + w / 2, ay + h / 2, w, h, `settings-theme-${opt}`, () => this.change(themePatch(opt)), { visual: pivot, kind: 'card' });
+      blk.add(zone);
+      if (tileChanged(this.prevTheme, v.theme, opt)) feedbackOf(zone)?.pop();
     });
     y += ui(M.themeCardH) + g;
     blk.add(this.add.text(WIDTH / 2, y + ui(M.captionDy), t('settings.autosave'), label(M.subFont, '800', th.soft)).setOrigin(0.5));
+    v.rows.forEach(r => this.prev.set(r.id, r.on)); this.prevTheme = v.theme;
   }
 }

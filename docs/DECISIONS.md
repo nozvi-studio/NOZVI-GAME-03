@@ -528,3 +528,13 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Context: GDD 8.3 left "reason to come back" open. Owner answer 2026-11-10.
 - Choice: players return for challenges (challenge levels / challenge content, details to be specced in P4) and for collecting skins. The Capy skin and its production guide (ART-003, `capyRig.ts`) are the base every later skin builds on. Daily bonus, leaderboard and streak stay parked.
 - Consequence: P4 specs (MEC-009/010/011) start from challenge + skin loops; ART-003 code work "before the 2nd skin" is a P4c prerequisite. GDD 8.3 to be updated when MEC-011 is written.
+
+## 2026-11-10 - MOT-1 widget feedback
+- Context: plan docs/superpowers/plans/2026-11-10-motion-1-widget-feedback.md; spec docs/superpowers/specs/2026-11-10-motion-1-widget-feedback-design.md.
+- `tap()` takes a trailing optional `fx?: TapFx` (`{ visual, kind, navigates? }`) instead of a bare visual, because the wrapper also needs the kind and the navigate flag.
+- Kind `card` needs half deltas, so `feedback.ts` builds one extra per-scene `createMotion` with `halfMotionCfg(balance.motion)`; its tween budget is separate (worst case 2 x `maxTweens`).
+- No destroy-time `killTweensOf`: the adapter has no "forget target" call and killing would leak a `live` budget entry. The wrapper sets `dead` on the source `destroy` event and the short tween finishes harmlessly. Follow-up for MOT-0: a `motion.stop(t)`.
+- The Settings knob slide uses `runSlide` (update-driven 0..1 progress from `scene.events` `update`), because the adapter has no progress tween and `scene.tweens.add` is forbidden in new code.
+- Reject only covers cases the code can detect: `tapCard` on a locked card and `tapSlot` beyond `slotCount` (same state object). "Not enough energy" is not a Loadout edit concept.
+- The Home `home-l1` link also gets `navigates: true` (it starts a scene like Play).
+- Tests that build real HUD scenes (`hud.test.ts`, `task8-save-wiring.qa.test.ts`) now stub `ui/feedback` like `hudViews.test.ts` does, since the harness scene has no `sys.game.device`.
