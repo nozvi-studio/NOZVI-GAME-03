@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: MOT-1 CODEMAP, DECISIONS and STATUS
 - feat(loadout): MOT-1 card and slot press feedback, picked-badge pop, reject shake for refused taps
 - feat(settings): MOT-1 switch knob slide with track colour lerp, tile press feedback and selection pop
 - feat(ui): MOT-1 confirm-before-navigate delay on Home play/link, Loadout go, Results, Pause quit; Pause buttons grey while Settings is open
