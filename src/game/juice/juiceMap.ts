@@ -20,9 +20,22 @@ export function bannerMotion(b: Balance, reduced: boolean): { inMs: number; slid
 /** P3a-R11 drop the oldest items so `list.length <= max`. */
 export function trimOldest<T>(list: T[], max: number): void { if (list.length > max) list.splice(0, list.length - max); }
 
+/** MOT-3 one bump per HUD target per batch: keep the first position, with the largest scale (R10 and a level-up can both bump the level bar). */
+export function dedupeBumps(list: readonly ScreenVisual[]): ScreenVisual[] {
+  const out: ScreenVisual[] = [];
+  for (const v of list) {
+    if (v.kind !== 'barBump') { out.push(v); continue; }
+    const i = out.findIndex(o => o.kind === 'barBump' && o.target === v.target);
+    if (i < 0) out.push(v);
+    else if (v.scale > (out[i] as Extract<ScreenVisual, { kind: 'barBump' }>).scale) out[i] = v;
+  }
+  return out;
+}
+const boardCentre = (b: Balance): { x: number; y: number } => ({ x: (b.board.cols - 1) / 2, y: (b.board.rows - 1) / 2 });
+
 // P3a-R1..R9 one event -> one cue; reduced motion and settings are applied here so they are unit-tested.
 export function mapJuice(ev: JuiceInput, ctx: JuiceCtx): JuiceCue {
-  const j = ctx.balance.juice, r = ctx.reduced, cap = j.reduced.flashAlphaMax, soft = j.reduced.softMs;
+  const j = ctx.balance.juice, r = ctx.reduced, cap = j.reduced.flashAlphaMax, soft = j.reduced.softMs, e = j.events;
   const cue: JuiceCue = { board: [], screen: [], sounds: [], haptic: null, death: null };
   const board = (v: BoardVisual): void => { cue.board.push(v); };
   const screen = (v: ScreenVisual): void => { cue.screen.push(v); };
@@ -70,10 +83,45 @@ export function mapJuice(ev: JuiceInput, ctx: JuiceCtx): JuiceCue {
     case 'rotted': burst(ev.x, ev.y, 'rock', 'rot'); cue.sounds = ['rot']; break;
     case 'dust': burst(ev.x, ev.y, 'rock', 'dust'); break;
     case 'landed': cue.sounds = ['land']; break;
-    case 'rampEnded': cue.sounds = ['go']; break;
-    case 'shieldBroke': cue.sounds = ['shieldBreak']; break;
-    case 'skillUnlocked': cue.sounds = ['unlock']; break;
-    case 'runWon': cue.sounds = ['biome']; break;
+    case 'rampEnded': // MOT-3-R10 "GO" cue
+      if (r) screen({ kind: 'flash', color: 'food', alpha: cap, ms: soft });
+      else {
+        screen({ kind: 'flash', color: 'food', alpha: e.goFlashAlpha, ms: e.goFlashMs });
+        board({ kind: 'snakePop', ms: j.level.popMs });
+        screen({ kind: 'barBump', target: 'levelBar', scale: j.barBump.scale, ms: j.barBump.ms });
+      }
+      cue.sounds = ['go']; break;
+    case 'shieldBroke': // MOT-3-R6
+      board({ kind: 'tintEnd', fadeMs: j.skill.tintFadeMs });
+      if (r) screen({ kind: 'flash', color: 'shield', alpha: cap, ms: soft });
+      else {
+        board({ kind: 'burst', x: ev.x, y: ev.y, color: 'shield', count: e.shieldBreakBurst, speed: j.bursts.eat.speed, lifeMs: e.shieldBurstLifeMs });
+        board({ kind: 'ringPulse', x: ev.x, y: ev.y, color: 'shield', scale: e.ringScale, ms: e.ringMs });
+        board({ kind: 'shake', amplitudePx: j.death.shakePx * e.shieldShakeFactor, ms: e.shieldShakeMs });
+        if (ctx.shieldSlot != null) screen({ kind: 'iconPop', slot: ctx.shieldSlot, color: 'shield', scale: j.skill.iconPopScale, ms: j.skill.iconPopMs });
+      }
+      cue.sounds = ['shieldBreak']; break;
+    case 'skillUnlocked': { // MOT-3-R7 (the unlock banner stays as it is)
+      const color = SKILL_COLOR[ev.skill];
+      if (!r) {
+        if (ev.slot !== null) screen({ kind: 'iconPop', slot: ev.slot, color, scale: j.skill.iconPopScale * e.unlockPopFactor, ms: j.skill.iconPopMs + e.unlockExtraMs });
+        screen({ kind: 'sparks', from: boardCentre(ctx.balance), count: j.orb.sparkCount, ms: j.orb.sparkMs, staggerMs: j.orb.sparkStaggerMs, color });
+      }
+      cue.sounds = ['unlock']; break;
+    }
+    case 'runWon': { // MOT-3-R8 plays once and must finish inside the run-over hold (validator: winGlowMs <= juice.death.totalMs)
+      if (r) board({ kind: 'levelGlow', alpha: cap, ms: soft });
+      else {
+        const { cols, rows } = ctx.balance.board, g = j.bursts.golden;
+        board({ kind: 'levelGlow', alpha: j.level.glowAlpha, ms: e.winGlowMs });
+        if (ctx.head) board({ kind: 'burst', x: ctx.head.x, y: ctx.head.y, color: 'gold', count: e.winBurstCount, speed: g.speed, lifeMs: g.lifeMs });
+        for (const [x, y] of [[0, 0], [cols - 1, 0], [0, rows - 1], [cols - 1, rows - 1]] as const)
+          board({ kind: 'burst', x, y, color: 'gold', count: e.winCornerBurst, speed: g.speed, lifeMs: g.lifeMs });
+        board({ kind: 'snakePop', ms: j.level.popMs });
+        screen({ kind: 'flash', color: 'gold', alpha: j.skill.flashAlpha, ms: j.skill.flashMs });
+      }
+      cue.sounds = ['biome']; break;
+    }
     default: break;
   }
   if (!ctx.sound) cue.sounds = [];     // P3a-R9
