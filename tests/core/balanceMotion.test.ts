@@ -44,3 +44,18 @@ describe('MOT-4 balance.motion', () => {
       expect(() => loadBalance(withMotion({ [k]: 0 }))).toThrow(new RegExp(`motion\\.${k}`));
   });
 });
+
+describe('D3-R23 balance.motion.d3', () => {
+  const withD3 = (patch: Record<string, number>) => (j: any) => { j.motion.d3 = { ...j.motion.d3, ...patch }; };
+  it('D3-R23 motion.d3 holds the touch feedback numbers', () => {
+    const d = loadBalance().motion.d3;
+    expect(d.burstMs).toBe(220); expect(d.burstFromScale).toBe(0.6); expect(d.burstToScale).toBe(1.4);
+    expect(d.burstSparks).toBe(6); expect(d.burstMaxParticles).toBe(24);
+    expect(d.shakeCycles).toBe(3); expect(d.shakePx).toBe(6); expect(d.shakeMs).toBe(240);
+  });
+  it('D3-R23 motion.d3 cross-field rules reject bad values', () => {
+    expect(() => loadBalance(withD3({ burstToScale: 0.5 }))).toThrow(/motion\.d3\.burstToScale/);
+    expect(() => loadBalance(withD3({ burstSparks: 30 }))).toThrow(/motion\.d3\.burstSparks/);
+    expect(() => loadBalance(withD3({ burstSparkEndScale: 1.2 }))).toThrow(/motion\.d3\.burstSparkEndScale/);
+  });
+});
