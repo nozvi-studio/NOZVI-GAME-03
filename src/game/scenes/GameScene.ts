@@ -66,7 +66,9 @@ export class GameScene extends Phaser.Scene {
     this.board.setMask(this.boardClip.createGeometryMask());
     const juice = this.balance.juice;
     this.effects = new Effects(this, this.board, cellPx(this.balance), this.reduced,
-      { maxParticles: juice.perf.maxParticles, maxFloats: juice.perf.maxFloats, gulpMs: juice.gulpMs });
+      { maxParticles: juice.perf.maxParticles, maxFloats: juice.perf.maxFloats, gulpMs: juice.gulpMs,
+        ringMax: juice.events.ringMax, sparkleMax: juice.events.sparkleMax, overshoot: this.balance.motion.overshoot,
+        sparkleRadius: juice.events.sparkleRadius, sparkleThickness: juice.events.sparkleThickness });
     this.capy = new CapyHead(this, this.board, this.layers.snake, this.balance.ui.capy, cellPx(this.balance), this.reduced, this.time.now);
     this.flow = createFlow();
     // P1 scene flow: the session run already exists (Home/Loadout/Results); Game opens on the P0 countdown.
