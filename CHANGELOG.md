@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(input): all D-pad buttons share one border style (UIFIX-R13).
 - feat(hud): skill cost text turns red when the skill is not affordable (UIFIX-R12).
 - docs: Wave 2 (UIFIX-R6..R11) CODEMAP, DECISIONS, STATUS
 - fix(art-preview): UIFIX-R11 widget row moved to the live panel margin so the live capy no longer overlaps it (debug only)
