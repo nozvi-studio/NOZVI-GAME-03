@@ -15,6 +15,7 @@ const hint = { key: 'hud.nextCheckpoint', level: 10 };
 it('P3b2-R7 GameD2 default state: level+biome, quota, score, energy, skills, checkpoint chip', () => {
   expect(hudView(snap(), hint, b, t)).toEqual({
     levelTitle: 'Level 7', biomeName: 'Rice Paddy', quota: { done: '3', total: '/6' }, score: '44',
+    scoreValue: 44, quotaFill: 0.5, quotaBar: true, quotaLast: false,
     energy: { text: '35', fill: 0.35 },
     skills: [{ slot: 0, id: 'slowmo', cost: 40, state: 'off', ring: null, charge: 35 / 40 }, { slot: 1, id: 'tailSnip', cost: 30, state: 'ready', ring: null, charge: 1 }],
     chip: { kind: 'checkpoint', text: 'Next checkpoint at L10' } });
@@ -62,4 +63,10 @@ it('UIFIX-R12 charge is clamp01(energy / cost); full when ready; guarded for cos
 it('UIFIX-R12 cost text colour never changes with affordability (view model carries no costShort)', () => {
   const v = hudView(snap(), hint, b, t);
   expect(v.skills[0]).not.toHaveProperty('costShort'); expect(v.skills[1]).not.toHaveProperty('costShort');
+});
+
+it('MOT-4-R8 quotaFill / quotaLast: fill = progress/need, last mango flagged, max level has no bar', () => {
+  expect(hudView(snap({ progress: 5, need: 6 }), hint, b, t)).toMatchObject({ quotaFill: 5 / 6, quotaLast: true, quotaBar: true });
+  expect(hudView(snap({ progress: 0, need: 6 }), hint, b, t)).toMatchObject({ quotaFill: 0, quotaLast: false });
+  expect(hudView(snap({ level: 30, progress: 2, need: 8 }), hint, b, t)).toMatchObject({ quotaFill: 0, quotaLast: false, quotaBar: false });
 });

@@ -8,6 +8,7 @@ export interface SkillView { slot: 0 | 1; id: SkillId; cost: number; state: Skil
 export interface HudView {
   levelTitle: string; biomeName: string; quota: { done: string; total: string };
   score: string; energy: { text: string; fill: number };
+  scoreValue: number; quotaFill: number; quotaBar: boolean; quotaLast: boolean;
   skills: readonly [SkillView | null, SkillView | null];
   chip: { kind: 'ramp' | 'checkpoint' | 'wait'; text: string } | null;
 }
@@ -31,6 +32,7 @@ export function hudView(s: HudSnap, hint: { key: string; level: number } | null,
     levelTitle: levelTitle(s, t), biomeName: biomeName(s.biome, t),
     quota: max ? { done: t('hud.quotaMax'), total: '' } : { done: String(s.progress), total: `/${s.need}` },
     score: String(s.score), energy: { text: String(s.energy), fill: clamp01(s.energy / s.energyMax) },
+    scoreValue: s.score, quotaFill: max ? 0 : clamp01(s.progress / s.need), quotaBar: !max, quotaLast: !max && s.need - s.progress === 1,
     skills: [skill(0), skill(1)],
     chip: wait ? { kind: 'wait', text: t(wait.touch ? 'hud.wait.touch' : 'hud.wait.keys') }
       : s.rampActive && s.startLevel > 1 ? { kind: 'ramp', text: t('hud.ramp', { n: s.rampMangoesLeft }) }
