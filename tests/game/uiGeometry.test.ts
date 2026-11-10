@@ -1,9 +1,10 @@
 import { expect, it } from 'vitest';
 import { pillGeom, pillHitRect, barFill } from '../../src/game/ui/geometry';
 import { ui } from '../../src/game/ui/layout';
+import { TOKENS } from '../../src/game/uiTokens';
 it('P3-0-R7 pill geometry is fully rounded with a shelf', () => {
   const g = pillGeom(200, 60);
-  expect(g).toEqual({ w: ui(200), h: ui(60), radius: ui(60) / 2, shelf: ui(5), pressedDy: ui(3), labelStroke: ui(4) });
+  expect(g).toEqual({ w: ui(200), h: ui(60), radius: ui(60) / 2, shelf: ui(TOKENS.d3.shape.lip), pressedDy: ui(TOKENS.d3.shape.lip - TOKENS.d3.shape.pressedLip), labelStroke: ui(4) });
 });
 it('P3-0-R7 bar fill clamps', () => {
   expect(barFill(5, 10, 100)).toBe(50);

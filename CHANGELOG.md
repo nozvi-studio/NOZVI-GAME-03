@@ -2,6 +2,14 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs(ui): D3 U1 codemap rows (skin kit, touch feedback), playtest screenshot record, status
+- feat(ui): tap burst (pooled ring + sparks) and denied shake with reduced-motion rules, pure interactionModel (D3-R23, R24, R28)
+- feat(ui): widget kit painted with D3 skins - pill, card, chip, bar, round button (D3-R6, R21, R22); touchFx stubs for U1 Task 6
+- fix(ui): GameScene no longer listens to prefers-color-scheme (D3-R3)
+- feat(ui): one light theme - OS colour scheme ignored, Board theme setting removed (D3-R3)
+- feat(ui): skin painter and canvas texture cache for the skin kit (D3-R5)
+- feat(ui): skinSpec pure paint recipes for the skin kit (D3-R5, R21)
+- feat(balance): `motion.d3` touch feedback numbers with cross-field rules (D3-R23, R24)
 - docs(design): D3 boards - no text under 12 px, mango fill uses the token colour; PNGs recaptured
 - docs(ui): `UI-MOCKUPS.md` rewritten for D3 (rules for agents, board-to-code map, capture how-to); docs map, codemap and status updated
 - docs(design): D3 boards for all screens, states and biomes (`docs/design/mockups/d3/boards.html`, `d3.css`, `png/`)

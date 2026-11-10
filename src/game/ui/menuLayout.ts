@@ -42,7 +42,7 @@ export function loadoutColumn(minShrink: number, compact = false): Spec {
 export function settingsColumn(minShrink: number): Spec {
   const s = MENU.settings, g = MENU.section;
   const rows = s.rows * s.rowH; // each row box is rowH tall and includes its divider
-  return { top: head, middle: g + rows + g + s.themeCardH + g + s.captionH, bottom: 0, minShrink };
+  return { top: head, middle: g + rows + g + s.captionH, bottom: 0, minShrink };
 }
 /** Gap kept between the capy head overhang and whatever sits above the middle block (mockup px). */
 const HEAD_CLEARANCE = 4;

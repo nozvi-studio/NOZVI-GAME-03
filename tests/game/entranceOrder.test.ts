@@ -23,8 +23,8 @@ describe('MOT-2 entrance orders', () => {
     expect(Math.max(...delays)).toBe(m.staggerCapMs);
     expect(delays[o.length - 1]).toBe(m.staggerCapMs);
   });
-  it('MOT-2-R5 Settings order is back, title, card, rows, theme, caption', () => {
-    expect(ids(settingsOrder(4))).toEqual(['back', 'title', 'card', 'row0', 'row1', 'row2', 'row3', 'theme', 'caption']);
+  it('MOT-2-R5 Settings order is back, title, card, rows, caption', () => {
+    expect(ids(settingsOrder(4))).toEqual(['back', 'title', 'card', 'row0', 'row1', 'row2', 'row3', 'caption']);
   });
   it('MOT-2-R5 entranceEndMs is the last delay plus the longest motion', () => {
     expect(entranceEndMs(8, m)).toBe(staggerDelay(7, m.staggerMs, m.staggerCapMs) + Math.max(m.popInMs, m.slideInMs));

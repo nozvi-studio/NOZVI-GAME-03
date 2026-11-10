@@ -1,5 +1,5 @@
 export * from './curves';
 export * from './motionCore';
-export { motionFor } from './motion';
+export { motionFor, motionCfgFor } from './motion';
 
 export * from './transition';

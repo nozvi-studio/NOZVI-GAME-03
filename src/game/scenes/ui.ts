@@ -14,7 +14,8 @@ export function label(scene: Phaser.Scene, x: number, y: number, text: string, s
     color: hex(currentPalette().ink) }).setName(name).setOrigin(.5);
 }
 
-export interface Button { c: Phaser.GameObjects.Container; g: Phaser.GameObjects.Graphics; text: Phaser.GameObjects.Text; w: number; h: number }
+export interface Button { c: Phaser.GameObjects.Container; g: Phaser.GameObjects.Graphics | Phaser.GameObjects.Image;
+  text: Phaser.GameObjects.Text; w: number; h: number; lip?: Phaser.GameObjects.Image }
 
 type PressEvent = Phaser.Types.Input.EventData | undefined;
 type PressArgs = [pointer: Phaser.Input.Pointer, localX: number, localY: number, event?: Phaser.Types.Input.EventData];
@@ -47,6 +48,7 @@ export function button(scene: Phaser.Scene, x: number, y: number, w: number, h: 
 }
 
 export function paintButton(b: Button, p: Palette, fill = p.panel, line = 3): void {
+  if (!('fillStyle' in b.g)) return; // greybox buttons only; skinned pills have an Image face
   b.g.clear().fillStyle(fill).fillRoundedRect(-b.w / 2, -b.h / 2, b.w, b.h, 12)
     .lineStyle(line, p.ink).strokeRoundedRect(-b.w / 2, -b.h / 2, b.w, b.h, 12);
 }

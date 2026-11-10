@@ -29,7 +29,10 @@ export class DrawObject extends Signals {
   setX(v: number): this { this.x = v; return this; }
   setY(v: number): this { this.y = v; return this; }
   setOrigin(): this { return this; }
-  setTexture(): this { return this; }
+  texture = '';
+  crop: number[] | null = null;
+  setTexture(k?: string): this { if (k !== undefined) this.texture = k; return this; }
+  setCrop(x: number, y: number, w: number, h: number): this { this.crop = [x, y, w, h]; return this; }
   setAngle(): this { return this; }
   setWordWrapWidth(): this { return this; }
   setAlign(): this { return this; }
@@ -52,6 +55,8 @@ export class DrawObject extends Signals {
   strokeRect(...a: unknown[]): this { this.commands.push(['strokeRect', ...a]); return this; }
   setLetterSpacing(..._a: unknown[]): this { return this; }
   setStrokeStyle(..._a: unknown[]): this { return this; }
+  setRadius(r: number): this { this.width = this.height = 2 * r; return this; }
+  setFillStyle(..._a: unknown[]): this { return this; }
   fillRoundedRect(...a: unknown[]): this { this.commands.push(['fillRoundedRect', ...a]); return this; }
   strokeRoundedRect(...a: unknown[]): this { this.commands.push(['strokeRoundedRect', ...a]); return this; }
   fillCircle(...a: unknown[]): this { this.commands.push(['fillCircle', ...a]); return this; }
@@ -92,14 +97,14 @@ export function sceneHarness() {
   const adds: Record<string, unknown>[] = [];
   const scene = {
     add: { graphics: () => make(), text: (x: number, y: number, text: string, _style?: unknown) => make(x, y).setText(text),
-      image: (x: number, y: number, key: string) => make(x, y).setName(key),
+      image: (x: number, y: number, key: string) => make(x, y).setTexture(key).setName(key),
       circle: (x: number, y: number, r: number) => { const o = make(x, y); o.width = o.height = 2 * r; return o; },
       rectangle: (x: number, y: number, w: number, h: number) => { const o = make(x, y); o.width = w; o.height = h; return o; },
       zone: (x: number, y: number, w: number, h: number) => { const o = make(x, y); o.width = w; o.height = h; return o; },
       container: (x: number, y: number, children: DrawObject[] = []) => make(x, y).add(children) },
     textures: (() => { const keys = new Set<string>(); return { exists: (k: string) => keys.has(k),
-      createCanvas: (k: string) => { keys.add(k); const ctx = new Proxy({} as Record<string, unknown>, { get: (t, p: string) => t[p] ?? (() => {}), set: (t, p: string, v) => { t[p] = v; return true; } });
-        return { getContext: () => ctx, refresh: () => {} }; } }; })(),
+      createCanvas: (k: string) => { keys.add(k); const ctx = new Proxy({} as Record<string, unknown>, { get: (t, p: string) => p === 'createLinearGradient' ? () => ({ addColorStop: () => {} }) : (t[p] ?? (() => {})), set: (t, p: string, v) => { t[p] = v; return true; } });
+        return { context: ctx, getContext: () => ctx, refresh: () => {} }; } }; })(),
     sys: { isActive: () => true, game: { device: { input: { touch: false } } } }, game: { events: new Signals() },
     events: new Signals(), input: Object.assign(new Signals(), { keyboard: new Signals(), setGlobalTopOnly: (_v: boolean) => {} }),
     time: { delayedCall: (delay: number, fn: () => void) => { const t = { fn, removed: false, delay }; delayed.push(t); return { remove: () => { t.removed = true; } }; } },

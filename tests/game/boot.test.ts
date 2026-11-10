@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { BootScene } from '../../src/game/scenes/BootScene';
 import { defaultSave, defaultSettings, SAVE_KEY } from '../../src/meta';
-import { currentPalette, DARK, setDisplaySettings } from '../../src/game/render/palette';
+import { currentPalette, LIGHT, setDisplaySettings } from '../../src/game/render/palette';
 const flush = () => new Promise(r => setTimeout(r, 0));
 vi.mock('phaser', () => ({ default: { Scene: class {} } }));
 afterEach(() => { vi.unstubAllGlobals(); setDisplaySettings(null); });
@@ -24,7 +24,7 @@ it('ART-001 Boot opens the art preview only with ?debug=1&artPreview=1', async (
   await flush();
   expect(started).toEqual(['ArtPreview']);
 });
-it('P3-0-R5 Boot applies saved board theme', async () => {
+it('D3-R3 Boot ignores the saved board theme: the palette stays light', async () => {
   const data = { ...defaultSave(), settings: { ...defaultSettings(), boardTheme: 'dark' as const } };
   vi.stubGlobal('window', { localStorage: { getItem: (key: string) => key === SAVE_KEY ? JSON.stringify({ version: 3, data }) : null } });
   setDisplaySettings({ ...defaultSettings(), boardTheme: 'light' });
@@ -32,5 +32,5 @@ it('P3-0-R5 Boot applies saved board theme', async () => {
   Object.assign(scene, { registry: new Map(), scene: { start() {}, launch() {} } });
   scene.create();
   await flush();
-  expect(currentPalette()).toBe(DARK);
+  expect(currentPalette()).toBe(LIGHT);
 });

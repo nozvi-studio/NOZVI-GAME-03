@@ -1,4 +1,5 @@
 import { TOKENS as T } from '../uiTokens';
+import type { SkinTone } from './skin';
 
 export type PillTone = 'green' | 'orange' | 'cream' | 'danger';
 export const PILL_TONES: Record<PillTone, { face: string; deep: string; line: string; text: string; stroke: boolean }> = {
@@ -7,3 +8,6 @@ export const PILL_TONES: Record<PillTone, { face: string; deep: string; line: st
   cream: { face: T.surface.card, deep: T.surface.stone, line: T.text.soft, text: T.text.primary, stroke: false },
   danger: { face: T.surface.card, deep: T.surface.stone, line: T.danger.line, text: T.danger.text, stroke: false }, // UIFIX-R14 POL-04 soft red
 };
+
+/** D3-R6 old pill tone names (kept for call sites) to D3 skin tones. */
+export const PILL_SKIN: Record<PillTone, SkinTone> = { green: 'primary', orange: 'secondary', cream: 'light', danger: 'danger' };

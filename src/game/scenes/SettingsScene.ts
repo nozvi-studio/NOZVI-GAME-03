@@ -3,13 +3,12 @@ import type { Balance } from '../../core';
 import { resolveDisplay } from '../../meta/settings';
 import type { Session } from '../../session';
 import { createSynth, type Synth } from '../audio/synth';
-import { applySettings, settingsCardEdge, settingsExit, settingsView, SETTINGS_CLOSED, themePatch, toggleTrackStyle, togglePatch, type SettingsEntry, type SettingsToggle } from '../flow/settingsView';
+import { applySettings, settingsCardEdge, settingsExit, settingsView, SETTINGS_CLOSED, toggleTrackStyle, togglePatch, type SettingsEntry, type SettingsToggle } from '../flow/settingsView';
 import { HEIGHT, WIDTH } from '../layout';
 import { settingsOrder } from '../flow/entranceOrder';
 import { captureGroup, enter, goTo, motionFor, type EntranceTargets } from '../motion';
 import { currentPalette, osDisplay, reduceMotion, themeOf } from '../render/palette';
 import { t } from '../text';
-import { feedbackOf, pivotAt } from '../ui/feedback';
 import { runSlide } from '../ui/feedbackCore';
 import { borderColor, knobX, trackColor } from '../ui/feedbackModel';
 import { drawIcon } from '../ui/icons';
@@ -27,10 +26,8 @@ const label = (size: number, weight: '800' | '900', color: string): Phaser.Types
 
 /** MOT-1-R8 start state of a switch on rebuild: the previous value when known, else the current one (no slide). */
 export const slideFrom = (prev: ReadonlyMap<string, boolean>, id: string, on: boolean): boolean => prev.get(id) ?? on;
-/** MOT-1-R10 the tile `opt` plays a selection pop when it is the selected tile and the selection changed since the last build. */
-export const tileChanged = (prevTheme: string | null, theme: string, opt: string): boolean => prevTheme !== null && prevTheme !== theme && opt === theme;
 
-// P3b3-R6/R7 SettingsD2: four switch rows and a Light/Dark board theme choice; every change saves at once.
+// P3b3-R6/R7 SettingsD2: four switch rows; every change saves at once.
 // Overlay contract (P3b-2 Hud): scene.launch('Settings', { overlay: true }); Back stops this scene and emits SETTINGS_CLOSED on game.events.
 export class SettingsScene extends Phaser.Scene {
   private entry: SettingsEntry = {};
@@ -38,7 +35,7 @@ export class SettingsScene extends Phaser.Scene {
   private synth!: Synth;
   private body?: Phaser.GameObjects.Container;
   private closing = false; private targets: EntranceTargets = {};
-  private prev = new Map<string, boolean>(); private prevTheme: string | null = null; private slides: (() => void)[] = [];
+  private prev = new Map<string, boolean>(); private slides: (() => void)[] = [];
   private head!: Phaser.GameObjects.Text; private veil?: Phaser.GameObjects.Rectangle;
   constructor() { super('Settings'); }
   private cancelSlides(): void { for (const stop of this.slides.splice(0)) stop(); }
@@ -59,7 +56,7 @@ export class SettingsScene extends Phaser.Scene {
     keys?.on('keydown', onKey);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => keys?.off('keydown', onKey));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cancelSlides());
-    this.targets = { back: backBtn, title: this.head }; // MOT-2-R5; build() adds card, rows, theme and caption
+    this.targets = { back: backBtn, title: this.head }; // MOT-2-R5; build() adds card, rows and caption
     this.build();
     if (!this.entry.overlay) enter(this, settingsOrder(M.rows), this.targets); // MOT-2-R3/R5 full screen only; build() after change() never re-enters (R6)
   }
@@ -103,7 +100,7 @@ export class SettingsScene extends Phaser.Scene {
     const t_: EntranceTargets = {};
     const rows = this.add.graphics(); blk.add(rows); t_.card = rows; // the shared card background fades with the title
     rows.fillStyle(toInt(th.card)).fillRoundedRect(cardX, y, cardW, ui(rowsH), rad);
-    rows.lineStyle(ui(M.sw.line), toInt(settingsCardEdge(v.theme))).strokeRoundedRect(cardX, y, cardW, ui(rowsH), rad); // UIFIX-R14
+    rows.lineStyle(ui(M.sw.line), toInt(settingsCardEdge('light'))).strokeRoundedRect(cardX, y, cardW, ui(rowsH), rad); // UIFIX-R14
     v.rows.forEach((r, i) => {
       const top = y + ui(i * M.rowH), cy = top + ui(M.rowH / 2);
       if (i > 0) rows.fillStyle(toInt(TOKENS.menu.rowDivider)).fillRect(cardX, top, cardW, ui(M.divider));
@@ -123,7 +120,7 @@ export class SettingsScene extends Phaser.Scene {
       // Track and knob are separate objects so the knob can slide and squash (MOT-1-R8). Track: green on / sand off; 2 px inset outline per state (SettingsD2).
       const sw = this.add.graphics().setPosition(swX, cy); blk.add(sw);
       const lw = ui(M.sw.line), iw = swW - lw, ih = swH - lw, kpx = ui(M.sw.knob);
-      const ts = toggleTrackStyle(r.on, v.theme), fts = toggleTrackStyle(slideFrom(this.prev, r.id, r.on), v.theme); // UIFIX-R14 POL-02
+      const ts = toggleTrackStyle(r.on, 'light'), fts = toggleTrackStyle(slideFrom(this.prev, r.id, r.on), 'light'); // UIFIX-R14 POL-02
       const kg = this.add.graphics(), kc = this.add.container(swX + knobX(r.on, 1, kpx), cy, [kg]); blk.add(kc);
       const paint = (p: number): void => { // p = slide progress 0..1; 1 is the final look
         kc.x = swX + knobX(r.on, p, kpx);
@@ -137,43 +134,9 @@ export class SettingsScene extends Phaser.Scene {
       });
     });
     y += ui(rowsH) + g;
-    // Board theme card: title, sub line, two swatch tiles (Light / Dark).
-    t_.theme = captureGroup(this, blk, { x: 0, y: 0 }, () => {
-    const T = M.theme, padX = ui(T.padX), tc = this.add.graphics(); blk.add(tc);
-    tc.fillStyle(toInt(th.card)).fillRoundedRect(cardX, y, cardW, ui(M.themeCardH), rad);
-    tc.lineStyle(ui(M.sw.line), toInt(settingsCardEdge(v.theme))).strokeRoundedRect(cardX, y, cardW, ui(M.themeCardH), rad); // UIFIX-R14
-    blk.add(this.add.text(cardX + padX, y + ui(T.titleY), t('settings.theme'), label(M.titleFont, '900', th.ink)).setOrigin(0, 0.5));
-    blk.add(this.add.text(cardX + padX, y + ui(T.subY), t('settings.theme.sub'), label(M.subFont, '800', th.cardSoft)).setOrigin(0, 0.5));
-    (['light', 'dark'] as const).forEach((opt, i) => {
-      const w = (cardW - 2 * padX - ui(T.gap)) / 2, ax = cardX + padX + i * (w + ui(T.gap)), ay = y + ui(T.tilesY);
-      const h = ui(T.tileH), r = ui(T.r), x0 = 0, y0 = 0; // x0, y0: local to tg
-      const sel = v.theme === opt, cols = opt === 'light' ? TOKENS.menu.themeLight : TOKENS.menu.themeDark;
-      // MOT-1-R10 the tile draws inside a pivot at its centre so press, hover and the selection pop scale about it.
-      const { pivot } = pivotAt(this, blk, ax + w / 2, ay + h / 2);
-      const tg = this.add.graphics().setPosition(-w / 2, -h / 2); pivot.add(tg);
-      tg.fillStyle(toInt(sel ? TOKENS.menu.bestSoft : TOKENS.surface.cream)).fillRoundedRect(x0, y0, w, h, r);
-      tg.lineStyle(ui(sel ? T.lineSel : T.line), toInt(sel ? TOKENS.text.primary : TOKENS.surface.stone)).strokeRoundedRect(x0, y0, w, h, r);
-      // Rounded swatch: a 2x2 checker whose outer corner cell carries the swatch radius.
-      const sq = ui(T.swatch), half = sq / 2, sr = ui(T.swatchR), sx = x0 + w / 2 - half, sy = y0 + ui(T.swatchTop);
-      for (let q = 0; q < 4; q++) {
-        const col = q % 2, row = q >> 1, corner = (c: number, rr: number) => (c === col && rr === row ? sr : 0);
-        tg.fillStyle(toInt(cols[(q + (q >> 1)) % 2]!))
-          .fillRoundedRect(sx + half * col, sy + half * row, half, half, { tl: corner(0, 0), tr: corner(1, 0), bl: corner(0, 1), br: corner(1, 1) });
-      }
-      const lw = ui(T.swatchLine);
-      tg.lineStyle(lw, toInt(TOKENS.text.primary), T.swatchEdgeAlpha).strokeRoundedRect(sx + lw / 2, sy + lw / 2, sq - lw, sq - lw, sr - lw / 2);
-      tg.fillStyle(toInt(TOKENS.accent.orange)).fillRoundedRect(sx + ui(T.snake.dx), sy + ui(T.snake.dy), ui(T.snake.w), ui(T.snake.h), ui(T.snake.r));
-      tg.fillStyle(toInt(TOKENS.menu.slotRing)).fillCircle(sx + ui(T.ball.dx), sy + ui(T.ball.dy), ui(T.ball.r));
-      pivot.add(this.add.text(0, -h / 2 + ui(T.labelY), t(opt === 'light' ? 'settings.light' : 'settings.dark'), label(T.labelFont, '900', TOKENS.text.primary)).setOrigin(0.5));
-      const zone = tap(this, ax + w / 2, ay + h / 2, w, h, `settings-theme-${opt}`, () => this.change(themePatch(opt)), { visual: pivot, kind: 'card' });
-      blk.add(zone);
-      if (tileChanged(this.prevTheme, v.theme, opt)) feedbackOf(zone)?.pop();
-    });
-    });
-    y += ui(M.themeCardH) + g;
     const caption = this.add.text(WIDTH / 2, y + ui(M.captionDy), t('settings.autosave'), label(M.subFont, '800', th.soft)).setOrigin(0.5);
     blk.add(caption); t_.caption = caption;
     Object.assign(this.targets, t_);
-    v.rows.forEach(r => this.prev.set(r.id, r.on)); this.prevTheme = v.theme;
+    v.rows.forEach(r => this.prev.set(r.id, r.on));
   }
 }

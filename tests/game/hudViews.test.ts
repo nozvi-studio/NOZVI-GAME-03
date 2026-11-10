@@ -187,7 +187,7 @@ it('P3b2-R15 HudTop redraws the pause icon only when paused or enabled changes',
   top.apply(v, true, false); expect(clear).toHaveBeenCalledTimes(3); expect(h.find('pause-button').alpha).toBeLessThan(1);
 });
 
-it('UIFIX-R4 HudTop level and biome titles use the dark title colours in the dark theme and the D2 ink in light', () => {
+it('D3-R3 HudTop level and biome titles use the light colours even with a saved dark board theme', () => {
   const colours: string[] = [];
   const spy = vi.spyOn(DrawObject.prototype, 'setColor').mockImplementation(function (this: DrawObject, c?: unknown) { colours.push(`${this.name}:${String(c)}`); return this; } as never);
   try {
@@ -195,20 +195,20 @@ it('UIFIX-R4 HudTop level and biome titles use the dark title colours in the dar
     setDisplaySettings({ ...defaultSettings(), boardTheme: 'dark' });
     const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, hudLayout(false), () => {});
     top.apply(hudView(snap(), null, b, t), false, true);
-    expect(colours).toContain(`level:${uiTheme('dark').title}`); expect(colours).toContain(`biome:${uiTheme('dark').soft}`);
+    expect(colours).toContain(`level:${uiTheme('light').title}`); expect(colours).toContain(`biome:${uiTheme('light').soft}`);
     colours.length = 0; setDisplaySettings({ ...defaultSettings(), boardTheme: 'light' });
     top.apply(hudView(snap(), null, b, t), false, true);
     expect(colours).toContain(`level:${uiTheme('light').title}`);
   } finally { spy.mockRestore(); setDisplaySettings(null); }
 });
-it('UIFIX-R4 PauseOverlay draws a dark card in the dark theme', () => {
+it('D3-R3 PauseOverlay draws the light card even with a saved dark board theme', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
   setDisplaySettings({ ...defaultSettings(), boardTheme: 'dark' });
   try {
     const h = sceneHarness(), o = new PauseOverlay(h.scene as unknown as Phaser.Scene, { onResume() {}, onSettings() {}, onQuit() {} });
     o.show(pauseView({ level: 7, biome: 2, hint: null, settingsAvailable: true }, t));
     const fills = h.objects.flatMap(x => x.commands).filter(c => c[0] === 'fillStyle').map(c => c[1]);
-    expect(fills).toContain(toInt(uiTheme('dark').card));
+    expect(fills).toContain(toInt(uiTheme('light').card));
   } finally { setDisplaySettings(null); }
 });
 

@@ -16,6 +16,13 @@ interface GroundTileBalance {
   shapePool: string[]; shapes: Record<string, Pair[]>;
 }
 
+/** D3-R23 touch feedback numbers. */
+export interface MotionD3Balance {
+  burstMs: number; burstFromScale: number; burstToScale: number; burstSparks: number; burstSparkPx: number; burstSparkEndScale: number;
+  burstMaxParticles: number; ringFadeMs: number; shakeMs: number; shakeCycles: number; shakePx: number; badgeFlashMs: number;
+  sweepMs: number; trailMs: number; trailPx: number; trailAlpha: number; chevronMs: number; edgePx: number; edgeAlpha: number;
+}
+
 /** MOT-0 motion tokens (all tuned by feel; see docs/superpowers/specs/2026-11-10-motion-0-foundation-design.md section 4). */
 export interface MotionBalance {
   tapDownMs: number; tapUpMs: number; pressScale: number; releaseOvershoot: number; hoverScale: number; reducedPressAlpha: number;
@@ -26,6 +33,7 @@ export interface MotionBalance {
   telegraphHzStart: number; telegraphHzEnd: number; telegraphAlphaMin: number; telegraphScaleAmp: number; telegraphUrgentMs: number;
   telegraphSnapScale: number; telegraphSnapMs: number; digitPopMs: number; hudTickMs: number; barEaseMs: number; barSpendMs: number; energyLowFrac: number;
   digitPopScale: number; readyDipMs: number;
+  d3: MotionD3Balance;
 }
 
 export interface Balance {
@@ -271,6 +279,9 @@ const SPEC: Spec = {
     telegraphHzStart: 'num+', telegraphHzEnd: 'num+', telegraphAlphaMin: 'prob', telegraphScaleAmp: 'num+', telegraphUrgentMs: 'int+',
     telegraphSnapScale: 'num+', telegraphSnapMs: 'int+', digitPopMs: 'int+', hudTickMs: 'int+', barEaseMs: 'int+', barSpendMs: 'int+', energyLowFrac: 'prob',
     digitPopScale: 'num+', readyDipMs: 'int+',
+    d3: { burstMs: 'int+', burstFromScale: 'num+', burstToScale: 'num+', burstSparks: 'int0', burstSparkPx: 'num+', burstSparkEndScale: 'prob',
+      burstMaxParticles: 'int+', ringFadeMs: 'int+', shakeMs: 'int+', shakeCycles: 'int+', shakePx: 'num+', badgeFlashMs: 'int+',
+      sweepMs: 'int+', trailMs: 'int+', trailPx: 'num+', trailAlpha: 'prob', chevronMs: 'int+', edgePx: 'num+', edgeAlpha: 'prob' },
   },
 };
 
@@ -397,6 +408,11 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (mo.disabledAlpha >= 1) fail('motion.disabledAlpha', 'must be < 1');
   if (mo.idleBreathAmp >= mo.pulseAmp) fail('motion.idleBreathAmp', 'must be < pulseAmp');
   if (mo.resultsSeqMs < 200 + mo.countUpMs + mo.popInMs) fail('motion.resultsSeqMs', 'must be >= 200 + countUpMs + popInMs');
+  // D3-R23 touch feedback cross-field rules.
+  const d3 = mo.d3;
+  if (d3.burstToScale <= d3.burstFromScale) fail('motion.d3.burstToScale', 'must be > burstFromScale');
+  if (d3.burstSparks > d3.burstMaxParticles) fail('motion.d3.burstSparks', 'must be <= burstMaxParticles');
+  if (d3.burstSparkEndScale >= 1) fail('motion.d3.burstSparkEndScale', 'must be < 1');
   // P3a-R7 death sequence <= 1.5 s (GDD §10.4, spec §4) and reduced-motion limits (P3a-R8).
   const jd = b.juice.death;
   if (jd.totalMs > 1500) fail('juice.death.totalMs', 'must be <= 1500');

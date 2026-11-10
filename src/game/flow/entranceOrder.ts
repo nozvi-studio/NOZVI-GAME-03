@@ -17,9 +17,9 @@ export const HOME_ORDER: EntranceStep[] = [pop('gear'), slide('logo1', 'up'), sl
 export const loadoutOrder = (cardCount: number): EntranceStep[] => [pop('back'), fade('title'), pop('slots'), slide('chips', 'nav'),
   ...Array.from({ length: cardCount }, (_, i) => slide(`card${i}`, 'nav')), pop('go')];
 
-/** MOT-2-R5 Settings (full screen): back, title, card background, rows, theme card, caption. */
+/** MOT-2-R5 Settings (full screen): back, title, card background, rows, caption. */
 export const settingsOrder = (rowCount: number): EntranceStep[] => [pop('back'), fade('title'), fade('card'),
-  ...Array.from({ length: rowCount }, (_, i) => slide(`row${i}`, 'nav')), slide('theme', 'nav'), fade('caption')];
+  ...Array.from({ length: rowCount }, (_, i) => slide(`row${i}`, 'nav')), fade('caption')];
 
 /** MOT-2-R8 time from the first entrance frame until the last of `count` items has settled. */
 export function entranceEndMs(count: number, cfg: Pick<MotionBalance, 'staggerMs' | 'staggerCapMs' | 'popInMs' | 'slideInMs'>): number {
