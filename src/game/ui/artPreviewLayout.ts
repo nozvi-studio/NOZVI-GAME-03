@@ -9,6 +9,8 @@ export const PREVIEW = {
   titleY: 20, titleSize: 20, btnY: 60, btnW: 100, btnH: 40, btnSize: 18, btnXs: [70, 190, 310, 430],
   headRowY: 410, homeSize: 124, headSwatch: 130, headDx: 70, bodyRowY: 548, bodyW: 80, bodySwatchW: 90, bodySwatchH: 130,
   bodyDx: 50, bodyCols: 4, bodyPad: 5,
+  // ART-003 extra (tongue) expressions of a skin: a row right of the large head swatches.
+  extraX: 280, extraW: 82, extraH: 130, extraGap: 5, extraSize: 72, extraImgDy: 12, extraLabelDy: 102,
   bigSize: 256, liveTop: 680, liveY: 828,
   // UIFIX-R11 widget column in the left margin of the live panel (x stays left of the capy box). Positions in game px; w/h in mockup px (ui() inside the widgets).
   wPills: [{ x: 38, y: 716, tone: 'green' }, { x: 100, y: 716, tone: 'orange' }, { x: 38, y: 758, tone: 'cream' }] as readonly { x: number; y: number; tone: PillTone }[],

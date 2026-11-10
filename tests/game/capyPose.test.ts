@@ -51,3 +51,51 @@ describe('ART-001 capy pose', () => {
     expect(capyPose(capyEat(st, 0), 1, cfg, true, rnd).pose.scaleX).toBe(1);
   });
 });
+
+describe('ART-003 snake tongue pose', () => {
+  const sn = (now = 0) => createCapyAnim(now, cfg, rnd, 'snake');
+  const gapMs = cfg.tongueMinGapMs; // rnd = 0
+
+  it('ART-003 snake idle flicks the tongue on schedule, then reschedules', () => {
+    const st = sn();
+    expect(st.nextTongueAt).toBe(gapMs);
+    expect(capyPose(st, gapMs - 1, cfg, false, rnd).pose.expression).toBe('idle');
+    const on = capyPose(st, gapMs + 1, cfg, false, rnd);
+    expect(on.pose.expression).toBe('idle_tongue');
+    const done = capyPose(on.state, gapMs + cfg.tongueMs + 1, cfg, false, rnd);
+    expect(done.pose.expression).toBe('idle');
+    expect(done.state.nextTongueAt).toBe(gapMs + cfg.tongueMs + 1 + gapMs);
+  });
+
+  it('ART-003 snake shows eat_tongue right after the chew ends, once', () => {
+    const t = 100 + cfg.eatOpenMs + cfg.eatChewMs + 1;
+    const st = capyEat(sn(), 100);
+    const a = capyPose(st, t, cfg, false, rnd);
+    expect(a.state.mode).toBe('idle');
+    expect(a.pose.expression).toBe('eat_tongue');
+    expect(capyPose(a.state, t + cfg.tongueMs - 1, cfg, false, rnd).pose.expression).toBe('eat_tongue');
+    expect(capyPose(a.state, t + cfg.tongueMs + 1, cfg, false, rnd).pose.expression).toBe('idle');
+  });
+
+  it('ART-003 snake dead hangs the tongue, also with reduced motion', () => {
+    const st = capyDie(sn(), 0);
+    expect(capyPose(st, 10, cfg, false, rnd).pose.expression).toBe('dead_tongue');
+    expect(capyPose(st, 10, cfg, true, rnd).pose.expression).toBe('dead_tongue');
+  });
+
+  it('ART-003 snake reduced motion: no flick, no post-chew tongue', () => {
+    expect(capyPose(sn(), gapMs + 1, cfg, true, rnd).pose.expression).toBe('idle');
+    const a = capyPose(capyEat(sn(), 0), cfg.eatOpenMs + cfg.eatChewMs + 1, cfg, true, rnd);
+    expect(a.pose.expression).toBe('idle');
+  });
+
+  it('ART-003 capy skin never shows a tongue', () => {
+    const st = createCapyAnim(0, cfg, rnd, 'capy');
+    expect(capyPose(st, gapMs + 1, cfg, false, rnd).pose.expression).toBe('idle');
+    expect(capyPose(capyDie(st, 0), 1, cfg, false, rnd).pose.expression).toBe('dead');
+  });
+
+  it('ART-003 snake keeps breath', () => {
+    expect(capyPose(sn(), cfg.breathPeriodMs / 4, cfg, false, rnd).pose.scaleY).toBeCloseTo(1 + cfg.breathAmp);
+  });
+});

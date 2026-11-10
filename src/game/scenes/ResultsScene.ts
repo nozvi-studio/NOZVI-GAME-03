@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 import type { Balance } from '../../core';
 import { biome } from '../../core';
 import type { Session } from '../../session';
-import { capyHeadKey } from '../art/capyRig';
+import { deadFace, headKey } from '../art/capyRig';
+import { activeSkin } from '../art/skins';
 import { isMotionOff } from '../flow/debugFlag';
 import { resultsTimeline } from '../flow/entranceOrder';
 import { runResultsSequence, type SeqTargets } from '../flow/resultsSeq';
@@ -84,9 +85,9 @@ export class ResultsScene extends Phaser.Scene {
   private summaryCard(blk: Phaser.GameObjects.Container, v: ResultsView, won: boolean, x0: number, y0: number): void {
     const cx = WIDTH / 2, text = (x: number, y: number, s: string, st: Phaser.Types.GameObjects.Text.TextStyle) => this.add.text(x, y0 + ui(y), s, st).setOrigin(0.5);
     this.targets.card = captureGroup(this, blk, { x: WIDTH / 2, y: y0 + ui(R.cardH) / 2 }, () => blk.add(card(this, x0, y0, C.w, R.cardH, C.r)));
-    const headKey = capyHeadKey(won ? 'idle' : 'dead', 'large');
-    if (this.textures.exists(headKey)) {
-      const head = this.add.image(cx, y0 - ui(C.headOverlap) + ui(C.headW) / 2, headKey).setDisplaySize(ui(C.headW), ui(C.headW));
+    const hk = headKey(activeSkin(), won ? 'idle' : deadFace(activeSkin()), 'large');
+    if (this.textures.exists(hk)) {
+      const head = this.add.image(cx, y0 - ui(C.headOverlap) + ui(C.headW) / 2, hk).setDisplaySize(ui(C.headW), ui(C.headW));
       blk.add(head); this.targets.head = head;
     }
     const headline = t(v.headline.key) + (v.headline.context ? ' ' + t(v.headline.context) : '');

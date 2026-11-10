@@ -582,3 +582,9 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Root cause: `transitionFor` cached `scene.cameras.main` once per scene instance. Phaser reuses scene instances but creates a new main camera on every start, so the cached camera was destroyed and `camerafadeoutcomplete` never fired.
 - Choice: `cameraPort(getCamera, rgb)` resolves the camera at every call; with no camera the fade completes at once. Regression test in `tests/game/transition.test.ts`.
 - Consequence: rule for all scene-bound caches: key by scene instance only for objects that survive a restart (tweens host, registry); resolve cameras, inputs and display objects lazily.
+
+## 2026-11-10 - Snake is the default head skin; capy kept as a skin (ART-003)
+- Context: the character head was capy-only code. The owner wants the snake itself to be the default face, with the same animations, and later skins on the same base.
+- Choice: `art/skins.ts` holds `SkinId` ('snake' | 'capy'), palettes and `activeSkin()` (returns 'snake'; P4 reads the save later). `capyRig.ts` keeps the shared anchors, eyes, mouth and expression table and builds per-skin ears/head. Snake: no ears, pill head, blue family of the snake body (outline = body colour so the edge merges), plus a forked tongue part and three tongue expressions (`idle_tongue`, `eat_tongue`, `dead_tongue`). Texture keys are `${skin}/head/${expr}/${size}`; capy SVGs are unchanged (hash regression test). Tongue timings live in `ui.capy` (tongueMs, tongueMinGapMs, tongueMaxGapMs).
+- Why: keeps capy as the reference skin for ART-003 acceptance and avoids a rewrite at the 2nd skin; ART-003 says skins change shapes and colours, never anchors.
+- Consequence: file names `capy*.ts` and `ui.capy` stay for now (renaming is churn); only the active skin is preloaded, except `?debug=1&artPreview=1` which preloads all skins.
