@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): MOT-1 attachFeedback wrapper, feedbackOf registry, pivotAt helper
 - feat(ui): MOT-1 feedback core (press, hover, navigate latch, reject, disabled) and slide driver
 - feat(ui): MOT-1 pure feedback model (scales, knob x, track colour)
 - feat(motion): MOT-0 motion foundation (curves, balance.motion, adapter)
