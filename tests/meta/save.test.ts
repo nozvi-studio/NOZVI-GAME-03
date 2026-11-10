@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { defaultSave, load, memoryStore, save, SAVE_KEY } from '../../src/meta';
+import { defaultSave, load, memoryStore, save, SAVE_KEY, SAVE_VERSION } from '../../src/meta';
 import type { KeyValueStore } from '../../src/meta';
 const rules = { skillIds: ['slowmo', 'tailSnip', 'shield', 'mangoRain'], maxLevel: 30, carryMax: 50 };
 const from = (data: unknown, version = 2) => load(memoryStore({ [SAVE_KEY]: JSON.stringify({ version, data }) }), rules);
@@ -39,4 +39,21 @@ it('MEC-008-R12 validates each field independently and returns fresh defaults', 
   expect(from({ bestScore: -1, settings: { sound: false }, fullClear: 'yes', bestLevel: 8 })).toEqual({ ...defaultSave(), settings: { sound: false }, bestLevel: 8 });
   const a = defaultSave(); a.settings.sound = false; a.unlockedCheckpoints.push(4);
   expect(defaultSave().settings.sound).toBe(true); expect(defaultSave().unlockedCheckpoints).toEqual([]);
+});
+it('MEC-008-R12 save never overwrites a newer-version envelope', () => {
+  const raw = JSON.stringify({ version: SAVE_VERSION + 1, data: { bestScore: 99 } });
+  const st = memoryStore({ [SAVE_KEY]: raw });
+  expect(save(st, defaultSave())).toBe(false); expect(st.dump()[SAVE_KEY]).toBe(raw);
+});
+it('MEC-008-R12 loading an older save keeps a one-time backup of the raw envelope', () => {
+  const raw = JSON.stringify({ version: 1, data: { ...defaultSave(), bestScore: 9 } });
+  const st = memoryStore({ [SAVE_KEY]: raw });
+  expect(load(st, rules).bestScore).toBe(9);
+  expect(st.dump()[`${SAVE_KEY}.v1.bak`]).toBe(raw);
+  st.set(SAVE_KEY, JSON.stringify({ version: 1, data: { bestLevel: 1 } })); load(st, rules);
+  expect(st.dump()[`${SAVE_KEY}.v1.bak`]).toBe(raw);
+});
+it('MEC-008-R12 a current-version or corrupt save writes no backup', () => {
+  const st = memoryStore(); save(st, defaultSave()); load(st, rules); load(memoryStore({ [SAVE_KEY]: '{' }), rules);
+  expect(Object.keys(st.dump())).toEqual([SAVE_KEY]);
 });

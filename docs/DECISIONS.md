@@ -440,3 +440,8 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: owner-approved deviation from GDD section 11 order: P3 starts now, split into P3a juice, P3b screens, P3c capy; P3c first. Capy personality follows Figma (round eyes, smile) plus the GDD outline. The agent draws a layered SVG on the ART-001 rig; Phaser rasterises it with `load.svg` (no new dependency); motion by texture swaps and tweens.
 - Alternatives: finish the P2 exit first; Codex image_gen raster masters (ART-002, now fallback); owner exports from Figma.
 - Consequence: P2 exit (playtest, full fuzz) stays open in STATUS; spec docs/superpowers/specs/2026-11-06-capy-character-design.md.
+
+## 2026-11-10 - Save compatibility guard in v0.2 (port of the v0.3 fix)
+- Context: v0.3 writes save v3 under the same key; a v0.2 build without the guard treats it as a future version and overwrites it with defaults.
+- Choice: ported the guard: `save()` refuses to write over a newer-version envelope; `load()` keeps a one-time raw backup `mango-snake.save.v<N>.bak` before migrating an older one. No schema change.
+- Consequence: a v0.2 build containing this commit no longer destroys v3 progress.
