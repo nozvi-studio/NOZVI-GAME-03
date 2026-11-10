@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs(design): D3 boards - no text under 12 px, mango fill uses the token colour; PNGs recaptured
 - docs(ui): `UI-MOCKUPS.md` rewritten for D3 (rules for agents, board-to-code map, capture how-to); docs map, codemap and status updated
 - docs(design): D3 boards for all screens, states and biomes (`docs/design/mockups/d3/boards.html`, `d3.css`, `png/`)
 - feat(ui): D3 tokens - tones, shape numbers, biome table, contrast tests (D3-R1, R2, R4); mango outline set to `#8A4500` in spec §4

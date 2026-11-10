@@ -43,7 +43,7 @@
 - Biome 4 coconut = 100% of bot deaths (12 of 22 on L20, clear 8/20): options L20 coconut 4 -> 2 or coconut params, if playtest confirms. Biome 5 chicken 39.6%.
 
 ## Known issues / tech debt
-- Full family fuzz matrix not run (host RAM); reduced matrix passes.
+- Full family fuzz matrix not run (host RAM); reduced matrix passes. Under host load `npm test` times out in random core tests (5-10 s limits); a clean run needs `--maxWorkers 1` (1664 pass, 165 s).
 - Windows: Vitest needs --configLoader native --pool threads --maxWorkers 2. Host RAM low: agy browser QA gets killed when fuzz/bot run at the same time.
 - 4 skipped QA (reasons in files). Single 1.28 MB JS chunk.
 - Checkpoints only reach L12; for QA use `?debug=1&level=N` or the debug HUD buttons "+1" / "Key ▶".

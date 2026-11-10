@@ -197,7 +197,7 @@ const OUT = { snake: '#2B2F9E', mango: '#8A4500', rock: '#4A5563', warn: '#C81E1
 const OUT_STORM = { snake: '#7CF2D4', mango: '#FFF3C4', rock: '#D5DCE6', warn: '#FF9A9A' };
 const ic = (n, s, style = '') => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" style="${style}"><use href="#ic-${n}"/></svg>`;
 const bgCss = (b) => `radial-gradient(120% 70% at 50% 38%, ${b.bg[0]} 0%, ${b.bg[1]} 45%, ${b.bg[2]} 100%)`;
-const mangoSvg = (o, leafLine = '') => `<use href="#mango" fill="${o}" transform="scale(1.16)"/><use href="#mango" fill="#FFB21A"/><ellipse cx="-.14" cy="-.12" rx=".12" ry=".07" fill="#fff" opacity=".7"/><path d="M.02-.36c.1-.16.26-.16.34-.12-.06.14-.2.18-.34.12z" fill="#3FC23D" ${leafLine}/>`;
+const mangoSvg = (o, leafLine = '') => `<use href="#mango" fill="${o}" transform="scale(1.16)"/><use href="#mango" fill="#FFAB1A"/><ellipse cx="-.14" cy="-.12" rx=".12" ry=".07" fill="#fff" opacity=".7"/><path d="M.02-.36c.1-.16.26-.16.34-.12-.06.14-.2.18-.34.12z" fill="#3FC23D" ${leafLine}/>`;
 
 // D3-R12 board art: frame with inner top shadow, checker ground, snake (head 1.4 cells), mango with halo, pebbles, dashed warn tile.
 function boardSvg(biome, px, n = 17, extra = '') {
@@ -249,7 +249,7 @@ function game(o) {
   if (o.strip) {
     const sh = 1.5 * cell + 6, base = `left:${10 + .4 * cell}px;width:${17 * cell}px;top:${bt + .4 * cell}px;height:${sh}px`;
     const card = (inner) => `<div class="abs panel" style="${base};border-width:2px;border-radius:10px;box-shadow:0 3px 0 var(--ink-deep);display:flex;align-items:center;justify-content:center;gap:8px;padding:0 10px">${inner}</div>`;
-    const two = (a, b) => `<div class="c" style="line-height:1.15"><div class="lil" style="font-size:16px">${a}</div><div style="font-size:11px">${b}</div></div>`;
+    const two = (a, b) => `<div class="c" style="line-height:1.15"><div class="lil" style="font-size:15px">${a}</div><div style="font-size:12px">${b}</div></div>`;
     if (o.strip === 'level') h += card(`${ic('up', 22, 'color:#3FC23D')}${two('Level 4', 'Level 4: rocks unlocked')}`);
     if (o.strip === 'biome') h += card(`<span class="chip sm gold" style="height:24px">BIOME 2</span>${two('Rice Paddy', 'Fences and mud. Mind the rows.')}`);
     if (o.strip === 'tip') h += card(`${ic('bolt', 22, 'color:#22B8E6')}<div style="font-size:13px">Energy orb! Fuel for skills</div>`);
