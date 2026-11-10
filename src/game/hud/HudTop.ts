@@ -1,8 +1,9 @@
 import type Phaser from 'phaser';
 import { TOKENS, toInt, uiTheme } from '../uiTokens';
 import { ui, UI_SCALE } from '../ui/layout';
-import { currentPalette, reduceMotion, themeOf } from '../render/palette';
+import { currentPalette, themeOf } from '../render/palette';
 import { bindPress } from '../scenes/ui';
+import { attachFeedback } from '../ui/feedback';
 import { drawCard, hudLabel } from './draw';
 import { hudIconKey } from './hudIcons';
 import { HUD_MOCK, statsRow, type HudLayout, type StatsRow } from './hudLayout';
@@ -12,7 +13,7 @@ import type { HudTarget, Pt } from '../juice/types';
 
 // Mockup px of the stats / chip / pause drawing (GameD2); layout rects themselves come from HUD_MOCK / hudLayout.
 const M = { stat: 19, chip: 14, mango: 28, star: 20, bolt: 16, bar: 10, chipPadL: 12, chipIcon: 18, chipGap: 8, chipPadR: 16,
-  pauseBarW: 5, pauseBarH: 16, pauseBarX: 7, pauseGap: 2, pauseRadius: 2, playHalf: 9, playBack: 6, playTip: 9, pressScale: 0.94, disabledAlpha: 0.4 } as const;
+  pauseBarW: 5, pauseBarH: 16, pauseBarX: 7, pauseGap: 2, pauseRadius: 2, playHalf: 9, playBack: 6, playTip: 9, disabledAlpha: 0.4 } as const;
 
 /** UIFIX-R3: the wait prompt has no icon (no arrow icon exists); ramp / checkpoint chips keep the flag. */
 export const chipHasIcon = (kind: 'ramp' | 'checkpoint' | 'wait' | undefined): boolean => kind !== 'wait';
@@ -36,7 +37,9 @@ export class HudTop {
     this.biome = hudLabel(scene, WIDTH / 2, l.biomeY, '', HUD_MOCK.biomeSize, TOKENS.text.soft, 700, 'biome').setOrigin(0.5, 0);
     this.pauseG = scene.add.graphics();
     this.pauseButton = scene.add.container(l.pause.cx, l.pause.cy, [this.pauseG]).setName('pause-button').setSize(l.pause.hit, l.pause.hit).setInteractive({ useHandCursor: true });
-    bindPress(this.pauseButton, () => { if (!reduceMotion()) this.pauseButton.setScale(M.pressScale); }, () => this.pauseButton.setScale(1), onPause, true);
+    // MOT-1-R2 the pause disc (pauseG, drawn around the container centre) animates; the 'pause-button' hit container never scales.
+    const fb = attachFeedback(scene, this.pauseG, 'hudButton', { source: this.pauseButton });
+    bindPress(this.pauseButton, () => fb.press(), () => fb.release(), () => fb.fire(onPause), true);
     this.done = hudLabel(scene, 0, 0, '', M.stat, TOKENS.hud.quota, 800, 'quota-done');
     this.total = hudLabel(scene, 0, 0, '', M.stat, ink, 800, 'quota-total');
     this.score = hudLabel(scene, 0, 0, '', M.stat, ink, 800, 'score');
