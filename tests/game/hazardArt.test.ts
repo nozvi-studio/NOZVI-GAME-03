@@ -4,10 +4,12 @@ import { boardLook } from '../../src/game/render/biomePalette';
 import { loadBalance } from '../support/balance';
 import { gfx } from '../support/gfx';
 import { createSim, type SimSnapshot } from '../../src/core';
-import { ROCK } from '../../src/game/render/boardParts';
+import { PART, ROCK } from '../../src/game/render/boardParts';
 import { drawMango } from '../../src/game/render/mango';
 import { drawSkillObjects } from '../../src/game/render/skills';
 import { LIGHT } from '../../src/game/render/palette';
+import { TEL } from '../support/telegraph';
+import { telegraphPulse } from '../../src/game/render/telegraph';
 
 const b = loadBalance();
 const themes = ['light', 'dark'] as const;
@@ -38,7 +40,7 @@ it('P3b1-R4 a rock has an outline ring in the board edge colour and a highlight;
 it('P3b1-R5 hazard warning keeps ring + dashes + "!" shape in both themes, blinking or reduced', () => {
   for (const theme of themes) for (const reduced of [false, true]) for (const ms of [0, 90, 400]) {
     const p = gfx();
-    drawWarn(p.g, { x: 2, y: 3 }, 30, ms, 0.4, boardLook(3, theme), 'hazard', false, reduced);
+    drawWarn(p.g, { x: 2, y: 3 }, 30, ms, 1000, boardLook(3, theme), 'hazard', false, reduced, TEL.cfg);
     expect(p.count('strokeRoundedRect')).toBe(1);                // constant outline ring
     expect(p.count('lineBetween')).toBeGreaterThan(8);           // dashed border
     expect(p.count('fillCircle')).toBe(1);                       // dot of the "!"
@@ -48,26 +50,27 @@ it('P3b1-R5 hazard warning keeps ring + dashes + "!" shape in both themes, blink
 
 it('P3b1-R5 rising-ground warning draws the chevron shape, not just a tint', () => {
   const p = gfx();
-  drawWarn(p.g, { x: 2, y: 3 }, 30, 0, 0.5, boardLook(3, 'light'), 'rise', false, true);
+  drawWarn(p.g, { x: 2, y: 3 }, 30, 0, 1000, boardLook(3, 'light'), 'rise', false, true, TEL.cfg);
   expect(p.count('strokeRoundedRect')).toBe(1);
   expect(p.count('fillCircle')).toBe(0);
   const chevron = p.calls.filter(c => c[0] === 'lineStyle').at(-1)!;
   expect(chevron[1]).toBeCloseTo(30 * 0.13);
 });
 
-it('P3b1-R5 reduced motion never blinks: fill alpha is constant over time, motion mode varies it', () => {
-  const alphas = (reduced: boolean): number[] => [0, 60, 130].map(ms => {
-    const p = gfx(); drawWarn(p.g, { x: 0, y: 0 }, 30, ms, 0.5, boardLook(1, 'light'), 'hazard', false, reduced);
+it('P3b1-R5 MOT-4 reduced motion never blinks: fill alpha only ramps up with progress, motion mode oscillates', () => {
+  const alphas = (reduced: boolean): number[] => Array.from({ length: 21 }, (_, i) => i * 50).map(ms => {
+    const p = gfx(); drawWarn(p.g, { x: 0, y: 0 }, 30, ms, 1000, boardLook(1, 'light'), 'hazard', false, reduced, TEL.cfg);
     return p.calls.filter(c => c[0] === 'fillStyle')[0]![2] as number;
   });
-  expect(new Set(alphas(true)).size).toBe(1);
-  expect(new Set(alphas(false)).size).toBeGreaterThan(1);
+  const steps = (a: number[]): number[] => a.slice(1).map((v, i) => v - a[i]!);
+  expect(steps(alphas(true)).every(d => d >= -1e-9)).toBe(true);
+  expect(steps(alphas(false)).some(d => d < -1e-9)).toBe(true);
 });
 
 it('P3b1-R5 a warning rock also previews the rock faintly; a solid rock does not draw a ring', () => {
   const warn = gfx(), solid = gfx(), look = boardLook(1, 'light');
-  drawHazards(warn.g, rockHazard('warn', [{ x: 3, y: 4, on: false, ageMs: 0 }]), 30, look, b, false);
-  drawHazards(solid.g, rockHazard('solid'), 30, look, b, false);
+  drawHazards(warn.g, rockHazard('warn', [{ x: 3, y: 4, on: false, ageMs: 0 }]), 30, look, b, false, TEL);
+  drawHazards(solid.g, rockHazard('solid'), 30, look, b, false, TEL);
   expect(warn.count('strokeRoundedRect')).toBe(1);
   expect(warn.count('fillEllipse')).toBeGreaterThan(0);          // faint rock preview
   expect(solid.count('strokeRoundedRect')).toBe(0);
@@ -79,9 +82,9 @@ const fenceHazard = (cells: { x: number; y: number }[]): SimSnapshot['hazards'] 
 
 it('P3b1-R6 a lone fence cell is one post; two horizontally joined cells add two rails; rails are drawn before posts', () => {
   const look = boardLook(2, 'light');
-  const one = gfx(); drawHazards(one.g, fenceHazard([{ x: 1, y: 1 }]), 30, look, b, false);
+  const one = gfx(); drawHazards(one.g, fenceHazard([{ x: 1, y: 1 }]), 30, look, b, false, TEL);
   expect(one.count('fillRoundedRect')).toBe(2);                              // post: edge + fill
-  const two = gfx(); drawHazards(two.g, fenceHazard([{ x: 1, y: 1 }, { x: 2, y: 1 }]), 30, look, b, false);
+  const two = gfx(); drawHazards(two.g, fenceHazard([{ x: 1, y: 1 }, { x: 2, y: 1 }]), 30, look, b, false, TEL);
   expect(two.count('fillRoundedRect')).toBe(8);                              // 2 rail boxes + 2 posts, each edge + fill
   const rects = two.calls.filter(c => c[0] === 'fillRoundedRect');
   const first = rects[0]!, last = rects.at(-1)!;
@@ -91,8 +94,8 @@ it('P3b1-R6 a lone fence cell is one post; two horizontally joined cells add two
 
 it('P3b1-R6 fences use the biome wood edge: brown on light grounds, white on dark ones', () => {
   const light = gfx(), dark = gfx();
-  drawHazards(light.g, fenceHazard([{ x: 1, y: 1 }]), 30, boardLook(2, 'light'), b, false);
-  drawHazards(dark.g, fenceHazard([{ x: 1, y: 1 }]), 30, boardLook(2, 'dark'), b, false);
+  drawHazards(light.g, fenceHazard([{ x: 1, y: 1 }]), 30, boardLook(2, 'light'), b, false, TEL);
+  drawHazards(dark.g, fenceHazard([{ x: 1, y: 1 }]), 30, boardLook(2, 'dark'), b, false, TEL);
   expect(light.calls.find(c => c[0] === 'fillStyle')![1]).toBe(boardLook(2, 'light').woodEdge);
   expect(dark.calls.find(c => c[0] === 'fillStyle')![1]).toBe(boardLook(2, 'dark').woodEdge);
   expect(boardLook(2, 'light').woodEdge).not.toBe(boardLook(2, 'dark').woodEdge);
@@ -101,16 +104,16 @@ it('P3b1-R6 fences use the biome wood edge: brown on light grounds, white on dar
 it('P3b1-R6 a maze hazard draws glow, edge and fill passes over every bar', () => {
   const p = gfx();
   drawHazards(p.g, [{ type: 'maze', state: 'solid', t: 100, warnMs: 2600, lifeMs: 10000,
-    cells: [{ x: 1, y: 1, on: true, ageMs: 400 }, { x: 2, y: 1, on: true, ageMs: 400 }] }], 30, boardLook(6, 'light'), b, false);
+    cells: [{ x: 1, y: 1, on: true, ageMs: 400 }, { x: 2, y: 1, on: true, ageMs: 400 }] }], 30, boardLook(6, 'light'), b, false, TEL);
   expect(p.count('fillRoundedRect')).toBe(3 * 3);                            // 2 bars + 1 connector, x (glow, edge, fill)
 });
 
 it('P3b1-R6 rising ground: warn tile has ring + chevron, up tile is a two-face stone with a look edge', () => {
   const look = boardLook(3, 'light');
   const mk = (vis: 'down' | 'warn' | 'up'): SimSnapshot['terrains'] => [{ t: 5000, lifeMs: 20000, cells: [{ x: 2, y: 2, vis, delay: 0 }] }];
-  const warn = gfx(); drawTerrains(warn.g, mk('warn'), 30, look, b, false);
+  const warn = gfx(); drawTerrains(warn.g, mk('warn'), 30, look, b, false, TEL);
   expect(warn.count('strokeRoundedRect')).toBe(1);
-  const up = gfx(); drawTerrains(up.g, mk('up'), 30, look, b, false);
+  const up = gfx(); drawTerrains(up.g, mk('up'), 30, look, b, false, TEL);
   expect(up.calls.some(c => c[0] === 'fillStyle' && c[1] === look.edge)).toBe(true);
   expect(up.count('fillRoundedRect')).toBe(1 + 2 * 2);                       // zone mark + (front, top) x (edge, fill)
 });
@@ -134,4 +137,21 @@ describe('P3b1-R4 crumble alpha is applied exactly once', () => {
     drawMango(p.g, s, 30, LIGHT, look, 0, true, 0);
     expect(ringAlpha(p.calls)).toBeCloseTo(ROCK.crumbleAlpha);
   });
+});
+
+it('MOT-4-R2 the warn symbol (ring, dashes and the "!" bar+dot) is drawn at the dimmest pulse frame', () => {
+  const dim = (() => { for (let ms = 0; ms < 1000; ms++) if (telegraphPulse(1000 - ms, 1000, TEL.cfg).alpha < TEL.cfg.telegraphAlphaMin + 0.02) return ms; return 0; })();
+  const p = gfx(); drawWarn(p.g, { x: 2, y: 3 }, 30, dim, 1000, boardLook(1, 'light'), 'hazard', false, false, TEL.cfg);
+  expect(p.count('strokeRoundedRect')).toBe(1); expect(p.count('lineBetween')).toBeGreaterThan(0);
+  expect(p.count('fillCircle')).toBe(1);   // the "!" dot
+});
+it('MOT-4-R6 in the last telegraphUrgentMs the dash colour is the hard warn colour at alpha 1', () => {
+  const p = gfx(); drawWarn(p.g, { x: 0, y: 0 }, 30, 1000 - TEL.cfg.telegraphUrgentMs, 1000, boardLook(1, 'light'), 'hazard', false, false, TEL.cfg);
+  const dash = p.calls.find(c => c[0] === 'lineStyle' && c[2] === PART.warn.dash && c[3] === 1);
+  expect(dash).toBeTruthy();
+});
+it('MOT-4-R5 a live rock is enlarged by the hit beat scale and returns to size at 1', () => {
+  const look = boardLook(1, 'light'), live = rockHazard('solid');
+  const sized = (k: number) => { const q = gfx(); drawHazards(q.g, live, 30, look, b, false, { ...TEL, beat: () => k }); return q.calls.find(c => c[0] === 'fillEllipse')!; };
+  expect(sized(1.12)[3] as number).toBeGreaterThan(sized(1)[3] as number);
 });
