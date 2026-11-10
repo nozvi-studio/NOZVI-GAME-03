@@ -90,7 +90,8 @@
     "terrainFadeInMs": 600, "hazardFlickerMs": 1500
     , "capy": { "breathPeriodMs": 1600, "breathAmp": 0.03, "blinkMs": 120, "blinkMinGapMs": 2000, "blinkMaxGapMs": 4000,
     "eatOpenMs": 80, "eatChewMs": 120, "gulpScaleX": 1.12, "gulpScaleY": 0.9,
-    "deadDroopMs": 300, "deadRotDeg": 12, "deadDropPx": 4, "headCellScale": 1.2 }
+    "deadDroopMs": 300, "deadRotDeg": 12, "deadDropPx": 4, "headCellScale": 1.2,
+    "tongueMs": 260, "tongueMinGapMs": 2500, "tongueMaxGapMs": 5000 }
     , "hud": { "rejectShakeMs": 200, "rejectShakeAmpPx": 6, "tipFactor": 2, "bannerQueueMax": 4 }
   },
   "juice": {

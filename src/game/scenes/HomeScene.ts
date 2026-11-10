@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 import type { Balance } from '../../core';
 import { summarizeLog, deathCauseReport, type RunLog } from '../../meta';
 import type { Session } from '../../session';
-import { capyHeadKey } from '../art/capyRig';
+import { headKey } from '../art/capyRig';
+import { activeSkin } from '../art/skins';
 import { createSynth, type Synth } from '../audio/synth';
 import { debugStartLevel, isDebug, isMotionOff } from '../flow/debugFlag';
 import { HOME_ORDER, entranceEndMs } from '../flow/entranceOrder';
@@ -238,7 +239,7 @@ export class HomeScene extends Phaser.Scene {
     m.fillStyle(toInt(TOKENS.accent.orange)).fillCircle(mc.x, mc.y, ui(M.size * M.inner));
     m.fillStyle(toInt(TOKENS.green.deep)).fillEllipse(mc.x + ui(M.size * M.leaf.dx), mc.y + ui(M.size * M.leaf.dy), ui(M.size * M.leaf.w), ui(M.size * M.leaf.h));
     const C = H.capy, cc = at(C.x + C.size / 2, C.y + C.size / 2);
-    const capy = this.add.image(cc.x, cc.y, capyHeadKey('idle', 'large')).setDisplaySize(ui(C.size), ui(C.size));
+    const capy = this.add.image(cc.x, cc.y, headKey(activeSkin(), 'idle', 'large')).setDisplaySize(ui(C.size), ui(C.size));
     blk.add(capy); this.capy = capy; this.capyRest = { sx: capy.scaleX, sy: capy.scaleY };
   }
 

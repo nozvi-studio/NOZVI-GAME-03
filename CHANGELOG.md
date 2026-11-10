@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(art): ART-003 skin layer - the default head is now the snake skin (blue, no ears, forked tongue flick/after-chew/dead); capy kept as a selectable skin; per-skin texture keys, `activeSkin()`, ui.capy tongue timings, art preview skin switch
 - fix(motion): menu scene transitions no longer hang on the second visit of a scene (stale cached camera; input stayed locked) - `cameraPort` resolves `cameras.main` per call
 - docs(motion): MOT-2 codemap, decisions and playtest record
 - feat(motion): MOT-2 Results sequence (<= 1500 ms), count-up, best-chip pulse, skip on tap

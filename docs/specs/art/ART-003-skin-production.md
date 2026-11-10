@@ -25,12 +25,12 @@ Status: **Draft — owner has not fully approved (2026-11-07).** Rules for skins
 - [ ] `dead` expression reads instantly; `eat` visible at board size.
 - [ ] No console errors on the preview page.
 
-## 4. Code work before the 2nd skin (not done yet)
+## 4. Code work before the 2nd skin (done 2026-11-10)
 Current code is capy-specific: `capyRig.ts` (`capyHeadSvg`, `capyBodySvg`, `CAPY`, `capyHeadKey`), `capyTextures.ts` (`preloadCapy`), `capyHead.ts` (`CapyHead`), balance `ui.capy`. Before skin 2:
 - Split into a shared rig (anchors, eye/mouth variants, expression table, builder) + a per-skin definition (palette, ear/muzzle/extra shapes).
 - Keys and preload take a skin id; `CapyHead` becomes a generic head view fed by the selected skin (MEC-011 save).
 - Preview scene lists every skin.
-This refactor is a separate task with its own plan (M3/P4 skins), not part of P3.
+Done: `art/skins.ts` (ids, palettes, `activeSkin()`), `headSvg/bodySvg(skin, ...)`, `headKey/bodyKey(skin, ...)`, `preloadSkins`, per-skin pose state, preview `&skin=` switch. Still open: the save-backed skin choice (MEC-011, P4) and the `CapyHead`/`capy*.ts` renames.
 
 ## 5. Fallback raster route
 If a skin cannot be drawn well as SVG, use the ART-001 §6 raster pipeline (ART-002 style brief per skin) on the same anchors.

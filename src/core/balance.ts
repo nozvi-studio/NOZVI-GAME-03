@@ -91,7 +91,8 @@ export interface Balance {
     terrainFadeInMs: number; hazardFlickerMs: number;
     capy: { breathPeriodMs: number; breathAmp: number; blinkMs: number; blinkMinGapMs: number; blinkMaxGapMs: number;
       eatOpenMs: number; eatChewMs: number; gulpScaleX: number; gulpScaleY: number;
-      deadDroopMs: number; deadRotDeg: number; deadDropPx: number; headCellScale: number };
+      deadDroopMs: number; deadRotDeg: number; deadDropPx: number; headCellScale: number;
+      tongueMs: number; tongueMinGapMs: number; tongueMaxGapMs: number };
     hud: { rejectShakeMs: number; rejectShakeAmpPx: number; tipFactor: number; bannerQueueMax: number };
   };
   juice: {
@@ -236,7 +237,8 @@ const SPEC: Spec = {
     terrainFadeInMs: 'int+', hazardFlickerMs: 'int+',
     capy: { breathPeriodMs: 'int+', breathAmp: 'prob', blinkMs: 'int+', blinkMinGapMs: 'int+', blinkMaxGapMs: 'int+',
       eatOpenMs: 'int+', eatChewMs: 'int+', gulpScaleX: 'num+', gulpScaleY: 'num+',
-      deadDroopMs: 'int+', deadRotDeg: 'num0', deadDropPx: 'num0', headCellScale: 'num+' },
+      deadDroopMs: 'int+', deadRotDeg: 'num0', deadDropPx: 'num0', headCellScale: 'num+',
+      tongueMs: 'int+', tongueMinGapMs: 'int+', tongueMaxGapMs: 'int+' },
     hud: { rejectShakeMs: 'int+', rejectShakeAmpPx: 'num+', tipFactor: 'int+', bannerQueueMax: 'int+' },
   },
   juice: {
@@ -380,6 +382,7 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (rain.mangoBlinkMs >= rain.mangoLifeMs) fail('skills.mangoRain.mangoBlinkMs', 'must be < mangoLifeMs');
   if (b.energy.orbBlinkMs >= b.energy.orbLifeMs) fail('energy.orbBlinkMs', 'must be < orbLifeMs');
   if (b.ui.capy.blinkMaxGapMs < b.ui.capy.blinkMinGapMs) fail('ui.capy.blinkMaxGapMs', 'must be >= blinkMinGapMs');
+  if (b.ui.capy.tongueMaxGapMs < b.ui.capy.tongueMinGapMs) fail('ui.capy.tongueMaxGapMs', 'must be >= tongueMinGapMs');
   // MOT-0 motion token cross-field rules (spec section 4).
   const mo = b.motion;
   if (mo.pressScale >= 1) fail('motion.pressScale', 'must be < 1');

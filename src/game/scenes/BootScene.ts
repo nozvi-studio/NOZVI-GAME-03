@@ -2,8 +2,9 @@ import Phaser from 'phaser';
 import json from '../../../config/balance.json';
 import { parseBalance } from '../../core';
 import { createSession } from '../../session';
-import { capyHeadKey } from '../art/capyRig';
-import { preloadCapy } from '../art/capyTextures';
+import { headKey } from '../art/capyRig';
+import { SKIN_IDS, activeSkin } from '../art/skins';
+import { preloadSkins } from '../art/capyTextures';
 import { preloadHudIcons } from '../hud/hudIcons';
 import { bootView } from '../flow/bootView';
 import { isArtPreview } from '../flow/debugFlag';
@@ -30,7 +31,7 @@ export class BootScene extends Phaser.Scene {
   constructor() { super('Boot'); }
   // ART-001 capy textures are ready before any scene draws.
   preload(): void {
-    preloadCapy(this.load); preloadHudIcons(this.load);
+    preloadSkins(this.load, isArtPreview(typeof location === 'undefined' ? '' : location.search) ? SKIN_IDS : [activeSkin()]); preloadHudIcons(this.load);
     this.buildView(); // P3b3-R12 logo, hero and progress bar are drawn while assets load
     this.load.on('progress', (p: number) => this.setProgress(p));
   }
@@ -76,7 +77,7 @@ export class BootScene extends Phaser.Scene {
   }
   // The capy head texture exists only after loading, so it is added from create().
   private drawHead(): void {
-    const key = capyHeadKey('idle', 'large');
+    const key = headKey(activeSkin(), 'idle', 'large');
     if (this.headSlot && this.textures.exists(key)) this.headSlot.add(this.add.image(this.heroCentre.x, this.heroCentre.y, key).setDisplaySize(ui(B.capy.size), ui(B.capy.size)));
   }
   // GDD-13 validate config, then create the run session (P1-D1) and open Home.
