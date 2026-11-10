@@ -44,7 +44,7 @@ export class LoadoutScene extends Phaser.Scene {
     roundIconButton(this, back.cx, back.cy, MENU.round, 'back', 'loadout-back', () => this.back());
     this.title = this.add.text(WIDTH / 2, headY, '', text(L.titleFont, '900', TOKENS.text.primary)).setOrigin(0.5).setName('loadout-title');
     const goY = HEIGHT - ui(L.goBottom + L.goH / 2 + MENU.widgets.shelfDy);
-    bigLabel(pillButton(this, WIDTH / 2, goY, L.goW, L.goH, t('loadout.go'), 'loadout-go', () => this.go()), L.goLabel, L.goStroke);
+    bigLabel(pillButton(this, WIDTH / 2, goY, L.goW, L.goH, t('loadout.go'), 'loadout-go', () => this.go(), 'green', { navigates: true }), L.goLabel, L.goStroke);
     const keys = this.input.keyboard;
     const onKey = (e: KeyboardEvent): void => {
       if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); this.go(); }

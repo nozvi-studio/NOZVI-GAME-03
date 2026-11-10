@@ -13,6 +13,7 @@ import { layoutColumn, ui, UI_SCALE } from '../ui/layout';
 import { headerButton, homeColumn, l1Link, smoothPath } from '../ui/menuLayout';
 import { MENU } from '../ui/menuMetrics';
 import { bgCream, bigLabel, hill, logoLine, roundIconButton, scaledBlock, tap } from '../ui/menuWidgets';
+import { pivotAt } from '../ui/feedback';
 import { chip, pillButton } from '../ui/widgets';
 import { FONT_UI, TOKENS, toInt } from '../uiTokens';
 import { beginRun, button, label } from './ui';
@@ -109,7 +110,7 @@ export class HomeScene extends Phaser.Scene {
     y += g;
     const ph = v.compact ? H.playHFirst : H.playH;
     const play = pillButton(this, WIDTH / 2, y + ui(ph) / 2, H.hero.w, ph, t('home.play'), 'home-primary',
-      () => this.play(this.homeView().primary.level));
+      () => this.play(this.homeView().primary.level), 'green', { navigates: true });
     bigLabel(play, v.compact ? H.play.labelFirst : H.play.label, v.compact ? H.play.strokeFirst : H.play.stroke);
     if (v.startAt !== null) {
       play.text.setOrigin(0, 0.5).setX(-play.w / 2 + ui(H.play.labelLeft));
@@ -144,7 +145,11 @@ export class HomeScene extends Phaser.Scene {
         const tx = this.add.text(cx, cy, label, style(K.font, '800', TOKENS.text.soft)).setOrigin(0.5);
         const ly = cy + tx.height / 2 + ui(K.underlineDy);
         const line = this.add.graphics().lineStyle(ui(K.underline), toInt(TOKENS.text.soft)).lineBetween(cx - tx.width / 2, ly, cx + tx.width / 2, ly);
-        return this.add.container(0, 0, [line, tx, tap(this, cx, cy, ui(link.w), ui(link.h), 'home-l1', () => this.play(1))]);
+        // MOT-1-R3 the link text and underline scale together (kind card, half delta) about the link centre; the zone stays unscaled.
+        const lc = this.add.container(0, 0), { pivot, inner } = pivotAt(this, lc, cx, cy);
+        inner.add([line, tx]);
+        lc.add(tap(this, cx, cy, ui(link.w), ui(link.h), 'home-l1', () => this.play(1), { visual: pivot, kind: 'card', navigates: true }));
+        return lc;
       } });
     }
     if (v.carry !== null) {

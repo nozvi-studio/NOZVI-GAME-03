@@ -3,6 +3,7 @@ import { SETTINGS_CLOSED } from '../flow/settingsView';
 import { HEIGHT, WIDTH } from '../layout';
 import { FONT_TITLE, FONT_UI, TOKENS, toInt, uiTheme } from '../uiTokens';
 import { currentPalette, themeOf } from '../render/palette';
+import { feedbackOf } from '../ui/feedback';
 import { pillButton } from '../ui/widgets';
 import { ui } from '../ui/layout';
 import { drawCard, hudLabel } from './draw';
@@ -38,7 +39,7 @@ export class PauseOverlay {
     // Lilita One is loaded at weight 400 only: 'normal' avoids a synthetic bold.
     resume.text.setFontFamily(FONT_TITLE).setFontSize(ui(M.resumeFont)).setFontStyle('normal').setStroke(TOKENS.green.line, ui(M.resumeStroke));
     const settings = pillButton(scene, WIDTH / 2, 0, inner, m.secondary, '', 'overlay-settings', () => { this.setEnabled(false); cb.onSettings(); }, 'cream');
-    const quit = pillButton(scene, WIDTH / 2, 0, inner, m.secondary, '', 'overlay-quit', cb.onQuit, 'danger');
+    const quit = pillButton(scene, WIDTH / 2, 0, inner, m.secondary, '', 'overlay-quit', cb.onQuit, 'danger', { navigates: true });
     for (const b of [settings, quit]) b.text.setFontFamily(FONT_UI).setFontSize(ui(M.secondaryFont));
     this.btn = { resume, settings, quit };
     this.root = scene.add.container(0, 0, [scrim, block, this.card, this.chipG, this.title, this.subtitle, this.chipIcon, this.chipText,
@@ -50,7 +51,11 @@ export class PauseOverlay {
   }
 
   private setEnabled(on: boolean): void {
-    for (const id of IDS) { const c = this.btn[id].c; if (c.input) c.input.enabled = on && this.shown.has(id); }
+    for (const id of IDS) {
+      const c = this.btn[id].c, live = on && this.shown.has(id);
+      if (c.input) c.input.enabled = live;
+      feedbackOf(c)?.setDisabled(!live); // MOT-1-R12 alpha disabledAlpha, no hover or press feedback; hit area unchanged
+    }
   }
 
   show(v: PauseView): void {

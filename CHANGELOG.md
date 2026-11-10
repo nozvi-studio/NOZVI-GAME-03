@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): MOT-1 confirm-before-navigate delay on Home play/link, Loadout go, Results, Pause quit; Pause buttons grey while Settings is open
 - feat(ui): MOT-1 greybox button and HUD pause button use the feedback wrapper (no hard-coded press scale)
 - feat(ui): MOT-1 tap() optional visual feedback; roundIconButton press and release
 - feat(ui): MOT-1 pillButton press dip, scale and overshoot through the feedback wrapper

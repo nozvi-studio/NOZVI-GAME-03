@@ -118,11 +118,11 @@ export class ResultsScene extends Phaser.Scene {
   // Home round button and Play again pill, anchored to the bottom (marble-machine button hidden until P4, D8).
   private footer(session: Session, home: () => void): void {
     const cy = HEIGHT - ui(R.bottom + R.againH / 2);
-    roundIconButton(this, ui(R.side + R.btn / 2), cy, R.btn, 'home', RESULTS_BUTTONS.home, home, true);
+    roundIconButton(this, ui(R.side + R.btn / 2), cy, R.btn, 'home', RESULTS_BUTTONS.home, home, true, { navigates: true });
     const last = session.lastStartLevel();
     if (last === null) return;
     const left = ui(R.side + R.btn + R.btnGap), w = WIDTH - left - ui(R.side);
-    const b = pillButton(this, left + w / 2, cy, w / UI_SCALE, R.againH, t('playAgain'), RESULTS_BUTTONS.again, () => beginRun(this, last, 'results'));
+    const b = pillButton(this, left + w / 2, cy, w / UI_SCALE, R.againH, t('playAgain'), RESULTS_BUTTONS.again, () => beginRun(this, last, 'results'), 'green', { navigates: true });
     bigLabel(b, R.againLabel, R.againStroke);
   }
 }
