@@ -36,7 +36,7 @@ Descriptor: `{key: 'npc', cause: 'cat', capClass: 'small', maxActiveKey: 'npc.ma
 
 ## 6. Interactions with other mechanics
 - **MEC-004:** Mover `wait` mode; per-cell cause via `causeAt` for the death cause (MEC-014 §11 L4).
-- **MEC-006:** Shield knock-away; rubble and bonk.
+- **MEC-006:** Shield knock-away; bonk.
 - Fuzz extraction: route `warn` during the telegraph, NPC cell `mover` afterwards (TR-B4).
 
 ## 7. Core API changes
