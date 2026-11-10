@@ -593,3 +593,8 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Context: the first snake skin reused the capy oval muzzle and nostril pair and read as a blue hippo in headless-Chrome screenshots (no subagent could view it).
 - Choice: the snake skin has its own skull path, lower-jaw patch (clipped), two close nostril dots, forehead diamond, longer tongue (stroke 1.9) and a coil body. Eyes and mouth stay the shared ART-001 anchors; nostrils and muzzle belong to the skin (ART-003 only fixes eyes and mouth).
 - Consequence: visual checks of art need a screenshot pass (dev server + headless Chrome over DevTools, see the 2026-11-10 stale-camera entry).
+
+## 2026-11-10 - D3 "Juicy" replaces the D2 look; one light theme
+- Context: owner feedback: the game does not look casual and reads as sloppy on every screen; the D2 mockups themselves are not casual enough. Three direction sketches were shown (A glossy/chunky, B flat/minimal, C cozy orchard); the owner chose A.
+- Choice: new visual language D3 (spec `docs/superpowers/specs/2026-11-10-ui-d3-juicy-design.md`), designed for 360x640 first. Widgets are painted with Canvas2D into cached textures (skin kit) because Phaser Graphics cannot draw rounded gradients or gloss, and a pre-drawn PNG atlas needs an art pipeline and is hard to tune. The UI and board always render light; the OS colour scheme is no longer read and the Board theme setting is removed (the save field stays, ignored, no save version bump).
+- Consequence: the D2 mockups stay as a layout reference only until U0 rewrites `UI-MOCKUPS.md`; D2 tokens are removed as screens migrate (U1..U5). No gameplay rule or balance number changes.

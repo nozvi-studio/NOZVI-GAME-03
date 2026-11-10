@@ -1,8 +1,9 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-10 by Claude (lead, local) **Milestone:** M2 P3 on `version/v0.3` (branched from docs/p3-spec, owner 2026-11-07); P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
+**Updated:** 2026-11-10 by Claude (lead, local) **Milestone:** M2 P3 on `version/v0.3`; UI redesign D3 "Juicy" planned (not started); P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
 
 ## Now (in progress)
+- [ ] **UI D3 "Juicy" redesign (owner 2026-11-10: game looks sloppy, D2 not casual enough; chose direction A).** Spec + plans on branch `docs/ui-d3-juicy-spec` (not merged, not pushed): spec `docs/superpowers/specs/2026-11-10-ui-d3-juicy-design.md`, roadmap + U0 + U1 plans in `docs/superpowers/plans/2026-11-10-ui-d3-*.md`. Owner said: plan only, do not execute yet. **RESUME HERE (D3):** owner reviews the plans -> merge the docs branch -> U0 (QA tool, tokens, boards; owner eye-check of boards) -> U1. Findings: canvas is fixed 540x960 FIT (bands on tall phones, D3-R7), HUD followed OS dark while Home stayed light (D3-R3), Results first-run buttons not seen in headless (check in U5).
 - [x] **Motion / visual feedback (MOT-0..4) all merged into version/v0.3** (1639 pass, typecheck clean, not pushed): MOT-0 curves + `balance.motion` + adapter; MOT-1 widget feedback; MOT-2 menu flow (`goTo`, entrances, Home idle, Results sequence, `?debug=1&motion=off`); MOT-3 run events (`balance.juice.events`); MOT-4 telegraph pulses + HUD numbers. [ ] **Owner browser eye-check + tune numbers in config/balance.json `motion` / `juice.events`** (per-spec lists in the plans; PLAYTEST has a PENDING entry). Follow-up: `motion.stop(t)` in MOT-0 (DECISIONS).
 - [x] R12 energy gauge on skill buttons (replaces red cost). Dark theme parked (owner 2026-11-10): light mode only. P4 return hook = challenges + skins (DECISIONS); P4 specs not started (open: what 'challenge' means).
 - [ ] **RESUME HERE:** owner sends the P2 exit playtest log (normal runs, no ?debug=1; start from checkpoint L10; >= 30 runs, >= 10 reaching biome 4). Lead runs deathCauseReport + summarizeLog, writes the verdict in PLAYTEST, tunes if over40 (OQ-C5).
@@ -49,6 +50,7 @@
 - Rubble family and `skills.shield.rubbleLifeMs` removed (chore/remove-rubble-family, 2026-11-10).
 
 ## Last session summary
+- 2026-11-10 (local lead, D3): pushed version/v0.3 + v0.2; screenshots of v0.3 at 360x640; three direction sketches (`docs/design/mockups/d3/directions.html`), owner chose A; spec D3-R1..R28 + roadmap + U0/U1 plans written. No code changed, no tests run.
 - 2026-11-10 (local lead): save compat v0.2+v0.3, Rubble removed, UIFIX waves 1-3 + R12 gauge, MOT-0..4 specs/plans/impl via Sonnet subagents (3 in parallel), all merged; one bad blanket conflict resolution on code files caught and redone by hand.
 - 2026-11-10 (local): save compat guard (v0.3 + v0.2), Rubble family removed (subagent, 1395 pass), v0.2 merged into v0.3, UIFIX waves 1-3 merged via Sonnet subagents. Tech debt left: shrink fade crumble visual, hudText test cleanups, level%5 in tests, MEC-003 R21 heading, stale rubble mentions in MEC-004 L7/MEC-006 §7/MEC-013, single 1.28 MB chunk. Not pushed.
 - 2026-11-07 (local): owner rulings (GDD §4 ok, leaderboard+streak parked, OQ-B1..B5 closed); ART-003 skin guide (draft); ART-001 Q6/Q7; Remotion capy POC approved + merged. 1395 pass, typecheck clean. Not pushed.
@@ -56,5 +58,3 @@
 - 2026-11-07 (cloud, P3-0): version/v0.3 created; P3-0 executed via subagents (Haiku/Sonnet implementers + reviewers, Opus final review). Superpowers skills read from github obra/superpowers (plugin not loaded in cloud). Playwright replaces agy for browser checks here.
 - 2026-11-07 (P3 planning): owner pushed HTML mockups; lead wrote P3 spec + P3-0 plan, 4 Sonnet subagents wrote the other plans. No code changed, no tests run. Mockup-vs-spec conflicts resolved spec-first (listed in each plan); visible changes: D-pad hidden unless setting on, sound toggle moves to Settings.
 - 2026-11-06 (P3c): spec + plan in docs/superpowers/; 4 tasks via subagents (Haiku/Sonnet, Opus final review). Final review caught Phaser 3.90 decoding every data: URL as base64 -> fixed (base64 SVG URLs). Deferred minors in branch ledger (magic numbers in eye/mouth geometry, capyDie twice, preview label contrast).
-- 2026-11-06 (art prep): reviewed Figma D2 and agent-sprite-forge; wrote ART-001 v2 + ART-002 (docs/JSON only, no tests run); branch feat/capy-character-spec from version/v0.2, pushed, not merged.
-- 2026-11-06: owner accepted (nghiem thu) version/v0.2 with P2c, Shield without rubble, debug skip buttons, run start waits for first input (MEC-001-R2). First owner log (69 runs, 37 normal): over40 empty, wall 77% (review), max L13, biome 4 not reached; 7 runs died at 1260 ms with 0 turns -> fixed by the waiting phase.
