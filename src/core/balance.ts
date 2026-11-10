@@ -25,6 +25,7 @@ export interface MotionBalance {
   idleBreathAmp: number; idleStartMs: number; idlePauseMs: number; resultsSeqMs: number;
   telegraphHzStart: number; telegraphHzEnd: number; telegraphAlphaMin: number; telegraphScaleAmp: number; telegraphUrgentMs: number;
   telegraphSnapScale: number; telegraphSnapMs: number; digitPopMs: number; hudTickMs: number; barEaseMs: number; barSpendMs: number; energyLowFrac: number;
+  digitPopScale: number; readyDipMs: number;
 }
 
 export interface Balance {
@@ -249,6 +250,7 @@ const SPEC: Spec = {
     idleBreathAmp: 'num+', idleStartMs: 'int+', idlePauseMs: 'int+', resultsSeqMs: 'int+',
     telegraphHzStart: 'num+', telegraphHzEnd: 'num+', telegraphAlphaMin: 'prob', telegraphScaleAmp: 'num+', telegraphUrgentMs: 'int+',
     telegraphSnapScale: 'num+', telegraphSnapMs: 'int+', digitPopMs: 'int+', hudTickMs: 'int+', barEaseMs: 'int+', barSpendMs: 'int+', energyLowFrac: 'prob',
+    digitPopScale: 'num+', readyDipMs: 'int+',
   },
 };
 
@@ -369,6 +371,8 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (mo.staggerCapMs < mo.staggerMs) fail('motion.staggerCapMs', 'must be >= staggerMs');
   if (mo.telegraphHzEnd <= mo.telegraphHzStart) fail('motion.telegraphHzEnd', 'must be > telegraphHzStart');
   if (mo.telegraphSnapScale <= 1 || mo.telegraphSnapScale >= 2) fail('motion.telegraphSnapScale', 'must be in (1, 2)');
+  if (mo.telegraphAlphaMin <= 0 || mo.telegraphAlphaMin >= 1) fail('motion.telegraphAlphaMin', 'must be in (0, 1)');
+  if (mo.digitPopScale <= 1 || mo.digitPopScale >= 2) fail('motion.digitPopScale', 'must be in (1, 2)');
   if (mo.disabledAlpha >= 1) fail('motion.disabledAlpha', 'must be < 1');
   if (mo.idleBreathAmp >= mo.pulseAmp) fail('motion.idleBreathAmp', 'must be < pulseAmp');
   if (mo.resultsSeqMs < 200 + mo.countUpMs + mo.popInMs) fail('motion.resultsSeqMs', 'must be >= 200 + countUpMs + popInMs');
