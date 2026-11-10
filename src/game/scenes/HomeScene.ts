@@ -6,6 +6,7 @@ import { capyHeadKey } from '../art/capyRig';
 import { createSynth, type Synth } from '../audio/synth';
 import { debugStartLevel, isDebug } from '../flow/debugFlag';
 import { homeView, stepCheckpoint } from '../flow/homeModel';
+import { enter, goTo } from '../motion';
 import { HEIGHT, WIDTH } from '../layout';
 import { t } from '../text';
 import { drawIcon } from '../ui/icons';
@@ -39,13 +40,14 @@ export class HomeScene extends Phaser.Scene {
     this.selected = this.session.homeModel().defaultStart;
     const gear = headerButton('right');
     roundIconButton(this, gear.cx, gear.cy, MENU.round, 'sliders', 'home-settings',
-      () => { this.synth.play('uiTap'); this.scene.start('Settings', { returnTo: 'Home' }); });
+      () => { this.synth.play('uiTap'); goTo(this, 'Settings', { returnTo: 'Home' }, 'forward'); });
     const logoY = ui(MENU.padTop + MENU.round + MENU.gap + MENU.logo.lineH / 2);
     logoLine(this, WIDTH / 2, logoY, t('logo.mango'), 0, MENU.logo.size);
     logoLine(this, WIDTH / 2, logoY + ui(MENU.logo.lineH - MENU.logo.overlap), t('logo.snake'), 2, MENU.logo.size);
     hill(this, HEIGHT - ui(H.hillPeek));
     if (isDebug(window.location.search)) this.setupDebug();
     this.build();
+    enter(this, [], {}); // MOT-2-R3 camera fade-in and re-arm goTo; Task 5 fills the entrance
   }
 
   // MEC-003-R21 debug-only log export and console summary helper (P1 design §11).
@@ -85,7 +87,7 @@ export class HomeScene extends Phaser.Scene {
     const balance = this.registry.get('balance') as Balance;
     const dbgLevel = debugStartLevel(window.location.search, balance.level.maxLevel);
     const level = dbgLevel ?? chosen, debug = dbgLevel !== null;
-    if (this.session.homeModel().showLoadout) this.scene.start('Loadout', { level, debug });
+    if (this.session.homeModel().showLoadout) goTo(this, 'Loadout', { level, debug }, 'forward');
     else beginRun(this, level, 'home', debug);
   }
 

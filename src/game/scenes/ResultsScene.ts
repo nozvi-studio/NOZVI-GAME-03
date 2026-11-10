@@ -5,6 +5,7 @@ import type { Session } from '../../session';
 import { capyHeadKey } from '../art/capyRig';
 import { RESULTS_BUTTONS, resultsView, type ResultsView } from '../flow/resultsView';
 import { HEIGHT, WIDTH } from '../layout';
+import { enter, goTo } from '../motion';
 import { t } from '../text';
 import { drawIcon, type IconId } from '../ui/icons';
 import { layoutColumn, ui, UI_SCALE } from '../ui/layout';
@@ -30,13 +31,14 @@ export class ResultsScene extends Phaser.Scene {
     const s = session.summary();
     bgCream(this);
     hill(this, HEIGHT - ui(R.hillPeek));
-    const home = (): void => { this.scene.start('Home'); };
+    const home = (): void => { goTo(this, 'Home', undefined, 'back'); };
     const v = s ? resultsView(s, session.homeModel().nextMilestone, biome(balance, balance.level.maxLevel)) : null;
     logoLine(this, WIDTH / 2, ui(R.titleY + R.titleSize / 2), t(v?.titleKey ?? 'results.gameOver'), 0, R.titleSize);
     if (s && v) {
       this.summaryBlock(v, s.won, balance.ui.minShrink);
     }
     this.footer(session, home);
+    enter(this, [], {}); // MOT-2-R3 camera fade-in and re-arm goTo; the Results sequence (Task 7) is its own entrance
   }
 
   private summaryBlock(v: ResultsView, won: boolean, minShrink: number): void {

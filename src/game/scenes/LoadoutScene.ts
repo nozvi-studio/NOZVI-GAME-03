@@ -5,7 +5,7 @@ import { createSynth, type Synth } from '../audio/synth';
 import { initEdit, tapCard, tapSlot, type LoadoutEditState } from '../flow/loadoutEdit';
 import { loadoutView, type SkillCardView } from '../flow/loadoutView';
 import { HEIGHT, WIDTH } from '../layout';
-import { motionFor } from '../motion';
+import { enter, goTo, motionFor } from '../motion';
 import { t } from '../text';
 import { feedbackOf, pivotAt } from '../ui/feedback';
 import { isRejected } from '../ui/feedbackModel';
@@ -64,6 +64,7 @@ export class LoadoutScene extends Phaser.Scene {
     const onResize = (): void => this.render(); // UIFIX-R9 re-evaluate compact mode when the canvas size changes
     this.scale.on(Phaser.Scale.Events.RESIZE, onResize);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off(Phaser.Scale.Events.RESIZE, onResize));
+    enter(this, [], {}); // MOT-2-R3 camera fade-in and re-arm goTo; Task 6 fills the entrance
   }
   private title!: Phaser.GameObjects.Text;
 
@@ -73,7 +74,7 @@ export class LoadoutScene extends Phaser.Scene {
     this.session.confirmLoadout(this.edit.selection);
     beginRun(this, this.level, 'home', this.debug);
   }
-  private back(): void { this.synth.play('uiTap'); this.scene.start('Home'); }
+  private back(): void { this.synth.play('uiTap'); goTo(this, 'Home', undefined, 'back'); }
 
   // MOT-1-R11 a refused edit (locked card, slot beyond slotCount) returns the same state: shake the tapped target, no sound, no rebuild.
   private pick(action: () => LoadoutEditState, zone: Phaser.GameObjects.Zone): void {

@@ -8,6 +8,7 @@ import { preloadHudIcons } from '../hud/hudIcons';
 import { bootView } from '../flow/bootView';
 import { isArtPreview } from '../flow/debugFlag';
 import { HEIGHT, WIDTH } from '../layout';
+import { bootHoldMs, goTo } from '../motion';
 import { localStore } from '../platform/localStore';
 import { setDisplaySettings } from '../render/palette';
 import { t } from '../text';
@@ -96,6 +97,11 @@ export class BootScene extends Phaser.Scene {
     const search = typeof location === 'undefined' ? '' : location.search;
     const next = isArtPreview(search) ? 'ArtPreview' : 'Home';
     const fontSet = typeof document === 'undefined' ? undefined : document.fonts;
-    void waitForFonts(fontSet, UI_FONT_SPECS, balance.ui.fontLoadTimeoutMs).then(() => this.scene.start(next)); // P3-0-R6
+    const waitStart = performance.now(); // MOT-2-R7
+    void waitForFonts(fontSet, UI_FONT_SPECS, balance.ui.fontLoadTimeoutMs).then(() => {
+      const hold = bootHoldMs(performance.now() - waitStart, balance.motion.fadeMs);
+      const go = (): void => { goTo(this, next, undefined, 'start'); }; // fade only: Boot has no spatial relation to Home (ruling 1); ArtPreview gets the same fade
+      if (hold > 0 && this.time) this.time.delayedCall(hold, go); else go();
+    }); // P3-0-R6
   }
 }

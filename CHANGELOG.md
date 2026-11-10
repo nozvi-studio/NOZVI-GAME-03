@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(motion): MOT-2 goTo fades for all menu navigation, run start/end and Settings overlay
 - feat(motion): MOT-2 transition.ts with goTo, enter, entrance runner and group capture
 - feat(motion): MOT-2 pure entrance orders, Results timeline and Home idle math
 - feat(motion): MOT-2 ?debug=1&motion=off flag

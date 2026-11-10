@@ -5,6 +5,7 @@ import type { Session } from '../../session';
 import { createSynth, type Synth } from '../audio/synth';
 import { applySettings, settingsCardEdge, settingsExit, settingsView, SETTINGS_CLOSED, themePatch, toggleTrackStyle, togglePatch, type SettingsEntry, type SettingsToggle } from '../flow/settingsView';
 import { HEIGHT, WIDTH } from '../layout';
+import { enter, goTo, motionFor } from '../motion';
 import { currentPalette, osDisplay, reduceMotion, themeOf } from '../render/palette';
 import { t } from '../text';
 import { feedbackOf, pivotAt } from '../ui/feedback';
@@ -48,6 +49,7 @@ export class SettingsScene extends Phaser.Scene {
     this.synth = createSynth(); this.synth.setOn(this.session.save().settings.sound);
     // Overlay: a full-screen rect (theme background) that swallows taps on the paused board underneath.
     if (this.entry.overlay) this.veil = this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, toInt(this.theme().bg)).setInteractive();
+    if (this.veil) { this.veil.setAlpha(0); motionFor(this).fadeIn(this.veil); } // MOT-2-R4
     const back = headerButton('left'), headY = back.cy;
     roundIconButton(this, back.cx, back.cy, MENU.round, 'back', 'settings-back', () => this.back());
     this.head = this.add.text(WIDTH / 2, headY, t('settings.title'), label(M.headFont, '900', TOKENS.text.primary)).setOrigin(0.5);
@@ -57,6 +59,7 @@ export class SettingsScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => keys?.off('keydown', onKey));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cancelSlides());
     this.build();
+    if (!this.entry.overlay) enter(this, [], {}); // MOT-2-R3 full screen only; the overlay keeps the veil fade
   }
 
   private theme(): UiTheme { return uiTheme(themeOf(currentPalette())); }
@@ -68,9 +71,13 @@ export class SettingsScene extends Phaser.Scene {
     this.closing = true;
     this.synth.play('uiTap');
     const x = settingsExit(this.entry);
-    if (x.action === 'start') this.scene.start(x.scene);
-    else { this.game.events.emit(SETTINGS_CLOSED); this.scene.stop(); }
+    if (x.action === 'start') goTo(this, x.scene, undefined, 'back');
+    else {
+      const close = (): void => { this.game.events.emit(SETTINGS_CLOSED); this.scene.stop(); }; // MOT-2-R4 overlay: veil fade only, no camera fade
+      if (this.veil) { motionFor(this).fadeOut(this.veil); this.time.delayedCall(this.fadeMs(), close); } else close();
+    }
   }
+  private fadeMs(): number { const b = this.registry.get('balance') as Balance; return reduceMotion() ? b.juice.reduced.softMs : b.motion.fadeMs; }
 
   private change(patch: Parameters<typeof applySettings>[1]): void {
     applySettings(this.session, patch, osDisplay());

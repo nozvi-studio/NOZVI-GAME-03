@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { Session } from '../../session';
+import { goTo } from '../motion';
 import { currentPalette, type Palette } from '../render/palette';
 import { attachFeedback } from '../ui/feedback';
 import { FONT_UI } from '../uiTokens';
@@ -54,6 +55,5 @@ export function paintButton(b: Button, p: Palette, fill = p.panel, line = 3): vo
 export function beginRun(scene: Phaser.Scene, level: number, entry: 'home' | 'results' = 'home', debug = false): void {
   const session = scene.registry.get('session') as Session;
   session.startRun(level, entry, debug);
-  scene.scene.start('Game');
-  scene.scene.launch('Hud');
+  goTo(scene, 'Game', undefined, 'start', { after: () => scene.scene.launch('Hud') }); // MOT-2-R11 order: startRun, start Game, launch Hud
 }
