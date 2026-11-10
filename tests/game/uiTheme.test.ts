@@ -22,3 +22,6 @@ it('UIFIX-R4 every dark text/background pair reaches WCAG 4.5:1', () => {
 it('UIFIX-R4 the dark card is distinguishable from the dark background', () => {
   expect(UI_THEME.dark.card).not.toBe(UI_THEME.dark.bg);
 });
+it('UIFIX-R12 danger text is readable (>= 4.5:1) on the skill cost chip', () => {
+  expect(contrastRatio(toInt(TOKENS.danger.text), toInt(TOKENS.surface.card))).toBeGreaterThanOrEqual(4.5);
+});

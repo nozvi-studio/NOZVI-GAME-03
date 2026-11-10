@@ -35,6 +35,7 @@ export class SkillButtons {
     for (const o of [s.c, s.costG, s.cost, s.bolt]) o.setVisible(k !== null);
     if (!k) { s.key = ''; return; }
     s.cost.setText(String(k.cost));
+    s.cost.setColor(k.costShort ? TOKENS.danger.text : TOKENS.text.primary); // UIFIX-R12
     const key = `${k.id}|${k.state}|${k.ring === null ? 'n' : k.ring.toFixed(2)}|${k.cost}`;
     if (key === s.key) return;
     s.key = key;

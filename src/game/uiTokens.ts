@@ -25,6 +25,7 @@ export const TOKENS = {
     slotRing: '#FFE98A', pickRing: '#7FC98C', costChip: '#E6F5F8', rowDivider: '#F3EBDD',
     themeLight: ['#CFEBD0', '#C2E4C6'], themeDark: ['#3B4A5A', '#33414F'],
   },
+  danger: { text: '#B3261E', line: '#E0A39B' }, // UIFIX-R12/R14 soft red: short-of-energy cost, Quit run
 } as const;
 export type UiThemeName = 'light' | 'dark';
 export interface UiTheme { bg: string; title: string; soft: string; card: string; ink: string; cardSoft: string }
