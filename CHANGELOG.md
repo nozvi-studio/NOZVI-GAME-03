@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(motion): MOT-2 pure entrance orders, Results timeline and Home idle math
 - feat(motion): MOT-2 ?debug=1&motion=off flag
 - docs: MOT-1 CODEMAP, DECISIONS and STATUS
 - feat(loadout): MOT-1 card and slot press feedback, picked-badge pop, reject shake for refused taps
