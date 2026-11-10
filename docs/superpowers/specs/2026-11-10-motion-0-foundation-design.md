@@ -59,12 +59,13 @@ All values are starting points; tune by feel.
 | `hudTickMs` | 360 | MOT-4 score tick-up |
 | `barEaseMs` / `barSpendMs` | 220 / 160 | MOT-4 bar fill ease / spend |
 | `energyLowFrac` | 0.2 | MOT-4 low-energy cue threshold |
+| `reducedPressAlpha` | 0.85 | MOT-0-R6 flat alpha dip on press in reduced motion |
 Validator: every value finite and > 0; scales in (0, 2); `releaseOvershoot` > 1 > `pressScale`; `staggerCapMs` >= `staggerMs`; `telegraphHzEnd` > `telegraphHzStart`; `0 < telegraphAlphaMin < 1`; `disabledAlpha` < 1; `idleBreathAmp` < `pulseAmp`; `resultsSeqMs` >= 200 + `countUpMs` + `popInMs`. MOT-3 run-event numbers live in a separate `balance.juice.events` block (see MOT-3), not here. Reduced motion reuses `juice.reduced.softMs` (400) as the single fade length.
 
 ## 5. Modules
 - **`src/game/motion/curves.ts` (pure, no Phaser).** `backOut(t, s)`, `cubicOut(t)`, `sineInOut(t)`, `lerp`, `staggerDelay(index, stepMs, capMs)`, `countUpValue(from, to, t)` (integer, monotone, exact at t = 1), `pulseScale(timeMs, periodMs, amp)` (1 +/- amp, period exact). Unit-tested, deterministic.
 - **`src/game/motion/motion.ts` (Phaser adapter).** `pressDown(scene, target)`, `release(scene, target)`, `hover(scene, target, on)`, `popIn(scene, target, index?)`, `slideIn(scene, target, from, index?)`, `fadeIn/fadeOut`, `shake(scene, target)`, `pulse(scene, target)` returning `stop()`, `countUp(scene, text, from, to, fmt?)`. Every call goes through one `play()` that: applies MOT-0-R4 (kill by target), the tween budget (drops the lowest-priority motion when `maxTweens` is reached; looping pulses first), and the reduced-motion rule (section 6).
-- **`src/game/motion/transition.ts`** (MOT-2): `goTo(scene, key, data)` scene transition and `enter(scene, targets, kind)` stagger helper, built on `play()`. `curves.ts` also gets `mangoGrow` (MOT-3) and the MOT-4 `telegraphPulse(remainingMs, warnMs)` helper.
+- MOT-2 adds `src/game/motion/transition.ts` (not in MOT-0): `goTo(scene, key, data)` scene transition and `enter(scene, targets, kind)` stagger helper, built on `play()`. `curves.ts` also gets `mangoGrow` (MOT-3) and the MOT-4 `telegraphPulse(remainingMs, warnMs)` helper.
 - **`src/game/motion/index.ts`** re-exports; CODEMAP row; JuicePlayer/ScreenFx keep their own code (no rewrite) and may adopt `curves.ts` later.
 
 ## 6. Reduced motion and performance
