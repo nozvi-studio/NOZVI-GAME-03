@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): widget kit painted with D3 skins - pill, card, chip, bar, round button (D3-R6, R21, R22); touchFx stubs for U1 Task 6
 - fix(ui): GameScene no longer listens to prefers-color-scheme (D3-R3)
 - feat(ui): one light theme - OS colour scheme ignored, Board theme setting removed (D3-R3)
 - feat(ui): skin painter and canvas texture cache for the skin kit (D3-R5)

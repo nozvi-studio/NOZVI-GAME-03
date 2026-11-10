@@ -4,11 +4,13 @@ import { FONT_TITLE, FONT_UI, TOKENS, toInt } from '../uiTokens';
 import { attachFeedback } from './feedback';
 import { barFill, pillGeom, pillHitRect } from './geometry';
 import { ui } from './layout';
-import { PILL_TONES, type PillTone } from './pillTones';
+import { PILL_SKIN, type PillTone } from './pillTones';
+import { hostOf, lipPx, skinTexture, type SkinKind, type SkinState, type SkinTone } from './skin';
+import { tapBurst } from './touchFx';
 
 /*
  * Token widget kit (P3-0-R7). All sizes are mockup px (ui() applied inside); colours come from TOKENS.
- * Origins: pillButton x,y = centre of the face (the shelf hangs below); chip x,y = centre; card and progressBar x,y = top-left; titleText x,y = centre.
+ * Origins: pillButton x,y = centre of the face (the lip hangs below); chip x,y = centre; card and progressBar x,y = top-left; titleText x,y = centre.
  *
  * Settings overlay contract (P3b-2 <-> P3b-3): Hud launches `scene.launch('Settings', { overlay: true })`;
  * Settings stops itself on Back and emits `settings-closed` on `game.events`;
@@ -16,62 +18,77 @@ import { PILL_TONES, type PillTone } from './pillTones';
  * While the Settings overlay is active, the window keyboard handler (input/keyboard.ts) ignores keys; HudScene's own skill-key handler must also check this (P3b-2).
  */
 
-export { PILL_TONES, type PillTone } from './pillTones';
-const T = TOKENS;
+export { PILL_SKIN, type PillTone } from './pillTones';
+const D = TOKENS.d3, S = D.shape;
+const LABEL_RATIO = 0.42, LABEL_RATIO_BIG = 0.56, CHIP_FONT = 13, CHIP_PAD_X = 12, CHIP_PAD_Y = 6;
 
+/** D3-R5 image of one skin state, centred at x,y. */
+function skinImage(scene: Phaser.Scene, x: number, y: number, kind: SkinKind, tone: SkinTone, w: number, h: number, state: SkinState): Phaser.GameObjects.Image {
+  return scene.add.image(x, y, skinTexture(hostOf(scene), kind, tone, w, h, state, ui(1)));
+}
+
+// D3-R6/R21/R22 pill button: static lip, face + label dip on press, pressed face texture on pointer down.
 export function pillButton(scene: Phaser.Scene, x: number, y: number, wMock: number, hMock: number, text: string,
   name: string, action: () => void, tone: PillTone = 'green', opts: { navigates?: boolean } = {}): Button {
-  const geom = pillGeom(wMock, hMock);
-  const tc = PILL_TONES[tone];
-  const { w, h, radius, shelf } = geom;
-  // The shelf stays put; the face and label sink on press.
-  const shelfG = scene.add.graphics().fillStyle(toInt(tc.deep)).fillRoundedRect(-w / 2, -h / 2 + shelf, w, h, radius);
-  const g = scene.add.graphics()
-    .fillStyle(toInt(tc.face)).fillRoundedRect(-w / 2, -h / 2, w, h, radius)
-    .lineStyle(ui(2), toInt(tc.line)).strokeRoundedRect(-w / 2, -h / 2, w, h, radius);
+  const skin = PILL_SKIN[tone], tc = D.tone[skin];
+  const geom = pillGeom(wMock, hMock, skin === 'primary' ? S.lipBig : S.lip), { w, h } = geom;
+  const key = (state: SkinState): string => skinTexture(hostOf(scene), 'button', skin, w, h, state, ui(1));
+  const lip = scene.add.image(0, geom.shelf, key('lip'));
+  const face = scene.add.image(0, 0, key('rest'));
   const t = scene.add.text(0, 0, text, {
-    fontFamily: FONT_UI, fontSize: `${ui(hMock * 0.4)}px`, fontStyle: '900', color: tc.text,
-    stroke: tc.stroke ? tc.line : undefined, strokeThickness: tc.stroke ? geom.labelStroke : 0,
+    fontFamily: tc.outlined ? FONT_TITLE : FONT_UI, fontSize: `${ui(hMock * (tc.outlined ? LABEL_RATIO_BIG : LABEL_RATIO))}px`,
+    fontStyle: tc.outlined ? '' : '900', color: tc.text,
+    stroke: tc.outlined ? tc.line : undefined, strokeThickness: tc.outlined ? geom.labelStroke : 0,
   }).setOrigin(0.5);
   const hit = pillHitRect(geom);
-  // Container sized w x h so displayOrigin is the face centre; the custom rect extends over the shelf (see pillHitRect).
-  const c = scene.add.container(x, y, [shelfG, g, t]).setName(name).setSize(w, h).setInteractive({
+  // Container sized w x h so displayOrigin is the face centre; the custom rect extends over the lip (see pillHitRect).
+  const c = scene.add.container(x, y, [lip, face, t]).setName(name).setSize(w, h).setInteractive({
     hitArea: new Phaser.Geom.Rectangle(hit.x, hit.y, hit.w, hit.h), hitAreaCallback: Phaser.Geom.Rectangle.Contains, useHandCursor: true });
-  // MOT-1-R5 face and label dip by pressedDy and scale about the face centre (shelf static); the hit container is never scaled.
-  const fb = attachFeedback(scene, [g, t], 'pill', { source: c, dipPx: geom.pressedDy, navigates: opts.navigates });
-  bindPress(c, () => fb.press(), () => fb.release(), () => fb.fire(action));
-  return { c, g, text: t, w, h };
+  // MOT-1-R5 face and label dip by pressedDy and scale about the face centre (lip static); the hit container is never scaled.
+  const fb = attachFeedback(scene, [face, t], 'pill', { source: c, dipPx: geom.pressedDy, navigates: opts.navigates });
+  bindPress(c, () => { face.setTexture(key('pressed')); fb.press(); }, () => { face.setTexture(key('rest')); fb.release(); },
+    () => fb.fire(() => { tapBurst(scene, c.x, c.y, skin); action(); }));
+  return { c, g: face, text: t, w, h, lip };
 }
 
-export function card(scene: Phaser.Scene, x: number, y: number, wMock: number, hMock: number, radiusMock = 22): Phaser.GameObjects.Graphics {
-  const w = ui(wMock), h = ui(hMock), r = ui(radiusMock), sh = T.shadow.card;
-  return scene.add.graphics().setPosition(x, y)
-    .fillStyle(toInt(sh.color), sh.alpha).fillRoundedRect(0, ui(sh.y), w, h, r)
-    .fillStyle(toInt(T.surface.card)).fillRoundedRect(0, 0, w, h, r);
+// D3-R6 panel card, origin top-left; the lip hangs below. `radiusMock` is kept for the call signature (one panel radius in D3).
+export function card(scene: Phaser.Scene, x: number, y: number, wMock: number, hMock: number, _radiusMock: number = S.radiusPanel): Phaser.GameObjects.Container {
+  const w = ui(wMock), h = ui(hMock), lip = lipPx('panel', 'light', ui(1));
+  return scene.add.container(x, y, [
+    skinImage(scene, w / 2, h / 2 + lip, 'panel', 'light', w, h, 'lip'),
+    skinImage(scene, w / 2, h / 2, 'panel', 'light', w, h, 'rest'),
+  ]);
 }
 
-export function chip(scene: Phaser.Scene, x: number, y: number, text: string, fill: string, name = ''): Phaser.GameObjects.Container {
-  const t = scene.add.text(0, 0, text, { fontFamily: FONT_UI, fontSize: `${ui(13)}px`, fontStyle: '900', color: T.text.primary }).setOrigin(0.5);
-  const w = t.width + 2 * ui(10), h = t.height + 2 * ui(4);
-  const g = scene.add.graphics().fillStyle(toInt(fill)).fillRoundedRect(-w / 2, -h / 2, w, h, h / 2);
-  return scene.add.container(x, y, [g, t]).setName(name).setSize(w, h);
+// D3-R6 light chip; `fill` is kept for the call signature and ignored (one chip look in D3).
+export function chip(scene: Phaser.Scene, x: number, y: number, text: string, _fill: string, name = ''): Phaser.GameObjects.Container {
+  const t = scene.add.text(0, 0, text, { fontFamily: FONT_UI, fontSize: `${ui(CHIP_FONT)}px`, fontStyle: '900', color: D.text }).setOrigin(0.5);
+  const w = t.width + 2 * ui(CHIP_PAD_X), h = t.height + 2 * ui(CHIP_PAD_Y), lip = lipPx('chip', 'light', ui(1));
+  return scene.add.container(x, y, [
+    skinImage(scene, 0, lip, 'chip', 'light', w, h, 'lip'), skinImage(scene, 0, 0, 'chip', 'light', w, h, 'rest'), t,
+  ]).setName(name).setSize(w, h);
 }
 
-export function titleText(scene: Phaser.Scene, x: number, y: number, text: string, sizeMock: number, fill: string = T.surface.white): Phaser.GameObjects.Text {
+// D3-R1 display type: white Lilita One, deep ink outline and drop.
+export function titleText(scene: Phaser.Scene, x: number, y: number, text: string, sizeMock: number, fill: string = D.white): Phaser.GameObjects.Text {
   return scene.add.text(x, y, text, {
     fontFamily: FONT_TITLE, fontSize: `${ui(sizeMock)}px`, color: fill,
-    stroke: T.text.logoOutline, strokeThickness: ui(T.title.strokePx),
-  }).setOrigin(0.5).setShadow(0, ui(T.title.shadowY), T.text.logoOutline, 0, true, true);
+    stroke: D.inkDeep, strokeThickness: ui(TOKENS.title.strokePx),
+  }).setOrigin(0.5).setShadow(0, ui(TOKENS.title.shadowY), D.inkDeep, 0, true, true);
 }
 
+// D3-R6 bar: track image plus a cropped fill image; `fill` picks the fill tone (energy colour -> energy, anything else -> mango).
 export function progressBar(scene: Phaser.Scene, x: number, y: number, wMock: number, hMock: number, fill: string):
-  { g: Phaser.GameObjects.Graphics; set(value: number, max: number): void } {
-  const w = ui(wMock), h = ui(hMock);
-  const g = scene.add.graphics().setPosition(x, y);
+  { g: Phaser.GameObjects.Container; set(value: number, max: number): void } {
+  const w = ui(wMock), h = ui(hMock), pad = ui(S.line), fw = w - 2 * pad, fh = h - 2 * pad;
+  const tone: SkinTone = toInt(fill) === toInt(D.tone.energy.face[0]) || toInt(fill) === toInt(TOKENS.sky.energy) ? 'energy' : 'mango';
+  const track = skinImage(scene, w / 2, h / 2, 'bar', 'track', w, h, 'rest');
+  const fillImg = skinImage(scene, w / 2, h / 2, 'bar', tone, fw, fh, 'rest');
+  const g = scene.add.container(x, y, [track, fillImg]);
   const set = (value: number, max: number): void => {
-    g.clear().fillStyle(toInt(T.surface.sand)).fillRoundedRect(0, 0, w, h, h / 2);
-    const fw = barFill(value, max, w);
-    if (fw > 0) g.fillStyle(toInt(fill)).fillRoundedRect(0, 0, Math.max(fw, h), h, h / 2);
+    const px = barFill(value, max, fw);
+    fillImg.setVisible(px > 0);
+    if (px > 0) fillImg.setCrop(0, 0, px, fh);
   };
   set(0, 1);
   return { g, set };

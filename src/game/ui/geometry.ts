@@ -1,9 +1,13 @@
+import { TOKENS } from '../uiTokens';
 import { ui } from './layout';
+
+const S = TOKENS.d3.shape;
 // P3-0-R7 pure widget geometry (game px derived from mockup px). No Phaser.
 export interface PillGeom { w: number; h: number; radius: number; shelf: number; pressedDy: number; labelStroke: number }
-export function pillGeom(wMock: number, hMock: number): PillGeom {
+// D3-R21 shelf = the lip depth; the pressed face sinks by (lip - pressed lip) so a 1 px lip stays visible.
+export function pillGeom(wMock: number, hMock: number, lipMock: number = S.lip): PillGeom {
   const h = ui(hMock);
-  return { w: ui(wMock), h, radius: h / 2, shelf: ui(5), pressedDy: ui(3), labelStroke: ui(4) };
+  return { w: ui(wMock), h, radius: h / 2, shelf: ui(lipMock), pressedDy: ui(lipMock - S.pressedLip), labelStroke: ui(4) };
 }
 /**
  * Pill hit rect (face plus the shelf below) for a container sized w x h (NOT h + shelf).

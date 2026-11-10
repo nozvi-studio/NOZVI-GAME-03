@@ -8,6 +8,8 @@ import { drawIcon, type IconId } from './icons';
 import { hitSize, ui, type ColumnLayout } from './layout';
 import { logoLetters } from './menuLayout';
 import { MENU } from './menuMetrics';
+import { hostOf, lipPx, skinTexture } from './skin';
+import { tapBurst } from './touchFx';
 import { titleText } from './widgets';
 
 // Menu-only widgets (P3b3). Origin convention follows the P3-0 kit: pills and chips are centred, cards and bars are top-left.
@@ -33,17 +35,16 @@ export function tap(scene: Phaser.Scene, x: number, y: number, w: number, h: num
   return z;
 }
 
-/** Round white icon button (back, sliders, home), optional blue shelf for the footer variant. */
+/** D3-R6 round light icon button (back, sliders, home): lip image under a face image; `shelf` is kept for the call signature and ignored. */
 export function roundIconButton(scene: Phaser.Scene, x: number, y: number, diameterMock: number, icon: IconId, name: string,
-  action: () => void, shelf = false, opts: { navigates?: boolean } = {}): Phaser.GameObjects.Container {
-  const d = ui(diameterMock), g = scene.add.graphics();
-  if (shelf) g.fillStyle(toInt(TOKENS.sky.bottom), MENU.widgets.shelfAlpha).fillCircle(0, ui(MENU.widgets.shelfDy), d / 2);
-  else g.fillStyle(toInt(TOKENS.shadow.card.color), TOKENS.shadow.card.alpha).fillCircle(0, ui(TOKENS.shadow.card.y), d / 2);
-  g.fillStyle(toInt(TOKENS.surface.card)).fillCircle(0, 0, d / 2);
-  const ic = scene.add.graphics(); drawIcon(ic, icon, d * MENU.widgets.iconRatio, toInt(TOKENS.text.primary));
-  const c = scene.add.container(x, y, [g, ic]).setName(name);
+  action: () => void, _shelf = false, opts: { navigates?: boolean } = {}): Phaser.GameObjects.Container {
+  const d = ui(diameterMock), lip = lipPx('round', 'light', ui(1)), host = hostOf(scene);
+  const lipImg = scene.add.image(0, lip, skinTexture(host, 'round', 'light', d, d, 'lip', ui(1)));
+  const face = scene.add.image(0, 0, skinTexture(host, 'round', 'light', d, d, 'rest', ui(1)));
+  const ic = scene.add.graphics(); drawIcon(ic, icon, d * MENU.widgets.iconRatio, toInt(TOKENS.d3.text));
+  const c = scene.add.container(x, y, [lipImg, face, ic]).setName(name);
   const hit = hitSize(d); // UIFIX-R7
-  tap(scene, x, y, hit, hit, `${name}-hit`, action, { visual: c, kind: 'round', navigates: opts.navigates });
+  tap(scene, x, y, hit, hit, `${name}-hit`, () => { tapBurst(scene, x, y, 'light'); action(); }, { visual: [face, ic], kind: 'round', navigates: opts.navigates });
   return c;
 }
 
