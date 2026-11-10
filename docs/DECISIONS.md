@@ -576,3 +576,9 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Settings groups use the origin as anchor (they only slide and fade), because the switch slide sets absolute knob x each frame; Loadout MOT-1 badge pops run after the groups moved their children.
 - Results skip uses `tweens.killTweensOf` and local rest snapshots (the one allowed direct tween call); the best star gets its alpha restored when its pulse starts (pulse never touches alpha).
 - Consequence: BootScene is exempt from the "calls enter" guard (runs once). During a pop entrance the group's hit area scales with it (about 240 ms); slide entrances keep hit areas final.
+
+## 2026-11-10 - Never cache a Phaser camera across scene restarts (MOT-2 bug)
+- Context: owner reported the app hanging when tapping Settings on the main menu. Reproduced in headless Chrome (CDP): the 2nd visit of any menu scene never left it and input stayed locked (`inp:false`).
+- Root cause: `transitionFor` cached `scene.cameras.main` once per scene instance. Phaser reuses scene instances but creates a new main camera on every start, so the cached camera was destroyed and `camerafadeoutcomplete` never fired.
+- Choice: `cameraPort(getCamera, rgb)` resolves the camera at every call; with no camera the fade completes at once. Regression test in `tests/game/transition.test.ts`.
+- Consequence: rule for all scene-bound caches: key by scene instance only for objects that survive a restart (tweens host, registry); resolve cameras, inputs and display objects lazily.

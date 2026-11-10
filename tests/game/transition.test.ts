@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import json from '../../config/balance.json';
-import { bootHoldMs, createTransition, runEntrance, transitionPlan, type NavKind, type TransitionDeps } from '../../src/game/motion/transition';
+import { bootHoldMs, cameraPort, createTransition, runEntrance, transitionPlan, type NavKind, type TransitionDeps } from '../../src/game/motion/transition';
 import type { MotionTarget } from '../../src/game/motion/motionCore';
 
 const m = json.motion;
@@ -115,5 +115,22 @@ describe('MOT-2-R5 runEntrance', () => {
     const off = recMotion();
     expect(runEntrance(off, transitionPlan('forward', m, SOFT, false, true), [{ id: 'a', motion: 'pop' }], { a: target() })).toBe(0);
     expect(off.calls).toEqual([]);
+  });
+});
+
+describe('MOT-2 cameraPort (second visit of a menu scene)', () => {
+  const cam = () => { const c = { outs: 0, ins: 0, done: null as null | (() => void),
+    once(_e: string, fn: () => void) { c.done = fn; }, fadeOut() { c.outs++; }, fadeIn() { c.ins++; } }; return c; };
+  it('MOT-2-R3 resolves scene.cameras.main on every call: Phaser creates a new camera each time a scene restarts', () => {
+    let cur = cam(); const first = cur; const port = cameraPort(() => cur, [1, 2, 3]);
+    port.fadeOut(180, () => {}); expect(first.outs).toBe(1);
+    cur = cam(); // the scene restarted: a fresh camera, the old one is destroyed
+    let went = false; port.fadeOut(180, () => { went = true; }); port.fadeIn(180);
+    expect(cur.outs).toBe(1); expect(cur.ins).toBe(1); expect(first.outs).toBe(1);
+    cur.done?.(); expect(went).toBe(true);
+  });
+  it('MOT-2-R3 with no camera the port finishes at once instead of hanging with input locked', () => {
+    const port = cameraPort(() => undefined, [1, 2, 3]); let went = false;
+    port.fadeOut(180, () => { went = true; }); port.fadeIn(180); expect(went).toBe(true);
   });
 });

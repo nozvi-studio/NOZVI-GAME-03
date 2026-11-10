@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(motion): menu scene transitions no longer hang on the second visit of a scene (stale cached camera; input stayed locked) - `cameraPort` resolves `cameras.main` per call
 - docs(motion): MOT-2 codemap, decisions and playtest record
 - feat(motion): MOT-2 Results sequence (<= 1500 ms), count-up, best-chip pulse, skip on tap
 - feat(motion): MOT-2 Loadout and Settings staggered entrances

@@ -75,17 +75,29 @@ const cache = new WeakMap<object, Transition>();
 const KIND_KEY = 'navKind';
 const cream = toInt(TOKENS.surface.cream);
 
+export interface FadeCamera { once(event: string, fn: () => void): unknown; fadeOut(ms: number, r: number, g: number, b: number): unknown; fadeIn(ms: number, r: number, g: number, b: number): unknown }
+/**
+ * MOT-2-R3 camera port that resolves the camera on EVERY call. Phaser reuses a scene instance but creates a new main camera each time the
+ * scene starts, so a camera captured once goes stale (its fade never completes and input stays locked on the second visit).
+ * With no camera the fade completes at once.
+ */
+export function cameraPort(get: () => FadeCamera | undefined | null, rgb: readonly [number, number, number]): NonNullable<TransitionDeps['camera']> {
+  return {
+    fadeOut: (ms, done) => { const c = get(); if (!c) { done(); return; } c.once('camerafadeoutcomplete', done); c.fadeOut(ms, rgb[0], rgb[1], rgb[2]); },
+    fadeIn: ms => { get()?.fadeIn(ms, rgb[0], rgb[1], rgb[2]); },
+  };
+}
+
 /** MOT-2 per-scene transition. A fake scene without cameras/balance (unit tests) starts immediately. */
 export function transitionFor(scene: Phaser.Scene): Transition {
   const hit = cache.get(scene);
   if (hit) return hit;
   const b = scene.registry.get('balance') as Balance | undefined;
-  const cam = scene.cameras?.main;
-  const r = (cream >> 16) & 255, g = (cream >> 8) & 255, bl = cream & 255;
+  const rgb = [(cream >> 16) & 255, (cream >> 8) & 255, cream & 255] as const;
   const tr = createTransition({
     cfg: b?.motion ?? { fadeMs: 0 }, softMs: b?.juice.reduced.softMs ?? 0, reduced: reduceMotion,
     off: !b || isMotionOff(typeof location === 'undefined' ? '' : location.search),
-    camera: cam && b ? { fadeOut: (ms, done) => { cam.once('camerafadeoutcomplete', done); cam.fadeOut(ms, r, g, bl); }, fadeIn: ms => { cam.fadeIn(ms, r, g, bl); } } : null,
+    camera: b && scene.cameras ? cameraPort(() => scene.cameras?.main, rgb) : null, // never cache the camera object (see cameraPort)
     lockInput: () => { if (scene.input) scene.input.enabled = false; },
     start: (key, data) => { scene.scene.start(key, data); },
     navKind: { get: () => scene.registry.get(KIND_KEY) as NavKind | undefined, set: k => { scene.registry.set(KIND_KEY, k); } },
