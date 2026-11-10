@@ -5,7 +5,8 @@ import { createSynth, type Synth } from '../audio/synth';
 import { initEdit, tapCard, tapSlot, type LoadoutEditState } from '../flow/loadoutEdit';
 import { loadoutView, type SkillCardView } from '../flow/loadoutView';
 import { HEIGHT, WIDTH } from '../layout';
-import { enter, goTo, motionFor } from '../motion';
+import { loadoutOrder } from '../flow/entranceOrder';
+import { captureGroup, enter, goTo, motionFor, type EntranceTargets } from '../motion';
 import { t } from '../text';
 import { feedbackOf, pivotAt } from '../ui/feedback';
 import { isRejected } from '../ui/feedbackModel';
@@ -37,6 +38,7 @@ export class LoadoutScene extends Phaser.Scene {
   private edit!: LoadoutEditState;
   private body?: Phaser.GameObjects.Container;
   private prevSlot: Map<string, number | null> | null = null;
+  private targets: EntranceTargets = {}; // MOT-2-R5/R6 only create() calls enter(); render() on pick or resize shows instantly
 
   constructor() { super('Loadout'); }
 
@@ -49,10 +51,11 @@ export class LoadoutScene extends Phaser.Scene {
     bgCream(this);
     this.edit = initEdit(this.session.loadoutModel());
     const back = headerButton('left'), headY = back.cy;
-    roundIconButton(this, back.cx, back.cy, MENU.round, 'back', 'loadout-back', () => this.back());
+    const backBtn = roundIconButton(this, back.cx, back.cy, MENU.round, 'back', 'loadout-back', () => this.back());
     this.title = this.add.text(WIDTH / 2, headY, '', text(L.titleFont, '900', TOKENS.text.primary)).setOrigin(0.5).setName('loadout-title');
     const goY = HEIGHT - ui(L.goBottom + L.goH / 2 + MENU.widgets.shelfDy);
-    bigLabel(pillButton(this, WIDTH / 2, goY, L.goW, L.goH, t('loadout.go'), 'loadout-go', () => this.go(), 'green', { navigates: true }), L.goLabel, L.goStroke);
+    const goBtn = pillButton(this, WIDTH / 2, goY, L.goW, L.goH, t('loadout.go'), 'loadout-go', () => this.go(), 'green', { navigates: true });
+    bigLabel(goBtn, L.goLabel, L.goStroke);
     const keys = this.input.keyboard;
     const onKey = (e: KeyboardEvent): void => {
       if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); this.go(); }
@@ -60,11 +63,12 @@ export class LoadoutScene extends Phaser.Scene {
     };
     keys?.on('keydown', onKey);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => keys?.off('keydown', onKey));
+    this.targets = { back: backBtn, title: this.title, go: goBtn.c }; // MOT-2-R5; render() adds slots, chips and cards
     this.render();
     const onResize = (): void => this.render(); // UIFIX-R9 re-evaluate compact mode when the canvas size changes
     this.scale.on(Phaser.Scale.Events.RESIZE, onResize);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off(Phaser.Scale.Events.RESIZE, onResize));
-    enter(this, [], {}); // MOT-2-R3 camera fade-in and re-arm goTo; Task 6 fills the entrance
+    enter(this, loadoutOrder(this.balance.loadout.order.length), this.targets); // MOT-2-R3/R5 camera fade-in, re-arm goTo, entrance
   }
   private title!: Phaser.GameObjects.Text;
 
@@ -92,7 +96,9 @@ export class LoadoutScene extends Phaser.Scene {
     const blk = (this.body = scaledBlock(this, layoutColumn(loadoutColumn(this.balance.ui.minShrink, cards.cardH < L.cardH))));
     const g = ui(MENU.gap), cardW = ui(L.cardW), cardX = WIDTH / 2 - cardW / 2;
     let y = g;
-    // Slots panel.
+    const t_: EntranceTargets = {};
+    // Slots panel (MOT-2-R5 one entrance group; captureGroup anchors it at the panel centre).
+    t_.slots = captureGroup(this, blk, { x: WIDTH / 2, y: y + ui(L.slotsH) / 2 }, () => {
     const panel = this.add.graphics(); blk.add(panel);
     const sh = TOKENS.shadow.card;
     panel.fillStyle(toInt(sh.color), sh.alpha).fillRoundedRect(cardX, y + ui(sh.y), cardW, ui(L.slotsH), ui(L.slotsR));
@@ -115,15 +121,23 @@ export class LoadoutScene extends Phaser.Scene {
         () => this.pick(() => tapSlot(this.edit, slot.index), zone), { visual: pivot, kind: 'card' });
       blk.add(zone);
     });
+    });
     y += ui(L.slotsH + MENU.gap);
     // Read-only start chips (C1): the checkpoint level was chosen on Home.
     const chips: { text: string; icon: IconId }[] = [{ text: t('home.startAt', { level: view.startAt }), icon: 'flag' }];
     if (view.energy !== null) chips.push({ text: t('home.startEnergy', { e: view.energy }), icon: 'bolt' });
-    chips.forEach((c, i) => this.infoChip(blk, c.text, c.icon, chips.length === 1 ? 'mid' : i === 0 ? 'left' : 'right', cardX, cardW, y));
+    t_.chips = captureGroup(this, blk, { x: WIDTH / 2, y: y + ui(L.chipsH) / 2 }, () =>
+      chips.forEach((c, i) => this.infoChip(blk, c.text, c.icon, chips.length === 1 ? 'mid' : i === 0 ? 'left' : 'right', cardX, cardW, y)));
     y += ui(L.chipsH + MENU.gap);
-    for (const card of view.cards) { this.skillCard(blk, card, cardX, y, cards.cardH); y += ui(cards.cardH + cards.cardGap); }
+    view.cards.forEach((card, i) => {
+      t_[`card${i}`] = captureGroup(this, blk, { x: WIDTH / 2, y: y + ui(cards.cardH) / 2 }, () => this.skillCard(blk, card, cardX, y, cards.cardH));
+      y += ui(cards.cardH + cards.cardGap);
+    });
+    for (const run of this.afterCapture.splice(0)) run(); // MOT-1-R10 pops run after the groups moved their children (rest positions are final)
     this.prevSlot = new Map(view.cards.map(c => [c.id, c.slot] as const));
+    Object.assign(this.targets, t_);
   }
+  private afterCapture: (() => void)[] = [];
 
   private infoChip(blk: Phaser.GameObjects.Container, label: string, icon: IconId, at: 'left' | 'mid' | 'right', cardX: number, cardW: number, y: number): void {
     const tx = this.add.text(0, 0, label, text(L.chipFont, '800', TOKENS.text.primary)).setOrigin(0, 0.5);
@@ -182,11 +196,11 @@ export class LoadoutScene extends Phaser.Scene {
         const bw = badge.width + 2 * ui(L.badgePad), bh = ui(L.badgeH), bx = x + w - pad - bw;
         const bgG = this.add.graphics().fillStyle(toInt(TOKENS.green.face)).fillRoundedRect(-bw / 2, -bh / 2, bw, bh, bh / 2);
         const bc = this.add.container(bx + bw / 2, cy, [bgG, badge]); blk.add(bc);
-        if (badgeIsNew(this.prevSlot, c.id, c.slot)) motionFor(this).popIn(bc); // MOT-1-R10
+        if (badgeIsNew(this.prevSlot, c.id, c.slot)) this.afterCapture.push(() => motionFor(this).popIn(bc)); // MOT-1-R10
       }
     }
     const zone = tap(this, x + w / 2, cy, w, h, `loadout-card-${c.id}`, () => this.pick(() => tapCard(this.edit, c.id), zone), { visual: pivot, kind: 'card' });
     outer.add(zone);
-    if (badgeIsNew(this.prevSlot, c.id, c.slot)) feedbackOf(zone)?.pop(); // MOT-1-R10 the newly picked card bounces once
+    if (badgeIsNew(this.prevSlot, c.id, c.slot)) this.afterCapture.push(() => feedbackOf(zone)?.pop()); // MOT-1-R10 the newly picked card bounces once
   }
 }

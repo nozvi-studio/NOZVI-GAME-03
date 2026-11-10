@@ -5,7 +5,8 @@ import type { Session } from '../../session';
 import { createSynth, type Synth } from '../audio/synth';
 import { applySettings, settingsCardEdge, settingsExit, settingsView, SETTINGS_CLOSED, themePatch, toggleTrackStyle, togglePatch, type SettingsEntry, type SettingsToggle } from '../flow/settingsView';
 import { HEIGHT, WIDTH } from '../layout';
-import { enter, goTo, motionFor } from '../motion';
+import { settingsOrder } from '../flow/entranceOrder';
+import { captureGroup, enter, goTo, motionFor, type EntranceTargets } from '../motion';
 import { currentPalette, osDisplay, reduceMotion, themeOf } from '../render/palette';
 import { t } from '../text';
 import { feedbackOf, pivotAt } from '../ui/feedback';
@@ -36,7 +37,7 @@ export class SettingsScene extends Phaser.Scene {
   private session!: Session;
   private synth!: Synth;
   private body?: Phaser.GameObjects.Container;
-  private closing = false;
+  private closing = false; private targets: EntranceTargets = {};
   private prev = new Map<string, boolean>(); private prevTheme: string | null = null; private slides: (() => void)[] = [];
   private head!: Phaser.GameObjects.Text; private veil?: Phaser.GameObjects.Rectangle;
   constructor() { super('Settings'); }
@@ -51,15 +52,16 @@ export class SettingsScene extends Phaser.Scene {
     if (this.entry.overlay) this.veil = this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, toInt(this.theme().bg)).setInteractive();
     if (this.veil) { this.veil.setAlpha(0); motionFor(this).fadeIn(this.veil); } // MOT-2-R4
     const back = headerButton('left'), headY = back.cy;
-    roundIconButton(this, back.cx, back.cy, MENU.round, 'back', 'settings-back', () => this.back());
+    const backBtn = roundIconButton(this, back.cx, back.cy, MENU.round, 'back', 'settings-back', () => this.back());
     this.head = this.add.text(WIDTH / 2, headY, t('settings.title'), label(M.headFont, '900', TOKENS.text.primary)).setOrigin(0.5);
     const keys = this.input.keyboard;
     const onKey = (e: KeyboardEvent): void => { if (e.code === 'Escape') { e.preventDefault(); this.back(); } };
     keys?.on('keydown', onKey);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => keys?.off('keydown', onKey));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cancelSlides());
+    this.targets = { back: backBtn, title: this.head }; // MOT-2-R5; build() adds card, rows, theme and caption
     this.build();
-    if (!this.entry.overlay) enter(this, [], {}); // MOT-2-R3 full screen only; the overlay keeps the veil fade
+    if (!this.entry.overlay) enter(this, settingsOrder(M.rows), this.targets); // MOT-2-R3/R5 full screen only; build() after change() never re-enters (R6)
   }
 
   private theme(): UiTheme { return uiTheme(themeOf(currentPalette())); }
@@ -98,12 +100,16 @@ export class SettingsScene extends Phaser.Scene {
     const cardW = ui(M.cardW), cardX = WIDTH / 2 - cardW / 2, rad = ui(M.radius);
     const rowsH = M.rows * M.rowH;
     let y = g;
-    const rows = this.add.graphics(); blk.add(rows);
+    const t_: EntranceTargets = {};
+    const rows = this.add.graphics(); blk.add(rows); t_.card = rows; // the shared card background fades with the title
     rows.fillStyle(toInt(th.card)).fillRoundedRect(cardX, y, cardW, ui(rowsH), rad);
     rows.lineStyle(ui(M.sw.line), toInt(settingsCardEdge(v.theme))).strokeRoundedRect(cardX, y, cardW, ui(rowsH), rad); // UIFIX-R14
     v.rows.forEach((r, i) => {
       const top = y + ui(i * M.rowH), cy = top + ui(M.rowH / 2);
       if (i > 0) rows.fillStyle(toInt(TOKENS.menu.rowDivider)).fillRect(cardX, top, cardW, ui(M.divider));
+      // MOT-2-R5 Settings entrances only translate and fade, so the group anchor is the origin: children keep their absolute coordinates
+      // (the switch paint() sets absolute knob x on every slide frame).
+      t_[`row${i}`] = captureGroup(this, blk, { x: 0, y: 0 }, () => {
       const half = ui(M.tile / 2), tileX = cardX + pad - ui(M.tileInset) + half;
       const tile = this.add.graphics().setPosition(tileX, cy); blk.add(tile);
       tile.fillStyle(toInt(TILE[r.id])).fillRoundedRect(-half, -half, ui(M.tile), ui(M.tile), ui(M.tileR));
@@ -128,9 +134,11 @@ export class SettingsScene extends Phaser.Scene {
       if (slideFrom(this.prev, r.id, r.on) !== r.on && !reduceMotion()) this.slides.push(runSlide(this, slideMs, paint));
       else paint(1); // unchanged switches and reduced motion draw once at rest
       blk.add(tap(this, WIDTH / 2, cy, cardW, ui(M.rowH), `settings-${r.id}`, () => this.change(togglePatch(s, d, r.id)), { visual: kg, kind: 'switch' }));
+      });
     });
     y += ui(rowsH) + g;
     // Board theme card: title, sub line, two swatch tiles (Light / Dark).
+    t_.theme = captureGroup(this, blk, { x: 0, y: 0 }, () => {
     const T = M.theme, padX = ui(T.padX), tc = this.add.graphics(); blk.add(tc);
     tc.fillStyle(toInt(th.card)).fillRoundedRect(cardX, y, cardW, ui(M.themeCardH), rad);
     tc.lineStyle(ui(M.sw.line), toInt(settingsCardEdge(v.theme))).strokeRoundedRect(cardX, y, cardW, ui(M.themeCardH), rad); // UIFIX-R14
@@ -161,8 +169,11 @@ export class SettingsScene extends Phaser.Scene {
       blk.add(zone);
       if (tileChanged(this.prevTheme, v.theme, opt)) feedbackOf(zone)?.pop();
     });
+    });
     y += ui(M.themeCardH) + g;
-    blk.add(this.add.text(WIDTH / 2, y + ui(M.captionDy), t('settings.autosave'), label(M.subFont, '800', th.soft)).setOrigin(0.5));
+    const caption = this.add.text(WIDTH / 2, y + ui(M.captionDy), t('settings.autosave'), label(M.subFont, '800', th.soft)).setOrigin(0.5);
+    blk.add(caption); t_.caption = caption;
+    Object.assign(this.targets, t_);
     v.rows.forEach(r => this.prev.set(r.id, r.on)); this.prevTheme = v.theme;
   }
 }
