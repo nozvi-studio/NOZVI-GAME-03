@@ -31,7 +31,7 @@ Save fields: none.
 - **MEC-012-R4 Level up.** No level-end hook (MEC-004-R16): patches keep their lifecycle through a level up (MEC-003-R8).
 
 ### Mud
-- **MEC-012-R5 (mud) Reserved and BFS.** Mud cells are `reserved` in every state (no mango, orb, rain mango, rubble or other hazard on them). They are not BFS walls.
+- **MEC-012-R5 (mud) Reserved and BFS.** Mud cells are `reserved` in every state (no mango, orb, rain mango or other hazard on them). They are not BFS walls.
 - **MEC-012-R6 Half speed.** `tileAt(x, y) = 'mud'` for an `on` mud cell. In each speed update, `tileFactor = mud.tickFactor` (2) if `tileAt(head) = 'mud'`, else 1, and the effective tick is MEC-004-R7: `round(baseTickMs × slowFactor × tileFactor)`. The head cell is read at every 1 ms step, so the step after entering mud takes the slow tick and the step after leaving takes the normal tick (MEC-006-R18 clamp prevents a double step).
 
 ### Ice

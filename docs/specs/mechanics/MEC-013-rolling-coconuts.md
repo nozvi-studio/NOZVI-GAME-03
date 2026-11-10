@@ -6,7 +6,7 @@
 - Defines the **rolling coconut** family: a full row or column is highlighted, then a coconut rolls across it one cell at a time. Only the head can be hit.
 - GDD: §5.1 (biome 4), §5.3 (fairness), §5.4 row "Rolling coconuts", §6.3 (Shield, Slow-mo), §7.
 - Framework: MEC-004 (registry R1–R3, Mover block R5, collision R6/R8, fairness R11–R14, level up R16 flow B, verification R17–R18). Design: P2 design §5, §8, §9, §10, §11. Plan: `docs/superpowers/plans/2026-11-04-p2b-movers-cycles-blasts.md` Tasks 3, 4 (TR-B3, TR-B4).
-- Related: MEC-002 (mango), MEC-003 (table, introduction), MEC-006 (Shield break, rubble, bonk).
+- Related: MEC-002 (mango), MEC-003 (table, introduction), MEC-006 (Shield break, bonk).
 
 ## 2. Player-facing summary
 - **From level 16:** a row or column lights up with arrows for 1.5 s, then a coconut rolls fast along it from one edge to the other.
@@ -22,7 +22,7 @@ Save fields: none.
 
 ## 4. Rules
 - **MEC-013-R1 Lane choice.** `laneCandidates(s, b)` lists, in deterministic order rows 0…ROWS−1 then cols 0…COLS−1, each lane twice (`from: 'start'` then `'end'`), excluding: the head's row and column, every lane that contains a front-lane cell (`frontLane(head, dir, fairness.frontLaneCells)`), and lanes already rolling. Spawn draws up to `coconut.tries` lanes with `rng.int(remaining)` (without replacement); the first lane whose cells pass `candidateValid` (in bounds, not `reserved`, MEC-004-R11 with the lane exemption of TR-B3, no new BFS walls for R12) is used. The path is the lane's cells ordered from `from`.
-- **MEC-013-R2 Telegraph.** The whole lane is shown with the roll direction for `coconut.warnMs` (1500 ≥ MEC-004-R13) before the coconut enters the first cell. Lane cells are `reserved` while warning and rolling (no mango, orb, rubble or other hazard is placed on them).
+- **MEC-013-R2 Telegraph.** The whole lane is shown with the roll direction for `coconut.warnMs` (1500 ≥ MEC-004-R13) before the coconut enters the first cell. Lane cells are `reserved` while warning and rolling (no mango, orb or other hazard is placed on them).
 - **MEC-013-R3 Roll.** After the warning the coconut enters cell 0, then advances one cell per `coconut.cellMs` (90 ms, sim time: Slow-mo does not slow it, P2 design §9). After the last cell the roll ends and is removed. The coconut is not solid and not a BFS wall.
 - **MEC-013-R4 Shatter.** If the next cell is solid (`solidCauseAt ≠ null`) or holds a body cell (snake index > 0), the coconut does not enter it: the roll ends and is removed (Mover `stop` mode). It never damages the body.
 - **MEC-013-R5 Head hit / Shield.** The coconut moving onto the head calls `ctx.hitHead('coconut', x, y, 'mover', moverDir)`; the head moving onto a rolling coconut is a `headHit = 'mover'` (MEC-004-R6). Without Shield: death, cause `coconut`. With Shield: Shield is consumed, the coconut is removed (`onBreak`), bonk follows MEC-006-R27; no rubble (R28).
@@ -36,7 +36,7 @@ Save fields: none.
 2. **Snake turns into the lane during the warning:** allowed; the lane was fair at spawn. If the head is on the lane when the coconut arrives, the head is hit.
 3. **Body crosses the lane:** the coconut shatters at the body (R4).
 4. **Head moves onto the coconut's current cell:** `headHit` → death `coconut` or Shield break.
-5. **A hazard becomes solid on a lane cell after spawn:** impossible for placed hazards (lane reserved); rubble from a Shield break may land on a lane only if not reserved, so it cannot either. A solid cell present for any other reason stops the coconut (R4).
+5. **A hazard becomes solid on a lane cell after spawn:** impossible for placed hazards (lane reserved). A solid cell present for any other reason stops the coconut (R4).
 6. **Level up during a roll:** the roll continues (flow B).
 7. **Slow-mo:** the coconut still moves every 90 ms; the snake moves slower, so the player has more steps of reaction per coconut cell.
 
@@ -44,7 +44,7 @@ Save fields: none.
 - **MEC-002:** lanes reserved for placement; mango untouched by the roll.
 - **MEC-003:** table rows and introduction (R8).
 - **MEC-004:** Mover block, small cap, collision R6/R8, fairness (TR-B3 lane exemption for rule 2; rule 3 trivially holds, coconuts add no BFS walls), verification (TR-B4 mover invariants).
-- **MEC-006:** Shield break with bonk and rubble; Slow-mo does not slow coconuts.
+- **MEC-006:** Shield break with bonk; Slow-mo does not slow coconuts.
 
 ## 7. Core API changes
 - `FamilyKey` and `CauseKey` add `coconut`. Event `moverHit {family: 'coconut', x, y}` (TR-B8).

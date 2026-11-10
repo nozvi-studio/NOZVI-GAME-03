@@ -98,8 +98,8 @@ Save fields: none owned here. Start energy and carry-over are MEC-008; unlocks a
 
 ## 6. Interactions with other mechanics
 - **MEC-001 snake:** eating a rain mango uses the normal grow step; an orb uses the normal move step. Tail Snip shortens without changing direction or queue. The length reset on level-up (MEC-001) also applies to a snake grown by rain.
-- **MEC-002 mango:** MEC-002-R2 is the single `reserved` list (it includes orbs, rain mangoes, snip walls and rubble). Golden mango gives +10 energy (R9). Rain mangoes are separate objects and do not affect rot time or golden gating (R33, MEC-002-R11).
-- **MEC-003 levels:** rain progress counts toward the quota. Orb, rain and effect timers keep running through a level up, skill presses are accepted, snip wall and rubble survive. Energy is never reset by a level-up.
+- **MEC-002 mango:** MEC-002-R2 is the single `reserved` list (it includes orbs, rain mangoes and snip walls). Golden mango gives +10 energy (R9). Rain mangoes are separate objects and do not affect rot time or golden gating (R33, MEC-002-R11).
+- **MEC-003 levels:** rain progress counts toward the quota. Orb, rain and effect timers keep running through a level up, skill presses are accepted, snip wall survives. Energy is never reset by a level-up.
 - **MEC-004 obstacles:** hazard placement uses the MEC-002-R2 `reserved` list; BFS `reachable` adds snip walls (every state) as walls (orbs and rain mangoes are not walls). Fairness rule 3 still targets the regular mango only. New cause key: `snipWall`.
 - **MEC-008 checkpoints:** provides `startEnergy`; reads `snapshot.energy` at death. Base tick (incl. speed ramp) comes from MEC-008 and is multiplied per R17 (Slow-mo and the MEC-003-R22 slowdown, larger factor wins). Whether rain mangoes advance the speed ramp is MEC-008's rule; the `ate` event carries `source` for it.
 - **MEC-007 loadout:** provides `loadout`; mid-run unlocks may fill an empty slot (MEC-007).
@@ -111,15 +111,15 @@ interface Sim { /* P0 API */ useSkill(slot: 0 | 1): void; }
 ```
 - `createSim` and `SimOptions`: defined once in MEC-003 §7; this spec owns the `startEnergy` validation (R1) and the `SkillId` type.
 - `CauseKey` adds `snipWall`.
-- `SimEvent` adds: `energyChanged {energy, delta, source: 'orb' | 'golden' | 'skill'}`, `orbSpawned {x, y}`, `orbEaten {x, y, gained}`, `orbExpired {x, y}`, `skillUsed {slot, skill, level, energyBefore, energyAfter}`, `skillRejected {slot, skill: SkillId | null, reason: 'empty' | 'active' | 'energy' | 'noTarget'}`, `skillEnded {skill, reason: 'timeout' | 'consumed'}`, `tailSnipped {cut, cells}`, `shieldBroke {x, y, family, rubble: {x, y} | null}`, `rainDrop {x, y}`, `rainDropSkipped {}`, `rainMangoExpired {x, y}`. The `ate` event shape (incl. `source`) is defined in MEC-002 §7.
-- `SimSnapshot` adds: `energy`, `energyMax`, `orbs: {x, y, leftMs}[]`, `skills: {slot, id: SkillId | null, cost, affordable, active, leftMs}[2]` (`leftMs` of the active effect, else 0), `snipWall: {x, y, state: 'solid' | 'crumble', leftMs}[]` (cells of all snip walls), `rubble: {x, y, state: 'solid' | 'crumble', leftMs}[]`, `rainMangoes: {x, y, leftMs}[]`, `rain: {leftMs, dropsLeft} | null`, `slowmo: {leftMs} | null`, `shield: {leftMs} | null`.
+- `SimEvent` adds: `energyChanged {energy, delta, source: 'orb' | 'golden' | 'skill'}`, `orbSpawned {x, y}`, `orbEaten {x, y, gained}`, `orbExpired {x, y}`, `skillUsed {slot, skill, level, energyBefore, energyAfter}`, `skillRejected {slot, skill: SkillId | null, reason: 'empty' | 'active' | 'energy' | 'noTarget'}`, `skillEnded {skill, reason: 'timeout' | 'consumed'}`, `tailSnipped {cut, cells}`, `shieldBroke {x, y, family}`, `rainDrop {x, y}`, `rainDropSkipped {}`, `rainMangoExpired {x, y}`. The `ate` event shape (incl. `source`) is defined in MEC-002 §7.
+- `SimSnapshot` adds: `energy`, `energyMax`, `orbs: {x, y, leftMs}[]`, `skills: {slot, id: SkillId | null, cost, affordable, active, leftMs}[2]` (`leftMs` of the active effect, else 0), `snipWall: {x, y, state: 'solid' | 'crumble', leftMs}[]` (cells of all snip walls), `rainMangoes: {x, y, leftMs}[]`, `rain: {leftMs, dropsLeft} | null`, `slowmo: {leftMs} | null`, `shield: {leftMs} | null`.
 - Main functions carry `// MEC-006` comments (`src/core/energy.ts`, `src/core/skills.ts`).
 
 ## 8. Feedback in P1 (greybox only)
 - Orb: cyan circle with outline; blinks (shape on/off, not color only) when `leftMs ≤ 2000`. Rain mango: normal mango shape with a small droplet mark; blinks the same way.
 - Energy bar in the HUD under the level bar, number `energy/100`. Skill buttons: icon letter + cost; glow when affordable; grey when not; ring of remaining time while active.
 - Snip wall: rock tile with a tail-stripe mark. Slow-mo: blue board tint. Shield: outline ring on the head.
-- Text keys: `hud.energy`, `skill.slowmo.name`, `skill.tailSnip.name`, `skill.shield.name`, `skill.mangoRain.name`, `skill.reject.energy` ("Need {cost} energy"), `skill.reject.active` ("Already on!"), `skill.reject.noTarget` ("Too short to snip"), `tip.orb.first` ("Energy orb! Fuel for skills"), `death.snipWall`, `death.rubble`.
+- Text keys: `hud.energy`, `skill.slowmo.name`, `skill.tailSnip.name`, `skill.shield.name`, `skill.mangoRain.name`, `skill.reject.energy` ("Need {cost} energy"), `skill.reject.active` ("Already on!"), `skill.reject.noTarget` ("Too short to snip"), `tip.orb.first` ("Energy orb! Fuel for skills"), `death.snipWall`.
 - Sounds (synth): `orb` soft zap; `skillSlowmo`, `skillSnip`, `skillShield`, `skillRain` one cast tone each; `shieldBreak` crack; `nope` short low buzz. Haptics: orb 8 ms, cast 20 ms (GDD §10.4).
 - "Nope": on `skillRejected` with reason `active | energy | noTarget`, the button shakes 200 ms and plays `nope`; reason `empty` gives no feedback (no button is drawn for an empty slot). The orb tooltip shows once, on the first `orbSpawned` when the saved best level was < 2.
 
