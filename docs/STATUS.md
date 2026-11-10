@@ -1,9 +1,9 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-10 by Claude (lead, local) **Milestone:** M2 P3 on `version/v0.3`; UI redesign D3 "Juicy" planned (not started); P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
+**Updated:** 2026-11-10 by Claude (lead, local) **Milestone:** M2 P3 on `version/v0.3`; UI redesign D3 "Juicy": U0 done (boards await owner eye-check), U1 next; P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
 
 ## Now (in progress)
-- [ ] **UI D3 "Juicy" redesign (owner 2026-11-10: game looks sloppy, D2 not casual enough; chose direction A).** Spec + plans on branch `docs/ui-d3-juicy-spec` (not merged, not pushed): spec `docs/superpowers/specs/2026-11-10-ui-d3-juicy-design.md`, roadmap + U0 + U1 plans in `docs/superpowers/plans/2026-11-10-ui-d3-*.md`. Owner said: plan only, do not execute yet. **RESUME HERE (D3):** owner reviews the plans -> merge the docs branch -> U0 (QA tool, tokens, boards; owner eye-check of boards) -> U1. Findings: canvas is fixed 540x960 FIT (bands on tall phones, D3-R7), HUD followed OS dark while Home stayed light (D3-R3), Results first-run buttons not seen in headless (check in U5).
+- [ ] **UI D3 "Juicy" redesign (owner 2026-11-10 approved the plans).** Spec `docs/superpowers/specs/2026-11-10-ui-d3-juicy-design.md`, roadmap + U0/U1 plans in `docs/superpowers/plans/2026-11-10-ui-d3-*.md`. **U0 done and merged into version/v0.3:** `tools/qa/shot.mjs`, `TOKENS.d3` + contrast tests, D3 boards (`docs/design/mockups/d3/boards.html`, `d3.css`, `png/`), `UI-MOCKUPS.md` rewritten. **RESUME HERE (D3):** owner eye-checks the boards (record in DECISIONS as "D3 boards approved" + changes) -> U1 skin kit (plan ready; U1 and U2 do not wait for the gate; U3..U6 do). Board decisions to confirm: D-pad mode shows the checkpoint as a short `L10` chip beside the energy bar; first-run Results ends with `TEXT.start`; marble.html keeps its own CSS (not folded into d3.css). Findings: canvas is fixed 540x960 FIT (D3-R7), HUD followed OS dark while Home stayed light (D3-R3), Results first-run buttons not seen in headless (check in U5).
 - [x] **Motion / visual feedback (MOT-0..4) all merged into version/v0.3** (1639 pass, typecheck clean, not pushed): MOT-0 curves + `balance.motion` + adapter; MOT-1 widget feedback; MOT-2 menu flow (`goTo`, entrances, Home idle, Results sequence, `?debug=1&motion=off`); MOT-3 run events (`balance.juice.events`); MOT-4 telegraph pulses + HUD numbers. [ ] **Owner browser eye-check + tune numbers in config/balance.json `motion` / `juice.events`** (per-spec lists in the plans; PLAYTEST has a PENDING entry). Follow-up: `motion.stop(t)` in MOT-0 (DECISIONS).
 - [x] R12 energy gauge on skill buttons (replaces red cost). Dark theme parked (owner 2026-11-10): light mode only. P4 return hook = challenges + skins (DECISIONS); P4 specs not started (open: what 'challenge' means).
 - [ ] **RESUME HERE:** owner sends the P2 exit playtest log (normal runs, no ?debug=1; start from checkpoint L10; >= 30 runs, >= 10 reaching biome 4). Lead runs deathCauseReport + summarizeLog, writes the verdict in PLAYTEST, tunes if over40 (OQ-C5).
@@ -43,13 +43,14 @@
 - Biome 4 coconut = 100% of bot deaths (12 of 22 on L20, clear 8/20): options L20 coconut 4 -> 2 or coconut params, if playtest confirms. Biome 5 chicken 39.6%.
 
 ## Known issues / tech debt
-- Full family fuzz matrix not run (host RAM); reduced matrix passes.
+- Full family fuzz matrix not run (host RAM); reduced matrix passes. Under host load `npm test` times out in random core tests (5-10 s limits); a clean run needs `--maxWorkers 1` (1664 pass, 165 s).
 - Windows: Vitest needs --configLoader native --pool threads --maxWorkers 2. Host RAM low: agy browser QA gets killed when fuzz/bot run at the same time.
 - 4 skipped QA (reasons in files). Single 1.28 MB JS chunk.
 - Checkpoints only reach L12; for QA use `?debug=1&level=N` or the debug HUD buttons "+1" / "Key ▶".
 - Rubble family and `skills.shield.rubbleLifeMs` removed (chore/remove-rubble-family, 2026-11-10).
 
 ## Last session summary
+- 2026-11-10 (local lead, D3 U0): docs branch merged; U0 via subagent-driven development (Haiku implementers, Sonnet task reviews, Opus final review): screenshot tool, D3 tokens (1664 pass), boards drawn and captured by the lead, UI-MOCKUPS/README/CODEMAP updated. Deferred minors: shot.mjs has no CDP timeout and `eval` ignores JS exceptions.
 - 2026-11-10 (local lead, D3): pushed version/v0.3 + v0.2; screenshots of v0.3 at 360x640; three direction sketches (`docs/design/mockups/d3/directions.html`), owner chose A; spec D3-R1..R28 + roadmap + U0/U1 plans written. No code changed, no tests run.
 - 2026-11-10 (local lead): save compat v0.2+v0.3, Rubble removed, UIFIX waves 1-3 + R12 gauge, MOT-0..4 specs/plans/impl via Sonnet subagents (3 in parallel), all merged; one bad blanket conflict resolution on code files caught and redone by hand.
 - 2026-11-10 (local): save compat guard (v0.3 + v0.2), Rubble family removed (subagent, 1395 pass), v0.2 merged into v0.3, UIFIX waves 1-3 merged via Sonnet subagents. Tech debt left: shrink fade crumble visual, hudText test cleanups, level%5 in tests, MEC-003 R21 heading, stale rubble mentions in MEC-004 L7/MEC-006 §7/MEC-013, single 1.28 MB chunk. Not pushed.
@@ -57,4 +58,3 @@
 - 2026-11-07 (cloud, P3b-1/2/3 + P3a): all via subagents (Haiku/Sonnet implementers+reviewers, Opus final review per sub-phase, one fix wave each). Two interruptions (5h usage limit, container restart) without loss — commit+push per step.
 - 2026-11-07 (cloud, P3-0): version/v0.3 created; P3-0 executed via subagents (Haiku/Sonnet implementers + reviewers, Opus final review). Superpowers skills read from github obra/superpowers (plugin not loaded in cloud). Playwright replaces agy for browser checks here.
 - 2026-11-07 (P3 planning): owner pushed HTML mockups; lead wrote P3 spec + P3-0 plan, 4 Sonnet subagents wrote the other plans. No code changed, no tests run. Mockup-vs-spec conflicts resolved spec-first (listed in each plan); visible changes: D-pad hidden unless setting on, sound toggle moves to Settings.
-- 2026-11-06 (P3c): spec + plan in docs/superpowers/; 4 tasks via subagents (Haiku/Sonnet, Opus final review). Final review caught Phaser 3.90 decoding every data: URL as base64 -> fixed (base64 SVG URLs). Deferred minors in branch ledger (magic numbers in eye/mouth geometry, capyDie twice, preview label contrast).

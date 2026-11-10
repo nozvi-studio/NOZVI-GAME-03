@@ -26,8 +26,42 @@ export const TOKENS = {
     cardEdgeDark: '#46584B', // UIFIX-R14 edge of Settings cards and toggle tracks on the dark card (#2B3A2F)
     themeLight: ['#CFEBD0', '#C2E4C6'], themeDark: ['#3B4A5A', '#33414F'],
   },
+  // D3-R1/R4 "Juicy" visual language (spec 2026-11-10-ui-d3-juicy-design.md §4). Mock px for shape numbers.
+  d3: {
+    bg: { stops: ['#7FD8FF', '#3FB2F2', '#1F86D8'], centerY: 0.38, rayAlpha: 0.13, rayDeg: 9 },
+    ink: '#145A9C', inkDeep: '#0F4578', text: '#173B63', white: '#FFFFFF',
+    logo: { mango: '#FFD93B', mangoLine: '#8A4500' },
+    tone: {
+      primary: { face: ['#8DF06A', '#3FC23D', '#2EA634'], line: '#17661F', lip: '#114F18', text: '#FFFFFF', outlined: true },
+      secondary: { face: ['#FFF6D6', '#FFE08A', '#FFE08A'], line: '#A86A10', lip: '#7D4D08', text: '#6B3F05', outlined: false },
+      danger: { face: ['#FF8A8A', '#F04B4B', '#F04B4B'], line: '#9C1F3F', lip: '#7A1430', text: '#FFFFFF', outlined: true },
+      light: { face: ['#FFFFFF', '#E6F1FA', '#E6F1FA'], line: '#145A9C', lip: '#0F4578', text: '#173B63', outlined: false },
+      skillA: { face: ['#B48CFF', '#7A47E6', '#7A47E6'], line: '#3B1F7A', lip: '#2A1459', text: '#FFFFFF', outlined: true },
+      skillB: { face: ['#FFC457', '#FF8A1F', '#FF8A1F'], line: '#8A4A12', lip: '#6E390B', text: '#FFFFFF', outlined: true },
+      off: { face: ['#E9F1F7', '#C9D6E2', '#C9D6E2'], line: '#6F8499', lip: '#566B80', text: '#3F5266', outlined: false },
+      ribbon: { face: ['#FF5A7A', '#FF5A7A', '#FF5A7A'], line: '#9C1F3F', lip: '#0F4578', text: '#FFFFFF', outlined: true },
+      track: { face: ['#0F4578', '#0F4578', '#0F4578'], line: '#0B3560', lip: '#0B3560', text: '#FFFFFF', outlined: true },
+      mango: { face: ['#FFE36B', '#FFAB1A', '#FFAB1A'], line: '#8A4500', lip: '#8A4500', text: '#FFFFFF', outlined: true },
+      energy: { face: ['#8FF0FF', '#22B8E6', '#22B8E6'], line: '#0B5E7A', lip: '#0B5E7A', text: '#FFFFFF', outlined: true },
+    },
+    shape: { line: 3, lineBig: 4, lip: 4, lipSkill: 6, lipBig: 8, pressedLip: 1, glossTop: 0.55, glossBottom: 0.08, glossFrac: 0.36,
+      pressedGloss: 0.5, radiusBig: 28, radiusPanel: 22, selectedRing: 4, selectedLift: 2 },
+    snake: { body: '#6F7DFF', head: '#7F8CFF', belly: '#CFD6FF', blush: '#FF8FB1', tongue: '#FF5A7A', eye: '#1C1447' },
+    outline: { snake: '#2B2F9E', mango: '#8A4500', rock: '#4A5563', warn: '#C81E1E' },
+    outlineStorm: { snake: '#7CF2D4', mango: '#FFF3C4', rock: '#D5DCE6', warn: '#FF9A9A' },
+    stormIndex: 5,
+    biomes: [
+      { bg: ['#7FD8FF', '#3FB2F2', '#1F86D8'], frame: '#1D6B2A', cells: ['#A6E25A', '#93D648'] },
+      { bg: ['#8FE8D8', '#3CC4B4', '#1C9A8E'], frame: '#7A6A1C', cells: ['#E3E07A', '#D2D062'] },
+      { bg: ['#B9C8FF', '#7F92F0', '#5565D6'], frame: '#2C5D8F', cells: ['#D6F1FF', '#BFE6FA'] },
+      { bg: ['#FFD9A0', '#F5A65B', '#DB7A35'], frame: '#6B4A2B', cells: ['#E9D3A6', '#D9BF8A'] },
+      { bg: ['#A8E6A0', '#5CC46A', '#2F9E4E'], frame: '#9C4A2A', cells: ['#F6C9A0', '#EDB583'] },
+      { bg: ['#6A5ACD', '#41358F', '#241C5C'], frame: '#15103A', cells: ['#4A3F86', '#41377A'] },
+    ],
+  },
   danger: { text: '#B3261E', line: '#E0A39B' }, // UIFIX-R12/R14 soft red: short-of-energy cost, Quit run
 } as const;
+export type D3Tone = keyof typeof TOKENS.d3.tone;
 export type UiThemeName = 'light' | 'dark';
 export interface UiTheme { bg: string; title: string; soft: string; card: string; ink: string; cardSoft: string }
 /** UIFIX-R4 text/card colours per resolved theme. Dark: light ink on a raised dark-green card (contrast >= 4.5:1, tested). */

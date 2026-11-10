@@ -1,56 +1,52 @@
-# UI-MOCKUPS - visual source of truth for the new (D2) UI
-Status: Draft. Added 2026-11-06 for P3 (juice + screens). Owner: design (Claude Design project "Mango Snake - D2 design").
+# UI-MOCKUPS - visual source of truth for the D3 "Juicy" UI
+Status: Draft (boards await the owner's eye-check, 2026-11-10). Spec: `docs/superpowers/specs/2026-11-10-ui-d3-juicy-design.md`.
 
 ## 1. What this is
-The owner's D2 mockups were made in a Claude Design artifact (not Figma). They are committed here as **code** so an AI can implement P3 screens from them offline. **Code is the primary reference; PNG is for visual cross-checking only.**
-- `docs/design/mockups/html/<Board>.html` - **primary.** Static standalone HTML per board (no scripts, no runtime): every div, inline style (px sizes, radii, gaps, colours), SVG path and copy text as rendered in the default state. `html/index.html` lists all boards; links between boards work. Fonts load from Google Fonts (Nunito, Lilita One).
-- `docs/design/mockups/src/<Board>.dc.html` - original component source with the tweakable props (`data-props`: `skin`, `state`, `tweak`...) and the logic that computes positions. Use it to read variants and conditional blocks that the static HTML does not show.
-- `docs/design/mockups/src/canvas.json` - board list, sizes, titles, canvas positions and section titles (P1 core loop, P3 settings and biomes, P4 meta, head rig).
-- `docs/design/mockups/png/<Board>.png` - 2x screenshots (390x844 CSS px for screens). **Reference only**: compare your result against them, never copy numbers from pixels.
-- `docs/design/mockups/export-html.example.js`, `render.example.js` - the scripts that produced the HTML and PNG (section 5).
-Original artifact: https://claude.ai/artifact/9zVMtmVhjWzeHeyWwjQ9JX (owner-shared; may change after this snapshot).
+- The D3 boards in `docs/design/mockups/d3/` are the visual source of truth for every screen: `boards.html` (all boards, static HTML/SVG), `d3.css` (shared styles, CSS variables named after the tokens), `png/` (one capture per board).
+- `directions.html` is the direction study (section A was chosen by the owner). `marble.html` holds the P4 marble machine and wheel mockups; they are linked from `boards.html` and are not built in U1..U7.
+- The D2 files (`mockups/html`, `mockups/src`, `mockups/png`) stay as history. Do not copy colours, shapes or layout from them.
+- Boards are drawn at 360x640 CSS px (the 9:16 canvas); Home, Game and Results also at 390x844. Numbers on the boards are mock px.
 
 ## 2. Rules for agents
-1. The HTML (then `.dc.html` for variants) wins over any assumption about look and feel; the PNG only confirms it. Gameplay rules still come from GDD / MEC specs; if a mockup shows behavior that conflicts with a spec, stop and ask (AGENTS section 5).
-2. Do not hard-code colours or sizes in scenes: put them in one UI token module (create `src/game/uiTokens.ts` or the balance `ui` block when the first screen is ported) using section 3.
-3. Mockups are HTML/SVG; Phaser scenes must reproduce them with text, graphics and generated textures (SVG to texture as done for capy in `src/game/art/`). Do not embed the `.dc.html` files in the game.
-4. Only the default state of each board is exported. Read `data-props` in `src/*.dc.html` for the other options (skins, Results states, Home first run) and their conditional blocks.
-5. Replaced visuals update this doc in the same PR (status column below).
+1. Colours and shape numbers come from `TOKENS.d3` in `src/game/uiTokens.ts`, never from a hex copied off a board. If a board and a token disagree, the token wins; report the mismatch.
+2. Positions and sizes come from the boards (open `boards.html`, read the inline `left/top/width/height` of the element, or measure the PNG).
+3. Strings come from `src/game/text.ts`. A board never introduces copy; if a board shows text that has no key, treat it as a board defect.
+4. Gameplay rules, timings and tuning numbers are not defined here (spec, MEC files and `config/balance.json` own them).
+5. Open the PNG first; open `boards.html` only for the section you build (search by `id="<Board>"`).
 
-## 3. Design tokens (from `PaletteD2.dc.html`)
-Rule of thumb: warm cream base, one strong colour per screen (green CTA), pastels elsewhere, never pure black. Fonts: Nunito 700/800/900 (UI), Lilita One (logo/title letters, outline `#6B4C82`, drop shadow 0 6px 0 same colour). Pill/card shadow: `0 4px 10px -3px rgba(110,80,70,.15)`. Portrait 390x844 reference, 16px side padding, pills fully rounded.
-| Group | Tokens |
-|---|---|
-| Surfaces | Cream `#F8F2E8` (screen bg) - Card `#FFFCF6` - White `#FFFFFF` - Sand `#EFE6D8` - Stone `#E3DCD2` - Peach `#FBE3C8` |
-| Text | Plum brown `#5A3B3B` (primary) - Soft brown `#8A6A6A` - Faint `#B79F8A` - Slate `#3F4D5E` (labels on hill) - Logo outline `#6B4C82` - Walnut `#B98558` |
-| Action green | face `#79D391` - shade `#5DB878` - deep `#4A9A63` (shelf) - line `#3E7A52` (label outline) - Board mint `#CFEBD0` / `#C2E4C6` |
-| Accents | Orange `#F4A157` / deep `#DB8238` - Butter `#F8D468` - Star gold `#FFC845` - Pink `#F6C2D3` - Periwinkle `#8EA0FF` (marbles) |
-| Sky and hill | `#B3DEF3` to `#9DD3EE` gradient footer hill - silhouette `#C4E7F7` - Sky stat `#BCDDF4` - Lavender `#C6B0F5` - Cyan `#3CC6DA` (energy) |
-| Characters | Snake body `#6F93F5` / shade `#3F63D1` / belly `#E4ECFF`; cat `#F4A157`/`#DB8238`; dog `#E9B87F`/`#C48A4F`; capy `#C79A6B`/`#A8794D`; picker tiles pup `#FBE7B0`, capy `#D7EBD2`, snake `#DCE5FF` |
+## 3. Tokens
+The token table lives in the spec §4 (D3-R1, R4) and in code as `TOKENS.d3`; `tests/game/d3Tokens.test.ts` guards the contrast rules (D3-R2). `d3.css` mirrors the values as CSS variables (`--tone-primary-face-0`, `--ink`, `--ink-deep`, `--text`, ...).
 
-## 4. Screen map (mockup board -> code)
-Code column uses CODEMAP names. "planned" = no scene yet; check `docs/CODEMAP.md` before assuming.
-| Board (png/src base name) | Purpose | Target code | Phase |
+## 4. Screen map (board -> code -> phase)
+| Board id | PNG (`mockups/d3/png/`) | Scene / file | Phase |
 |---|---|---|---|
-| `BootD2` | Loading screen, logo, progress bar | `scenes/BootScene.ts`, `flow/bootView.ts` | done (P3b-3, P4 elements hidden) |
-| `HomeD2` (prop `firstRun`, `skin`) | Home: currencies, logo, hero panel, Play + Start at Lx / energy, Skins, Marbles | `scenes/HomeScene.ts`, `flow/homeModel.ts` | done (P3b-3, P4 elements hidden) |
-| `LoadoutD2` | Pick 2 skills | `scenes/LoadoutScene.ts`, `flow/loadoutView.ts` | done (P3b-3, P4 elements hidden) |
-| `GameD2`, `GameDpadD2` | In-run HUD (level, biome, mango x/y, score, energy, skill buttons, checkpoint chip), D-pad variant | `src/game/hud/*` (`hudModel`, `hudLayout`, `HudTop`, `SkillButtons`), `input/dpad.ts`, `scenes/HudScene.ts` (wiring), `hudText.ts` | done (P3b-2; D-pad only when `settings.dpad`) |
-| `PauseD2`, `CountdownD2` | Pause menu, start countdown | `src/game/hud/*` (`overlayModel`, `PauseOverlay`, `CountdownOverlay`) | done (P3b-2; marbles line hidden, no tap-to-skip) |
-| `BannersD2` (tweak `banner`), `SkillActiveD2` (tweak `skill`) | Level-up / event banners, active skill states | `src/game/hud/*` (`banners`, `BannerLayer`), `render/skills.ts`, `juice/*` | done (P3b-2; P3a: banner motion hook via `bannerMotion` (soft fade when reduced), skill flash / icon pop / Shield tint; Slow-mo tint stays in `BannerLayer`) |
-| `DeathD2` | Death flash/shake (reduced-motion variant) | `src/game/juice/*` (`ScreenFx`, `DeathCard`, `JuicePlayer`), GameScene shake | done (P3a) |
-| `ResultsD2` (prop `state`: normal/newBest/checkpointUnlocked/firstRun) | Game over | `scenes/ResultsScene.ts`, `flow/resultsView.ts` | done (P3b-3, P4 elements hidden) |
-| `SettingsD2` | Settings | `scenes/SettingsScene.ts`, `flow/settingsView.ts`, `flow/settingsApply.ts` | done (P3b-3, P4 elements hidden) |
-| `BiomeBoardsD2` | 6 biome board looks (tiles, fences, rocks per biome) | `render/tiles.ts`, GameScene board | P3b (P3b-1 done 2026-11-07; coconut lane, bomb and NPC art not ported) |
-| `SkinsD3`, `SkinBuyD2`, `DuplicateD2` | Character picker, buy skin, duplicate-skin result | planned (meta) | P4 |
-| `MarbleMachineD2`, `MarbleWheelD2`, `MarbleSkinDropD2`, `OddsD2` | Marble machine board, wheel bonus, skin drop, published odds | planned (meta) | P4 |
-| `FullClearD2` | Level 30 full-clear screen | planned | P4 |
-| `PlayerHead`, `HeadRigD2`, `HeadIcon`, `MeowHead`, `ExpressionsD2`, `ExprHeadD2` | Head rig per skin, anchors, states, expressions (draft, not wired) | `src/game/art/` (capy rig exists; see ART-001) | P3c+ |
-| `Tile`, `Rock`, `FencePiece`, `FoodIcon` | Shared board parts (mud, pebble/rock/boulder/crumble/warn, fence, mango) | `render/tiles.ts` and board renderers | done (mango only; fish/bone/melon in P4) |
-| `PaletteD2` | Colour tokens (section 3) | `src/game/uiTokens.ts` (done) | P3b |
-P3b-3 gameplay rulings C1-C10 (where mockups and specs disagree, spec wins) are listed in `docs/superpowers/plans/2026-11-07-p3b-3-menus.md`; the D2 screens above follow them.
+| `Boot` | `Boot-360` | `src/game/scenes/BootScene.ts` | U3 |
+| `Home` | `Home-360`, `Home-390` | `scenes/HomeScene.ts`, `flow/homeModel.ts`, `ui/menuLayout.ts` | U3 |
+| `Game` | `Game-360`, `Game-390` | `hud/hudLayout.ts`, `hud/HudTop.ts`, `hud/SkillButtons.ts`, `hud/bottomGroup.ts`, `render/*` | U4 |
+| `GameDpad` | `GameDpad-360` | `hud/bottomGroup.ts`, `input/dpad.ts` | U4 |
+| `GameLocked` | `GameLocked-360`, `-360-2` | `hud/SkillButtons.ts` | U4 |
+| `GameHint` | `GameHint-360`, `-360-2` | `input/steerFx.ts`, `input/steerFxModel.ts` | U4 |
+| `Biomes` | `Biomes` | `render/biomePalette.ts`, `render/boardParts.ts`, `ui/background.ts` | U3, U4 |
+| `Pause` | `Pause-360` | `hud/PauseOverlay.ts` | U5 |
+| `Countdown` | `Countdown-360` | `hud/CountdownOverlay.ts` | U5 |
+| `Banners` | `Banners-360`, `-360-2..4` | `hud/BannerLayer.ts` | U5 |
+| `Death` | `Death-360` | `juice/DeathCard.ts` | U5 |
+| `Results`, `ResultsFirstRun` | `Results-360`, `Results-390`, `ResultsFirstRun-360` | `scenes/ResultsScene.ts`, `flow/resultsView.ts` | U5 |
+| `Loadout` | `Loadout-360` | `scenes/LoadoutScene.ts` | U6 |
+| `Settings` | `Settings-360` | `scenes/SettingsScene.ts`, `ui/icons.ts` | U6 |
+| `States` | `States` | `ui/skin/*`, `ui/widgets.ts`, `ui/touchFx.ts` | U1 |
+| `MarbleMachine`, `MarbleWheel` | `MarbleMachineD3`, `MarbleWheelD3` | none (P4, mockup only) | — |
 
-Board sizes and the canvas layout: `canvas.json` (`boards.<file>.w/h`).
+Board notes that are decisions, not decoration:
+- `GameDpad`: with the D-pad on, the energy bar sits above the bottom group and the checkpoint becomes a short chip (`L10`) on the same row.
+- `GameLocked`: an unaffordable skill keeps its icon and cost badge on the `off` tone; the energy gauge runs on the rim.
+- `Banners`: all four kinds stay inside the existing banner strip (top 1.5 rows of the board, UIFIX-R1).
+- `ResultsFirstRun`: same panel as `Results`; rows without a value are absent and `TEXT.start` fills the last line.
+- `Settings`: four rows, no Board theme card (D3-R3).
 
-## 5. Refreshing the snapshot
-The `.dc.html` files need the Claude Design runtime as `./support.js` (it is `artifact-type/dc-runtime.js` inside the artifact; not committed, 190 KB). To refresh: read the artifact files with the Artifact tool (`read` with `paths`), copy `project/*` plus `dc-runtime.js` renamed to `support.js` into one folder, serve it (`python3 -m http.server 8765`; `file://` fails because components are fetched), then run `render.example.js <folder> <outdir>` for PNGs and `export-html.example.js <outdir> <folder>` for static HTML (needs Playwright; the HTML script drops scripts and the `<helmet>` block and rewrites `.dc.html` links to `.html`). Static HTML vs PNG matched within 0.2% of pixels except the head-rig boards (blink animation timing). Commit only the files that changed.
+## 5. Refreshing the PNGs
+The boards load fonts from `public/fonts/` by relative path, so open them by file path. One board:
+
+`node tools/qa/shot.mjs size:416,680,2 "go:file:///<repo>/docs/design/mockups/d3/boards.html" wait:900 "eval:(()=>{const p=document.querySelectorAll('#Home .phone')[0].getBoundingClientRect();scrollTo(0,p.top+scrollY-20);return 1})()" wait:250 shot:docs/design/mockups/d3/png/Home-360.png`
+
+Use `size:446,884,2` and index `[1]` for the 390x844 frame. `States` and `Biomes` are captured from their `.frames` box at DPR 1. After changing a board, recapture its PNG in the same commit.
