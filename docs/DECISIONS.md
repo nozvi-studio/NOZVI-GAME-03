@@ -528,3 +528,8 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Context: GDD 8.3 left "reason to come back" open. Owner answer 2026-11-10.
 - Choice: players return for challenges (challenge levels / challenge content, details to be specced in P4) and for collecting skins. The Capy skin and its production guide (ART-003, `capyRig.ts`) are the base every later skin builds on. Daily bonus, leaderboard and streak stay parked.
 - Consequence: P4 specs (MEC-009/010/011) start from challenge + skin loops; ART-003 code work "before the 2nd skin" is a P4c prerequisite. GDD 8.3 to be updated when MEC-011 is written.
+
+## 2026-11-10 - MOT-3 run-event feedback is derived render-side
+- Context: hazard landing cells, snake turns and mango respawns are not sim events; the sim, its RNG and `session.turn` timing must not change (MOT-3-R5).
+- Choice: `GameScene`/`HudScene` derive them from snapshot changes with pure helpers in `src/game/juice/derived.ts` and feed them through `JuicePlayer.handleBatch` as extra `JuiceInput` members (`landedAt`, `turned`, `mangoSpawned`). Rulings A1-A8 of the MOT-3 plan: `juice.events.landShakeFamilies` flags `rock` only; `mangoGrow` takes a fifth `from` parameter; `drawMango` takes the ready `grow` scale; `drawSnake` gets a `bulge` argument; `JuiceDeps.headCell` supplies the head for the win burst; extra config keys (`shieldBurstLifeMs`, `spawnPuffLifeMs`, `sparkleRingRadius`, `sparkleThickness`).
+- Consequence: no new sim events and no new tween path; all numbers live in `balance.juice.events`.

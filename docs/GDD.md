@@ -241,9 +241,17 @@ Boot → Home (Play from checkpoint · Play from L1 · Marble machine · Skins �
 | Biome change | palette sweep + biome name card | longer jingle | 30 ms |
 | Checkpoint unlocked | flag plants on the level bar, "Next run starts at L6!" banner | fanfare | 40 ms |
 | Death | screen shake, red flash, X eyes, death line | sawtooth drop | 90 ms |
+| Shield breaks | shield-blue burst and expanding ring, short shake, board tint ends, shield icon pops | shield break | none |
+| Skill unlocked | skill icon pops bigger, sparks fly from the board centre to the energy bar | unlock | none |
+| Run won | long gold glow, gold bursts at the head and the four corners, gold flash, snake pop | biome jingle | none |
+| Hazard lands | dust per landed cell, tiny shake for heavy rocks | land | none |
+| Ramp ends (GO) | soft food-coloured flash, snake pop, level bar bump | go | none |
+| Mango appears | pops in from 85% with a small overshoot, tiny puff (none for golden) | none | none |
+| Snake turns | capy face tilts about 10 degrees toward the turn, first body segment swells, 140 ms | none | none |
+| Golden mango waits | a gold 4-point star twinkles on its ring about every 0.7 s | none | none |
 | Marble machine | peg ticks, bumper glow, slot light-up, coin burst / skin reveal | ticks + win jingle | light per bump |
 
-Status: implemented in P3a; 60 fps exit pending a device check (2026-11-07): every row except Marble machine (P4); numbers in `balance.juice`; death lines per cause in `text.ts`.
+Status: implemented in P3a; 60 fps exit pending a device check (2026-11-07): every row except Marble machine (P4); numbers in `balance.juice` (MOT-3 run-event rows: `balance.juice.events`); death lines per cause in `text.ts`.
 
 ## 11. Scope & phases [REQUIRED]
 Big phases; each phase gets **one spec set + one plan** (Superpowers `brainstorming` → `writing-plans`), and the plan is executed as **small tasks, one PR each** (AGENTS §6). The owner approves at two gates per phase: the spec and the exit criteria. Do not start a phase before the previous phase's exit criteria pass.
