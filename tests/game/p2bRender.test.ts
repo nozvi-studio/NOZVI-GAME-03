@@ -5,6 +5,8 @@ import { drawShrink } from '../../src/game/render/shrink';
 import { drawCycles } from '../../src/game/render/cycles';
 import { bombDigit, digitSegments, drawBlasts } from '../../src/game/render/blasts';
 import { t } from '../../src/game/text';
+import { TEL } from '../support/telegraph';
+import { gfx } from '../support/gfx';
 import type { Dir, SimSnapshot } from '../../src/core';
 
 function graphics() {
@@ -41,31 +43,29 @@ it('MEC-017 §8 dashedSegments splits an edge into dashes', () => {
   expect(segs[0]).toEqual([0, 0, 10, 0]);
 });
 
-it('MEC-013 §8 coconut warning blinks with arrows; reduced motion keeps a solid outline; rolling is a circle', () => {
+it('MEC-013 §8 coconut warning pulses with arrows; reduced motion keeps a solid outline; rolling is a circle', () => {
   const warn = snap({ coconut: [{ id: 1, path, cell: null, state: 'warn', t: 0, warnMs: 1000 }] });
-  let r = graphics(); drawMovers(r.g, warn, 20, 0, false);
+  let r = graphics(); drawMovers(r.g, warn, 20, TEL, false);
   expect(r.calls).toContain('fillTriangle');
-  r = graphics(); drawMovers(r.g, warn, 20, 250, false);
-  expect(r.calls).toEqual([]);
-  r = graphics(); drawMovers(r.g, warn, 20, 250, true);
+  r = graphics(); drawMovers(r.g, warn, 20, TEL, true);
   expect(r.calls).toContain('strokeRect'); expect(r.calls).toContain('fillTriangle');
   const move = snap({ coconut: [{ id: 1, path, cell: { x: 2, y: 1 }, state: 'move', t: 5, warnMs: 1000 }] });
-  r = graphics(); drawMovers(r.g, move, 20, 0, false);
+  r = graphics(); drawMovers(r.g, move, 20, TEL, false);
   expect(r.calls).toContain('fillCircle');
 });
 it('MEC-015 §8 cat is a square with ears and chicken a circle with a beak', () => {
   const npc = (variant: 'cat' | 'chicken') => snap({ npc: [{ id: 1, variant, path, cell: { x: 2, y: 1 }, state: 'move', t: 0, warnMs: 0, dir: { x: 1, y: 0 } }] });
-  let r = graphics(); drawMovers(r.g, npc('cat'), 20, 0, false);
+  let r = graphics(); drawMovers(r.g, npc('cat'), 20, TEL, false);
   expect(r.calls.filter(c => c === 'fillTriangle').length).toBeGreaterThanOrEqual(2);
   expect(r.calls).toContain('fillRect');
-  r = graphics(); drawMovers(r.g, npc('chicken'), 20, 0, false);
+  r = graphics(); drawMovers(r.g, npc('chicken'), 20, TEL, false);
   expect(r.calls).toContain('fillCircle'); expect(r.calls).toContain('fillTriangle');
 });
 it('MEC-015 §8 chicken beak follows NpcView.dir, backward on a return leg', () => {
   const beakX = (dir: Dir) => {
     const xs: number[] = [];
     const g: unknown = new Proxy({}, { get: (_o, name: string) => (...a: number[]): unknown => { if (name === 'fillTriangle') xs.push(a[0]!); return g; } });
-    drawMovers(g as Phaser.GameObjects.Graphics, snap({ npc: [{ id: 1, variant: 'chicken', path, cell: { x: 2, y: 1 }, state: 'move', t: 0, warnMs: 0, dir }] }), 20, 0, false);
+    drawMovers(g as Phaser.GameObjects.Graphics, snap({ npc: [{ id: 1, variant: 'chicken', path, cell: { x: 2, y: 1 }, state: 'move', t: 0, warnMs: 0, dir }] }), 20, TEL, false);
     return xs[xs.length - 1]!;
   };
   expect(beakX({ x: 1, y: 0 })).toBeGreaterThan(55);
@@ -73,7 +73,7 @@ it('MEC-015 §8 chicken beak follows NpcView.dir, backward on a return leg', () 
 });
 it('MEC-016 §8 bird draws a shadow ellipse on the target mango', () => {
   const r = graphics();
-  drawMovers(r.g, snap({ bird: { x: 4, y: 4, leftMs: 300, shadowMs: 600 } }), 20, 0, false);
+  drawMovers(r.g, snap({ bird: { x: 4, y: 4, leftMs: 300, shadowMs: 600 } }), 20, TEL, false);
   expect(r.calls).toContain('fillEllipse');
 });
 it('MEC-014 §8 gate open is dashed, warn blinks with a lock, closed is solid; spikes show dots and triangles', () => {
@@ -129,4 +129,13 @@ it('MEC-018 §8 drawShrink blinks the warn outline, hatches closed cells, and ke
   expect(still.calls).toContain('strokeRect');
   const closed = graphics(); drawShrink(closed.g, view('closed'), 20, 250, false);
   expect(closed.calls).toContain('fillRect'); expect(closed.calls).toContain('lineBetween');
+});
+
+it('MOT-4-R4 a warning lane keeps its arrows on every pulse frame and tightens toward the hit', () => {
+  const lane = (t: number) => ({ families: { coconut: [{ id: 1, path: [{ x: 0, y: 0 }, { x: 1, y: 0 }], cell: null, state: 'warn', t, warnMs: 1000 }], npc: [], bird: null } }) as unknown as SimSnapshot;
+  for (let t = 0; t <= 1000; t += 50) { const q = gfx(); drawMovers(q.g, lane(t), 20, TEL, false); expect(q.count('fillTriangle')).toBe(2); }
+});
+it('MOT-4 arrowTriangle scale shrinks and grows the arrow about its centre and defaults to 1', () => {
+  const a = arrowTriangle({ x: 1, y: 1 }, { x: 1, y: 0 }, 20), b2 = arrowTriangle({ x: 1, y: 1 }, { x: 1, y: 0 }, 20, 2);
+  expect(b2[0] - 30).toBeCloseTo((a[0] - 30) * 2, 10);
 });

@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(motion): MOT-4 ground tile and coconut/NPC lane warn pulses
 - feat(motion): MOT-4 rock/fence/maze/rise warn pulse from remaining time (tightening rhythm, alpha floor, urgent colour)
 - feat(core): additive warnLeftMs on gate and spike cell snapshot views (presentation only, MOT-4)
 - feat(motion): MOT-4 Motion.snap (scale beat) and Motion.ease (number tween) on the MOT-0 adapter
