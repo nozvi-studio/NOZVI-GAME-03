@@ -24,7 +24,8 @@ Only files listed here exist. Status: Draft / Approved / Deprecated.
 | ARCH | `docs/ARCHITECTURE.md` | Module boundaries, time model, Sim step order | Draft |
 | PLAYTEST | `docs/PLAYTEST.md` | Playtest evidence | — |
 | P3-UIFIX | `docs/superpowers/specs/2026-11-07-p3-ui-review-fixes-design.md` | P3 UI fixes from the agy review: banner strip, toasts, dark theme, layout, polish (UIFIX-R1..R15) | Approved |
-| UI-D3 | `docs/superpowers/specs/2026-11-10-ui-d3-juicy-design.md` | D3 "Juicy" mobile-first visual redesign: tokens, skin kit, layout, per-screen rules (D3-R1..R20), phases U0..U6; supersedes the D2 look; direction study in `docs/design/mockups/d3/directions.html` (section A is the reference) | Draft |
+| UI-D3 | `docs/superpowers/specs/2026-11-10-ui-d3-juicy-design.md` | D3 "Juicy" mobile-first visual redesign: tokens, skin kit, viewport and layout, per-screen rules, visual interaction feedback (D3-R1..R28, R7b), phases U0..U7; supersedes the D2 look; direction study in `docs/design/mockups/d3/directions.html` (section A is the reference) | Draft |
+| UI-D3-PLANS | `docs/superpowers/plans/2026-11-10-ui-d3-roadmap.md`, `-u0-boards-tokens.md`, `-u1-skin-kit.md` | D3 roadmap U0..U7 (task lists, shared interfaces), detailed plans for U0 and U1; plans for U2..U7 are written at each phase start | Draft |
 | P3-UIFIX-PLANS | `docs/superpowers/plans/2026-11-07-p3-uifix-wave1.md`, `-wave2.md`, `-wave3.md` | UI fix plans: wave 1 occlusion + color, wave 2 layout, wave 3 polish + agy re-review | Draft |
 | ART-001 | `docs/specs/art/ART-001-character-coordinate-system.md` | Character anchors, look rules, action list, asset folders and production routes (capy reference) | Draft |
 | ART-002 | `docs/specs/art/ART-002-capy-master-still.md` | Capy master still brief: spec files, Codex steps, acceptance checklist, motion test | Draft |
