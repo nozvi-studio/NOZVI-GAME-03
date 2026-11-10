@@ -52,7 +52,7 @@ it('MEC-004-R10 candidate cells and extraFree must be in bounds and unreserved',
   const s = buildBoard({ mango: [16, 16] }), cell = { x: 0, y: 0 };
   s.orbs.push({ x: 1, y: 0, ageMs: 0 });
   s.rainMangoes.push({ x: 2, y: 0, ageMs: 0, castId: 1 });
-  withFamilies(s, [{ key: 'rubble', reserved: [[3, 0]] }], () => {
+  withFamilies(s, [{ key: 'snipWall', reserved: [[3, 0]] }], () => {
     for (const blocked of [{ x: -1, y: 0 }, { x: 0, y: 17 }, { x: 16, y: 16 },
       { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, s.snake[0]!]) {
       expect(candidateValid(s, b, [blocked], { nearDist: 4, wallCells: [], exemptNearHead: true })).toBe(false);
@@ -67,7 +67,7 @@ it('MEC-004-R10 spawn returns null and changes nothing when no candidate is vali
   const s = buildBoard({ mango: [16, 16] });
   const all: [number, number][] = Array.from({ length: 289 }, (_, i) => [i % 17, Math.floor(i / 17)]);
   const before = structuredClone(s);
-  withFamilies(s, [{ key: 'rubble', reserved: all }], () => {
+  withFamilies(s, [{ key: 'snipWall', reserved: all }], () => {
     expect(ROCK.spawn(s, spawnCtx(s, b))).toBeNull();
   });
   expect(s.rng).not.toEqual(before.rng);

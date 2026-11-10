@@ -502,3 +502,8 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: Remotion renders the game's own capy SVGs (exported from `capyRig.ts`) into a PNG sequence, packed as a 10 x 9 sheet of 128 px frames (`public/art/capy-remotion.png`, 428 KB) and shown only on the debug art preview next to the tween capy. Owner approved the look. Board head stays tween-driven (reactive, a few KB, sharp at any size); Remotion is for showcase clips (win, skin unlock, store video).
 - Alternatives: replace board tweens with sprite sheets (heavier, not reactive); raster AI frames (identity drift).
 - Consequence: Remotion sources live in the owner's repo `D:/Working/Agent/remotion-showcase/src/capy/` (entry `src/capy/index.ts`, not committed there); export frames with 10% margin. Production use needs its own plan (generated sheet pipeline, size budget).
+
+## 2026-11-10 Remove the rubble hazard family
+- Choice: delete `src/core/hazards/rubble.ts`, `Rubble` type, `CauseKey` `rubble`, `families.rubble`, snapshot `rubble`, `skills.shield.rubbleLifeMs`, rubble strings and drawing. `breakable` stays (still used by 9 other families).
+- Why: Shield stopped leaving rubble on 2026-11-06, so nothing creates it; dead code and a dead balance key.
+- Consequence: saves never persisted rubble, so no migration; tests that used rubble as a solid now use a snip wall.

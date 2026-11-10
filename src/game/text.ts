@@ -15,7 +15,7 @@ export const CAUSE_TEXT: Record<CauseKey, string> = {
   wall: 'You hit the edge of the board.', self: 'You bit your own tail.',
   rotten: 'You hit a rock left by a rotten mango.', rock: 'A falling rock got you.',
   fence: 'You ran into a fence.', maze: 'You ran into a hedge.', ground: 'The ground rose in front of you.',
-  snipWall: 'You hit your discarded tail.', rubble: 'You hit the rubble.',
+  snipWall: 'You hit your discarded tail.',
   coconut: 'Hit by a coconut.', // OQ-B6 provisional
   gate: 'Crushed by a gate.', // OQ-B6 provisional
   spike: 'Spiked.', // OQ-B6 provisional
@@ -52,7 +52,6 @@ export const DEATH_LINES: Record<CauseKey, readonly string[]> = {
   maze: ['Lost in the hedge.', 'The hedge keeps its secrets.'],
   ground: ['The ground had other plans.', 'Hills happen. Watch your step.'],
   snipWall: ['You cut it. You hit it.', 'Your own snip bit back.'],
-  rubble: ['Rubble does not move.', 'You bonked the rubble.'],
   coconut: ['Bonked by a coconut.', 'Coconut incoming. Too late.'],
   gate: ['The gate said no.', 'Closed just in time. Not yours.'],
   spike: ['Spikes: pointy and rude.', 'Ouch. Spikes up.'],
@@ -81,7 +80,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'skill.reject.energy': 'Need {cost} energy', 'skill.reject.active': 'Already on!',
   'skill.reject.noTarget': 'Too short to snip',
   'tip.orb.first': 'Energy orb! Fuel for skills',
-  'death.snipWall': CAUSE_TEXT.snipWall, 'death.rubble': CAUSE_TEXT.rubble,
+  'death.snipWall': CAUSE_TEXT.snipWall,
   'death.title': 'RUN OVER',
   'banner.new.coconut': 'Rolling coconuts! Watch the lanes', // OQ-B6 provisional
   'banner.new.gate': 'Gates open and close', // OQ-B6 provisional

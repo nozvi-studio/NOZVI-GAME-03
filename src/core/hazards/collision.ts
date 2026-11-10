@@ -44,7 +44,7 @@ export function deathContext(s: SimState, headBefore: Cell): TileKind | undefine
   return tileAt(s, headBefore.x, headBefore.y) ?? undefined;
 }
 
-// MEC-006-R26..R28 mover/solid breaks bonk and leave NO rubble (owner 2026-11-06); area absorption does neither.
+// MEC-006-R26..R28 mover/solid breaks bonk (no rubble since owner 2026-11-06); area absorption does neither.
 function consumeShield(s: SimState, ctx: StepCtx, family: HazardFamily, x: number, y: number, kind: HitKind, dir: Dir): void {
   const b = ctx.balance;
   if (kind === 'mover') family.onBreak?.(s, x, y);

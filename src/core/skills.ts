@@ -55,7 +55,7 @@ export function useSkill(s: SimState, b: Balance, ctx: StepCtx, slot: 0 | 1): vo
   def.apply(s, b, ctx);
 }
 
-// MEC-006-R16 step 7 runs only during playing time; walls and rubble tick through their family.
+// MEC-006-R16 step 7 runs only during playing time; walls tick through their family.
 export function skillTimers(s: SimState, _b: Balance, ctx: StepCtx): void {
   if (s.slowmo && --s.slowmo.leftMs <= 0) {
     s.slowmo = null;

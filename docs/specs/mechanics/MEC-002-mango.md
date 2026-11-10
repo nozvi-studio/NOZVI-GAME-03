@@ -29,7 +29,7 @@ No save fields.
 
 ## 4. Rules
 - **MEC-002-R1 Port.** Placement candidates, the "good" set (reachable and not `nearHead(x, y, mango.nearHeadDist)`), the fallback to "any" candidate, golden roll, rot formula shape and the fair-rock check are P0 design §5 MEC-002, with the changes below.
-- **MEC-002-R2 Reserved cells (single list).** A cell is `reserved` for every placement (regular mango, MEC-004 hazards, MEC-006 orbs, rain drops, rubble) if it holds: a snake cell; the regular mango; a rotten rock in any state; any MEC-004 hazard cell in any state (P0); any terrain cell (P0); an orb; a rain mango; a snip-wall cell or rubble cell in any state (MEC-006 §3). P2 also reserves ground-tile patch cells and ice exit rings in every lifecycle state (MEC-012-R5/R8). Other MEC files reference this list and do not repeat it.
+- **MEC-002-R2 Reserved cells (single list).** A cell is `reserved` for every placement (regular mango, MEC-004 hazards, MEC-006 orbs, rain drops) if it holds: a snake cell; the regular mango; a rotten rock in any state; any MEC-004 hazard cell in any state (P0); any terrain cell (P0); an orb; a rain mango; a snip-wall cell or rubble cell in any state (MEC-006 §3). P2 also reserves ground-tile patch cells and ice exit rings in every lifecycle state (MEC-012-R5/R8). Other MEC files reference this list and do not repeat it.
 - **MEC-002-R3 Counters.** Eating the **regular** mango (normal or golden) does `eatenInRun += 1` and `eatenInLevel += 1`. Rain mangoes and orbs change neither counter (MEC-006-R8, R33). Both counters start at 0 for every run, whatever the start level (MEC-008-R5).
 - **MEC-002-R4 Rot time.** At placement: `totalMs = floor(max(mango.rotMinMs, mango.rotBaseMs − mango.rotPerEatenMs × eatenInLevel) × (golden ? mango.goldenRotFactor : 1))`; `ageMs = 0`. Changed from P0: the formula uses `eatenInLevel` (GDD §7 "eaten in level"), not the run count.
 - **MEC-002-R5 Golden.** At placement, the mango is golden with chance `mango.goldenChance` (0.15) only if `eatenInRun ≥ mango.goldenMinEaten` (3) (P0 gating, per run). Eating it gives score `mango.points.golden` (3), progress `mango.progress.golden` (2), growth +1 (MEC-001-R3) and energy `energy.goldenGain` (+10, MEC-006-R9). A normal mango gives `points.normal` (1), `progress.normal` (1), growth +1, no energy.
@@ -95,7 +95,7 @@ Referenced, owned elsewhere: `energy.goldenGain` (MEC-006 §9), `hazard.crumbleM
 
 ## 10. Acceptance tests
 - `MEC-002-R1 first mango is reachable and not near the head` (P0 kept)
-- `MEC-002-R2 no placement ever uses a reserved cell` (fuzz invariant, extended with orbs, rain mangoes, snip walls, rubble, rotten rocks)
+- `MEC-002-R2 no placement ever uses a reserved cell` (fuzz invariant, extended with orbs, rain mangoes, snip walls, rotten rocks)
 - `MEC-002-R3 rain mangoes and orbs do not change eatenInLevel or eatenInRun`
 - `MEC-002-R4 rot time uses eatenInLevel: 8000 at level start, 7550 after 3, golden half`
 - `MEC-002-R4 rot time returns to 8000 after a level up`

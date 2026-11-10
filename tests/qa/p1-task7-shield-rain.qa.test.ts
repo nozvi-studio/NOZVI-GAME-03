@@ -1,4 +1,4 @@
-// tests/qa/p1-task7-shield-rain.qa.test.ts — Black-box QA tests for P1 Task 7 Shield, Rubble & Mango Rain (MEC-006)
+// tests/qa/p1-task7-shield-rain.qa.test.ts — Black-box QA tests for P1 Task 7 Shield & Mango Rain (MEC-006)
 import { addTimedHazards } from '../../src/core/hazards/timed';
 import { describe, expect, it } from 'vitest';
 import {
@@ -33,7 +33,7 @@ function circleSim(sim: Sim, totalMs: number, tickMs: number): void {
   }
 }
 
-describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => {
+describe('QA P1 Task 7: Shield & Mango Rain (MEC-006 Black-Box)', () => {
   const b = loadBalance();
 
   // --------------------------------------------------------------------------
@@ -196,37 +196,6 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     expect(sim.drainEvents()).toEqual([]);
   });
 
-  it('QA-P1T7-08 MEC-006-R24/EC8 rubble is not breakable; shield collision with rubble results in death', () => {
-    // MEC-006-R24: "Never breakable: board edge (wall), own body (self), rubble."
-    // EC8: "Shield active, head hits rubble from an earlier shield: death, cause rubble."
-    const s = buildState(b, {
-      snake: [[2, 8], [1, 8], [0, 8]],
-      dir: [1, 0],
-      spawnInMs: QUIET,
-      mango: [15, 15],
-    });
-    s.loadout = ['shield', 'mangoRain'];
-    s.bestLevel = 16;
-    s.energy = 100;
-    s.families.rubble.push({
-      family: 'rubble',
-      x: 3,
-      y: 8,
-      state: 'solid',
-      leftMs: 1500,
-    });
-
-    const sim = restoreSim(b, s);
-    sim.useSkill(0);
-    sim.drainEvents();
-
-    sim.advance(s.tickMs);
-    expect(sim.snapshot().status).toBe('over');
-    expect(sim.drainEvents()).toEqual([
-      { type: 'died', cause: 'rubble', x: 2, y: 8 },
-    ]);
-  });
-
   // --------------------------------------------------------------------------
   // Group 3: Shield Breaking Breakable Families & Single-Use Consumption (MEC-006-R24, R26)
   // --------------------------------------------------------------------------
@@ -267,7 +236,6 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     expect(snap.shield).toBeNull();
     expect(snap.snake[0]).toEqual({ x: 3, y: 8 });
     expect(snap.hazards).toEqual([]);
-    expect(snap.rubble).toEqual([]);
   });
 
   it('QA-P1T7-10 MEC-006-R24/R26 shield breaks fence cell and removes it', () => {
@@ -501,7 +469,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     sim.advance(s.tickMs);
     expect(sim.snapshot().snake[0]).toEqual({ x: 3, y: 8 });
 
-    // Turn down during bonk pause so it doesn't walk into rubble at (4, 8)
+    // Turn down during bonk pause so it doesn't walk into a free cell at (4, 8)
     sim.turn(0, 1);
 
     // After 4 ticks - 1 ms, head must STILL be at (3, 8)
@@ -513,7 +481,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     expect(sim.snapshot().snake[0]).toEqual({ x: 3, y: 9 });
   });
 
-  it('QA-P1T7-17 MEC-006-R27 turns can be queued during bonk pause to avoid rubble', () => {
+  it('QA-P1T7-17 MEC-006-R27 turns can be queued during bonk pause to avoid an obstacle', () => {
     // Turns queued during bonk pause are executed when the bonk pause ends
     const s = buildState(b, {
       snake: [[2, 8], [1, 8], [0, 8]],
@@ -536,8 +504,7 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
 
     const sim = restoreSim(b, s);
     sim.useSkill(0);
-    sim.advance(s.tickMs); // Break rock, rubble placed at (4, 8)
-    expect(sim.snapshot().rubble).toEqual([]);
+    sim.advance(s.tickMs); // Break rock, no rubble is left
 
     // Queue turn UP to (3, 7)
     sim.turn(0, -1);
@@ -547,40 +514,11 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
   });
 
   // --------------------------------------------------------------------------
-  // Group 5: Rubble Mechanics, Lifecycle & Edge Cases (MEC-006-R28, EC9, EC10, EC15)
+  // Group 5: Break Edge Cases (MEC-006-R28, EC9, EC10, EC15)
   // --------------------------------------------------------------------------
 
-  it('QA-P1T7-18 MEC-006-R28 rubble lifecycle: solid for 1500 ms, crumble for 450 ms, then removed', () => {
-    // Rubble lifecycle directly tested with the rubble hazard update
-    const s = buildState(b, { snake: SQUARE_SNAKE, dir: [0, 1], spawnInMs: QUIET, mango: [15, 15], mangoLeftMs: 1_000_000 });
-    s.loadout = ['shield', 'mangoRain'];
-    s.bestLevel = 16;
-    s.families.rubble.push({
-      family: 'rubble',
-      x: 12,
-      y: 12,
-      state: 'solid',
-      leftMs: 1500,
-    });
-
-    const sim = restoreSim(b, s);
-    expect(sim.snapshot().rubble).toEqual([{ x: 12, y: 12, state: 'solid', leftMs: 1500 }]);
-
-    circleSim(sim, 1499, s.tickMs);
-    expect(sim.snapshot().rubble).toEqual([{ x: 12, y: 12, state: 'solid', leftMs: 1 }]);
-
-    circleSim(sim, 1, s.tickMs);
-    expect(sim.snapshot().rubble).toEqual([{ x: 12, y: 12, state: 'crumble', leftMs: 450 }]);
-
-    circleSim(sim, 449, s.tickMs);
-    expect(sim.snapshot().rubble).toEqual([{ x: 12, y: 12, state: 'crumble', leftMs: 1 }]);
-
-    circleSim(sim, 1, s.tickMs);
-    expect(sim.snapshot().rubble).toEqual([]);
-  });
-
-  it('QA-P1T7-19 MEC-006-R28/EC10 rubble skipped when target cell is out of bounds', () => {
-    // EC10: rock at x = 16 (last cell before edge), heading right -> behind is out of bounds -> rubble null
+  it('QA-P1T7-19 MEC-006-R28/EC10 no rubble when target cell is out of bounds', () => {
+    // EC10: rock at x = 16 (last cell before edge), heading right -> behind is out of bounds
     const s = buildState(b, {
       snake: [[15, 8], [14, 8], [13, 8]],
       dir: [1, 0],
@@ -609,11 +547,10 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     expect(broke).toBeDefined();
     expect(broke.x).toBe(16);
     expect('rubble' in broke).toBe(false);
-    expect(sim.snapshot().rubble).toEqual([]);
   });
 
-  it('QA-P1T7-20 MEC-006-R28/EC9 rubble skipped when target cell is reserved', () => {
-    // EC9: rock at (3, 8), behind is (4, 8) occupied by regular mango -> rubble null, mango stays
+  it('QA-P1T7-20 MEC-006-R28/EC9 no rubble when target cell is reserved', () => {
+    // EC9: rock at (3, 8), behind is (4, 8) occupied by regular mango, mango stays
     const s = buildState(b, {
       snake: [[2, 8], [1, 8], [0, 8]],
       dir: [1, 0],
@@ -641,7 +578,6 @@ describe('QA P1 Task 7: Shield, Rubble & Mango Rain (MEC-006 Black-Box)', () => 
     const broke = sim.drainEvents().find(e => e.type === 'shieldBroke') as Extract<SimEvent, { type: 'shieldBroke' }>;
     expect(broke).toBeDefined();
     expect('rubble' in broke).toBe(false);
-    expect(sim.snapshot().rubble).toEqual([]);
     expect(sim.snapshot().mango).toMatchObject({ x: 4, y: 8 });
   });
 

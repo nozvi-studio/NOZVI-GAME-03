@@ -17,7 +17,7 @@ describe('GDD-7 balance', () => {
   });
   it('MEC-004-R9 parseBalance validates every family maxActiveKey even when disabled', () => {
     const families = Object.freeze(DEFAULT_FAMILIES.map(f => Object.freeze({ ...f,
-      maxActiveKey: f.key === 'rubble' ? 'testCap.nested.limit' : f.maxActiveKey,
+      maxActiveKey: f.key === 'snipWall' ? 'testCap.nested.limit' : f.maxActiveKey,
     })));
     for (const value of [undefined, '2', NaN, Infinity, -1, 0, 1.5]) {
       expect(() => parseBalance(mutate(j => { j.testCap = { nested: { limit: value } }; }), families)).toThrow(/testCap.nested.limit/);
@@ -94,7 +94,7 @@ describe('GDD-7 balance', () => {
     expect(b.mango).toMatchObject({"rotBaseMs":8000,"rotPerEatenMs":150,"rotMinMs":4000,"goldenRotFactor":0.5,"goldenChance":0.15,"goldenMinEaten":3,"points":{"normal":1,"golden":3},"progress":{"normal":1,"golden":2},"nearHeadDist":3,"rottenRockLifeMs":5000,"placeRetryMs":250});
     expect(b.director).toMatchObject({"firstSpawnMs":2500,"intervalBaseMs":5000,"intervalPerLevelMs":120,"intervalMinMs":1600,"capBase":2,"capPerLevels":3,"capMax":10,"challengeIntervalFactor":0.8,"challengeCapBonus":2});
     expect(b.energy).toMatchObject({"max":100,"orbGain":15,"goldenGain":10,"orbSpawnIntervalMs":6000,"orbMax":2,"orbLifeMs":8000,"orbBlinkMs":2000,"orbFromLevel":2});
-    expect(b.skills).toMatchObject({"slowmo":{"cost":40,"durationMs":4000,"tickFactor":1.6,"unlockLevel":3},"tailSnip":{"cost":30,"minLength":3,"wallLifeMs":3000,"unlockLevel":6},"shield":{"cost":50,"durationMs":5000,"rubbleLifeMs":1500,"bonkPauseTicks":3,"unlockLevel":11},"mangoRain":{"cost":80,"durationMs":6000,"dropsMin":6,"dropsMax":10,"barCapFraction":0.5,"mangoLifeMs":8000,"mangoBlinkMs":2000,"unlockLevel":16}});
+    expect(b.skills).toMatchObject({"slowmo":{"cost":40,"durationMs":4000,"tickFactor":1.6,"unlockLevel":3},"tailSnip":{"cost":30,"minLength":3,"wallLifeMs":3000,"unlockLevel":6},"shield":{"cost":50,"durationMs":5000,"bonkPauseTicks":3,"unlockLevel":11},"mangoRain":{"cost":80,"durationMs":6000,"dropsMin":6,"dropsMax":10,"barCapFraction":0.5,"mangoLifeMs":8000,"mangoBlinkMs":2000,"unlockLevel":16}});
     expect(b.loadout).toMatchObject({"slots":2,"secondSlotLevel":6,"order":["slowmo","tailSnip","shield","mangoRain"]});
     expect(b.checkpoints).toMatchObject({"milestones":[{"reach":10,"start":4},{"reach":15,"start":6},{"reach":20,"start":8},{"reach":25,"start":10},{"reach":30,"start":12,"requiresClear":true}],"carryRatio":0.5,"carryMax":50,"rampMangoes":5});
     expect(b.log).toMatchObject({"maxEntries":500});

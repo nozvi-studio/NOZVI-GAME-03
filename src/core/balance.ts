@@ -67,7 +67,7 @@ export interface Balance {
   skills: {
     slowmo: { cost: number; durationMs: number; tickFactor: number; unlockLevel: number };
     tailSnip: { cost: number; minLength: number; wallLifeMs: number; unlockLevel: number };
-    shield: { cost: number; durationMs: number; rubbleLifeMs: number; bonkPauseTicks: number; unlockLevel: number };
+    shield: { cost: number; durationMs: number; bonkPauseTicks: number; unlockLevel: number };
     mangoRain: { cost: number; durationMs: number; dropsMin: number; dropsMax: number; barCapFraction: number; mangoLifeMs: number; mangoBlinkMs: number; unlockLevel: number };
   };
   loadout: { slots: number; secondSlotLevel: number; order: import('./types').SkillId[] };
@@ -199,7 +199,7 @@ const SPEC: Spec = {
   skills: {
     slowmo: { cost: 'int+', durationMs: 'int+', tickFactor: 'num+', unlockLevel: 'int+' },
     tailSnip: { cost: 'int+', minLength: 'int+', wallLifeMs: 'int+', unlockLevel: 'int+' },
-    shield: { cost: 'int+', durationMs: 'int+', rubbleLifeMs: 'int+', bonkPauseTicks: 'int+', unlockLevel: 'int+' },
+    shield: { cost: 'int+', durationMs: 'int+', bonkPauseTicks: 'int+', unlockLevel: 'int+' },
     mangoRain: { cost: 'int+', durationMs: 'int+', dropsMin: 'int+', dropsMax: 'int+', barCapFraction: 'prob', mangoLifeMs: 'int+', mangoBlinkMs: 'int+', unlockLevel: 'int+' },
   },
   loadout: { slots: 'int+', secondSlotLevel: 'int+', order: namesOf(['slowmo', 'tailSnip', 'shield', 'mangoRain']) },
