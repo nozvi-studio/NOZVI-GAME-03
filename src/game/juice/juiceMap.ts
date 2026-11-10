@@ -122,6 +122,19 @@ export function mapJuice(ev: JuiceInput, ctx: JuiceCtx): JuiceCue {
       }
       cue.sounds = ['biome']; break;
     }
+    case 'landedAt': // MOT-3-R9 cells were derived from the snapshot (derived.ts landedCells); the 'land' sound is on the sim event
+      if (!r) {
+        for (const c of ev.cells.slice(0, e.landCellsMax))
+          board({ kind: 'burst', x: c.x, y: c.y, color: 'rock', count: e.landDust, speed: j.bursts.dust.speed, lifeMs: j.bursts.dust.lifeMs });
+        if (e.landShakeFamilies[ev.hazardType]) board({ kind: 'shake', amplitudePx: e.landShakePx, ms: e.landShakeMs });
+      }
+      break;
+    case 'mangoSpawned': // MOT-3-R11 (a golden mango skips the puff: its sparkle, R13, marks it)
+      if (!r && !ev.golden) board({ kind: 'burst', x: ev.x, y: ev.y, color: 'food', count: e.spawnPuffCount, speed: j.bursts.eat.speed, lifeMs: e.spawnPuffLifeMs });
+      break;
+    case 'turned': // MOT-3-R12
+      if (!r) board({ kind: 'turnTilt', dx: ev.dx, dy: ev.dy, deg: e.turnTiltDeg, ms: e.turnMs });
+      break;
     default: break;
   }
   if (!ctx.sound) cue.sounds = [];     // P3a-R9

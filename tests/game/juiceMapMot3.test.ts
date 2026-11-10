@@ -87,6 +87,44 @@ describe('MOT-3-R10 ramp ended (GO)', () => {
   });
 });
 
+describe('MOT-3-R9 hazard landed', () => {
+  const at = (hazardType: 'rock' | 'fence', n: number) => ({ type: 'landedAt', hazardType, cells: Array.from({ length: n }, (_, i) => ({ x: i, y: 2 })) }) as const;
+  it('a rock-coloured dust burst per cell (capped), plus a short shake for flagged families', () => {
+    const c = mapJuice(at('rock', 6), on);
+    const bursts = c.board.filter(v => v.kind === 'burst');
+    expect(bursts.length).toBe(e.landCellsMax);
+    expect(bursts[0]).toEqual({ kind: 'burst', x: 0, y: 2, color: 'rock', count: e.landDust, speed: j.bursts.dust.speed, lifeMs: j.bursts.dust.lifeMs });
+    expect(c.board.at(-1)).toEqual({ kind: 'shake', amplitudePx: e.landShakePx, ms: e.landShakeMs });
+    expect(c.sounds).toEqual([]); // the 'land' sound stays on the sim `landed` event
+  });
+  it('unflagged family: dust only, no shake', () => {
+    expect(kinds(mapJuice(at('fence', 2), on))).toEqual(['burst', 'burst']);
+  });
+  it('the sim landed event keeps its sound and adds no visual', () => {
+    const c = mapJuice({ type: 'landed', hazardType: 'rock' }, on);
+    expect(c.sounds).toEqual(['land']); expect(kinds(c)).toEqual([]);
+  });
+  it('MOT-3-R15 reduced: no dust, no shake', () => {
+    expect(kinds(mapJuice(at('rock', 3), red))).toEqual([]);
+  });
+});
+describe('MOT-3-R11 mango spawn puff', () => {
+  it('a normal spawn puffs in food colour; golden skips the puff; reduced skips it', () => {
+    expect(mapJuice({ type: 'mangoSpawned', x: 2, y: 3, golden: false }, on).board).toEqual(
+      [{ kind: 'burst', x: 2, y: 3, color: 'food', count: e.spawnPuffCount, speed: j.bursts.eat.speed, lifeMs: e.spawnPuffLifeMs }]);
+    expect(kinds(mapJuice({ type: 'mangoSpawned', x: 2, y: 3, golden: true }, on))).toEqual([]);
+    expect(kinds(mapJuice({ type: 'mangoSpawned', x: 2, y: 3, golden: false }, red))).toEqual([]);
+  });
+});
+describe('MOT-3-R12 snake turn', () => {
+  it('a tilt toward the new direction; none when reduced; no sound or haptic', () => {
+    const c = mapJuice({ type: 'turned', dx: 0, dy: 1 }, on);
+    expect(c.board).toEqual([{ kind: 'turnTilt', dx: 0, dy: 1, deg: e.turnTiltDeg, ms: e.turnMs }]);
+    expect(c.sounds).toEqual([]); expect(c.haptic).toBeNull();
+    expect(kinds(mapJuice({ type: 'turned', dx: 0, dy: 1 }, red))).toEqual([]);
+  });
+});
+
 describe('MOT-3 dedupeBumps', () => {
   const bump = (target: 'levelBar' | 'score', scale: number) => ({ kind: 'barBump', target, scale, ms: 160 }) as const;
   it('keeps one bump per target with the largest scale at the first position and passes other visuals through', () => {
