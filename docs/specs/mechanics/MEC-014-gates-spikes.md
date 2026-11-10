@@ -106,3 +106,5 @@ Save fields: none.
 ### Escalate to owner
 - OQ-B1 gate rhythm and OQ-B2 spike beat: owner approved 2026-11-07 (playtest felt fine).
 - OQ-B6 strings: provisional, owner review at end of P2.
+
+Telegraph rhythm, alpha floor and hit beat are presentation only and live in docs/superpowers/specs/2026-11-10-motion-4-telegraph-hud-feedback-design.md (MOT-4); no rule change.

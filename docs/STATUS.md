@@ -1,6 +1,6 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-10 by Claude (lead, local) **Milestone:** M2 P3 on `version/v0.3` (branched from docs/p3-spec, owner 2026-11-07); P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
+**Updated:** 2026-11-10 by Claude (MOT-4 agent) **Milestone:** M2 P3 on `version/v0.3` (branched from docs/p3-spec, owner 2026-11-07); P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
 
 ## Now (in progress)
 - [x] P2a, P2b merged into version/v0.2 (PLAYTEST 2026-11-05).
@@ -49,6 +49,7 @@
 - Rubble family and `skills.shield.rubbleLifeMs` removed (chore/remove-rubble-family, 2026-11-10).
 
 ## Last session summary
+- 2026-11-10 (MOT-4, worktree agent): branch feat/motion-4 from version/v0.3, NOT merged (lead merges): shared remaining-time telegraph pulse for all nine warn draw functions, hit beat + bomb count pop (HitBeats), additive warnLeftMs on gate/spike cells, HUD score tick/quota bar/energy cues/title/chip/skill-ready motion via motion.snap/ease/rebase. Next: lead merge + browser eye-check (60 fps, reduced motion).
 - 2026-11-10 (local): save compat guard (v0.3 + v0.2), Rubble family removed (subagent, 1395 pass), v0.2 merged into v0.3, UIFIX waves 1-3 merged via Sonnet subagents. Tech debt left: shrink fade crumble visual, hudText test cleanups, level%5 in tests, MEC-003 R21 heading, stale rubble mentions in MEC-004 L7/MEC-006 §7/MEC-013, single 1.28 MB chunk. Not pushed.
 - 2026-11-07 (local): owner rulings (GDD §4 ok, leaderboard+streak parked, OQ-B1..B5 closed); ART-003 skin guide (draft); ART-001 Q6/Q7; Remotion capy POC approved + merged. 1395 pass, typecheck clean. Not pushed.
 - 2026-11-07 (cloud, P3b-1/2/3 + P3a): all via subagents (Haiku/Sonnet implementers+reviewers, Opus final review per sub-phase, one fix wave each). Two interruptions (5h usage limit, container restart) without loss — commit+push per step.
@@ -57,4 +58,3 @@
 - 2026-11-06 (P3c): spec + plan in docs/superpowers/; 4 tasks via subagents (Haiku/Sonnet, Opus final review). Final review caught Phaser 3.90 decoding every data: URL as base64 -> fixed (base64 SVG URLs). Deferred minors in branch ledger (magic numbers in eye/mouth geometry, capyDie twice, preview label contrast).
 - 2026-11-06 (art prep): reviewed Figma D2 and agent-sprite-forge; wrote ART-001 v2 + ART-002 (docs/JSON only, no tests run); branch feat/capy-character-spec from version/v0.2, pushed, not merged.
 - 2026-11-06: owner accepted (nghiem thu) version/v0.2 with P2c, Shield without rubble, debug skip buttons, run start waits for first input (MEC-001-R2). First owner log (69 runs, 37 normal): over40 empty, wall 77% (review), max L13, biome 4 not reached; 7 runs died at 1260 ms with 0 turns -> fixed by the waiting phase.
-- P2c executed via subagent-driven development (Sonnet implementers + reviewers, Opus final review, agy browser QA). Fuzz found and fixed shrink-on-reserved-cell; QA found and fixed run-start banner race.

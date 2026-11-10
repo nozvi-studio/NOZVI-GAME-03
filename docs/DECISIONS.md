@@ -528,3 +528,27 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Context: GDD 8.3 left "reason to come back" open. Owner answer 2026-11-10.
 - Choice: players return for challenges (challenge levels / challenge content, details to be specced in P4) and for collecting skins. The Capy skin and its production guide (ART-003, `capyRig.ts`) are the base every later skin builds on. Daily bonus, leaderboard and streak stay parked.
 - Consequence: P4 specs (MEC-009/010/011) start from challenge + skin loops; ART-003 code work "before the 2nd skin" is a P4c prerequisite. GDD 8.3 to be updated when MEC-011 is written.
+
+## 2026-11-10 - MOT-4 two extra motion keys
+- Context: The MOT-4 spec prose uses a bomb digit pop scale (1.2) and an 80 ms skill-ready alpha dip that its key table omitted.
+- Choice: Add `balance.motion.digitPopScale` and `readyDipMs` with validators (pop scale in (1, 2), alpha floor in (0, 1)).
+- Alternatives: Magic numbers in the draw code (rejected by the no-magic-numbers rule).
+- Consequence: All MOT-4 numbers are tunable in `config/balance.json`.
+
+## 2026-11-10 - MOT-4 score tick through motion.ease
+- Context: `motion.countUp` writes the Text directly, and the P3a `HudTop.bump` kills tweens on that Text, which would freeze a count mid-way.
+- Choice: Tick a proxy number with `motion.ease` (same cubicOut curve) and write the rounded value; `HudTop.bump` moves onto `motion.snap`; `Motion.rebase` keeps tween rest positions current after a HUD relayout.
+- Alternatives: `motion.countUp` on the Text (rejected: kill-by-target conflict).
+- Consequence: Every HUD motion on a target obeys kill-by-target; `countUpValue` and its tests are unchanged.
+
+## 2026-11-10 - MOT-4 hit-beat key and snap primitive
+- Context: `HazardView` has no id and MOT-0 has no generic "scale up and back" or "tween a number" primitive.
+- Choice: Beat key = type + first cell (unique among live hazards); add `Motion.snap`, `Motion.ease` and `Motion.rebase` to the adapter.
+- Alternatives: Add ids to the sim snapshot (rejected: sim change for a presentation need).
+- Consequence: `HitBeats` plays one proxy per key through `motion.snap`; reduced motion plays none.
+
+## 2026-11-10 - MOT-4 additive warnLeftMs on gate and spike cells
+- Context: Gate and spike cell views exposed only `vis`, so a remaining-time pulse could not be derived from the snapshot.
+- Choice: Add presentation-only `warnLeftMs` (via `cycleWarnLeft`) to both cell views; `HazardFamily.snapshot` now receives the balance.
+- Alternatives: Infer remaining time in the renderer from frame diffs (rejected: not replay-safe).
+- Consequence: No rule, state or determinism change; the field is derived.

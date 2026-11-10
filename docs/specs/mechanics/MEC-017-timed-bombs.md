@@ -71,3 +71,5 @@ Descriptor: `{key: 'bomb', cause: 'bomb', capClass: 'small', maxActiveKey: 'bomb
 - **L3** Director emits `hazardIncoming`.
 ### Escalate to owner
 - OQ-B6 strings: provisional, owner review at end of P2.
+
+Telegraph rhythm, alpha floor and hit beat are presentation only and live in docs/superpowers/specs/2026-11-10-motion-4-telegraph-hud-feedback-design.md (MOT-4); no rule change.
