@@ -2,6 +2,9 @@
 
 > Newest entry first. AI: read the latest entry only (AGENTS §2b).
 
+## How to capture
+Headless screenshots with `tools/qa/shot.mjs` (no dependency; uses the local Chrome, or `CHROME_PATH`). Start `npm run dev`, then run: `node tools/qa/shot.mjs size:360,640 media:light "go:http://localhost:5173/" wait:3500 shot:tmp/qa/home-360.png`. The three standard sizes are 360x640, 390x844 and 412x915. Use `media:dark` for the OS dark-mode check. Keys use DOM names (`ArrowUp`, not `Up`). Steps: `size:W,H[,DPR]`, `media:`, `go:URL`, `wait:MS`, `tap:X,Y`, `swipe:X1,Y1,X2,Y2`, `key:Name`, `shot:FILE`, `eval:JS`; any failed step exits 1.
+
 ## 2026-11-05 — P2 exit check (lead; owner playtest pending)
 - Tests: full suite 1158 pass (~25 s), typecheck clean. Fairness per family + full-table L30 fuzz test pass.
 - Fuzz: reduced matrix (10 seeds x 60 s, every family solo + full) 22/22 pass after fix 5d96b3e (shrink no longer starts on a ring cell reserved by another family; found by fuzz I5 in full mode). Shrink rate at L30 after fix ~1.3/min (was 1.45). Full default matrix (200 x 120 s) NOT run: stopped for host RAM (owner choice); run overnight.

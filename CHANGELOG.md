@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- chore(qa): headless Chrome screenshot tool `tools/qa/shot.mjs` (DevTools driver, no dependency); how-to in PLAYTEST
 - fix(art): snake head now reads as a snake (egg skull, light lower jaw, forehead diamond, close nostrils, longer forked tongue, coiled body instead of capy limbs); capy output unchanged
 - feat(art): ART-003 skin layer - the default head is now the snake skin (blue, no ears, forked tongue flick/after-chew/dead); capy kept as a selectable skin; per-skin texture keys, `activeSkin()`, ui.capy tongue timings, art preview skin switch
 - fix(motion): menu scene transitions no longer hang on the second visit of a scene (stale cached camera; input stayed locked) - `cameraPort` resolves `cameras.main` per call
