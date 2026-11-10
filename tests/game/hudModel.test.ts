@@ -16,7 +16,7 @@ it('P3b2-R7 GameD2 default state: level+biome, quota, score, energy, skills, che
   expect(hudView(snap(), hint, b, t)).toEqual({
     levelTitle: 'Level 7', biomeName: 'Rice Paddy', quota: { done: '3', total: '/6' }, score: '44',
     energy: { text: '35', fill: 0.35 },
-    skills: [{ slot: 0, id: 'slowmo', cost: 40, state: 'off', ring: null, costShort: true }, { slot: 1, id: 'tailSnip', cost: 30, state: 'ready', ring: null, costShort: false }],
+    skills: [{ slot: 0, id: 'slowmo', cost: 40, state: 'off', ring: null, charge: 35 / 40 }, { slot: 1, id: 'tailSnip', cost: 30, state: 'ready', ring: null, charge: 1 }],
     chip: { kind: 'checkpoint', text: 'Next checkpoint at L10' } });
 });
 it('P3b2-R7 empty slot is null; challenge level shows the star; max level shows Max', () => {
@@ -51,11 +51,15 @@ it('P3b2-R9 stack places items with gap, margins and padding', () => {
   expect(r.height).toBeCloseTo(366.4, 5); expect(r.ys[0]).toBe(26); expect(r.ys[2]).toBeCloseTo(100.4, 5);
   expect(stack([], { gap: 6, padTop: 3, padBottom: 4 })).toEqual({ ys: [], height: 7 });
 });
-it('UIFIX-R12 cost is flagged short only when the skill is idle and not affordable', () => {
+it('UIFIX-R12 charge is clamp01(energy / cost); full when ready; guarded for cost 0', () => {
   const v = hudView(snap(), hint, b, t);
-  expect(v.skills[0]).toMatchObject({ state: 'off', costShort: true });
-  expect(v.skills[1]).toMatchObject({ state: 'ready', costShort: false });
-  const active = hudView(snap({ skills: [{ slot: 0, id: 'slowmo', cost: 40, affordable: false, active: true, leftMs: 1000 },
-    { slot: 1, id: null, cost: 0, affordable: false, active: false, leftMs: 0 }] }), null, b, t);
-  expect(active.skills[0]).toMatchObject({ state: 'active', costShort: false });
+  expect(v.skills[0]!.charge).toBeCloseTo(35 / 40, 9);
+  expect(v.skills[1]!.charge).toBe(1);
+  const e = (energy: number, cost: number) => hudView(snap({ energy, skills: [{ slot: 0, id: 'slowmo', cost, affordable: energy >= cost, active: false, leftMs: 0 },
+    { slot: 1, id: null, cost: 0, affordable: false, active: false, leftMs: 0 }] }), null, b, t).skills[0]!.charge;
+  expect(e(0, 40)).toBe(0); expect(e(20, 40)).toBe(0.5); expect(e(99, 40)).toBe(1); expect(e(5, 0)).toBe(1);
+});
+it('UIFIX-R12 cost text colour never changes with affordability (view model carries no costShort)', () => {
+  const v = hudView(snap(), hint, b, t);
+  expect(v.skills[0]).not.toHaveProperty('costShort'); expect(v.skills[1]).not.toHaveProperty('costShort');
 });

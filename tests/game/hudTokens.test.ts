@@ -3,7 +3,7 @@ import { TOKENS } from '../../src/game/uiTokens';
 it('P3b2-R4 HUD tokens match GameD2 / PauseD2 / CountdownD2 / SkillActiveD2', () => {
   expect(TOKENS.hud).toEqual({
     skillOffFace: '#E9F1F7', skillOffIcon: '#9DB1C2', skillActiveIcon: '#2E7F93', skillUsedFace: '#EFE6D8',
-    glow: '#FFE98A', glowAlpha: 0.85, shelf: '#508CB4', shelfAlpha: 0.3,
+    charge: '#97DB9B', chargeAlpha: 0.7, glow: '#FFE98A', glowAlpha: 0.85, shelf: '#508CB4', shelfAlpha: 0.3,
     ring: '#3CC6DA', ringTrack: '#FFFFFF', ringTrackAlpha: 0.75, energyTrack: '#D9EEF3', quota: '#2E9E5B',
     scrim: '#5A3B3B', pauseScrimAlpha: 0.5, countScrimAlpha: 0.28,
     tooltip: '#5A3B3B', tooltipText: '#FFFFFF', mintCard: '#D7EBD2', mintInk: '#234B35',

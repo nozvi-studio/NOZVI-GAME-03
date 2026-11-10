@@ -3,13 +3,14 @@ import type { Balance } from '../../core';
 import { reduceMotion } from '../render/palette';
 import { TOKENS, toInt } from '../uiTokens';
 import { ui } from '../ui/layout';
+import { chargeSegment } from './gaugeGeometry';
 import { drawCard, hudLabel } from './draw';
 import { hudIconKey, type IconTone } from './hudIcons';
 import type { HudLayout } from './hudLayout';
 import type { HudView, SkillView } from './hudModel';
 
 // Mockup px of the skill button drawing (GameD2 / SkillActiveD2).
-const M = { icon: 38, boltIcon: 12, costFont: 14, pressed: 4, shelfUp: 3, shelfDown: 7, glow: 7, ring: 46, ringW: 6, chipPadL: 8, chipPadR: 10, chipGap: 4 } as const;
+const M = { icon: 38, boltIcon: 12, costFont: 14, pressed: 4, shelfUp: 3, shelfDown: 7, glow: 7, ring: 46, ringW: 6, chipPadL: 8, chipPadR: 10, chipGap: 4, chargeSteps: 24, chargeArc: 48 } as const;
 
 interface Slot { c: Phaser.GameObjects.Container; g: Phaser.GameObjects.Graphics; icon: Phaser.GameObjects.Image; cost: Phaser.GameObjects.Text; costG: Phaser.GameObjects.Graphics; bolt: Phaser.GameObjects.Image; key: string }
 
@@ -35,8 +36,8 @@ export class SkillButtons {
     for (const o of [s.c, s.costG, s.cost, s.bolt]) o.setVisible(k !== null);
     if (!k) { s.key = ''; return; }
     s.cost.setText(String(k.cost));
-    s.cost.setColor(k.costShort ? TOKENS.danger.text : TOKENS.text.primary); // UIFIX-R12
-    const key = `${k.id}|${k.state}|${k.ring === null ? 'n' : k.ring.toFixed(2)}|${k.cost}`;
+    const fill = k.state === 'active' ? 0 : Math.round(k.charge * M.chargeSteps); // UIFIX-R12 quantised gauge steps
+    const key = `${k.id}|${k.state}|${k.ring === null ? 'n' : k.ring.toFixed(2)}|${k.cost}|${fill}`;
     if (key === s.key) return;
     s.key = key;
     const used = k.state === 'active', pressed = used ? ui(M.pressed) : 0, shelf = ui(used ? M.shelfUp : M.shelfDown);
@@ -47,6 +48,10 @@ export class SkillButtons {
     g.fillStyle(toInt(TOKENS.hud.shelf), TOKENS.hud.shelfAlpha).fillCircle(0, pressed + shelf, r.r);
     if (k.state === 'ready') g.lineStyle(ui(M.glow), toInt(TOKENS.hud.glow), TOKENS.hud.glowAlpha).strokeCircle(0, 0, r.r + ui(M.glow) / 2);
     g.fillStyle(toInt(face)).fillCircle(0, pressed, r.r);
+    if (fill > 0) { // UIFIX-R12 tank fill, bottom up, clipped to the face circle
+      const pts = chargeSegment(r.r, fill / M.chargeSteps, M.chargeArc).map((p) => ({ x: p.x, y: p.y + pressed }));
+      g.fillStyle(toInt(TOKENS.hud.charge), TOKENS.hud.chargeAlpha).fillPoints(pts, true);
+    }
     if (used && k.ring !== null) {
       const rr = ui(M.ring), end = -Math.PI / 2 + Math.PI * 2 * k.ring;
       g.lineStyle(ui(M.ringW), toInt(TOKENS.hud.ringTrack), TOKENS.hud.ringTrackAlpha).strokeCircle(0, 0, rr);
