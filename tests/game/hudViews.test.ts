@@ -17,6 +17,8 @@ import { toInt, uiTheme } from '../../src/game/uiTokens';
 
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } },
   Geom: { Rectangle: Object.assign(class { constructor(..._a: number[]) {} }, { Contains: () => false }) } } }));
+const stubFb = { press() {}, release() {}, over() {}, out() {}, fire: (a: () => void) => a(), pop() {}, reject() {}, setDisabled() {}, destroy() {} };
+vi.mock('../../src/game/ui/feedback', () => ({ attachFeedback: () => stubFb, feedbackOf: () => stubFb, pivotAt: () => ({ pivot: {}, inner: {} }) }));
 afterEach(() => vi.unstubAllGlobals());
 const b = loadBalance();
 const snap = (o: Partial<HudSnap> = {}): HudSnap => ({ level: 7, biome: 2, challenge: false, progress: 3, need: 6, score: 44, energy: 35, energyMax: 100,

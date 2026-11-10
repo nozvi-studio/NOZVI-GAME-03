@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
-import { reduceMotion } from '../render/palette';
 import { bindPress, type Button } from '../scenes/ui';
 import { FONT_TITLE, FONT_UI, TOKENS, toInt } from '../uiTokens';
+import { attachFeedback } from './feedback';
 import { barFill, pillGeom, pillHitRect } from './geometry';
 import { ui } from './layout';
 import { PILL_TONES, type PillTone } from './pillTones';
@@ -20,7 +20,7 @@ export { PILL_TONES, type PillTone } from './pillTones';
 const T = TOKENS;
 
 export function pillButton(scene: Phaser.Scene, x: number, y: number, wMock: number, hMock: number, text: string,
-  name: string, action: () => void, tone: PillTone = 'green'): Button {
+  name: string, action: () => void, tone: PillTone = 'green', opts: { navigates?: boolean } = {}): Button {
   const geom = pillGeom(wMock, hMock);
   const tc = PILL_TONES[tone];
   const { w, h, radius, shelf } = geom;
@@ -37,8 +37,9 @@ export function pillButton(scene: Phaser.Scene, x: number, y: number, wMock: num
   // Container sized w x h so displayOrigin is the face centre; the custom rect extends over the shelf (see pillHitRect).
   const c = scene.add.container(x, y, [shelfG, g, t]).setName(name).setSize(w, h).setInteractive({
     hitArea: new Phaser.Geom.Rectangle(hit.x, hit.y, hit.w, hit.h), hitAreaCallback: Phaser.Geom.Rectangle.Contains, useHandCursor: true });
-  const move = (dy: number): void => { g.setY(dy); t.setY(dy); };
-  bindPress(c, () => { if (!reduceMotion()) move(geom.pressedDy); }, () => move(0), action);
+  // MOT-1-R5 face and label dip by pressedDy and scale about the face centre (shelf static); the hit container is never scaled.
+  const fb = attachFeedback(scene, [g, t], 'pill', { source: c, dipPx: geom.pressedDy, navigates: opts.navigates });
+  bindPress(c, () => fb.press(), () => fb.release(), () => fb.fire(action));
   return { c, g, text: t, w, h };
 }
 
