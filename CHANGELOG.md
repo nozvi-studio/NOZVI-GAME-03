@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: STATUS after P3 UI fixes wave 3
 - test(session): UIFIX-R15 guards the next-checkpoint hint after a normal run; LAY-03 not reproducible.
 - feat(ui): Settings toggle tracks and cards share one edge; Quit run gets a soft red accent (UIFIX-R14).
 - feat(input): all D-pad buttons share one border style (UIFIX-R13).
