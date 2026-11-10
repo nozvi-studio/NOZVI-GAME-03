@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest';
-import { SettingsScene, slideFrom, tileChanged } from '../../src/game/scenes/SettingsScene';
+import { SettingsScene, slideFrom } from '../../src/game/scenes/SettingsScene';
 import { SETTINGS_CLOSED } from '../../src/game/flow/settingsView';
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } } } }));
 
@@ -18,10 +18,4 @@ it('MOT-1-R8 slideFrom animates only switches whose value differs from the previ
   expect(slideFrom(prev, 'sound', true)).toBe(true);    // unchanged -> same start state (no slide)
   expect(slideFrom(prev, 'haptics', true)).toBe(false); // changed -> starts from previous value
   expect(slideFrom(prev, 'dpad', true)).toBe(true);     // first build -> no slide
-});
-it('MOT-1-R10 tileChanged is true only for the newly selected tile after the first build', () => {
-  expect(tileChanged(null, 'light', 'light')).toBe(false); // first build
-  expect(tileChanged('light', 'dark', 'dark')).toBe(true);
-  expect(tileChanged('light', 'dark', 'light')).toBe(false);
-  expect(tileChanged('dark', 'dark', 'dark')).toBe(false);
 });

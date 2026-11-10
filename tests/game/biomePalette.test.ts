@@ -42,7 +42,7 @@ it('P3b1-R1 out-of-range biomes clamp, DEFAULT_LOOK is Orchard light, themeOf ma
   expect(boardLook(99, 'dark')).toEqual(boardLook(6, 'dark'));
   expect(DEFAULT_LOOK).toEqual(boardLook(1, 'light'));
   expect(themeOf(LIGHT)).toBe('light');
-  expect(themeOf(DARK)).toBe('dark');
+  expect(themeOf(DARK)).toBe('light'); // D3-R3
 });
 
 it('P3b1-R1 contrastRatio is the WCAG ratio', () => {

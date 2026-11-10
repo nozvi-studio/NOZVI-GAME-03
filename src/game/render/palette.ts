@@ -10,6 +10,7 @@ export const LIGHT: Palette = {
   warn: 0xef8414, gold: 0xf7c62f, wood: 0x7e4f24, woodHi: 0xb07a42, hedge: 0x2f5a24,
   hedgeHi: 0x4f8a3c, earth: 0xb98352, earthSide: 0x6f4a2b, ink: 0x22311a, panel: 0xfafcf4,
 };
+// removed in U6 with the D2 tokens
 export const DARK: Palette = {
   bg: 0x131d15, boardA: 0x2d4b27, boardB: 0x284322, snake: 0x93a5ff, belly: 0xc3ccff,
   food: 0xffb548, leaf: 0x7cc35e, rock: 0x6e6a60, rockHi: 0x938e80, danger: 0xff6b5b,
@@ -19,14 +20,15 @@ export const DARK: Palette = {
 
 // GDD-13 follow the prototype's system theme and accessibility preferences.
 const media = (q: string): boolean => typeof window !== 'undefined' && !!window.matchMedia?.(q).matches;
-export const osDisplay = () => ({ dark: media('(prefers-color-scheme: dark)'), reducedMotion: media('(prefers-reduced-motion: reduce)') });
+export const osDisplay = () => ({ dark: false, reducedMotion: media('(prefers-reduced-motion: reduce)') });
 let saved: Settings | null = null;
 /** P3-0-R5 Boot and Settings push the saved settings; null values keep following the OS, resolved on every call. */
 export const setDisplaySettings = (s: Settings | null): void => { saved = s; };
 const display = () => resolveDisplay(saved ?? defaultSettings(), osDisplay());
-export const currentPalette = (): Palette => display().theme === 'dark' ? DARK : LIGHT;
+/** D3-R3 the UI and the board always render the light look; the saved board theme and the OS scheme are ignored. */
+export const currentPalette = (): Palette => LIGHT;
 /** P3b1-R1 the board theme that matches a palette. */
-export const themeOf = (p: Palette): BoardTheme => (p === DARK ? 'dark' : 'light');
+export const themeOf = (_p: Palette): BoardTheme => 'light';
 export const reduceMotion = (): boolean => display().reducedMotion;
 
 // MEC-006 §8 greybox colors for orbs, skills, slow-mo and shield.
