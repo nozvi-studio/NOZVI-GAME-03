@@ -20,6 +20,7 @@ import { createDpad } from '../input/dpad';
 import { DeathCard } from '../juice/DeathCard';
 import { deathSeed } from '../juice/deathLine';
 import { colorOf } from '../juice/colors';
+import { landedCells } from '../juice/derived';
 import { JuicePlayer } from '../juice/JuicePlayer';
 import { ScreenFx } from '../juice/ScreenFx';
 import type { JuiceInput } from '../juice/types';
@@ -66,6 +67,7 @@ export class HudScene extends Phaser.Scene {
       balance: this.balance, synth: { play: n => this.synth.play(n), buzz: p => this.buzz(p) }, board: this.gameScene,
       screen: new ScreenFx(this, hud, id => colorOf(id, currentPalette()), cellPx(this.balance), this.balance.juice.perf, this.balance.juice.skill.iconRingScale),
       settings: () => this.session.save().settings, reduced: reduceMotion,
+      headCell: () => { const s = this.gameScene.snapshot(); const h = s?.snake[0]; return h ? { x: h.x, y: h.y } : null; }, // MOT-3-R8
       seed: () => { const s = this.gameScene.snapshot(); return s ? deathSeed(s.score, s.level, s.timeMs) : 0; },
       makeCard: () => new DeathCard(this, this.balance, reduceMotion()), later: (ms, fn) => this.time.delayedCall(ms, fn), onDone: () => this.leave() });
     this.count = new CountdownOverlay(this);
@@ -76,6 +78,7 @@ export class HudScene extends Phaser.Scene {
     });
     this.applySettings();
     const flow = (e: FlowEffect): void => this.onFlow(e), events = (e: SimEvent[]): void => this.onEvents(e), over = (s: SimSnapshot): void => this.onOver(s);
+    const derived = (i: JuiceInput): void => this.juice.handleBatch([i]);
     const toggle = (): void => this.toggleSound(), pause = (): void => this.gameScene.apply(flowPause(this.gameScene.flow));
     const hidden = (): void => { if (document.hidden) { pause(); this.session.hidden(); } };
     const reread = (): void => { this.applySettings(); this.refresh(); }; // handoff 3: settings changed in the overlay
@@ -86,11 +89,13 @@ export class HudScene extends Phaser.Scene {
       e.preventDefault(); this.useSkill(slot);
     };
     this.gameScene.events.on('flow', flow); this.gameScene.events.on('sim-events', events);
+    this.gameScene.events.on('derived-juice', derived);
     this.gameScene.events.on('run-over', over); this.gameScene.events.on('toggle-sound', toggle);
     this.game.events.on(SETTINGS_CLOSED, reread);
     keys?.on('keydown', onKey); window.addEventListener('blur', pause); document.addEventListener('visibilitychange', hidden);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.gameScene.events.off('flow', flow); this.gameScene.events.off('sim-events', events);
+      this.gameScene.events.off('derived-juice', derived);
       this.gameScene.events.off('run-over', over); this.gameScene.events.off('toggle-sound', toggle);
       this.game.events.off(SETTINGS_CLOSED, reread);
       keys?.off('keydown', onKey); window.removeEventListener('blur', pause); document.removeEventListener('visibilitychange', hidden);
@@ -167,6 +172,12 @@ export class HudScene extends Phaser.Scene {
         if (e.reason === 'empty') break;
         this.skills.shake(e.slot);
         this.banners.tip(t(`skill.reject.${e.reason}`, { cost: e.skill ? this.balance.skills[e.skill].cost : 0 }), e.slot);
+        break;
+      }
+      case 'landed': { // MOT-3-R9 the sim event has no coordinates: read the landed cells from the current snapshot
+        const s = this.gameScene.snapshot();
+        const cells = s ? landedCells(s.hazards, e.hazardType, this.balance.juice.events.landCellsMax) : [];
+        if (cells.length) batch.push({ type: 'landedAt', hazardType: e.hazardType, cells });
         break;
       }
       case 'skillUnlocked': { const tip = skillTip(e, t); this.banners.tip(tip.text, tip.slot); break; }

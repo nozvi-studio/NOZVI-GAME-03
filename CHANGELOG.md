@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(game): MOT-3 wire derived landing, turn, spawn and golden sparkle feedback
 - feat(render): MOT-3 Effects ring pulse, golden sparkle and turn tilt state
 - feat(juice): MOT-3 JuicePlayer shield slot, head cell and per-batch bump dedupe
 - feat(juice): MOT-3-R9/R11/R12 rows for landing dust, spawn puff and turn tilt
