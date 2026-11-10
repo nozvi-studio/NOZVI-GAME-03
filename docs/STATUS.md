@@ -1,10 +1,10 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-10 by Claude (MOT-4 agent) **Milestone:** M2 P3 on `version/v0.3` (branched from docs/p3-spec, owner 2026-11-07); P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
+**Updated:** 2026-11-10 by Claude (lead, local) **Milestone:** M2 P3 on `version/v0.3` (branched from docs/p3-spec, owner 2026-11-07); P2 exit (v0.2) still waits on owner playtest. **Version branches:** `version/v0.3` (P3), `version/v0.2` (P2 exit)
 
 ## Now (in progress)
-- [x] MOT-2 menu flow implemented on `feat/motion-2` (not merged; lead merges): `goTo` for every menu change, Home/Loadout/Settings entrances, Home idle, Results sequence + skip, `?debug=1&motion=off`. [ ] Owner browser eye-check list in PLAYTEST (2026-11-10 MOT-2). Next after merge: nothing queued in MOT.
-- [x] MOT-1 widget feedback (merged into version/v0.3). [ ] Owner browser eye-check of Tasks 4-9 (list in the MOT-1 plan).
+- [x] **Motion / visual feedback (MOT-0..4) all merged into version/v0.3** (1639 pass, typecheck clean, not pushed): MOT-0 curves + `balance.motion` + adapter; MOT-1 widget feedback; MOT-2 menu flow (`goTo`, entrances, Home idle, Results sequence, `?debug=1&motion=off`); MOT-3 run events (`balance.juice.events`); MOT-4 telegraph pulses + HUD numbers. [ ] **Owner browser eye-check + tune numbers in config/balance.json `motion` / `juice.events`** (per-spec lists in the plans; PLAYTEST has a PENDING entry). Follow-up: `motion.stop(t)` in MOT-0 (DECISIONS).
+- [x] R12 energy gauge on skill buttons (replaces red cost). Dark theme parked (owner 2026-11-10): light mode only. P4 return hook = challenges + skins (DECISIONS); P4 specs not started (open: what 'challenge' means).
 - [ ] **RESUME HERE:** owner sends the P2 exit playtest log (normal runs, no ?debug=1; start from checkpoint L10; >= 30 runs, >= 10 reaching biome 4). Lead runs deathCauseReport + summarizeLog, writes the verdict in PLAYTEST, tunes if over40 (OQ-C5).
 
 - [x] P3c capy merged into version/v0.2 (e40a333, owner approved 2026-11-06): SVG capy face on the snake head + debug preview `?debug=1&artPreview=1`.
@@ -17,7 +17,7 @@
 - [x] P3b-2 HUD merged into version/v0.3 (D2 HUD top/stats/chips, round skill buttons + affordable/nope, round D-pad behind setting, Pause overlay with Settings, countdown, banner cards/tips/skill pills; quit: startRun ends an active run as quit; haptics gated by setting; Settings overlay blocks HUD keys). 1347 pass, typecheck clean. Note for PLAYTEST: runs auto-ended by a new start now log run_end cause quit.
 - [x] P3a juice merged into version/v0.3: balance.juice, juiceMap (§10.4 rows, reduced motion, sound/haptics gating), death lines per cause, new SFX, JuicePlayer/ScreenFx (smooth pre-rendered vignette)/DeathCard RUN OVER (tap skip), banner motion (reduced = fade). 1395 pass, typecheck clean. All P3 sub-phases (P3-0, P3b-1/2/3, P3a) merged.
 - [ ] **P3 EXIT RESUME HERE (owner):** device/agy pass on version/v0.3: 60 fps on a mid-range phone (cloud has no GPU: v0.3 vs P3a both ~12 fps SwiftShader, not representative), 5" readability at 360x640, peak death vignette vs DeathD2, orb/skill-cast/checkpoint-flag juice not browser-verified in cloud, tap-skip feel. Then owner string batch + C1-C10 + derived dark theme review. After owner OK: merge version/v0.3 into dev (with P2 exit).
-- [x] ART-003 skin production guide written (Draft, owner not fully approved; open Q1-Q3). MOT-3 run-event feedback implemented on `feat/motion-3` (not merged yet; lead merges); blocker: owner phone eye-check (shield break, win, landing, mango pop, golden sparkle, turn tilt, reduced motion, 60 fps).
+- [x] ART-003 skin production guide written (Draft, owner not fully approved; open Q1-Q3).e eye-check (shield break, win, landing, mango pop, golden sparkle, turn tilt, reduced motion, 60 fps).
 - [x] Remotion capy POC merged (owner approved 2026-11-07): pre-rendered idle/eat/dead clip on `?debug=1&artPreview=1`; board head stays tween (DECISIONS).
 - [x] UIFIX waves 1-3 (R1..R15) merged into version/v0.3 (1445 pass). R12 red cost, R13 one D-pad border, R14 Settings edge + soft-red Quit run; R15 (LAY-03 'Next checkpoint at L10') NOT reproducible in tests (likely a ?debug=1 run). Browser visual checks of all waves not run yet. [ ] **Next:** agy re-review on merged v0.3 (plan wave3 Task 5 step 5 checklist; confirm LAY-03 with a normal run to L10). Open owner questions: D-pad raise capped at +9 mockup px by the chip row; dark card edge `#46584B` retune; string `hud.wait.touch` 'Swipe to steer!'.
 - [x] Save compat (2026-11-10): `save()` never overwrites a newer-version envelope; older saves get a one-time `mango-snake.save.v<N>.bak`. Ported to version/v0.2 (b74e878), so v0.2 builds from that commit no longer destroy v3 saves; older v0.2 builds still do (back up `mango-snake.save`).
@@ -49,7 +49,7 @@
 - Rubble family and `skills.shield.rubbleLifeMs` removed (chore/remove-rubble-family, 2026-11-10).
 
 ## Last session summary
-- 2026-11-10 (MOT-1, MOT-2): MOT-1 Tasks 1-10 and MOT-2 Tasks 1-8 executed on feat/motion-1 and feat/motion-2 (TDD, one commit per task); full suite and typecheck pass. Merges left to the lead.
+- 2026-11-10 (local lead): save compat v0.2+v0.3, Rubble removed, UIFIX waves 1-3 + R12 gauge, MOT-0..4 specs/plans/impl via Sonnet subagents (3 in parallel), all merged; one bad blanket conflict resolution on code files caught and redone by hand.
 - 2026-11-10 (local): save compat guard (v0.3 + v0.2), Rubble family removed (subagent, 1395 pass), v0.2 merged into v0.3, UIFIX waves 1-3 merged via Sonnet subagents. Tech debt left: shrink fade crumble visual, hudText test cleanups, level%5 in tests, MEC-003 R21 heading, stale rubble mentions in MEC-004 L7/MEC-006 §7/MEC-013, single 1.28 MB chunk. Not pushed.
 - 2026-11-07 (local): owner rulings (GDD §4 ok, leaderboard+streak parked, OQ-B1..B5 closed); ART-003 skin guide (draft); ART-001 Q6/Q7; Remotion capy POC approved + merged. 1395 pass, typecheck clean. Not pushed.
 - 2026-11-07 (cloud, P3b-1/2/3 + P3a): all via subagents (Haiku/Sonnet implementers+reviewers, Opus final review per sub-phase, one fix wave each). Two interruptions (5h usage limit, container restart) without loss — commit+push per step.
