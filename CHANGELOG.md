@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(render): MOT-3-R12 capy head tilt and first-segment bulge on a turn
 - feat(game): MOT-3 wire derived landing, turn, spawn and golden sparkle feedback
 - feat(render): MOT-3 Effects ring pulse, golden sparkle and turn tilt state
 - feat(juice): MOT-3 JuicePlayer shield slot, head cell and per-batch bump dedupe
