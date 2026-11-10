@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- test(motion): MOT-4 characterize warn-time direction for telegraph pulses
 - feat(motion): MOT-0 motion foundation (curves, balance.motion, adapter)
 - feat(motion): MOT-0 adapter core with kill-by-target, budget and reduced motion
 - feat(balance): MOT-0 balance.motion block and validator
