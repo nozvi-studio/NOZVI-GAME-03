@@ -4,8 +4,12 @@ import { summarizeLog, deathCauseReport, type RunLog } from '../../meta';
 import type { Session } from '../../session';
 import { capyHeadKey } from '../art/capyRig';
 import { createSynth, type Synth } from '../audio/synth';
-import { debugStartLevel, isDebug } from '../flow/debugFlag';
+import { debugStartLevel, isDebug, isMotionOff } from '../flow/debugFlag';
+import { HOME_ORDER, entranceEndMs } from '../flow/entranceOrder';
+import { breathScale, createIdleGate } from '../flow/homeIdle';
 import { homeView, stepCheckpoint } from '../flow/homeModel';
+import { captureGroup, enter, goTo, motionFor, type EntranceTargets } from '../motion';
+import { reduceMotion } from '../render/palette';
 import { HEIGHT, WIDTH } from '../layout';
 import { t } from '../text';
 import { drawIcon } from '../ui/icons';
@@ -29,23 +33,47 @@ export class HomeScene extends Phaser.Scene {
   private synth!: Synth;
   private selected = 1;
   private body?: Phaser.GameObjects.Container;
+  private entered = false; private targets: EntranceTargets = {}; // MOT-2-R5/R6 entrance targets; later rebuilds show instantly
+  private capy?: Phaser.GameObjects.Image; private capyRest = { sx: 1, sy: 1 };
+  private idle: { t0: number; gate: ReturnType<typeof createIdleGate> } | null = null; // MOT-2-R8
+  private stopPulse: (() => void) | null = null; private playBtn?: Phaser.GameObjects.Container;
 
   constructor() { super('Home'); }
 
   create(): void {
+    this.entered = false; this.idle = null; this.stopPulse = null; this.targets = {}; this.capy = undefined; this.playBtn = undefined; // Phaser reuses the instance
     this.session = this.registry.get('session') as Session;
     this.synth = createSynth(); this.synth.setOn(this.session.save().settings.sound);
     bgCream(this);
     this.selected = this.session.homeModel().defaultStart;
     const gear = headerButton('right');
-    roundIconButton(this, gear.cx, gear.cy, MENU.round, 'sliders', 'home-settings',
-      () => { this.synth.play('uiTap'); this.scene.start('Settings', { returnTo: 'Home' }); });
+    const gearBtn = roundIconButton(this, gear.cx, gear.cy, MENU.round, 'sliders', 'home-settings',
+      () => { this.synth.play('uiTap'); goTo(this, 'Settings', { returnTo: 'Home' }, 'forward'); });
     const logoY = ui(MENU.padTop + MENU.round + MENU.gap + MENU.logo.lineH / 2);
-    logoLine(this, WIDTH / 2, logoY, t('logo.mango'), 0, MENU.logo.size);
-    logoLine(this, WIDTH / 2, logoY + ui(MENU.logo.lineH - MENU.logo.overlap), t('logo.snake'), 2, MENU.logo.size);
+    const logo1 = logoLine(this, WIDTH / 2, logoY, t('logo.mango'), 0, MENU.logo.size);
+    const logo2 = logoLine(this, WIDTH / 2, logoY + ui(MENU.logo.lineH - MENU.logo.overlap), t('logo.snake'), 2, MENU.logo.size);
+    this.targets.gear = gearBtn; this.targets.logo1 = logo1; this.targets.logo2 = logo2;
     hill(this, HEIGHT - ui(H.hillPeek));
     if (isDebug(window.location.search)) this.setupDebug();
     this.build();
+    this.input.on('pointerdown', () => this.idle?.gate.interact(this.time.now)); // MOT-2-R8 any tap pauses the attention pulse
+    this.input.on('gameobjectover', () => this.idle?.gate.interact(this.time.now));
+    const n = enter(this, HOME_ORDER, this.targets); // MOT-2-R3 camera fade-in, re-arm goTo, staggered entrance (R5)
+    this.entered = true; // MOT-2-R6 later build() calls (stepper taps) show instantly
+    const cfg = (this.registry.get('balance') as Balance).motion;
+    if (!reduceMotion() && !isMotionOff(window.location.search)) {
+      this.time.delayedCall(entranceEndMs(n, cfg), () => { this.idle = { t0: this.time.now, gate: createIdleGate(cfg, this.time.now) }; });
+    }
+  }
+
+  // MOT-2-R8 Home idle: capy breath (pure curve, no tween) and the Play attention pulse, both after the entrance.
+  update(time: number): void {
+    const idle = this.idle; if (!idle) return;
+    const cfg = (this.registry.get('balance') as Balance).motion;
+    if (this.capy) { const k = breathScale(time - idle.t0, cfg); this.capy.setScale(this.capyRest.sx * k.sx, this.capyRest.sy * k.sy); }
+    const want = idle.gate.allowed(time);
+    if (want && !this.stopPulse && this.playBtn) this.stopPulse = motionFor(this).pulse(this.playBtn);
+    else if (!want && this.stopPulse) { this.stopPulse(); this.stopPulse = null; }
   }
 
   // MEC-003-R21 debug-only log export and console summary helper (P1 design §11).
@@ -76,6 +104,7 @@ export class HomeScene extends Phaser.Scene {
 
   private homeView() { return homeView(this.session.homeModel(), this.selected); }
   private step(dir: -1 | 1): void {
+    this.idle?.gate.interact(this.time.now); // MOT-2-R8 a stepper tap pauses the attention pulse
     this.selected = stepCheckpoint(this.session.homeModel(), this.selected, dir);
     this.synth.play('uiTap'); this.build();
   }
@@ -85,18 +114,19 @@ export class HomeScene extends Phaser.Scene {
     const balance = this.registry.get('balance') as Balance;
     const dbgLevel = debugStartLevel(window.location.search, balance.level.maxLevel);
     const level = dbgLevel ?? chosen, debug = dbgLevel !== null;
-    if (this.session.homeModel().showLoadout) this.scene.start('Loadout', { level, debug });
+    if (this.session.homeModel().showLoadout) goTo(this, 'Loadout', { level, debug }, 'forward');
     else beginRun(this, level, 'home', debug);
   }
 
   // Rebuilds the middle block (hero, stepper, Play, chips, hint) from the view model.
   private build(): void {
-    this.body?.destroy(true);
+    this.stopPulse?.(); this.stopPulse = null; this.body?.destroy(true); // the pulse stops before its target is destroyed
     const v = this.homeView(), g = ui(MENU.gap);
     const minShrink = (this.registry.get('balance') as Balance).ui.minShrink;
     const blk = (this.body = scaledBlock(this, layoutColumn(homeColumn({ compact: v.compact, stepper: v.showStepper, extras: v.extras, hint: v.hint !== null }, minShrink))));
     const heroY = ui(H.hero.gap);
-    this.heroPanel(blk, WIDTH / 2 - ui(H.hero.w) / 2, heroY);
+    const hero = captureGroup(this, blk, { x: WIDTH / 2, y: heroY + ui(H.hero.h) / 2 }, () => this.heroPanel(blk, WIDTH / 2 - ui(H.hero.w) / 2, heroY));
+    const t_: EntranceTargets = { hero };
     let y = heroY + ui(H.hero.h);
     if (v.showStepper && v.startAt !== null) {
       y += g;
@@ -105,6 +135,8 @@ export class HomeScene extends Phaser.Scene {
       const prev = pillButton(this, WIDTH / 2 - off, cy, H.stepper.btn, H.stepper.btn, t('home.prev'), 'home-prev', () => this.step(-1), 'cream');
       const next = pillButton(this, WIDTH / 2 + off, cy, H.stepper.btn, H.stepper.btn, t('home.next'), 'home-next', () => this.step(1), 'cream');
       blk.add([mid, prev.c, next.c]);
+      t_.stepper = [mid, prev.c, next.c];
+      if (this.entered) motionFor(this).popIn(mid, 0); // MOT-2-R6 confirm the new start-at value
       y += ui(H.stepperH);
     }
     y += g;
@@ -123,20 +155,23 @@ export class HomeScene extends Phaser.Scene {
       play.c.add([bg, ic, tx]);
     }
     blk.add(play.c);
+    t_.play = play.c; this.playBtn = play.c;
     y += ui(ph);
     if (v.extras) {
       y += g;
-      this.chipRow(blk, v, y);
+      t_.chips = this.chipRow(blk, v, y);
       y += ui(H.chipH);
     }
     if (v.hint) {
       y += g;
-      blk.add(this.add.text(WIDTH / 2, y + ui(H.hintH) / 2, t(v.hint.key, { level: v.hint.level }), style(H.hintFont, '800', TOKENS.text.soft)).setOrigin(0.5));
+      const hint = this.add.text(WIDTH / 2, y + ui(H.hintH) / 2, t(v.hint.key, { level: v.hint.level }), style(H.hintFont, '800', TOKENS.text.soft)).setOrigin(0.5);
+      blk.add(hint); t_.hint = hint;
     }
+    Object.assign(this.targets, t_);
   }
 
   // "Start from L1" text link (when a checkpoint exists) and the carried-energy chip, centred together.
-  private chipRow(blk: Phaser.GameObjects.Container, v: ReturnType<HomeScene['homeView']>, y: number): void {
+  private chipRow(blk: Phaser.GameObjects.Container, v: ReturnType<HomeScene['homeView']>, y: number): Phaser.GameObjects.Container[] {
     const cy = y + ui(H.chipH) / 2, gap = ui(H.chips.gap), C = H.chips;
     const items: { w: number; make: (cx: number) => Phaser.GameObjects.GameObject }[] = [];
     if (v.secondaryL1) {
@@ -166,7 +201,9 @@ export class HomeScene extends Phaser.Scene {
       } });
     }
     let x = WIDTH / 2 - (items.reduce((a, i) => a + i.w, 0) + gap * (items.length - 1)) / 2;
-    for (const it of items) { blk.add(it.make(x + it.w / 2) as Phaser.GameObjects.Container); x += it.w + gap; }
+    const made: Phaser.GameObjects.Container[] = [];
+    for (const it of items) { const c = it.make(x + it.w / 2) as Phaser.GameObjects.Container; blk.add(c); made.push(c); x += it.w + gap; }
+    return made;
   }
 
   private measure(text: string, size: number): number {
@@ -201,7 +238,8 @@ export class HomeScene extends Phaser.Scene {
     m.fillStyle(toInt(TOKENS.accent.orange)).fillCircle(mc.x, mc.y, ui(M.size * M.inner));
     m.fillStyle(toInt(TOKENS.green.deep)).fillEllipse(mc.x + ui(M.size * M.leaf.dx), mc.y + ui(M.size * M.leaf.dy), ui(M.size * M.leaf.w), ui(M.size * M.leaf.h));
     const C = H.capy, cc = at(C.x + C.size / 2, C.y + C.size / 2);
-    blk.add(this.add.image(cc.x, cc.y, capyHeadKey('idle', 'large')).setDisplaySize(ui(C.size), ui(C.size)));
+    const capy = this.add.image(cc.x, cc.y, capyHeadKey('idle', 'large')).setDisplaySize(ui(C.size), ui(C.size));
+    blk.add(capy); this.capy = capy; this.capyRest = { sx: capy.scaleX, sy: capy.scaleY };
   }
 
 }

@@ -16,7 +16,7 @@ function mounted() {
   Object.assign(game, h.scene, {
     add: { ...h.scene.add, image: () => new DrawObject(), renderTexture: () => new DrawObject() },
     children: { getByName: () => null }, textures: { exists: () => false },
-    cameras: { main: { setBackgroundColor: background } },
+    cameras: { main: { setBackgroundColor: background, fadeIn() {} } },
     game: { events, canvas: { addEventListener() {}, removeEventListener() {} } },
   });
   vi.spyOn(game, 'startRun').mockImplementation(() => {});
@@ -53,7 +53,7 @@ it('GDD-13 gameplay and floating scores clip inside rounded board while the outl
   Object.assign(game, h.scene, {
     add: { ...h.scene.add, image: () => new DrawObject(), renderTexture: () => new DrawObject() },
     children: { getByName: () => null }, textures: { exists: () => false },
-    cameras: { main: { setBackgroundColor() {} } },
+    cameras: { main: { setBackgroundColor() {}, fadeIn() {} } },
     game: { events: new Signals(), canvas: { addEventListener() {}, removeEventListener() {} } },
   });
   vi.spyOn(game, 'startRun').mockImplementation(() => {});

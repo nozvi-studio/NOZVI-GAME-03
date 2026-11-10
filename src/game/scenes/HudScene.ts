@@ -26,6 +26,7 @@ import { ScreenFx } from '../juice/ScreenFx';
 import type { JuiceInput } from '../juice/types';
 import { acceptSkillInput, skillSlotForKey } from '../input/skillKeys';
 import { cellPx, WIDTH } from '../layout';
+import { enter, goTo } from '../motion';
 import { currentPalette, reduceMotion } from '../render/palette';
 import { runStartLines } from '../hudText';
 import { pillButton } from '../ui/widgets';
@@ -102,6 +103,7 @@ export class HudScene extends Phaser.Scene {
       this.overTimer?.remove(); this.juice.destroy(); this.banners.hide();
     });
     this.refresh(); this.showRunStart();
+    enter(this, [], {}); // MOT-2-R11 camera fade-in, same as Game; also re-arms goTo on this reused scene instance
   }
 
   /** Settings that can change while paused (Settings overlay, P3b-3): sound, haptics and D-pad. Read on create, Resume and settings-closed. */
@@ -211,12 +213,12 @@ export class HudScene extends Phaser.Scene {
   }
   private leave(): void {
     if (this.leaving) return;
-    this.leaving = true; this.scene.stop('Game'); this.scene.start('Results');
+    this.leaving = true; goTo(this, 'Results', undefined, 'quit', { before: () => this.scene.stop('Game') }); // MOT-2-R12
   }
   private toResults(delayMs: number): void {
     if (this.leaving) return;
     this.leaving = true; this.overTimer?.remove();
-    this.overTimer = this.time.delayedCall(delayMs, () => { this.scene.stop('Game'); this.scene.start('Results'); });
+    this.overTimer = this.time.delayedCall(delayMs, () => { goTo(this, 'Results', undefined, 'quit', { before: () => this.scene.stop('Game') }); }); // MOT-2-R12 delay unchanged
   }
   private toggleSound(): void { // M key (the HUD sound button moved to Settings, P3b-3)
     const on = !this.session.save().settings.sound;

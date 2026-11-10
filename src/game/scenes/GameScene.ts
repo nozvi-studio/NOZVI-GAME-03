@@ -25,7 +25,7 @@ import { drawMovers } from '../render/movers';
 import { drawCycles } from '../render/cycles';
 import { drawBlasts } from '../render/blasts';
 import { drawShrink } from '../render/shrink';
-import { motionFor } from '../motion';
+import { enter, motionFor } from '../motion';
 import { HitBeats, telegraphEdges } from '../render/hitBeat';
 import { telegraphCtx, type TelegraphCtx } from '../render/telegraph';
 
@@ -107,6 +107,7 @@ export class GameScene extends Phaser.Scene {
       this.beats.clear();
       this.board.clearMask(true);
     });
+    enter(this, [], {}); // MOT-2-R11 camera fade-in; the P0 countdown is untouched
   }
 
   // Resets presentation for a new session run (the run itself is started by the menu scenes).

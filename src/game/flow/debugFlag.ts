@@ -16,3 +16,8 @@ export function debugStartLevel(search: string, maxLevel: number): number | null
 export function isArtPreview(search: string): boolean {
   return isDebug(search) && new URLSearchParams(search).get('artPreview') === '1';
 }
+
+// MOT-2-R13 `?debug=1&motion=off` makes every MOT-2 motion jump to its rest state (deterministic QA frames).
+export function isMotionOff(search: string): boolean {
+  return isDebug(search) && new URLSearchParams(search).get('motion') === 'off';
+}

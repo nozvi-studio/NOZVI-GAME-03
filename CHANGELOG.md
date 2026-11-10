@@ -2,6 +2,14 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs(motion): MOT-2 codemap, decisions and playtest record
+- feat(motion): MOT-2 Results sequence (<= 1500 ms), count-up, best-chip pulse, skip on tap
+- feat(motion): MOT-2 Loadout and Settings staggered entrances
+- feat(motion): MOT-2 Home staggered entrance, capy breathing and Play attention pulse
+- feat(motion): MOT-2 goTo fades for all menu navigation, run start/end and Settings overlay
+- feat(motion): MOT-2 transition.ts with goTo, enter, entrance runner and group capture
+- feat(motion): MOT-2 pure entrance orders, Results timeline and Home idle math
+- feat(motion): MOT-2 ?debug=1&motion=off flag
 - docs: MOT-1 CODEMAP, DECISIONS and STATUS
 - feat(loadout): MOT-1 card and slot press feedback, picked-badge pop, reject shake for refused taps
 - feat(settings): MOT-1 switch knob slide with track colour lerp, tile press feedback and selection pop
