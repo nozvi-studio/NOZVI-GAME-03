@@ -3,9 +3,13 @@ import type { Balance } from '../../core';
 import { biome } from '../../core';
 import type { Session } from '../../session';
 import { capyHeadKey } from '../art/capyRig';
+import { isMotionOff } from '../flow/debugFlag';
+import { resultsTimeline } from '../flow/entranceOrder';
+import { runResultsSequence, type SeqTargets } from '../flow/resultsSeq';
 import { RESULTS_BUTTONS, resultsView, type ResultsView } from '../flow/resultsView';
 import { HEIGHT, WIDTH } from '../layout';
-import { enter, goTo } from '../motion';
+import { captureGroup, enter, goTo, motionFor } from '../motion';
+import { reduceMotion } from '../render/palette';
 import { t } from '../text';
 import { drawIcon, type IconId } from '../ui/icons';
 import { layoutColumn, ui, UI_SCALE } from '../ui/layout';
@@ -23,9 +27,11 @@ const style = (size: number, weight: '800' | '900', color: string): Phaser.Types
 
 // P3b3-R11 ResultsD2: the four states come from resultsView; marbles row and marble machine stay hidden until P4 (D8).
 export class ResultsScene extends Phaser.Scene {
+  private targets: SeqTargets = {}; private scoreText?: Phaser.GameObjects.Text;
   constructor() { super('Results'); }
 
   create(): void {
+    this.targets = {}; this.scoreText = undefined; // Phaser reuses the instance
     const session = this.registry.get('session') as Session;
     const balance = this.registry.get('balance') as Balance;
     const s = session.summary();
@@ -33,12 +39,23 @@ export class ResultsScene extends Phaser.Scene {
     hill(this, HEIGHT - ui(R.hillPeek));
     const home = (): void => { goTo(this, 'Home', undefined, 'back'); };
     const v = s ? resultsView(s, session.homeModel().nextMilestone, biome(balance, balance.level.maxLevel)) : null;
-    logoLine(this, WIDTH / 2, ui(R.titleY + R.titleSize / 2), t(v?.titleKey ?? 'results.gameOver'), 0, R.titleSize);
+    this.targets.title = logoLine(this, WIDTH / 2, ui(R.titleY + R.titleSize / 2), t(v?.titleKey ?? 'results.gameOver'), 0, R.titleSize);
     if (s && v) {
       this.summaryBlock(v, s.won, balance.ui.minShrink);
     }
     this.footer(session, home);
-    enter(this, [], {}); // MOT-2-R3 camera fade-in and re-arm goTo; the Results sequence (Task 7) is its own entrance
+    enter(this, [], {}); // camera fade-in and re-arm goTo (MOT-2-R3); the sequence below is Results' own entrance
+    if (s && v) this.playSequence(s.score, v);
+  }
+
+  // MOT-2-R9/R10 the Results sequence, skippable by a tap anywhere (Home / Play again taps still act at once).
+  private playSequence(score: number, v: ResultsView): void {
+    const cfg = (this.registry.get('balance') as Balance).motion, m = motionFor(this);
+    const timeline = resultsTimeline({ newBest: v.bestChip.key === 'results.newBest', energy: v.energySaved !== null, banner: v.checkpointBanner !== null,
+      next: v.next !== null, again: this.targets.again !== undefined }, cfg);
+    const seq = runResultsSequence({ motion: m, later: (ms, fn) => this.time.delayedCall(ms, fn), kill: t => this.tweens.killTweensOf(t), // the one allowed direct tween call (ruling 7)
+      pulsePeriodMs: cfg.pulsePeriodMs, reduced: reduceMotion(), off: isMotionOff(window.location.search) }, timeline, this.targets, { text: this.scoreText!, value: score });
+    this.input.on('pointerdown', () => seq.skip());
   }
 
   private summaryBlock(v: ResultsView, won: boolean, minShrink: number): void {
@@ -47,30 +64,49 @@ export class ResultsScene extends Phaser.Scene {
     let y = ui(resultsCardTop());
     this.summaryCard(blk, v, won, x0, y);
     y += ui(R.cardH);
-    if (v.energySaved !== null) { y += g; this.row(blk, x0, y, 'bolt', t('results.carryLabel'), String(v.energySaved), TOKENS.menu.bestSoft); y += ui(R.energyH); }
-    if (v.checkpointBanner) { y += g; this.banner(blk, x0, y, v.checkpointBanner.level); y += ui(R.bannerH); }
-    if (v.next) { y += g; this.progress(blk, x0, y, v.next); }
+    const at = (hMock: number, yy: number) => ({ x: WIDTH / 2, y: yy + ui(hMock) / 2 }); // group anchor = block centre
+    if (v.energySaved !== null) {
+      y += g; const yy = y;
+      this.targets.energy = captureGroup(this, blk, at(R.energyH, yy), () => this.row(blk, x0, yy, 'bolt', t('results.carryLabel'), String(v.energySaved), TOKENS.menu.bestSoft));
+      y += ui(R.energyH);
+    }
+    if (v.checkpointBanner) {
+      y += g; const yy = y, level = v.checkpointBanner.level;
+      this.targets.banner = captureGroup(this, blk, at(R.bannerH, yy), () => this.banner(blk, x0, yy, level));
+      y += ui(R.bannerH);
+    }
+    if (v.next) {
+      y += g; const yy = y, next = v.next;
+      this.targets.next = captureGroup(this, blk, at(R.progressH, yy), () => this.progress(blk, x0, yy, next));
+    }
   }
 
   private summaryCard(blk: Phaser.GameObjects.Container, v: ResultsView, won: boolean, x0: number, y0: number): void {
     const cx = WIDTH / 2, text = (x: number, y: number, s: string, st: Phaser.Types.GameObjects.Text.TextStyle) => this.add.text(x, y0 + ui(y), s, st).setOrigin(0.5);
-    blk.add(card(this, x0, y0, C.w, R.cardH, C.r));
+    this.targets.card = captureGroup(this, blk, { x: WIDTH / 2, y: y0 + ui(R.cardH) / 2 }, () => blk.add(card(this, x0, y0, C.w, R.cardH, C.r)));
     const headKey = capyHeadKey(won ? 'idle' : 'dead', 'large');
-    if (this.textures.exists(headKey)) blk.add(this.add.image(cx, y0 - ui(C.headOverlap) + ui(C.headW) / 2, headKey).setDisplaySize(ui(C.headW), ui(C.headW)));
+    if (this.textures.exists(headKey)) {
+      const head = this.add.image(cx, y0 - ui(C.headOverlap) + ui(C.headW) / 2, headKey).setDisplaySize(ui(C.headW), ui(C.headW));
+      blk.add(head); this.targets.head = head;
+    }
     const headline = t(v.headline.key) + (v.headline.context ? ' ' + t(v.headline.context) : '');
     const line = text(cx, C.headlineY, headline, { ...style(C.headline, '800', TOKENS.text.soft), wordWrap: { width: ui(C.w - 2 * C.pad) }, align: 'center' });
     // A wrapped headline (death context) grows upward so it never touches the SCORE label.
     if (line.height > ui(C.headline) * C.wrapLines) line.setOrigin(0.5, 1).setY(y0 + ui(C.headlineY + C.headline / 2));
-    blk.add(line.setName('results-headline'));
-    blk.add(text(cx, C.scoreLabelY, t('results.scoreLabel'), style(C.scoreLabel, '800', TOKENS.text.soft)).setLetterSpacing(ui(C.scoreLabelTrack)).setName('results-score-label'));
-    blk.add(text(cx, C.scoreY, String(v.score), style(C.score, '800', TOKENS.text.primary)).setName('results-score'));
+    blk.add(line.setName('results-headline')); this.targets.headline = line;
+    const scoreLabel = text(cx, C.scoreLabelY, t('results.scoreLabel'), style(C.scoreLabel, '800', TOKENS.text.soft)).setLetterSpacing(ui(C.scoreLabelTrack)).setName('results-score-label');
+    blk.add(scoreLabel); this.targets.scoreLabel = scoreLabel;
+    const score = text(cx, C.scoreY, String(v.score), style(C.score, '800', TOKENS.text.primary)).setName('results-score');
+    blk.add(score); this.targets.score = score; this.scoreText = score;
     this.bestChip(blk, v, cx, y0 + ui(C.chipY));
     const tw = (C.w - 2 * C.pad - 2 * C.tileGap) / 3;
     v.stats.forEach((st, i) => {
       const tx = x0 + ui(C.pad + i * (tw + C.tileGap)), ty = y0 + ui(C.tilesY);
-      blk.add(this.add.graphics().fillStyle(toInt(TONE_FILL[st.tone])).fillRoundedRect(tx, ty, ui(tw), ui(C.tileH), ui(C.tileR)));
-      blk.add(this.add.text(tx + ui(tw) / 2, ty + ui(C.tileLabelY), t(st.labelKey), style(C.tileLabel, '800', TOKENS.text.primary)).setOrigin(0.5).setLetterSpacing(ui(C.tileTrack)));
-      blk.add(this.add.text(tx + ui(tw) / 2, ty + ui(C.tileValueY), st.value, style(C.tileValue, '800', TOKENS.text.primary)).setOrigin(0.5));
+      this.targets[`stat${i}`] = captureGroup(this, blk, { x: tx + ui(tw) / 2, y: ty + ui(C.tileH) / 2 }, () => {
+        blk.add(this.add.graphics().fillStyle(toInt(TONE_FILL[st.tone])).fillRoundedRect(tx, ty, ui(tw), ui(C.tileH), ui(C.tileR)));
+        blk.add(this.add.text(tx + ui(tw) / 2, ty + ui(C.tileLabelY), t(st.labelKey), style(C.tileLabel, '800', TOKENS.text.primary)).setOrigin(0.5).setLetterSpacing(ui(C.tileTrack)));
+        blk.add(this.add.text(tx + ui(tw) / 2, ty + ui(C.tileValueY), st.value, style(C.tileValue, '800', TOKENS.text.primary)).setOrigin(0.5));
+      });
     });
   }
 
@@ -83,7 +119,9 @@ export class ResultsScene extends Phaser.Scene {
     const star = this.add.graphics().setPosition(x + ui(C.chipPadL) + ico / 2, cy).fillStyle(toInt(v.bestChip.gold ? TOKENS.accent.butter : TOKENS.accent.gold));
     star.fillCircle(0, 0, ico / 2);
     tx.setX(x + ui(C.chipPadL) + ico + ui(C.chipGap));
-    blk.add([bg, star, tx]).setName('results-best');
+    blk.setName('results-best'); // kept on the block as before (QA name); the chip itself is the entrance group below
+    this.targets.best = captureGroup(this, blk, { x: cx, y: cy }, () => blk.add([bg, star, tx]), 'results-best-chip');
+    this.targets.bestStar = star;
   }
 
   // Energy-saved card in the slot of the P4 marbles card (C7).
@@ -120,11 +158,12 @@ export class ResultsScene extends Phaser.Scene {
   // Home round button and Play again pill, anchored to the bottom (marble-machine button hidden until P4, D8).
   private footer(session: Session, home: () => void): void {
     const cy = HEIGHT - ui(R.bottom + R.againH / 2);
-    roundIconButton(this, ui(R.side + R.btn / 2), cy, R.btn, 'home', RESULTS_BUTTONS.home, home, true, { navigates: true });
+    this.targets.home = roundIconButton(this, ui(R.side + R.btn / 2), cy, R.btn, 'home', RESULTS_BUTTONS.home, home, true, { navigates: true });
     const last = session.lastStartLevel();
     if (last === null) return;
     const left = ui(R.side + R.btn + R.btnGap), w = WIDTH - left - ui(R.side);
     const b = pillButton(this, left + w / 2, cy, w / UI_SCALE, R.againH, t('playAgain'), RESULTS_BUTTONS.again, () => beginRun(this, last, 'results'), 'green', { navigates: true });
     bigLabel(b, R.againLabel, R.againStroke);
+    this.targets.again = b.c;
   }
 }
