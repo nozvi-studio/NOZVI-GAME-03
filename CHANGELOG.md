@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: motion specs MOT-0..4 (visual feedback system for menus and in-run events), bouncy cartoon style
 - docs: remove stale live mentions of the rubble family from MEC-002/004/006/012/013/015/018
 - feat(hud): skill buttons are energy gauges, the face fills bottom-up as energy/cost (owner 2026-11-10); replaces the red cost text (UIFIX-R12).
 - docs: STATUS after P3 UI fixes wave 3

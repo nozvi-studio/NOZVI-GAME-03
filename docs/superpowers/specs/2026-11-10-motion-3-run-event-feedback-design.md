@@ -28,7 +28,7 @@ GDD 10.4 and `mapJuice` (`src/game/juice/juiceMap.ts`) cover eat, orb, skill cas
 | MOT-3-R11 | Mango spawn pop | Trigger: `GameScene.mangoBornAt` set (on `ate` and `rotted`, `handleEvents`) or `snapshot.mango` going from null to set. Replace the 220 ms literal in `drawMango` with a pure `mangoGrow(timeMs, bornAt, ms, s)` in `src/game/motion/curves.ts` = `lerp(popFromScale, 1, backOut(t, motion.overshoot))` with `ms = motion.popInMs` (240), `popFromScale` 0.85. Plus one `burst` of `spawnPuffCount` (5), colour `food`, life 300 ms. A golden spawn skips the puff (R13 covers it). |
 | MOT-3-R12 | Snake turn | Trigger: `GameScene.turn()` when `flowTurn` returned `forward` and (dx,dy) differs from the current head direction. The capy head (`src/game/art/capyHead.ts`, `capyPose.ts`) tilts `turnTiltDeg` (10) toward the new direction and returns in `turnMs` (140) with `backOut`; the first body segment behind the head scales by `turnBodyBulge` (1.06) over the same time, passed through the existing scale argument of `drawSnake` (same channel as `gulp`). Render offset only: the head cell does not move. Rapid turns restart from the current value (MOT-0-R4). |
 | MOT-3-R13 | Golden mango sparkle | Trigger: `snapshot.mango.golden === true`. Every `sparkleEveryMs` (700) emit one 4-point star (two crossed thin rects drawn in `Effects.draw`, colour `gold`, radius `sparkleRadius` x cell = 0.2) at a point on the mango ring chosen by a render-only counter (never the sim RNG), life `sparkleLifeMs` (420), scale 0 to 1 to 0 with `sineInOut`. At most `sparkleMax` (3) alive, counted inside `maxParticles`. Cleared at once on eat or rot and by `Effects.reset`. |
-| MOT-3-R14 | Quota fill pulse | Trigger: `HudScene` already receives `sim-events`. On each `ate` with `progressGain > 0`, `barBump('levelBar', quotaBump (1.06), barBump.ms)` (today the `ate` row bumps `score`, not the level bar). If a `levelUp` is in the same batch, only the larger bump per target plays (pure `dedupeBumps` applied in `JuicePlayer.handleBatch`). When progress crosses `quotaNearFraction` (0.8), the bar fill runs MOT-0 `pulse` for `quotaNearPulseMs` (1200) then stops (bounded attention pulse, allowed by MOT-0-R5). |
+| MOT-3-R14 | (moved) Quota fill pulse | Owned by MOT-4-R8 (single owner of the quota bar and HUD numbers, lead decision 2026-11-10). Not implemented in MOT-3. | | |
 
 ## 5. Plug-in points (no forks)
 - `src/game/juice/types.ts`: `BoardVisual` gains `ringPulse {x,y,color,scale,ms}`, `sparkle {x,y,color,lifeMs}`, `turnTilt {dx,dy,deg,ms}`; `JuiceInput` gains `{type:'landedAt'; hazardType; cells}` and `{type:'turned'; dx; dy}`. `ScreenVisual` is unchanged (R7, R10, R14 reuse `sparks`, `iconPop`, `barBump`, `flash`).
@@ -44,7 +44,7 @@ Decided in `mapJuice` with `ctx.reduced`:
 - R8: `levelGlow` at `flashAlphaMax` for `softMs`; no bursts, pop or flash.
 - R9: no dust, no shake; sound only.
 - R10: one `flash` at `flashAlphaMax` for `softMs`; no pop or bump.
-- R11: no grow (`drawMango` already uses `grow = 1`), no puff. R12: no tilt, no bulge. R13: no sparkle (gold colour still distinguishes it). R14: no bump, no pulse; the fill updates as today.
+- R11: no grow (`drawMango` already uses `grow = 1`), no puff. R12: no tilt, no bulge. R13: no sparkle (gold colour still distinguishes it). R14: moved to MOT-4-R8.
 Sound and haptics follow the user settings only (P3a-R9), never `reduced`.
 
 ## 7. Performance and testing
@@ -68,7 +68,6 @@ No new `balance.motion` key is required (uses `popInMs`, `popFromScale`, `oversh
 | `spawnPuffCount` | 5 | R11 |
 | `turnTiltDeg` / `turnMs` / `turnBodyBulge` | 10 / 140 / 1.06 | R12 |
 | `sparkleEveryMs` / `sparkleLifeMs` / `sparkleRadius` / `sparkleMax` | 700 / 420 / 0.2 / 3 | R13 |
-| `quotaBump` / `quotaNearFraction` / `quotaNearPulseMs` | 1.06 / 0.8 / 1200 | R14 |
 
 ## 9. Files a plan would touch
 `config/balance.json` (+ validator and types in `src/core`), `src/game/juice/types.ts`, `juiceMap.ts`, `JuicePlayer.ts`, `src/game/render/effects.ts`, `mango.ts`, `snake.ts`, `src/game/art/capyHead.ts`, `src/game/scenes/GameScene.ts` (`turn`, `handleEvents`, `playBoardFx`), `src/game/scenes/HudScene.ts`, `src/game/hud/HudTop.ts`, `src/game/motion/curves.ts` (`mangoGrow`), tests under `tests/`, `docs/GDD.md` 10.4 (new rows), `docs/CODEMAP.md`.
