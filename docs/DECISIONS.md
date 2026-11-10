@@ -523,3 +523,8 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Choice: each skill button face fills like a tank, bottom-up, as `charge = clamp01(energy / cost)` (24 quantised steps, pure `chargeSegment` geometry); full = existing ready glow ring; cost number always `text.primary`. Fill token `TOKENS.hud.charge` `#97DB9B` (the menu logo mint, already in the palette) at alpha 0.7: light, and the dark icon stays >= 3:1 on it. Light mode only; dark tokens untouched.
 - Alternative: red cost text only (rejected by owner: shows "not enough" but not how close the player is).
 - Consequence: `SkillView.costShort` removed, `charge` added; `TOKENS.danger` kept for R14. Tests in `tests/game/hudModel.test.ts`, `gaugeGeometry.test.ts`, `uiTheme.test.ts`.
+
+## 2026-11-10 - P4 return hook: challenges and skins; Capy skin is the skin platform
+- Context: GDD 8.3 left "reason to come back" open. Owner answer 2026-11-10.
+- Choice: players return for challenges (challenge levels / challenge content, details to be specced in P4) and for collecting skins. The Capy skin and its production guide (ART-003, `capyRig.ts`) are the base every later skin builds on. Daily bonus, leaderboard and streak stay parked.
+- Consequence: P4 specs (MEC-009/010/011) start from challenge + skin loops; ART-003 code work "before the 2nd skin" is a P4c prerequisite. GDD 8.3 to be updated when MEC-011 is written.
