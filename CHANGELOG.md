@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): skin painter and canvas texture cache for the skin kit (D3-R5)
 - feat(ui): skinSpec pure paint recipes for the skin kit (D3-R5, R21)
 - feat(balance): `motion.d3` touch feedback numbers with cross-field rules (D3-R23, R24)
 - docs(design): D3 boards - no text under 12 px, mango fill uses the token colour; PNGs recaptured
