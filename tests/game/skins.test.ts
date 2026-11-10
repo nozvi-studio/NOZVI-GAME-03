@@ -49,8 +49,9 @@ describe('ART-003 skins', () => {
       const svg = headSvg(skin, 'idle');
       expect(attr(svg, 'pupil', 'cx')).toEqual(['14.4', '33.6']);
       expect(attr(svg, 'pupil', 'cy')).toEqual(['20.4', '20.4']);
-      expect(attr(svg, 'nostril', 'cx')).toEqual(['20.6', '27.4']);
-      expect(attr(svg, 'muzzle', 'cy')).toEqual(['34']);
+      // ART-003: eyes and mouth are shared anchors; nostrils and muzzle belong to the skin.
+      if (skin === 'capy') { expect(attr(svg, 'nostril', 'cx')).toEqual(['20.6', '27.4']); expect(attr(svg, 'muzzle', 'cy')).toEqual(['34']); }
+      else { expect(attr(svg, 'nostril', 'cx')).toEqual(['21.6', '26.4']); expect(svg).not.toContain('data-part="ear"'); expect(svg).toContain('data-part="diamond"'); }
       expect(svg).toMatch(/data-part="mouth"[^>]*data-y="37.6"/);
       expect(attr(svg, 'face', 'stroke-width')).toEqual(['2']);
     });
