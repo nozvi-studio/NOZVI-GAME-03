@@ -43,14 +43,14 @@ it('MEC-004-R2 MEC-014-R2 gate snapshots survive clone/restore without live alia
   const f = fixture(), sim = restoreSim(f.b, f.s), snap = sim.snapshot();
   expect(snap.families.gate).toEqual([{ id: 1, t: 1500, lifeMs: 14000, state: 'live',
     fence: [4, 5, 7, 8].map(x => ({ x, y: 10, on: true, ageMs: 0 })),
-    gate: [{ x: 6, y: 10, delay: 0, vis: 'up' }],
+    gate: [{ x: 6, y: 10, delay: 0, vis: 'up', warnLeftMs: 0 }],
   }]);
   expectTypeOf(snap.families.gate[0]!.fence).toEqualTypeOf<readonly {
     x: number; y: number; on: boolean; ageMs: number;
   }[]>();
   expectTypeOf(snap.families.gate).toEqualTypeOf<readonly GateView[]>();
   expect(sim.clone().snapshot()).toEqual(snap);
-  const live = stateOf(sim), copy = gate.snapshot(live);
+  const live = stateOf(sim), copy = gate.snapshot(live, f.b);
   live.families.gate.gates[0]!.gate[0]!.x = 99;
   live.families.gate.gates[0]!.fence[0]!.x = 98;
   expect(copy).toMatchObject([{ gate: [{ x: 6 }] }]);

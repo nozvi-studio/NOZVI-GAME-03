@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(core): additive warnLeftMs on gate and spike cell snapshot views (presentation only, MOT-4)
 - feat(motion): MOT-4 Motion.snap (scale beat) and Motion.ease (number tween) on the MOT-0 adapter
 - feat(motion): MOT-4 pure telegraphPulse (remaining-time rhythm, alpha floor, urgent window) and TelegraphCtx
 - feat(balance): MOT-4 digitPopScale and readyDipMs motion keys, alpha-min and pop-scale validators

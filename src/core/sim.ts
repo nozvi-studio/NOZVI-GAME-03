@@ -95,7 +95,7 @@ function stepMs(s: SimState, b: Balance, rng: Rng, internal: InternalOptions): v
 function snapshotOf(s: SimState, b: Balance): SimSnapshot {
   // MEC-004-R17 projects only snapshot-owned data: per-ms fuzz must not clone pending events/internal state.
   return {
-    families: { coconut: coconutSnapshot(s), gate: gateSnapshot(s), spike: spikeSnapshot(s), npc: npcSnapshot(s), bird: birdSnapshot(s, b), bomb: bombSnapshot(s), shrink: shrinkSnapshot(s, b) },
+    families: { coconut: coconutSnapshot(s), gate: gateSnapshot(s, b), spike: spikeSnapshot(s, b), npc: npcSnapshot(s), bird: birdSnapshot(s, b), bomb: bombSnapshot(s), shrink: shrinkSnapshot(s, b) },
     // MEC-012-R2 snapshot-owned tile views retain the optional ice exit ring.
     tiles: (['mud', 'ice'] as const).flatMap(family => s.families[family].patches.map(p => ({ family, id: p.id, state: p.state,
       leftMs: Math.max(0, (p.state === 'warn' ? p.warnMs : p.state === 'active' ? p.lifeMs : b.hazard.crumbleMs) - p.t),

@@ -139,7 +139,7 @@ export interface NpcView extends CoconutView { variant: 'cat' | 'chicken'; dir: 
 export interface GateView {
   id: number; t: number; lifeMs: number; state: 'warn' | 'live' | 'crumble';
   fence: readonly TimedCell[];
-  gate: readonly { x: number; y: number; delay: number; vis: TerrainVis }[];
+  gate: readonly { x: number; y: number; delay: number; vis: TerrainVis; warnLeftMs: number }[];
 }
 
 /** MEC-016-R2 bird shadow on the target mango; leftMs counts sim ms down to the steal. */
@@ -158,7 +158,7 @@ export interface ShrinkView { state: 'warn' | 'closed' | 'fade'; leftMs: number;
 
 export interface SpikeView {
   id: number; t: number; lifeMs: number; ending: boolean;
-  cells: readonly { x: number; y: number; delay: number; vis: TerrainVis }[];
+  cells: readonly { x: number; y: number; delay: number; vis: TerrainVis; warnLeftMs: number }[];
 }
 
 export interface SimSnapshot {
@@ -265,7 +265,7 @@ export interface HazardFamily {
   readonly emitsIncoming?: boolean;
   spawn(s: SimState, ctx: SpawnCtx): Cell[] | null;
   update(s: SimState, ctx: StepCtx & HitCtx): void;
-  snapshot(s: SimState): unknown;
+  snapshot(s: SimState, b: Balance): unknown;
   solidAt(s: SimState, x: number, y: number): boolean;
   bfsWallAt(s: SimState, x: number, y: number): boolean;
   reservedAt(s: SimState, x: number, y: number): boolean;

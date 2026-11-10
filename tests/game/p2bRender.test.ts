@@ -78,7 +78,7 @@ it('MEC-016 §8 bird draws a shadow ellipse on the target mango', () => {
 });
 it('MEC-014 §8 gate open is dashed, warn blinks with a lock, closed is solid; spikes show dots and triangles', () => {
   const gate = (vis: 'down' | 'warn' | 'up') => snap({ gate: [{ id: 1, t: 0, lifeMs: 9000, state: 'live',
-    fence: [{ x: 1, y: 1, on: true, ageMs: 0 }], gate: [{ x: 2, y: 1, delay: 0, vis }] }] });
+    fence: [{ x: 1, y: 1, on: true, ageMs: 0 }], gate: [{ x: 2, y: 1, delay: 0, vis, warnLeftMs: 0 }] }] });
   let r = graphics(); drawCycles(r.g, gate('down'), 20, 0, false);
   expect(r.calls).toContain('lineBetween');
   r = graphics(); drawCycles(r.g, gate('warn'), 20, 0, false);
@@ -87,7 +87,7 @@ it('MEC-014 §8 gate open is dashed, warn blinks with a lock, closed is solid; s
   expect(r.calls.filter(c => c === 'fillRect')).toHaveLength(1);        // fence post only; bar and lock blink off
   r = graphics(); drawCycles(r.g, gate('up'), 20, 0, false);
   expect(r.calls.filter(c => c === 'fillRect').length).toBeGreaterThan(1);
-  const spike = (vis: 'down' | 'warn' | 'up') => snap({ spike: [{ id: 1, t: 0, lifeMs: 9000, ending: false, cells: [{ x: 1, y: 1, delay: 0, vis }] }] });
+  const spike = (vis: 'down' | 'warn' | 'up') => snap({ spike: [{ id: 1, t: 0, lifeMs: 9000, ending: false, cells: [{ x: 1, y: 1, delay: 0, vis, warnLeftMs: 0 }] }] });
   r = graphics(); drawCycles(r.g, spike('down'), 20, 0, false);
   expect(r.calls).toContain('fillCircle'); expect(r.calls).not.toContain('fillTriangle');
   r = graphics(); drawCycles(r.g, spike('warn'), 20, 250, false);

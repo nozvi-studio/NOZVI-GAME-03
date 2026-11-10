@@ -163,9 +163,9 @@ it('MEC-004-R2 MEC-014-R6 snapshots expose SpikeView without internal flags or l
   const { b, s, g } = fixture(), sim = restoreSim(b, s), snap = sim.snapshot();
   expectTypeOf(snap.families.spike).toEqualTypeOf<readonly SpikeView[]>();
   expect(snap.families.spike[0]).toEqual({ id: 1, t: g.t, lifeMs: g.lifeMs, ending: false,
-    cells: g.cells.map(({ x, y, delay, vis }) => ({ x, y, delay, vis })) });
+    cells: g.cells.map(({ x, y, delay, vis }) => ({ x, y, delay, vis, warnLeftMs: expect.any(Number) })) });
   expect(sim.clone().snapshot()).toEqual(snap);
-  const live = stateOf(sim), copy = spike.snapshot(live);
+  const live = stateOf(sim), copy = spike.snapshot(live, loadBalance());
   live.families.spike.groups[0]!.cells[0]!.x = 99;
   expect(copy).toMatchObject([{ cells: [{ x: 2 }, { x: 3 }] }]);
   expect(snap.families.spike[0]!.cells[0]!.x).toBe(2);
