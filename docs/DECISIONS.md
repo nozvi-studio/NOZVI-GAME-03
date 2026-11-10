@@ -517,3 +517,9 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Context: wave 2 fixes D-pad placement, tap targets and the compact Loadout.
 - Choice: (1) UIFIX-R6: the D-pad raise is capped at the chip row; final `dpadBottom` = 25 mockup px (the full +24 raise needs the chip row moved: owner choice, open). (2) UIFIX-R7: 48 px = 48 CSS px at the 360 px reference = 72 game px (`MIN_HIT`). (3) UIFIX-R9: the compact Loadout threshold uses the canvas CSS height (`scale.displaySize`), not the window height.
 - Consequence: layout tests in `tests/game/hudLayout.test.ts`, `uiMinHit.test.ts`, `menuLayout.test.ts`.
+
+## 2026-11-10 - UIFIX-R12 skill energy gauge instead of red cost text
+- Context: the red cost number for unaffordable skills (JUI-04) was replaced by an owner decision.
+- Choice: each skill button face fills like a tank, bottom-up, as `charge = clamp01(energy / cost)` (24 quantised steps, pure `chargeSegment` geometry); full = existing ready glow ring; cost number always `text.primary`. Fill token `TOKENS.hud.charge` `#97DB9B` (the menu logo mint, already in the palette) at alpha 0.7: light, and the dark icon stays >= 3:1 on it. Light mode only; dark tokens untouched.
+- Alternative: red cost text only (rejected by owner: shows "not enough" but not how close the player is).
+- Consequence: `SkillView.costShort` removed, `charge` added; `TOKENS.danger` kept for R14. Tests in `tests/game/hudModel.test.ts`, `gaugeGeometry.test.ts`, `uiTheme.test.ts`.

@@ -55,6 +55,7 @@ export class DrawObject extends Signals {
   strokeRoundedRect(...a: unknown[]): this { this.commands.push(['strokeRoundedRect', ...a]); return this; }
   fillCircle(...a: unknown[]): this { this.commands.push(['fillCircle', ...a]); return this; }
   strokeCircle(...a: unknown[]): this { this.commands.push(['strokeCircle', ...a]); return this; }
+  fillPoints(...a: unknown[]): this { this.commands.push(['fillPoints', ...a]); return this; }
   fillTriangle(...a: unknown[]): this { this.commands.push(['fillTriangle', ...a]); return this; }
   beginPath(): this { return this; }
   moveTo(): this { return this; }

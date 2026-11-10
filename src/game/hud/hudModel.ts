@@ -4,7 +4,7 @@ import { biomeName, levelTitle } from '../hudText';
 export type T = (k: string, v?: Record<string, string | number>) => string;
 export type HudSnap = Pick<SimSnapshot, 'level' | 'biome' | 'challenge' | 'progress' | 'need' | 'score' | 'energy' | 'energyMax' | 'skills' | 'rampActive' | 'rampMangoesLeft' | 'startLevel'>;
 export type SkillState = 'off' | 'ready' | 'active';
-export interface SkillView { slot: 0 | 1; id: SkillId; cost: number; state: SkillState; ring: number | null; costShort: boolean }
+export interface SkillView { slot: 0 | 1; id: SkillId; cost: number; state: SkillState; ring: number | null; charge: number }
 export interface HudView {
   levelTitle: string; biomeName: string; quota: { done: string; total: string };
   score: string; energy: { text: string; fill: number };
@@ -23,7 +23,7 @@ export function hudView(s: HudSnap, hint: { key: string; level: number } | null,
     if (!k || k.id === null) return null;
     const total = timedMs(k.id, b);
     return { slot, id: k.id, cost: k.cost, state: k.active ? 'active' : k.affordable ? 'ready' : 'off',
-      costShort: !k.active && !k.affordable, // UIFIX-R12 JUI-04
+      charge: k.cost > 0 ? clamp01(s.energy / k.cost) : 1, // UIFIX-R12 energy gauge fill (0..1)
       ring: k.active && total !== null ? clamp01(k.leftMs / total) : null };
   };
   const max = s.level >= b.level.maxLevel;

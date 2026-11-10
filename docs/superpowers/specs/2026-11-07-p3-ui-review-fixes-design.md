@@ -28,7 +28,7 @@ Remove board occlusion, fix dark-theme readability and the clear layout/polish f
 - R11 Art preview: reserve space so the live capy does not overlap the widget row (LAY-04).
 
 ## 6. Wave 3 — polish (UIFIX-R12..R15)
-- R12 Skill cost text turns red when not affordable (JUI-04).
+- R12 (owner 2026-11-10, replaces red cost text) Each skill button is an energy gauge: the round face fills bottom-up with `TOKENS.hud.charge` as energy/cost (24 steps); full = ready glow ring; cost number stays `text.primary`. Light mode only.
 - R13 All D-pad buttons share one border style (COL-05).
 - R14 Settings toggles get a track border matching the cards (POL-02); "Quit run" gets a soft red accent (POL-04).
 - R15 LAY-03: reproduce "Next checkpoint at L10" with a normal (non-debug) run that unlocks L10; fix only if it reproduces.
