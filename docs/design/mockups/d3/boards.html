@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mango Snake D3 boards</title>
+<link rel="stylesheet" href="d3.css">
+<style>
+.ic { display: inline-grid; place-items: center; flex: none; }
+.c { text-align: center; }
+.col { display: flex; flex-direction: column; align-items: center; }
+.st { display: grid; grid-template-columns: 96px repeat(5, 150px); gap: 22px 16px; align-items: center; justify-items: center; }
+.st .h { color: #fff; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; text-shadow: 0 2px 0 var(--ink-deep); }
+.st .skill, .st .round { position: relative; }
+</style>
+</head>
+<body>
+<h1>Mango Snake · D3 "Juicy" boards</h1>
+<p class="lead">Visual source of truth for the D3 redesign (spec <code>docs/superpowers/specs/2026-11-10-ui-d3-juicy-design.md</code>). Every phone frame is 360×640 CSS px (the 9:16 canvas); Home, Game and Results are also drawn at 390×844. Colours come from <code>TOKENS.d3</code>, strings from <code>src/game/text.ts</code>. Mockups only: numbers here are mock px.</p>
+<nav id="nav"></nav>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <g id="mango"><path d="M0-.36c.3 0 .44.2.44.42 0 .26-.2.4-.44.4s-.44-.14-.44-.4C-.44-.16-.3-.36 0-.36z"/></g>
+    <g id="ic-gear"><path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" d="M4 8h9M19 8h1M4 16h1M11 16h9"/><circle cx="16" cy="8" r="2.6" fill="none" stroke="currentColor" stroke-width="2.6"/><circle cx="8" cy="16" r="2.6" fill="none" stroke="currentColor" stroke-width="2.6"/></g>
+    <g id="ic-pause"><rect x="6" y="5" width="4.4" height="14" rx="1.6" fill="currentColor"/><rect x="13.6" y="5" width="4.4" height="14" rx="1.6" fill="currentColor"/></g>
+    <g id="ic-shield"><path d="M12 3l8 3v6c0 5-3.6 8-8 9.4C7.6 20 4 17 4 12V6z" fill="currentColor"/></g>
+    <g id="ic-rain"><path d="M12 3c3.4 0 5.6 2.4 5.6 5.4 0 3.4-2.6 5.2-5.6 5.2S6.4 11.8 6.4 8.4C6.4 5.4 8.6 3 12 3z" fill="currentColor"/><path d="M7 17l-1 3M12 17l-1 3M17 17l-1 3" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></g>
+    <g id="ic-bolt"><path d="M13 2L5 13h5l-1 9 8-12h-5z" fill="currentColor"/></g>
+    <g id="ic-flag"><path d="M6 21V4M6 5h11l-2.5 3.5L17 12H6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="ic-back"><path d="M13 5l-7 7 7 7M6 12h13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="ic-lock"><rect x="5" y="10.5" width="14" height="10" rx="2.6" fill="currentColor"/><path d="M8 10.5V8a4 4 0 018 0v2.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></g>
+    <g id="ic-home"><path d="M4 11.5L12 4l8 7.500V20h-5.500v-5h-5v5H4z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="ic-sound"><path d="M4 9.500h3.500L12 5.500v13l-4.500-4H4z" fill="currentColor"/><path d="M15.500 9a4.200 4.200 0 010 6M18 6.500a7.800 7.800 0 010 11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></g>
+    <g id="ic-buzz"><rect x="8" y="4" width="8" height="16" rx="2.4" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M4 9v6M20 9v6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></g>
+    <g id="ic-dpad"><path d="M9.500 4h5v5.500H20v5h-5.500V20h-5v-5.500H4v-5h5.500z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/></g>
+    <g id="ic-motion"><path d="M4 8h10M4 12h14M4 16h8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="18.500" cy="16" r="2" fill="currentColor"/></g>
+    <g id="ic-clock"><circle cx="12" cy="12" r="8.200" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 7.500V12l3 2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="ic-snip"><circle cx="7" cy="7" r="2.600" fill="none" stroke="currentColor" stroke-width="2.6"/><circle cx="7" cy="17" r="2.600" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M9 8.500L20 17M9 15.500L20 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></g>
+    <g id="ic-up"><path d="M12 5l7 9H5z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></g>
+    <g id="ic-star"><path d="M12 2l3 6.500 7 .8-5.200 4.800L18.200 21 12 17.500 5.800 21l1.400-6.900L2 9.300l7-.8z" fill="#FFC21A" stroke="#8A4500" stroke-width="1.5" stroke-linejoin="round"/></g>
+    <g id="ic-check"><path d="M5 12.500l4.500 4.500L19 7.500" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="ic-finger"><path d="M9 21c-2-2-4.500-5-4.500-7 0-1.300 1.600-1.800 2.500-.6l1 1.300V5.500a1.750 1.750 0 013.500 0V11l5 1c1.400.3 2.200 1.300 2 2.800L17.500 21z" fill="#fff" stroke="#0F4578" stroke-width="1.8" stroke-linejoin="round"/></g>
+    <symbol id="ribbon" viewBox="0 0 176 56"><path d="M4 10h168l-12 20 12 20H4l12-20z" fill="#0F4578"/><path d="M8 6h160l-12 20 12 20H8l12-20z" fill="#FF5A7A" stroke="#9C1F3F" stroke-width="3"/></symbol>
+  </defs>
+</svg>
+
+<section class="board" id="Boot"><h2>Boot</h2><p>D3-R10. Background, logo, loading bar in the mango fill.</p>
+  <div class="frames"><div><div class="phone a" data-size="360x640"><div class="rays"></div><div data-logo="150"></div>
+    <div class="abs bar" style="left:60px;right:60px;top:420px"><u style="width:64%"></u></div>
+    <div class="abs onblue c" style="left:0;right:0;top:456px;font-size:15px">Loading… 64%</div>
+  </div><div class="cap">Boot · 360×640</div></div></div>
+</section>
+
+<section class="board" id="Home"><h2>Home</h2><p>D3-R11. Best chip, Settings, two-line logo, hero on the ray fan, PLAY, "Start at L10", then "Start from L1" and the Loadout entry as light buttons. All actions sit in the lower 45%.</p>
+  <div class="frames"><div><div class="phone a" data-size="360x640" data-home="s"></div><div class="cap">Home · 360×640</div></div>
+  <div><div class="phone a tall" data-size="390x844" data-home="t"></div><div class="cap">Home · 390×844</div></div></div>
+</section>
+
+<section class="board" id="Game"><h2>Game</h2><p>D3-R9, R12..R14. Biome 1, two skills affordable. The board is the focus; the bottom group is always present. At 390×844 the spare height is split above and below the bottom group.</p>
+  <div class="frames"><div><div class="phone a" data-size="360x640" data-game="{}"></div><div class="cap">Game · 360×640</div></div>
+  <div><div class="phone a tall" data-size="390x844" data-game='{"tall":1}'></div><div class="cap">Game · 390×844</div></div></div>
+</section>
+
+<section class="board" id="GameDpad"><h2>GameDpad</h2><p>D3-R9. D-pad setting on: the D-pad takes the centre of the bottom group, the energy bar moves above it and the checkpoint becomes a small chip on the same row.</p>
+  <div class="frames"><div><div class="phone a" data-size="360x640" data-game='{"dpad":1}'></div><div class="cap">GameDpad · 360×640</div></div></div>
+</section>
+
+<section class="board" id="GameLocked"><h2>GameLocked</h2><p>D3-R9, R14. Left: no skill unlocked, two locked slots in the <code>off</code> tone. Right: skill B not affordable (grey face, no gloss, energy gauge on the rim, cost badge kept).</p>
+  <div class="frames"><div><div class="phone a" data-size="360x640" data-game='{"skills":"locked","energy":0}'></div><div class="cap">GameLocked · no skill</div></div>
+  <div><div class="phone a" data-size="360x640" data-game='{"skills":"bNo","energy":38}'></div><div class="cap">GameLocked · B unaffordable</div></div></div>
+</section>
+
+<section class="board" id="GameHint"><h2>GameHint</h2><p>D3-R25, R26. Left: waiting for the first input, finger glyph looping a swipe next to the hint text. Right: swipe trail under the finger and the chevron at the head for an accepted turn.</p>
+  <div class="frames"><div><div class="phone a" data-size="360x640" data-game='{"hint":1}'></div><div class="cap">GameHint · waiting</div></div>
+  <div><div class="phone a" data-size="360x640" data-game='{"trail":1}'></div><div class="cap">GameHint · trail + chevron</div></div></div>
+</section>
+
+<section class="board" id="Pause"><h2>Pause</h2><p>D3-R15. 50% ink scrim, panel, Resume primary, Settings light, Quit run danger.</p>
+  <div class="frames"><div><div class="phone a" data-size="360x640" data-game="{}">
+    <div class="scrim"></div>
+    <div class="abs panel col" style="left:30px;right:30px;top:132px;height:408px;padding:20px 24px 0">
+      <div class="disp" style="font-size:40px">Paused</div>
+      <div style="font-size:15px;margin-top:6px">Level 3 · Mango Orchard</div>
+      <div class="chip sm butter" style="margin-top:12px"><i class="ic" data-ic="flag:16"></i>Next checkpoint at L10</div>
+      <div class="btn primary mid" style="width:100%;margin-top:26px"><span>Resume</span></div>
+      <div class="btn light" style="width:100%;margin-top:22px"><i class="ic" data-ic="gear:22"></i>Settings</div>
+      <div class="btn danger" style="width:100%;margin-top:16px"><span style="font-size:20px">Quit run</span></div>
+    </div>
+  </div><div class="cap">Pause · 360×640</div></div></div>
+</section>
+
+<section class="board" id="Countdown"><h2>Countdown</h2><p>D3-R15. 28% scrim, digit in mango yellow display type.</p>
+  <div class="frames"><div><div class="phone a" data-size="360x640" data-game="{}">
+    <div class="scrim soft"></div>
+    <div class="abs disp mango c" style="left:0;right:0;top:186px;font-size:170px;line-height:1;-webkit-text-stroke-width:12px;text-shadow:0 8px 0 var(--logo-mango-line)">3</div>
+    <div class="abs c" style="left:0;right:0;top:372px"><span class="chip sm"><i class="ic" data-ic="flag:16"></i>Starting at L10</span></div>
+  </div><div class="cap">Countdown · 360×640</div></div></div>
+</section>
+
+<section class="board" id="Banners"><h2>Banners</h2><p>D3-R16. All inside the existing banner strip (top 1.5 rows of the board, UIFIX-R1): level-up, biome with tagline, tip card, skill pills.</p>
+  <div class="frames">
+    <div><div class="phone a" data-size="360x640" data-game='{"strip":"level"}'></div><div class="cap">Level-up banner</div></div>
+    <div><div class="phone a" data-size="360x640" data-game='{"strip":"biome","biome":2}'></div><div class="cap">Biome banner</div></div>
+    <div><div class="phone a" data-size="360x640" data-game='{"strip":"tip"}'></div><div class="cap">Tip card</div></div>
+    <div><div class="phone a" data-size="360x640" data-game='{"strip":"pills"}'></div><div class="cap">Skill pills</div></div>
+  </div>
+</section>
+
+<section class="board" id="Death"><h2>Death</h2><p>D3-R17. Vignette, RUN OVER ribbon over a panel with the death line. Tap skips.</p>
+  <div class="frames"><div><div class="phone a" data-size="360x640" data-game="{}">
+    <div class="vignette"></div>
+    <div class="abs panel c" style="left:36px;right:36px;top:262px;padding:42px 18px 20px;font-size:19px;line-height:1.3">Bonked by a coconut.</div>
+    <svg class="abs" style="left:50px;top:222px" width="260" height="76" viewBox="0 0 176 56" preserveAspectRatio="none"><use href="#ribbon"/></svg>
+    <div class="abs disp c" style="left:0;right:0;top:236px;font-size:34px;--ol:var(--tone-ribbon-line)">RUN OVER</div>
+  </div><div class="cap">Death · 360×640</div></div></div>
+</section>
+
+<section class="board" id="Results"><h2>Results</h2><p>D3-R18. One panel: score, Best chip, level, eaten, biome, new checkpoint, energy saved, next checkpoint. "Play again" and "Home" in the lower 45%.</p>
+  <div class="frames"><div><div class="phone a" data-size="360x640" data-results='{}'></div><div class="cap">Results · 360×640</div></div>
+  <div><div class="phone a tall" data-size="390x844" data-results='{"tall":1}'></div><div class="cap">Results · 390×844</div></div></div>
+</section>
+
+<section class="board" id="ResultsFirstRun"><h2>ResultsFirstRun</h2><p>D3-R18. Same panel on a first run with score 0: no empty layout; the rows that have no value are simply absent and the panel keeps its place.</p>
+  <div class="frames"><div><div class="phone a" data-size="360x640" data-results='{"first":1}'></div><div class="cap">ResultsFirstRun · 360×640</div></div></div>
+</section>
+
+<section class="board" id="Loadout"><h2>Loadout</h2><p>D3-R19, R21. Two slots on top (slot 1 selected, yellow ring), skill cards with icon, name, effect, cost chip and pick state.</p>
+  <div class="frames"><div><div class="phone a" data-size="360x640"><div class="rays dim"></div>
+    <div class="abs round" style="left:12px;top:12px"><i class="ic" data-ic="back:24"></i></div>
+    <div class="abs disp c" style="left:60px;right:60px;top:16px;font-size:30px">Pick 2 skills</div>
+    <div class="abs" style="left:92px;top:74px;width:78px;height:98px"><div class="skill selected" style="left:0;top:0"><i class="ic" data-ic="clock:38"></i></div><div class="abs onblue c" style="left:0;right:0;top:86px;font-size:12px">Slot 1</div></div>
+    <div class="abs" style="left:190px;top:74px;width:78px;height:98px"><div class="skill b" style="left:0;top:0"><i class="ic" data-ic="snip:38"></i></div><div class="abs onblue c" style="left:0;right:0;top:86px;font-size:12px">Slot 2</div></div>
+    <div class="abs col" style="left:12px;right:12px;top:190px;gap:9px" id="cards"></div>
+    <div class="abs btn primary mid" style="left:60px;right:60px;top:558px"><span>Go!</span></div>
+  </div><div class="cap">Loadout · 360×640</div></div></div>
+</section>
+
+<section class="board" id="Settings"><h2>Settings</h2><p>D3-R19, R3. One panel with four rows (icon tile, label, hint, toggle). No Board theme card.</p>
+  <div class="frames"><div><div class="phone a" data-size="360x640"><div class="rays dim"></div>
+    <div class="abs round" style="left:12px;top:12px"><i class="ic" data-ic="back:24"></i></div>
+    <div class="abs disp c" style="left:60px;right:60px;top:14px;font-size:34px">Settings</div>
+    <div class="abs panel" style="left:14px;right:14px;top:84px;padding:4px 2px">
+      <div class="row"><div class="tile"><i class="ic" data-ic="sound:26"></i></div><div class="l"><b>Sound</b><i>Music and effects</i></div><div class="toggle on"></div></div>
+      <div class="row"><div class="tile"><i class="ic" data-ic="buzz:26"></i></div><div class="l"><b>Haptics</b><i>Buzz when you eat or crash</i></div><div class="toggle on"></div></div>
+      <div class="row"><div class="tile"><i class="ic" data-ic="dpad:26"></i></div><div class="l"><b>On-screen D-pad</b><i>Show arrows between the skill buttons</i></div><div class="toggle"></div></div>
+      <div class="row"><div class="tile"><i class="ic" data-ic="motion:26"></i></div><div class="l"><b>Reduced motion</b><i>No shaking, softer flashes</i></div><div class="toggle"></div></div>
+    </div>
+    <div class="abs onblue c" style="left:0;right:0;top:384px;font-size:13px">Changes save automatically</div>
+  </div><div class="cap">Settings · 360×640</div></div></div>
+</section>
+
+<section class="board" id="States"><h2>States</h2><p>D3-R21..R24. Each widget in rest, pressed (face down by the lip, lip 1 px, gloss halved), disabled (<code>off</code> tone, no gloss), selected (4 px mango ring, 2 px lift) and attention (gloss sweep). Then a tap burst and a denied frame.</p>
+  <div class="frames"><div><div class="sheet a"><div class="st">
+    <div></div><div class="h">Rest</div><div class="h">Pressed</div><div class="h">Disabled</div><div class="h">Selected</div><div class="h">Attention</div>
+    <div class="h">Primary</div><div data-st="btn primary|<span>Play</span>"></div>
+    <div class="h">Secondary</div><div data-st="btn|Start at L10"></div>
+    <div class="h">Light</div><div data-st="btn light|Settings"></div>
+    <div class="h">Danger</div><div data-st="btn danger|<span style='font-size:20px'>Quit run</span>"></div>
+    <div class="h">Round</div><div data-st="round|gear"></div>
+    <div class="h">Skill</div><div data-st="skill|shield"></div>
+  </div></div><div class="cap">States</div></div>
+  <div><div class="sheet a" style="width:250px;height:240px">
+    <div class="abs btn primary mid pressed" style="left:35px;top:36px;width:180px"><span>Play</span></div>
+    <svg class="abs" style="left:45px;top:-10px" width="160" height="160" viewBox="-80 -80 160 160"><circle r="52" fill="none" stroke="#fff" stroke-width="5" opacity=".8"/><g fill="#8DF06A" stroke="#17661F" stroke-width="2"><circle cx="66" cy="0" r="6"/><circle cx="33" cy="57" r="5"/><circle cx="-33" cy="57" r="6"/><circle cx="-66" cy="0" r="5"/><circle cx="-33" cy="-57" r="6"/><circle cx="33" cy="-57" r="5"/></g></svg>
+    <div class="abs onblue c" style="left:0;right:0;top:132px;font-size:12px;line-height:1.4">D3-R23 tap burst<br>ring 0.6 → 1.4 in 220 ms + 6 sparks<br>in the face colour (primary, skill);<br>ring only for the other tones</div>
+  </div><div class="cap">Tap burst</div></div>
+  <div><div class="sheet a" style="width:250px;height:240px">
+    <div class="skill off" style="left:76px;top:30px;transform:translateX(6px) rotate(3deg)"><i class="ic" data-ic="rain:38"></i><div class="cost no">80</div></div>
+    <div class="skill off" style="left:76px;top:30px;opacity:.25;transform:translateX(-6px) rotate(-3deg)"></div>
+    <div class="abs onblue c" style="left:0;right:0;top:136px;font-size:12px;line-height:1.4">D3-R24 denied<br>shake 3 cycles, 6 px, 240 ms;<br>cost badge flashes in the danger colour</div>
+  </div><div class="cap">Denied</div></div></div>
+</section>
+
+<section class="board" id="Biomes"><h2>Biomes</h2><p>D3-R4. Screen background, frame, two-tone checker (one hue, no grid lines), snake, mango, rock and warn tile per biome. Biome 6 uses the light outline set.</p>
+  <div class="frames" id="biomes"></div>
+</section>
+
+<section class="board" id="MarbleMachine"><h2>MarbleMachine</h2><p>P4 feature, mockup only (no code in U1..U7). Source: <a href="marble.html" style="color:#ffc83d">marble.html</a>.</p>
+  <div class="frames"><div><img src="png/MarbleMachineD3.png" alt="MarbleMachine D3" style="max-width:780px;width:100%;border-radius:12px"></div></div>
+</section>
+<section class="board" id="MarbleWheel"><h2>MarbleWheel</h2><p>P4 feature, mockup only. Source: <a href="marble.html" style="color:#ffc83d">marble.html</a>.</p>
+  <div class="frames"><div><img src="png/MarbleWheelD3.png" alt="MarbleWheel D3" style="max-width:780px;width:100%;border-radius:12px"></div></div>
+</section>
+
+<script>
+// Board builders. Values mirror TOKENS.d3 (src/game/uiTokens.ts).
+const BIOMES = [
+  { name: 'Mango Orchard', bg: ['#7FD8FF', '#3FB2F2', '#1F86D8'], frame: '#1D6B2A', cells: ['#A6E25A', '#93D648'] },
+  { name: 'Rice Paddy', bg: ['#8FE8D8', '#3CC4B4', '#1C9A8E'], frame: '#7A6A1C', cells: ['#E3E07A', '#D2D062'] },
+  { name: 'Frozen Pond', bg: ['#B9C8FF', '#7F92F0', '#5565D6'], frame: '#2C5D8F', cells: ['#D6F1FF', '#BFE6FA'] },
+  { name: 'Rocky Hills', bg: ['#FFD9A0', '#F5A65B', '#DB7A35'], frame: '#6B4A2B', cells: ['#E9D3A6', '#D9BF8A'] },
+  { name: 'Backyard', bg: ['#A8E6A0', '#5CC46A', '#2F9E4E'], frame: '#9C4A2A', cells: ['#F6C9A0', '#EDB583'] },
+  { name: 'Storm Garden', bg: ['#6A5ACD', '#41358F', '#241C5C'], frame: '#15103A', cells: ['#4A3F86', '#41377A'] },
+];
+const OUT = { snake: '#2B2F9E', mango: '#8A4500', rock: '#4A5563', warn: '#C81E1E' };
+const OUT_STORM = { snake: '#7CF2D4', mango: '#FFF3C4', rock: '#D5DCE6', warn: '#FF9A9A' };
+const ic = (n, s, style = '') => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" style="${style}"><use href="#ic-${n}"/></svg>`;
+const bgCss = (b) => `radial-gradient(120% 70% at 50% 38%, ${b.bg[0]} 0%, ${b.bg[1]} 45%, ${b.bg[2]} 100%)`;
+const mangoSvg = (o, leafLine = '') => `<use href="#mango" fill="${o}" transform="scale(1.16)"/><use href="#mango" fill="#FFB21A"/><ellipse cx="-.14" cy="-.12" rx=".12" ry=".07" fill="#fff" opacity=".7"/><path d="M.02-.36c.1-.16.26-.16.34-.12-.06.14-.2.18-.34.12z" fill="#3FC23D" ${leafLine}/>`;
+
+// D3-R12 board art: frame with inner top shadow, checker ground, snake (head 1.4 cells), mango with halo, pebbles, dashed warn tile.
+function boardSvg(biome, px, n = 17, extra = '') {
+  const b = BIOMES[biome - 1], o = biome === 6 ? OUT_STORM : OUT, id = 'p' + Math.random().toString(36).slice(2, 8);
+  const rock = (x, y) => `<g transform="translate(${x} ${y})"><ellipse cy=".08" rx=".5" ry=".43" fill="${o.rock}"/><ellipse cy="-.02" rx=".42" ry=".34" fill="#9FB0C0"/><ellipse cx="-.13" cy="-.13" rx="0.150" ry=".08" fill="#fff" opacity=".55"/></g>`;
+  const s = n === 17 ? { path: 'M3.5 12.5V8.5H8.5V5.5H11.5', hi: 'M3.34 12.4V8.34H8.3', head: [11.7, 5.5], mango: [14.5, 9.5], rocks: [[5.5, 13.5], [12.5, 2.5]], warn: [9, 12] }
+    : { path: 'M1.5 5.5V3.5H4', hi: 'M1.34 5.4V3.34H3.8', head: [4.2, 3.5], mango: [5.5, 1.5], rocks: [[1.5, 1.5]], warn: [4, 5] };
+  return `<svg width="${px}" height="${px}" viewBox="-.4 -.4 ${n + .8} ${n + .8}">
+    <defs><pattern id="${id}" width="2" height="2" patternUnits="userSpaceOnUse"><rect width="2" height="2" fill="${b.cells[0]}"/><rect width="1" height="1" fill="${b.cells[1]}"/><rect x="1" y="1" width="1" height="1" fill="${b.cells[1]}"/></pattern></defs>
+    <rect x="-.4" y="-.2" width="${n + .8}" height="${n + .8}" rx="1.300" fill="#0F4578" opacity=".5"/>
+    <rect x="-.4" y="-.4" width="${n + .8}" height="${n + .6}" rx="1.300" fill="${b.frame}"/>
+    <rect width="${n}" height="${n}" rx=".7" fill="url(#${id})"/>
+    <rect width="${n}" height=".5" rx=".2" fill="#000" opacity=".16"/>
+    ${s.rocks.map((r) => rock(r[0], r[1])).join('')}
+    <rect x="${s.warn[0] + .06}" y="${s.warn[1] + .06}" width=".88" height=".88" rx=".2" fill="#FF5A5A" fill-opacity=".35" stroke="${o.warn}" stroke-width=".11" stroke-dasharray=".25 .15"/>
+    <path d="${s.path}" fill="none" stroke="${o.snake}" stroke-width=".96" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${s.path}" fill="none" stroke="#6F7DFF" stroke-width=".76" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${s.hi}" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width=".14" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(${s.head[0]} ${s.head[1]})"><circle r=".8" fill="${o.snake}"/><circle r=".7" fill="#7F8CFF"/>
+      <ellipse cx=".22" cy="-.28" rx=".2" ry=".22" fill="#fff"/><ellipse cx=".22" cy=".28" rx=".2" ry=".22" fill="#fff"/>
+      <circle cx=".3" cy="-.28" r=".11" fill="#1C1447"/><circle cx=".3" cy=".28" r=".11" fill="#1C1447"/>
+      <path d="M.7 0h.34l.14-.12M1.04 0l.14.12" stroke="#FF5A7A" stroke-width=".09" fill="none" stroke-linecap="round"/></g>
+    <g transform="translate(${s.mango[0]} ${s.mango[1]})"><circle r=".62" fill="#fff" opacity=".35"/><g transform="scale(1.05)">${mangoSvg(o.mango)}</g></g>
+    ${extra}</svg>`;
+}
+
+function skillBtn(side, kind, x, y, o) {
+  const pos = `${side}:${x}px;top:${y}px`;
+  if (o.skills === 'locked') return `<div class="skill off" style="${pos}">${ic('lock', 34)}</div>`;
+  if (kind === 'b' && o.skills === 'bNo') return `<div class="skill off" style="${pos}"><div class="gauge" style="background:conic-gradient(#22B8E6 0 ${o.energy / 80 * 360}deg, transparent 0);-webkit-mask:radial-gradient(circle, transparent 36px, #000 37px)"></div>${ic('rain', 38)}<div class="cost">80</div></div>`;
+  return `<div class="skill ${kind}" style="${pos}">${ic(kind === 'b' ? 'rain' : 'shield', 38)}<div class="cost">${kind === 'b' ? 80 : 50}</div></div>`;
+}
+
+// D3-R9 in-run layout. o: tall, dpad, skills ('locked' | 'bNo'), energy, hint, trail, strip, biome.
+function game(o) {
+  const W = o.tall ? 390 : 360, H = o.tall ? 844 : 640, T = o.tall ? 40 : 0, B = W - 20, bt = T + 112, be = bt + B;
+  const biome = o.biome || 1, energy = o.energy ?? 62;
+  const extra = o.trail ? `<path d="M9 9.500c1.500 0 3-.6 3.800-2.200" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width=".5" stroke-linecap="round"/><path d="M11.300 3.700l.5-.9.5.9" transform="translate(-.1 .3)" fill="none" stroke="#fff" stroke-width=".28" stroke-linecap="round" stroke-linejoin="round"/><path d="M11.200 4.100L11.700 3.100 12.200 4.100" fill="none" stroke="#0F4578" stroke-opacity="0" stroke-width=".1"/>` : '';
+  let h = `<div class="rays dim"></div>
+    <div class="abs round" style="left:12px;top:${T + 12}px">${ic('pause', 24)}</div>
+    <svg class="abs" style="left:${W / 2 - 80}px;top:${T + 10}px" width="160" height="51"><use href="#ribbon"/></svg>
+    <div class="abs disp c" style="left:${W / 2 - 80}px;width:160px;top:${T + 18}px;font-size:22px;-webkit-text-stroke-width:4px;--ol:var(--tone-ribbon-line);text-shadow:none">LEVEL 3</div>
+    <div class="abs chip" style="right:12px;top:${T + 14}px">${ic('star', 22)}240</div>
+    <div class="abs" style="left:14px;right:14px;top:${T + 70}px;display:flex;align-items:center;gap:8px">
+      <svg width="34" height="34" viewBox="-.6 -.6 1.2 1.2">${mangoSvg('#8A4500')}</svg>
+      <div class="bar" style="flex:1"><u style="width:50%"></u></div><span class="onblue" style="font-size:18px">3/6</span></div>
+    <div class="abs" style="left:10px;top:${bt}px">${boardSvg(biome, B, 17, extra)}</div>`;
+  const cell = B / 17.8;
+  if (o.strip) {
+    const sh = 1.5 * cell + 6, base = `left:${10 + .4 * cell}px;width:${17 * cell}px;top:${bt + .4 * cell}px;height:${sh}px`;
+    const card = (inner) => `<div class="abs panel" style="${base};border-width:2px;border-radius:10px;box-shadow:0 3px 0 var(--ink-deep);display:flex;align-items:center;justify-content:center;gap:8px;padding:0 10px">${inner}</div>`;
+    const two = (a, b) => `<div class="c" style="line-height:1.15"><div class="lil" style="font-size:16px">${a}</div><div style="font-size:11px">${b}</div></div>`;
+    if (o.strip === 'level') h += card(`${ic('up', 22, 'color:#3FC23D')}${two('Level 4', 'Level 4: rocks unlocked')}`);
+    if (o.strip === 'biome') h += card(`<span class="chip sm gold" style="height:24px">BIOME 2</span>${two('Rice Paddy', 'Fences and mud. Mind the rows.')}`);
+    if (o.strip === 'tip') h += card(`${ic('bolt', 22, 'color:#22B8E6')}<div style="font-size:13px">Energy orb! Fuel for skills</div>`);
+    if (o.strip === 'pills') h += `<div class="abs" style="${base};display:flex;align-items:center;justify-content:center;gap:6px">
+      <span class="chip sm" style="border-color:var(--tone-skillA-line);box-shadow:0 3px 0 var(--tone-skillA-lip)">${ic('shield', 16, 'color:#7A47E6')}Shield · 4 s left</span>
+      <span class="chip sm" style="border-color:var(--tone-skillB-line);box-shadow:0 3px 0 var(--tone-skillB-lip)">${ic('rain', 16, 'color:#FF8A1F')}Mango Rain · 5 s left</span></div>`;
+  }
+  const eBar = (style) => `<div class="abs" style="${style};display:flex;align-items:center;gap:6px">${ic('bolt', 22, 'color:#8FF0FF;filter:drop-shadow(0 2px 0 #0F4578)')}<div class="bar energy" style="flex:1;height:22px"><u style="width:${energy}%"></u></div><span class="onblue" style="font-size:15px;min-width:20px">${energy}</span></div>`;
+  if (o.dpad) {
+    const g = be + 8, cx = W / 2 - 25, k = (x, y, r) => `<div class="dkey" style="left:${x}px;top:${y}px">${ic('up', 24, `transform:rotate(${r}deg)`)}</div>`;
+    h += eBar(`left:16px;right:96px;top:${g}px`) + `<div class="abs chip sm butter" style="right:14px;top:${g - 3}px">${ic('flag', 16)}L10</div>`
+      + k(cx, g + 30, 0) + k(cx - 54, g + 76, -90) + k(cx + 54, g + 76, 90) + k(cx, g + 122, 180)
+      + skillBtn('left', 'a', 12, g + 62, o) + skillBtn('right', 'b', 12, g + 62, o);
+  } else {
+    const spare = H - be - 146, g = be + (o.tall ? Math.round(spare * .45) : 24);
+    h += skillBtn('left', 'a', 22, g, o) + skillBtn('right', 'b', 22, g, o) + eBar(`left:112px;right:112px;top:${g + 8}px`);
+    if (o.hint) h += `<div class="abs onblue c" style="left:100px;right:100px;top:${g + 42}px;font-size:15px">Swipe to steer!</div>
+      <svg class="abs" style="left:${W / 2 - 38}px;top:${g + 58}px" width="76" height="44" viewBox="0 0 120 70"><path d="M22 46Q60 18 98 40" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="6" stroke-linecap="round" stroke-dasharray="1 11"/><g transform="translate(84 22) scale(1.700)"><use href="#ic-finger"/></g></svg>`;
+    h += `<div class="abs c" style="left:0;right:0;top:${g + (o.tall ? 112 : 100)}px"><span class="chip sm butter" style="height:36px;padding:0 14px 0 10px;border-radius:18px">${ic('flag', 16)}Next checkpoint at L10</span></div>`;
+  }
+  return h;
+}
+
+const logo = (top, scale = 1) => `<svg class="abs" style="left:50%;margin-left:${-180 * scale}px;top:${top}px" width="${360 * scale}" height="${150 * scale}" viewBox="0 0 360 150">
+  <g font-family="Lilita" font-size="70" text-anchor="middle" stroke-linejoin="round">
+    <text x="180" y="70" fill="#0F4578" stroke="#0F4578" stroke-width="16">MANGO</text><text x="180" y="64" fill="#FFD93B" stroke="#8A4500" stroke-width="5" paint-order="stroke">MANGO</text>
+    <text x="180" y="136" fill="#0F4578" stroke="#0F4578" stroke-width="16">SNAKE</text><text x="180" y="130" fill="#fff" stroke="#145A9C" stroke-width="5" paint-order="stroke">SNAKE</text></g></svg>`;
+
+const hero = (top, w) => `<svg class="abs" style="left:50%;margin-left:${-w / 2}px;top:${top}px" width="${w}" height="${w * 2 / 3}" viewBox="0 0 360 240">
+  <ellipse cx="180" cy="222" rx="130" ry="14" fill="#0F4578" opacity=".25"/>
+  <path d="M40 196c40 0 50-40 90-40s40 40 80 40 40-70 0-90" fill="none" stroke="#2B2F9E" stroke-width="56" stroke-linecap="round"/>
+  <path d="M40 196c40 0 50-40 90-40s40 40 80 40 40-70 0-90" fill="none" stroke="#6F7DFF" stroke-width="46" stroke-linecap="round"/>
+  <path d="M44 184c36-2 48-40 86-40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="8" stroke-linecap="round"/>
+  <g transform="translate(206 92)"><ellipse rx="72" ry="64" fill="#2B2F9E"/><ellipse rx="66" ry="58" fill="#7F8CFF"/><ellipse cx="0" cy="24" rx="40" ry="26" fill="#CFD6FF"/>
+    <ellipse cx="-24" cy="-28" rx="26" ry="10" fill="#fff" opacity=".4"/><ellipse cx="-27" cy="-6" rx="17" ry="20" fill="#fff"/><ellipse cx="27" cy="-6" rx="17" ry="20" fill="#fff"/>
+    <ellipse cx="-23" cy="-3" rx="9" ry="12" fill="#1C1447"/><ellipse cx="23" cy="-3" rx="9" ry="12" fill="#1C1447"/><circle cx="-26" cy="-9" r="4" fill="#fff"/><circle cx="20" cy="-9" r="4" fill="#fff"/>
+    <path d="M-16 24q16 16 32 0" fill="none" stroke="#1C1447" stroke-width="5" stroke-linecap="round"/><path d="M0 34v12l-7 8M0 46l7 8" fill="none" stroke="#FF5A7A" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="-46" cy="18" rx="11" ry="7" fill="#FF8FB1" opacity=".8"/><ellipse cx="46" cy="18" rx="11" ry="7" fill="#FF8FB1" opacity=".8"/></g>
+  <g transform="translate(74 70) scale(64)">${mangoSvg('#8A4500', 'stroke="#17661F" stroke-width=".04"')}</g></svg>`;
+
+// D3-R11 Home.
+function home(tall) {
+  const y = tall ? { chip: 52, logo: 112, hero: 280, heroW: 372, play: 560, start: 668, links: 736 } : { chip: 14, logo: 52, hero: 186, heroW: 318, play: 408, start: 512, links: 574 };
+  const side = tall ? 30 : 22;
+  return `<div class="rays"></div>
+    <div class="abs chip" style="left:14px;top:${y.chip + 2}px">${ic('flag', 26, 'color:#F5A400')}Best 1240</div>
+    <div class="abs round" style="right:14px;top:${y.chip}px">${ic('gear', 26)}</div>
+    ${logo(y.logo, tall ? 1 : .92)}${hero(y.hero, y.heroW)}
+    <div class="abs btn primary big attn" style="left:40px;right:40px;top:${y.play}px"><span>PLAY</span></div>
+    <div class="abs btn" style="left:70px;right:70px;top:${y.start}px;height:48px">${ic('flag', 20)}Start at L10</div>
+    <div class="abs btn light" style="left:${side}px;width:${tall ? 158 : 152}px;top:${y.links}px;height:48px;font-size:15px">Start from L1</div>
+    <div class="abs btn light" style="right:${side}px;width:${tall ? 158 : 152}px;top:${y.links}px;height:48px;font-size:15px">${ic('shield', 18, 'color:#7A47E6')}Pick 2 skills</div>`;
+}
+
+// D3-R18 Results.
+function results(o) {
+  const T = o.tall ? 70 : 0, first = !!o.first, top = T + 76;
+  const stat = (l, v, tone) => `<div class="panel inset stat"><span class="lab">${l}</span><b style="color:${tone}">${v}</b></div>`;
+  const rows = first ? '' : `
+      <div class="chip sm butter" style="margin-top:10px;height:34px;width:100%;justify-content:center">${ic('flag', 16)}Next run starts at L10!</div>
+      <div style="display:flex;align-items:center;gap:8px;width:100%;margin-top:10px;font-size:13px">${ic('bolt', 20, 'color:#22B8E6')}Energy saved<b style="margin-left:auto;font-size:16px">35</b></div>`;
+  const next = `<div style="display:flex;align-items:center;gap:8px;width:100%;margin-top:${first ? 14 : 8}px">${ic('flag', 18, 'color:#F5A400')}<div class="bar" style="flex:1;height:18px"><u style="width:${first ? 20 : 100}%"></u></div><span class="chip sm butter" style="height:26px">${first ? 'L10' : 'L12'}</span></div>`;
+  const py = o.tall ? 600 : 470;
+  return `<div class="rays dim"></div>
+    <svg class="abs" style="left:50%;margin-left:-125px;top:${T + 18}px" width="250" height="72" viewBox="0 0 176 56" preserveAspectRatio="none"><use href="#ribbon"/></svg>
+    <div class="abs disp c" style="left:0;right:0;top:${T + 31}px;font-size:32px;--ol:var(--tone-ribbon-line)">GAME OVER</div>
+    <div class="abs panel col" style="left:20px;right:20px;top:${top}px;padding:22px 16px 14px">
+      <div style="font-size:14px;text-align:center">${first ? 'You hit the edge of the board.' : 'Hit by a coconut.'}</div>
+      <span class="lab" style="margin-top:8px">SCORE</span>
+      <div class="lil" style="font-size:64px;line-height:1;color:var(--text)">${first ? 0 : 1240}</div>
+      <div class="chip sm ${first ? '' : 'gold'}" style="margin-top:6px">${ic('star', 16)}${first ? 'Best 0' : 'New best!'}</div>
+      <div style="display:flex;gap:8px;width:100%;margin-top:12px">${stat('LEVEL', first ? 1 : 10, '#D6336C')}${stat('EATEN', first ? 2 : 57, '#A86A10')}${stat('BIOME', first ? '1/6' : '2/6', '#1F86D8')}</div>
+      ${rows}${next}
+      ${first ? '<div style="font-size:13px;text-align:center;margin-top:14px;line-height:1.35;color:#48688A">Fill the bar with mangoes to level up. Each level brings new obstacles.</div>' : ''}
+    </div>
+    <div class="abs btn primary mid" style="left:40px;right:40px;top:${py}px;height:72px"><span>Play again</span></div>
+    <div class="abs btn light" style="left:96px;right:96px;top:${py + 94}px;height:48px">${ic('home', 20)}Home</div>`;
+}
+
+for (const el of document.querySelectorAll('[data-game]')) {
+  const o = JSON.parse(el.dataset.game || '{}');
+  el.style.background = bgCss(BIOMES[(o.biome || 1) - 1]);
+  el.insertAdjacentHTML('afterbegin', game(o));
+}
+for (const el of document.querySelectorAll('[data-home]')) el.innerHTML = home(el.dataset.home === 't');
+for (const el of document.querySelectorAll('[data-results]')) el.innerHTML = results(JSON.parse(el.dataset.results));
+for (const el of document.querySelectorAll('[data-logo]')) el.outerHTML = logo(Number(el.dataset.logo));
+for (const el of document.querySelectorAll('[data-ic]')) { const [n, s] = el.dataset.ic.split(':'); el.innerHTML = ic(n, s); }
+
+// Loadout cards: icon, name, effect, cost chip, pick state.
+const SKILLS = [
+  { ic: 'clock', tone: '', name: 'Slow-mo', desc: 'Slower snake 4 s · timers keep real time', cost: 40, state: 'Slot 1' },
+  { ic: 'snip', tone: 'b', name: 'Tail Snip', desc: 'Cut back half · rock wall for 3 s', cost: 30, state: 'Slot 2' },
+  { ic: 'shield', tone: '', name: 'Shield', desc: 'Breaks the next obstacle you hit · lasts 5 s', cost: 50, state: '' },
+  { ic: 'rain', tone: 'off', name: 'Mango Rain', desc: 'Unlocks at L16', cost: 80, state: 'lock' },
+];
+document.getElementById('cards').innerHTML = SKILLS.map((s) => `<div class="panel" style="width:100%;height:80px;display:flex;align-items:center;gap:10px;padding:0 12px 0 10px;${s.state && s.state !== 'lock' ? 'outline:4px solid var(--logo-mango);' : ''}${s.state === 'lock' ? 'filter:saturate(.4);opacity:.85;' : ''}">
+  <div class="skill ${s.tone}" style="position:relative;width:54px;height:54px;border-width:3px;box-shadow:0 4px 0 var(--lp);flex:none">${ic(s.state === 'lock' ? 'lock' : s.ic, 28)}</div>
+  <div style="flex:1;min-width:0"><div class="lil" style="font-size:19px">${s.name}</div><div style="font-size:12px;font-weight:800;color:#48688A;line-height:1.2">${s.desc}</div></div>
+  <div class="col" style="gap:5px;flex:none"><span class="chip sm" style="height:26px">${ic('bolt', 14, 'color:#22B8E6')}${s.cost}</span>
+  ${s.state && s.state !== 'lock' ? `<span class="chip sm gold" style="height:26px">${ic('check', 14)}${s.state}</span>` : ''}</div></div>`).join('');
+
+// States grid: rest, pressed, disabled, selected, attention.
+for (const el of document.querySelectorAll('[data-st]')) {
+  const [cls, inner] = el.dataset.st.split('|');
+  const body = cls === 'round' ? ic(inner, 26) : cls === 'skill' ? ic(inner, 38) + '<div class="cost">50</div>' : inner;
+  const w = cls.startsWith('btn') ? 'width:140px;' : '';
+  el.outerHTML = ['', 'pressed', cls === 'skill' ? 'off' : 'disabled', 'selected', 'attn'].map((st) =>
+    `<div class="${cls} ${st}" style="${w}${cls === 'round' && st === 'disabled' ? 'background:linear-gradient(#E9F1F7,#C9D6E2);border-color:#6F8499;box-shadow:0 4px 0 #566B80;color:#3F5266;' : ''}">${body}</div>`).join('');
+}
+
+// Biomes: six 170 px mini boards.
+document.getElementById('biomes').innerHTML = BIOMES.map((b, i) => `<div><div class="a" style="width:206px;height:236px;border-radius:20px;position:relative;overflow:hidden;background:${bgCss(b)}"><div class="rays dim"></div>
+  <div class="abs" style="left:18px;top:14px">${boardSvg(i + 1, 170, 7)}</div><div class="abs onblue c" style="left:0;right:0;top:196px;font-size:15px">${i + 1} ${b.name}</div></div><div class="cap">Biome ${i + 1}</div></div>`).join('');
+
+document.getElementById('nav').innerHTML = [...document.querySelectorAll('section.board')].map((s) => `<a href="#${s.id}">${s.id}</a>`).join('');
+</script>
+</body>
+</html>
