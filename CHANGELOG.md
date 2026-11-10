@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): Settings toggle tracks and cards share one edge; Quit run gets a soft red accent (UIFIX-R14).
 - feat(input): all D-pad buttons share one border style (UIFIX-R13).
 - feat(hud): skill cost text turns red when the skill is not affordable (UIFIX-R12).
 - docs: Wave 2 (UIFIX-R6..R11) CODEMAP, DECISIONS, STATUS

@@ -38,7 +38,7 @@ export class PauseOverlay {
     // Lilita One is loaded at weight 400 only: 'normal' avoids a synthetic bold.
     resume.text.setFontFamily(FONT_TITLE).setFontSize(ui(M.resumeFont)).setFontStyle('normal').setStroke(TOKENS.green.line, ui(M.resumeStroke));
     const settings = pillButton(scene, WIDTH / 2, 0, inner, m.secondary, '', 'overlay-settings', () => { this.setEnabled(false); cb.onSettings(); }, 'cream');
-    const quit = pillButton(scene, WIDTH / 2, 0, inner, m.secondary, '', 'overlay-quit', cb.onQuit, 'cream');
+    const quit = pillButton(scene, WIDTH / 2, 0, inner, m.secondary, '', 'overlay-quit', cb.onQuit, 'danger');
     for (const b of [settings, quit]) b.text.setFontFamily(FONT_UI).setFontSize(ui(M.secondaryFont));
     this.btn = { resume, settings, quit };
     this.root = scene.add.container(0, 0, [scrim, block, this.card, this.chipG, this.title, this.subtitle, this.chipIcon, this.chipText,

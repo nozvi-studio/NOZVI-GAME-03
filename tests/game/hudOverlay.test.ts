@@ -11,7 +11,7 @@ const ctx = { level: 7, biome: 2, hint: { key: 'hud.nextCheckpoint', level: 10 }
 it('P3b2-R12 PauseD2: Resume / Settings / Quit run, level + biome subtitle, checkpoint chip, no marbles line (P4)', () => {
   const v = pauseView(ctx, t);
   expect(v).toEqual({ title: 'Paused', subtitle: 'Level 7 · Rice Paddy', chip: 'Next checkpoint at L10',
-    buttons: [{ id: 'resume', label: 'Resume' }, { id: 'settings', label: 'Settings' }, { id: 'quit', label: 'Quit run' }] });
+    buttons: [{ id: 'resume', label: 'Resume', tone: 'green' }, { id: 'settings', label: 'Settings', tone: 'cream' }, { id: 'quit', label: 'Quit run', tone: 'danger' }] });
   expect(JSON.stringify(v)).not.toMatch(/marble/i);
 });
 it('P3b2-R12 Settings is hidden until the scene exists; chip hidden without a hint', () => {
@@ -32,4 +32,8 @@ it('P3b2-R13 CountdownD2 checkpoint card only on a fresh start from a checkpoint
   expect(countdownCard({ rampActive: true, startLevel: 6 }, false, b, t)).toBeNull();   // resume countdown
   expect(countdownCard({ rampActive: true, startLevel: 1 }, true, b, t)).toBeNull();    // L1 start
   expect(countdownCard({ rampActive: false, startLevel: 6 }, true, b, t)).toBeNull();
+});
+it('UIFIX-R14 Quit run is the only pause button with the danger tone', () => {
+  const v = pauseView({ level: 5, biome: 1, hint: null, settingsAvailable: true }, t);
+  expect(v.buttons.map(b => [b.id, b.tone])).toEqual([['resume', 'green'], ['settings', 'cream'], ['quit', 'danger']]);
 });

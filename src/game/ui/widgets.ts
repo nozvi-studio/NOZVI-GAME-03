@@ -4,6 +4,7 @@ import { bindPress, type Button } from '../scenes/ui';
 import { FONT_TITLE, FONT_UI, TOKENS, toInt } from '../uiTokens';
 import { barFill, pillGeom, pillHitRect } from './geometry';
 import { ui } from './layout';
+import { PILL_TONES, type PillTone } from './pillTones';
 
 /*
  * Token widget kit (P3-0-R7). All sizes are mockup px (ui() applied inside); colours come from TOKENS.
@@ -15,18 +16,13 @@ import { ui } from './layout';
  * While the Settings overlay is active, the window keyboard handler (input/keyboard.ts) ignores keys; HudScene's own skill-key handler must also check this (P3b-2).
  */
 
-export type PillTone = 'green' | 'orange' | 'cream';
+export { PILL_TONES, type PillTone } from './pillTones';
 const T = TOKENS;
-const TONES: Record<PillTone, { face: string; deep: string; line: string; text: string; stroke: boolean }> = {
-  green: { face: T.green.face, deep: T.green.deep, line: T.green.line, text: T.surface.white, stroke: true },
-  orange: { face: T.accent.orange, deep: T.accent.orangeDeep, line: T.accent.orangeDeep, text: T.surface.white, stroke: true },
-  cream: { face: T.surface.card, deep: T.surface.stone, line: T.text.soft, text: T.text.primary, stroke: false },
-};
 
 export function pillButton(scene: Phaser.Scene, x: number, y: number, wMock: number, hMock: number, text: string,
   name: string, action: () => void, tone: PillTone = 'green'): Button {
   const geom = pillGeom(wMock, hMock);
-  const tc = TONES[tone];
+  const tc = PILL_TONES[tone];
   const { w, h, radius, shelf } = geom;
   // The shelf stays put; the face and label sink on press.
   const shelfG = scene.add.graphics().fillStyle(toInt(tc.deep)).fillRoundedRect(-w / 2, -h / 2 + shelf, w, h, radius);

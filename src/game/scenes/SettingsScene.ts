@@ -3,7 +3,7 @@ import type { Balance } from '../../core';
 import { resolveDisplay } from '../../meta/settings';
 import type { Session } from '../../session';
 import { createSynth, type Synth } from '../audio/synth';
-import { applySettings, settingsExit, settingsView, SETTINGS_CLOSED, themePatch, togglePatch, type SettingsEntry, type SettingsToggle } from '../flow/settingsView';
+import { applySettings, settingsCardEdge, settingsExit, settingsView, SETTINGS_CLOSED, themePatch, toggleTrackStyle, togglePatch, type SettingsEntry, type SettingsToggle } from '../flow/settingsView';
 import { HEIGHT, WIDTH } from '../layout';
 import { currentPalette, osDisplay, themeOf } from '../render/palette';
 import { t } from '../text';
@@ -81,6 +81,7 @@ export class SettingsScene extends Phaser.Scene {
     let y = g;
     const rows = this.add.graphics(); blk.add(rows);
     rows.fillStyle(toInt(th.card)).fillRoundedRect(cardX, y, cardW, ui(rowsH), rad);
+    rows.lineStyle(ui(M.sw.line), toInt(settingsCardEdge(v.theme))).strokeRoundedRect(cardX, y, cardW, ui(rowsH), rad); // UIFIX-R14
     v.rows.forEach((r, i) => {
       const top = y + ui(i * M.rowH), cy = top + ui(M.rowH / 2);
       if (i > 0) rows.fillStyle(toInt(TOKENS.menu.rowDivider)).fillRect(cardX, top, cardW, ui(M.divider));
@@ -97,15 +98,17 @@ export class SettingsScene extends Phaser.Scene {
       // Track: green when on, sand when off; the 2 px outline is inset and coloured per state (SettingsD2).
       const sw = this.add.graphics().setPosition(swX, cy); blk.add(sw);
       const lw = ui(M.sw.line), iw = swW - lw, ih = swH - lw;
-      sw.fillStyle(toInt(r.on ? TOKENS.green.face : TOKENS.surface.sand)).fillRoundedRect(-swW / 2, -swH / 2, swW, swH, swH / 2);
-      sw.lineStyle(lw, toInt(r.on ? TOKENS.green.deep : TOKENS.text.soft)).strokeRoundedRect(-iw / 2, -ih / 2, iw, ih, ih / 2);
-      sw.fillStyle(toInt(r.on ? TOKENS.surface.white : TOKENS.text.soft)).fillCircle(ui(r.on ? M.sw.knob : -M.sw.knob), 0, ui(M.sw.knob));
+      const ts = toggleTrackStyle(r.on, v.theme); // UIFIX-R14 POL-02
+      sw.fillStyle(toInt(ts.fill)).fillRoundedRect(-swW / 2, -swH / 2, swW, swH, swH / 2);
+      sw.lineStyle(lw, toInt(ts.border)).strokeRoundedRect(-iw / 2, -ih / 2, iw, ih, ih / 2);
+      sw.fillStyle(toInt(ts.knob)).fillCircle(ui(r.on ? M.sw.knob : -M.sw.knob), 0, ui(M.sw.knob));
       blk.add(tap(this, WIDTH / 2, cy, cardW, ui(M.rowH), `settings-${r.id}`, () => this.change(togglePatch(s, d, r.id))));
     });
     y += ui(rowsH) + g;
     // Board theme card: title, sub line, two swatch tiles (Light / Dark).
     const T = M.theme, padX = ui(T.padX), tc = this.add.graphics(); blk.add(tc);
     tc.fillStyle(toInt(th.card)).fillRoundedRect(cardX, y, cardW, ui(M.themeCardH), rad);
+    tc.lineStyle(ui(M.sw.line), toInt(settingsCardEdge(v.theme))).strokeRoundedRect(cardX, y, cardW, ui(M.themeCardH), rad); // UIFIX-R14
     blk.add(this.add.text(cardX + padX, y + ui(T.titleY), t('settings.theme'), label(M.titleFont, '900', th.ink)).setOrigin(0, 0.5));
     blk.add(this.add.text(cardX + padX, y + ui(T.subY), t('settings.theme.sub'), label(M.subFont, '800', th.cardSoft)).setOrigin(0, 0.5));
     (['light', 'dark'] as const).forEach((opt, i) => {

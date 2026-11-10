@@ -23,6 +23,7 @@ export const TOKENS = {
     heroBands: ['#F6C2D3', '#FBE19A', '#BCDDF4'], heroBandStops: [0.34, 0.67],
     statButter: '#FBE19A', bestSoft: '#FFF3D1', mintBanner: '#D7EBD2', mintBannerText: '#234B35',
     slotRing: '#FFE98A', pickRing: '#7FC98C', costChip: '#E6F5F8', rowDivider: '#F3EBDD',
+    cardEdgeDark: '#46584B', // UIFIX-R14 edge of Settings cards and toggle tracks on the dark card (#2B3A2F)
     themeLight: ['#CFEBD0', '#C2E4C6'], themeDark: ['#3B4A5A', '#33414F'],
   },
   danger: { text: '#B3261E', line: '#E0A39B' }, // UIFIX-R12/R14 soft red: short-of-energy cost, Quit run

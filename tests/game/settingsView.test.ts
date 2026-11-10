@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { applySettings, settingsExit, settingsView, SETTINGS_CLOSED, themePatch, togglePatch } from '../../src/game/flow/settingsView';
+import { applySettings, settingsCardEdge, settingsExit, settingsView, SETTINGS_CLOSED, themePatch, toggleTrackStyle, togglePatch } from '../../src/game/flow/settingsView';
 import { defaultSettings } from '../../src/meta/settings';
 import { currentPalette, DARK, LIGHT, setDisplaySettings } from '../../src/game/render/palette';
 const os = { dark: false, reducedMotion: false };
@@ -41,4 +41,12 @@ it('P3b3-R7 applySettings saves immediately and updates the palette', () => {
   expect(currentPalette()).toBe(DARK);
   applySettings(session, themePatch('light'), os);
   expect(currentPalette()).toBe(LIGHT);
+});
+it('UIFIX-R14 toggle track border equals the card edge in both themes and both states', () => {
+  for (const theme of ['light', 'dark'] as const)
+    for (const on of [true, false]) expect(toggleTrackStyle(on, theme).border).toBe(settingsCardEdge(theme));
+});
+it('UIFIX-R14 on and off tracks differ by fill so state never relies on the border', () => {
+  expect(toggleTrackStyle(true, 'light').fill).not.toBe(toggleTrackStyle(false, 'light').fill);
+  expect(toggleTrackStyle(true, 'dark').fill).not.toBe(toggleTrackStyle(false, 'dark').fill);
 });

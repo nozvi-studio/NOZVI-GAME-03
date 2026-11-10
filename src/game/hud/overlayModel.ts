@@ -3,13 +3,13 @@ import type { T } from './hudModel';
 import { stack } from './stack';
 
 export type PauseButtonId = 'resume' | 'settings' | 'quit';
-export interface PauseView { title: string; subtitle: string; chip: string | null; buttons: { id: PauseButtonId; label: string }[] }
+export interface PauseView { title: string; subtitle: string; chip: string | null; buttons: { id: PauseButtonId; label: string; tone: 'green' | 'cream' | 'danger' }[] }
 
 /** P3b2-R12 PauseD2 content. Settings appears only when its scene exists (P3b-3); the marbles line is P4. */
 export function pauseView(c: { level: number; biome: number; hint: { key: string; level: number } | null; settingsAvailable: boolean }, t: T): PauseView {
-  const buttons: PauseView['buttons'] = [{ id: 'resume', label: t('resume') }];
-  if (c.settingsAvailable) buttons.push({ id: 'settings', label: t('pause.settings') });
-  buttons.push({ id: 'quit', label: t('pause.quit') });
+  const buttons: PauseView['buttons'] = [{ id: 'resume', label: t('resume'), tone: 'green' }];
+  if (c.settingsAvailable) buttons.push({ id: 'settings', label: t('pause.settings'), tone: 'cream' });
+  buttons.push({ id: 'quit', label: t('pause.quit'), tone: 'danger' }); // UIFIX-R14 POL-04
   return { title: t('paused'), subtitle: t('pause.subtitle', { n: c.level, biome: t(`banner.biome.${c.biome}`) }),
     chip: c.hint ? t(c.hint.key, { level: c.hint.level }) : null, buttons };
 }
