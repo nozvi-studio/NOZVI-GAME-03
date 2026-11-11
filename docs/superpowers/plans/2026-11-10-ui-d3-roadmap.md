@@ -98,6 +98,7 @@ Plan: `docs/superpowers/plans/2026-11-11-ui-d3-u3-boot-home.md` (written 2026-11
 7. Screenshot pass against the Home board; merge.
 
 ### U4 — In-run (D3-R9, R12..R14, R25..R27)
+Split (2026-11-11): U4a layout + HUD + skill buttons (`docs/superpowers/plans/2026-11-11-ui-d3-u4a-hud-layout.md`), U4b board art (items 4-7), U4c steer feedback + hint + value changes (items 8-10).
 1. **`bottomGroup.ts` (pure).** Rects for skill A, skill B, energy bar, hint, checkpoint chip, optional D-pad, locked slots; `hudLayout` top rects for Pause, ribbon, score chip, mango bar. Tests at 960 and 1170, D-pad on and off, 0/1/2 skills.
 2. **HUD top.** Ribbon (`ribbon` skin) with the level label, score chip, mango bar with the `eaten/quota` label; `hudText.ts` rules unchanged.
 3. **Skill buttons.** `skill` skins (A purple, B orange, `off` when locked or unaffordable), charge ring and R12 gauge restyled, cost badge bottom right, `denied` on a refused tap, `tapBurst` on a cast.
