@@ -14,7 +14,7 @@ import { setDisplaySettings } from '../render/palette';
 import { t } from '../text';
 import { UI_FONT_SPECS, drawThenSwap, waitForFonts } from '../ui/fonts';
 import { screenBackground } from '../ui/background';
-import { ui, UI_SCALE } from '../ui/layout';
+import { d3, d3Height, d3m, ui } from '../ui/layout';
 import { bootRects } from '../ui/menuLayout';
 import { D3_BOOT } from '../ui/menuMetrics';
 import { d3Logo } from '../ui/menuWidgets';
@@ -37,14 +37,14 @@ export class BootScene extends Phaser.Scene {
   // D3-R10 Boot: background, logo, mango progress bar and "Loading… N%"; the logo draws at once and swaps to Lilita when the fonts load (UIFIX-R8).
   private buildView(): void {
     screenBackground(this, 1);
-    const R = bootRects(HEIGHT / UI_SCALE), cx = WIDTH / 2;
-    const bar = progressBar(this, ui(R.bar.x), ui(R.bar.y), R.bar.w, R.bar.h, TOKENS.d3.tone.mango.face[0]);
-    const text = this.add.text(cx, ui(R.text.y + R.text.h / 2), '', { fontFamily: FONT_UI, fontStyle: '800', fontSize: `${ui(D3_BOOT.textFont)}px`, color: TOKENS.d3.white }).setOrigin(0.5);
+    const R = bootRects(d3Height()), cx = WIDTH / 2;
+    const bar = progressBar(this, d3(R.bar.x), d3(R.bar.y), d3m(R.bar.w), d3m(R.bar.h), TOKENS.d3.tone.mango.face[0]);
+    const text = this.add.text(cx, d3(R.text.y + R.text.h / 2), '', { fontFamily: FONT_UI, fontStyle: '800', fontSize: `${d3(D3_BOOT.textFont)}px`, color: TOKENS.d3.white }).setOrigin(0.5);
     text.setShadow(0, ui(2), TOKENS.d3.inkDeep, 0, false, true);
     this.view = v => { bar.set(v.fill, 1); text.setText(t(v.textKey, { n: v.n })); };
     this.setProgress(0);
     const drawLogo = () => {
-      const l = d3Logo(this, cx, ui(R.logo.y), R.logo.scale);
+      const l = d3Logo(this, cx, d3(R.logo.y), R.logo.scale);
       return { destroy: () => { l.mango.destroy(); l.snake.destroy(); } };
     };
     const ready = waitForFonts(typeof document === 'undefined' ? undefined : document.fonts, UI_FONT_SPECS, json.ui.fontLoadTimeoutMs);

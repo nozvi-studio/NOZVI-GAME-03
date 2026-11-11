@@ -13,7 +13,7 @@ import { captureGroup, enter, goTo, motionFor, type EntranceTargets } from '../m
 import { reduceMotion } from '../render/palette';
 import { HEIGHT, WIDTH } from '../layout';
 import { t } from '../text';
-import { ui, UI_SCALE } from '../ui/layout';
+import { d3, d3Height, d3m, ui } from '../ui/layout';
 import { homeRects, type Rect } from '../ui/menuLayout';
 import { D3_HOME, D3_LOGO } from '../ui/menuMetrics';
 import { screenBackground } from '../ui/background';
@@ -41,16 +41,16 @@ export class HomeScene extends Phaser.Scene {
     this.synth = createSynth(); this.synth.setOn(this.session.save().settings.sound);
     screenBackground(this, 1);
     this.selected = this.session.homeModel().defaultStart;
-    const R = this.rects(), px = (r: Rect) => ({ cx: ui(r.x + r.w / 2), cy: ui(r.y + r.h / 2) });
-    const gearBtn = roundIconButton(this, px(R.settings).cx, px(R.settings).cy, D3_HOME.round, 'sliders', 'home-settings',
+    const R = this.rects(), px = (r: Rect) => ({ cx: d3(r.x + r.w / 2), cy: d3(r.y + r.h / 2) });
+    const gearBtn = roundIconButton(this, px(R.settings).cx, px(R.settings).cy, d3m(D3_HOME.round), 'sliders', 'home-settings',
       () => { this.synth.play('uiTap'); goTo(this, 'Settings', { returnTo: 'Home' }, 'forward'); });
     this.targets.gear = gearBtn;
     const best = this.extras().best;
     if (best !== null) {
-      const bc = chip(this, 0, px(R.best).cy, t('home.best', { n: best }), '', 'home-best'); bc.setX(ui(R.best.x) + bc.width / 2);
+      const bc = chip(this, 0, px(R.best).cy, t('home.best', { n: best }), '', 'home-best'); bc.setX(d3(R.best.x) + bc.width / 2);
       this.targets.best = bc;
     }
-    const lg = d3Logo(this, WIDTH / 2, ui(R.logo.y - D3_LOGO.textTop * R.logo.scale), R.logo.scale);
+    const lg = d3Logo(this, WIDTH / 2, d3(R.logo.y - D3_LOGO.textTop * R.logo.scale), R.logo.scale);
     this.targets.logo1 = lg.mango; this.targets.logo2 = lg.snake;
     if (isDebug(window.location.search)) this.setupDebug();
     this.build();
@@ -153,28 +153,28 @@ export class HomeScene extends Phaser.Scene {
   // D3-R11/R7 Home rects in mock px for the current canvas height.
   private rects() {
     const v = this.homeView(), ex = this.extras();
-    return homeRects(HEIGHT / UI_SCALE, { start: v.startAt !== null, stepper: v.showStepper, l1: v.secondaryL1, loadout: ex.loadoutKey !== null, hint: v.hint !== null });
+    return homeRects(d3Height(), { start: v.startAt !== null, stepper: v.showStepper, l1: v.secondaryL1, loadout: ex.loadoutKey !== null, hint: v.hint !== null });
   }
 
   // Rebuilds the middle block (hero, start row, PLAY, hint, links) from the view model.
   private build(): void {
     this.stopPulse?.(); this.stopPulse = null; this.clearSweep(); this.body?.destroy(true); // the pulse stops before its target is destroyed
     const v = this.homeView(), ex = this.extras(), R = this.rects();
-    const px = (r: Rect) => ({ cx: ui(r.x + r.w / 2), cy: ui(r.y + r.h / 2) });
+    const px = (r: Rect) => ({ cx: d3(r.x + r.w / 2), cy: d3(r.y + r.h / 2) });
     const body = (this.body = this.add.container(0, 0));
     const t_: EntranceTargets = { hero: undefined, stepper: undefined, play: undefined, hint: undefined, links: undefined };
     const hero = captureGroup(this, body, { x: px(R.hero).cx, y: px(R.hero).cy }, () => {
-      const h = snakeHero(this, WIDTH / 2, ui(R.hero.y), R.hero.w);
+      const h = snakeHero(this, WIDTH / 2, d3(R.hero.y), R.hero.w);
       body.add(h.c); this.capy = h.head; this.capyRest = { sx: h.head.scaleX, sy: h.head.scaleY };
       if (v.carry !== null) { // H4 carried energy sits inside the hero's bottom-right corner
         const c = chip(this, 0, 0, t('home.startEnergy', { e: v.carry }), '');
-        const inset = ui(D3_HOME.carryInset);
-        c.setPosition(ui(R.hero.x + R.hero.w) - inset - c.width / 2, ui(R.hero.y + R.hero.h) - inset - c.height / 2);
+        const inset = d3(D3_HOME.carryInset);
+        c.setPosition(d3(R.hero.x + R.hero.w) - inset - c.width / 2, d3(R.hero.y + R.hero.h) - inset - c.height / 2);
         body.add(c);
       }
     });
     t_.hero = hero;
-    const play = pillButton(this, px(R.play).cx, px(R.play).cy, R.play.w, R.play.h, t('home.playBig'), 'home-primary',
+    const play = pillButton(this, px(R.play).cx, px(R.play).cy, d3m(R.play.w), d3m(R.play.h), t('home.playBig'), 'home-primary',
       () => this.play(this.homeView().primary.level), 'green', { navigates: true });
     body.add(play.c); t_.play = play.c; this.playBtn = play.c; this.playGeom = { w: play.w, h: play.h };
     if (R.start && v.startAt !== null) { // H1 Start-at row, with arrows when 2+ checkpoints
@@ -182,7 +182,7 @@ export class HomeScene extends Phaser.Scene {
       const row: Phaser.GameObjects.Container[] = [mid]; body.add(mid);
       for (const [r, key, dir] of [[R.prev, 'home.prev', -1], [R.next, 'home.next', 1]] as const) {
         if (!r) continue;
-        const b = pillButton(this, px(r).cx, px(r).cy, r.w, r.h, t(key), `home-${dir < 0 ? 'prev' : 'next'}`, () => this.step(dir), 'cream');
+        const b = pillButton(this, px(r).cx, px(r).cy, d3m(r.w), d3m(r.h), t(key), `home-${dir < 0 ? 'prev' : 'next'}`, () => this.step(dir), 'cream');
         body.add(b.c); row.push(b.c);
       }
       t_.stepper = row;
@@ -193,8 +193,8 @@ export class HomeScene extends Phaser.Scene {
       body.add(h); t_.hint = h;
     }
     const links: Phaser.GameObjects.Container[] = [];
-    if (R.l1) links.push(pillButton(this, px(R.l1).cx, px(R.l1).cy, R.l1.w, R.l1.h, t('home.startL1'), 'home-l1', () => this.play(1), 'cream', { navigates: true }).c);
-    if (R.loadout && ex.loadoutKey) links.push(pillButton(this, px(R.loadout).cx, px(R.loadout).cy, R.loadout.w, R.loadout.h, t(ex.loadoutKey), 'home-loadout',
+    if (R.l1) links.push(pillButton(this, px(R.l1).cx, px(R.l1).cy, d3m(R.l1.w), d3m(R.l1.h), t('home.startL1'), 'home-l1', () => this.play(1), 'cream', { navigates: true }).c);
+    if (R.loadout && ex.loadoutKey) links.push(pillButton(this, px(R.loadout).cx, px(R.loadout).cy, d3m(R.loadout.w), d3m(R.loadout.h), t(ex.loadoutKey), 'home-loadout',
       () => this.play(this.homeView().primary.level), 'cream', { navigates: true }).c);
     body.add(links); if (links.length) t_.links = links;
     Object.assign(this.targets, t_);

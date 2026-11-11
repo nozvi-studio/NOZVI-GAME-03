@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(ui): D3 Home/Boot used the 390 mock unit for 360-wide board numbers (new d3()/d3m()/d3Height()).
 - docs: U3 CODEMAP rows, UI-MOCKUPS built markers, PLAYTEST screenshot record, STATUS.
 - fix(ui): first frame uses the D3 background colour; PLAY sweep re-syncs with the pulse.
 - feat(ui): Boot on D3 - background, logo, mango progress bar; `bootRects`, `D3_BOOT`; D2 hero disc / capy head / `bootColumn` removed (D3-R10).

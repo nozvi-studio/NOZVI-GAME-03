@@ -603,3 +603,8 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Context: owner eye-checked the D3 boards (`docs/design/mockups/d3/`) and reviewed the U3 plan rulings and the fixed terrain design.
 - Choice: "D3 boards approved" (U3..U6 gate open), including the board decisions in STATUS (D-pad checkpoint chip, first-run Results ends with `TEXT.start`, marble.html keeps its own CSS). U3 rulings H1..H6 accepted as written in `docs/superpowers/plans/2026-11-11-ui-d3-u3-boot-home.md`. Fixed terrain spec `docs/superpowers/specs/2026-11-11-fixed-terrain-design.md` approved with its defaults: TER-R7 invulnerability only after a Shield hit on terrain; the lead draws the 12 templates and the owner reviews them on a picture board; built after UI D3.
 - Consequence: U3 execution starts; terrain needs a mechanic spec (MEC-019) and a plan after U7.
+
+## 2026-11-11 - D3 layout unit: 360-wide board px, converted with d3()/d3m()
+- Context: D3 boards are drawn 360 wide; the existing `ui()` converts the D2 390-wide mock unit. U3 used board numbers with `ui()`, so Home was 8% small and shifted left.
+- Choice: D3 tables stay in board px (360 wide). Convert with `d3(px)` (canvas px) or `d3m(px)` (to a 390 mock size for widgets that call `ui()`), and read the canvas height in board px with `d3Height()` (src/game/ui/layout.ts). Old D2 screens keep `ui()` until they migrate.
+- Consequence: every U4..U6 D3 layout uses `d3`/`d3m`/`d3Height`; a test pins PLAY centred at 270 canvas px.

@@ -3,6 +3,11 @@ import { TOKENS } from '../uiTokens';
 // P3-0-R2 mockup px (390 wide) -> game px (540 wide).
 export const UI_SCALE = WIDTH / TOKENS.screen.w;
 export const ui = (px: number): number => px * UI_SCALE;
+// D3-R7/R11 the D3 boards are drawn 360 wide; ui() converts the older 390 wide mock unit, so D3 numbers need this extra step.
+export const D3_W = 360;
+export const d3m = (px: number): number => px * TOKENS.screen.w / D3_W; // D3 mock px -> ui() mock px
+export const d3 = (px: number): number => ui(d3m(px)); // D3 mock px -> canvas px
+export const d3Height = (): number => HEIGHT * D3_W / WIDTH; // canvas height in D3 mock px (HEIGHT read at call time)
 /** UIFIX-R7 minimum touch target: 48 CSS px on the 360 px wide reference phone, in game px (72). */
 export const REF_PHONE_CSS_W = 360;
 export const MIN_HIT_CSS = 48;
