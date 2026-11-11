@@ -73,6 +73,7 @@ export class HomeScene extends Phaser.Scene {
     if (want && !this.stopPulse && this.playBtn) {
       this.stopPulse = motionFor(this).pulse(this.playBtn);
       if (!this.sweep && sweepAllowed(reduceMotion(), isMotionOff(window.location.search))) this.makeSweep(time);
+      else if (this.sweep) { this.sweep.t0 = time; this.sweep.cycle = -1; } // D3-R21 re-sync sweeps with the restarted pulse
     } else if (!want && this.stopPulse) { this.stopPulse(); this.stopPulse = null; this.sweep?.band.setVisible(false); }
     const s = this.sweep, g = this.playGeom;
     if (s && g && this.stopPulse) { // D3-R21 one gloss sweep per pulse period
