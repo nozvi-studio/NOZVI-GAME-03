@@ -24,17 +24,6 @@ export const MENU = {
     textFont: 15, hillPeek: 60,
     trail: [[20, 190], [92, 190], [108, 174], [108, 150]], trailRadius: 16, trailStep: 3, shadeR: 15, bodyR: 12.5, hiR: 2, hiDx: -3, hiDy: -4, hiAlpha: 0.45,
     capy: { x: 62, y: 40, size: 116 }, mango: { right: 22, bottom: 34, size: 56, outer: 0.42, inner: 0.36, leaf: { dx: 0.12, dy: -0.3, w: 0.36, h: 0.2 } } },
-  home: {
-    hero: { w: 358, h: 270, gap: 10, radius: 32, shadowDepth: 3 }, stepperH: 36, playH: 74, playHFirst: 96, chipH: 38, hintH: 16, hillPeek: 40,
-    stepper: { btn: 36, chipGap: 8 },
-    play: { label: 38, labelFirst: 52, stroke: 7, strokeFirst: 7, chipH: 32, chipPadL: 10, chipPadR: 14, chipFont: 14, chipIcon: 18, chipRight: 24, labelLeft: 34 },
-    chips: { font: 15, padL: 10, padR: 14, padX: 18, gap: 8, icon: 18, iconGap: 6 },
-    hintFont: 13,
-    l1: { font: 14, underline: 1.5, underlineDy: 2 }, // UIFIX-R10 "Start from L1" text link
-    trail: [[16, 232], [170, 232], [170, 168], [250, 168], [250, 112]], trailRadius: 34, trailStep: 3, shadeR: 17, bodyR: 14.5, hiR: 2.5, hiDx: -4, hiDy: -5, hiAlpha: 0.45,
-    mango: { x: 26, y: 30, size: 58, outer: 0.42, inner: 0.36, leaf: { dx: 0.12, dy: -0.3, w: 0.36, h: 0.2 } },
-    capy: { x: 188, y: 42, size: 124 },
-  },
   loadout: {
     slotsH: 156, slotCircle: 84, chipsH: 44, cardH: 80, cardGap: 10, cards: 4, goH: 78, goBottom: 30,
     cardW: 358, cardR: 22, slotsR: 26, slotsPadTop: 16, slotsEdge: 8, slotCol: 150, slotRing: 7, slotShelf: 7, ringAlpha: 0.85, shelfAlpha: 0.3, slotIcon: 44, slotGap: 8,
@@ -67,5 +56,5 @@ export const D3_HOME = {
   tall: { h: 779, chip: 48, logo: 103, hero: 258, heroW: 343, play: 517, start: 617, links: 679, linkSide: 28, linkW: 146 },
   side: 14, round: 48, bestH: 40, bestW: 132, bestDy: 2, logoScale: 0.92, heroAspect: 2 / 3,
   playX: 40, playH: 84, startX: 70, startH: 48, arrow: 48, arrowGap: 6, linkH: 48, linkFont: 15, hintX: 40, hintH: 36,
-  carryInset: 8,
+  carryInset: 8, chipIconRatio: 1.2, chipIconGap: 6,
 } as const;

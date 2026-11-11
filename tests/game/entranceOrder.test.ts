@@ -7,11 +7,12 @@ const m = json.motion;
 const ids = (o: { id: string }[]): string[] => o.map(s => s.id);
 
 describe('MOT-2 entrance orders', () => {
-  it('MOT-2-R5 Home order is gear, logo lines, hero, stepper, play, chips, hint', () => {
-    expect(ids(HOME_ORDER)).toEqual(['gear', 'logo1', 'logo2', 'hero', 'stepper', 'play', 'chips', 'hint']);
+  it('MOT-2-R5 D3-R11 Home order is gear, best, logo lines, hero, stepper, play, hint, links', () => {
+    expect(ids(HOME_ORDER)).toEqual(['gear', 'best', 'logo1', 'logo2', 'hero', 'stepper', 'play', 'hint', 'links']);
     expect(HOME_ORDER[0]).toMatchObject({ motion: 'pop' });
-    expect(HOME_ORDER[1]).toMatchObject({ motion: 'slide', from: 'up' });
-    expect(HOME_ORDER[5]).toMatchObject({ motion: 'slide', from: 'down' });
+    expect(HOME_ORDER[1]).toMatchObject({ motion: 'pop' });
+    expect(HOME_ORDER[2]).toMatchObject({ motion: 'slide', from: 'up' });
+    expect(HOME_ORDER[6]).toMatchObject({ motion: 'slide', from: 'down' });
   });
   it('MOT-2-R5 Loadout order follows the list and every card past index 6 enters at the cap', () => {
     const o = loadoutOrder(12);

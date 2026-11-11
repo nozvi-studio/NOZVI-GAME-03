@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): Home scene rebuilt on D3 - background, logo, hero, PLAY, start row, hint, link row; `homeExtras`, `butterChip`; D2 Home column removed (D3-R11).
 - feat(ui): D3 Home layout rects at every canvas height (`homeRects`, `D3_HOME`) (D3-R11, D3-R8).
 - feat(ui): D3 Home snake hero (`heroSpec` body and highlight paths, `snakeHero`, `D3_HERO` metrics) (D3-R11).
 - feat(ui): D3 two-line outlined logo (`logoSpec`, `d3Logo`, `D3_LOGO` metrics) (D3-R11).

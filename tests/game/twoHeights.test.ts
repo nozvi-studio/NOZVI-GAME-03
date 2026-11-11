@@ -3,7 +3,7 @@ import { hudLayout } from '../../src/game/hud/hudLayout';
 import { BOARD, HEIGHT, setHeight, VIEW, WIDTH } from '../../src/game/layout';
 import { previewRects } from '../../src/game/ui/artPreviewLayout';
 import { layoutColumn } from '../../src/game/ui/layout';
-import { bootColumn, homeColumn, loadoutColumn, resultsColumn, settingsColumn } from '../../src/game/ui/menuLayout';
+import { bootColumn, loadoutColumn, resultsColumn, settingsColumn } from '../../src/game/ui/menuLayout';
 
 const MIN = 0.85; // balance.ui.minShrink
 afterEach(() => setHeight(VIEW.minH));
@@ -24,8 +24,6 @@ describe.each([960, 1170])('D3-R7 layouts at HEIGHT %i', (h) => {
   it(`D3-R7 every menu column fits without shrinking below minShrink at ${h}`, () => {
     setHeight(h);
     const specs = [
-      homeColumn({ compact: false, stepper: true, extras: true, hint: true }, MIN),
-      homeColumn({ compact: true, stepper: false, extras: false, hint: false }, MIN),
       loadoutColumn(MIN), loadoutColumn(MIN, true), settingsColumn(MIN),
       resultsColumn({ banner: true, energy: true }, MIN), resultsColumn({ banner: false, energy: false }, MIN),
       bootColumn(MIN),

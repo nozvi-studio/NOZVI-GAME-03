@@ -9,9 +9,9 @@ const pop = (id: string): EntranceStep => ({ id, motion: 'pop' });
 const slide = (id: string, from: Dir | 'nav'): EntranceStep => ({ id, motion: 'slide', from });
 const fade = (id: string): EntranceStep => ({ id, motion: 'fade' });
 
-/** MOT-2-R5 Home: gear pops, logo slides from the top, the rest slides up from below; the hill is static. */
-export const HOME_ORDER: EntranceStep[] = [pop('gear'), slide('logo1', 'up'), slide('logo2', 'up'), pop('hero'),
-  slide('stepper', 'down'), slide('play', 'down'), slide('chips', 'down'), slide('hint', 'down')];
+/** D3-R11 / MOT-2-R5 Home: gear and Best pop, logo slides from the top, hero pops, the rest slides up from below. */
+export const HOME_ORDER: EntranceStep[] = [pop('gear'), pop('best'), slide('logo1', 'up'), slide('logo2', 'up'), pop('hero'),
+  slide('stepper', 'down'), slide('play', 'down'), slide('hint', 'down'), slide('links', 'down')];
 
 /** MOT-2-R5 Loadout: back, title, slots, start chips, one slide per card in list order, action last. */
 export const loadoutOrder = (cardCount: number): EntranceStep[] => [pop('back'), fade('title'), pop('slots'), slide('chips', 'nav'),

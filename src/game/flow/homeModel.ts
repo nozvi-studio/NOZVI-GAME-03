@@ -35,3 +35,8 @@ export function stepCheckpoint(m: HomeModel, selected: number, dir: -1 | 1): num
   const i = Math.max(0, list.indexOf(selected));
   return list[Math.min(list.length - 1, Math.max(0, i + dir))]!;
 }
+
+// D3-R11 Home extras: Best chip only once a score exists (H5); Loadout entry label when the Loadout is offered (H2).
+export function homeExtras(bestScore: number, showLoadout: boolean, slotCount: 1 | 2): { best: number | null; loadoutKey: 'home.loadoutOne' | 'home.loadoutTwo' | null } {
+  return { best: bestScore > 0 ? bestScore : null, loadoutKey: showLoadout ? (slotCount === 1 ? 'home.loadoutOne' : 'home.loadoutTwo') : null };
+}

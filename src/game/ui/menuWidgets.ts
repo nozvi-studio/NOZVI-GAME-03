@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { WIDTH } from '../layout';
-import { TOKENS, toInt, FONT_TITLE } from '../uiTokens';
+import { TOKENS, toInt, FONT_TITLE, FONT_UI } from '../uiTokens';
 import { t } from '../text';
 import type { MotionTarget } from '../motion/motionCore';
 import { attachFeedback } from './feedback';
@@ -8,11 +8,11 @@ import type { FeedbackKind } from './feedbackModel';
 import { drawIcon, type IconId } from './icons';
 import { hitSize, ui, type ColumnLayout } from './layout';
 import { logoLetters, logoSpec, type LogoLine } from './menuLayout';
-import { D3_HERO, MENU } from './menuMetrics';
+import { D3_HERO, D3_HOME, MENU } from './menuMetrics';
 import { heroBody, heroHighlight } from './heroSpec';
 import { headKey } from '../art/capyRig';
 import { activeSkin } from '../art/skins';
-import { hostOf, lipPx, skinTexture } from './skin';
+import { hostOf, lipPx, skinTexture, type SkinState } from './skin';
 import { tapBurst } from './touchFx';
 import { titleText } from './widgets';
 
@@ -110,4 +110,18 @@ export function snakeHero(scene: Phaser.Scene, cx: number, top: number, wMock: n
   const hc = at(H.head.x, H.head.y);
   const head = scene.add.image(hc.x, hc.y, headKey(activeSkin(), 'idle', 'large')).setDisplaySize(H.head.w * k, H.head.w * k);
   return { c: scene.add.container(0, 0, [g, head]), head };
+}
+
+// D3-R11 butter (secondary tone) chip of a fixed mock size, optional leading icon; static, not tappable.
+export function butterChip(scene: Phaser.Scene, cx: number, cy: number, wMock: number, hMock: number, text: string, fontMock: number, icon?: IconId): Phaser.GameObjects.Container {
+  const w = ui(wMock), h = ui(hMock), tone = TOKENS.d3.tone.secondary, lip = lipPx('chip', 'secondary', ui(1));
+  const host = hostOf(scene), key = (st: SkinState) => skinTexture(host, 'chip', 'secondary', w, h, st, ui(1));
+  const tx = scene.add.text(0, 0, text, { fontFamily: FONT_UI, fontStyle: '900', fontSize: `${ui(fontMock)}px`, color: tone.text }).setOrigin(0.5);
+  const parts: Phaser.GameObjects.GameObject[] = [scene.add.image(0, lip, key('lip')), scene.add.image(0, 0, key('rest')), tx];
+  if (icon) {
+    const ico = ui(fontMock * D3_HOME.chipIconRatio), gap = ui(D3_HOME.chipIconGap), total = ico + gap + tx.width;
+    const g = scene.add.graphics().setPosition(-total / 2 + ico / 2, 0); drawIcon(g, icon, ico, toInt(tone.text));
+    tx.setX(-total / 2 + ico + gap + tx.width / 2); parts.push(g);
+  }
+  return scene.add.container(cx, cy, parts).setSize(w, h);
 }

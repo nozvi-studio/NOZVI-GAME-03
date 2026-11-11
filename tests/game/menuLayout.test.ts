@@ -2,16 +2,9 @@ import { expect, it } from 'vitest';
 import { layoutColumn, ui } from '../../src/game/ui/layout';
 import { MENU } from '../../src/game/ui/menuMetrics';
 import { TOKENS } from '../../src/game/uiTokens';
-import { bootColumn, homeColumn, isCompactHeight, l1Link, logoLetters, logoSpec, loadoutCards, loadoutColumn, resultsCardTop, resultsColumn, settingsColumn, smoothPath, homeRects, type HomeRects, type Rect } from '../../src/game/ui/menuLayout';
+import { bootColumn, isCompactHeight, logoLetters, logoSpec, loadoutCards, loadoutColumn, resultsCardTop, resultsColumn, settingsColumn, smoothPath, homeRects, type HomeRects, type Rect } from '../../src/game/ui/menuLayout';
 const MIN = 0.85; // balance.ui.minShrink
 
-it('P3b3-R3 every Home variant fits at 540x960 without shrinking below minShrink', () => {
-  for (const compact of [true, false]) for (const stepper of [true, false]) for (const extras of [true, false]) for (const hint of [true, false]) {
-    const l = layoutColumn(homeColumn({ compact, stepper, extras, hint }, MIN));
-    expect(l.fits, JSON.stringify({ compact, stepper, extras, hint, s: l.middleScale })).toBe(true);
-    expect(l.middleScale).toBeGreaterThanOrEqual(MIN);
-  }
-});
 it('P3b3-R3 Loadout, Settings, Results and Boot fit', () => {
   expect(layoutColumn(loadoutColumn(MIN)).fits).toBe(true);
   expect(layoutColumn(settingsColumn(MIN)).fits).toBe(true);
@@ -69,14 +62,6 @@ it('UIFIX-R9 compact cards are shorter but still hold the icon disc, and the col
   const a = layoutColumn(loadoutColumn(MIN)), b = layoutColumn(loadoutColumn(MIN, true));
   expect(b.fits).toBe(true);
   expect(b.middleScale).toBeGreaterThan(a.middleScale);                  // text is larger on short phones
-});
-
-it('UIFIX-R10 Start from L1 is a link: smaller than the chip text, row-height hit area, padded sides', () => {
-  const l = MENU.home;
-  expect(l.l1.font).toBeLessThan(l.chips.font);
-  const k = l1Link(80);
-  expect(k.w).toBe(80 + 2 * l.chips.padX);
-  expect(k.h).toBe(l.chipH);
 });
 
 it('D3-R11 logoSpec: MANGO yellow with mango line, SNAKE white with ink line, ink drop under both', () => {

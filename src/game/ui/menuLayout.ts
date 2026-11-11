@@ -3,11 +3,6 @@ import { hitSize, ui, type ColumnSpec } from './layout';
 import { TOKENS } from '../uiTokens';
 import { D3_HOME, D3_LOGO, MENU } from './menuMetrics';
 
-/** UIFIX-R10 hit box of the "Start from L1" text link (mockup px): padded like a chip, same height as the chip row. */
-export function l1Link(textWidthMock: number): { w: number; h: number } {
-  return { w: textWidthMock + 2 * MENU.home.chips.padX, h: MENU.home.chipH };
-}
-
 export interface HeaderButton { cx: number; cy: number; hit: number }
 /** UIFIX-R7 round header button (Settings gear on the right, back on the left): mockup centre, >= 48 CSS px hit area. */
 export function headerButton(side: 'left' | 'right'): HeaderButton {
@@ -20,13 +15,6 @@ const head = MENU.padTop + MENU.round; // 66
 /** Trail samples per px of corner arc (smooth enough at phone width, cheap to draw). */
 const ARC_SAMPLES_PER_PX = 1.6;
 
-/** P3b3-R3 Home: top = settings gear row + logo; middle = hero, stepper, Play, chips, hint; bottom = hill peek. */
-export function homeColumn(f: { compact: boolean; stepper: boolean; extras: boolean; hint: boolean }, minShrink: number): Spec {
-  const h = MENU.home, g = MENU.gap;
-  const middle = h.hero.gap + h.hero.h + (f.stepper ? g + h.stepperH : 0) + g + (f.compact ? h.playHFirst : h.playH)
-    + (f.extras ? g + h.chipH : 0) + (f.hint ? g + h.hintH : 0);
-  return { top: head + g + MENU.logo.height, middle, bottom: h.hillPeek, minShrink };
-}
 /** UIFIX-R9 canvas CSS height below which Loadout cards use the compact metrics. */
 export const isCompactHeight = (cssHeight: number): boolean => cssHeight < MENU.loadout.compactBelowCssH;
 export function loadoutCards(compact: boolean): { cardH: number; cardGap: number } {
