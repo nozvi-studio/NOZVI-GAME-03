@@ -1,6 +1,7 @@
 /** D3-R11 logo, 360x150 mock viewBox at scale 1 (boards.html logo()). capMid = cap-height centre / font size (Lilita caps). */
 /** textTop/textBottom = inked box of both lines incl. strokes and drop (viewBox units); layout rects use it so the logo does not collide with the header chips or the hero. */
-export const D3_LOGO = { w: 360, h: 150, font: 70, base: [64, 130], drop: 6, stroke: 5, backStroke: 16, capMid: 0.35, textTop: 8, textBottom: 144 } as const;
+/** inkW = horizontal ink width of the wider line (MANGO/SNAKE in Lilita 70 plus back stroke), viewBox units. */
+export const D3_LOGO = { w: 360, h: 150, font: 70, base: [64, 130], drop: 6, stroke: 5, backStroke: 16, capMid: 0.35, textTop: 8, textBottom: 144, inkW: 250 } as const;
 
 /** D3-R11 snake hero in a 360x240 viewBox (boards.html hero()). Cubic segments are [p0, c1, c2, p1]. */
 export const D3_HERO = {
@@ -58,4 +59,13 @@ export const MENU = {
     banner: { r: 20, pad: 12, disc: 36, icon: 20, gap: 12, font: 19 },
     progress: { barH: 18, gap: 10, chipH: 32, chipFont: 14, chipPadL: 10, chipPadR: 14, chipIcon: 18, chipGap: 6 },
   },
+} as const;
+
+/** D3-R11 Home anchors (mock px, 360 wide). `short` = Home 360x640 board, `tall` = Home 390x844 board scaled by 360/390. */
+export const D3_HOME = {
+  short: { h: 640, chip: 14, logo: 52, hero: 186, heroW: 318, play: 408, start: 512, links: 574, linkSide: 22, linkW: 152 },
+  tall: { h: 779, chip: 48, logo: 103, hero: 258, heroW: 343, play: 517, start: 617, links: 679, linkSide: 28, linkW: 146 },
+  side: 14, round: 48, bestH: 40, bestW: 132, bestDy: 2, logoScale: 0.92, heroAspect: 2 / 3,
+  playX: 40, playH: 84, startX: 70, startH: 48, arrow: 48, arrowGap: 6, linkH: 48, linkFont: 15, hintX: 40, hintH: 36,
+  carryInset: 8,
 } as const;

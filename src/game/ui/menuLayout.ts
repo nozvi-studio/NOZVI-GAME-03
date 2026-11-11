@@ -1,7 +1,7 @@
 import { WIDTH } from '../layout';
 import { hitSize, ui, type ColumnSpec } from './layout';
 import { TOKENS } from '../uiTokens';
-import { D3_LOGO, MENU } from './menuMetrics';
+import { D3_HOME, D3_LOGO, MENU } from './menuMetrics';
 
 /** UIFIX-R10 hit box of the "Start from L1" text link (mockup px): padded like a chip, same height as the chip row. */
 export function l1Link(textWidthMock: number): { w: number; h: number } {
@@ -108,4 +108,39 @@ export function smoothPath(pts: readonly Pt[], r: number, step: number): Pt[] {
   }
   line(pts[pts.length - 1]!);
   return out;
+}
+
+export interface Rect { x: number; y: number; w: number; h: number }
+export interface HomeFlags { start: boolean; stepper: boolean; l1: boolean; loadout: boolean; hint: boolean }
+export interface HomeRects {
+  best: Rect; settings: Rect; logo: Rect & { scale: number }; hero: Rect; play: Rect;
+  start?: Rect; prev?: Rect; next?: Rect; hint?: Rect; l1?: Rect; loadout?: Rect;
+}
+// D3-R11/R7 Home rects in mock px for a canvas `hm` mock px tall: anchors interpolate (and extrapolate up to 800) between the two boards.
+export function homeRects(hm: number, f: HomeFlags): HomeRects {
+  const D = D3_HOME, s = D.short, l = D.tall, u = (hm - s.h) / (l.h - s.h);
+  const at = (k: keyof typeof s): number => s[k] + (l[k] - s[k]) * u;
+  const W = 360, heroW = at('heroW');
+  const r: HomeRects = {
+    best: { x: D.side, y: at('chip') + D.bestDy, w: D.bestW, h: D.bestH },
+    settings: { x: W - D.side - D.round, y: at('chip'), w: D.round, h: D.round },
+    // inked text box only (D3_LOGO.textTop..textBottom); the logo viewBox top is y - textTop * scale
+    logo: { x: (W - D3_LOGO.inkW * D.logoScale) / 2, y: at('logo') + D3_LOGO.textTop * D.logoScale, w: D3_LOGO.inkW * D.logoScale,
+      h: (D3_LOGO.textBottom - D3_LOGO.textTop) * D.logoScale, scale: D.logoScale },
+    hero: { x: (W - heroW) / 2, y: at('hero'), w: heroW, h: heroW * D.heroAspect },
+    play: { x: D.playX, y: at('play'), w: W - 2 * D.playX, h: D.playH },
+  };
+  const sy = at('start');
+  if (f.start) {
+    r.start = { x: D.startX, y: sy, w: W - 2 * D.startX, h: D.startH };
+    if (f.stepper) {
+      r.prev = { x: D.startX - D.arrowGap - D.arrow, y: sy, w: D.arrow, h: D.arrow };
+      r.next = { x: W - D.startX + D.arrowGap, y: sy, w: D.arrow, h: D.arrow };
+    }
+  } else if (f.hint) r.hint = { x: D.hintX, y: sy + (D.startH - D.hintH) / 2, w: W - 2 * D.hintX, h: D.hintH };
+  const ly = at('links'), side = at('linkSide'), lw = at('linkW');
+  if (f.l1 && f.loadout) { r.l1 = { x: side, y: ly, w: lw, h: D.linkH }; r.loadout = { x: W - side - lw, y: ly, w: lw, h: D.linkH }; }
+  else if (f.l1) r.l1 = { x: (W - lw) / 2, y: ly, w: lw, h: D.linkH };
+  else if (f.loadout) r.loadout = { x: (W - lw) / 2, y: ly, w: lw, h: D.linkH };
+  return r;
 }
