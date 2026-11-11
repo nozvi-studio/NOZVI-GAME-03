@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): D3 Home snake hero (`heroSpec` body and highlight paths, `snakeHero`, `D3_HERO` metrics) (D3-R11).
 - feat(ui): D3 two-line outlined logo (`logoSpec`, `d3Logo`, `D3_LOGO` metrics) (D3-R11).
 - feat(ui): D3 screen background (gradient + ray fan), cached per biome and height (D3-R10).
 - docs: owner approvals 2026-11-11 (D3 boards, U3 rulings H1..H6, fixed terrain spec).

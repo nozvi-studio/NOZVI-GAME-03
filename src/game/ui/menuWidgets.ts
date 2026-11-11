@@ -8,7 +8,10 @@ import type { FeedbackKind } from './feedbackModel';
 import { drawIcon, type IconId } from './icons';
 import { hitSize, ui, type ColumnLayout } from './layout';
 import { logoLetters, logoSpec, type LogoLine } from './menuLayout';
-import { MENU } from './menuMetrics';
+import { D3_HERO, MENU } from './menuMetrics';
+import { heroBody, heroHighlight } from './heroSpec';
+import { headKey } from '../art/capyRig';
+import { activeSkin } from '../art/skins';
 import { hostOf, lipPx, skinTexture } from './skin';
 import { tapBurst } from './touchFx';
 import { titleText } from './widgets';
@@ -86,4 +89,25 @@ export function hill(scene: Phaser.Scene, topY: number): Phaser.GameObjects.Grap
 /** Big green Lilita pill label ("Play", "Go!", "Play again"): swap the P3-0 pill text to the title font (Lilita One is loaded at weight 400 only). */
 export function bigLabel(b: { text: Phaser.GameObjects.Text }, sizeMock: number, strokeMock: number): void {
   b.text.setFontFamily(FONT_TITLE).setFontStyle('normal').setFontSize(ui(sizeMock)).setStroke(TOKENS.green.line, ui(strokeMock));
+}
+
+// D3-R11 hero on the ray fan: ground shadow, outlined body with highlight, mango with halo, current skin head.
+export function snakeHero(scene: Phaser.Scene, cx: number, top: number, wMock: number): { c: Phaser.GameObjects.Container; head: Phaser.GameObjects.Image } {
+  const H = D3_HERO, k = ui(wMock) / H.w, x0 = cx - ui(wMock) / 2, at = (x: number, y: number) => ({ x: x0 + x * k, y: top + y * k });
+  const d = TOKENS.d3, g = scene.add.graphics();
+  const sh = at(H.shadow.x, H.shadow.y);
+  g.fillStyle(toInt(d.inkDeep), H.shadow.alpha).fillEllipse(sh.x, sh.y, 2 * H.shadow.rx * k, 2 * H.shadow.ry * k);
+  const body = heroBody(H.step);
+  for (const [col, w] of [[d.outline.snake, H.outlineW], [d.snake.body, H.bodyW]] as const) {
+    g.fillStyle(toInt(col)); for (const p of body) { const q = at(p.x, p.y); g.fillCircle(q.x, q.y, w * k / 2); }
+  }
+  g.fillStyle(toInt(d.white), H.hiAlpha); for (const p of heroHighlight(H.step)) { const q = at(p.x, p.y); g.fillCircle(q.x, q.y, H.hiW * k / 2); }
+  const M = H.mango, mc = at(M.x, M.y), s = M.size * k;
+  g.fillStyle(toInt(d.white), M.haloAlpha).fillCircle(mc.x, mc.y, M.haloR * s);
+  g.fillStyle(toInt(d.outline.mango)).fillEllipse(mc.x, mc.y, 2 * (M.rx + M.line) * s, 2 * (M.ry + M.line) * s);
+  g.fillStyle(toInt(d.tone.mango.face[1])).fillEllipse(mc.x, mc.y, 2 * M.rx * s, 2 * M.ry * s);
+  g.fillStyle(toInt(d.tone.primary.line)).fillEllipse(mc.x + M.leaf.dx * s, mc.y + M.leaf.dy * s, M.leaf.w * s, M.leaf.h * s);
+  const hc = at(H.head.x, H.head.y);
+  const head = scene.add.image(hc.x, hc.y, headKey(activeSkin(), 'idle', 'large')).setDisplaySize(H.head.w * k, H.head.w * k);
+  return { c: scene.add.container(0, 0, [g, head]), head };
 }

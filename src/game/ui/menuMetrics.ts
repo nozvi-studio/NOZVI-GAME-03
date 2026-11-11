@@ -2,6 +2,17 @@
 /** textTop/textBottom = inked box of both lines incl. strokes and drop (viewBox units); layout rects use it so the logo does not collide with the header chips or the hero. */
 export const D3_LOGO = { w: 360, h: 150, font: 70, base: [64, 130], drop: 6, stroke: 5, backStroke: 16, capMid: 0.35, textTop: 8, textBottom: 144 } as const;
 
+/** D3-R11 snake hero in a 360x240 viewBox (boards.html hero()). Cubic segments are [p0, c1, c2, p1]. */
+export const D3_HERO = {
+  w: 360, h: 240, step: 3,
+  body: [[[40, 196], [80, 196], [90, 156], [130, 156]], [[130, 156], [170, 156], [170, 196], [210, 196]], [[210, 196], [250, 196], [250, 126], [210, 106]]],
+  highlight: [[[44, 184], [80, 182], [92, 144], [130, 144]]],
+  outlineW: 56, bodyW: 46, hiW: 8, hiAlpha: 0.45,
+  shadow: { x: 180, y: 222, rx: 130, ry: 14, alpha: 0.25 },
+  head: { x: 206, y: 92, w: 144 },
+  mango: { x: 74, y: 70, size: 64, rx: 0.44, ry: 0.4, line: 0.06, haloR: 0.6, haloAlpha: 0.35, leaf: { dx: 0.12, dy: -0.42, w: 0.3, h: 0.14 } },
+} as const;
+
 // P3b3-R3 menu geometry in mockup px (390x844 reference). Pure data; scenes call ui(MENU.x.y).
 export const MENU = {
   padTop: 22, side: 16, round: 44, gap: 12, section: 14,
