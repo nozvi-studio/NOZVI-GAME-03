@@ -80,3 +80,22 @@ describe('MOT-2-R9/R10 runResultsSequence', () => {
     const n = x.calls.length; seq.skip(); expect(x.calls.length).toBe(n);
   });
 });
+
+// Bug 2026-11-11 (owner): Results stuck with invisible buttons. The sequence hides targets (alpha 0) before the
+// real Motion first sees them, so Motion's lazy rest capture stored alpha 0 and every entrance tweened to 0.
+import { createMotion } from '../../src/game/motion/motionCore';
+it('MOT-2-R9 with the real Motion, every target ends visible once the sequence has played', () => {
+  const adds: Record<string, unknown>[] = [];
+  const motion = createMotion({ tweens: { add: (c: Record<string, unknown>) => { adds.push(c); return { stop: () => {} }; }, killTweensOf: () => {} },
+    cfg: json.motion as never, softMs: 400, reduced: () => false, finePointer: true, ui: n => n, shake: { ampPx: 4, ms: 120 } });
+  const mk = (): MotionTarget => { const t = { x: 0, y: 0, alpha: 1, scaleX: 1, scaleY: 1,
+    setScale(x: number, y = x) { t.scaleX = x; t.scaleY = y; return t; }, setAlpha(a: number) { t.alpha = a; return t; },
+    setPosition(x: number, y = x) { t.x = x; t.y = y; return t; } }; return t; };
+  const targets = { title: mk(), card: mk(), score: mk(), home: mk(), again: mk() };
+  const text = { setText() {} };
+  const tl = resultsTimeline({ newBest: false, energy: false, banner: false, next: false, again: true }, json.motion as never);
+  runResultsSequence({ motion, later: (_ms, fn) => { fn(); return { remove() {} }; }, kill: () => {}, pulsePeriodMs: 900, reduced: false, off: false },
+    tl, targets, { text, value: 58 });
+  for (const a of adds) { for (const [k, v] of Object.entries(a)) if (typeof v === 'number' && k in targets.home) (a.targets as Record<string, number>)[k] = v; (a.onComplete as (() => void) | undefined)?.(); }
+  for (const [id, t] of Object.entries(targets)) expect(t.alpha, id).toBe(1);
+});

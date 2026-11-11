@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(ui): Results buttons stayed invisible after the entrance sequence (Motion captured a hidden rest alpha); MOT-2-R9 regression test.
 - docs(ui): U3 Boot and Home implementation plan (D3-R10, R11, R21 attention).
 - feat(ui): adaptive canvas height from the viewport aspect, live HEIGHT, page band colour (D3-R7); guard test against module-level HEIGHT constants; layout tests at 960 and 1170; agy browser pass at three sizes
 - docs(ui): D3 U1 codemap rows (skin kit, touch feedback), playtest screenshot record, status
