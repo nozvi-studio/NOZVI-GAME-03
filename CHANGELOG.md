@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): PLAY gloss sweep once per attention pulse, off under reduced motion / motion=off; `sweepModel`, `motion.d3.sweepBand/sweepAlpha` (D3-R21, D3-R28).
 - feat(ui): Home scene rebuilt on D3 - background, logo, hero, PLAY, start row, hint, link row; `homeExtras`, `butterChip`; D2 Home column removed (D3-R11).
 - feat(ui): D3 Home layout rects at every canvas height (`homeRects`, `D3_HOME`) (D3-R11, D3-R8).
 - feat(ui): D3 Home snake hero (`heroSpec` body and highlight paths, `snakeHero`, `D3_HERO` metrics) (D3-R11).

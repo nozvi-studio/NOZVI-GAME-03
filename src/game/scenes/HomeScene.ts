@@ -6,6 +6,8 @@ import { createSynth, type Synth } from '../audio/synth';
 import { debugStartLevel, isDebug, isMotionOff } from '../flow/debugFlag';
 import { HOME_ORDER, entranceEndMs } from '../flow/entranceOrder';
 import { breathScale, createIdleGate } from '../flow/homeIdle';
+import { sweepAllowed, sweepCycle, sweepX } from '../flow/sweepModel';
+import { TOKENS, toInt } from '../uiTokens';
 import { homeExtras, homeView, stepCheckpoint } from '../flow/homeModel';
 import { captureGroup, enter, goTo, motionFor, type EntranceTargets } from '../motion';
 import { reduceMotion } from '../render/palette';
@@ -29,11 +31,12 @@ export class HomeScene extends Phaser.Scene {
   private capy?: Phaser.GameObjects.Image; private playGeom?: { w: number; h: number }; private capyRest = { sx: 1, sy: 1 };
   private idle: { t0: number; gate: ReturnType<typeof createIdleGate> } | null = null; // MOT-2-R8
   private stopPulse: (() => void) | null = null; private playBtn?: Phaser.GameObjects.Container;
+  private sweep?: { band: Phaser.GameObjects.Graphics; maskG: Phaser.GameObjects.Graphics; t0: number; cycle: number; start: number }; // D3-R21
 
   constructor() { super('Home'); }
 
   create(): void {
-    this.entered = false; this.idle = null; this.stopPulse = null; this.targets = {}; this.capy = undefined; this.playBtn = undefined; // Phaser reuses the instance
+    this.entered = false; this.idle = null; this.stopPulse = null; this.targets = {}; this.capy = undefined; this.playBtn = undefined; this.sweep = undefined; // Phaser reuses the instance
     this.session = this.registry.get('session') as Session;
     this.synth = createSynth(); this.synth.setOn(this.session.save().settings.sound);
     screenBackground(this, 1);
@@ -67,8 +70,37 @@ export class HomeScene extends Phaser.Scene {
     const cfg = (this.registry.get('balance') as Balance).motion;
     if (this.capy) { const k = breathScale(time - idle.t0, cfg); this.capy.setScale(this.capyRest.sx * k.sx, this.capyRest.sy * k.sy); }
     const want = idle.gate.allowed(time);
-    if (want && !this.stopPulse && this.playBtn) this.stopPulse = motionFor(this).pulse(this.playBtn);
-    else if (!want && this.stopPulse) { this.stopPulse(); this.stopPulse = null; }
+    if (want && !this.stopPulse && this.playBtn) {
+      this.stopPulse = motionFor(this).pulse(this.playBtn);
+      if (!this.sweep && sweepAllowed(reduceMotion(), isMotionOff(window.location.search))) this.makeSweep(time);
+    } else if (!want && this.stopPulse) { this.stopPulse(); this.stopPulse = null; this.sweep?.band.setVisible(false); }
+    const s = this.sweep, g = this.playGeom;
+    if (s && g && this.stopPulse) { // D3-R21 one gloss sweep per pulse period
+      const c = sweepCycle(time, s.t0, cfg.pulsePeriodMs);
+      if (c !== s.cycle) { s.cycle = c; s.start = time; }
+      const x = sweepX(time - s.start, cfg.d3.sweepMs, g.w, g.w * cfg.d3.sweepBand);
+      s.band.setVisible(x !== null); if (x !== null) s.band.setX(x);
+    }
+  }
+
+  // D3-R21 white skewed band clipped to the PLAY face; child of the button so it follows the pulse.
+  private makeSweep(time: number): void {
+    const btn = this.playBtn, g = this.playGeom; if (!btn || !g) return;
+    const d3 = (this.registry.get('balance') as Balance).motion.d3, bw = g.w * d3.sweepBand, sk = g.h / 2;
+    const band = this.add.graphics().setVisible(false);
+    band.fillStyle(toInt(TOKENS.d3.white), d3.sweepAlpha);
+    band.fillPoints([new Phaser.Geom.Point(-bw / 2 + sk, -g.h / 2), new Phaser.Geom.Point(bw / 2 + sk, -g.h / 2),
+      new Phaser.Geom.Point(bw / 2 - sk, g.h / 2), new Phaser.Geom.Point(-bw / 2 - sk, g.h / 2)], true);
+    btn.add(band);
+    const maskG = this.make.graphics({}, false);
+    maskG.fillStyle(toInt(TOKENS.d3.white)).fillRoundedRect(btn.x - g.w / 2, btn.y - g.h / 2, g.w, g.h, ui(TOKENS.d3.shape.radiusBig));
+    band.setMask(maskG.createGeometryMask());
+    this.sweep = { band, maskG, t0: time, cycle: -1, start: -1e9 };
+    this.events.once('shutdown', () => this.clearSweep());
+  }
+  private clearSweep(): void {
+    const s = this.sweep; this.sweep = undefined; if (!s) return;
+    s.band.setVisible(false); s.band.destroy(); s.maskG.destroy();
   }
 
   // MEC-003-R21 debug-only log export and console summary helper (P1 design §11).
@@ -125,7 +157,7 @@ export class HomeScene extends Phaser.Scene {
 
   // Rebuilds the middle block (hero, start row, PLAY, hint, links) from the view model.
   private build(): void {
-    this.stopPulse?.(); this.stopPulse = null; this.body?.destroy(true); // the pulse stops before its target is destroyed
+    this.stopPulse?.(); this.stopPulse = null; this.clearSweep(); this.body?.destroy(true); // the pulse stops before its target is destroyed
     const v = this.homeView(), ex = this.extras(), R = this.rects();
     const px = (r: Rect) => ({ cx: ui(r.x + r.w / 2), cy: ui(r.y + r.h / 2) });
     const body = (this.body = this.add.container(0, 0));
