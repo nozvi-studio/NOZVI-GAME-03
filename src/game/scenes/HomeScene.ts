@@ -156,7 +156,7 @@ export class HomeScene extends Phaser.Scene {
       if (this.entered) motionFor(this).popIn(mid, 0); // MOT-2-R6 confirm the new start-at value
     }
     if (R.hint && v.hint) { // H3 next checkpoint hint
-      const h = butterChip(this, px(R.hint).cx, px(R.hint).cy, R.hint.w, R.hint.h, t(v.hint.key, { level: v.hint.level }), D3_HOME.linkFont);
+      const h = butterChip(this, px(R.hint).cx, px(R.hint).cy, R.hint.w, R.hint.h, t(v.hint.key, { level: v.hint.level }), D3_HOME.linkFont, 'flag');
       body.add(h); t_.hint = h;
     }
     const links: Phaser.GameObjects.Container[] = [];
