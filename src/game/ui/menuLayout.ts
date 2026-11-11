@@ -1,7 +1,7 @@
 import { WIDTH } from '../layout';
 import { hitSize, ui, type ColumnSpec } from './layout';
 import { TOKENS } from '../uiTokens';
-import { D3_HOME, D3_LOGO, MENU } from './menuMetrics';
+import { D3_BOOT, D3_HOME, D3_LOGO, MENU } from './menuMetrics';
 
 export interface HeaderButton { cx: number; cy: number; hit: number }
 /** UIFIX-R7 round header button (Settings gear on the right, back on the left): mockup centre, >= 48 CSS px hit area. */
@@ -44,9 +44,14 @@ export function resultsColumn(f: { banner: boolean; energy: boolean }, minShrink
   const middle = resultsCardTop() + r.cardH + (f.energy ? g + r.energyH : 0) + (f.banner ? g + r.bannerH : 0) + g + r.progressH;
   return { top: head, middle, bottom: r.bottom + r.againH + MENU.gap, minShrink };
 }
-export function bootColumn(minShrink: number): Spec {
-  const b = MENU.boot;
-  return { top: b.top + MENU.logo.height, middle: b.heroGap + b.hero + b.barGap + b.barH + b.textGap + b.textH, bottom: 0, minShrink };
+// D3-R10 Boot rects (mock px): board positions shifted down by half the spare height.
+export function bootRects(hm: number): { logo: Rect & { scale: number }; bar: Rect; text: Rect } {
+  const B = D3_BOOT, off = Math.max(0, (hm - B.h) / 2);
+  return {
+    logo: { x: (360 - D3_LOGO.w * B.logoScale) / 2, y: B.logoTop + off, w: D3_LOGO.w * B.logoScale, h: D3_LOGO.h * B.logoScale, scale: B.logoScale }, // y = viewBox top
+    bar: { x: B.barX, y: B.barY + off, w: 360 - 2 * B.barX, h: B.barH },
+    text: { x: 0, y: B.textY + off, w: 360, h: B.textH },
+  };
 }
 
 export interface LogoLetter { ch: string; color: string; rotDeg: number; dy: number }

@@ -2,13 +2,12 @@ import { expect, it } from 'vitest';
 import { layoutColumn, ui } from '../../src/game/ui/layout';
 import { MENU } from '../../src/game/ui/menuMetrics';
 import { TOKENS } from '../../src/game/uiTokens';
-import { bootColumn, isCompactHeight, logoLetters, logoSpec, loadoutCards, loadoutColumn, resultsCardTop, resultsColumn, settingsColumn, smoothPath, homeRects, type HomeRects, type Rect } from '../../src/game/ui/menuLayout';
+import { bootRects, isCompactHeight, logoLetters, logoSpec, loadoutCards, loadoutColumn, resultsCardTop, resultsColumn, settingsColumn, smoothPath, homeRects, type HomeRects, type Rect } from '../../src/game/ui/menuLayout';
 const MIN = 0.85; // balance.ui.minShrink
 
-it('P3b3-R3 Loadout, Settings, Results and Boot fit', () => {
+it('P3b3-R3 Loadout, Settings and Results fit', () => {
   expect(layoutColumn(loadoutColumn(MIN)).fits).toBe(true);
   expect(layoutColumn(settingsColumn(MIN)).fits).toBe(true);
-  expect(layoutColumn(bootColumn(MIN)).fits).toBe(true);
   for (const banner of [true, false]) for (const energy of [true, false])
     expect(layoutColumn(resultsColumn({ banner, energy }, MIN)).fits).toBe(true);
 });
@@ -119,4 +118,11 @@ it('D3-R11 H2 a single link button is centred; two links sit left and right', ()
   expect(one.x + one.w / 2).toBeCloseTo(180);
   const two = homeRects(640, { start: true, stepper: false, l1: true, loadout: true, hint: false });
   expect(two.l1!.x).toBe(22); expect(two.loadout!.x + two.loadout!.w).toBe(338);
+});
+it('D3-R10 bootRects: board positions at 640, group centred on taller canvases, all inside', () => {
+  const a = bootRects(640);
+  expect(a.bar).toEqual({ x: 60, y: 420, w: 240, h: 26 });
+  const b = bootRects(780);
+  expect(b.bar.y - a.bar.y).toBeCloseTo(70); expect(b.logo.y - a.logo.y).toBeCloseTo(70);
+  for (const hm of [640, 779, 800]) { const r = bootRects(hm); expect(r.text.y + r.text.h).toBeLessThanOrEqual(hm); }
 });

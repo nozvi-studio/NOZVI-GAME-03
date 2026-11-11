@@ -14,16 +14,15 @@ export const D3_HERO = {
   mango: { x: 74, y: 70, size: 64, rx: 0.44, ry: 0.4, line: 0.06, haloR: 0.6, haloAlpha: 0.35, leaf: { dx: 0.12, dy: -0.42, w: 0.3, h: 0.14 } },
 } as const;
 
+/** D3-R10 Boot board 360x640 (mock px); extra canvas height is split above and below the group. */
+export const D3_BOOT = { h: 640, logoTop: 150, logoScale: 1, barX: 60, barY: 420, barH: 26, textY: 456, textH: 20, textFont: 15 } as const;
+
 // P3b3-R3 menu geometry in mockup px (390x844 reference). Pure data; scenes call ui(MENU.x.y).
 export const MENU = {
   padTop: 22, side: 16, round: 44, gap: 12, section: 14,
   widgets: { shelfDy: 6, logoGap: 1, logoSpace: 0.25, shelfAlpha: 0.6, iconRatio: 0.5 },
   hill: { w: 530, topH: 260, topDy: 130, bottomH: 240, bottomDy: 150 },
   logo: { size: 66, lineH: 63, overlap: 4, shadowY: 6, height: 128 },
-  boot: { top: 96, heroGap: 46, hero: 240, barGap: 44, barW: 260, barH: 20, textGap: 10, textH: 18,
-    textFont: 15, hillPeek: 60,
-    trail: [[20, 190], [92, 190], [108, 174], [108, 150]], trailRadius: 16, trailStep: 3, shadeR: 15, bodyR: 12.5, hiR: 2, hiDx: -3, hiDy: -4, hiAlpha: 0.45,
-    capy: { x: 62, y: 40, size: 116 }, mango: { right: 22, bottom: 34, size: 56, outer: 0.42, inner: 0.36, leaf: { dx: 0.12, dy: -0.3, w: 0.36, h: 0.2 } } },
   loadout: {
     slotsH: 156, slotCircle: 84, chipsH: 44, cardH: 80, cardGap: 10, cards: 4, goH: 78, goBottom: 30,
     cardW: 358, cardR: 22, slotsR: 26, slotsPadTop: 16, slotsEdge: 8, slotCol: 150, slotRing: 7, slotShelf: 7, ringAlpha: 0.85, shelfAlpha: 0.3, slotIcon: 44, slotGap: 8,
