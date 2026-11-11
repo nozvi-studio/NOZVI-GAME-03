@@ -1,12 +1,13 @@
 import Phaser from 'phaser';
 import { WIDTH } from '../layout';
 import { TOKENS, toInt, FONT_TITLE } from '../uiTokens';
+import { t } from '../text';
 import type { MotionTarget } from '../motion/motionCore';
 import { attachFeedback } from './feedback';
 import type { FeedbackKind } from './feedbackModel';
 import { drawIcon, type IconId } from './icons';
 import { hitSize, ui, type ColumnLayout } from './layout';
-import { logoLetters } from './menuLayout';
+import { logoLetters, logoSpec, type LogoLine } from './menuLayout';
 import { MENU } from './menuMetrics';
 import { hostOf, lipPx, skinTexture } from './skin';
 import { tapBurst } from './touchFx';
@@ -46,6 +47,19 @@ export function roundIconButton(scene: Phaser.Scene, x: number, y: number, diame
   const hit = hitSize(d); // UIFIX-R7
   tap(scene, x, y, hit, hit, `${name}-hit`, () => { tapBurst(scene, x, y, 'light'); action(); }, { visual: [face, ic], kind: 'round', navigates: opts.navigates });
   return c;
+}
+
+// D3-R11 logo: per line, an ink back text (thick stroke, dropped) under the coloured front text.
+export function d3Logo(scene: Phaser.Scene, cx: number, top: number, scale: number): { mango: Phaser.GameObjects.Container; snake: Phaser.GameObjects.Container } {
+  const s = logoSpec(scale);
+  const make = (l: LogoLine): Phaser.GameObjects.Container => {
+    const st = (fill: string, stroke: string, px: number): Phaser.Types.GameObjects.Text.TextStyle =>
+      ({ fontFamily: FONT_TITLE, fontSize: `${ui(s.fontPx)}px`, color: fill, stroke, strokeThickness: ui(px) });
+    const back = scene.add.text(0, ui(l.backY - l.y), t(l.key), st(l.back, l.back, l.backStrokePx)).setOrigin(0.5);
+    const front = scene.add.text(0, 0, t(l.key), st(l.fill, l.stroke, l.strokePx)).setOrigin(0.5);
+    return scene.add.container(cx, top + ui(l.y), [back, front]);
+  };
+  return { mango: make(s.lines[0]!), snake: make(s.lines[1]!) };
 }
 
 /** One logo line (e.g. MANGO, GAME OVER): coloured, tilted Lilita letters with the outline and drop shadow. */

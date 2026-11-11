@@ -1,7 +1,8 @@
 import { expect, it } from 'vitest';
 import { layoutColumn, ui } from '../../src/game/ui/layout';
 import { MENU } from '../../src/game/ui/menuMetrics';
-import { bootColumn, homeColumn, isCompactHeight, l1Link, loadoutCards, loadoutColumn, logoLetters, resultsCardTop, resultsColumn, settingsColumn, smoothPath } from '../../src/game/ui/menuLayout';
+import { TOKENS } from '../../src/game/uiTokens';
+import { bootColumn, homeColumn, isCompactHeight, l1Link, logoLetters, logoSpec, loadoutCards, loadoutColumn, resultsCardTop, resultsColumn, settingsColumn, smoothPath } from '../../src/game/ui/menuLayout';
 const MIN = 0.85; // balance.ui.minShrink
 
 it('P3b3-R3 every Home variant fits at 540x960 without shrinking below minShrink', () => {
@@ -76,4 +77,14 @@ it('UIFIX-R10 Start from L1 is a link: smaller than the chip text, row-height hi
   const k = l1Link(80);
   expect(k.w).toBe(80 + 2 * l.chips.padX);
   expect(k.h).toBe(l.chipH);
+});
+
+it('D3-R11 logoSpec: MANGO yellow with mango line, SNAKE white with ink line, ink drop under both', () => {
+  const s = logoSpec(0.92);
+  expect(s.lines.map(l => l.key)).toEqual(['logo.mango', 'logo.snake']);
+  expect(s.lines[0]).toMatchObject({ fill: TOKENS.d3.logo.mango, stroke: TOKENS.d3.logo.mangoLine });
+  expect(s.lines[1]).toMatchObject({ fill: TOKENS.d3.white, stroke: TOKENS.d3.ink });
+  for (const l of s.lines) { expect(l.back).toBe(TOKENS.d3.inkDeep); expect(l.backY - l.y).toBeCloseTo(6 * 0.92); }
+  expect(s.fontPx).toBeCloseTo(70 * 0.92); expect(s.h).toBeCloseTo(150 * 0.92);
+  expect(s.lines[0]!.y).toBeCloseTo((64 - 0.35 * 70) * 0.92); // centre of the caps, mock px from the logo top
 });

@@ -1,7 +1,7 @@
 import { WIDTH } from '../layout';
 import { hitSize, ui, type ColumnSpec } from './layout';
 import { TOKENS } from '../uiTokens';
-import { MENU } from './menuMetrics';
+import { D3_LOGO, MENU } from './menuMetrics';
 
 /** UIFIX-R10 hit box of the "Start from L1" text link (mockup px): padded like a chip, same height as the chip row. */
 export function l1Link(textWidthMock: number): { w: number; h: number } {
@@ -71,6 +71,17 @@ export function logoLetters(text: string, colorOffset: number): LogoLetter[] {
     const idx = n++;
     return { ch, color: cols[(idx + colorOffset) % cols.length]!, rotDeg: i % 2 ? 3 : -3, dy: i % 2 ? 2 : -2 };
   });
+}
+
+export interface LogoLine { key: 'logo.mango' | 'logo.snake'; y: number; backY: number; fill: string; stroke: string; strokePx: number; back: string; backStrokePx: number }
+export interface LogoSpec { w: number; h: number; fontPx: number; lines: LogoLine[] }
+// D3-R11 two-line logo in mock px from the logo top; y values are cap centres (text origin 0.5, 0.5).
+export function logoSpec(scale: number): LogoSpec {
+  const L = D3_LOGO, d = TOKENS.d3, mid = L.capMid * L.font;
+  const line = (key: LogoLine['key'], base: number, fill: string, stroke: string): LogoLine => ({
+    key, y: (base - mid) * scale, backY: (base - mid + L.drop) * scale, fill, stroke, strokePx: L.stroke * scale, back: d.inkDeep, backStrokePx: L.backStroke * scale });
+  return { w: L.w * scale, h: L.h * scale, fontPx: L.font * scale,
+    lines: [line('logo.mango', L.base[0], d.logo.mango, d.logo.mangoLine), line('logo.snake', L.base[1], d.white, d.ink)] };
 }
 
 export interface Pt { x: number; y: number }

@@ -1,3 +1,7 @@
+/** D3-R11 logo, 360x150 mock viewBox at scale 1 (boards.html logo()). capMid = cap-height centre / font size (Lilita caps). */
+/** textTop/textBottom = inked box of both lines incl. strokes and drop (viewBox units); layout rects use it so the logo does not collide with the header chips or the hero. */
+export const D3_LOGO = { w: 360, h: 150, font: 70, base: [64, 130], drop: 6, stroke: 5, backStroke: 16, capMid: 0.35, textTop: 8, textBottom: 144 } as const;
+
 // P3b3-R3 menu geometry in mockup px (390x844 reference). Pure data; scenes call ui(MENU.x.y).
 export const MENU = {
   padTop: 22, side: 16, round: 44, gap: 12, section: 14,
