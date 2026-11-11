@@ -101,7 +101,7 @@ export function snakeHero(scene: Phaser.Scene, cx: number, top: number, wMock: n
   for (const [col, w] of [[d.outline.snake, H.outlineW], [d.snake.body, H.bodyW]] as const) {
     g.fillStyle(toInt(col)); for (const p of body) { const q = at(p.x, p.y); g.fillCircle(q.x, q.y, w * k / 2); }
   }
-  g.fillStyle(toInt(d.white), H.hiAlpha); for (const p of heroHighlight(H.step)) { const q = at(p.x, p.y); g.fillCircle(q.x, q.y, H.hiW * k / 2); }
+  const hl = heroHighlight(H.step).map(p => at(p.x, p.y)); g.lineStyle(H.hiW * k, toInt(d.white), H.hiAlpha); g.beginPath(); hl.forEach((q, i) => i ? g.lineTo(q.x, q.y) : g.moveTo(q.x, q.y)); g.strokePath();
   const M = H.mango, mc = at(M.x, M.y), s = M.size * k;
   g.fillStyle(toInt(d.white), M.haloAlpha).fillCircle(mc.x, mc.y, M.haloR * s);
   g.fillStyle(toInt(d.outline.mango)).fillEllipse(mc.x, mc.y, 2 * (M.rx + M.line) * s, 2 * (M.ry + M.line) * s);
