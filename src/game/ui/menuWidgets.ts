@@ -1,14 +1,18 @@
 import Phaser from 'phaser';
 import { WIDTH } from '../layout';
-import { TOKENS, toInt, FONT_TITLE } from '../uiTokens';
+import { TOKENS, toInt, FONT_TITLE, FONT_UI } from '../uiTokens';
+import { t } from '../text';
 import type { MotionTarget } from '../motion/motionCore';
 import { attachFeedback } from './feedback';
 import type { FeedbackKind } from './feedbackModel';
 import { drawIcon, type IconId } from './icons';
 import { hitSize, ui, type ColumnLayout } from './layout';
-import { logoLetters } from './menuLayout';
-import { MENU } from './menuMetrics';
-import { hostOf, lipPx, skinTexture } from './skin';
+import { logoLetters, logoSpec, type LogoLine } from './menuLayout';
+import { D3_HERO, D3_HOME, MENU } from './menuMetrics';
+import { heroBody, heroHighlight } from './heroSpec';
+import { headKey } from '../art/capyRig';
+import { activeSkin } from '../art/skins';
+import { hostOf, lipPx, skinTexture, type SkinState } from './skin';
 import { tapBurst } from './touchFx';
 import { titleText } from './widgets';
 
@@ -48,6 +52,19 @@ export function roundIconButton(scene: Phaser.Scene, x: number, y: number, diame
   return c;
 }
 
+// D3-R11 logo: per line, an ink back text (thick stroke, dropped) under the coloured front text.
+export function d3Logo(scene: Phaser.Scene, cx: number, top: number, scale: number): { mango: Phaser.GameObjects.Container; snake: Phaser.GameObjects.Container } {
+  const s = logoSpec(scale);
+  const make = (l: LogoLine): Phaser.GameObjects.Container => {
+    const st = (fill: string, stroke: string, px: number): Phaser.Types.GameObjects.Text.TextStyle =>
+      ({ fontFamily: FONT_TITLE, fontSize: `${ui(s.fontPx)}px`, color: fill, stroke, strokeThickness: ui(px) });
+    const back = scene.add.text(0, ui(l.backY - l.y), t(l.key), st(l.back, l.back, l.backStrokePx)).setOrigin(0.5);
+    const front = scene.add.text(0, 0, t(l.key), st(l.fill, l.stroke, l.strokePx)).setOrigin(0.5);
+    return scene.add.container(cx, top + ui(l.y), [back, front]);
+  };
+  return { mango: make(s.lines[0]!), snake: make(s.lines[1]!) };
+}
+
 /** One logo line (e.g. MANGO, GAME OVER): coloured, tilted Lilita letters with the outline and drop shadow. */
 export function logoLine(scene: Phaser.Scene, cx: number, y: number, text: string, colorOffset: number, sizeMock: number): Phaser.GameObjects.Container {
   const letters = logoLetters(text, colorOffset);
@@ -72,4 +89,39 @@ export function hill(scene: Phaser.Scene, topY: number): Phaser.GameObjects.Grap
 /** Big green Lilita pill label ("Play", "Go!", "Play again"): swap the P3-0 pill text to the title font (Lilita One is loaded at weight 400 only). */
 export function bigLabel(b: { text: Phaser.GameObjects.Text }, sizeMock: number, strokeMock: number): void {
   b.text.setFontFamily(FONT_TITLE).setFontStyle('normal').setFontSize(ui(sizeMock)).setStroke(TOKENS.green.line, ui(strokeMock));
+}
+
+// D3-R11 hero on the ray fan: ground shadow, outlined body with highlight, mango with halo, current skin head.
+export function snakeHero(scene: Phaser.Scene, cx: number, top: number, wMock: number): { c: Phaser.GameObjects.Container; head: Phaser.GameObjects.Image } {
+  const H = D3_HERO, k = ui(wMock) / H.w, x0 = cx - ui(wMock) / 2, at = (x: number, y: number) => ({ x: x0 + x * k, y: top + y * k });
+  const d = TOKENS.d3, g = scene.add.graphics();
+  const sh = at(H.shadow.x, H.shadow.y);
+  g.fillStyle(toInt(d.inkDeep), H.shadow.alpha).fillEllipse(sh.x, sh.y, 2 * H.shadow.rx * k, 2 * H.shadow.ry * k);
+  const body = heroBody(H.step);
+  for (const [col, w] of [[d.outline.snake, H.outlineW], [d.snake.body, H.bodyW]] as const) {
+    g.fillStyle(toInt(col)); for (const p of body) { const q = at(p.x, p.y); g.fillCircle(q.x, q.y, w * k / 2); }
+  }
+  const hl = heroHighlight(H.step).map(p => at(p.x, p.y)); g.lineStyle(H.hiW * k, toInt(d.white), H.hiAlpha); g.beginPath(); hl.forEach((q, i) => i ? g.lineTo(q.x, q.y) : g.moveTo(q.x, q.y)); g.strokePath();
+  const M = H.mango, mc = at(M.x, M.y), s = M.size * k;
+  g.fillStyle(toInt(d.white), M.haloAlpha).fillCircle(mc.x, mc.y, M.haloR * s);
+  g.fillStyle(toInt(d.outline.mango)).fillEllipse(mc.x, mc.y, 2 * (M.rx + M.line) * s, 2 * (M.ry + M.line) * s);
+  g.fillStyle(toInt(d.tone.mango.face[1])).fillEllipse(mc.x, mc.y, 2 * M.rx * s, 2 * M.ry * s);
+  g.fillStyle(toInt(d.tone.primary.line)).fillEllipse(mc.x + M.leaf.dx * s, mc.y + M.leaf.dy * s, M.leaf.w * s, M.leaf.h * s);
+  const hc = at(H.head.x, H.head.y);
+  const head = scene.add.image(hc.x, hc.y, headKey(activeSkin(), 'idle', 'large')).setDisplaySize(H.head.w * k, H.head.w * k);
+  return { c: scene.add.container(0, 0, [g, head]), head };
+}
+
+// D3-R11 butter (secondary tone) chip of a fixed mock size, optional leading icon; static, not tappable.
+export function butterChip(scene: Phaser.Scene, cx: number, cy: number, wMock: number, hMock: number, text: string, fontMock: number, icon?: IconId): Phaser.GameObjects.Container {
+  const w = ui(wMock), h = ui(hMock), tone = TOKENS.d3.tone.secondary, lip = lipPx('chip', 'secondary', ui(1));
+  const host = hostOf(scene), key = (st: SkinState) => skinTexture(host, 'chip', 'secondary', w, h, st, ui(1));
+  const tx = scene.add.text(0, 0, text, { fontFamily: FONT_UI, fontStyle: '900', fontSize: `${ui(fontMock)}px`, color: tone.text }).setOrigin(0.5);
+  const parts: Phaser.GameObjects.GameObject[] = [scene.add.image(0, lip, key('lip')), scene.add.image(0, 0, key('rest')), tx];
+  if (icon) {
+    const ico = ui(fontMock * D3_HOME.chipIconRatio), gap = ui(D3_HOME.chipIconGap), total = ico + gap + tx.width;
+    const g = scene.add.graphics().setPosition(-total / 2 + ico / 2, 0); drawIcon(g, icon, ico, toInt(tone.text));
+    tx.setX(-total / 2 + ico + gap + tx.width / 2); parts.push(g);
+  }
+  return scene.add.container(cx, cy, parts).setSize(w, h);
 }

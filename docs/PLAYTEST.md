@@ -5,6 +5,11 @@
 ## How to capture
 Headless screenshots with `tools/qa/shot.mjs` (no dependency; uses the local Chrome, or `CHROME_PATH`). Start `npm run dev`, then run: `node tools/qa/shot.mjs size:360,640 media:light "go:http://localhost:5173/" wait:3500 shot:tmp/qa/home-360.png`. The three standard sizes are 360x640, 390x844 and 412x915. Use `media:dark` for the OS dark-mode check. Keys use DOM names (`ArrowUp`, not `Up`). Steps: `size:W,H[,DPR]`, `media:`, `go:URL`, `wait:MS`, `tap:X,Y`, `swipe:X1,Y1,X2,Y2`, `key:Name`, `shot:FILE`, `eval:JS`; any failed step exits 1.
 
+## 2026-11-11 — D3 U3 Boot + Home screenshot record (lead, headless)
+- Branch `feat/ui-d3-u3-boot-home`. Full suite 1727 pass (7 skipped, 12 todo), typecheck clean.
+- Captured with `tools/qa/shot.mjs` into `tmp/qa/u3/`: Home fresh save at 360x640 and 390x844, Home during the PLAY sweep (sweep-c: band masked to the face), Home mid-entrance. Matches `Home-360`/`Home-390` boards (logo, hero, PLAY, hint chip with flag); no overlap or cut-off.
+- Not captured: Boot (loads in < 700 ms headless; first frame now the D3 blue), Home with checkpoint/best/loadout (covered by homeRects unit tests at 640..800). Owner eye-check: PLAY sweep feel, Home with a checkpoint save, Boot on a slow load.
+
 ## 2026-11-10 — D3 U2 viewport browser pass (agy, headless; lead reviewed)
 - Branch `feat/ui-d3-u2-viewport`. agy captured Home, in-run, Pause, Settings (from Pause), Results (after Quit run) at 360x640, 390x844, 412x915 DPR 1 into `tmp/qa/u2/` (report `tmp/qa/u2/REPORT.md`).
 - Canvas buffer measured: 540x960, 540x1169, 540x1199; canvas fills the full window height at 390x844 and 412x915 (no bands). 15/15 PASS for no cut-off and no overlap; 0 console errors.

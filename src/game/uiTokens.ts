@@ -28,7 +28,8 @@ export const TOKENS = {
   },
   // D3-R1/R4 "Juicy" visual language (spec 2026-11-10-ui-d3-juicy-design.md §4). Mock px for shape numbers.
   d3: {
-    bg: { stops: ['#7FD8FF', '#3FB2F2', '#1F86D8'], centerY: 0.38, rayAlpha: 0.13, rayDeg: 9 },
+    bg: { stops: ['#7FD8FF', '#3FB2F2', '#1F86D8'], centerY: 0.38, rayAlpha: 0.13, rayDeg: 9,
+      rayCenterY: 0.46, rx: 1.2, ry: 0.7, midStop: 0.45 },
     ink: '#145A9C', inkDeep: '#0F4578', text: '#173B63', white: '#FFFFFF',
     logo: { mango: '#FFD93B', mangoLine: '#8A4500' },
     tone: {

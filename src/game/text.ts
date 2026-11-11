@@ -119,6 +119,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'skill.tailSnip.desc': 'Cut back half · rock wall for {s} s',
   'skill.shield.desc': 'Breaks the next obstacle you hit · lasts {s} s', // provisional
   'skill.mangoRain.desc': '{min} to {max} extra mangoes over {s} s', // provisional
+  'home.best': 'Best {n}', 'home.playBig': 'PLAY', 'home.loadoutOne': 'Pick 1 skill', 'home.loadoutTwo': 'Pick 2 skills', // D3-R11 provisional
   'home.startAt': 'Start at L{level}', 'home.startL1': 'Start from L1', 'home.startEnergy': 'Start energy {e}',
   'settings.title': 'Settings', 'settings.on': 'On', 'settings.off': 'Off',
   'settings.sound': 'Sound', 'settings.sound.sub': 'Music and effects',

@@ -1,12 +1,7 @@
 import { WIDTH } from '../layout';
 import { hitSize, ui, type ColumnSpec } from './layout';
 import { TOKENS } from '../uiTokens';
-import { MENU } from './menuMetrics';
-
-/** UIFIX-R10 hit box of the "Start from L1" text link (mockup px): padded like a chip, same height as the chip row. */
-export function l1Link(textWidthMock: number): { w: number; h: number } {
-  return { w: textWidthMock + 2 * MENU.home.chips.padX, h: MENU.home.chipH };
-}
+import { D3_BOOT, D3_HOME, D3_LOGO, MENU } from './menuMetrics';
 
 export interface HeaderButton { cx: number; cy: number; hit: number }
 /** UIFIX-R7 round header button (Settings gear on the right, back on the left): mockup centre, >= 48 CSS px hit area. */
@@ -20,13 +15,6 @@ const head = MENU.padTop + MENU.round; // 66
 /** Trail samples per px of corner arc (smooth enough at phone width, cheap to draw). */
 const ARC_SAMPLES_PER_PX = 1.6;
 
-/** P3b3-R3 Home: top = settings gear row + logo; middle = hero, stepper, Play, chips, hint; bottom = hill peek. */
-export function homeColumn(f: { compact: boolean; stepper: boolean; extras: boolean; hint: boolean }, minShrink: number): Spec {
-  const h = MENU.home, g = MENU.gap;
-  const middle = h.hero.gap + h.hero.h + (f.stepper ? g + h.stepperH : 0) + g + (f.compact ? h.playHFirst : h.playH)
-    + (f.extras ? g + h.chipH : 0) + (f.hint ? g + h.hintH : 0);
-  return { top: head + g + MENU.logo.height, middle, bottom: h.hillPeek, minShrink };
-}
 /** UIFIX-R9 canvas CSS height below which Loadout cards use the compact metrics. */
 export const isCompactHeight = (cssHeight: number): boolean => cssHeight < MENU.loadout.compactBelowCssH;
 export function loadoutCards(compact: boolean): { cardH: number; cardGap: number } {
@@ -56,9 +44,14 @@ export function resultsColumn(f: { banner: boolean; energy: boolean }, minShrink
   const middle = resultsCardTop() + r.cardH + (f.energy ? g + r.energyH : 0) + (f.banner ? g + r.bannerH : 0) + g + r.progressH;
   return { top: head, middle, bottom: r.bottom + r.againH + MENU.gap, minShrink };
 }
-export function bootColumn(minShrink: number): Spec {
-  const b = MENU.boot;
-  return { top: b.top + MENU.logo.height, middle: b.heroGap + b.hero + b.barGap + b.barH + b.textGap + b.textH, bottom: 0, minShrink };
+// D3-R10 Boot rects (mock px): board positions shifted down by half the spare height.
+export function bootRects(hm: number): { logo: Rect & { scale: number }; bar: Rect; text: Rect } {
+  const B = D3_BOOT, off = Math.max(0, (hm - B.h) / 2);
+  return {
+    logo: { x: (360 - D3_LOGO.w * B.logoScale) / 2, y: B.logoTop + off, w: D3_LOGO.w * B.logoScale, h: D3_LOGO.h * B.logoScale, scale: B.logoScale }, // y = viewBox top
+    bar: { x: B.barX, y: B.barY + off, w: 360 - 2 * B.barX, h: B.barH },
+    text: { x: 0, y: B.textY + off, w: 360, h: B.textH },
+  };
 }
 
 export interface LogoLetter { ch: string; color: string; rotDeg: number; dy: number }
@@ -71,6 +64,17 @@ export function logoLetters(text: string, colorOffset: number): LogoLetter[] {
     const idx = n++;
     return { ch, color: cols[(idx + colorOffset) % cols.length]!, rotDeg: i % 2 ? 3 : -3, dy: i % 2 ? 2 : -2 };
   });
+}
+
+export interface LogoLine { key: 'logo.mango' | 'logo.snake'; y: number; backY: number; fill: string; stroke: string; strokePx: number; back: string; backStrokePx: number }
+export interface LogoSpec { w: number; h: number; fontPx: number; lines: LogoLine[] }
+// D3-R11 two-line logo in mock px from the logo top; y values are cap centres (text origin 0.5, 0.5).
+export function logoSpec(scale: number): LogoSpec {
+  const L = D3_LOGO, d = TOKENS.d3, mid = L.capMid * L.font;
+  const line = (key: LogoLine['key'], base: number, fill: string, stroke: string): LogoLine => ({
+    key, y: (base - mid) * scale, backY: (base - mid + L.drop) * scale, fill, stroke, strokePx: L.stroke * scale, back: d.inkDeep, backStrokePx: L.backStroke * scale });
+  return { w: L.w * scale, h: L.h * scale, fontPx: L.font * scale,
+    lines: [line('logo.mango', L.base[0], d.logo.mango, d.logo.mangoLine), line('logo.snake', L.base[1], d.white, d.ink)] };
 }
 
 export interface Pt { x: number; y: number }
@@ -97,4 +101,39 @@ export function smoothPath(pts: readonly Pt[], r: number, step: number): Pt[] {
   }
   line(pts[pts.length - 1]!);
   return out;
+}
+
+export interface Rect { x: number; y: number; w: number; h: number }
+export interface HomeFlags { start: boolean; stepper: boolean; l1: boolean; loadout: boolean; hint: boolean }
+export interface HomeRects {
+  best: Rect; settings: Rect; logo: Rect & { scale: number }; hero: Rect; play: Rect;
+  start?: Rect; prev?: Rect; next?: Rect; hint?: Rect; l1?: Rect; loadout?: Rect;
+}
+// D3-R11/R7 Home rects in mock px for a canvas `hm` mock px tall: anchors interpolate (and extrapolate up to 800) between the two boards.
+export function homeRects(hm: number, f: HomeFlags): HomeRects {
+  const D = D3_HOME, s = D.short, l = D.tall, u = (hm - s.h) / (l.h - s.h);
+  const at = (k: keyof typeof s): number => s[k] + (l[k] - s[k]) * u;
+  const W = 360, heroW = at('heroW');
+  const r: HomeRects = {
+    best: { x: D.side, y: at('chip') + D.bestDy, w: D.bestW, h: D.bestH },
+    settings: { x: W - D.side - D.round, y: at('chip'), w: D.round, h: D.round },
+    // inked text box only (D3_LOGO.textTop..textBottom); the logo viewBox top is y - textTop * scale
+    logo: { x: (W - D3_LOGO.inkW * D.logoScale) / 2, y: at('logo') + D3_LOGO.textTop * D.logoScale, w: D3_LOGO.inkW * D.logoScale,
+      h: (D3_LOGO.textBottom - D3_LOGO.textTop) * D.logoScale, scale: D.logoScale },
+    hero: { x: (W - heroW) / 2, y: at('hero'), w: heroW, h: heroW * D.heroAspect },
+    play: { x: D.playX, y: at('play'), w: W - 2 * D.playX, h: D.playH },
+  };
+  const sy = at('start');
+  if (f.start) {
+    r.start = { x: D.startX, y: sy, w: W - 2 * D.startX, h: D.startH };
+    if (f.stepper) {
+      r.prev = { x: D.startX - D.arrowGap - D.arrow, y: sy, w: D.arrow, h: D.arrow };
+      r.next = { x: W - D.startX + D.arrowGap, y: sy, w: D.arrow, h: D.arrow };
+    }
+  } else if (f.hint) r.hint = { x: D.hintX, y: sy + (D.startH - D.hintH) / 2, w: W - 2 * D.hintX, h: D.hintH };
+  const ly = at('links'), side = at('linkSide'), lw = at('linkW');
+  if (f.l1 && f.loadout) { r.l1 = { x: side, y: ly, w: lw, h: D.linkH }; r.loadout = { x: W - side - lw, y: ly, w: lw, h: D.linkH }; }
+  else if (f.l1) r.l1 = { x: (W - lw) / 2, y: ly, w: lw, h: D.linkH };
+  else if (f.loadout) r.loadout = { x: (W - lw) / 2, y: ly, w: lw, h: D.linkH };
+  return r;
 }

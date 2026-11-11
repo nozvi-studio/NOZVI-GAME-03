@@ -1,6 +1,6 @@
 // tests/game/homeModel.test.ts
 import { describe, it, expect } from 'vitest';
-import { homeView, stepCheckpoint } from '../../src/game/flow/homeModel';
+import { homeExtras, homeView, stepCheckpoint } from '../../src/game/flow/homeModel';
 import type { HomeModel } from '../../src/session';
 const base: HomeModel = { checkpoints: [], defaultStart: 1, carriedEnergy: 0,
   nextMilestone: { reach: 4, requiresClear: false }, showLoadout: false };
@@ -51,5 +51,10 @@ describe('homeModel P3b3 menu flags', () => {
     expect(one).toMatchObject({ compact: false, startAt: 4, extras: true, showStepper: false, secondaryL1: true });
     const two = homeView({ ...base, checkpoints: [4, 6], defaultStart: 6 }, 4);
     expect(two).toMatchObject({ startAt: 4, showStepper: true });
+  });
+  it('D3-R11 H5 H2 homeExtras: Best only above 0, loadout label by slot count, none without loadout', () => {
+    expect(homeExtras(0, false, 1)).toEqual({ best: null, loadoutKey: null });
+    expect(homeExtras(1240, true, 2)).toEqual({ best: 1240, loadoutKey: 'home.loadoutTwo' });
+    expect(homeExtras(5, true, 1).loadoutKey).toBe('home.loadoutOne');
   });
 });

@@ -2,6 +2,15 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: U3 CODEMAP rows, UI-MOCKUPS built markers, PLAYTEST screenshot record, STATUS.
+- fix(ui): first frame uses the D3 background colour; PLAY sweep re-syncs with the pulse.
+- feat(ui): Boot on D3 - background, logo, mango progress bar; `bootRects`, `D3_BOOT`; D2 hero disc / capy head / `bootColumn` removed (D3-R10).
+- feat(ui): PLAY gloss sweep once per attention pulse, off under reduced motion / motion=off; `sweepModel`, `motion.d3.sweepBand/sweepAlpha` (D3-R21, D3-R28).
+- feat(ui): Home scene rebuilt on D3 - background, logo, hero, PLAY, start row, hint, link row; `homeExtras`, `butterChip`; D2 Home column removed (D3-R11).
+- feat(ui): D3 Home layout rects at every canvas height (`homeRects`, `D3_HOME`) (D3-R11, D3-R8).
+- feat(ui): D3 Home snake hero (`heroSpec` body and highlight paths, `snakeHero`, `D3_HERO` metrics) (D3-R11).
+- feat(ui): D3 two-line outlined logo (`logoSpec`, `d3Logo`, `D3_LOGO` metrics) (D3-R11).
+- feat(ui): D3 screen background (gradient + ray fan), cached per biome and height (D3-R10).
 - docs: owner approvals 2026-11-11 (D3 boards, U3 rulings H1..H6, fixed terrain spec).
 - docs: fixed terrain design spec (TER-R1..R14), scheduled after UI D3.
 - fix(ui): Results buttons stayed invisible after the entrance sequence (Motion captured a hidden rest alpha); MOT-2-R9 regression test.
