@@ -20,8 +20,8 @@ The token table lives in the spec §4 (D3-R1, R4) and in code as `TOKENS.d3`; `t
 ## 4. Screen map (board -> code -> phase)
 | Board id | PNG (`mockups/d3/png/`) | Scene / file | Phase |
 |---|---|---|---|
-| `Boot` | `Boot-360` | `src/game/scenes/BootScene.ts` | U3 |
-| `Home` | `Home-360`, `Home-390` | `scenes/HomeScene.ts`, `flow/homeModel.ts`, `ui/menuLayout.ts` | U3 |
+| `Boot` | `Boot-360` | `src/game/scenes/BootScene.ts` | U3 (built) |
+| `Home` | `Home-360`, `Home-390` | `scenes/HomeScene.ts`, `flow/homeModel.ts`, `ui/menuLayout.ts` | U3 (built) |
 | `Game` | `Game-360`, `Game-390` | `hud/hudLayout.ts`, `hud/HudTop.ts`, `hud/SkillButtons.ts`, `hud/bottomGroup.ts`, `render/*` | U4 |
 | `GameDpad` | `GameDpad-360` | `hud/bottomGroup.ts`, `input/dpad.ts` | U4 |
 | `GameLocked` | `GameLocked-360`, `-360-2` | `hud/SkillButtons.ts` | U4 |

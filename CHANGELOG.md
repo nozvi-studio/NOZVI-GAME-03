@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: U3 CODEMAP rows, UI-MOCKUPS built markers, PLAYTEST screenshot record, STATUS.
 - fix(ui): first frame uses the D3 background colour; PLAY sweep re-syncs with the pulse.
 - feat(ui): Boot on D3 - background, logo, mango progress bar; `bootRects`, `D3_BOOT`; D2 hero disc / capy head / `bootColumn` removed (D3-R10).
 - feat(ui): PLAY gloss sweep once per attention pulse, off under reduced motion / motion=off; `sweepModel`, `motion.d3.sweepBand/sweepAlpha` (D3-R21, D3-R28).
