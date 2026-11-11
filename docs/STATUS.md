@@ -24,6 +24,8 @@
 - [x] Save compat (2026-11-10): `save()` never overwrites a newer-version envelope; older saves get a one-time `mango-snake.save.v<N>.bak`. Ported to version/v0.2 (b74e878), so v0.2 builds from that commit no longer destroy v3 saves; older v0.2 builds still do (back up `mango-snake.save`).
 - Strings to review with owner after P3 (agy pass by owner): death lines, Settings/Results/HUD copy, banners — provisional, from mockups. New provisional: Shield/Mango Rain card text, Settings labels, results.carryLabel 'Energy saved', results.youWin 'YOU WIN!'. Acknowledge P3b-3 rulings C1-C10 (plan). Known: firstRun = bestScore 0 (a 0-score first run shows first-run again).
 
+- [ ] **Fixed terrain (owner idea 2026-11-11):** spec `docs/superpowers/specs/2026-11-11-fixed-terrain-design.md` awaits owner review; build after UI D3 (U3..U7).
+
 ## Next (ordered, max 5)
 1. Owner playtest + 40% verdict; if over40 not empty: lead tunes (OQ-C5), re-playtest.
 2. Full fuzz matrix 200 x 120 s overnight (`npm run test:fuzz`).
