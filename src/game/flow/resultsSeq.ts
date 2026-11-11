@@ -29,8 +29,10 @@ export function runResultsSequence(d: SeqDeps, timeline: SeqItem[], targets: Seq
   score.text.setText('0');
   const play = (it: SeqItem): void => {
     const t = targets[it.item]; if (!t) return;
-    if (it.kind === 'pop') d.motion.popIn(t, 0);
-    else if (it.kind === 'slide') d.motion.slideIn(t, 'down', 0); // slides up from below
+    // Show the rest alpha first: Motion captures a target's rest state lazily on first use, and popIn/slideIn
+    // hide it again synchronously (no flash). Without this the rest alpha is 0 and the target never appears.
+    if (it.kind === 'pop') { t.setAlpha(rests.get(it.item)!.a); d.motion.popIn(t, 0); }
+    else if (it.kind === 'slide') { t.setAlpha(rests.get(it.item)!.a); d.motion.slideIn(t, 'down', 0); } // slides up from below
     else if (it.kind === 'fade') d.motion.fadeIn(t);
     else if (it.kind === 'count') { t.setAlpha(rests.get(it.item)!.a); d.motion.countUp(score.text, 0, score.value); }
     else { // pulse: two periods, then stop (best star on a new best)
