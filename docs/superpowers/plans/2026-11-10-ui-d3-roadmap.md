@@ -88,6 +88,7 @@ Plan: `docs/superpowers/plans/2026-11-10-ui-d3-u1-skin-kit.md`. After U1 the old
 6. Screenshot pass of the unchanged screens at three sizes (nothing cut off, nothing overlapping); merge.
 
 ### U3 — Boot and Home (D3-R10, R11, R21 attention)
+Plan: `docs/superpowers/plans/2026-11-11-ui-d3-u3-boot-home.md` (written 2026-11-11; waits for the board gate).
 1. **`screenBackground`.** One canvas texture per biome and height: radial gradient plus ray fan from `TOKENS.d3`; replaces `bgCream` and `hill`. Test: one texture per key, `setBandColor` called with the outer stop.
 2. **Logo.** Two lines in Lilita One, MANGO in mango yellow with a `#8A4500` outline, SNAKE in white with an ink outline, deep ink under-shadow; replaces the five-colour `logoLine`.
 3. **Hero.** The Home hero card is removed; the snake hero (current skin SVG, head about 144 mock px wide, body with outline and highlight, mango with halo) sits on the ray fan. Home idle breath and tongue stay.
