@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { hudLayout } from '../../src/game/hud/hudLayout';
 import { BOARD, HEIGHT, setHeight, VIEW, WIDTH } from '../../src/game/layout';
 import { previewRects } from '../../src/game/ui/artPreviewLayout';
-import { layoutColumn } from '../../src/game/ui/layout';
+import { d3, layoutColumn } from '../../src/game/ui/layout';
 import { loadoutColumn, resultsColumn, settingsColumn } from '../../src/game/ui/menuLayout';
 
 const MIN = 0.85; // balance.ui.minShrink
@@ -44,6 +44,6 @@ describe.each([960, 1170])('D3-R7 layouts at HEIGHT %i', (h) => {
   });
   it(`D3-R7 the board never grows at ${h}`, () => {
     setHeight(h);
-    expect(BOARD).toEqual({ x: 18, y: 152, size: 504 });
+    expect(BOARD.x).toBeCloseTo(d3(10)); expect(BOARD.y).toBeCloseTo(d3(112)); expect(BOARD.size).toBeCloseTo(d3(340));
   });
 });

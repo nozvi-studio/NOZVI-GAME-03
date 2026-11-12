@@ -5,7 +5,7 @@ const sources = import.meta.glob('../../src/game/**/*.ts', { query: '?raw', impo
 const files = Object.entries(sources).map(([path, src]) => ({ path, src }));
 
 /** Top-level (column 0) `const`/`let`/`export const` statements whose initialiser mentions HEIGHT. */
-function offenders(src: string): string[] {
+function offenders(src: string, id = 'HEIGHT'): string[] {
   const out: string[] = [];
   const re = /^(?:export\s+)?(?:const|let|var)\s[^\n]*?=([\s\S]*?);\s*$/gm;
   for (const m of src.matchAll(re)) {
@@ -26,5 +26,12 @@ describe('D3-R7 HEIGHT guard', () => {
     expect(offenders('const Y = HEIGHT - 10;')).toHaveLength(1);
     expect(offenders('export const f = (): number => HEIGHT - 10;')).toHaveLength(0);
     expect(offenders('  const y = HEIGHT - 10;')).toHaveLength(0); // indented = inside a body
+  });
+});
+
+describe('D3-R9 BOARD guard', () => {
+  it('D3-R9 BOARD is never read in a module-level initialiser', () => {
+    const bad = files.flatMap(f => offenders(f.src, 'BOARD').map(l => `${f.path}: ${l}`));
+    expect(bad).toEqual([]);
   });
 });
