@@ -1,25 +1,25 @@
-import { toInt } from '../uiTokens';
+import { TOKENS, toInt } from '../uiTokens';
 
 // P3b1-R2 board parts from Rock/Tile/FencePiece/FoodIcon/BiomeBoardsD2 (mockup HTML). Pure: no Phaser.
 export type RockKind = 'pebble' | 'rock' | 'boulder';
 export type Pt = readonly [number, number];
 
 export const PART = {
-  rock: { fill: toInt('#9AA3B8'), shade: toInt('#6B7490') },
+  rock: { fill: toInt(TOKENS.d3.board.rock.body), shade: toInt(TOKENS.d3.board.rock.shade), hi: toInt(TOKENS.d3.board.rock.hi) },
   wood: { rail: toInt('#E3AC6D'), post: toInt('#CF9150') },
   mud: { fill: toInt('#B8956A'), puddle: toInt('#8F6F43') },
   ice: { fill: toInt('#9ED8F2'), shine: toInt('#B8E5F7') },
   stone: { top: toInt('#EDEFF4'), front: toInt('#A9B0C0'), warnFill: toInt('#D3D7E0'), warnDash: toInt('#FF9A1F'), chevron: toInt('#B35F00') },
-  warn: { fill: toInt('#FF6B5B'), dash: toInt('#E5483A'), bang: toInt('#B3261E') },
+  warn: { fill: toInt(TOKENS.d3.board.warn.fill), bang: toInt(TOKENS.d3.board.warn.bang) },
   hedge: { fill: toInt('#4FBF7A'), edge: toInt('#FFFFFF'), glow: toInt('#7CF2D4') },
-  mango: { body: toInt('#FFA21A'), leaf: toInt('#2E9E4F'), hi: toInt('#FFD27A') },
+  mango: { body: toInt(TOKENS.d3.board.mango.body), leaf: toInt(TOKENS.d3.board.mango.leaf), shine: toInt(TOKENS.d3.board.mango.shine), halo: toInt(TOKENS.d3.board.mango.halo) },
 } as const;
 
 /** Fractions of one cell unless noted. */
 // D3-R12 board frame, fractions of one cell.
 export const FRAME = { pad: 0.4, radius: 1.3, groundRadius: 0.7, dropY: 0.2, dropAlpha: 0.5, shadowH: 0.5, shadowAlpha: 0.16, shadowRadius: 0.2 } as const;
 export const ROCK = { scale: { pebble: 0.5, rock: 0.82, boulder: 0.98 } as Record<RockKind, number>, aspect: 0.92,
-  edge: 0.1, band: 0.19, drop: 0.095, dropAlpha: 0.35, hiColor: 0xffffff, hiAlpha: 0.55, hiRotDeg: -20,
+  edge: 0.1, band: 0.19, drop: 0.095, dropAlpha: 0.35, hiAlpha: 0.55, hiRotDeg: -20,
   crumbleAlpha: 0.65, previewAlpha: 0.35, crackWidth: 0.075,
   /** Crack polyline in the 20-unit rock box (Rock.dc). */
   crack: [[11, 2], [8.5, 7.5], [12, 10.5], [9, 14.5], [11, 19]] as readonly Pt[],
@@ -32,8 +32,7 @@ export const TILE = { inset: 1 / 21, radius: 1 / 3, border: 0.095, stoneRadius: 
   /** Mud.dc puddle (fractions of the inset box) and bubbles (centre fractions of the box, radius in cell fractions). */
   mud: { puddle: { w: 0.56, h: 0.4 }, bubbles: [{ x: 0.3, y: 0.36, r: 0.0715 }, { x: 0.55, y: 0.48, r: 0.0475 }] as readonly { x: number; y: number; r: number }[] } } as const;
 export const HEDGE = { bar: 0.8, edge: 0.11, glow: 0.12, glowAlpha: 0.22, radius: 0.22, edgeHalf: 0.055 } as const;
-export const MANGO = { box: 32, fill: 0.92, body: { cx: 16, cy: 18.5, rx: 11.5, ry: 10, rotDeg: -20 },
-  hi: { p: [[8.5, 16], [9.5, 13], [11.7, 11], [14.7, 10.4]] as readonly Pt[], width: 2.4 },
+export const MANGO = { halo: 0.62, haloAlpha: 0.35, outline: 1.16, shineAlpha: 0.7, shine: { x: -0.3, y: -0.3, w: 0.3, h: 0.18, rotDeg: -35 }, box: 32, fill: 0.92, body: { cx: 16, cy: 18.5, rx: 11.5, ry: 10, rotDeg: -20 },
   leaf: [[[16, 9], [17, 4.5], [21.5, 2.5], [26, 3.5]], [[26, 3.5], [25.4, 8.1], [21, 10.7], [16, 9]]] as readonly (readonly Pt[])[] } as const;
 
 /** P3b1-R2 shape id of each warning kind; every warn state is drawn with its shape, not only a colour. */

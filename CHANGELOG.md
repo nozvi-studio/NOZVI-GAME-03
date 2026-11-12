@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): D3 mango (halo, outline, shine), pebble rocks and warn tiles from `TOKENS.d3.board` and the board outline set (D3-R12, D3-R2)
 - feat(ui): D3 snake - 1.4-cell head, outlined body in every biome, highlight stripe; `drawSnake` takes `BoardLook` (D3-R12)
 - feat(ui): D3 board frame with drop and inner top shadow (D3-R12).
 - feat(ui): D3 board look per biome (`boardLook(biome)`: frame, checker cells, outline set, snake colours), checker ground without grid lines (D3-R4).

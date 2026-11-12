@@ -29,7 +29,7 @@ it('P3b1-R4 a rock has an outline ring in the board edge colour and a highlight;
     const look = boardLook(2), solid = gfx(), crumbling = gfx();
     drawRock(solid.g, { x: 50, y: 50 }, 30, look, 1, 'rock', false);
     drawRock(crumbling.g, { x: 50, y: 50 }, 30, look, 1, 'rock', true);
-    expect(solid.calls.some(c => c[0] === 'fillStyle' && c[1] === look.edge)).toBe(true);
+    expect(solid.calls.some(c => c[0] === 'fillStyle' && c[1] === look.outline.rock)).toBe(true);
     expect(solid.count('rotateCanvas')).toBe(1);
     expect(solid.count('lineBetween')).toBe(0);
     expect(crumbling.count('lineBetween')).toBe(4);               // crack polyline M11 2 L8.5 7.5 12 10.5 9 14.5 11 19
@@ -147,8 +147,12 @@ it('MOT-4-R2 the warn symbol (ring, dashes and the "!" bar+dot) is drawn at the 
 });
 it('MOT-4-R6 in the last telegraphUrgentMs the dash colour is the hard warn colour at alpha 1', () => {
   const p = gfx(); drawWarn(p.g, { x: 0, y: 0 }, 30, 1000 - TEL.cfg.telegraphUrgentMs, 1000, boardLook(1), 'hazard', false, false, TEL.cfg);
-  const dash = p.calls.find(c => c[0] === 'lineStyle' && c[2] === PART.warn.dash && c[3] === 1);
+  const dash = p.calls.find(c => c[0] === 'lineStyle' && c[2] === boardLook(1).outline.warn && c[3] === 1);
   expect(dash).toBeTruthy();
+});
+it('D3-R12 warn tile dashes use the warn outline colour', () => {
+  const look = boardLook(2), p = gfx(); drawWarn(p.g, { x: 0, y: 0 }, 30, 100, 1000, look, 'hazard', false, true, TEL.cfg);
+  expect(p.calls.filter(c => c[0] === 'lineStyle' && c[2] === look.outline.warn).length).toBeGreaterThanOrEqual(2);   // ring + dashes
 });
 it('MOT-4-R5 a live rock is enlarged by the hit beat scale and returns to size at 1', () => {
   const look = boardLook(1), live = rockHazard('solid');

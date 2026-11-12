@@ -30,7 +30,10 @@ export const TOKENS = {
   d3: {
     bg: { stops: ['#7FD8FF', '#3FB2F2', '#1F86D8'], centerY: 0.38, rayAlpha: 0.13, dimRays: 0.5, rayDeg: 9,
       rayCenterY: 0.46, rx: 1.2, ry: 0.7, midStop: 0.45 },
-    ink: '#145A9C', inkDeep: '#0F4578', board: { frameShadow: '#000000' }, text: '#173B63', white: '#FFFFFF',
+    ink: '#145A9C', inkDeep: '#0F4578', board: { frameShadow: '#000000',
+      mango: { body: '#FFAB1A', leaf: '#3FC23D', shine: '#FFFFFF', halo: '#FFFFFF' },
+      rock: { body: '#9FB0C0', shade: '#7D8FA3', hi: '#FFFFFF' },
+      warn: { fill: '#FF5A5A', bang: '#C81E1E' } }, text: '#173B63', white: '#FFFFFF',
     logo: { mango: '#FFD93B', mangoLine: '#8A4500' },
     tone: {
       primary: { face: ['#8DF06A', '#3FC23D', '#2EA634'], line: '#17661F', lip: '#114F18', text: '#FFFFFF', outlined: true },

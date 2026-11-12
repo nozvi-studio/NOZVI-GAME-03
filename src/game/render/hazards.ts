@@ -19,20 +19,20 @@ export function boxed(g: Graphics, x: number, y: number, w: number, h: number, r
 export function drawRock(g: Graphics, c: Cell, size: number, look: BoardLook, alpha = 1, kind: RockKind = 'rock', crumble = false): void {
   const m = rockMetrics(kind, size), a = crumble ? alpha * ROCK.crumbleAlpha : alpha;
   const bw = m.d - 2 * m.edge, bh = m.h - 2 * m.edge;
-  g.fillStyle(look.edge, ROCK.dropAlpha * a).fillEllipse(c.x, c.y + m.drop, m.d, m.h);
-  g.fillStyle(look.edge, a).fillEllipse(c.x, c.y, m.d, m.h);
+  g.fillStyle(look.outline.rock, ROCK.dropAlpha * a).fillEllipse(c.x, c.y + m.drop, m.d, m.h);
+  g.fillStyle(look.outline.rock, a).fillEllipse(c.x, c.y, m.d, m.h);
   g.fillStyle(PART.rock.shade, a).fillEllipse(c.x, c.y, bw, bh);
   g.fillStyle(PART.rock.fill, a).fillEllipse(c.x, c.y - m.band / 2, bw, bh - m.band);
   g.save().translateCanvas(c.x + m.hl.dx, c.y + m.hl.dy).rotateCanvas(m.hl.rot);
-  g.fillStyle(ROCK.hiColor, ROCK.hiAlpha * a).fillEllipse(0, 0, m.hl.w, m.hl.h);
+  g.fillStyle(PART.rock.hi, ROCK.hiAlpha * a).fillEllipse(0, 0, m.hl.w, m.hl.h);
   g.restore();
   if (!crumble) return;
   const ox = c.x - m.d / 2, oy = c.y - m.d / 2, s = m.d / 20;
   const crack = ROCK.crack;
-  g.lineStyle(Math.max(1, size * ROCK.crackWidth), look.edge, a);
+  g.lineStyle(Math.max(1, size * ROCK.crackWidth), look.outline.rock, a);
   for (let i = 0; i < crack.length - 1; i++) g.lineBetween(ox + crack[i]![0] * s, oy + crack[i]![1] * s, ox + crack[i + 1]![0] * s, oy + crack[i + 1]![1] * s);
   const x0 = c.x - size / 2, y0 = c.y - size / 2, bd = Math.max(1, size * ROCK.crackWidth * ROCK.debris.borderShare);
-  for (const k of ROCK.debris.chips) boxed(g, x0 + size * k.x, y0 + size * k.y, size * k.size, size * k.size, size * k.radius, PART.rock.fill, look.edge, bd, a);
+  for (const k of ROCK.debris.chips) boxed(g, x0 + size * k.x, y0 + size * k.y, size * k.size, size * k.size, size * k.radius, PART.rock.fill, look.outline.rock, bd, a);
 }
 
 // P3b1-R5 outline ring, dashes and the "!" / chevron never depend on colour or blink alone; MOT-4-R1/R2/R6 the rhythm now comes from the shared
@@ -42,8 +42,8 @@ export function drawWarn(g: Graphics, c: Cell, cell: number, ms: number, warnMs:
   const p = telegraphPulse(warnMs - ms, warnMs, cfg, reduced, SCRATCH);
   const off = jitter && !reduced ? Math.sin(ms / 28) * cell * 0.04 : 0;
   const x = c.x * cell + off, y = c.y * cell, ring = cell * WARN.ring, inset = cell * WARN.inset, size = cell - 2 * inset;
-  const hazard = kind === 'hazard', a = p.urgent ? 1 : p.alpha, hard = hazard ? PART.warn.dash : PART.stone.warnDash;
-  g.lineStyle(ring, look.edge, 1).strokeRoundedRect(x - ring / 2, y - ring / 2, cell + ring, cell + ring, cell * WARN.radius + ring / 2);
+  const hazard = kind === 'hazard', a = p.urgent ? 1 : p.alpha, hard = hazard ? look.outline.warn : PART.stone.warnDash, ringColor = hazard ? look.outline.warn : look.edge;
+  g.lineStyle(ring, ringColor, 1).strokeRoundedRect(x - ring / 2, y - ring / 2, cell + ring, cell + ring, cell * WARN.radius + ring / 2);
   g.fillStyle(p.urgent ? hard : hazard ? PART.warn.fill : PART.stone.warnFill, (WARN.fillBase + WARN.fillGain * p.progress) * a + (hazard ? 0 : WARN.riseFillFloor))
     .fillRoundedRect(x + inset, y + inset, size, size, cell * WARN.tileRadius);
   g.lineStyle(Math.max(1, cell * WARN.dashWidth), hard, a);
