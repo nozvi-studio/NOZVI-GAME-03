@@ -5,6 +5,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: Se
 - feat(results): D3-R18 pure layout (flow/resultsLayout.ts, MENU.results.d3 metrics).
 - feat(results): D3-R18 row model and first-run tip (ResultsView.rows/firstRunTip/ribbon).
 - docs(qa): U5 Task 1 results button check (first-run Results buttons visible, no code change).
+- feat(results): D3-R18 ribbon, panel and footer (ResultsScene rebuild, U5-R3/R4/R8; resultsColumn/resultsCardTop and old ResultsView fields removed; chip tone/lead options, TOKENS.d3.stat).
 - docs: UI D3 U5 plan (overlays + Results, rulings U5-R1..R8).
 - docs: STATUS open items after U4c.
 - docs: U4c rulings C1..C5 (DECISIONS), U4c headless QA entry (PLAYTEST), STATUS.

@@ -62,12 +62,15 @@ export function card(scene: Phaser.Scene, x: number, y: number, wMock: number, h
   ]);
 }
 
-// D3-R6 light chip; `fill` is kept for the call signature and ignored (one chip look in D3).
-export function chip(scene: Phaser.Scene, x: number, y: number, text: string, _fill: string, name = ''): Phaser.GameObjects.Container {
+// D3-R6 chip; `fill` is kept for the call signature and ignored. opts.tone picks the skin (default light; 'mango' = gold New best, D3-R18);
+// opts.lead (mock px) reserves room left of the text for an icon the caller draws.
+export function chip(scene: Phaser.Scene, x: number, y: number, text: string, _fill: string, name = '', opts: { tone?: SkinTone; lead?: number } = {}): Phaser.GameObjects.Container {
+  const tone = opts.tone ?? 'light', lead = ui(opts.lead ?? 0);
   const t = scene.add.text(0, 0, text, { fontFamily: FONT_UI, fontSize: `${ui(CHIP_FONT)}px`, fontStyle: '900', color: D.text }).setOrigin(0.5);
-  const w = t.width + 2 * ui(CHIP_PAD_X), h = t.height + 2 * ui(CHIP_PAD_Y), lip = lipPx('chip', 'light', ui(1));
+  const w = t.width + lead + 2 * ui(CHIP_PAD_X), h = t.height + 2 * ui(CHIP_PAD_Y), lip = lipPx('chip', tone, ui(1));
+  t.setX(lead / 2);
   return scene.add.container(x, y, [
-    skinImage(scene, 0, lip, 'chip', 'light', w, h, 'lip'), skinImage(scene, 0, 0, 'chip', 'light', w, h, 'rest'), t,
+    skinImage(scene, 0, lip, 'chip', tone, w, h, 'lip'), skinImage(scene, 0, 0, 'chip', tone, w, h, 'rest'), t,
   ]).setName(name).setSize(w, h);
 }
 

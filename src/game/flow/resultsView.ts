@@ -17,13 +17,10 @@ export interface ResultsView {
   score: number;
   bestChip: { key: 'results.newBest' | 'results.best'; vars: { best: number }; gold: boolean };
   stats: { labelKey: string; value: string; tone: 'pink' | 'butter' | 'sky' }[];
-  energySaved: number | null;
-  checkpointBanner: { level: number } | null;
-  next: { fill: number; chip: { key: 'results.nextCp' | 'results.nextCpClear'; level: number } } | null;
 }
 
-// D3-R18 / U5-R5/R6: rows in board order (checkpoint, energy, next), first-run tip, ribbon key.
-// P3b3-R11 ResultsD2 states (MEC-003-R20, MEC-008-R6/R11). Marbles row and marble-machine tip are hidden until P4 (D8).
+// D3-R18 / U5-R5/R6 (was P3b3-R11) Results view: states (MEC-003-R20, MEC-008-R6/R11), rows in board order (checkpoint, energy, next), first-run tip, ribbon key.
+// Marbles row and marble-machine tip are hidden until P4 (D8).
 export function resultsView(s: RunSummary, nextMilestone: { reach: number; requiresClear: boolean } | null, biomeCount: number): ResultsView {
   const checkpoint = s.newCheckpoints.length > 0;
   const state: ResultsState = checkpoint ? 'checkpointUnlocked' : s.firstRun ? 'firstRun' : s.newBest ? 'newBest' : 'normal';
@@ -44,9 +41,5 @@ export function resultsView(s: RunSummary, nextMilestone: { reach: number; requi
       { labelKey: 'results.eatenLabel', value: String(s.eaten), tone: 'butter' },
       { labelKey: 'results.biomeLabel', value: t('results.biomeOf', { b: s.biome, n: biomeCount }), tone: 'sky' },
     ],
-    energySaved: s.carriedEnergy > 0 ? s.carriedEnergy : null,
-    checkpointBanner: checkpoint ? { level: Math.max(...s.newCheckpoints) } : null,
-    next: nextMilestone ? { fill: Math.min(1, s.level / nextMilestone.reach),
-      chip: { key: nextMilestone.requiresClear ? 'results.nextCpClear' : 'results.nextCp', level: nextMilestone.reach } } : null,
   };
 }

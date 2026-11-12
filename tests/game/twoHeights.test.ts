@@ -3,7 +3,7 @@ import { d3HudLayout } from '../../src/game/hud/d3HudLayout';
 import { BOARD, HEIGHT, setHeight, VIEW, WIDTH } from '../../src/game/layout';
 import { previewRects } from '../../src/game/ui/artPreviewLayout';
 import { d3, d3Height, layoutColumn } from '../../src/game/ui/layout';
-import { loadoutColumn, resultsColumn, settingsColumn } from '../../src/game/ui/menuLayout';
+import { loadoutColumn, settingsColumn } from '../../src/game/ui/menuLayout';
 
 const boardBottomMock = (): number => (BOARD.y + BOARD.size) * 360 / WIDTH;
 const MIN = 0.85; // balance.ui.minShrink
@@ -22,7 +22,6 @@ describe.each([960, 1170])('D3-R7 layouts at HEIGHT %i', (h) => {
     setHeight(h);
     const specs = [
       loadoutColumn(MIN), loadoutColumn(MIN, true), settingsColumn(MIN),
-      resultsColumn({ banner: true, energy: true }, MIN), resultsColumn({ banner: false, energy: false }, MIN),
     ];
     for (const s of specs) {
       const c = layoutColumn(s);

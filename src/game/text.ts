@@ -132,7 +132,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'results.biomeOf': '{b}/{n}', 'results.nextCp': 'L{level}', 'results.nextCpClear': 'Clear L{level}', 'results.gameOver': 'GAME OVER',
   'results.youWin': 'YOU WIN!', // provisional
   'results.firstRunTip': 'Fill the bar with mangoes to level up. Each level brings new obstacles.',
-  'results.nextRunAt': 'Next run starts at L{level}!',
+  'results.nextRunAt': 'Next run starts at L{level}!', 'results.home': 'Home',
   'logo.mango': 'MANGO', 'logo.snake': 'SNAKE', 'home.prev': '◀', 'home.next': '▶',
   'boot.loading': 'Loading… {n}%',
   // P3b-2 HUD and overlay strings (provisional, owner-question batch)

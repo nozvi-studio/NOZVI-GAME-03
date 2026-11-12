@@ -2,31 +2,32 @@ import Phaser from 'phaser';
 import type { Balance } from '../../core';
 import { biome } from '../../core';
 import type { Session } from '../../session';
-import { deadFace, headKey } from '../art/capyRig';
-import { activeSkin } from '../art/skins';
 import { isMotionOff } from '../flow/debugFlag';
 import { resultsTimeline } from '../flow/entranceOrder';
+import { resultsLayout, type ResultsLayout } from '../flow/resultsLayout';
 import { runResultsSequence, type SeqTargets } from '../flow/resultsSeq';
-import { RESULTS_BUTTONS, resultsView, type ResultsView } from '../flow/resultsView';
-import { HEIGHT, WIDTH } from '../layout';
+import { RESULTS_BUTTONS, resultsView, type ResultsRow, type ResultsView } from '../flow/resultsView';
+import { WIDTH } from '../layout';
 import { captureGroup, enter, goTo, motionFor } from '../motion';
 import { reduceMotion } from '../render/palette';
 import { t } from '../text';
+import { screenBackground } from '../ui/background';
 import { drawIcon, type IconId } from '../ui/icons';
-import { layoutColumn, ui, UI_SCALE } from '../ui/layout';
-import { resultsCardTop, resultsColumn } from '../ui/menuLayout';
+import { d3, d3Height, d3m } from '../ui/layout';
 import { MENU } from '../ui/menuMetrics';
-import { bgCream, bigLabel, hill, logoLine, roundIconButton, scaledBlock } from '../ui/menuWidgets';
-import { card, pillButton, progressBar } from '../ui/widgets';
-import { FONT_UI, TOKENS, toInt } from '../uiTokens';
+import { bigLabel, butterChip } from '../ui/menuWidgets';
+import { hostOf, lipPx, skinTexture } from '../ui/skin';
+import { card, chip, pillButton, progressBar, titleText } from '../ui/widgets';
+import { FONT_TITLE, FONT_UI, TOKENS, toInt } from '../uiTokens';
 import { beginRun } from './ui';
 
-const R = MENU.results, C = R.card;
-const TONE_FILL = { pink: TOKENS.accent.pink, butter: TOKENS.menu.statButter, sky: TOKENS.sky.stat } as const;
-const style = (size: number, weight: '800' | '900', color: string): Phaser.Types.GameObjects.Text.TextStyle =>
-  ({ fontFamily: FONT_UI, fontStyle: weight, fontSize: `${ui(size)}px`, color });
+const R = MENU.results, M = { ...R.d3, ...R }, D = TOKENS.d3; // M: layout metrics plus scene-only metrics
+const NEXT_CHIP_CLEAR_W = 84; // "Clear L12" is wider than "L12" (mock px)
+const ENERGY_ICON = D.tone.energy.face[1], NEXT_ICON = '#F5A400'; // board colours of the bolt and the next-checkpoint flag
+const st = (size: number, color: string, weight: '800' | '900' = '800'): Phaser.Types.GameObjects.Text.TextStyle =>
+  ({ fontFamily: FONT_UI, fontStyle: weight, fontSize: `${d3(size)}px`, color });
 
-// P3b3-R11 ResultsD2: the four states come from resultsView; marbles row and marble machine stay hidden until P4 (D8).
+// D3-R18 / U5-R3/R4/R8 Results: rays, ribbon, one panel (headline, score, best chip, tiles, rows, tip) and the footer; layout comes from resultsLayout.
 export class ResultsScene extends Phaser.Scene {
   private targets: SeqTargets = {}; private scoreText?: Phaser.GameObjects.Text;
   constructor() { super('Results'); }
@@ -36,135 +37,117 @@ export class ResultsScene extends Phaser.Scene {
     const session = this.registry.get('session') as Session;
     const balance = this.registry.get('balance') as Balance;
     const s = session.summary();
-    bgCream(this);
-    hill(this, HEIGHT - ui(R.hillPeek));
+    screenBackground(this, R.rayBiome, true);
     const home = (): void => { goTo(this, 'Home', undefined, 'back'); };
+    const last = session.lastStartLevel();
     const v = s ? resultsView(s, session.homeModel().nextMilestone, biome(balance, balance.level.maxLevel)) : null;
-    this.targets.title = logoLine(this, WIDTH / 2, ui(R.titleY + R.titleSize / 2), t(v?.titleKey ?? 'results.gameOver'), 0, R.titleSize);
-    if (s && v) {
-      this.summaryBlock(v, s.won, balance.ui.minShrink);
-    }
-    this.footer(session, home);
+    const l = resultsLayout(v ?? { rows: [], firstRunTip: null }, d3Height(), last !== null);
+    if (v) this.panel(v, l);
+    this.ribbon(t(v?.ribbon ?? 'results.gameOver'), l); // after the panel: the ribbon overlaps the panel top
+    this.footer(l, last, home);
     enter(this, [], {}); // camera fade-in and re-arm goTo (MOT-2-R3); the sequence below is Results' own entrance
     if (s && v) this.playSequence(s.score, v);
   }
 
   // MOT-2-R9/R10 the Results sequence, skippable by a tap anywhere (Home / Play again taps still act at once).
   private playSequence(score: number, v: ResultsView): void {
-    const cfg = (this.registry.get('balance') as Balance).motion, m = motionFor(this);
-    const timeline = resultsTimeline({ newBest: v.bestChip.key === 'results.newBest', energy: v.energySaved !== null, banner: v.checkpointBanner !== null,
-      next: v.next !== null, again: this.targets.again !== undefined }, cfg);
+    const cfg = (this.registry.get('balance') as Balance).motion, m = motionFor(this), has = (k: ResultsRow['kind']) => v.rows.some(r => r.kind === k);
+    const timeline = resultsTimeline({ newBest: v.bestChip.key === 'results.newBest', energy: has('energy'), banner: has('checkpoint'),
+      next: has('next'), again: this.targets.again !== undefined }, cfg);
     const seq = runResultsSequence({ motion: m, later: (ms, fn) => this.time.delayedCall(ms, fn), kill: t => this.tweens.killTweensOf(t), // the one allowed direct tween call (ruling 7)
       pulsePeriodMs: cfg.pulsePeriodMs, reduced: reduceMotion(), off: isMotionOff(window.location.search) }, timeline, this.targets, { text: this.scoreText!, value: score });
     this.input.on('pointerdown', () => seq.skip());
   }
 
-  private summaryBlock(v: ResultsView, won: boolean, minShrink: number): void {
-    const blk = scaledBlock(this, layoutColumn(resultsColumn({ banner: v.checkpointBanner !== null, energy: v.energySaved !== null }, minShrink)));
-    const x0 = WIDTH / 2 - ui(C.w) / 2, g = ui(MENU.section);
-    let y = ui(resultsCardTop());
-    this.summaryCard(blk, v, won, x0, y);
-    y += ui(R.cardH);
-    const at = (hMock: number, yy: number) => ({ x: WIDTH / 2, y: yy + ui(hMock) / 2 }); // group anchor = block centre
-    if (v.energySaved !== null) {
-      y += g; const yy = y;
-      this.targets.energy = captureGroup(this, blk, at(R.energyH, yy), () => this.row(blk, x0, yy, 'bolt', t('results.carryLabel'), String(v.energySaved), TOKENS.menu.bestSoft));
-      y += ui(R.energyH);
-    }
-    if (v.checkpointBanner) {
-      y += g; const yy = y, level = v.checkpointBanner.level;
-      this.targets.banner = captureGroup(this, blk, at(R.bannerH, yy), () => this.banner(blk, x0, yy, level));
-      y += ui(R.bannerH);
-    }
-    if (v.next) {
-      y += g; const yy = y, next = v.next;
-      this.targets.next = captureGroup(this, blk, at(R.progressH, yy), () => this.progress(blk, x0, yy, next));
-    }
+  private ribbon(label: string, l: ResultsLayout): void {
+    const r = l.ribbon, w = d3(r.w), h = d3(r.h), cy = d3(r.y + r.h / 2), host = hostOf(this), unit = d3(1);
+    const img = (state: 'lip' | 'rest', y: number) => this.add.image(0, y, skinTexture(host, 'ribbon', 'ribbon', w, h, state, unit));
+    const text = titleText(this, 0, 0, label, M.ribbonFont).setStroke(D.tone.ribbon.line, d3(M.ribbonStroke)).setName('results-title');
+    this.targets.title = this.add.container(WIDTH / 2, cy, [img('lip', lipPx('ribbon', 'ribbon', unit)), img('rest', 0), text]);
   }
 
-  private summaryCard(blk: Phaser.GameObjects.Container, v: ResultsView, won: boolean, x0: number, y0: number): void {
-    const cx = WIDTH / 2, text = (x: number, y: number, s: string, st: Phaser.Types.GameObjects.Text.TextStyle) => this.add.text(x, y0 + ui(y), s, st).setOrigin(0.5);
-    this.targets.card = captureGroup(this, blk, { x: WIDTH / 2, y: y0 + ui(R.cardH) / 2 }, () => blk.add(card(this, x0, y0, C.w, R.cardH, C.r)));
-    const hk = headKey(activeSkin(), won ? 'idle' : deadFace(activeSkin()), 'large');
-    if (this.textures.exists(hk)) {
-      const head = this.add.image(cx, y0 - ui(C.headOverlap) + ui(C.headW) / 2, hk).setDisplaySize(ui(C.headW), ui(C.headW));
-      blk.add(head); this.targets.head = head;
-    }
+  private panel(v: ResultsView, l: ResultsLayout): void {
+    const root = this.add.container(0, 0), px = d3(l.panel.x), pw = d3(l.panel.w), cx = WIDTH / 2, inner = l.panel.w - 2 * M.padX;
+    const group = (key: string, at: { x: number; y: number }, build: () => void, name?: string): void => {
+      this.targets[key] = captureGroup(this, root, at, build, name);
+    };
+    const text = (x: number, y: number, s: string, style: Phaser.Types.GameObjects.Text.TextStyle) => this.add.text(x, d3(y), s, style).setOrigin(0.5);
+    group('card', { x: cx, y: d3(l.panel.y + l.panel.h / 2) }, () => root.add(card(this, px, d3(l.panel.y), d3m(l.panel.w), d3m(l.panel.h))));
     const headline = t(v.headline.key) + (v.headline.context ? ' ' + t(v.headline.context) : '');
-    const line = text(cx, C.headlineY, headline, { ...style(C.headline, '800', TOKENS.text.soft), wordWrap: { width: ui(C.w - 2 * C.pad) }, align: 'center' });
-    // A wrapped headline (death context) grows upward so it never touches the SCORE label.
-    if (line.height > ui(C.headline) * C.wrapLines) line.setOrigin(0.5, 1).setY(y0 + ui(C.headlineY + C.headline / 2));
-    blk.add(line.setName('results-headline')); this.targets.headline = line;
-    const scoreLabel = text(cx, C.scoreLabelY, t('results.scoreLabel'), style(C.scoreLabel, '800', TOKENS.text.soft)).setLetterSpacing(ui(C.scoreLabelTrack)).setName('results-score-label');
-    blk.add(scoreLabel); this.targets.scoreLabel = scoreLabel;
-    const score = text(cx, C.scoreY, String(v.score), style(C.score, '800', TOKENS.text.primary)).setName('results-score');
-    blk.add(score); this.targets.score = score; this.scoreText = score;
-    this.bestChip(blk, v, cx, y0 + ui(C.chipY));
-    const tw = (C.w - 2 * C.pad - 2 * C.tileGap) / 3;
-    v.stats.forEach((st, i) => {
-      const tx = x0 + ui(C.pad + i * (tw + C.tileGap)), ty = y0 + ui(C.tilesY);
-      this.targets[`stat${i}`] = captureGroup(this, blk, { x: tx + ui(tw) / 2, y: ty + ui(C.tileH) / 2 }, () => {
-        blk.add(this.add.graphics().fillStyle(toInt(TONE_FILL[st.tone])).fillRoundedRect(tx, ty, ui(tw), ui(C.tileH), ui(C.tileR)));
-        blk.add(this.add.text(tx + ui(tw) / 2, ty + ui(C.tileLabelY), t(st.labelKey), style(C.tileLabel, '800', TOKENS.text.primary)).setOrigin(0.5).setLetterSpacing(ui(C.tileTrack)));
-        blk.add(this.add.text(tx + ui(tw) / 2, ty + ui(C.tileValueY), st.value, style(C.tileValue, '800', TOKENS.text.primary)).setOrigin(0.5));
+    const hl = text(cx, l.headline + M.headlineH / 2, headline, { ...st(M.headlineFont, D.text), wordWrap: { width: d3(inner) }, align: 'center' }).setName('results-headline');
+    // A wrapped headline (death context) grows upward into the panel padding so it never touches the SCORE label.
+    if (hl.height > d3(M.headlineFont) * 1.6) hl.setOrigin(0.5, 1).setY(d3(l.headline + M.headlineH));
+    root.add(hl); this.targets.headline = hl;
+    const label = text(cx, l.scoreLabel + M.scoreLabelH / 2, t('results.scoreLabel'), st(M.scoreLabelFont, D.text)).setLetterSpacing(d3(M.scoreLabelTrack)).setName('results-score-label');
+    root.add(label); this.targets.scoreLabel = label;
+    const score = text(cx, l.score + M.scoreH / 2, String(v.score), { fontFamily: FONT_TITLE, fontSize: `${d3(M.scoreFont)}px`, color: D.text }).setName('results-score');
+    root.add(score); this.targets.score = score; this.scoreText = score;
+    this.best(root, v, cx, d3(l.best + M.bestH / 2));
+    const tw = (inner - 2 * M.tileGap) / 3, tileColor = [D.stat.level, D.stat.eaten, D.stat.biome];
+    v.stats.forEach((s, i) => {
+      const x = d3(l.panel.x + M.padX + i * (tw + M.tileGap)), y = d3(l.tiles.y);
+      group(`stat${i}`, { x: x + d3(tw) / 2, y: y + d3(l.tiles.h) / 2 }, () => {
+        root.add(card(this, x, y, d3m(tw), d3m(l.tiles.h)));
+        root.add(this.add.text(x + d3(tw) / 2, y + d3(M.tileLabelY), t(s.labelKey), st(M.tileLabelFont, D.text)).setOrigin(0.5));
+        root.add(this.add.text(x + d3(tw) / 2, y + d3(M.tileValueY), s.value, st(M.tileValueFont, tileColor[i]!, '900')).setOrigin(0.5));
       });
     });
+    l.rows.forEach((rect, i) => this.row(root, v.rows[i]!, rect, l, group));
+    if (l.tip && v.firstRunTip) {
+      const tip = this.add.text(cx, d3(l.tip.y + l.tip.h / 2), v.firstRunTip, { ...st(M.tipFont, D.tip), wordWrap: { width: d3(inner) }, align: 'center', lineSpacing: d3(M.tipFont * (M.tipLine - 1)) })
+        .setOrigin(0.5).setName('results-tip');
+      // The tip enters with the next-checkpoint row (no timeline item of its own, U5-R4); without that row it is static.
+      const host = this.targets.next as Phaser.GameObjects.Container | undefined;
+      if (host) host.add(tip.setPosition(tip.x - host.x, tip.y - host.y)); else root.add(tip);
+    }
   }
 
-  // Star chip: gold star for "New best!", muted for a plain best.
-  private bestChip(blk: Phaser.GameObjects.Container, v: ResultsView, cx: number, cy: number): void {
+  // Best chip: gold (mango skin) with a star disc for "New best!", the plain light chip otherwise.
+  private best(root: Phaser.GameObjects.Container, v: ResultsView, cx: number, cy: number): void {
     const label = v.bestChip.key === 'results.newBest' ? t('results.newBest') : t('results.best', v.bestChip.vars);
-    const tx = this.add.text(0, cy, label, style(C.chipFont, '800', TOKENS.text.primary)).setOrigin(0, 0.5);
-    const ico = ui(C.chipIcon), w = ui(C.chipPadL) + ico + ui(C.chipGap) + tx.width + ui(C.chipPadR), h = ui(C.chipH), x = cx - w / 2;
-    const bg = this.add.graphics().fillStyle(toInt(TOKENS.menu.bestSoft)).fillRoundedRect(x, cy - h / 2, w, h, h / 2);
-    const star = this.add.graphics().setPosition(x + ui(C.chipPadL) + ico / 2, cy).fillStyle(toInt(v.bestChip.gold ? TOKENS.accent.butter : TOKENS.accent.gold));
-    star.fillCircle(0, 0, ico / 2);
-    tx.setX(x + ui(C.chipPadL) + ico + ui(C.chipGap));
-    blk.setName('results-best'); // kept on the block as before (QA name); the chip itself is the entrance group below
-    this.targets.best = captureGroup(this, blk, { x: cx, y: cy }, () => blk.add([bg, star, tx]), 'results-best-chip');
-    this.targets.bestStar = star;
+    const c = chip(this, cx, cy, label, '', 'results-best-chip', { tone: v.bestChip.gold ? 'mango' : 'light', lead: M.bestLead });
+    const star = this.add.graphics().setPosition(cx - c.width / 2 + d3(M.padX / 2 + M.bestIcon / 2 - 4), cy).fillStyle(toInt(D.tone.mango.face[1])).fillCircle(0, 0, d3(M.bestIcon) / 2);
+    star.lineStyle(d3(2), toInt(D.tone.mango.line)).strokeCircle(0, 0, d3(M.bestIcon) / 2);
+    root.setName('results-best'); // kept on the root as before (QA name)
+    this.targets.best = captureGroup(this, root, { x: cx, y: cy }, () => root.add([c, star]), 'results-best-group');
+    if (v.bestChip.gold) this.targets.bestStar = star; // only a new best pulses (and is hidden first) the plain chip's star is static
   }
 
-  // Energy-saved card in the slot of the P4 marbles card (C7).
-  private row(blk: Phaser.GameObjects.Container, x: number, y: number, icon: IconId, label: string, value: string, fill: string): void {
-    const w = ui(C.w), h = ui(R.energyH), q = MENU.results.row, sh = TOKENS.shadow.card;
-    blk.add(this.add.graphics().fillStyle(toInt(sh.color), sh.alpha).fillRoundedRect(x, y + ui(sh.y), w, h, ui(q.r))
-      .fillStyle(toInt(fill)).fillRoundedRect(x, y, w, h, ui(q.r)));
-    const ic = this.add.graphics().setPosition(x + ui(q.padX) + ui(q.icon) / 2, y + h / 2); drawIcon(ic, icon, ui(q.icon), toInt(TOKENS.text.primary));
-    blk.add([ic, this.add.text(x + ui(q.padX + q.icon + q.gap), y + h / 2, label, style(q.label, '800', TOKENS.text.primary)).setOrigin(0, 0.5).setName('results-carry'),
-      this.add.text(x + w - ui(q.padX), y + h / 2, value, style(q.value, '800', TOKENS.text.primary)).setOrigin(1, 0.5)]);
+  private row(root: Phaser.GameObjects.Container, r: ResultsRow, rect: ResultsLayout['rows'][number], l: ResultsLayout, group: (k: string, at: { x: number; y: number }, b: () => void) => void): void {
+    const x0 = d3(l.panel.x + M.padX), w = d3(l.panel.w - 2 * M.padX), y = d3(rect.y), h = d3(rect.h), cy = y + h / 2, at = { x: WIDTH / 2, y: cy };
+    const icon = (id: IconId, x: number, color: string) => { const g = this.add.graphics().setPosition(x + d3(M.rowIcon) / 2, cy); drawIcon(g, id, d3(M.rowIcon), toInt(color)); return g; };
+    if (r.kind === 'checkpoint') {
+      group('banner', at, () => root.add(butterChip(this, WIDTH / 2, cy, l.panel.w - 2 * M.padX, rect.h, t('results.nextRunAt', { level: r.level }), M.chipFont, 'flag').setName('results-banner')));
+    } else if (r.kind === 'energy') {
+      group('energy', at, () => root.add([icon('bolt', x0, ENERGY_ICON),
+        this.add.text(x0 + d3(M.rowIcon + M.rowGap), cy, t('results.carryLabel'), st(M.rowFont, D.text)).setOrigin(0, 0.5).setName('results-carry'),
+        this.add.text(x0 + w, cy, String(r.value), st(M.rowValueFont, D.text, '900')).setOrigin(1, 0.5)]));
+    } else {
+      const cw = r.requiresClear ? NEXT_CHIP_CLEAR_W : M.nextChipW, bx = M.rowIcon + M.rowGap, barW = l.panel.w - 2 * M.padX - bx - cw - M.rowGap;
+      group('next', at, () => {
+        const bar = progressBar(this, x0 + d3(bx), cy - d3(M.barH) / 2, d3m(barW), d3m(M.barH), TOKENS.accent.orange); bar.set(r.fill, 1);
+        root.add([icon('flag', x0, NEXT_ICON), bar.g,
+          butterChip(this, x0 + w - d3(cw) / 2, cy, cw, M.nextChipH, t(r.requiresClear ? 'results.nextCpClear' : 'results.nextCp', { level: r.level }), M.nextChipFont)]);
+      });
+    }
   }
 
-  private banner(blk: Phaser.GameObjects.Container, x: number, y: number, level: number): void {
-    const q = R.banner, w = ui(C.w), h = ui(R.bannerH), d = ui(q.disc);
-    blk.add(this.add.graphics().fillStyle(toInt(TOKENS.menu.mintBanner)).fillRoundedRect(x, y, w, h, ui(q.r))
-      .fillStyle(toInt(TOKENS.green.face)).fillCircle(x + ui(q.pad) + d / 2, y + h / 2, d / 2));
-    const ic = this.add.graphics().setPosition(x + ui(q.pad) + d / 2, y + h / 2); drawIcon(ic, 'flag', ui(q.icon), toInt(TOKENS.surface.white));
-    blk.add([ic, this.add.text(x + ui(q.pad + q.disc + q.gap), y + h / 2, t('banner.checkpoint', { level }), style(q.font, '900', TOKENS.menu.mintBannerText)).setOrigin(0, 0.5).setName('results-banner')]);
-  }
-
-  private progress(blk: Phaser.GameObjects.Container, x: number, y: number, next: NonNullable<ResultsView['next']>): void {
-    const q = R.progress, label = t(next.chip.key, { level: next.chip.level });
-    const tx = this.add.text(0, 0, label, style(q.chipFont, '800', TOKENS.text.primary)).setOrigin(0, 0.5);
-    const ico = ui(q.chipIcon), cw = ui(q.chipPadL) + ico + ui(q.chipGap) + tx.width + ui(q.chipPadR), ch = ui(q.chipH), cy = y + ui(R.progressH) / 2;
-    const barW = (ui(C.w) - cw - ui(q.gap)) / UI_SCALE;
-    const bar = progressBar(this, x, cy - ui(q.barH) / 2, barW, q.barH, TOKENS.accent.orange); bar.set(next.fill, 1);
-    const cx = x + ui(C.w) - cw;
-    const bg = this.add.graphics().fillStyle(toInt(TOKENS.surface.card)).fillRoundedRect(cx, cy - ch / 2, cw, ch, ch / 2);
-    const ic = this.add.graphics().setPosition(cx + ui(q.chipPadL) + ico / 2, cy); drawIcon(ic, 'flag', ico, toInt(TOKENS.text.primary));
-    tx.setPosition(cx + ui(q.chipPadL) + ico + ui(q.chipGap), cy);
-    blk.add([bar.g, bg, ic, tx]);
-  }
-
-  // Home round button and Play again pill, anchored to the bottom (marble-machine button hidden until P4, D8).
-  private footer(session: Session, home: () => void): void {
-    const cy = HEIGHT - ui(R.bottom + R.againH / 2);
-    this.targets.home = roundIconButton(this, ui(R.side + R.btn / 2), cy, R.btn, 'home', RESULTS_BUTTONS.home, home, true, { navigates: true });
-    const last = session.lastStartLevel();
-    if (last === null) return;
-    const left = ui(R.side + R.btn + R.btnGap), w = WIDTH - left - ui(R.side);
-    const b = pillButton(this, left + w / 2, cy, w / UI_SCALE, R.againH, t('playAgain'), RESULTS_BUTTONS.again, () => beginRun(this, last, 'results'), 'green', { navigates: true });
-    bigLabel(b, R.againLabel, R.againStroke);
-    this.targets.again = b.c;
+  // Primary (Play again, or Home when there is no run to repeat, U5-R8) and the cream Home pill below it.
+  private footer(l: ResultsLayout, last: number | null, home: () => void): void {
+    const p = l.primary, cy = d3(p.y + p.h / 2);
+    if (last === null) {
+      const b = pillButton(this, WIDTH / 2, cy, d3m(p.w), d3m(p.h), t('results.home'), RESULTS_BUTTONS.home, home, 'green', { navigates: true });
+      bigLabel(b, d3m(M.primaryLabel), d3m(M.primaryStroke)); this.targets.home = b.c;
+      return;
+    }
+    const a = pillButton(this, WIDTH / 2, cy, d3m(p.w), d3m(p.h), t('playAgain'), RESULTS_BUTTONS.again, () => beginRun(this, last, 'results'), 'green', { navigates: true });
+    bigLabel(a, d3m(M.primaryLabel), d3m(M.primaryStroke)); this.targets.again = a.c;
+    const s = l.secondary!, sy = d3(s.y + s.h / 2);
+    const h = pillButton(this, WIDTH / 2, sy, d3m(s.w), d3m(s.h), t('results.home'), RESULTS_BUTTONS.home, home, 'cream', { navigates: true });
+    h.text.setFontSize(d3(M.secondaryFont));
+    const ico = d3(M.secondaryIcon), gap = d3(M.secondaryGap), total = ico + gap + h.text.width;
+    const g = this.add.graphics().setPosition(-total / 2 + ico / 2, 0); drawIcon(g, 'home', ico, toInt(D.text));
+    h.text.setX(-total / 2 + ico + gap + h.text.width / 2); h.c.add(g);
+    this.targets.home = h.c;
   }
 }

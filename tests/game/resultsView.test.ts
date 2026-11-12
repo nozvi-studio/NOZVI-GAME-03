@@ -14,9 +14,7 @@ it('P3b3-R11 normal state: cause line, score, plain best chip, stats, next-check
   expect(v.bestChip).toEqual({ key: 'results.best', vars: { best: 61 }, gold: false });
   expect(v.stats.map(s => [s.labelKey, s.value, s.tone])).toEqual([
     ['results.levelLabel', '8', 'pink'], ['results.eatenLabel', '35', 'butter'], ['results.biomeLabel', '2/6', 'sky']]);
-  expect(v.checkpointBanner).toBeNull();
-  expect(v.next).toEqual({ fill: 0.8, chip: { key: 'results.nextCp', level: 10 } });
-  expect(v.energySaved).toBeNull();
+  expect(v.rows).toEqual([{ kind: 'next', fill: 0.8, level: 10, requiresClear: false }]);
 });
 it('P3b3-R11 newBest state: gold New best! chip', () => {
   const v = resultsView({ ...base, score: 68, bestScore: 68, newBest: true }, next, 6);
@@ -26,9 +24,8 @@ it('P3b3-R11 newBest state: gold New best! chip', () => {
 it('P3b3-R11 checkpointUnlocked state: banner shows the highest new start level and the next target', () => {
   const v = resultsView({ ...base, level: 10, newCheckpoints: [4] }, { reach: 15, requiresClear: false }, 6);
   expect(v.state).toBe('checkpointUnlocked');
-  expect(v.checkpointBanner).toEqual({ level: 4 });
-  expect(v.next).toEqual({ fill: 10 / 15, chip: { key: 'results.nextCp', level: 15 } });
-  expect(resultsView({ ...base, newCheckpoints: [4, 6] }, next, 6).checkpointBanner).toEqual({ level: 6 });
+  expect(v.rows).toEqual([{ kind: 'checkpoint', level: 4 }, { kind: 'next', fill: 10 / 15, level: 15, requiresClear: false }]);
+  expect(resultsView({ ...base, newCheckpoints: [4, 6] }, next, 6).rows[0]).toEqual({ kind: 'checkpoint', level: 6 });
 });
 it('P3b3-R11 firstRun state: plain "Best N" chip even though the score is a new best (C5)', () => {
   const v = resultsView({ ...base, score: 44, bestScore: 44, newBest: true, firstRun: true }, next, 6);
@@ -39,10 +36,10 @@ it('P3b3-R11 win and quit headlines, mud context, energy saved, clear milestone,
   expect(resultsView({ ...base, won: true, cause: 'clear' }, null, 6).headline.key).toBe('results.won');
   expect(resultsView({ ...base, cause: 'quit' }, null, 6).headline.key).toBe('cause.quit');
   expect(resultsView({ ...base, cause: 'rock', context: 'mud' }, null, 6).headline).toEqual({ key: 'cause.rock', context: 'death.context.mud' });
-  expect(resultsView({ ...base, carriedEnergy: 18 }, null, 6).energySaved).toBe(18);
-  expect(resultsView(base, { reach: 30, requiresClear: true }, 6).next!.chip).toEqual({ key: 'results.nextCpClear', level: 30 });
-  expect(resultsView(base, null, 6).next).toBeNull();
-  expect(resultsView({ ...base, level: 40 }, next, 6).next!.fill).toBe(1);
+  expect(resultsView({ ...base, carriedEnergy: 18 }, null, 6).rows).toEqual([{ kind: 'energy', value: 18 }]);
+  expect(resultsView(base, { reach: 30, requiresClear: true }, 6).rows[0]).toMatchObject({ kind: 'next', requiresClear: true, level: 30 });
+  expect(resultsView(base, null, 6).rows).toEqual([]);
+  expect((resultsView({ ...base, level: 40 }, next, 6).rows[0] as { fill: number }).fill).toBe(1);
 });
 it('P3b3-R11 the title key is results.youWin for a won run and results.gameOver otherwise', () => {
   expect(resultsView({ ...base, won: true, cause: 'clear' }, null, 6).titleKey).toBe('results.youWin');
