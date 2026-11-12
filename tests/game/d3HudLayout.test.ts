@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { boardRect, d3HudLayout, type R } from '../../src/game/hud/d3HudLayout';
+import { boardRect, d3HudLayout, debugRects, type R } from '../../src/game/hud/d3HudLayout';
 
 const HM = [640, 700, 780, 800];
 const rects = (l: ReturnType<typeof d3HudLayout>): [string, R][] => {
@@ -47,4 +47,16 @@ it('D3-R9 R3 D-pad mode: keys centred, energy bar above, short chip on the right
   expect(l.dpad!.up.x + 25).toBe(180); expect(l.dpad!.left.x + 25).toBe(126); expect(l.dpad!.right.x + 25).toBe(234);
   expect(l.energy.bar.y + l.energy.bar.h).toBeLessThan(l.dpad!.up.y);
   expect(l.chip.short).toBe(true); expect(l.chip.right).toBe(14); expect(l.hint).toBeNull();
+});
+it('MEC-003-R21 debug "+1" / "Key" sit on the bottom edge and overlap no HUD rect, 640 and 780, D-pad on and off', () => {
+  for (const hm of [640, 780]) for (const dpad of [false, true]) {
+    const l = d3HudLayout(hm, dpad), d = debugRects(hm), chipW = 200;
+    const chip: R = l.chip.right === null ? { x: l.chip.cx - chipW / 2, y: l.chip.y, w: chipW, h: l.chip.h } : { x: 360 - l.chip.right - chipW, y: l.chip.y, w: chipW, h: l.chip.h };
+    const score: R = { x: 360 - l.score.right - 120, y: l.score.y, w: 120, h: l.score.h };
+    const all: [string, R][] = [...rects(l), ['chip', chip], ['quota', l.mango.label], ['score', score], ['skillsAll', l.skills[0]]];
+    for (const b of [d.next, d.key]) {
+      expect(b.y + b.h).toBeLessThanOrEqual(hm);
+      for (const [name, r] of all) expect(overlap(b, r), `${hm} ${dpad} ${name}`).toBe(false);
+    }
+  }
 });

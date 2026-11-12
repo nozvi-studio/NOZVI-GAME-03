@@ -11,6 +11,7 @@ export const D3_RUN = {
   hint: { dy: 42, h: 20, x: 100, font: 14, shadowY: 2 },
   chip: { dy: 100, dyTall: 112, h: 36, hDpad: 30, rightDpad: 14, dyDpad: -3, font: 15, padX: 16 },
   dpad: { key: 50, dx: 54, upDy: 30, midDy: 76, downDy: 122, gap: 8, block: 172 },
+  debug: { nextW: 52, keyW: 64, h: 24, side: 10, bottom: 4 },
 } as const;
 
 export interface R { x: number; y: number; w: number; h: number }
@@ -22,6 +23,11 @@ export interface D3HudLayout {
   dpad: { up: R; left: R; right: R; down: R } | null;
 }
 const W = 360;
+// MEC-003-R21 ?debug=1 only: "+1" bottom left, "Key" bottom right, on the canvas bottom edge under the skill buttons (D-pad on or off).
+export function debugRects(hm: number): { next: R; key: R } {
+  const G = D3_RUN.debug, y = hm - G.bottom - G.h;
+  return { next: { x: G.side, y, w: G.nextW, h: G.h }, key: { x: W - G.side - G.keyW, y, w: G.keyW, h: G.h } };
+}
 const topOff = (hm: number): number => { const D = D3_RUN; return D.short.top + (D.tall.top - D.short.top) * (hm - D.short.h) / (D.tall.h - D.short.h); };
 // D3-R9 board rect in board px: full width minus the side padding, under the top bar.
 export function boardRect(hm: number): { x: number; y: number; size: number } {

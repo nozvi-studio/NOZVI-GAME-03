@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(hud): ?debug=1 "+1" / "Key" buttons move to the bottom corners (`debugRects` in `D3_RUN.debug`) so they no longer cover the mango quota label; overlap test at 640 and 780.
 - refactor(ui): drop the D2 HUD layout (HUD_MOCK, hudLayout, statsRow); banners, skill tips and debug buttons use D3 rects; CODEMAP rows for the D3 HUD modules.
 - feat(ui): D3 D-pad on light round skin in four key rects, live relayout of skills/bottom/top when the D-pad setting changes mid-run (D3-R9 R4).
 - feat(ui): D3 skill buttons - skill skins by slot tone, rim charge gauge, white countdown ring, cost badge, locked empty slot with denied tap (onDenied), tap burst on cast, place() for D-pad toggle (D3-R14 R1 R21 R23 R24); new white `on` HUD icon tone.
