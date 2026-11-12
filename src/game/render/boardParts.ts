@@ -43,7 +43,8 @@ export const TILE = { inset: 1 / 21, radius: 1 / 3, border: 0.095, stoneRadius: 
   /** Mud.dc puddle (fractions of the inset box) and bubbles (centre fractions of the box, radius in cell fractions). */
   mud: { puddle: { w: 0.56, h: 0.4 }, bubbles: [{ x: 0.3, y: 0.36, r: 0.0715 }, { x: 0.55, y: 0.48, r: 0.0475 }] as readonly { x: number; y: number; r: number }[] } } as const;
 export const HEDGE = { bar: 0.8, edge: 0.11, glow: 0.12, glowAlpha: 0.22, radius: 0.22, edgeHalf: 0.055 } as const;
-export const MANGO = { halo: 0.62, haloAlpha: 0.35, outline: 1.16, shineAlpha: 0.7, shine: { x: -0.3, y: -0.3, w: 0.3, h: 0.18, rotDeg: -35 }, box: 32, fill: 0.92, body: { cx: 16, cy: 18.5, rx: 11.5, ry: 10, rotDeg: -20 },
+// D3-R12 boards.html `#mango` is 0.88 cell wide (scale 1.0): fill 1.2 makes the body 0.8625 cell and the 1.16 outline 1.0 cell; the icon is centred on the body.
+export const MANGO = { halo: 0.62, haloAlpha: 0.35, outline: 1.16, arc: 0.56, shineAlpha: 0.7, shine: { x: -0.3, y: -0.3, w: 0.3, h: 0.18, rotDeg: -35 }, box: 32, fill: 1.2, body: { cx: 16, cy: 18.5, rx: 11.5, ry: 10, rotDeg: -20 },
   leaf: [[[16, 9], [17, 4.5], [21.5, 2.5], [26, 3.5]], [[26, 3.5], [25.4, 8.1], [21, 10.7], [16, 9]]] as readonly (readonly Pt[])[] } as const;
 
 /** P3b1-R2 shape id of each warning kind; every warn state is drawn with its shape, not only a colour. */

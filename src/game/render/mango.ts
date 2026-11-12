@@ -10,8 +10,8 @@ interface IconPoints { cell: number; leaf: Phaser.Types.Math.Vector2Like[]; body
 let cached: IconPoints | null = null;
 function iconPoints(cell: number): IconPoints {
   if (cached?.cell === cell) return cached;
-  const u = (cell * MANGO.fill) / MANGO.box;                       // px per icon unit; icon centre is (16, 16)
-  const pt = ([px, py]: Pt): Phaser.Types.Math.Vector2Like => ({ x: (px - MANGO.box / 2) * u, y: (py - MANGO.box / 2) * u });
+  const u = (cell * MANGO.fill) / MANGO.box;                       // px per icon unit; the body centre is the origin
+  const pt = ([px, py]: Pt): Phaser.Types.Math.Vector2Like => ({ x: (px - MANGO.body.cx) * u, y: (py - MANGO.body.cy) * u });
   const body = pt([MANGO.body.cx, MANGO.body.cy]) as { x: number; y: number };
   cached = { cell, u, leaf: mangoLeaf().map(pt), body: [body.x, body.y] };
   return cached;
@@ -42,7 +42,7 @@ export function drawMango(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: 
   const urgent = fraction < 0.3 && !reduced ? 1 + 0.5 * Math.abs(Math.sin(time / 110)) : 1;
   const width = Math.max(2, cell * 0.08) * urgent;
   const color = fraction < 0.3 ? p.danger : food.golden ? p.gold : p.leaf;
-  const start = -Math.PI / 2, end = start + fraction * Math.PI * 2, radius = cell * 0.47;
+  const start = -Math.PI / 2, end = start + fraction * Math.PI * 2, radius = cell * MANGO.arc;   // just outside the 1.0-cell body outline
   g.lineStyle(width, color).beginPath().arc(x, y, radius, start, end, false).strokePath();
   g.fillStyle(color);
   for (const angle of [start, end]) g.fillCircle(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius, width / 2);

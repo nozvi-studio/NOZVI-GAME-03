@@ -71,6 +71,14 @@ describe('P3b1-R8 mango art', () => {
     expect(style(ell[2]![1])).toEqual(['fillStyle', PART.mango.shine, 0.7]);
     expect((ell[0]![0][3] as number) / (ell[1]![0][3] as number)).toBeCloseTo(1.16, 10);
   });
+  it('D3-R12 mango body is about 0.86 cell wide and 1.0 cell with outline; ripeness arc sits outside it', () => {
+    const calls = record(false), ell = calls.filter(c => c[0] === 'fillEllipse');
+    const body = (ell[1]![3] as number) / 30, outline = (ell[0]![3] as number) / 30;
+    expect(outline).toBeGreaterThanOrEqual(0.9); expect(outline).toBeLessThanOrEqual(1.05);
+    expect(body).toBeGreaterThan(0.8);
+    const arc = calls.find(c => c[0] === 'arc')!;
+    expect(arc[3] as number).toBeGreaterThanOrEqual((outline / 2) * 30);
+  });
   it('P3b1-R8 golden mango recolours the body to the gold token, normal mango keeps the body token', () => {
     const bodyFill = (golden: boolean) => {
       const calls = record(golden), i = calls.findIndex((c, k) => c[0] === 'fillEllipse' && calls.slice(0, k).some(q => q[0] === 'fillEllipse'));   // second ellipse = body (first = outline)
