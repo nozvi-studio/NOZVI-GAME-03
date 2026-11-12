@@ -7,6 +7,7 @@ export interface Ctx2D {
   beginPath(): void; moveTo(x: number, y: number): void; lineTo(x: number, y: number): void;
   arcTo(x1: number, y1: number, x2: number, y2: number, r: number): void; closePath(): void; fill(): void;
   clearRect(x: number, y: number, w: number, h: number): void;
+  save(): void; restore(): void; clip(): void;
   createLinearGradient(x0: number, y0: number, x1: number, y1: number): { addColorStop(offset: number, color: string): void };
 }
 function shape(ctx: Ctx2D, x: number, y: number, w: number, h: number, r: number, notch: number): void {
@@ -28,11 +29,13 @@ export function paintSkin(ctx: Ctx2D, rc: SkinRecipe): void {
   if (rc.line) { shape(ctx, 0, 0, rc.w, rc.h, rc.r, rc.notch); ctx.fillStyle = rc.line.color; ctx.fill(); }
   const g = ctx.createLinearGradient(0, lp, 0, rc.h - lp), last = rc.stops.length - 1;
   rc.stops.forEach((c, i) => g.addColorStop(last === 0 ? 0 : i / last, c));
-  shape(ctx, lp, lp, rc.w - 2 * lp, rc.h - 2 * lp, Math.max(0, rc.r - lp), Math.max(0, rc.notch - lp));
-  ctx.fillStyle = g; ctx.fill();
-  if (rc.gloss) {
+  const face = (): void => shape(ctx, lp, lp, rc.w - 2 * lp, rc.h - 2 * lp, Math.max(0, rc.r - lp), Math.max(0, rc.notch - lp));
+  face(); ctx.fillStyle = g; ctx.fill();
+  if (rc.gloss) { // D3-R14 clipped to the face: on a round button the gloss pill would leak past the rim at the top corners
     const q = rc.gloss, gg = ctx.createLinearGradient(0, q.y, 0, q.y + q.h);
     gg.addColorStop(0, `rgba(255,255,255,${q.top})`); gg.addColorStop(1, `rgba(255,255,255,${q.bottom})`);
+    ctx.save(); face(); ctx.clip();
     shape(ctx, q.x, q.y, q.w, q.h, q.r, 0); ctx.fillStyle = gg; ctx.fill();
+    ctx.restore();
   }
 }

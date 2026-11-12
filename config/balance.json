@@ -90,7 +90,7 @@
     "terrainFadeInMs": 600, "hazardFlickerMs": 1500
     , "capy": { "breathPeriodMs": 1600, "breathAmp": 0.03, "blinkMs": 120, "blinkMinGapMs": 2000, "blinkMaxGapMs": 4000,
     "eatOpenMs": 80, "eatChewMs": 120, "gulpScaleX": 1.12, "gulpScaleY": 0.9,
-    "deadDroopMs": 300, "deadRotDeg": 12, "deadDropPx": 4, "headCellScale": 1.2,
+    "deadDroopMs": 300, "deadRotDeg": 12, "deadDropPx": 4, "headCellScale": 1.6,
     "tongueMs": 260, "tongueMinGapMs": 2500, "tongueMaxGapMs": 5000 }
     , "hud": { "rejectShakeMs": 200, "rejectShakeAmpPx": 6, "tipFactor": 2, "bannerQueueMax": 4 }
   },
@@ -133,7 +133,7 @@
     "digitPopScale": 1.2, "readyDipMs": 80,
     "d3": { "burstMs": 220, "burstFromScale": 0.6, "burstToScale": 1.4, "burstSparks": 6, "burstSparkPx": 26, "burstSparkEndScale": 0.5,
       "burstMaxParticles": 24, "ringFadeMs": 120, "shakeMs": 240, "shakeCycles": 3, "shakePx": 6, "badgeFlashMs": 240,
-      "sweepMs": 420, "trailMs": 120, "trailPx": 6, "trailAlpha": 0.5, "chevronMs": 160, "edgePx": 4, "edgeAlpha": 0.6, "sweepBand": 0.18, "sweepAlpha": 0.45 }
+      "sweepMs": 1100, "sweepEveryPulses": 2, "trailMs": 120, "trailPx": 6, "trailAlpha": 0.5, "chevronMs": 160, "edgePx": 4, "edgeAlpha": 0.6, "sweepBand": 0.18, "sweepAlpha": 0.45 }
   },
   "energy": { "max": 100, "orbGain": 15, "goldenGain": 10, "orbSpawnIntervalMs": 6000, "orbMax": 2, "orbLifeMs": 8000, "orbBlinkMs": 2000, "orbFromLevel": 2 },
   "skills": {

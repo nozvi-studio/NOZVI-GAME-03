@@ -2,6 +2,9 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(ui): pre-U4c owner review — snake face matches the D3 Home board (oval skull, white sclera, muzzle oval, top gloss; no nostrils/diamond); headCellScale 1.2 -> 1.6 so the visible head is ~1.4 cells, wider than the body (D3-R12).
+- fix(hud): affordable skill buttons drop the full rim gauge; skin gloss clipped to the face and the skill gloss inset like the board CSS (D3-R14).
+- fix(ui): Home PLAY sweep slower (1100 ms, every 2 pulses), eased and soft-edged (D3-R21).
 - fix(ui): snake head disc derived from the face size (ui.capy.headCellScale) so no ring shows around the capy face; one head size for every skin (D3-R12).
 - docs(ui): U4b screenshot record, CODEMAP/UI-MOCKUPS rows, DECISIONS B1..B5, STATUS.
 - fix(ui): D3 U4b review — snake draw no longer allocates per frame (cached widths, reused stripe polyline, hoisted pass), stripe colour moved to tokens, thin hazard outline width named in boardParts, fence edge hoisted.

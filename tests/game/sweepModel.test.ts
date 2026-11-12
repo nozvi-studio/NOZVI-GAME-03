@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest';
+import { loadBalance } from '../support/balance';
 import { sweepAllowed, sweepCycle, sweepX } from '../../src/game/flow/sweepModel';
 
 it('D3-R21 one sweep per pulse period: the cycle index steps every periodMs from t0', () => {
@@ -12,4 +13,14 @@ it('D3-R21 the band crosses the face left to right in sweepMs, then hides', () =
 });
 it('D3-R28 no sweep under reduced motion or motion=off', () => {
   expect(sweepAllowed(false, false)).toBe(true); expect(sweepAllowed(true, false)).toBe(false); expect(sweepAllowed(false, true)).toBe(false);
+});
+it('D3-R21 the sweep eases in and out (slow at the edges, fastest in the middle)', () => {
+  const at = (ms: number): number => sweepX(ms, 1000, 280, 50)!;
+  expect(at(100) - at(0)).toBeLessThan(0.5 * (at(550) - at(450)));
+  expect(at(1000) - at(900)).toBeLessThan(0.5 * (at(550) - at(450)));
+});
+it('D3-R21 Home sweep lasts long enough to read and fits inside one pulse period', () => {
+  const m = loadBalance().motion;
+  expect(m.d3.sweepMs).toBeGreaterThanOrEqual(800);
+  expect(m.d3.sweepMs).toBeLessThan(m.pulsePeriodMs * m.d3.sweepEveryPulses);
 });

@@ -12,6 +12,8 @@ export interface SkinRecipe {
   line: { px: number; color: string } | null; gloss: SkinGloss | null; notch: number;
 }
 const RIBBON_NOTCH = 0.25, GLOSS_INSET = 3;
+// D3-R14 skill button gloss from the board CSS (.skill::before): 12 mock px in from each side, 6 down, 26 tall, fades to 0.
+const SKILL_GLOSS = { side: 12, top: 6, h: 26, bottom: 0 } as const;
 const isBig = (kind: SkinKind, tone: SkinTone): boolean => kind === 'skill' || (kind === 'button' && tone === 'primary');
 
 /** D3-R5 depth of the static lip under a face. */
@@ -36,9 +38,13 @@ export function skinRecipe(kind: SkinKind, tone: SkinTone, w: number, h: number,
   const glossy = state !== 'disabled' && tone !== 'off' && kind !== 'panel' && kind !== 'ribbon' && !(kind === 'bar' && !fill);
   const mul = state === 'pressed' ? S.pressedGloss : 1;
   const inset = (fill ? 0 : linePx) + unit * GLOSS_INSET, gh = h * S.glossFrac;
+  const sg = SKILL_GLOSS, skillGloss = (): SkinGloss => {
+    const x = linePx + unit * sg.side, gw = Math.max(0, w - 2 * x), sh = unit * sg.h;
+    return { x, y: linePx + unit * sg.top, w: gw, h: sh, r: Math.min(gw, sh) / 2, top: S.glossTop * mul, bottom: sg.bottom };
+  };
   return {
     kind, w, h, r, stops: t.face, notch,
     line: fill ? null : { px: linePx, color: t.line },
-    gloss: glossy ? { x: inset, y: inset, w: w - 2 * inset, h: gh, r: Math.min(Math.max(0, r - inset), gh / 2), top: S.glossTop * mul, bottom: S.glossBottom * mul } : null,
+    gloss: !glossy ? null : kind === 'skill' ? skillGloss() : { x: inset, y: inset, w: w - 2 * inset, h: gh, r: Math.min(Math.max(0, r - inset), gh / 2), top: S.glossTop * mul, bottom: S.glossBottom * mul },
   };
 }

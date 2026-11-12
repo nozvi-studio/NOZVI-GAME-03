@@ -5,12 +5,13 @@ import { skinRecipe } from '../../src/game/ui/skin/skinSpec';
 import { skinKey, skinTexture, type TextureHost } from '../../src/game/ui/skin/skinTextures';
 import { TOKENS } from '../../src/game/uiTokens';
 
-function fakeCtx(): Ctx2D & { fills: unknown[]; grads: [number, string][][] } {
-  const fills: unknown[] = [], grads: [number, string][][] = [];
+function fakeCtx(): Ctx2D & { fills: unknown[]; grads: [number, string][][]; ops: string[] } {
+  const fills: unknown[] = [], grads: [number, string][][] = [], ops: string[] = [];
   const ctx = {
-    fillStyle: '' as unknown, fills, grads,
+    fillStyle: '' as unknown, fills, grads, ops,
     beginPath() {}, moveTo() {}, lineTo() {}, arcTo() {}, closePath() {}, clearRect() {},
-    fill() { fills.push(ctx.fillStyle); },
+    save() { ops.push('save'); }, restore() { ops.push('restore'); }, clip() { ops.push('clip'); },
+    fill() { fills.push(ctx.fillStyle); ops.push('fill'); },
     createLinearGradient() { const stops: [number, string][] = []; grads.push(stops); return { addColorStop: (o: number, c: string) => { stops.push([o, c]); } }; },
   };
   return ctx;
@@ -31,6 +32,11 @@ it('D3-R5 paintSkin fills the outline, then the face gradient, then the gloss', 
   expect(ctx.grads[0]!.map(([, c]) => c)).toEqual([...TOKENS.d3.tone.primary.face]);
   expect(ctx.grads[0]!.map(([o]) => o)).toEqual([0, 0.5, 1]);
   expect(ctx.grads[1]![0]![1]).toBe(`rgba(255,255,255,${TOKENS.d3.shape.glossTop})`);
+});
+it('D3-R14 the gloss is clipped to the face so it never leaks past a round skill button', () => {
+  const ctx = fakeCtx();
+  paintSkin(ctx, skinRecipe('skill', 'primary', 120, 120, 'rest', 1));
+  expect(ctx.ops).toEqual(['fill', 'fill', 'save', 'clip', 'fill', 'restore']);
 });
 it('D3-R5 a lip recipe paints one flat fill', () => {
   const ctx = fakeCtx();
