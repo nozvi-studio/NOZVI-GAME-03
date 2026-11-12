@@ -1,4 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest';
+import { BOARD } from '../../src/game/layout';
 import { GameScene } from '../../src/game/scenes/GameScene';
 import type { Effects } from '../../src/game/render/effects';
 import { LIGHT, currentPalette, setDisplaySettings } from '../../src/game/render/palette';
@@ -67,7 +68,7 @@ it('GDD-13 gameplay and floating scores clip inside rounded board while the outl
   game.create();
   const content = h.find('board'), border = h.find('board-border'), clip = h.find('board-clip');
   expect(content).toBeDefined();
-  expect(clip.commands).toContainEqual(['fillRoundedRect', 0, 0, 504, 504, 18]);
+  expect(clip.commands).toContainEqual(['fillRoundedRect', 0, 0, BOARD.size, BOARD.size, 18]);
   // Phaser documents masking on root containers; the external border must stay separate.
   expect(content.mask).toBeDefined(); expect(border.mask).toBeUndefined();
   expect(content.list).not.toContain(border);
