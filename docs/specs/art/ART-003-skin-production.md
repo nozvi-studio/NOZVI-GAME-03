@@ -12,6 +12,7 @@ Status: **Draft — owner has not fully approved (2026-11-07).** Rules for skins
 3. **Expressions.** Reuse the expression table (capy design spec §3): A set (`idle`, `idle_blink`, `eat_open`, `eat_chew`, `dead`) is required; B set optional (rarity, GDD §8.3).
 4. **Body** (Skins/Results only): round belly + two stub feet, poses `idle`, `win`, same palette and outline.
 5. **Render.** Pure SVG builder (no Phaser) → `svgDataUrl` (base64) → `load.svg` at sizes `board` 96 px and `large` 256 px. Texture keys `<skin>/head/<expression>/<size>`, `<skin>/body/<pose>/large`.
+6. **One head size for every skin (D3-R12, 2026-11-12).** On the board the face is drawn `ui.capy.headCellScale` cells wide (balance.json) for every skin; the snake head disc is derived from that number (`SNAKE.headFit` in `boardParts.ts`) and stays hidden behind the face even at full gulp. The face must fill the round centre of its frame (`snakeHeadPath`); never size a skin's head on its own.
 6. **Motion.** Reuse the capy motion (`capyPose.ts`, numbers in `config/balance.json` `ui.capy`); per-skin overrides only if the owner asks.
 7. **Preview + review.** Open `?debug=1&artPreview=1`; check every expression at 24, 40, 124, 256 CSS px on light and dark boards; then the owner checks on a 5" phone.
 8. **Tests.** Vitest per skin: all fixed layers present, anchors as §2.1, outline color/width, every expression resolves. Test names carry `ART-003` and the skin id.

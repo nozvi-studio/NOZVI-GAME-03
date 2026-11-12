@@ -100,5 +100,7 @@ export function mangoLeaf(): Pt[] {
   return [...cubic(a[0]!, a[1]!, a[2]!, a[3]!, 8), ...cubic(b[0]!, b[1]!, b[2]!, b[3]!, 8).slice(1)];
 }
 
-// D3-R12 snake, fractions of one cell (boardSvg: outline 0.96, body 0.76, stripe 0.14, head r 0.7 + 0.1 outline)
-export const SNAKE = { body: 0.76, outline: 0.96, stripe: 0.14, stripeAlpha: 0.4, stripeOffset: 0.16, head: 0.7, headOutline: 0.1, belly: 0.26, gulp: 0.18 } as const;
+// D3-R12 snake, fractions of one cell (boardSvg: outline 0.96, body 0.76, stripe 0.14, head outline 0.1).
+// Head disc is not a fixed size: it derives from the character face size (balance ui.capy.headCellScale);
+// headFit = disc diameter incl. outline at full gulp, as a fraction of the face, so the disc stays hidden behind every skin.
+export const SNAKE = { body: 0.76, outline: 0.96, stripe: 0.14, stripeAlpha: 0.4, stripeOffset: 0.16, headFit: 0.9, headOutline: 0.1, belly: 0.26, gulp: 0.18 } as const;

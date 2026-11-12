@@ -12,11 +12,14 @@ export function snakeHeadPoint(s: SimSnapshot, cell: number): { x: number; y: nu
 
 export interface SnakeWidths { body: number; outline: number; stripe: number; head: number; headOutline: number; belly: number }
 // D3-R12 widths in px (pure, testable); cached per cell size so the per-frame draw allocates nothing new.
-let widths: { cell: number; w: SnakeWidths } | null = null;
-export function snakeWidths(cell: number): SnakeWidths {
-  if (widths?.cell === cell) return widths.w;
-  widths = { cell, w: { body: cell * SNAKE.body, outline: cell * SNAKE.outline, stripe: cell * SNAKE.stripe, head: cell * SNAKE.head,
-    headOutline: cell * SNAKE.headOutline, belly: cell * SNAKE.belly } };
+let widths: { cell: number; face: number; w: SnakeWidths } | null = null;
+// D3-R12 one head size for every character: the disc radius derives from the face size (cells), so the face always covers it.
+export function snakeWidths(cell: number, faceCells: number): SnakeWidths {
+  if (widths?.cell === cell && widths.face === faceCells) return widths.w;
+  const headOutline = cell * SNAKE.headOutline;
+  const head = Math.max(0, (cell * faceCells * SNAKE.headFit / 2 - headOutline) / (1 + SNAKE.gulp));
+  widths = { cell, face: faceCells, w: { body: cell * SNAKE.body, outline: cell * SNAKE.outline, stripe: cell * SNAKE.stripe, head,
+    headOutline, belly: cell * SNAKE.belly } };
   return widths.w;
 }
 
@@ -29,15 +32,15 @@ function pass(g: Phaser.GameObjects.Graphics, color: number, width: number, pts:
 // Reused stripe polyline (grows to the longest snake, then only its entries are rewritten).
 const STRIPE: P[] = [];
 
-// MEC-001 interpolate the head and tail; D3-R12 outlined body, highlight stripe, 1.4-cell head disc.
-export function drawSnake(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: number, look: BoardLook, gulp: number, drawFace = true, bulge = 0): void {
+// MEC-001 interpolate the head and tail; D3-R12 outlined body, highlight stripe, head disc sized from the face.
+export function drawSnake(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: number, look: BoardLook, gulp: number, faceCells: number, drawFace = true, bulge = 0): void {
   const last = s.snake[s.snake.length - 1]!;
   const lerp = (a: number, b: number): number => a + (b - a) * s.tickAlpha;
   const center = (x: number, y: number): { x: number; y: number } => ({ x: (x + 0.5) * cell, y: (y + 0.5) * cell });
   const headPt = snakeHeadPoint(s, cell);
   const tailPt = center(lerp(s.tailFrom.x, last.x), lerp(s.tailFrom.y, last.y));
   const points = [headPt, ...s.snake.slice(1).map(c => center(c.x, c.y)), tailPt];
-  const w = snakeWidths(cell), headR = w.head * (1 + SNAKE.gulp * gulp);
+  const w = snakeWidths(cell, faceCells), headR = w.head * (1 + SNAKE.gulp * gulp);
   pass(g, look.outline.snake, w.outline, points);
   g.fillStyle(look.outline.snake).fillCircle(headPt.x, headPt.y, headR + w.headOutline);
   pass(g, look.snake.body, w.body, points);
