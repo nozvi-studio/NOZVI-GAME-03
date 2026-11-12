@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(hud): D3-R15 pause panel (300 px card, butter chip, gear on Settings) and bigger pause glyph U5-R1 (bars 7x22).
 - feat(results): D3-R18 pure layout (flow/resultsLayout.ts, MENU.results.d3 metrics).
 - feat(results): D3-R18 row model and first-run tip (ResultsView.rows/firstRunTip/ribbon).
 - docs(qa): U5 Task 1 results button check (first-run Results buttons visible, no code change).

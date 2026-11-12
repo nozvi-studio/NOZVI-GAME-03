@@ -15,8 +15,8 @@ import { motionFor, type Motion } from '../motion';
 import { levelTitleChanged } from './hudMotion';
 
 const T = TOKENS.d3;
-// Mockup px of the pause glyph (kept from GameD2).
-const M = { pauseBarW: 5, pauseBarH: 16, pauseBarX: 7, pauseGap: 2, pauseRadius: 2, playHalf: 9, playBack: 6, playTip: 9, disabledAlpha: 0.4 } as const;
+// Mockup px of the pause glyph (U5-R1 bigger glyph: bars at x -10..-3 and 3..10).
+const M = { pauseBarW: 7, pauseBarH: 22, pauseBarX: 10, pauseGap: 3, pauseRadius: 3, playHalf: 11, playBack: 8, playTip: 11, disabledAlpha: 0.4 } as const;
 
 
 const cen = (r: R): { x: number; y: number } => ({ x: d3(r.x + r.w / 2), y: d3(r.y + r.h / 2) });

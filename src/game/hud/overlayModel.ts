@@ -14,16 +14,17 @@ export function pauseView(c: { level: number; biome: number; hint: { key: string
     chip: c.hint ? t(c.hint.key, { level: c.hint.level }) : null, buttons };
 }
 
-export const PAUSE_MOCK = { w: 310, radius: 30, padTop: 26, padBottom: 20, gap: 6, title: 37.4, subtitle: 19, chip: 34, chipMt: 6,
-  resume: 66, resumeMt: 16, secondary: 52, secondaryMt: 8, titleSize: 34, subtitleSize: 16 } as const;
+// D3-R15 board px (360 wide; convert with d3m/d3). Margins only: the board panel is a plain column, so gap is 0.
+export const PAUSE_MOCK = { w: 300, padTop: 20, padBottom: 22, gap: 0, title: 44, subtitle: 20, subtitleMt: 6, chip: 30, chipMt: 12,
+  resume: 66, resumeMt: 26, secondary: 52, secondaryMt: 22, quitMt: 16, titleSize: 40, subtitleSize: 15 } as const;
 
-/** P3b2-R12 mockup-px y/height of every row in the dialog (top of the dialog = 0). */
+/** D3-R15 board-px y/height of every row in the dialog (top of the dialog = 0). */
 export function pauseLayout(v: PauseView) {
-  const m = PAUSE_MOCK, rows: { key: string; h: number; mt?: number }[] = [{ key: 'title', h: m.title }, { key: 'subtitle', h: m.subtitle }];
+  const m = PAUSE_MOCK, rows: { key: string; h: number; mt?: number }[] = [{ key: 'title', h: m.title }, { key: 'subtitle', h: m.subtitle, mt: m.subtitleMt }];
   if (v.chip !== null) rows.push({ key: 'chip', h: m.chip, mt: m.chipMt });
   for (const btn of v.buttons)
     rows.push({ key: btn.id, h: btn.id === 'resume' ? m.resume : m.secondary,
-      ...(btn.id === 'resume' ? { mt: m.resumeMt } : btn.id === 'settings' ? { mt: m.secondaryMt } : {}) });
+      mt: btn.id === 'resume' ? m.resumeMt : btn.id === 'settings' ? m.secondaryMt : m.quitMt });
   const s = stack(rows, { gap: m.gap, padTop: m.padTop, padBottom: m.padBottom });
   const at = (key: string): number => s.ys[rows.findIndex(r => r.key === key)]!;
   return { w: m.w, height: s.height, title: at('title'), subtitle: at('subtitle'), chip: v.chip === null ? null : at('chip'),
