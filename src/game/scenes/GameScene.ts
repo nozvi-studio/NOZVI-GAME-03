@@ -132,7 +132,7 @@ export class GameScene extends Phaser.Scene {
     if (result.forward) {
       const s = this.snapshot(); // MOT-3-R12 render-only cue; session.turn timing is untouched
       if (s && isTurn(s.dir, dx, dy)) this.events.emit('derived-juice', { type: 'turned', dx, dy } satisfies JuiceInput);
-      this.session.turn(dx, dy);
+      if (this.session.turn(dx, dy)) this.events.emit('steer', { dx, dy }); // D3-R25 accepted turns only
     }
   }
 
