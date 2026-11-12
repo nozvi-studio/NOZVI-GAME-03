@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: STATUS after U5 merge.
 - docs: U5 QA pass, rulings (DECISIONS), UI-MOCKUPS built marks, PLAYTEST entry.
 - fix(hud): D3-R16 review: banner queue cap counts the card on screen, slot B pill text/icon ink (white on orange was 2.4:1), darker up/warn icons, D3-R2 strip contrast test.
 - feat(juice): D3-R17 death card is a RUN OVER ribbon over a 288 px panel (board metrics, layoutColumn centring kept).
