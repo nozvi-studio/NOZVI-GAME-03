@@ -1,5 +1,5 @@
 import type Phaser from 'phaser';
-import { FONT_UI, TOKENS } from '../uiTokens';
+import { FONT_UI, TOKENS, toInt } from '../uiTokens';
 import { d3, d3m } from '../ui/layout';
 import { progressBar } from '../ui/widgets';
 import { butterChip } from '../ui/menuWidgets';
@@ -15,7 +15,7 @@ import { chipHasIcon, chipTransition, easeMsFor, energyCue } from './hudMotion';
 
 const T = TOKENS.d3;
 // D3-R26 first-input finger glyph proportions (360-wide D3 px): tip radius, body size, gap left of the hint text, y offset, press scale.
-const FINGER = { tip: 7, bodyW: 12, bodyH: 18, gap: 18, dy: 6, pressScale: 0.88 } as const;
+const FINGER = { tip: 7, bodyW: 12, bodyH: 18, gap: 18, dy: 6, pressScale: 0.88, outline: 2 } as const;
 const cen = (r: R): Pt => ({ x: d3(r.x + r.w / 2), y: d3(r.y + r.h / 2) });
 
 // D3-R9 bottom group: energy bar, steer hint (R2) and checkpoint / ramp chip (R3). Static art is built once; apply() only sets text / crop / visibility.
@@ -30,7 +30,7 @@ export class BottomGroup {
   private last: HudView | null = null;
   private pos: Pt = { x: 0, y: 0 };
   private readonly finger: Phaser.GameObjects.Graphics; private touch = false; private reduced = false; private fingerOn = false;
-  private fingerX = 0; private fingerY = 0;
+  private placedText = ''; private fingerX = 0; private fingerY = 0;
 
   constructor(private readonly scene: Phaser.Scene, private l: D3HudLayout) {
     const e = l.energy, ec = cen(e.icon), lc = cen(e.label), E = D3_RUN.energy, H = D3_RUN.hint;
@@ -86,8 +86,8 @@ export class BottomGroup {
   /** D3-R26 C4: the finger glyph is drawn once (white tip with ink outline over a rounded body), origin at the tip centre. */
   private buildFinger(): Phaser.GameObjects.Graphics {
     const F = FINGER, g = this.scene.add.graphics().setName('first-input-finger').setVisible(false);
-    g.fillStyle(parseInt(T.white.slice(1), 16), 1).fillRoundedRect(-d3(F.bodyW) / 2, 0, d3(F.bodyW), d3(F.bodyH), d3(F.bodyW) / 2);
-    g.fillCircle(0, 0, d3(F.tip)).lineStyle(2, parseInt(T.inkDeep.slice(1), 16), 1).strokeCircle(0, 0, d3(F.tip));
+    g.fillStyle(toInt(T.white), 1).fillRoundedRect(-d3(F.bodyW) / 2, 0, d3(F.bodyW), d3(F.bodyH), d3(F.bodyW) / 2);
+    g.fillCircle(0, 0, d3(F.tip)).lineStyle(d3(F.outline), toInt(T.inkDeep), 1).strokeCircle(0, 0, d3(F.tip));
     return g;
   }
   /** D3-R26 C3: touch only; reduced motion makes the glyph static. */
@@ -101,14 +101,15 @@ export class BottomGroup {
 
   private placeHint(): void {
     const h = this.l.hint; if (!h) return;
-    this.hint.setPosition(d3(h.x + h.w / 2), d3(h.y + h.h / 2));
+    this.placedText = this.hint.text; this.hint.setPosition(d3(h.x + h.w / 2), d3(h.y + h.h / 2));
     this.fingerX = this.hint.x - d3(FINGER.gap) - this.hint.width / 2; this.fingerY = this.hint.y + d3(FINGER.dy);
   }
   /** D3-R9 R2/R3: the wait prompt is white text under the energy bar; no hint slot in D-pad mode, so it is hidden there. */
   private syncHint(v: HudView | null): void {
     const show = !!this.l.hint && v?.chip?.kind === 'wait';
     this.hint.setVisible(show); if (show) this.hint.setText(v!.chip!.text);
-    this.placeHint(); this.fingerOn = fingerShown(this.touch, !!this.l.hint, show); this.finger.setVisible(this.fingerOn);
+    if (show && v!.chip!.text !== this.placedText) { this.placedText = v!.chip!.text; this.placeHint(); }
+    this.fingerOn = fingerShown(this.touch, !!this.l.hint, show); this.finger.setVisible(this.fingerOn);
   }
 
   /** D3-R9 R2/R3: butter chip for ramp / checkpoint only (wait is the hint text); rebuilt only when its text or place changes. */
