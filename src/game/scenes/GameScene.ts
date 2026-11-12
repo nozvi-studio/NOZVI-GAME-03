@@ -8,7 +8,8 @@ import { createFlow, flowKey, flowOver, flowPause, flowStart, flowTick, flowTurn
 import { bindKeyboard } from '../input/keyboard';
 import { bindSwipe } from '../input/swipe';
 import { screenBackground } from '../ui/background';
-import { BOARD_RADIUS, buildBoardTexture, drawBoardBorder } from '../render/board';
+import { FRAME } from '../render/boardParts';
+import { buildBoardTexture, drawBoardFrame, drawBoardShadow } from '../render/board';
 import { Effects } from '../render/effects';
 import { colorOf } from '../juice/colors';
 import type { BoardVisual, JuiceInput } from '../juice/types';
@@ -63,17 +64,19 @@ export class GameScene extends Phaser.Scene {
     this.prev = null; this.beats = new HitBeats(motionFor(this), this.balance.motion); this.tel = telegraphCtx(this.balance, key => this.beats.scale(key));
     this.look = boardLook(1);
     this.setBackground(this.look.biome);
+    this.border = this.add.graphics().setName('board-border').setPosition(BOARD.x, BOARD.y);
+    drawBoardFrame(this.border, this.look, BOARD.size, cellPx(this.balance));
     const image = this.add.image(0, 0, buildBoardTexture(this, this.balance, this.look)).setOrigin(0);
-    this.board = this.add.container(BOARD.x, BOARD.y, [image]).setName('board');
+    const shadow = this.add.graphics();
+    drawBoardShadow(shadow, this.look, BOARD.size, cellPx(this.balance));
+    this.board = this.add.container(BOARD.x, BOARD.y, [image, shadow]).setName('board');
     this.layers = {
       ground: this.add.graphics(), terrain: this.add.graphics(), hazards: this.add.graphics(), mango: this.add.graphics(),
       skills: this.add.graphics(), snake: this.add.graphics(), overlay: this.add.graphics(), effects: this.add.graphics(),
     };
     this.board.add(Object.values(this.layers));
-    this.border = this.add.graphics().setName('board-border').setPosition(BOARD.x, BOARD.y);
-    drawBoardBorder(this.border, this.palette);
     this.boardClip = this.add.graphics().setName('board-clip').setPosition(BOARD.x, BOARD.y).setVisible(false);
-    this.boardClip.fillStyle(0xffffff).fillRoundedRect(0, 0, BOARD.size, BOARD.size, BOARD_RADIUS);
+    this.boardClip.fillStyle(0xffffff).fillRoundedRect(0, 0, BOARD.size, BOARD.size, cellPx(this.balance) * FRAME.groundRadius);
     this.board.setMask(this.boardClip.createGeometryMask());
     const juice = this.balance.juice;
     this.effects = new Effects(this, this.board, cellPx(this.balance), this.reduced,
@@ -93,7 +96,7 @@ export class GameScene extends Phaser.Scene {
     this.game.events.on(Phaser.Core.Events.HIDDEN, hidden);
     const recolor = (): void => {
       this.palette = currentPalette(); this.reduced = reduceMotion(); this.effects.setReduced(this.reduced); this.lookStale = true; // texture rebuilt on the next draw
-      drawBoardBorder(this.border.clear(), this.palette);
+      drawBoardFrame(this.border.clear(), this.look, BOARD.size, cellPx(this.balance));
       this.setBackground(this.look.biome);
     };
     this.game.events.on('settings-closed', recolor);
@@ -226,6 +229,7 @@ export class GameScene extends Phaser.Scene {
     this.border.setPosition(this.board.x, this.board.y);
     if (this.lookStale || snapshot.biome !== this.look.biome) {
       this.look = boardLook(snapshot.biome); this.lookStale = false;
+      drawBoardFrame(this.border.clear(), this.look, BOARD.size, cellPx(this.balance));
       this.setBackground(this.look.biome);
       buildBoardTexture(this, this.balance, this.look);
     }

@@ -2,17 +2,35 @@ import type Phaser from 'phaser';
 import type { Balance } from '../../core';
 import { BOARD, cellPx } from '../layout';
 import type { BoardLook } from './biomePalette';
-import type { Palette } from './palette';
+import { FRAME } from './boardParts';
+import { TOKENS, toInt } from '../uiTokens';
 
-// Prototype CSS L72–73: 18px board corners, 4px external ink outline.
-export const BOARD_RADIUS = 18;
-export const BOARD_OUTLINE = 4;
+export interface RoundRect { x: number; y: number; w: number; h: number; r: number; color: number; alpha: number }
 
-// GDD-13 center the outline outside the board, matching the CSS box-shadow spread.
-export function drawBoardBorder(g: Phaser.GameObjects.Graphics, p: Palette): void {
-  const half = BOARD_OUTLINE / 2;
-  g.lineStyle(BOARD_OUTLINE, p.ink).strokeRoundedRect(-half, -half,
-    BOARD.size + BOARD_OUTLINE, BOARD.size + BOARD_OUTLINE, BOARD_RADIUS + half);
+// D3-R12 frame: overhang, drop shadow and inner top shadow, board px relative to the board origin.
+export function frameRects(look: BoardLook, size: number, cell: number): { drop: RoundRect; frame: RoundRect; shadow: RoundRect } {
+  const pad = FRAME.pad * cell, w = size + 2 * pad;
+  const frame: RoundRect = { x: -pad, y: -pad, w, h: w, r: FRAME.radius * cell, color: look.frame, alpha: 1 };
+  return {
+    drop: { ...frame, y: frame.y + FRAME.dropY * cell, color: toInt(TOKENS.d3.inkDeep), alpha: FRAME.dropAlpha },
+    frame,
+    shadow: { x: 0, y: 0, w: size, h: FRAME.shadowH * cell, r: FRAME.shadowRadius * cell, color: toInt(TOKENS.d3.board.frameShadow), alpha: FRAME.shadowAlpha },
+  };
+}
+
+function fillRound(g: Phaser.GameObjects.Graphics, r: RoundRect): void {
+  g.fillStyle(r.color, r.alpha).fillRoundedRect(r.x, r.y, r.w, r.h, r.r);
+}
+
+// D3-R12 draws the drop shadow and the frame (below the ground).
+export function drawBoardFrame(g: Phaser.GameObjects.Graphics, look: BoardLook, size: number, cell: number): void {
+  const f = frameRects(look, size, cell);
+  fillRound(g, f.drop); fillRound(g, f.frame);
+}
+
+// D3-R12 inner top shadow, drawn above the ground inside the board container.
+export function drawBoardShadow(g: Phaser.GameObjects.Graphics, look: BoardLook, size: number, cell: number): void {
+  fillRound(g, frameRects(look, size, cell).shadow);
 }
 
 // Presentation seam fix: checker rects overlap by half a pixel so no hairline shows between cells.
