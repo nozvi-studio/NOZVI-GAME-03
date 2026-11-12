@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs(ui): U4b screenshot record, CODEMAP/UI-MOCKUPS rows, DECISIONS B1..B5, STATUS.
 - fix(ui): D3 U4b review — snake draw no longer allocates per frame (cached widths, reused stripe polyline, hoisted pass), stripe colour moved to tokens, thin hazard outline width named in boardParts, fence edge hoisted.
 - fix(ui): D3 board mango is 1.0 cell wide with outline (was 0.77), centred on its body, ripeness arc at 0.56 cell; HUD quota mango icon uses the board mango body and leaf colours (D3-R12, D3-R13)
 - feat(ui): D3 hazard families recoloured from `TOKENS.d3.board` and outlined from `HAZARD_EDGES`; board outlines keep >= 3:1 on all biomes (D3-R12, D3-R2)

@@ -22,11 +22,11 @@ The token table lives in the spec §4 (D3-R1, R4) and in code as `TOKENS.d3`; `t
 |---|---|---|---|
 | `Boot` | `Boot-360` | `src/game/scenes/BootScene.ts` | U3 (built) |
 | `Home` | `Home-360`, `Home-390` | `scenes/HomeScene.ts`, `flow/homeModel.ts`, `ui/menuLayout.ts` | U3 (built) |
-| `Game` | `Game-360`, `Game-390` | `hud/d3HudLayout.ts`, `hud/HudTop.ts`, `hud/SkillButtons.ts`, `hud/BottomGroup.ts`, `render/*` | U4a (built; board art U4b) |
+| `Game` | `Game-360`, `Game-390` | `hud/d3HudLayout.ts`, `hud/HudTop.ts`, `hud/SkillButtons.ts`, `hud/BottomGroup.ts`, `render/*` | U4a + U4b (built) |
 | `GameDpad` | `GameDpad-360` | `hud/BottomGroup.ts`, `input/dpad.ts` | U4a (built) |
 | `GameLocked` | `GameLocked-360`, `-360-2` | `hud/SkillButtons.ts`, `hud/skillLook.ts` | U4a (built) |
 | `GameHint` | `GameHint-360`, `-360-2` | `input/steerFx.ts`, `input/steerFxModel.ts` | U4 |
-| `Biomes` | `Biomes` | `render/biomePalette.ts`, `render/boardParts.ts`, `ui/background.ts` | U3, U4 |
+| `Biomes` | `Biomes` | `render/biomePalette.ts`, `render/boardParts.ts`, `ui/background.ts` | U3, U4b (built) |
 | `Pause` | `Pause-360` | `hud/PauseOverlay.ts` | U5 |
 | `Countdown` | `Countdown-360` | `hud/CountdownOverlay.ts` | U5 |
 | `Banners` | `Banners-360`, `-360-2..4` | `hud/BannerLayer.ts` | U5 |
