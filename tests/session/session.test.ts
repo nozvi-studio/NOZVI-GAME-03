@@ -267,3 +267,17 @@ describe('session debug skip', () => {
     expect(loadLog(store).entries.map(e => e.type)).toEqual(['run_start', 'run_end', 'run_start']);
   });
 });
+
+describe('D3-R25 session.turn reports acceptance', () => {
+  it('D3-R25 returns true for a queued turn and false for a reverse or repeat', () => {
+    const { s } = setup();
+    s.startRun(1);
+    expect(s.turn(1, 0)).toBe(false); // same as start direction
+    expect(s.turn(0, 1)).toBe(true);
+    expect(s.turn(0, 1)).toBe(false); // same as last queued
+    expect(s.turn(0, -1)).toBe(false); // reverse of last queued
+  });
+  it('D3-R25 returns false with no run', () => {
+    expect(setup().s.turn(0, 1)).toBe(false);
+  });
+});

@@ -6,7 +6,9 @@ import { barFill, pillGeom, pillHitRect } from './geometry';
 import { ui } from './layout';
 import { PILL_SKIN, type PillTone } from './pillTones';
 import { hostOf, lipPx, skinTexture, type SkinKind, type SkinState, type SkinTone } from './skin';
+import { edgeAlpha, flashAlpha } from './barEdgeModel';
 import { tapBurst } from './touchFx';
+import { motionCfgFor } from '../motion';
 
 /*
  * Token widget kit (P3-0-R7). All sizes are mockup px (ui() applied inside); colours come from TOKENS.
@@ -79,17 +81,32 @@ export function titleText(scene: Phaser.Scene, x: number, y: number, text: strin
 
 // D3-R6 bar: track image plus a cropped fill image; `fill` picks the fill tone (energy colour -> energy, anything else -> mango).
 export function progressBar(scene: Phaser.Scene, x: number, y: number, wMock: number, hMock: number, fill: string):
-  { g: Phaser.GameObjects.Container; set(value: number, max: number): void } {
+  { g: Phaser.GameObjects.Container; set(value: number, max: number): void; edge(now: number): void; flash(now: number): void } {
   const w = ui(wMock), h = ui(hMock), pad = ui(S.line), fw = w - 2 * pad, fh = h - 2 * pad;
   const tone: SkinTone = toInt(fill) === toInt(D.tone.energy.face[0]) || toInt(fill) === toInt(TOKENS.sky.energy) ? 'energy' : 'mango';
   const track = skinImage(scene, w / 2, h / 2, 'bar', 'track', w, h, 'rest');
   const fillImg = skinImage(scene, w / 2, h / 2, 'bar', tone, fw, fh, 'rest');
-  const g = scene.add.container(x, y, [track, fillImg]);
+  // D3-R27 prebuilt value-change cues: a leading-edge sliver (alpha only) and a full-bar flash; absent when no balance is loaded (art preview).
+  const cfg = scene.registry.get('balance') ? motionCfgFor(scene) : null;
+  const edgeW = cfg ? ui(cfg.d3.edgePx) : 0;
+  const edgeG = scene.add.graphics().setAlpha(0), flashG = scene.add.graphics().setAlpha(0);
+  edgeG.fillStyle(toInt(D.white), 1).fillRect(0, 0, edgeW, fh); edgeG.setPosition(pad, pad);
+  flashG.fillStyle(toInt(D.white), 1).fillRoundedRect(pad, pad, fw, fh, fh / 2);
+  const g = scene.add.container(x, y, [track, fillImg, flashG, edgeG]);
+  let lastPx = -1, movedAt = -1e9, flashAt = -1, edgeLit = false, curPx = 0;
   const set = (value: number, max: number): void => {
     const px = barFill(value, max, fw);
     fillImg.setVisible(px > 0);
     if (px > 0) fillImg.setCrop(0, 0, px, fh);
+    if (px !== lastPx) { if (lastPx >= 0) movedAt = scene.time.now; lastPx = px; curPx = px; edgeG.setX(pad + Math.max(0, px - edgeW)); }
   };
+  const edge = (now: number): void => {
+    if (!cfg) return;
+    if (flashAt >= 0) { const a = flashAlpha(now - flashAt, cfg.d3.flashMs); flashG.setAlpha(a); if (a === 0) flashAt = -1; }
+    if (curPx > 0 && now - movedAt <= cfg.fadeMs) { edgeG.setAlpha(edgeAlpha(now - movedAt, cfg.d3, cfg.fadeMs)); edgeLit = true; }
+    else if (edgeLit) { edgeG.setAlpha(0); edgeLit = false; }
+  };
+  const flash = (now: number): void => { if (!cfg) return; flashAt = now; flashG.setAlpha(1); };
   set(0, 1);
-  return { g, set };
+  return { g, set, edge, flash };
 }

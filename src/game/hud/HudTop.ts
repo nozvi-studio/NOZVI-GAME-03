@@ -4,6 +4,7 @@ import { d3, d3m, ui } from '../ui/layout';
 import { bindPress } from '../scenes/ui';
 import { attachFeedback } from '../ui/feedback';
 import { hostOf, lipPx, skinTexture } from '../ui/skin';
+import { quotaFlash } from '../ui/barEdgeModel';
 import { progressBar } from '../ui/widgets';
 import { hudIconKey } from './hudIcons';
 import { D3_RUN, type D3HudLayout, type R } from './d3HudLayout';
@@ -121,10 +122,13 @@ export class HudTop {
     this.pos.score.x = x + w / 2; this.pos.score.y = cy;
     this.motion.rebase(this.scoreIcon); this.motion.rebase(this.score);
   }
+  /** D3-R27 per-frame bar edge / flash fade; early-outs once settled. */
+  tick(now: number): void { this.mangoBar.edge(now); }
   /** MOT-4-R8 quota fill eases; first paint and a falling quota (level-up reset) jump. */
   private syncBars(quota: number): void {
     if (quota !== this.quotaTarget) {
-      const jump = this.quotaTarget < 0 || quota < this.quotaTarget; this.quotaTarget = quota;
+      const prev = this.quotaTarget, jump = prev < 0 || quota < prev; this.quotaTarget = quota;
+      if (quotaFlash(prev, quota)) this.mangoBar.flash(this.scene.time.now);   // D3-R27 one flash at the level-up reset (or when full)
       if (!jump) this.bump('levelBar', this.cfg.releaseOvershoot, this.cfg.tapUpMs);   // R8 pop on a progress change
       this.motion.ease(this.quotaEase, quota, jump ? 0 : this.cfg.barEaseMs, x => { this.mangoBar.set(x, 1); });
     }

@@ -133,7 +133,8 @@
     "digitPopScale": 1.2, "readyDipMs": 80,
     "d3": { "burstMs": 220, "burstFromScale": 0.6, "burstToScale": 1.4, "burstSparks": 6, "burstSparkPx": 26, "burstSparkEndScale": 0.5,
       "burstMaxParticles": 24, "ringFadeMs": 120, "shakeMs": 240, "shakeCycles": 3, "shakePx": 6, "badgeFlashMs": 240,
-      "sweepMs": 1100, "sweepEveryPulses": 2, "trailMs": 120, "trailPx": 6, "trailAlpha": 0.5, "chevronMs": 160, "edgePx": 4, "edgeAlpha": 0.6, "sweepBand": 0.18, "sweepAlpha": 0.45 }
+      "sweepMs": 1100, "sweepEveryPulses": 2, "trailMs": 120, "trailPx": 6, "trailAlpha": 0.5, "chevronMs": 160, "edgePx": 4, "edgeAlpha": 0.6, "sweepBand": 0.18, "sweepAlpha": 0.45,
+      "hintLoopMs": 1400, "hintTravelPx": 44, "flashMs": 260 }
   },
   "energy": { "max": 100, "orbGain": 15, "goldenGain": 10, "orbSpawnIntervalMs": 6000, "orbMax": 2, "orbLifeMs": 8000, "orbBlinkMs": 2000, "orbFromLevel": 2 },
   "skills": {

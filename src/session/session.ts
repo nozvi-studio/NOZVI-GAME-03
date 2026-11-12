@@ -27,7 +27,8 @@ export interface Session {
   startRun(startLevel: number, entry?: 'home' | 'results', debug?: boolean): void;
   lastStartLevel(): number | null;
   frame(ms: number): SimEvent[];
-  turn(dx: -1 | 0 | 1, dy: -1 | 0 | 1): void;
+  /** MEC-003-R19 counts accepted turns; D3-R25 returns whether the sim queued it. */
+  turn(dx: -1 | 0 | 1, dy: -1 | 0 | 1): boolean;
   useSkill(slot: 0 | 1): void;
   /** MEC-003-R21 debug only: level-up into `level` (> current); marks the run debug. Returns false when refused. */
   debugSkipTo(level: number): boolean;
@@ -175,7 +176,10 @@ export function createSession(deps: SessionDeps): Session {
       handle(events);
       return events;
     },
-    turn(dx, dy) { if (run && !run.over && run.sim.turn(dx, dy)) run.turns++; }, // MEC-003-R19 turns
+    turn(dx, dy) { // MEC-003-R19 turns, D3-R25 accepted flag
+      if (!run || run.over || !run.sim.turn(dx, dy)) return false;
+      run.turns++; return true;
+    },
     useSkill(slot) { if (run && !run.over) run.sim.useSkill(slot); }, // MEC-007-R14
     debugSkipTo(level) { // MEC-003-R21 converts a normal run to debug on first use; stats and progress stay clean
       const from = run && !run.over ? run.sim.snapshot().level : 0;

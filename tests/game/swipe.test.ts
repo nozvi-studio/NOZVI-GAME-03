@@ -10,12 +10,13 @@ afterEach(() => vi.unstubAllGlobals());
 function setup() {
   const h = sceneHarness(), browser = new Signals(), canvas = new Signals(), turns: number[][] = [];
   vi.stubGlobal('window', { addEventListener: browser.on.bind(browser), removeEventListener: browser.off.bind(browser) });
-  const game = Object.assign(h.scene, { balance: loadBalance(), scale: { displayScale: { x: 1 } },
+  const trailPoint = vi.fn(), trailEnd = vi.fn();
+  const game = Object.assign(h.scene, { trailPoint, trailEnd, balance: loadBalance(), scale: { displayScale: { x: 1 } },
     turn: (x: number, y: number) => turns.push([x, y]),
     game: { canvas: { addEventListener: canvas.on.bind(canvas), removeEventListener: canvas.off.bind(canvas) } } });
   const board = new DrawObject();
   bindSwipe(game as unknown as GameScene, board as unknown as Phaser.GameObjects.Zone);
-  return { ...h, browser, board, turns };
+  return { ...h, browser, board, turns, trailPoint, trailEnd };
 }
 it('GDD-13 releasing a board swipe over a HUD button cannot leave mouse hover turning', () => {
   const h = setup(), pointer = { id: 0, identifier: 0, event: { clientX: 100, clientY: 100 } };
@@ -39,4 +40,18 @@ it('GDD-13 native touch release tracks the active finger and shutdown removes it
   h.scene.input.emit('pointermove', pointer(8, 200)); expect(h.turns).toEqual([[1, 0]]);
   h.scene.events.emit('shutdown'); h.browser.emit('touchend', { changedTouches: [{ identifier: 8 }] });
   h.scene.input.emit('pointermove', pointer(8, 250)); expect(h.turns).toEqual([[1, 0]]);
+});
+it('D3-R25 a board swipe reports every move point and ends the trail on release', () => {
+  const h = setup(), pointer = { id: 0, identifier: 0, x: 1, y: 2, event: { clientX: 100, clientY: 100 } };
+  h.board.emit('pointerdown', pointer);
+  h.scene.input.emit('pointermove', { ...pointer, event: { clientX: 105, clientY: 100 } });
+  h.scene.input.emit('pointermove', { ...pointer, event: { clientX: 110, clientY: 100 } });
+  h.scene.input.emit('pointerup', pointer);
+  expect(h.trailPoint).toHaveBeenCalledTimes(2);
+  expect(h.trailEnd).toHaveBeenCalledTimes(1);
+});
+it('D3-R25 moves without a board press report nothing', () => {
+  const h = setup();
+  h.scene.input.emit('pointermove', { id: 0, identifier: 0, x: 1, y: 2, event: { clientX: 100, clientY: 100 } });
+  expect(h.trailPoint).not.toHaveBeenCalled();
 });

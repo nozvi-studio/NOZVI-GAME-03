@@ -11,6 +11,7 @@ import { screenBackground } from '../ui/background';
 import { FRAME } from '../render/boardParts';
 import { buildBoardTexture, drawBoardFrame, drawBoardShadow } from '../render/board';
 import { Effects } from '../render/effects';
+import { SteerFx } from '../render/steerFx';
 import { colorOf } from '../juice/colors';
 import type { BoardVisual, JuiceInput } from '../juice/types';
 import { isTurn, mangoSpawnInput, newSparkleClock, sparkleStep } from '../juice/derived';
@@ -50,6 +51,7 @@ export class GameScene extends Phaser.Scene {
   private boardClip!: Phaser.GameObjects.Graphics;
   private layers!: Record<'ground' | 'terrain' | 'hazards' | 'mango' | 'skills' | 'snake' | 'overlay' | 'effects', Phaser.GameObjects.Graphics>;
   private effects!: Effects;
+  private steer!: SteerFx; private readonly headPt = { x: 0, y: 0 };
   private capy!: CapyHead;
   private bg?: Phaser.GameObjects.Image;
 
@@ -83,6 +85,9 @@ export class GameScene extends Phaser.Scene {
       { maxParticles: juice.perf.maxParticles, maxFloats: juice.perf.maxFloats, gulpMs: juice.gulpMs,
         ringMax: juice.events.ringMax, sparkleMax: juice.events.sparkleMax, overshoot: this.balance.motion.overshoot,
         sparkleRadius: juice.events.sparkleRadius, sparkleThickness: juice.events.sparkleThickness });
+    this.steer = new SteerFx(this, this.board, cellPx(this.balance), this.balance.motion.d3, this.balance.motion.overshoot, this.reduced);
+    const onSteer = (d: { dx: Step; dy: Step }): void => this.steer.chevron(d.dx, d.dy, this.time.now); // D3-R25
+    this.events.on('steer', onSteer);
     this.capy = new CapyHead(this, this.board, this.layers.snake, this.balance.ui.capy, cellPx(this.balance), this.reduced, this.time.now);
     this.flow = createFlow();
     // P1 scene flow: the session run already exists (Home/Loadout/Results); Game opens on the P0 countdown.
@@ -95,7 +100,7 @@ export class GameScene extends Phaser.Scene {
     this.game.events.on(Phaser.Core.Events.BLUR, pause);
     this.game.events.on(Phaser.Core.Events.HIDDEN, hidden);
     const recolor = (): void => {
-      this.palette = currentPalette(); this.reduced = reduceMotion(); this.effects.setReduced(this.reduced); this.lookStale = true; // texture rebuilt on the next draw
+      this.palette = currentPalette(); this.reduced = reduceMotion(); this.effects.setReduced(this.reduced); this.steer.setReduced(this.reduced); this.lookStale = true; // texture rebuilt on the next draw
       drawBoardFrame(this.border.clear(), this.look, BOARD.size, cellPx(this.balance));
       this.setBackground(this.look.biome);
     };
@@ -104,6 +109,7 @@ export class GameScene extends Phaser.Scene {
       this.game.events.off(Phaser.Core.Events.BLUR, pause);
       this.game.events.off(Phaser.Core.Events.HIDDEN, hidden);
       this.game.events.off('settings-closed', recolor);
+      this.events.off('steer', onSteer);
       this.effects.reset();
       this.beats.clear();
       this.board.clearMask(true);
@@ -116,11 +122,18 @@ export class GameScene extends Phaser.Scene {
     this.mangoBornAt = this.time.now;
     this.hadMango = false; this.sparkle = newSparkleClock(); // MOT-3-R11 the first mango of a run pops with a puff
     this.effects.reset();
+    this.steer.reset();
     this.capy.reset(this.time.now);
     this.clock = createClock();
     this.tweens.killTweensOf(this.board);
     this.board.setPosition(BOARD.x, BOARD.y);
   }
+
+  trailPoint(x: number, y: number): void {
+    if (this.flow.status === 'playing' || this.flow.status === 'waiting' || this.flow.status === 'countdown') this.steer.point(x, y, this.time.now);
+  }
+
+  trailEnd(): void { this.steer.endTrail(); }
 
   snapshot(): SimSnapshot | null {
     try { return this.session.snapshot(); } catch { return null; }
@@ -132,7 +145,7 @@ export class GameScene extends Phaser.Scene {
     if (result.forward) {
       const s = this.snapshot(); // MOT-3-R12 render-only cue; session.turn timing is untouched
       if (s && isTurn(s.dir, dx, dy)) this.events.emit('derived-juice', { type: 'turned', dx, dy } satisfies JuiceInput);
-      this.session.turn(dx, dy);
+      if (this.session.turn(dx, dy)) this.events.emit('steer', { dx, dy }); // D3-R25 accepted turns only
     }
   }
 
@@ -251,5 +264,8 @@ export class GameScene extends Phaser.Scene {
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);
     drawIceArrow(this.layers.overlay, snapshot, cell, this.look);
     this.effects.draw(this.layers.effects, p);
+    const h = snapshot.snake[0];
+    if (h) { this.headPt.x = (h.x + 0.5) * cell; this.headPt.y = (h.y + 0.5) * cell; }
+    this.steer.update(time, h ? this.headPt : null);
   }
 }

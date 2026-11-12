@@ -6,7 +6,10 @@ import { FONT_UI, TOKENS, toInt } from '../uiTokens';
 import { d3, ui } from '../ui/layout';
 import { drawIcon } from '../ui/icons';
 import { hostOf, lipPx, skinTexture } from '../ui/skin';
-import { denied, tapBurst } from '../ui/touchFx';
+import { reduceMotion } from '../render/palette';
+import { sweepX } from '../flow/sweepModel';
+import { readySweep } from '../ui/barEdgeModel';
+import { denied, glossBand, tapBurst } from '../ui/touchFx';
 import { hudIconKey, type IconTone } from './hudIcons';
 import { D3_RUN, type D3HudLayout, type R } from './d3HudLayout';
 import { skillLook } from './skillLook';
@@ -18,7 +21,8 @@ const cen = (r: R): { x: number; y: number } => ({ x: d3(r.x + r.w / 2), y: d3(r
 interface Slot { c: Phaser.GameObjects.Container; vis: Phaser.GameObjects.Container; lip: Phaser.GameObjects.Image; face: Phaser.GameObjects.Image;
   icon: Phaser.GameObjects.Image; lock: Phaser.GameObjects.Graphics; gauge: Phaser.GameObjects.Graphics;
   badge: Phaser.GameObjects.Image; cost: Phaser.GameObjects.Text; key: string; down: boolean;
-  state: SkillState | null; view: SkillView | null; chargeTarget: number; shownCharge: number; charge: { v: number }; dip: { v: number } }
+  state: SkillState | null; view: SkillView | null; chargeTarget: number; shownCharge: number; charge: { v: number }; dip: { v: number };
+  band: Phaser.GameObjects.Graphics; maskG: Phaser.GameObjects.Graphics; sweepAt: number }
 
 // D3-R14 skill buttons on the `skill` skin: tone by slot, rim charge gauge, countdown ring, cost badge, locked empty slot (R1). Redraws only on a state / charge-step change.
 export class SkillButtons {
@@ -38,8 +42,11 @@ export class SkillButtons {
       const badge = scene.add.image(0, 0, skinTexture(host, 'chip', 'light', d3(B.minW), d3(B.h), 'rest', unit)).setName(`skill-${slot}-badge`);
       const cost = scene.add.text(0, 0, '', { fontFamily: FONT_UI, fontSize: `${d3(B.font)}px`, fontStyle: '900', color: T.text }).setOrigin(0.5).setName(`skill-${slot}-cost`);
       const vis = scene.add.container(0, 0, [lip, face, icon, lock, gauge, badge, cost]).setName(`skill-${slot}-visual`);
-      const c = scene.add.container(p.x, p.y, [vis]).setName(`skill-${slot}`).setSize(dd, dd).setInteractive({ useHandCursor: true });
-      const s: Slot = { c, vis, lip, face, icon, lock, gauge, badge, cost, key: '', down: false, state: null, view: null, chargeTarget: -1, shownCharge: 0, charge: { v: 0 }, dip: { v: 1 } };
+      const band = glossBand(scene, dd, dd, b.motion.d3);   // D3-R27 ready sweep band, clipped to the round face
+      const maskG = scene.make.graphics({}, false); maskG.fillStyle(toInt(T.white)).fillCircle(0, 0, dd / 2); maskG.setPosition(p.x, p.y);
+      band.setMask(maskG.createGeometryMask());
+      const c = scene.add.container(p.x, p.y, [vis, band]).setName(`skill-${slot}`).setSize(dd, dd).setInteractive({ useHandCursor: true });
+      const s: Slot = { c, vis, lip, face, icon, lock, gauge, badge, cost, key: '', down: false, state: null, view: null, chargeTarget: -1, shownCharge: 0, charge: { v: 0 }, dip: { v: 1 }, band, maskG, sweepAt: -1 };
       c.on('pointerdown', (_p: unknown, _x: number, _y: number, e?: Phaser.Types.Input.EventData) => { // MEC-007-R14 reacts on pointer down
         e?.stopPropagation();
         s.down = true; s.key = ''; this.paint(slot);
@@ -50,11 +57,12 @@ export class SkillButtons {
       c.on('pointerup', up); c.on('pointerout', up);
       this.slots.push(s);
     }
+    scene.events.once('shutdown', () => { for (const s of this.slots) s.maskG.destroy(); });
   }
   /** D3-R9 R4: move both buttons to a new layout (D-pad toggled mid-run); nothing is recreated. */
   place(l: D3HudLayout): void {
     this.l = l;
-    for (const slot of [0, 1] as const) { const p = cen(l.skills[slot]); this.slots[slot]!.c.setPosition(p.x, p.y); this.motion.rebase(this.slots[slot]!.vis); }
+    for (const slot of [0, 1] as const) { const p = cen(l.skills[slot]); this.slots[slot]!.c.setPosition(p.x, p.y); this.slots[slot]!.maskG.setPosition(p.x, p.y); this.motion.rebase(this.slots[slot]!.vis); }
   }
   apply(skills: HudView['skills']): void {
     for (const slot of [0, 1] as const) this.draw(slot, skills[slot]);
@@ -63,6 +71,7 @@ export class SkillButtons {
     const s = this.slots[slot]!, cfg = this.b.motion;
     const edge = skillReadyEdge(s.state, k?.state ?? null); s.state = k?.state ?? null; s.view = k;
     if (!k) { s.key = ''; s.chargeTarget = -1; this.paint(slot); return; }
+    if (readySweep(edge, reduceMotion())) s.sweepAt = this.scene.time.now;                  // D3-R27/R28 one gloss sweep on off -> ready, none under reduced motion
     if (edge === 'pop') this.motion.release(s.vis);                                       // 1 -> releaseOvershoot -> 1 over tapUpMs (MOT-4-R11)
     else if (edge === 'dip') { s.vis.setAlpha(cfg.reducedPressAlpha); s.dip.v = cfg.reducedPressAlpha; this.motion.ease(s.dip, 1, cfg.readyDipMs, v => { s.vis.setAlpha(v); }); }   // 80 ms alpha dip, no scale
     if (k.charge !== s.chargeTarget) {                                                    // eased charge between the quantised gauge steps
@@ -106,6 +115,15 @@ export class SkillButtons {
   }
   /** P3a juice adapter: centre of a skill button (JuiceHud.skillPoint). */
   point(slot: 0 | 1): { x: number; y: number } { return cen(this.l.skills[slot]); }
+  /** D3-R27 per-frame sweep position; early-outs when no sweep is running. */
+  tick(now: number): void {
+    const cfg = this.b.motion.d3, dd = d3(K.d);
+    for (const s of this.slots) {
+      if (s.sweepAt < 0) continue;
+      const x = sweepX(now - s.sweepAt, cfg.sweepMs, dd, dd * cfg.sweepBand);
+      if (x === null) { s.sweepAt = -1; s.band.setVisible(false); } else s.band.setVisible(true).setX(x);
+    }
+  }
   /** D3-R24 / MEC-006 §8 / GDD §10.4 refused cast: shake the button and flash the badge; skipped shake under reduced motion. */
   shake(slot: 0 | 1): void { const s = this.slots[slot]!; denied(this.scene, s.vis, s.badge.visible ? s.badge : undefined); }
   /** D3-R23 successful cast: tap burst at the button centre in the slot tone. */

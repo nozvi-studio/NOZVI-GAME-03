@@ -176,3 +176,10 @@ Run `npm run dev`, light mode, console open. Record pass/fail per item; failures
 - Loadout with a long list (later cards share the cap), pick and resize re-render instantly; Settings entrance, toggles and theme rebuild with no re-entrance, knob slide still correct; Settings overlay from Pause shows only the veil fade, Escape and double tap close once.
 - Results (normal, new best, checkpoint unlocked, first run): sequence <= ~1.5 s, score ends on the exact number, best star pulses twice and is visible, tap anywhere skips to rest, Home and Play again work from frame 0.
 - Reduced motion: single fade, no idle, count-up jumps. `?debug=1&level=N`, `?debug=1&artPreview=1`, `?debug=1&motion=off` (all at rest at once). 60 fps on a phone.
+
+## 2026-11-12 - U4c steer feedback / finger hint / value changes (headless, owner eye-check PENDING)
+Screenshots `tmp/qa/u4c/` (headless Chrome, 360x640 and 412x915, touch emulation). Suite 1763 pass, typecheck clean.
+- Finger hint: loops left of "Swipe to steer!" on the waiting screen, no overlap with skill buttons or energy bar (wait-360-*). 412x915: layout fine, finger caught in the loop gap.
+- Trail: visible mid-drag on all biomes viewed (mid-L*.png); faint on the pale L11/L16 grounds. One capture shows a straight diagonal line for a vertical swipe: likely the synthetic touch jumping in one move (two points), to confirm on a device.
+- Not captured headless: chevron (160 ms life), D-pad mode (finger hidden), level-up flash, skill-ready gloss sweep, reduced motion.
+- Owner eye-check list: trail feel and contrast on biomes 3/4, chevron size and readability, finger loop speed (`motion.d3.hintLoopMs`), skill-ready sweep, mango bar flash at level-up, bar leading edge, reduced motion (no trail/sweep, static finger).

@@ -18,6 +18,7 @@ export function bindSwipe(scene: GameScene, boardZone: Phaser.GameObjects.Zone):
   };
   const move = (pointer: Phaser.Input.Pointer): void => {
     if (!anchor || pointer.id !== pointerId) return;
+    scene.trailPoint(pointer.x, pointer.y); // D3-R25
     const point = swipePoint(pointer.event, pointer.identifier);
     if (!point) return;
     const b = scene.balance;
@@ -27,7 +28,7 @@ export function bindSwipe(scene: GameScene, boardZone: Phaser.GameObjects.Zone):
     scene.turn(...dir);
     anchor = point;
   };
-  const clear = (): void => { anchor = null; pointerId = null; touchId = null; };
+  const clear = (): void => { if (pointerId !== null) scene.trailEnd(); anchor = null; pointerId = null; touchId = null; };
   const up = (pointer: Phaser.Input.Pointer): void => { if (pointer.id === pointerId) clear(); };
   // GDD-13 HUD scene capture may swallow Phaser pointerup; native releases still end the board swipe.
   const mouseUp = (): void => { if (touchId === null) clear(); };

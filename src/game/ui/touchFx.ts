@@ -3,6 +3,7 @@ import type Phaser from 'phaser';
 import { motionCfgFor, motionFor, type MotionTarget } from '../motion';
 import { reduceMotion } from '../render/palette';
 import { TOKENS, toInt } from '../uiTokens';
+import type { MotionD3Balance } from '../../core/balance';
 import { burstKind, deniedPlan, ringAt, shakeDx, sparkAt, tapPlan } from './interactionModel';
 import { ui } from './layout';
 import type { SkinTone } from './skin';
@@ -46,4 +47,16 @@ export function denied(scene: Phaser.Scene, visual: MotionTarget, badge?: { setT
     if (plan.shake) visual.x = restX + ui(1) * shakeDx(t, c);
     if (t >= 1) { visual.x = restX; badge?.clearTint(); }
   });
+}
+
+const GLOSS_SLICES = 6; // D3-R21 soft-edged gloss band (slice count, not a tuning value)
+/** D3-R21/R27 white skewed gloss band centred on 0,0 (w x h), soft edges from stacked slices; hidden, caller masks and positions it. */
+export function glossBand(scene: Phaser.Scene, w: number, h: number, d3: Pick<MotionD3Balance, 'sweepBand' | 'sweepAlpha'>): Phaser.GameObjects.Graphics {
+  const bw = w * d3.sweepBand, sk = h / 2, band = scene.add.graphics().setVisible(false);
+  for (let i = 0; i < GLOSS_SLICES; i++) {
+    const hw = (bw / 2) * (1 - i / GLOSS_SLICES);
+    band.fillStyle(toInt(TOKENS.d3.white), d3.sweepAlpha / GLOSS_SLICES);
+    band.fillPoints([{ x: -hw + sk, y: -h / 2 }, { x: hw + sk, y: -h / 2 }, { x: hw - sk, y: h / 2 }, { x: -hw - sk, y: h / 2 }], true);
+  }
+  return band;
 }

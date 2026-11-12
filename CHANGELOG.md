@@ -2,6 +2,12 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: U4c rulings C1..C5 (DECISIONS), U4c headless QA entry (PLAYTEST), STATUS.
+- feat(hud): D3-R27 bar leading edge, mango full flash and skill-ready gloss sweep (none under reduced motion, D3-R28); `glossBand` shared with Home; balance `motion.d3.flashMs`.
+- feat(hud): D3-R26 first-input finger hint (looping swipe glyph beside the wait text on touch, static under reduced motion, none in D-pad mode); balance `motion.d3.hintLoopMs/hintTravelPx`.
+- feat(game): D3-R25 swipe trail and accepted-turn chevron (SteerFx view, swipe feeds trail points).
+- feat(render): D3-R25 steer feedback model (finger trail buffer, segment alpha, chevron pose; D3-R28 reduced motion).
+- feat(session): D3-R25 turn() reports acceptance; GameScene emits 'steer' for accepted turns.
 - docs: UI D3 U4c plan (steer feedback, first-input hint, value changes; D3-R25..R28).
 - feat(log): MEC-003-R22 uncaught errors and rejections are written to the run log with their stack, so an exported log shows the cause of a freeze.
 - fix(ui): pre-U4c owner review — snake face matches the D3 Home board (oval skull, white sclera, muzzle oval, top gloss; no nostrils/diamond); headCellScale 1.2 -> 1.6 so the visible head is ~1.4 cells, wider than the body (D3-R12).

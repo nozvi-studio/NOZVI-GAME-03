@@ -14,6 +14,7 @@ import { reduceMotion } from '../render/palette';
 import { HEIGHT, WIDTH } from '../layout';
 import { t } from '../text';
 import { d3, d3Height, d3m, ui } from '../ui/layout';
+import { glossBand } from '../ui/touchFx';
 import { homeRects, type Rect } from '../ui/menuLayout';
 import { D3_HOME, D3_LOGO } from '../ui/menuMetrics';
 import { screenBackground } from '../ui/background';
@@ -21,7 +22,6 @@ import { butterChip, d3Logo, roundIconButton, snakeHero } from '../ui/menuWidget
 import { chip, pillButton } from '../ui/widgets';
 import { beginRun, button, label } from './ui';
 
-const SWEEP_SLICES = 6; // D3-R21 soft-edged sweep band (slice count, not a tuning value)
 
 // D3-R11 Home: background, logo, hero, optional Start-at row, PLAY, hint, link row. P3b3-R10 content rules unchanged. MEC-008 rules live in homeModel.
 export class HomeScene extends Phaser.Scene {
@@ -89,15 +89,7 @@ export class HomeScene extends Phaser.Scene {
   // D3-R21 white skewed band clipped to the PLAY face; child of the button so it follows the pulse.
   private makeSweep(time: number): void {
     const btn = this.playBtn, g = this.playGeom; if (!btn || !g) return;
-    const d3 = (this.registry.get('balance') as Balance).motion.d3, bw = g.w * d3.sweepBand, sk = g.h / 2;
-    const band = this.add.graphics().setVisible(false);
-    // soft edges like the board CSS gradient: stacked skewed slices, widest faintest, so alpha peaks in the middle
-    for (let i = 0; i < SWEEP_SLICES; i++) {
-      const hw = (bw / 2) * (1 - i / SWEEP_SLICES);
-      band.fillStyle(toInt(TOKENS.d3.white), d3.sweepAlpha / SWEEP_SLICES);
-      band.fillPoints([new Phaser.Geom.Point(-hw + sk, -g.h / 2), new Phaser.Geom.Point(hw + sk, -g.h / 2),
-        new Phaser.Geom.Point(hw - sk, g.h / 2), new Phaser.Geom.Point(-hw - sk, g.h / 2)], true);
-    }
+    const band = glossBand(this, g.w, g.h, (this.registry.get('balance') as Balance).motion.d3);
     btn.add(band);
     const maskG = this.make.graphics({}, false);
     maskG.fillStyle(toInt(TOKENS.d3.white)).fillRoundedRect(btn.x - g.w / 2, btn.y - g.h / 2, g.w, g.h, ui(TOKENS.d3.shape.radiusBig));
