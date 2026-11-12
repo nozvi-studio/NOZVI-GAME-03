@@ -11,6 +11,7 @@ import { BannerLayer } from '../hud/BannerLayer';
 import { levelUpBanners, skillPills, skillTip } from '../hud/banners';
 import { CountdownOverlay } from '../hud/CountdownOverlay';
 import { HudTop } from '../hud/HudTop';
+import { BottomGroup } from '../hud/BottomGroup';
 import { d3HudLayout } from '../hud/d3HudLayout';
 
 import { hudLayout, HUD_MOCK, type HudLayout } from '../hud/hudLayout';
@@ -25,7 +26,7 @@ import { colorOf } from '../juice/colors';
 import { landedCells } from '../juice/derived';
 import { JuicePlayer } from '../juice/JuicePlayer';
 import { ScreenFx } from '../juice/ScreenFx';
-import type { JuiceInput } from '../juice/types';
+import type { HudTarget, JuiceInput } from '../juice/types';
 import { acceptSkillInput, skillSlotForKey } from '../input/skillKeys';
 import { cellPx, WIDTH } from '../layout';
 import { enter, goTo } from '../motion';
@@ -43,7 +44,7 @@ const M = { debugNextW: 56, debugKeyW: 70 } as const;
 // P3b-2: wiring only. Models in src/game/hud/*, views draw them; this scene owns events, sounds, haptics, flow and session calls.
 export class HudScene extends Phaser.Scene {
   private gameScene!: GameScene; private session!: Session; private balance!: Balance; private synth!: Synth;
-  private top!: HudTop; private skills!: SkillButtons; private pause!: PauseOverlay; private count!: CountdownOverlay; private banners!: BannerLayer;
+  private top!: HudTop; private bottom!: BottomGroup; private skills!: SkillButtons; private pause!: PauseOverlay; private count!: CountdownOverlay; private banners!: BannerLayer;
   private pad!: ReturnType<typeof createDpad>; private touch = false;
   private heading = ''; private hint: HudHint = null; private cpCount = 0; private bestLevelAtStart = 0; private orbTipShown = false; private leaving = false; private juice!: JuicePlayer;
   private haptics = true; private startBanner: string[] = []; private shrunkTo: number | null = null; private overTimer?: Phaser.Time.TimerEvent;
@@ -59,13 +60,15 @@ export class HudScene extends Phaser.Scene {
     this.touch = !!this.sys.game?.device?.input?.touch; this.orbTipShown = false; this.leaving = false; this.heading = ''; this.shrunkTo = null;
     this.synth = createSynth(); this.synth.unlock();
     this.input.setGlobalTopOnly(true);
-    this.top = new HudTop(this, d3HudLayout(d3Height(), save.settings.dpad), () => this.gameScene.apply(flowTogglePause(this.gameScene.flow, this.balance)));
+    const d3l = d3HudLayout(d3Height(), save.settings.dpad);
+    this.top = new HudTop(this, d3l, () => this.gameScene.apply(flowTogglePause(this.gameScene.flow, this.balance)));
+    this.bottom = new BottomGroup(this, d3l);
     this.skills = new SkillButtons(this, layout, slot => this.useSkill(slot), this.balance);
     this.createDebugButtons(layout); // created before the banner layer and overlays so those sit above them
     this.pad = createDpad(this, layout.dpad!, d => this.gameScene.turn(d.x, d.y)); // MEC-001-R2: a turn during the countdown counts
     this.banners = new BannerLayer(this, layout, this.balance);
-    const hud = { point: (t: Parameters<HudTop['point']>[0]) => this.top.point(t), skillPoint: (s: 0 | 1) => this.skills.point(s),
-      bump: (t: Parameters<HudTop['bump']>[0], k: number, ms: number) => this.top.bump(t, k, ms), plantFlag: (_level: number, ms: number) => this.top.plantFlag(ms) };
+    const hud = { point: (t: HudTarget) => t === 'energyBar' ? this.bottom.point(t) : this.top.point(t), skillPoint: (s: 0 | 1) => this.skills.point(s),
+      bump: (t: HudTarget, k: number, ms: number) => { if (t === 'energyBar') this.bottom.bump(t, k, ms); else this.top.bump(t, k, ms); }, plantFlag: (_level: number, ms: number) => this.bottom.plantFlag(ms) };
     this.juice = new JuicePlayer({ // P3a-R1..R9: sounds, haptics (through the gated buzz), board / screen visuals and the death sequence
       balance: this.balance, synth: { play: n => this.synth.play(n), buzz: p => this.buzz(p) }, board: this.gameScene,
       screen: new ScreenFx(this, hud, id => colorOf(id, currentPalette()), cellPx(this.balance), this.balance.juice.perf, this.balance.juice.skill.iconRingScale),
@@ -232,6 +235,7 @@ export class HudScene extends Phaser.Scene {
     const s = this.gameScene.snapshot(); if (!s) return;
     const status = this.gameScene.flow.status, v = hudView(s, this.hint, this.balance, t, status === 'waiting' ? { touch: this.touch } : null);
     this.top.apply(v, status === 'paused', status !== 'ready' && status !== 'over');
+    this.bottom.apply(v);
     this.skills.apply(v.skills);
     this.banners.setPills(skillPills(s.skills, this.balance, t)); this.banners.setSlowmo(s.slowmo !== null);
     this.debugNext?.c.setVisible(s.level < this.balance.level.maxLevel); this.debugKey?.c.setVisible(nextKeyLevel(s.level, this.balance) !== null);

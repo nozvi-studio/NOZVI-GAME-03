@@ -5,6 +5,7 @@ import { CountdownOverlay } from '../../src/game/hud/CountdownOverlay';
 import { PauseOverlay } from '../../src/game/hud/PauseOverlay';
 import { pauseView } from '../../src/game/hud/overlayModel';
 import { HudTop } from '../../src/game/hud/HudTop';
+import { BottomGroup } from '../../src/game/hud/BottomGroup';
 import { SkillButtons } from '../../src/game/hud/SkillButtons';
 import { hudView, type HudSnap } from '../../src/game/hud/hudModel';
 import { d3HudLayout } from '../../src/game/hud/d3HudLayout';
@@ -31,13 +32,15 @@ it('P3b2-R15 HudTop shows level, biome, quota, score, energy and the checkpoint 
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
   const h = sceneHarness(), pauses: number[] = [];
   const top = new HudTop(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), () => pauses.push(1));
-  top.apply(hudView(snap(), { key: 'hud.nextCheckpoint', level: 10 }, b, t), false, true);
+  const bottom = new BottomGroup(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false));
+  const v = hudView(snap(), { key: 'hud.nextCheckpoint', level: 10 }, b, t);
+  top.apply(v, false, true); bottom.apply(v);
   expect(h.find('level').text).toBe('Level 7'); expect(h.objects.some(o => o.name === 'biome')).toBe(false);   // D3-R5 no biome line
   expect(h.find('quota-label').text).toBe('3/6');
   expect(h.find('score').text).toBe('44'); expect(h.find('energy').text).toBe('35');
-  expect(h.find('next-checkpoint').text).toBe('Next checkpoint at L10'); expect(h.find('next-checkpoint').visible).toBe(true);
+  expect(h.objects.some(o => o.text === 'Next checkpoint at L10')).toBe(true); expect(h.find('next-checkpoint').visible).toBe(true);
   h.find('pause-button').emit('pointerdown'); h.find('pause-button').emit('pointerup'); expect(pauses).toEqual([1]);
-  top.apply(hudView(snap(), null, b, t), false, false);
+  top.apply(hudView(snap(), null, b, t), false, false); bottom.apply(hudView(snap(), null, b, t));
   expect(h.find('pause-button').alpha).toBeLessThan(1); expect(h.adds.some(a => a.alpha === 0)).toBe(true);   // MOT-4-R13 the chip fades out instead of vanishing
 });
 it('P3b2-R15 SkillButtons: hidden for empty slots, pointer down casts (MEC-007-R14), off/ready/active drawn differently', () => {
@@ -213,8 +216,8 @@ const motionCfg = b.motion;
 const topFixture = (reduced = false) => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: reduced }) });
   const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), () => {});
-  const hv = (o: Partial<HudSnap>) => hudView(snap(o), null, b, t);
-  return { h, top, adds: h.adds, hv };
+  const hv = (o: Partial<HudSnap>) => hudView(snap(o), null, b, t), bottom = new BottomGroup(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false));
+  return { h, top, bottom, adds: h.adds, hv };
 };
 it('MOT-4-R7 a rising score ticks up through motion.ease; the first paint and a falling score jump', () => {
   const { top, adds, hv } = topFixture();
@@ -234,11 +237,11 @@ it('MOT-4-R7 under reduced motion the score jumps with no tween', () => {
   expect(top.scoreText()).toBe('40'); expect(adds.length).toBe(0);
 });
 it('MOT-4-R9 an energy spend eases in barSpendMs and a gain in barEaseMs', () => {
-  const { top, adds, hv } = topFixture();
-  top.apply(hv({ energy: 80 }), false, true); expect(adds.length).toBe(0);
-  top.apply(hv({ energy: 40 }), false, true);
+  const { bottom, adds, hv } = topFixture();
+  bottom.apply(hv({ energy: 80 })); expect(adds.length).toBe(0);
+  bottom.apply(hv({ energy: 40 }));
   expect(adds.some(a => a.duration === motionCfg.barSpendMs)).toBe(true);
-  adds.length = 0; top.apply(hv({ energy: 80 }), false, true);
+  adds.length = 0; bottom.apply(hv({ energy: 80 }));
   expect(adds.some(a => a.duration === motionCfg.barEaseMs)).toBe(true);
 });
 it('MOT-4-R12 level title change slides in once; the first title does not animate', () => {

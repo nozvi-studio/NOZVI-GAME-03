@@ -5,25 +5,22 @@ import { bindPress } from '../scenes/ui';
 import { attachFeedback } from '../ui/feedback';
 import { hostOf, lipPx, skinTexture } from '../ui/skin';
 import { progressBar } from '../ui/widgets';
-import { drawCard, hudLabel } from './draw';
 import { hudIconKey } from './hudIcons';
 import { D3_RUN, type D3HudLayout, type R } from './d3HudLayout';
 import type { HudView } from './hudModel';
 import type { HudTarget, Pt } from '../juice/types';
 import type { Balance } from '../../core';
 import { motionFor, type Motion } from '../motion';
-import { chipHasIcon, chipTransition, easeMsFor, energyCue, levelTitleChanged } from './hudMotion';
+import { levelTitleChanged } from './hudMotion';
 
 const T = TOKENS.d3;
-// Mockup px of the pause glyph (kept from GameD2) and of the TEMP energy pill / checkpoint chip (replaced by BottomGroup in Task 4).
-const M = { pauseBarW: 5, pauseBarH: 16, pauseBarX: 7, pauseGap: 2, pauseRadius: 2, playHalf: 9, playBack: 6, playTip: 9, disabledAlpha: 0.4,
-  chip: 14, bolt: 16, bar: 10, chipPadL: 12, chipIcon: 18, chipGap: 8, chipPadR: 16 } as const;
+// Mockup px of the pause glyph (kept from GameD2).
+const M = { pauseBarW: 5, pauseBarH: 16, pauseBarX: 7, pauseGap: 2, pauseRadius: 2, playHalf: 9, playBack: 6, playTip: 9, disabledAlpha: 0.4 } as const;
 
 
 const cen = (r: R): { x: number; y: number } => ({ x: d3(r.x + r.w / 2), y: d3(r.y + r.h / 2) });
 
 // D3-R13 top bar: light pause button, level ribbon, score chip, mango quota bar. Static art is built once; apply() only sets text / crop / visibility.
-// TEMP (until Task 4 BottomGroup): the energy row and the checkpoint / ramp / wait chip are still drawn here, positioned from the D3 layout.
 export class HudTop {
   readonly pauseButton: Phaser.GameObjects.Container;
   private readonly pauseG: Phaser.GameObjects.Graphics; private readonly pauseFace: Phaser.GameObjects.Image;
@@ -31,18 +28,14 @@ export class HudTop {
   private readonly scoreLip: Phaser.GameObjects.Image; private readonly scoreFace: Phaser.GameObjects.Image;
   private readonly scoreIcon: Phaser.GameObjects.Image; private readonly score: Phaser.GameObjects.Text;
   private readonly mangoIcon: Phaser.GameObjects.Image; private readonly mangoBar: ReturnType<typeof progressBar>; private readonly quota: Phaser.GameObjects.Text;
-  private readonly energyIcon: Phaser.GameObjects.Image; private readonly energyG: Phaser.GameObjects.Graphics; private readonly energy: Phaser.GameObjects.Text;
-  private readonly chipG: Phaser.GameObjects.Graphics; private readonly chipText: Phaser.GameObjects.Text; private readonly chipIcon: Phaser.GameObjects.Image;
-  private readonly chipBox: Phaser.GameObjects.Container;
-  private chipKey = ''; private pauseKey = '';
-  private readonly pos: Record<HudTarget, Pt>;
+  private pauseKey = '';
+  private readonly pos: Record<'score' | 'levelBar', Pt>;
   private readonly motion: Motion; private readonly cfg: Balance['motion'];
   private cueKey = '';
   private scoreTarget = -1; private scoreW = 0; private scoreLayoutW = -1; private readonly scoreEase = { v: 0 };
   private quotaTarget = -1; private readonly quotaEase = { v: 0 };
-  private energyTarget = -1; private energyShown = 0; private readonly energyEase = { v: 0 };
-  private stopBolt: (() => void) | null = null; private stopQuota: (() => void) | null = null;
-  private titleSeen: string | null = null; private chipKind: string | null = null;
+  private stopQuota: (() => void) | null = null;
+  private titleSeen: string | null = null;
 
   constructor(private readonly scene: Phaser.Scene, private l: D3HudLayout, onPause: () => void) {
     const host = hostOf(scene), unit = ui(1), tone = T.tone;
@@ -77,22 +70,11 @@ export class HudTop {
     this.quota = scene.add.text(lc.x, lc.y, '', { fontFamily: FONT_UI, fontSize: `${d3(D3_RUN.mango.labelFont)}px`, fontStyle: '900', color: T.white })
       .setOrigin(0.5).setShadow(0, d3(D3_RUN.mango.shadowY), T.inkDeep, 0, false, true).setName('quota-label');
 
-    // TEMP energy pill + chip (Task 4 moves them to BottomGroup).
-    const e = l.energy, ec = cen(e.icon);
-    this.energyIcon = scene.add.image(ec.x, ec.y, hudIconKey('bolt')).setDisplaySize(d3(e.icon.w), d3(e.icon.h));
-    this.energyG = scene.add.graphics();
-    this.energy = hudLabel(scene, d3(e.label.x), d3(e.label.y + e.label.h / 2), '', 15, T.text, 900, 'energy').setOrigin(0, 0.5);
-    this.chipG = scene.add.graphics();
-    this.chipIcon = scene.add.image(0, 0, hudIconKey('flag', 'soft')).setDisplaySize(ui(M.chipIcon), ui(M.chipIcon));
-    this.chipText = hudLabel(scene, 0, 0, '', M.chip, TOKENS.text.soft, 800, 'next-checkpoint');
-    this.chipBox = scene.add.container(0, 0, [this.chipG, this.chipIcon, this.chipText]).setVisible(false);   // one animated target
-
     this.motion = motionFor(scene); this.cfg = (scene.registry.get('balance') as Balance).motion;
-    const bc = cen(m.bar), enc = cen(e.bar), sc = cen({ x: 360 - l.score.right - 60, y: l.score.y, w: 60, h: l.score.h });
-    this.pos = { score: sc, levelBar: bc, energyBar: enc };
+    const bc = cen(m.bar), sc = cen({ x: 360 - l.score.right - 60, y: l.score.y, w: 60, h: l.score.h });
+    this.pos = { score: sc, levelBar: bc };
     this.layoutScore(d3(60));
-    this.drawEnergy();
-    for (const o of [this.mangoIcon, this.quota, this.energyIcon, this.energy]) this.motion.rebase(o);
+    for (const o of [this.mangoIcon, this.quota]) this.motion.rebase(o);
   }
 
   /** D3-R13 layout is fixed for the top bar; kept for symmetry with the bottom group (R4). */
@@ -102,12 +84,11 @@ export class HudTop {
     const titleMoved = levelTitleChanged(this.titleSeen, v.levelTitle); this.titleSeen = v.levelTitle;
     this.level.setText(v.levelTitle);
     if (titleMoved) this.motion.slideIn(this.level, 'down');   // MOT-4-R12
-    this.quota.setText(`${v.quota.done}${v.quota.total}`); this.energy.setText(v.energy.text);
+    this.quota.setText(`${v.quota.done}${v.quota.total}`);
     this.mangoBar.g.setVisible(v.quotaBar);                    // R8 no bar at the max level
     if (v.scoreValue !== this.scoreTarget) this.retargetScore(v.scoreValue);
-    this.syncBars(v.quotaFill, v.energy.fill);
+    this.syncBars(v.quotaFill);
     this.syncCues(v);
-    this.drawChip(v.chip);
     const pk = `${paused}|${pauseEnabled}`;
     if (pk === this.pauseKey) return;
     this.pauseKey = pk;
@@ -140,55 +121,20 @@ export class HudTop {
     this.pos.score.x = x + w / 2; this.pos.score.y = cy;
     this.motion.rebase(this.scoreIcon); this.motion.rebase(this.score);
   }
-  /** MOT-4-R8/R9 quota and energy fills ease; first paint and a falling quota (level-up reset) jump; a spend eases faster. */
-  private syncBars(quota: number, energy: number): void {
+  /** MOT-4-R8 quota fill eases; first paint and a falling quota (level-up reset) jump. */
+  private syncBars(quota: number): void {
     if (quota !== this.quotaTarget) {
       const jump = this.quotaTarget < 0 || quota < this.quotaTarget; this.quotaTarget = quota;
       if (!jump) this.bump('levelBar', this.cfg.releaseOvershoot, this.cfg.tapUpMs);   // R8 pop on a progress change
       this.motion.ease(this.quotaEase, quota, jump ? 0 : this.cfg.barEaseMs, x => { this.mangoBar.set(x, 1); });
     }
-    if (energy !== this.energyTarget) {
-      const first = this.energyTarget < 0, ms = first ? 0 : easeMsFor(this.energyTarget, energy, this.cfg); this.energyTarget = energy;
-      this.motion.ease(this.energyEase, energy, ms, x => { this.energyShown = x; this.drawEnergy(); });
-    }
   }
-  /** MOT-4-R10 low energy: bolt pulses; full: one bolt pop. R8: the mango icon pulses while one mango is left. Cues are additive, never the only signal. */
+  /** R8: the mango icon pulses while one mango is left (additive cue, never the only signal). */
   private syncCues(v: HudView): void {
-    const cue = energyCue(v.energy.fill, this.cfg.energyLowFrac), key = `${cue}|${v.quotaLast}`;
+    const key = String(v.quotaLast);
     if (key === this.cueKey) return;
-    const prev = this.cueKey.split('|')[0]; this.cueKey = key;
-    this.stopBolt?.(); this.stopBolt = null; this.stopQuota?.(); this.stopQuota = null;
-    if (cue === 'low') this.stopBolt = this.motion.pulse(this.energyIcon);
-    else if (cue === 'full' && prev !== '' && prev !== 'full') this.motion.popIn(this.energyIcon);
+    this.cueKey = key; this.stopQuota?.(); this.stopQuota = null;
     if (v.quotaLast) this.stopQuota = this.motion.pulse(this.mangoIcon);
-  }
-
-  /** TEMP (Task 4): old energy bar, positioned from the D3 energy rect. */
-  private drawEnergy(): void {
-    const b = this.l.energy.bar, x = d3(b.x), w = d3(b.w), h = d3(b.h), y = d3(b.y), g = this.energyG.clear();
-    const low = energyCue(this.energyShown, this.cfg.energyLowFrac) === 'low';
-    g.fillStyle(toInt(TOKENS.hud.energyTrack)).fillRoundedRect(x, y, w, h, h / 2);
-    if (this.energyShown > 0) g.fillStyle(toInt(low ? TOKENS.danger.text : TOKENS.sky.energy)).fillRoundedRect(x, y, Math.max(h, w * this.energyShown), h, h / 2);
-  }
-  /** TEMP (Task 4): old chip, positioned from the D3 chip rect. */
-  private drawChip(chip: HudView['chip']): void {
-    const kind = chip?.kind ?? null, tr = chipTransition(this.chipKind, kind); this.chipKind = kind;
-    if (chip === null) {
-      if (tr === 'out') this.motion.fadeOut(this.chipBox); else if (this.chipBox.alpha <= 0) this.chipBox.setVisible(false);
-      this.chipKey = ''; return;
-    }
-    const text = chip.text, icon = chipHasIcon(chip.kind);
-    this.chipBox.setVisible(true); this.chipText.setVisible(true); this.chipIcon.setVisible(icon);
-    const key = `${chip.kind}|${text}`;
-    if (key !== this.chipKey) {
-      this.chipKey = key; this.chipText.setText(text);
-      const c = this.l.chip, y = d3(c.y), h = d3(c.h), tw = this.chipText.width, pad = ui(M.chipPadL), ic = icon ? ui(M.chipIcon) : 0, gap = icon ? ui(M.chipGap) : 0;
-      const w = pad + ic + gap + tw + ui(M.chipPadR), x = c.right !== null ? d3(360 - c.right) - w : d3(c.cx) - w / 2;
-      this.chipG.clear(); drawCard(this.chipG, x, y, w, h, h / 2, TOKENS.surface.card);
-      this.chipIcon.setPosition(x + pad + ic / 2, y + h / 2); this.chipText.setPosition(x + pad + ic + gap, y + h / 2).setOrigin(0, 0.5);
-    }
-    if (tr === 'in') { this.chipBox.setAlpha(1); this.motion.slideIn(this.chipBox, 'down'); }   // MOT-4-R13 fade + slide in
-    else if (tr === 'cross') { this.chipBox.setAlpha(0); this.motion.fadeIn(this.chipBox); }    // cross-fade over fadeMs
   }
   private drawPause(paused: boolean): void {
     const g = this.pauseG.clear();
@@ -198,17 +144,12 @@ export class HudTop {
     else g.fillRoundedRect(-ui(M.pauseBarX), -hb, ui(M.pauseBarW), 2 * hb, ui(M.pauseRadius)).fillRoundedRect(ui(M.pauseGap), -hb, ui(M.pauseBarW), 2 * hb, ui(M.pauseRadius));
   }
 
-  /** P3a juice adapter: centre of the score chip, the energy bar (TEMP) and the mango bar. */
-  point(target: HudTarget): Pt { return this.pos[target]; }
+  /** P3a juice adapter: centre of the score chip and the mango bar (the energy bar is the BottomGroup's). */
+  point(target: 'score' | 'levelBar'): Pt { return this.pos[target]; }
   /** P3a-R1/R2/R4: yoyo scale bump on a chip's icon and text, relative to their base scale (reduced motion is gated in the mapper). */
-  bump(target: HudTarget, scale: number, ms: number): void {
-    const parts = target === 'score' ? [this.scoreIcon, this.score] : target === 'levelBar' ? [this.mangoIcon, this.quota] : [this.energyIcon, this.energy];
-    for (const o of parts) this.motion.snap(o, scale, ms, target === 'score' ? undefined : () => { this.cueKey = ''; });   // re-arm the pulse cues a bump interrupted
-  }
-  /** P3a-R6: the chip's flag icon pops in from zero; ms 0 (reduced motion) is a no-op. */
-  plantFlag(ms: number): void {
-    if (ms <= 0) return;          // reduced motion is gated in the mapper (ms 0)
-    this.motion.popIn(this.chipIcon);
+  bump(target: 'score' | 'levelBar', scale: number, ms: number): void {
+    const parts = target === 'score' ? [this.scoreIcon, this.score] : [this.mangoIcon, this.quota];
+    for (const o of parts) this.motion.snap(o, scale, ms, target === 'score' ? undefined : () => { this.cueKey = ''; });   // re-arm the pulse cue a bump interrupted
   }
   /** Test seam: the score text as drawn right now. */
   scoreText(): string { return this.score.text; }

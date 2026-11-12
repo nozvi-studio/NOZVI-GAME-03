@@ -6,9 +6,9 @@ export const D3_RUN = {
   mango: { y: 70, h: 34, side: 14, icon: 34, gap: 8, barH: 26, labelW: 44, labelFont: 18, shadowY: 2 },
   bottom: { block: 146, gapMin: 24, spareShare: 0.45 },
   skill: { d: 78, side: 22, sideDpad: 12, dyDpad: 62 },
-  energy: { x: 112, dy: 8, h: 22, icon: 22, gap: 6, labelW: 24, xDpad: 16, rightDpad: 96 },
-  hint: { dy: 42, h: 20, x: 100 },
-  chip: { dy: 100, dyTall: 112, h: 36, hDpad: 30, rightDpad: 14, dyDpad: -3 },
+  energy: { x: 112, dy: 8, h: 22, icon: 22, gap: 6, labelW: 24, xDpad: 16, rightDpad: 96, font: 15, shadowY: 2 },
+  hint: { dy: 42, h: 20, x: 100, font: 14, shadowY: 2 },
+  chip: { dy: 100, dyTall: 112, h: 36, hDpad: 30, rightDpad: 14, dyDpad: -3, font: 15, padX: 16 },
   dpad: { key: 50, dx: 54, upDy: 30, midDy: 76, downDy: 122, gap: 8, block: 172 },
 } as const;
 

@@ -67,11 +67,11 @@ function setup(saveData: object = {}, opts: { settings?: boolean; settingsActive
 describe('P1 HUD flow, audio and session wiring', () => {
   it('MEC-001-R2 UIFIX-R3 HUD shows the wait prompt in the chip after the countdown until the first non-reverse input', () => {
     const h = setup();
-    const chip = (): { text: string; visible: boolean } => h.find('next-checkpoint');
+    const chip = (): { text: string; visible: boolean } => h.find('steer-hint');   // D3-R9 R2: the wait prompt is the hint text
     h.game.apply(flowTick(h.game.flow, b, b.flow.countdownMs));
     expect(h.game.flow.status).toBe('waiting'); expect(chip().visible).toBe(true); expect(chip().text).toBe('Press an arrow to go!');
     h.game.turn(-1, 0); expect(h.game.flow.status).toBe('waiting'); expect(chip().text).toBe('Press an arrow to go!');
-    h.game.turn(0, -1); expect(h.game.flow.status).toBe('playing'); expect(chip().text).not.toBe('Press an arrow to go!');
+    h.game.turn(0, -1); expect(h.game.flow.status).toBe('playing'); expect(chip().visible).toBe(false);
   });
   it('P1 HUD has no Play card: Game opens on the countdown; pause shows Resume and Quit', () => {
     const h = setup();
@@ -175,7 +175,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
   it('UIFIX-R15 HUD chip updates to L15 after L10 is reached in a normal run', () => {
     const h = setup();
     h.play();
-    const chip = (): { text: string } => h.find('next-checkpoint');
+    const chip = (): { text: string } => h.objects.filter(o => /^Next checkpoint/.test(o.text ?? '')).pop()!;   // D3-R9 chip text lives inside the butter chip
     expect(chip().text).toBe('Next checkpoint at L10');
     const up = (level: number): SimEvent => ({ type: 'levelUp', level, biome: 0, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 });
     for (let lv = 2; lv <= 10; lv++) processEvents(h.session, [up(lv)]); // the session saves checkpoint 4 at L10
@@ -300,6 +300,6 @@ describe('P1 HUD flow, audio and session wiring', () => {
   it('MEC-001-R2 a turn during the countdown counts: the run starts on go without a wait hint', () => {
     const h = setup(); h.game.turn(0, -1);
     h.game.apply(flowTick(h.game.flow, b, b.flow.countdownMs));
-    expect(h.game.flow.status).toBe('playing'); expect(h.find('next-checkpoint').text).not.toBe('Press an arrow to go!');
+    expect(h.game.flow.status).toBe('playing'); expect(h.find('steer-hint').visible).toBe(false);
   });
 });
