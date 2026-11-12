@@ -239,7 +239,7 @@ export class HudScene extends Phaser.Scene {
     this.session.setSound(on); this.synth.setOn(on); if (on) this.synth.play('eat');
   }
 
-  update(time: number): void { this.refresh(); this.bottom.tick(time); }
+  update(time: number): void { this.refresh(); this.bottom.tick(time); this.top.tick(time); this.skills.tick(time); }
   private refresh(): void {
     const s = this.gameScene.snapshot(); if (!s) return;
     const status = this.gameScene.flow.status, v = hudView(s, this.hint, this.balance, t, status === 'waiting' ? { touch: this.touch } : null);

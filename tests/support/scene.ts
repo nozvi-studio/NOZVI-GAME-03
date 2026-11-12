@@ -96,6 +96,7 @@ export function sceneHarness() {
   const registry = new Map<string, unknown>([['balance', loadBalance()]]);
   const adds: Record<string, unknown>[] = [];
   const scene = {
+    make: { graphics: (_c?: unknown, _a?: boolean) => make() },
     add: { graphics: () => make(), text: (x: number, y: number, text: string, _style?: unknown) => make(x, y).setText(text),
       image: (x: number, y: number, key: string) => make(x, y).setTexture(key).setName(key),
       circle: (x: number, y: number, r: number) => { const o = make(x, y); o.width = o.height = 2 * r; return o; },

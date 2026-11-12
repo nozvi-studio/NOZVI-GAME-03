@@ -94,6 +94,7 @@ export class BottomGroup {
   setTouch(touch: boolean, reduced: boolean): void { this.touch = touch; this.reduced = reduced; this.syncHint(this.last); }
   /** D3-R26 per-frame finger pose; early-outs while hidden. */
   tick(now: number): void {
+    this.bar.edge(now);   // D3-R27 leading edge fade
     if (!this.fingerOn) return;
     const p = fingerPose(now, this.reduced, this.cfg.d3);
     this.finger.setPosition(this.fingerX + d3(p.dx), this.fingerY).setAlpha(p.alpha).setScale(p.press ? FINGER.pressScale : 1);
