@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): D3 board look per biome (`boardLook(biome)`: frame, checker cells, outline set, snake colours), checker ground without grid lines (D3-R4).
 - docs(ui): U4b board art plan (rulings B1..B5).
 - docs(ui): U4a screenshot record (PLAYTEST), UI-MOCKUPS Game rows built, STATUS.
 - fix(hud): ?debug=1 "+1" / "Key" buttons move to the bottom corners (`debugRects` in `D3_RUN.debug`) so they no longer cover the mango quota label; overlap test at 640 and 780.

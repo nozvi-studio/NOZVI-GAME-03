@@ -2,7 +2,6 @@ import type Phaser from 'phaser';
 import type { Balance } from '../../core';
 import { BOARD, cellPx } from '../layout';
 import type { BoardLook } from './biomePalette';
-import { GRID_LINE } from './boardParts';
 import type { Palette } from './palette';
 
 // Prototype CSS L72–73: 18px board corners, 4px external ink outline.
@@ -19,14 +18,12 @@ export function drawBoardBorder(g: Phaser.GameObjects.Graphics, p: Palette): voi
 // Presentation seam fix: checker rects overlap by half a pixel so no hairline shows between cells.
 const SEAM_PX = 0.5;
 export interface GroundRect { x: number; y: number; w: number; h: number; color: number; alpha: number }
-// P3b1-R3 BiomeBoardsD2 ground: per-cell checker, then a translucent grid line on the trailing edge of every cell.
+// P3b1-R3 BiomeBoardsD2 ground: per-cell checker, no grid lines (D3-R4).
 export function groundRects(look: BoardLook, cols: number, rows: number, cell: number): GroundRect[] {
-  const out: GroundRect[] = [], line = cell * GRID_LINE;
+  const out: GroundRect[] = [];
   for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
     out.push({ x: x * cell, y: y * cell, w: cell + SEAM_PX, h: cell + SEAM_PX, color: (x + y) % 2 ? look.groundB : look.groundA, alpha: 1 });
   }
-  for (let i = 1; i <= cols; i++) out.push({ x: i * cell - line, y: 0, w: line, h: rows * cell, color: look.grid, alpha: look.gridAlpha });
-  for (let j = 1; j <= rows; j++) out.push({ x: 0, y: j * cell - line, w: cols * cell, h: line, color: look.grid, alpha: look.gridAlpha });
   return out;
 }
 

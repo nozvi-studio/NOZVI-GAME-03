@@ -30,7 +30,6 @@ export const TILE = { inset: 1 / 21, radius: 1 / 3, border: 0.095, stoneRadius: 
   /** Mud.dc puddle (fractions of the inset box) and bubbles (centre fractions of the box, radius in cell fractions). */
   mud: { puddle: { w: 0.56, h: 0.4 }, bubbles: [{ x: 0.3, y: 0.36, r: 0.0715 }, { x: 0.55, y: 0.48, r: 0.0475 }] as readonly { x: number; y: number; r: number }[] } } as const;
 export const HEDGE = { bar: 0.8, edge: 0.11, glow: 0.12, glowAlpha: 0.22, radius: 0.22, edgeHalf: 0.055 } as const;
-export const GRID_LINE = 0.1;
 export const MANGO = { box: 32, fill: 0.92, body: { cx: 16, cy: 18.5, rx: 11.5, ry: 10, rotDeg: -20 },
   hi: { p: [[8.5, 16], [9.5, 13], [11.7, 11], [14.7, 10.4]] as readonly Pt[], width: 2.4 },
   leaf: [[[16, 9], [17, 4.5], [21.5, 2.5], [26, 3.5]], [[26, 3.5], [25.4, 8.1], [21, 10.7], [16, 9]]] as readonly (readonly Pt[])[] } as const;

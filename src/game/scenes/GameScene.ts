@@ -17,7 +17,7 @@ import { drawHazards, drawTerrains } from '../render/hazards';
 import { drawMango } from '../render/mango';
 import { mangoGrow } from '../motion/curves';
 import { boardLook, type BoardLook } from '../render/biomePalette';
-import { currentPalette, reduceMotion, themeOf, type Palette } from '../render/palette';
+import { currentPalette, reduceMotion, type Palette } from '../render/palette';
 import { drawSnake } from '../render/snake';
 import { drawSkillObjects, drawSkillOverlay } from '../render/skills';
 import { drawTiles, drawIceArrow } from '../render/tiles';
@@ -61,7 +61,7 @@ export class GameScene extends Phaser.Scene {
     this.palette = currentPalette();
     this.reduced = reduceMotion();
     this.prev = null; this.beats = new HitBeats(motionFor(this), this.balance.motion); this.tel = telegraphCtx(this.balance, key => this.beats.scale(key));
-    this.look = boardLook(1, themeOf(this.palette));
+    this.look = boardLook(1);
     this.setBackground(this.look.biome);
     const image = this.add.image(0, 0, buildBoardTexture(this, this.balance, this.look)).setOrigin(0);
     this.board = this.add.container(BOARD.x, BOARD.y, [image]).setName('board');
@@ -201,7 +201,7 @@ export class GameScene extends Phaser.Scene {
       case 'shake': this.shake(v.amplitudePx, v.ms); break;
       case 'tint': this.effects.setTint(colorOf(v.color, p), v.alpha, v.fadeMs, v.ms); break;
       case 'tintEnd': this.effects.clearTint(v.fadeMs); break;
-      case 'biomeSweep': this.effects.sweep(boardLook(v.biome, themeOf(p)).groundA, v.alpha, v.ms, v.sweep); break;
+      case 'biomeSweep': this.effects.sweep(boardLook(v.biome).groundA, v.alpha, v.ms, v.sweep); break;
       case 'ringPulse': this.effects.ringPulse(v.x, v.y, colorOf(v.color, p), v.scale, v.ms); break;
       case 'sparkle': this.effects.sparkle(v.x, v.y, colorOf(v.color, p), v.lifeMs); break;
       case 'turnTilt': this.effects.turnTilt(v.dx, v.dy, v.deg, v.ms); break;
@@ -225,7 +225,7 @@ export class GameScene extends Phaser.Scene {
     this.boardClip.setPosition(this.board.x, this.board.y);
     this.border.setPosition(this.board.x, this.board.y);
     if (this.lookStale || snapshot.biome !== this.look.biome) {
-      this.look = boardLook(snapshot.biome, themeOf(this.palette)); this.lookStale = false;
+      this.look = boardLook(snapshot.biome); this.lookStale = false;
       this.setBackground(this.look.biome);
       buildBoardTexture(this, this.balance, this.look);
     }
@@ -241,7 +241,7 @@ export class GameScene extends Phaser.Scene {
     const mo = this.balance.motion;
     drawMango(this.layers.mango, snapshot, cell, p, this.look, time, this.reduced, mangoGrow(time, this.mangoBornAt, mo.popInMs, mo.overshoot, mo.popFromScale));
     drawSkillObjects(this.layers.skills, snapshot, cell, p, this.look, this.balance, time);
-    drawSnake(this.layers.snake, snapshot, cell, p, Math.max(this.effects.gulp, this.effects.pop), false, this.look.snakeRim,
+    drawSnake(this.layers.snake, snapshot, cell, p, Math.max(this.effects.gulp, this.effects.pop), false, this.look.outline.snake,
       this.effects.turnBulge * (this.balance.juice.events.turnBodyBulge - 1));
     this.capy.update(snapshot, time, cell, this.effects.turnDeg);
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);

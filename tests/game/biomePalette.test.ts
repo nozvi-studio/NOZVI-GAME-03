@@ -1,61 +1,29 @@
 import { expect, it } from 'vitest';
-import { biome } from '../../src/core';
 import { boardLook, contrastRatio, DEFAULT_LOOK, mixInt } from '../../src/game/render/biomePalette';
-import { DARK, LIGHT, themeOf } from '../../src/game/render/palette';
-import { toInt } from '../../src/game/uiTokens';
-import { loadBalance } from '../support/balance';
+import { TOKENS, toInt } from '../../src/game/uiTokens';
 
-const themes = ['light', 'dark'] as const;
-
-it('P3b1-R1 every level 1-30 resolves a look in both themes with a readable edge and a visible checker', () => {
-  const b = loadBalance();
-  for (const theme of themes) for (let level = 1; level <= 30; level++) {
-    const look = boardLook(biome(b, level), theme);
-    expect(look.theme).toBe(theme);
-    expect(look.groundA).not.toBe(look.groundB);
-    expect(contrastRatio(look.edge, look.groundA)).toBeGreaterThanOrEqual(4.5);
-    expect(contrastRatio(look.edge, look.groundB)).toBeGreaterThanOrEqual(4.5);
-    expect(contrastRatio(look.woodEdge, look.groundA)).toBeGreaterThanOrEqual(3);
-    expect(look.gridAlpha).toBeGreaterThan(0);
-    expect(look.gridAlpha).toBeLessThan(1);
+it('D3-R4 B1 each biome takes frame and cells from TOKENS.d3.biomes', () => {
+  for (let n = 1; n <= 6; n++) {
+    const l = boardLook(n), b = TOKENS.d3.biomes[n - 1]!;
+    expect(l).toMatchObject({ biome: n, frame: toInt(b.frame), groundA: toInt(b.cells[0]), groundB: toInt(b.cells[1]) });
   }
 });
-
-it('P3b1-R1 light grounds match BiomeBoardsD2 and the six biomes are all different', () => {
-  expect([1, 2, 3, 4, 5, 6].map(n => [boardLook(n, 'light').groundA, boardLook(n, 'light').groundB])).toEqual([
-    [toInt('#CFEBD0'), toInt('#F4E7A6')], [toInt('#D9EDC2'), toInt('#EADFA4')], [toInt('#DCEFFB'), toInt('#F5FBFF')],
-    [toInt('#EBDDBC'), toInt('#DCC79B')], [toInt('#F8D2A6'), toInt('#F0BF8A')], [toInt('#3B3363'), toInt('#332C58')],
-  ]);
-  expect(boardLook(1, 'light').edge).toBe(toInt('#2B3248'));
-  expect(boardLook(6, 'light').edge).toBe(toInt('#FFFFFF'));
-  expect(new Set([1, 2, 3, 4, 5, 6].map(n => boardLook(n, 'dark').groundA)).size).toBe(6);
+it('D3-R4 B1 B2 biome 6 uses the light outline set, others the dark set; edge = rock outline', () => {
+  expect(boardLook(1).outline.snake).toBe(toInt(TOKENS.d3.outline.snake));
+  expect(boardLook(6).outline.snake).toBe(toInt(TOKENS.d3.outlineStorm.snake));
+  for (const n of [1, 6]) expect(boardLook(n).edge).toBe(boardLook(n).outline.rock);
 });
-
-it('P3b1-R1 dark theme darkens biomes 1-5 and keeps Storm Garden', () => {
-  expect(boardLook(2, 'dark').groundA).toBe(mixInt(toInt('#D9EDC2'), toInt('#131D15'), 0.7));
-  expect(boardLook(6, 'dark').groundA).toBe(boardLook(6, 'light').groundA);
-  expect(boardLook(3, 'dark').edge).toBe(toInt('#FFFFFF'));
+it('D3-R4 biome is clamped to 1..6 and DEFAULT_LOOK is biome 1', () => {
+  expect(boardLook(0).biome).toBe(1); expect(boardLook(9).biome).toBe(6);
+  expect(DEFAULT_LOOK).toEqual(boardLook(1));
 });
-
-it('P3b1-R1 out-of-range biomes clamp, DEFAULT_LOOK is Orchard light, themeOf maps the palettes', () => {
-  expect(boardLook(0, 'light')).toEqual(boardLook(1, 'light'));
-  expect(boardLook(99, 'dark')).toEqual(boardLook(6, 'dark'));
-  expect(DEFAULT_LOOK).toEqual(boardLook(1, 'light'));
-  expect(themeOf(LIGHT)).toBe('light');
-  expect(themeOf(DARK)).toBe('light'); // D3-R3
+it('D3-R2 snake outline is >= 3:1 against both cell colours of every biome', () => {
+  for (let n = 1; n <= 6; n++) { const l = boardLook(n);
+    expect(contrastRatio(l.outline.snake, l.groundA)).toBeGreaterThanOrEqual(3);
+    expect(contrastRatio(l.outline.snake, l.groundB)).toBeGreaterThanOrEqual(3); }
 });
-
-it('P3b1-R1 contrastRatio is the WCAG ratio', () => {
+it('P3b1-R1 contrastRatio is the WCAG ratio and mixInt blends', () => {
   expect(contrastRatio(0xffffff, 0x000000)).toBeCloseTo(21, 1);
   expect(contrastRatio(0x808080, 0x808080)).toBeCloseTo(1, 5);
-});
-
-it('UIFIX-R5 only biome 6 has a snake rim and it is >= 3:1 against both biome 6 grounds in both themes', () => {
-  for (const theme of themes) {
-    for (const n of [1, 2, 3, 4, 5]) expect(boardLook(n, theme).snakeRim).toBeNull();
-    const look = boardLook(6, theme);
-    expect(look.snakeRim).not.toBeNull();
-    expect(contrastRatio(look.snakeRim!, look.groundA)).toBeGreaterThanOrEqual(3);
-    expect(contrastRatio(look.snakeRim!, look.groundB)).toBeGreaterThanOrEqual(3);
-  }
+  expect(mixInt(0x000000, 0xffffff, 0)).toBe(0);
 });

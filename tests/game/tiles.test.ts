@@ -32,7 +32,7 @@ it('MEC-012-R2 / P3b1-R7 mud renderer draws a plain rounded fill (no wood ring),
 
 it('P3b1-R7 warn states take their edge colour from the board look in both themes (mud wood edge, ice edge)', () => {
   for (const theme of ['light', 'dark'] as const) {
-    const look = boardLook(2, theme);
+    const look = boardLook(2);
     const mud = gfx(); drawTiles(mud.g, tile('warn'), 20, TEL, false, look);
     expect(mud.calls.find(c => c[0] === 'lineStyle')![2]).toBe(look.woodEdge);
     const ice = gfx(); drawTiles(ice.g, [{ ...tile('warn')[0]!, family: 'ice' }], 20, TEL, false, look);
@@ -42,7 +42,7 @@ it('P3b1-R7 warn states take their edge colour from the board look in both theme
 
 it('P3b1-R7 active and fading ice draw a ring in the board edge colour in both themes', () => {
   for (const theme of ['light', 'dark'] as const) for (const state of ['active', 'fade'] as const) {
-    const look = boardLook(2, theme), p = gfx();
+    const look = boardLook(2), p = gfx();
     drawTiles(p.g, [{ ...tile(state)[0]!, family: 'ice' }], 20, TEL, false, look);
     const i = p.names().indexOf('strokeRoundedRect');
     expect(i).toBeGreaterThan(-1);
