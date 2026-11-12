@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: U4c rulings C1..C5 (DECISIONS), U4c headless QA entry (PLAYTEST), STATUS.
 - feat(hud): D3-R27 bar leading edge, mango full flash and skill-ready gloss sweep (none under reduced motion, D3-R28); `glossBand` shared with Home; balance `motion.d3.flashMs`.
 - feat(hud): D3-R26 first-input finger hint (looping swipe glyph beside the wait text on touch, static under reduced motion, none in D-pad mode); balance `motion.d3.hintLoopMs/hintTravelPx`.
 - feat(game): D3-R25 swipe trail and accepted-turn chevron (SteerFx view, swipe feeds trail points).

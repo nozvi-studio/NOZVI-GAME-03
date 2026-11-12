@@ -620,3 +620,10 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 ## 2026-11-12 - Pre-U4c owner review: snake face, head size, skill gloss, PLAY sweep
 - Owner eye-check: in-game head smaller than the body; Home snake face less detailed than the board; affordable skill buttons had a full green rim and white gloss corners; PLAY sweep too fast and harsh.
 - Decision (lead, visual): the snake skin face follows the D3 Home board, not the ART-003 egg skull: oval skull, white sclera behind the pupils, light muzzle oval, top gloss, no nostrils or diamond (capy skin unchanged). `ui.capy.headCellScale` 1.2 -> 1.6 because the visible skull is ~0.88 of the 48-unit image, so 1.2 drew a ~1.05-cell head next to a 0.96-cell body. The skill rim gauge shows only while a skill is not affordable (board GameLocked). Skin gloss is clipped to the face; the skill gloss uses the board `.skill::before` inset. PLAY sweep: 1100 ms smoothstep, once every 2 pulse periods (`motion.d3.sweepEveryPulses`), soft-edged band.
+
+## 2026-11-12 - UI D3 U4c rulings (steer feedback, first-input hint, value changes)
+- C1 (lead): "accepted" = the sim queued the turn (`Session.turn` returns the `queueTurn` boolean); a refused turn (reverse, repeat, full queue, sim not playing) shows no chevron.
+- C2 (lead): the swipe trail is drawn in canvas coordinates from `pointer.x/y`, only for a pointer that started on the board.
+- C3 (lead): D-pad mode hides the finger hint, like the hint text (no hint slot).
+- C4 (lead): the finger glyph is Graphics, no new asset; U6 may replace it with the redrawn icon set.
+- C5 (lead, final review): the mango bar full flash (D3-R27) fires at the level-up reset (quota falls) and on reaching 1 (final win), because level-up happens in the same sim step as the eat, so the HUD never sees a full bar.
