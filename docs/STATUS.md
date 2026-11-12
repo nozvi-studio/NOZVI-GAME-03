@@ -52,7 +52,7 @@
 - Rubble family and `skills.shield.rubbleLifeMs` removed (chore/remove-rubble-family, 2026-11-10).
 
 ## Last session summary
-- 2026-11-12 (local lead): U4c planned + executed (Sonnet implementers/reviewers, Opus final review caught a dead mango flash -> fires at level-up reset, C5); headless QA tmp/qa/u4c/.
+- 2026-11-12 (local lead): U4c planned + executed (Sonnet implementers/reviewers, Opus final review caught a dead mango flash -> fires at level-up reset, C5); headless QA tmp/qa/u4c/. Open: one headless shot drew a diagonal trail for a vertical swipe (likely synthetic touch, check on a device); trail faint on pale L11/L16 grounds; minors deferred (no Phaser wiring tests for SteerFx/finger/sweep, edge rect not rounded). A stray Vite dev server on port 5174 was left by a subagent.
 - 2026-11-12 (local lead): owner pre-U4c review (docs/logs/pre-u4c.md); visual fixes + R22 crash capture merged (1745 pass). Pause icon, banner position, Game over -> U5; Loadout -> U6. Owner lag at high levels not reproduced headless (try a real device).
 - 2026-11-12 (local lead): head ring fix merged (fix/unified-head-size): head disc derived from ui.capy.headCellScale, one head size for every skin (D3-R12 amended, ART-003 step 6, DECISIONS); 1739 pass; screenshots tmp/qa/head/.
 - 2026-11-12 (local lead, cont.): U4b planned and executed (Sonnet implementers, Opus review: per-frame snake allocations removed); mango size + HUD icon fixed after screenshots. Incident: `git worktree remove --force` deleted the main node_modules through the agent junction; owner reinstalled. Rule in memory: remove the junction first, never --force.
