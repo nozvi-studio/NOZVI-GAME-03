@@ -4,11 +4,12 @@ import { BOARD, HEIGHT, WIDTH } from '../layout';
 import { reduceMotion } from '../render/palette';
 import { bannerMotion } from '../juice/juiceMap';
 import { TOKENS, toInt } from '../uiTokens';
-import { ui } from '../ui/layout';
+import { d3, ui } from '../ui/layout';
 import { drawCard, hudLabel } from './draw';
 import { bannerStrip, type BannerSpec, type SkillPill } from './banners';
 import { hudIconKey } from './hudIcons';
-import { bannerStripRect, STRIP_MOCK, skillTipPlacement, stripRows, type HudLayout } from './hudLayout';
+import { bannerStripRect, STRIP_MOCK, skillTipPlacement, stripRows } from './hudLayout';
+import type { D3HudLayout } from './d3HudLayout';
 
 // SkillActiveD2 / tip metrics in mockup px; the banner strip geometry lives in hudLayout (STRIP_MOCK).
 const W = { tipMax: 300 } as const;
@@ -27,7 +28,7 @@ export class BannerLayer {
   private readonly tint: Phaser.GameObjects.Graphics; private readonly pillKeys = ['', '']; private readonly strip: ReturnType<typeof bannerStripRect>;
   private readonly enter = { k: 0 }; private queue: BannerSpec[] = []; private cardTimer?: Phaser.Time.TimerEvent; private tipTimer?: Phaser.Time.TimerEvent;
 
-  constructor(private readonly scene: Phaser.Scene, private readonly l: HudLayout, private readonly b: Balance) {
+  constructor(private readonly scene: Phaser.Scene, private readonly l: D3HudLayout, private readonly b: Balance) {
     this.strip = bannerStripRect(b.board.cols);
     this.tint = scene.add.graphics().setName('slowmo-tint').setVisible(false);
     this.root = scene.add.container(0, 0).setName('banner').setVisible(false);
@@ -88,7 +89,7 @@ export class BannerLayer {
       ({ x, y } = skillTipPlacement(this.l, tailSlot, w, h, { margin: ui(m.margin), tailLeft: ui(m.tailLeft), tailGap: ui(m.tailGap) }));
     }
     g.fillStyle(toInt(TOKENS.hud.tooltip)).fillRoundedRect(x, y, w, h, ui(m.radius));
-    if (tailSlot !== null) { const tx = this.l.skills[tailSlot].cx; g.fillTriangle(tx - ui(m.tailHalf), y + h, tx + ui(m.tailHalf), y + h, tx, y + h + ui(m.tailH)); }
+    if (tailSlot !== null) { const sk = this.l.skills[tailSlot], tx = d3(sk.x + sk.w / 2); g.fillTriangle(tx - ui(m.tailHalf), y + h, tx + ui(m.tailHalf), y + h, tx, y + h + ui(m.tailH)); }
     this.tipText.setPosition(x + w / 2, y + h / 2); this.showTip(true);
     this.tipTimer = this.scene.time.delayedCall(this.b.ui.bannerMs * this.b.ui.hud.tipFactor, () => this.showTip(false));
   }

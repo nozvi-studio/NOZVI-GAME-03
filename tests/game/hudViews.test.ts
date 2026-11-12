@@ -9,7 +9,7 @@ import { BottomGroup } from '../../src/game/hud/BottomGroup';
 import { SkillButtons } from '../../src/game/hud/SkillButtons';
 import { d3HudLayout } from '../../src/game/hud/d3HudLayout';
 import { hudView, type HudSnap } from '../../src/game/hud/hudModel';
-import { bannerStripRect, hudLayout, STRIP_MOCK } from '../../src/game/hud/hudLayout';
+import { bannerStripRect, STRIP_MOCK } from '../../src/game/hud/hudLayout';
 import { t } from '../../src/game/text';
 import { loadBalance } from '../support/balance';
 import { DrawObject, sceneHarness } from '../support/scene';
@@ -122,7 +122,7 @@ it('P3b2-R13 CountdownOverlay shows the digit and the checkpoint card, hides bot
 });
 it('P3b2-R10 BannerLayer shows queued cards one after another for ui.bannerMs, then clears', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
   layer.show([{ kind: 'levelUp', title: 'Level 8', subtitle: 'Fresh start!', chip: 'Your snake shrinks to 4 segments' },
     { kind: 'biome', label: 'BIOME 3', name: 'Frozen Pond', tagline: 'Ice is slippery. Plan your turns.' }]);
   expect(h.find('banner').visible).toBe(true); expect(h.last('banner-title')!.text).toBe('Level 8');
@@ -133,7 +133,7 @@ it('P3b2-R10 BannerLayer shows queued cards one after another for ui.bannerMs, t
 });
 it('UIFIX-R1 BannerLayer draws every banner as one strip inside the board top edge, alpha ~0.85, pills sit below it', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
   const r = bannerStripRect(b.board.cols);
   layer.show([{ kind: 'levelUp', title: 'Level 8', subtitle: 'Fresh start!', chip: null }]);
   const rects = h.objects.flatMap(o => o.commands).filter(c => c[0] === 'fillRoundedRect');
@@ -146,7 +146,7 @@ it('UIFIX-R1 BannerLayer draws every banner as one strip inside the board top ed
 });
 it('P3b2-R10 a new queue replaces the old one; hide() cancels pending cards', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
   layer.show([{ kind: 'hint', text: 'Fences unlocked' }, { kind: 'hint', text: 'Second' }]);
   layer.show([{ kind: 'challenge', title: 'Challenge: Rock rain!' }]);
   expect(h.last('banner-title')!.text).toBe('Challenge: Rock rain!');
@@ -154,7 +154,7 @@ it('P3b2-R10 a new queue replaces the old one; hide() cancels pending cards', ()
 });
 it('P3b2-R11 tips last tipFactor x bannerMs; pills and the slow-mo tint follow the skill state', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
   layer.tip('Need 40 energy'); expect(h.find('tip').text).toBe('Need 40 energy'); expect(h.find('tip').visible).toBe(true);
   expect(h.delayed.at(-1)!.delay).toBe(b.ui.bannerMs * b.ui.hud.tipFactor);
   h.flush(); expect(h.find('tip').visible).toBe(false);
@@ -165,7 +165,7 @@ it('P3b2-R11 tips last tipFactor x bannerMs; pills and the slow-mo tint follow t
 });
 it('P3b2-R10 BannerLayer.hide() also hides the tip and kills the pop tween; show() keeps a tip that was just raised', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), killed: unknown[] = [], layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const h = sceneHarness(), killed: unknown[] = [], layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
   h.scene.tweens.killTweensOf = (v: unknown) => { killed.push(v); };
   layer.tip('Need 40 energy'); layer.show([{ kind: 'hint', text: 'Fences unlocked' }]);
   expect(h.find('tip').visible).toBe(true);
@@ -174,7 +174,7 @@ it('P3b2-R10 BannerLayer.hide() also hides the tip and kills the pop tween; show
 });
 it('P3b2-R10 setPills redraws a slot only when its content changes (per-frame calls are cheap)', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
   const text = h.find('pill-0'), set = vi.spyOn(text, 'setText');
   const pills = [{ slot: 0 as const, skill: 'slowmo' as const, text: 'Slow-mo · 3 s left' }];
   layer.setPills(pills); layer.setPills([...pills]); layer.setPills([...pills]);

@@ -12,9 +12,8 @@ import { levelUpBanners, skillPills, skillTip } from '../hud/banners';
 import { CountdownOverlay } from '../hud/CountdownOverlay';
 import { HudTop } from '../hud/HudTop';
 import { BottomGroup } from '../hud/BottomGroup';
-import { d3HudLayout } from '../hud/d3HudLayout';
+import { d3HudLayout, type D3HudLayout } from '../hud/d3HudLayout';
 
-import { hudLayout, HUD_MOCK, type HudLayout } from '../hud/hudLayout';
 import { hudView } from '../hud/hudModel';
 import { countdownCard, pauseView } from '../hud/overlayModel';
 import { PauseOverlay } from '../hud/PauseOverlay';
@@ -39,7 +38,7 @@ import type { GameScene } from './GameScene';
 
 type HudHint = ReturnType<typeof homeView>['hint'];
 // Mockup px of the ?debug=1 buttons (not in the D2 mockups).
-const M = { debugNextW: 56, debugKeyW: 70 } as const;
+const M = { debugNextW: 56, debugKeyW: 70, debugH: 34, debugGap: 6 } as const;
 
 // P3b-2: wiring only. Models in src/game/hud/*, views draw them; this scene owns events, sounds, haptics, flow and session calls.
 export class HudScene extends Phaser.Scene {
@@ -55,7 +54,7 @@ export class HudScene extends Phaser.Scene {
   create(): void {
     this.gameScene = this.scene.get('Game') as GameScene;
     this.session = this.registry.get('session') as Session; this.balance = this.registry.get('balance') as Balance;
-    const save = this.session.save(), layout = hudLayout(true); // pad geometry always computed; visibility follows settings.dpad
+    const save = this.session.save(); // pad geometry always computed (dpadKeys); visibility follows settings.dpad
     this.cpCount = save.unlockedCheckpoints.length; this.bestLevelAtStart = save.bestLevel; this.readHint();
     this.touch = !!this.sys.game?.device?.input?.touch; this.orbTipShown = false; this.leaving = false; this.heading = ''; this.shrunkTo = null;
     this.synth = createSynth(); this.synth.unlock();
@@ -64,10 +63,10 @@ export class HudScene extends Phaser.Scene {
     this.top = new HudTop(this, d3l, () => this.gameScene.apply(flowTogglePause(this.gameScene.flow, this.balance)));
     this.bottom = new BottomGroup(this, d3l);
     this.skills = new SkillButtons(this, d3l, slot => this.useSkill(slot), this.balance, slot => this.skillDenied(slot));
-    this.createDebugButtons(layout); // created before the banner layer and overlays so those sit above them
+    this.createDebugButtons(d3l); // created before the banner layer and overlays so those sit above them
     this.dpadOn = save.settings.dpad;
     this.pad = createDpad(this, this.dpadKeys(), d => this.gameScene.turn(d.x, d.y)); // MEC-001-R2: a turn during the countdown counts
-    this.banners = new BannerLayer(this, layout, this.balance);
+    this.banners = new BannerLayer(this, d3l, this.balance);
     const hud = { point: (t: HudTarget) => t === 'energyBar' ? this.bottom.point(t) : this.top.point(t), skillPoint: (s: 0 | 1) => this.skills.point(s),
       bump: (t: HudTarget, k: number, ms: number) => { if (t === 'energyBar') this.bottom.bump(t, k, ms); else this.top.bump(t, k, ms); }, plantFlag: (_level: number, ms: number) => this.bottom.plantFlag(ms) };
     this.juice = new JuicePlayer({ // P3a-R1..R9: sounds, haptics (through the gated buzz), board / screen visuals and the death sequence
@@ -138,7 +137,7 @@ export class HudScene extends Phaser.Scene {
   }
 
   // MEC-003-R21 ?debug=1 only: "+1" and "Key" jump through the normal level-up path; the run becomes a debug run.
-  private createDebugButtons(l: HudLayout): void {
+  private createDebugButtons(l: D3HudLayout): void {
     this.debugKey = this.debugNext = null;
     if (typeof window === 'undefined' || !isDebug(window.location?.search ?? '')) return;
     const skip = (key: boolean): void => {
@@ -147,9 +146,9 @@ export class HudScene extends Phaser.Scene {
       const to = key ? nextKeyLevel(cur, this.balance) : cur + 1;
       if (to !== null && to <= this.balance.level.maxLevel) this.session.debugSkipTo(to);
     };
-    const y = l.chip.y + l.chip.h / 2, side = ui(HUD_MOCK.sidePad);
-    this.debugNext = pillButton(this, side + ui(M.debugNextW) / 2, y, M.debugNextW, HUD_MOCK.chip, '+1', 'debug-next', () => skip(false), 'cream');
-    this.debugKey = pillButton(this, WIDTH - side - ui(M.debugKeyW) / 2, y, M.debugKeyW, HUD_MOCK.chip, 'Key ▶', 'debug-key', () => skip(true), 'cream');
+    const y = d3(l.score.y + l.score.h) + ui(M.debugGap + M.debugH / 2), right = WIDTH - d3(l.score.right); // debug only: under the score chip, top right
+    this.debugKey = pillButton(this, right - ui(M.debugKeyW) / 2, y, M.debugKeyW, M.debugH, 'Key ▶', 'debug-key', () => skip(true), 'cream');
+    this.debugNext = pillButton(this, right - ui(M.debugKeyW + M.debugGap + M.debugNextW / 2), y, M.debugNextW, M.debugH, '+1', 'debug-next', () => skip(false), 'cream');
   }
   /** D3-R1 tap on a locked slot: denied shake and the nope sound, no cast. */
   private skillDenied(slot: 0 | 1): void { if (!acceptSkillInput(this.gameScene.flow.status)) return; this.skills.shake(slot); this.synth.play('nope'); }

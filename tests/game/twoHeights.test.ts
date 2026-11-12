@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { hudLayout } from '../../src/game/hud/hudLayout';
+import { d3HudLayout } from '../../src/game/hud/d3HudLayout';
 import { BOARD, HEIGHT, setHeight, VIEW, WIDTH } from '../../src/game/layout';
 import { previewRects } from '../../src/game/ui/artPreviewLayout';
-import { d3, layoutColumn } from '../../src/game/ui/layout';
+import { d3, d3Height, layoutColumn } from '../../src/game/ui/layout';
 import { loadoutColumn, resultsColumn, settingsColumn } from '../../src/game/ui/menuLayout';
 
+const boardBottomMock = (): number => (BOARD.y + BOARD.size) * 360 / WIDTH;
 const MIN = 0.85; // balance.ui.minShrink
 afterEach(() => setHeight(VIEW.minH));
 
@@ -12,13 +13,9 @@ describe.each([960, 1170])('D3-R7 layouts at HEIGHT %i', (h) => {
   it(`D3-R7 HUD fits inside the canvas below the board at ${h}`, () => {
     setHeight(h);
     for (const dpad of [false, true]) {
-      const l = hudLayout(dpad);
-      expect(l.chip.y).toBeGreaterThanOrEqual(BOARD.y + BOARD.size);
-      for (const s of l.skills) {
-        expect(l.chip.y + l.chip.h).toBeLessThanOrEqual(s.groupTop);
-        expect(s.costY + s.costH).toBeLessThanOrEqual(HEIGHT);
-      }
-      if (l.dpad) expect(l.dpad.y + l.dpad.size).toBeLessThanOrEqual(HEIGHT);
+      const l = d3HudLayout(d3Height(), dpad), rs = [l.skills[0], l.skills[1], ...(l.dpad ? [l.dpad.up, l.dpad.down] : [])];
+      expect(l.energy.bar.y).toBeGreaterThanOrEqual(boardBottomMock());
+      for (const r of rs) expect(d3(r.y + r.h)).toBeLessThanOrEqual(HEIGHT);
     }
   });
   it(`D3-R7 every menu column fits without shrinking below minShrink at ${h}`, () => {

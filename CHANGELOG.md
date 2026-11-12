@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- refactor(ui): drop the D2 HUD layout (HUD_MOCK, hudLayout, statsRow); banners, skill tips and debug buttons use D3 rects; CODEMAP rows for the D3 HUD modules.
 - feat(ui): D3 D-pad on light round skin in four key rects, live relayout of skills/bottom/top when the D-pad setting changes mid-run (D3-R9 R4).
 - feat(ui): D3 skill buttons - skill skins by slot tone, rim charge gauge, white countdown ring, cost badge, locked empty slot with denied tap (onDenied), tap burst on cast, place() for D-pad toggle (D3-R14 R1 R21 R23 R24); new white `on` HUD icon tone.
 - feat(ui): D3 bottom group - energy bar, steer hint, checkpoint chip (D3-R9 R2 R3); HudTop temporary energy and chip removed; chip gains a short L<n> form.
