@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(game): D3-R25 swipe trail and accepted-turn chevron (SteerFx view, swipe feeds trail points).
 - feat(render): D3-R25 steer feedback model (finger trail buffer, segment alpha, chevron pose; D3-R28 reduced motion).
 - feat(session): D3-R25 turn() reports acceptance; GameScene emits 'steer' for accepted turns.
 - docs: UI D3 U4c plan (steer feedback, first-input hint, value changes; D3-R25..R28).
