@@ -206,7 +206,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
     h.game.events.emit('sim-events', [{ type: 'levelUp', level: 2, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }]);
     expect(spy).toHaveBeenCalledTimes(1);
   });
-  it('MEC-007-R14/R15 skill keys cast only while playing; buttons hide for empty slots', () => {
+  it('MEC-007-R14/R15 skill keys cast only while playing; empty slots show locked', () => {
     const h = setup({ bestLevel: 3, carriedEnergy: 50 });
     const spy = vi.spyOn(h.session, 'useSkill');
     h.scene.input.keyboard.emit('keydown', { code: 'KeyJ', repeat: false, preventDefault() {} });
@@ -217,7 +217,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
     h.find('skill-0').emit('pointerdown');
     expect(spy.mock.calls).toEqual([[1], [0]]);
     h.hud.update();
-    expect(h.find('skill-0').visible).toBe(true); expect(h.find('skill-1').visible).toBe(false);
+    expect(h.find('skill-0').visible).toBe(true); expect(h.find('skill-1-lock').visible).toBe(true); expect(h.find('skill-1-cost').visible).toBe(false);   // D3-R1 locked, not hidden
     expect(h.find('level').text).toBe('Level 1');
     h.session.frame(1); h.hud.update(); expect(h.find('energy').text).toBe('10'); // slow-mo cast spent 40
   });

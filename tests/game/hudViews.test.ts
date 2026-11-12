@@ -7,8 +7,8 @@ import { pauseView } from '../../src/game/hud/overlayModel';
 import { HudTop } from '../../src/game/hud/HudTop';
 import { BottomGroup } from '../../src/game/hud/BottomGroup';
 import { SkillButtons } from '../../src/game/hud/SkillButtons';
-import { hudView, type HudSnap } from '../../src/game/hud/hudModel';
 import { d3HudLayout } from '../../src/game/hud/d3HudLayout';
+import { hudView, type HudSnap } from '../../src/game/hud/hudModel';
 import { bannerStripRect, hudLayout, STRIP_MOCK } from '../../src/game/hud/hudLayout';
 import { t } from '../../src/game/text';
 import { loadBalance } from '../support/balance';
@@ -43,15 +43,16 @@ it('P3b2-R15 HudTop shows level, biome, quota, score, energy and the checkpoint 
   top.apply(hudView(snap(), null, b, t), false, false); bottom.apply(hudView(snap(), null, b, t));
   expect(h.find('pause-button').alpha).toBeLessThan(1); expect(h.adds.some(a => a.alpha === 0)).toBe(true);   // MOT-4-R13 the chip fades out instead of vanishing
 });
-it('P3b2-R15 SkillButtons: hidden for empty slots, pointer down casts (MEC-007-R14), off/ready/active drawn differently', () => {
+it('P3b2-R15 SkillButtons: locked empty slots, pointer down casts (MEC-007-R14), off/ready/active drawn differently', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), used: number[] = [];
-  const sk = new SkillButtons(h.scene as unknown as Phaser.Scene, hudLayout(false), s => used.push(s), b);
+  const h = sceneHarness(), used: number[] = [], denied: number[] = [];
+  const sk = new SkillButtons(h.scene as unknown as Phaser.Scene, d3HudLayout(700, false), s => used.push(s), b, s => denied.push(s));
   sk.apply(hudView(snap({ skills: [{ slot: 0, id: 'slowmo', cost: 40, affordable: false, active: false, leftMs: 0 },
     { slot: 1, id: null, cost: 0, affordable: false, active: false, leftMs: 0 }] }), null, b, t).skills);
-  expect(h.find('skill-0').visible).toBe(true); expect(h.find('skill-1').visible).toBe(false);
+  expect(h.find('skill-0').visible).toBe(true); expect(h.find('skill-1').visible).toBe(true); expect(h.find('skill-1-cost').visible).toBe(false); expect(h.find('skill-1-lock').visible).toBe(true);   // D3-R1 locked slot
   expect(h.find('skill-0-cost').text).toBe('40');
   h.find('skill-0').emit('pointerdown'); expect(used).toEqual([0]);
+  h.find('skill-1').emit('pointerdown'); expect(used).toEqual([0]); expect(denied).toEqual([1]);   // D3-R1 locked tap: onDenied, no cast
   const off = JSON.stringify(h.find('skill-0-face').commands);
   sk.apply(hudView(snap(), null, b, t).skills);
   expect(JSON.stringify(h.find('skill-0-face').commands)).toBe(off);   // slot 0 still off
@@ -64,7 +65,7 @@ it('P3b2-R15 a rejected cast shakes the button and respects reduced motion', () 
   const h = sceneHarness(); const moves: unknown[] = [];
   h.scene.tweens.add = (v: unknown) => { moves.push(v); return { stop: () => {} }; };
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const sk = new SkillButtons(h.scene as unknown as Phaser.Scene, hudLayout(false), () => {}, b);
+  const sk = new SkillButtons(h.scene as unknown as Phaser.Scene, d3HudLayout(700, false), () => {}, b);
   sk.apply(hudView(snap(), null, b, t).skills); sk.shake(0); expect(moves).toHaveLength(1);
   vi.stubGlobal('window', { matchMedia: () => ({ matches: true }) });
   sk.shake(0); expect(moves).toHaveLength(1);

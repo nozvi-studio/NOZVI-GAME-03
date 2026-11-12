@@ -5,10 +5,10 @@ import { TOKENS } from '../uiTokens';
 // P3b2-R14 HUD glyphs as SVG textures (path data from GameD2 / SkillActiveD2 / BannersD2 / PauseD2, 24x24 viewBox).
 // Separate from ui/icons.ts (P3b-3 menu glyphs drawn with Graphics): HUD icons need per-tone textures and mockup-exact shapes.
 export type IconName = 'slowmo' | 'tailSnip' | 'shield' | 'mangoRain' | 'flag' | 'bolt' | 'star' | 'settings' | 'shrink' | 'biome' | 'mango';
-export type IconTone = 'ink' | 'soft' | 'off' | 'active';
-const TONE: Record<IconTone, string> = { ink: TOKENS.text.primary, soft: TOKENS.text.soft, off: TOKENS.hud.skillOffIcon, active: TOKENS.hud.skillActiveIcon };
+export type IconTone = 'ink' | 'soft' | 'off' | 'active' | 'on';
+const TONE: Record<IconTone, string> = { ink: TOKENS.text.primary, soft: TOKENS.text.soft, off: TOKENS.hud.skillOffIcon, active: TOKENS.hud.skillActiveIcon, on: TOKENS.d3.white };
 export const ICON_TONES: Record<IconName, readonly IconTone[]> = {
-  slowmo: ['ink', 'off', 'active'], tailSnip: ['ink', 'off', 'active'], shield: ['ink', 'off', 'active'], mangoRain: ['ink', 'off', 'active'],
+  slowmo: ['ink', 'off', 'active', 'on'], tailSnip: ['ink', 'off', 'active', 'on'], shield: ['ink', 'off', 'active', 'on'], mangoRain: ['ink', 'off', 'active', 'on'],
   flag: ['ink', 'soft'], bolt: ['ink'], star: ['ink'], settings: ['ink'], shrink: ['ink'], biome: ['ink'], mango: ['ink'],
 };
 const line = (c: string, sw: number, body: string): string =>

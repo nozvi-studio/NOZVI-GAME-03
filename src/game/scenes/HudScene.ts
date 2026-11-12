@@ -63,7 +63,7 @@ export class HudScene extends Phaser.Scene {
     const d3l = d3HudLayout(d3Height(), save.settings.dpad);
     this.top = new HudTop(this, d3l, () => this.gameScene.apply(flowTogglePause(this.gameScene.flow, this.balance)));
     this.bottom = new BottomGroup(this, d3l);
-    this.skills = new SkillButtons(this, layout, slot => this.useSkill(slot), this.balance);
+    this.skills = new SkillButtons(this, d3l, slot => this.useSkill(slot), this.balance, slot => this.skillDenied(slot));
     this.createDebugButtons(layout); // created before the banner layer and overlays so those sit above them
     this.pad = createDpad(this, layout.dpad!, d => this.gameScene.turn(d.x, d.y)); // MEC-001-R2: a turn during the countdown counts
     this.banners = new BannerLayer(this, layout, this.balance);
@@ -142,6 +142,8 @@ export class HudScene extends Phaser.Scene {
     this.debugNext = pillButton(this, side + ui(M.debugNextW) / 2, y, M.debugNextW, HUD_MOCK.chip, '+1', 'debug-next', () => skip(false), 'cream');
     this.debugKey = pillButton(this, WIDTH - side - ui(M.debugKeyW) / 2, y, M.debugKeyW, HUD_MOCK.chip, 'Key ▶', 'debug-key', () => skip(true), 'cream');
   }
+  /** D3-R1 tap on a locked slot: denied shake and the nope sound, no cast. */
+  private skillDenied(slot: 0 | 1): void { if (!acceptSkillInput(this.gameScene.flow.status)) return; this.skills.shake(slot); this.synth.play('nope'); }
   private useSkill(slot: 0 | 1): void { if (acceptSkillInput(this.gameScene.flow.status)) this.session.useSkill(slot); } // MEC-007-R15
 
   private onFlow(effect: FlowEffect): void {
@@ -175,6 +177,7 @@ export class HudScene extends Phaser.Scene {
       case 'orbSpawned':
         if (!this.orbTipShown && this.bestLevelAtStart < 2) { this.orbTipShown = true; this.banners.tip(t('tip.orb.first')); }
         break;
+      case 'skillUsed': this.skills.cast(e.slot); break;   // D3-R23 tap burst on a successful cast
       case 'skillRejected': {
         if (e.reason === 'empty') break;
         this.skills.shake(e.slot);
