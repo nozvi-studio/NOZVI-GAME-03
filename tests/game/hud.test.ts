@@ -201,7 +201,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
   });
   it('MEC-008-R11 the checkpoint hint is computed on create and level-up, not every frame', () => {
     const h = setup(), spy = vi.spyOn(h.session, 'homeModel');
-    for (let i = 0; i < 5; i++) h.hud.update();
+    for (let i = 0; i < 5; i++) h.hud.update(0);
     expect(spy).not.toHaveBeenCalled();
     h.game.events.emit('sim-events', [{ type: 'levelUp', level: 2, biome: 1, challenge: false, biomeChanged: false, clearedLevelTimeMs: 1 }]);
     expect(spy).toHaveBeenCalledTimes(1);
@@ -216,10 +216,10 @@ describe('P1 HUD flow, audio and session wiring', () => {
     h.scene.input.keyboard.emit('keydown', { code: 'KeyE', repeat: false, preventDefault() {} });
     h.find('skill-0').emit('pointerdown');
     expect(spy.mock.calls).toEqual([[1], [0]]);
-    h.hud.update();
+    h.hud.update(0);
     expect(h.find('skill-0').visible).toBe(true); expect(h.find('skill-1-lock').visible).toBe(true); expect(h.find('skill-1-cost').visible).toBe(false);   // D3-R1 locked, not hidden
     expect(h.find('level').text).toBe('Level 1');
-    h.session.frame(1); h.hud.update(); expect(h.find('energy').text).toBe('10'); // slow-mo cast spent 40
+    h.session.frame(1); h.hud.update(0); expect(h.find('energy').text).toBe('10'); // slow-mo cast spent 40
   });
   it('P1 death opens Results after the death delay; hidden pauses; shutdown removes listeners', () => {
     const h = setup(); h.play();
@@ -286,7 +286,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
   });
   it('P3b2-R18 an active skill shows its pill and the slow-mo tint', () => {
     const h = setup({ lastLoadout: ['slowmo', null], bestLevel: 3, carriedEnergy: 50 }); // 50 start energy >= Slow-mo cost 40
-    h.play(); h.session.useSkill(0); h.hud.update();
+    h.play(); h.session.useSkill(0); h.hud.update(0);
     expect(h.find('pill-0').text).toBe('Slow-mo · 4 s left'); expect(h.find('slowmo-tint').visible).toBe(true);
   });
   it('P3b2-R13 countdown card shows on a fresh checkpoint start only', () => {

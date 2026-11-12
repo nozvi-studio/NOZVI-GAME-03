@@ -59,7 +59,7 @@ export class HudScene extends Phaser.Scene {
     this.input.setGlobalTopOnly(true);
     const d3l = d3HudLayout(d3Height(), save.settings.dpad);
     this.top = new HudTop(this, d3l, () => this.gameScene.apply(flowTogglePause(this.gameScene.flow, this.balance)));
-    this.bottom = new BottomGroup(this, d3l);
+    this.bottom = new BottomGroup(this, d3l); this.bottom.setTouch(this.touch, reduceMotion());
     this.skills = new SkillButtons(this, d3l, slot => this.useSkill(slot), this.balance, slot => this.skillDenied(slot));
     this.createDebugButtons(); // created before the banner layer and overlays so those sit above them
     this.dpadOn = save.settings.dpad;
@@ -112,7 +112,7 @@ export class HudScene extends Phaser.Scene {
   /** Settings that can change while paused (Settings overlay, P3b-3): sound, haptics and D-pad. Read on create, Resume and settings-closed. */
   private applySettings(): void {
     const s = this.session.save().settings;
-    this.synth.setOn(s.sound); this.haptics = s.haptics; this.pad.setVisible(s.dpad);
+    this.bottom.setTouch(this.touch, reduceMotion()); this.synth.setOn(s.sound); this.haptics = s.haptics; this.pad.setVisible(s.dpad);
     if (s.dpad !== this.dpadOn) { // D3-R9 R4: re-place the views, nothing is recreated
       this.dpadOn = s.dpad; const l = d3HudLayout(d3Height(), s.dpad);
       this.skills.place(l); this.bottom.place(l); this.top.place(l);
@@ -239,7 +239,7 @@ export class HudScene extends Phaser.Scene {
     this.session.setSound(on); this.synth.setOn(on); if (on) this.synth.play('eat');
   }
 
-  update(): void { this.refresh(); }
+  update(time: number): void { this.refresh(); this.bottom.tick(time); }
   private refresh(): void {
     const s = this.gameScene.snapshot(); if (!s) return;
     const status = this.gameScene.flow.status, v = hudView(s, this.hint, this.balance, t, status === 'waiting' ? { touch: this.touch } : null);

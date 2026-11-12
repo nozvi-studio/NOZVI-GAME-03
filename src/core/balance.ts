@@ -21,6 +21,7 @@ export interface MotionD3Balance {
   burstMs: number; burstFromScale: number; burstToScale: number; burstSparks: number; burstSparkPx: number; burstSparkEndScale: number;
   burstMaxParticles: number; ringFadeMs: number; shakeMs: number; shakeCycles: number; shakePx: number; badgeFlashMs: number;
   sweepMs: number; sweepEveryPulses: number; trailMs: number; trailPx: number; trailAlpha: number; chevronMs: number; edgePx: number; edgeAlpha: number; sweepBand: number; sweepAlpha: number;
+  hintLoopMs: number; hintTravelPx: number;
 }
 
 /** MOT-0 motion tokens (all tuned by feel; see docs/superpowers/specs/2026-11-10-motion-0-foundation-design.md section 4). */
@@ -281,7 +282,8 @@ const SPEC: Spec = {
     digitPopScale: 'num+', readyDipMs: 'int+',
     d3: { burstMs: 'int+', burstFromScale: 'num+', burstToScale: 'num+', burstSparks: 'int0', burstSparkPx: 'num+', burstSparkEndScale: 'prob',
       burstMaxParticles: 'int+', ringFadeMs: 'int+', shakeMs: 'int+', shakeCycles: 'int+', shakePx: 'num+', badgeFlashMs: 'int+',
-      sweepMs: 'int+', sweepEveryPulses: 'int+', trailMs: 'int+', trailPx: 'num+', trailAlpha: 'prob', chevronMs: 'int+', edgePx: 'num+', edgeAlpha: 'prob', sweepBand: 'prob', sweepAlpha: 'prob' },
+      sweepMs: 'int+', sweepEveryPulses: 'int+', trailMs: 'int+', trailPx: 'num+', trailAlpha: 'prob', chevronMs: 'int+', edgePx: 'num+', edgeAlpha: 'prob', sweepBand: 'prob', sweepAlpha: 'prob',
+      hintLoopMs: 'int+', hintTravelPx: 'num+' },
   },
 };
 
