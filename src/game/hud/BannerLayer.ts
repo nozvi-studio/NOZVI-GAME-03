@@ -20,7 +20,7 @@ const M = {
   tip: { font: 15, padX: 28, padY: 20, minH: 46, radius: 16, floor: 60, margin: 16, tailLeft: 50, tailGap: 11, tailHalf: 9, tailH: 10 },
   pill: { h: 30, font: 14, icon: 18, padL: 10, gap: 6, padR: 14, rowGap: 6 },
   // D3-R16 strip card metrics in 360-wide board px (d3()): icon 22, gap 8, title Lilita 15, sub Nunito 12, line-height 1.15.
-  card: { chipH: 20, icon: 22, gap: 8, title: 15, sub: 12, lineH: 1.15, unit: 0.5, titleStroke: 0 },
+  card: { chipH: 20, icon: 22, gap: 8, title: 15, sub: 12, lineH: 1.15, unit: 0.5 },
   tint: { radius: 20, ring: 4, ringAlpha: 0.8, inset: 2, ringInset: 6 },
 } as const;
 
@@ -50,9 +50,9 @@ export class BannerLayer {
   }
 
   show(queue: readonly BannerSpec[]): void { this.reset(); this.queue = [...queue]; this.next(); }
-  /** U5-R2 appends one card; a running queue is never reset, an idle strip starts a new one. A full queue drops the new card (bannerQueueMax). */
+  /** U5-R2 appends one card; a running queue is never reset, an idle strip starts a new one. The card on screen counts toward bannerQueueMax; a full strip drops the new card. */
   enqueue(spec: BannerSpec): void {
-    if (this.root.visible) { if (this.queue.length < this.b.ui.hud.bannerQueueMax) this.queue.push(spec); } else this.show([spec]);
+    if (this.root.visible) { if (this.queue.length + 1 < this.b.ui.hud.bannerQueueMax) this.queue.push(spec); } else this.show([spec]);
   }
   /** Clears the cards, their timer and pop tween; the tip is left alone (a tip may be raised just before a queue). */
   private reset(): void { this.cardTimer?.remove(); this.scene.tweens.killTweensOf(this.root); this.scene.tweens.killTweensOf(this.enter); this.root.setScale(1).setAlpha(1).setPosition(0, 0); this.queue = []; this.clear(); this.root.setVisible(false); }
@@ -84,10 +84,16 @@ export class BannerLayer {
     add(img('lip', cy + lipPx('panel', 'light', unit))); add(img('rest', cy));
     const title = this.scene.add.text(0, 0, v.title, { fontFamily: FONT_TITLE, fontSize: `${d3(m.title)}px`, color: TOKENS.d3.text }).setOrigin(0.5).setName('banner-title');
     const sub = v.sub === null ? null : this.scene.add.text(0, 0, v.sub, { fontFamily: FONT_UI, fontSize: `${d3(m.sub)}px`, fontStyle: '800', color: TOKENS.d3.text }).setOrigin(0.5).setName('banner-subtitle');
-    const lead = v.chip !== null ? chip(this.scene, 0, 0, v.chip, '', 'banner-chip', { tone: 'mango' }) : this.scene.add.image(0, 0, hudIconKey(v.icon)).setDisplaySize(d3(m.icon), d3(m.icon));
-    const k = v.chip !== null ? d3(m.chipH) / (lead as Phaser.GameObjects.Container).height : 1; lead.setScale(k);
-    if (v.chip === null && v.tone === 'mint') (lead as Phaser.GameObjects.Image).setTint(toInt(TOKENS.hud.mintInk));
-    const leadW = v.chip !== null ? (lead as Phaser.GameObjects.Container).width * k : d3(m.icon), textW = Math.max(title.width, sub?.width ?? 0);
+    let lead: Phaser.GameObjects.Container | Phaser.GameObjects.Image, leadW: number;
+    if (v.chip !== null) {
+      const c = chip(this.scene, 0, 0, v.chip, '', 'banner-chip', { tone: 'mango' }), k = d3(m.chipH) / c.height;
+      c.setScale(k); lead = c; leadW = c.width * k;
+    } else {
+      const ic = this.scene.add.image(0, 0, hudIconKey(v.icon)).setDisplaySize(d3(m.icon), d3(m.icon));
+      if (v.tone === 'mint') ic.setTint(toInt(TOKENS.hud.mintInk));
+      lead = ic; leadW = d3(m.icon);
+    }
+    const textW = Math.max(title.width, sub?.width ?? 0);
     const x0 = r.x + (r.w - (leadW + d3(m.gap) + textW)) / 2, tx = x0 + leadW + d3(m.gap) + textW / 2;
     const lh = d3(m.title) * m.lineH, sh = d3(m.sub) * m.lineH, block = sub === null ? lh : lh + sh, top = cy - block / 2;
     lead.setPosition(x0 + leadW / 2, cy); title.setPosition(tx, top + lh / 2); sub?.setPosition(tx, top + lh + sh / 2);
@@ -125,7 +131,7 @@ export class BannerLayer {
       this.pillKeys[slot] = key; changed = true;
       p.c.setVisible(spec !== null); p.text.setVisible(spec !== null); if (!spec) continue;
       const tone = slot === 0 ? 'skillA' : 'skillB';
-      p.text.setText(spec.text); p.icon.setTexture(hudIconKey(spec.skill, 'on'));
+      p.text.setText(spec.text); p.icon.setTexture(hudIconKey(spec.skill, slot === 0 ? 'on' : 'ink')); p.text.setColor(slot === 0 ? TOKENS.d3.white : TOKENS.d3.text); // D3-R2: white on the orange face is 2.4:1, so slot B uses ink
       const w = ui(m.padL + m.icon + m.gap + m.padR) + p.text.width;
       p.lip.setTexture(skinTexture(host, 'chip', tone, w, h, 'lip', unit)); p.face.setTexture(skinTexture(host, 'chip', tone, w, h, 'rest', unit));
       this.pillW[slot] = w;
