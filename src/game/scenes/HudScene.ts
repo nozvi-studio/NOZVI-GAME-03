@@ -11,6 +11,8 @@ import { BannerLayer } from '../hud/BannerLayer';
 import { levelUpBanners, skillPills, skillTip } from '../hud/banners';
 import { CountdownOverlay } from '../hud/CountdownOverlay';
 import { HudTop } from '../hud/HudTop';
+import { d3HudLayout } from '../hud/d3HudLayout';
+
 import { hudLayout, HUD_MOCK, type HudLayout } from '../hud/hudLayout';
 import { hudView } from '../hud/hudModel';
 import { countdownCard, pauseView } from '../hud/overlayModel';
@@ -30,7 +32,7 @@ import { enter, goTo } from '../motion';
 import { currentPalette, reduceMotion } from '../render/palette';
 import { runStartLines } from '../hudText';
 import { pillButton } from '../ui/widgets';
-import { ui } from '../ui/layout';
+import { d3Height, ui } from '../ui/layout';
 import { incomingBanner, t } from '../text';
 import type { GameScene } from './GameScene';
 
@@ -57,7 +59,7 @@ export class HudScene extends Phaser.Scene {
     this.touch = !!this.sys.game?.device?.input?.touch; this.orbTipShown = false; this.leaving = false; this.heading = ''; this.shrunkTo = null;
     this.synth = createSynth(); this.synth.unlock();
     this.input.setGlobalTopOnly(true);
-    this.top = new HudTop(this, layout, () => this.gameScene.apply(flowTogglePause(this.gameScene.flow, this.balance)));
+    this.top = new HudTop(this, d3HudLayout(d3Height(), save.settings.dpad), () => this.gameScene.apply(flowTogglePause(this.gameScene.flow, this.balance)));
     this.skills = new SkillButtons(this, layout, slot => this.useSkill(slot), this.balance);
     this.createDebugButtons(layout); // created before the banner layer and overlays so those sit above them
     this.pad = createDpad(this, layout.dpad!, d => this.gameScene.turn(d.x, d.y)); // MEC-001-R2: a turn during the countdown counts

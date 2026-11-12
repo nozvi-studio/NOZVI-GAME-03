@@ -2,8 +2,8 @@
 export const D3_RUN = {
   short: { h: 640, top: 0 }, tall: { h: 780, top: 37 },
   side: 10, boardTop: 112, boardSize: 340,
-  pause: { x: 12, y: 12, d: 48 }, ribbon: { w: 160, h: 51, y: 10 }, score: { right: 12, y: 14, h: 40 },
-  mango: { y: 70, h: 34, side: 14, icon: 34, gap: 8, barH: 26, labelW: 44 },
+  pause: { x: 12, y: 12, d: 48 }, ribbon: { w: 160, h: 51, y: 10, font: 22, stroke: 4 }, score: { right: 12, y: 14, h: 40, icon: 22, font: 17, padX: 12, gap: 6 },
+  mango: { y: 70, h: 34, side: 14, icon: 34, gap: 8, barH: 26, labelW: 44, labelFont: 18, shadowY: 2 },
   bottom: { block: 146, gapMin: 24, spareShare: 0.45 },
   skill: { d: 78, side: 22, sideDpad: 12, dyDpad: 62 },
   energy: { x: 112, dy: 8, h: 22, icon: 22, gap: 6, labelW: 24, xDpad: 16, rightDpad: 96 },

@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { chipHasIcon } from '../../src/game/hud/HudTop';
+import { chipHasIcon } from '../../src/game/hud/hudMotion';
 
 it('UIFIX-R3 the wait chip shows no checkpoint flag; ramp and checkpoint chips keep the icon', () => {
   expect(chipHasIcon('wait')).toBe(false);

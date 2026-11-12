@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): D3 HUD top - light pause, level ribbon, score chip, mango bar (D3-R13); biome line removed (R5); energy pill and checkpoint chip temporarily kept in HudTop until the bottom group (Task 4).
 - feat(ui): D3 dim background in the run, per biome (D3-R9 R6); removed unused gameBackground.
 - feat(ui): D3 in-run layout table (`hud/d3HudLayout.ts`) and live `BOARD` rect set at boot (D3-R9); legacy D2 D-pad hudLayout tests skipped until U4a Task 7
 - docs(ui): U4a in-run HUD layout plan; U4 split into U4a/U4b/U4c.

@@ -218,7 +218,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
     expect(spy.mock.calls).toEqual([[1], [0]]);
     h.hud.update();
     expect(h.find('skill-0').visible).toBe(true); expect(h.find('skill-1').visible).toBe(false);
-    expect(h.find('level').text).toBe('Level 1'); expect(h.find('biome').text).toBe('Mango Orchard');
+    expect(h.find('level').text).toBe('Level 1');
     h.session.frame(1); h.hud.update(); expect(h.find('energy').text).toBe('10'); // slow-mo cast spent 40
   });
   it('P1 death opens Results after the death delay; hidden pauses; shutdown removes listeners', () => {

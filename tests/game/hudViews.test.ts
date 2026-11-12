@@ -7,6 +7,7 @@ import { pauseView } from '../../src/game/hud/overlayModel';
 import { HudTop } from '../../src/game/hud/HudTop';
 import { SkillButtons } from '../../src/game/hud/SkillButtons';
 import { hudView, type HudSnap } from '../../src/game/hud/hudModel';
+import { d3HudLayout } from '../../src/game/hud/d3HudLayout';
 import { bannerStripRect, hudLayout, STRIP_MOCK } from '../../src/game/hud/hudLayout';
 import { t } from '../../src/game/text';
 import { loadBalance } from '../support/balance';
@@ -29,10 +30,10 @@ const snap = (o: Partial<HudSnap> = {}): HudSnap => ({ level: 7, biome: 2, chall
 it('P3b2-R15 HudTop shows level, biome, quota, score, energy and the checkpoint chip; pause button is enabled only while a run is live', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
   const h = sceneHarness(), pauses: number[] = [];
-  const top = new HudTop(h.scene as unknown as Phaser.Scene, hudLayout(false), () => pauses.push(1));
+  const top = new HudTop(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), () => pauses.push(1));
   top.apply(hudView(snap(), { key: 'hud.nextCheckpoint', level: 10 }, b, t), false, true);
-  expect(h.find('level').text).toBe('Level 7'); expect(h.find('biome').text).toBe('Rice Paddy');
-  expect(h.find('quota-done').text).toBe('3'); expect(h.find('quota-total').text).toBe('/6');
+  expect(h.find('level').text).toBe('Level 7'); expect(h.objects.some(o => o.name === 'biome')).toBe(false);   // D3-R5 no biome line
+  expect(h.find('quota-label').text).toBe('3/6');
   expect(h.find('score').text).toBe('44'); expect(h.find('energy').text).toBe('35');
   expect(h.find('next-checkpoint').text).toBe('Next checkpoint at L10'); expect(h.find('next-checkpoint').visible).toBe(true);
   h.find('pause-button').emit('pointerdown'); h.find('pause-button').emit('pointerup'); expect(pauses).toEqual([1]);
@@ -179,26 +180,22 @@ it('P3b2-R10 setPills redraws a slot only when its content changes (per-frame ca
 });
 it('P3b2-R15 HudTop redraws the pause icon only when paused or enabled changes', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, hudLayout(false), () => {});
-  const clear = vi.spyOn(h.find('pause-button').list[0]!, 'clear'), v = hudView(snap(), null, b, t);
+  const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), () => {});
+  const clear = vi.spyOn(h.find('pause-glyph'), 'clear'), v = hudView(snap(), null, b, t);
   top.apply(v, false, true); top.apply(v, false, true); top.apply(v, false, true);
   expect(clear).toHaveBeenCalledTimes(1);
   top.apply(v, true, true); expect(clear).toHaveBeenCalledTimes(2);
   top.apply(v, true, false); expect(clear).toHaveBeenCalledTimes(3); expect(h.find('pause-button').alpha).toBeLessThan(1);
 });
-
-it('D3-R3 HudTop level and biome titles use the light colours even with a saved dark board theme', () => {
+it('D3-R13 HudTop level ribbon text keeps its fixed white style (never recoloured) even with a saved dark board theme', () => {
   const colours: string[] = [];
   const spy = vi.spyOn(DrawObject.prototype, 'setColor').mockImplementation(function (this: DrawObject, c?: unknown) { colours.push(`${this.name}:${String(c)}`); return this; } as never);
   try {
     vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
     setDisplaySettings({ ...defaultSettings(), boardTheme: 'dark' });
-    const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, hudLayout(false), () => {});
+    const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), () => {});
     top.apply(hudView(snap(), null, b, t), false, true);
-    expect(colours).toContain(`level:${uiTheme('light').title}`); expect(colours).toContain(`biome:${uiTheme('light').soft}`);
-    colours.length = 0; setDisplaySettings({ ...defaultSettings(), boardTheme: 'light' });
-    top.apply(hudView(snap(), null, b, t), false, true);
-    expect(colours).toContain(`level:${uiTheme('light').title}`);
+    expect(h.find('level').text).toBe('Level 7'); expect(colours.filter(c => c.startsWith('level:'))).toEqual([]);
   } finally { spy.mockRestore(); setDisplaySettings(null); }
 });
 it('D3-R3 PauseOverlay draws the light card even with a saved dark board theme', () => {
@@ -215,7 +212,7 @@ it('D3-R3 PauseOverlay draws the light card even with a saved dark board theme',
 const motionCfg = b.motion;
 const topFixture = (reduced = false) => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: reduced }) });
-  const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, hudLayout(false), () => {});
+  const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), () => {});
   const hv = (o: Partial<HudSnap>) => hudView(snap(o), null, b, t);
   return { h, top, adds: h.adds, hv };
 };
