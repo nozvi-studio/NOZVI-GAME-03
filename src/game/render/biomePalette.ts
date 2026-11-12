@@ -4,7 +4,7 @@ import { TOKENS, toInt } from '../uiTokens';
 export interface BoardLook {
   biome: number; frame: number; groundA: number; groundB: number;
   outline: { snake: number; mango: number; rock: number; warn: number };
-  snake: { body: number; head: number; belly: number };
+  snake: { body: number; head: number; belly: number; stripe: number };
   edge: number; woodEdge: number; // hazard outlines (= outline.rock)
 }
 const STORM = 6;
@@ -25,7 +25,7 @@ export function boardLook(biome: number): BoardLook {
   const b = TOKENS.d3.biomes[n - 1]!, o = n === STORM ? TOKENS.d3.outlineStorm : TOKENS.d3.outline, s = TOKENS.d3.snake;
   const outline = { snake: toInt(o.snake), mango: toInt(o.mango), rock: toInt(o.rock), warn: toInt(o.warn) };
   return { biome: n, frame: toInt(b.frame), groundA: toInt(b.cells[0]), groundB: toInt(b.cells[1]), outline,
-    snake: { body: toInt(s.body), head: toInt(s.head), belly: toInt(s.belly) }, edge: outline.rock, woodEdge: outline.rock };
+    snake: { body: toInt(s.body), head: toInt(s.head), belly: toInt(s.belly), stripe: toInt(s.stripe) }, edge: outline.rock, woodEdge: outline.rock };
 }
 /** D3-R2 outline colour each hazard family draws with in a biome; every entry keeps >= 3:1 on both cells of all biomes. */
 export const HAZARD_EDGES: Record<'fence' | 'hedge' | 'mud' | 'ice' | 'stone' | 'coconut' | 'bomb' | 'npc' | 'spike' | 'gate' | 'shrink', (l: BoardLook) => number> = {

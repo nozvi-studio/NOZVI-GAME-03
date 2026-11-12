@@ -36,6 +36,8 @@ export const ROCK = { scale: { pebble: 0.5, rock: 0.82, boulder: 0.98 } as Recor
   debris: { chips: [{ x: 0.86, y: 0.66, size: 0.2, radius: 0.08 }, { x: 0.02, y: 0.78, size: 0.15, radius: 0.06 }] as readonly { x: number; y: number; size: number; radius: number }[], borderShare: 0.6 } } as const;
 /** D3-R2 stroke width of an outline added to a hazard shape that had none, as a cell fraction. */
 export const BOARD_EDGE = 0.08;
+/** D3-R2 thinner outline on small hazard parts (gate bar, spike triangles), as a cell fraction. */
+export const BOARD_EDGE_THIN = 0.04;
 export const WARN = { ring: 0.1, inset: 0.05, radius: 0.3, tileRadius: 0.285, dash: 0.2, dashWidth: 0.095, chevronWidth: 0.13,
   fillBase: 0.3, fillGain: 0.4, riseFillFloor: 0.3 } as const;
 export const FENCE = { rail: 0.2, railHigh: -0.28, railLow: 0.08, postW: 0.4, postH: 0.7, postRadius: 0.15, edge: 0.076, railRadius: 0.04 } as const;

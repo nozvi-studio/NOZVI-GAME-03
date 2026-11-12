@@ -10,11 +10,24 @@ export function snakeHeadPoint(s: SimSnapshot, cell: number): { x: number; y: nu
   return { x: (lerp(s.headFrom.x, head.x) + 0.5) * cell, y: (lerp(s.headFrom.y, head.y) + 0.5) * cell };
 }
 
-// D3-R12 widths in px (pure, testable).
-export function snakeWidths(cell: number): { body: number; outline: number; stripe: number; head: number; headOutline: number; belly: number } {
-  return { body: cell * SNAKE.body, outline: cell * SNAKE.outline, stripe: cell * SNAKE.stripe, head: cell * SNAKE.head,
-    headOutline: cell * SNAKE.headOutline, belly: cell * SNAKE.belly };
+export interface SnakeWidths { body: number; outline: number; stripe: number; head: number; headOutline: number; belly: number }
+// D3-R12 widths in px (pure, testable); cached per cell size so the per-frame draw allocates nothing new.
+let widths: { cell: number; w: SnakeWidths } | null = null;
+export function snakeWidths(cell: number): SnakeWidths {
+  if (widths?.cell === cell) return widths.w;
+  widths = { cell, w: { body: cell * SNAKE.body, outline: cell * SNAKE.outline, stripe: cell * SNAKE.stripe, head: cell * SNAKE.head,
+    headOutline: cell * SNAKE.headOutline, belly: cell * SNAKE.belly } };
+  return widths.w;
 }
+
+type P = { x: number; y: number };
+// One stroked + capped pass of the body polyline.
+function pass(g: Phaser.GameObjects.Graphics, color: number, width: number, pts: readonly P[]): void {
+  g.lineStyle(width, color).strokePoints(pts as P[], false); g.fillStyle(color);
+  for (const pt of pts) g.fillCircle(pt.x, pt.y, width / 2);
+}
+// Reused stripe polyline (grows to the longest snake, then only its entries are rewritten).
+const STRIPE: P[] = [];
 
 // MEC-001 interpolate the head and tail; D3-R12 outlined body, highlight stripe, 1.4-cell head disc.
 export function drawSnake(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: number, look: BoardLook, gulp: number, drawFace = true, bulge = 0): void {
@@ -25,18 +38,16 @@ export function drawSnake(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: 
   const tailPt = center(lerp(s.tailFrom.x, last.x), lerp(s.tailFrom.y, last.y));
   const points = [headPt, ...s.snake.slice(1).map(c => center(c.x, c.y)), tailPt];
   const w = snakeWidths(cell), headR = w.head * (1 + SNAKE.gulp * gulp);
-  const pass = (color: number, width: number, pts: { x: number; y: number }[], alpha = 1): void => {
-    g.lineStyle(width, color, alpha).strokePoints(pts, false); g.fillStyle(color, alpha);
-    for (const pt of pts) g.fillCircle(pt.x, pt.y, width / 2);
-  };
-  pass(look.outline.snake, w.outline, points);
+  pass(g, look.outline.snake, w.outline, points);
   g.fillStyle(look.outline.snake).fillCircle(headPt.x, headPt.y, headR + w.headOutline);
-  pass(look.snake.body, w.body, points);
-  pass(look.snake.belly, w.belly, points);
+  pass(g, look.snake.body, w.body, points);
+  pass(g, look.snake.belly, w.belly, points);
   const dy = cell * SNAKE.stripeOffset;
   if (points.length > 1) { // highlight stripe along the back, not on the head
-    const hi = points.slice(1).map(pt => ({ x: pt.x, y: pt.y - dy }));
-    g.lineStyle(w.stripe, 0xffffff, SNAKE.stripeAlpha).strokePoints(hi, false);
+    const n = points.length - 1;
+    for (let i = 0; i < n; i++) { const pt = points[i + 1]!, q = STRIPE[i] ?? (STRIPE[i] = { x: 0, y: 0 }); q.x = pt.x; q.y = pt.y - dy; }
+    STRIPE.length = n;
+    g.lineStyle(w.stripe, look.snake.stripe, SNAKE.stripeAlpha).strokePoints(STRIPE, false);
   }
   g.fillStyle(look.snake.head).fillCircle(headPt.x, headPt.y, headR);
   // MOT-3-R12 one extra disc on the first body point behind the head (render-only; the head cell does not move)

@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import type { SimSnapshot } from '../../core';
-import { BOARD_EDGE, PART } from './boardParts';
+import { BOARD_EDGE, BOARD_EDGE_THIN, PART } from './boardParts';
 import { DEFAULT_LOOK, HAZARD_EDGES, type BoardLook } from './biomePalette';
 import { cellKey, newPulse, telegraphPulse, type TelegraphCtx } from './telegraph';
 
@@ -43,7 +43,7 @@ function drawGates(g: Graphics, gates: SimSnapshot['families']['gate'], cellPx: 
       } else {
         const hh = bh * tel.beat(cellKey('g', gate.id, c.x, c.y));                                // MOT-4-R5 closing beat, about the bar centre
         g.fillStyle(PART.gate.bar, alpha).fillRect(x, y + cellPx / 2 - hh / 2, cellPx, hh);
-        g.lineStyle(Math.max(1, cellPx * 0.04), edge, alpha).strokeRect(x, y + cellPx / 2 - hh / 2, cellPx, hh);   // D3-R2
+        g.lineStyle(Math.max(1, cellPx * BOARD_EDGE_THIN), edge, alpha).strokeRect(x, y + cellPx / 2 - hh / 2, cellPx, hh);   // D3-R2
       }
     }
   }
@@ -68,7 +68,7 @@ function drawSpikes(g: Graphics, groups: SimSnapshot['families']['spike'], cellP
         const x1 = x + m + step * i, x2 = x1 + step, top = y + cellPx * 0.2, base = y + cellPx - m;
         if (c.vis === 'up') {
           g.fillStyle(PART.spike.fill, alpha).fillTriangle(sc(x1, cx), sc(base, cy), sc(x2, cx), sc(base, cy), sc((x1 + x2) / 2, cx), sc(top, cy));
-          g.lineStyle(Math.max(1, cellPx * 0.04), edge, alpha).strokeTriangle(sc(x1, cx), sc(base, cy), sc(x2, cx), sc(base, cy), sc((x1 + x2) / 2, cx), sc(top, cy));   // D3-R2
+          g.lineStyle(Math.max(1, cellPx * BOARD_EDGE_THIN), edge, alpha).strokeTriangle(sc(x1, cx), sc(base, cy), sc(x2, cx), sc(base, cy), sc((x1 + x2) / 2, cx), sc(top, cy));   // D3-R2
         }
         else g.lineStyle(Math.max(1, cellPx * 0.06), PART.spike.warn, a).strokeTriangle(sc(x1, cx), sc(base, cy), sc(x2, cx), sc(base, cy), sc((x1 + x2) / 2, cx), sc(top, cy));
       }

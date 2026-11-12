@@ -61,15 +61,15 @@ export function drawWarn(g: Graphics, c: Cell, cell: number, ms: number, warnMs:
 
 // P3b1-R6 FencePiece.dc: rails run from a post to the right/lower neighbour, posts are drawn after every rail.
 function drawFence(g: Graphics, cells: readonly PopCell[], cell: number, look: BoardLook, alpha: number): void {
-  const has = new Set(cells.map(c => `${c.x},${c.y}`)), bw = Math.max(1, cell * FENCE.edge), t = cell * FENCE.rail, r = cell * FENCE.railRadius;
+  const has = new Set(cells.map(c => `${c.x},${c.y}`)), edge = HAZARD_EDGES.fence(look), bw = Math.max(1, cell * FENCE.edge), t = cell * FENCE.rail, r = cell * FENCE.railRadius;
   for (const c of cells) {
     const cx = (c.x + 0.5) * cell, cy = (c.y + 0.5) * cell;
-    if (has.has(`${c.x + 1},${c.y}`)) for (const dy of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx, cy + dy * cell, cell, t, r, PART.wood.rail, HAZARD_EDGES.fence(look), bw, alpha);
-    if (has.has(`${c.x},${c.y + 1}`)) for (const dx of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx + dx * cell, cy, t, cell, r, PART.wood.rail, HAZARD_EDGES.fence(look), bw, alpha);
+    if (has.has(`${c.x + 1},${c.y}`)) for (const dy of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx, cy + dy * cell, cell, t, r, PART.wood.rail, edge, bw, alpha);
+    if (has.has(`${c.x},${c.y + 1}`)) for (const dx of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx + dx * cell, cy, t, cell, r, PART.wood.rail, edge, bw, alpha);
   }
   for (const c of cells) {
     const w = cell * FENCE.postW * c.k, h = cell * FENCE.postH * c.k;
-    boxed(g, (c.x + 0.5) * cell - w / 2, (c.y + 0.5) * cell - h / 2, w, h, cell * FENCE.postRadius, PART.wood.post, HAZARD_EDGES.fence(look), bw, alpha);
+    boxed(g, (c.x + 0.5) * cell - w / 2, (c.y + 0.5) * cell - h / 2, w, h, cell * FENCE.postRadius, PART.wood.post, edge, bw, alpha);
   }
 }
 
