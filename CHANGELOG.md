@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: UI D3 U4c plan (steer feedback, first-input hint, value changes; D3-R25..R28).
 - feat(log): MEC-003-R22 uncaught errors and rejections are written to the run log with their stack, so an exported log shows the cause of a freeze.
 - fix(ui): pre-U4c owner review — snake face matches the D3 Home board (oval skull, white sclera, muzzle oval, top gloss; no nostrils/diamond); headCellScale 1.2 -> 1.6 so the visible head is ~1.4 cells, wider than the body (D3-R12).
 - fix(hud): affordable skill buttons drop the full rim gauge; skin gloss clipped to the face and the skill gloss inset like the board CSS (D3-R14).
