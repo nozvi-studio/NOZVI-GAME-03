@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): D3 dim background in the run, per biome (D3-R9 R6); removed unused gameBackground.
 - docs(ui): U4a in-run HUD layout plan; U4 split into U4a/U4b/U4c.
 - fix(ui): D3 Home/Boot used the 390 mock unit for 360-wide board numbers (new d3()/d3m()/d3Height()).
 - docs: U3 CODEMAP rows, UI-MOCKUPS built markers, PLAYTEST screenshot record, STATUS.

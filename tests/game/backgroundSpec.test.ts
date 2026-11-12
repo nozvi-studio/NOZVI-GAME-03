@@ -33,3 +33,10 @@ it('D3-R10 paintBackground fills the gradient once and one path per wedge', () =
   paintBackground(ctx, s);
   expect(fills.length).toBe(1 + s.wedges.length);
 });
+
+it('D3-R9 R6 dim background halves the ray alpha and has its own key', () => {
+  const a = bgSpec(1, 540, 960), d = bgSpec(1, 540, 960, true);
+  expect(d.rayColor).not.toBe(a.rayColor);
+  expect(d.rayColor).toBe(`rgba(255,255,255,${TOKENS.d3.bg.rayAlpha * TOKENS.d3.bg.dimRays})`);
+  expect(bgKey(1, 540, 960, true)).toBe('d3/bg/1/540x960/dim');
+});

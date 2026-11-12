@@ -15,15 +15,15 @@ export interface BgCtx {
 }
 const DEG = Math.PI / 180;
 const clampBiome = (b: number): number => Math.min(TOKENS.d3.biomes.length, Math.max(1, Math.round(b)));
-export const bgKey = (biome: number, w: number, h: number): string => `d3/bg/${clampBiome(biome)}/${Math.ceil(w)}x${Math.ceil(h)}`;
+export const bgKey = (biome: number, w: number, h: number, dim = false): string => `d3/bg/${clampBiome(biome)}/${Math.ceil(w)}x${Math.ceil(h)}${dim ? '/dim' : ""}`;
 
 // D3-R10 one spec per biome and canvas size.
-export function bgSpec(biome: number, w: number, h: number): BgSpec {
+export function bgSpec(biome: number, w: number, h: number, dim = false): BgSpec {
   const b = TOKENS.d3.bg, [c0, c1, c2] = TOKENS.d3.biomes[clampBiome(biome) - 1]!.bg;
   const n = Math.round(360 / (2 * b.rayDeg)), wedges: BgSpec['wedges'] = [];
   for (let k = 0; k < n; k++) { const a0 = (k * 2 * b.rayDeg - 90) * DEG; wedges.push({ a0, a1: a0 + b.rayDeg * DEG }); }
   return { stops: [[0, c0], [b.midStop, c1], [1, c2]], cx: w / 2, cy: h * b.centerY, rx: w * b.rx, ry: h * b.ry,
-    rayCx: w / 2, rayCy: h * b.rayCenterY, rayR: Math.hypot(w, h), rayColor: `rgba(255,255,255,${b.rayAlpha})`, wedges, w, h, outer: c2 };
+    rayCx: w / 2, rayCy: h * b.rayCenterY, rayR: Math.hypot(w, h), rayColor: `rgba(255,255,255,${b.rayAlpha * (dim ? b.dimRays : 1)})`, wedges, w, h, outer: c2 };
 }
 
 // D3-R10 paint: gradient in a y-squashed space (CSS ellipse), then one filled wedge per ray.

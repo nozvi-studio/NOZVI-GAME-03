@@ -2,22 +2,23 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { GameScene } from '../../src/game/scenes/GameScene';
 import type { Effects } from '../../src/game/render/effects';
 import { LIGHT, currentPalette, setDisplaySettings } from '../../src/game/render/palette';
-import { gameBackground } from '../../src/game/hud/draw';
+import { screenBackground } from '../../src/game/ui/background';
 import { defaultSettings } from '../../src/meta';
 import { loadBalance } from '../support/balance';
 import { DrawObject, sceneHarness, Signals } from '../support/scene';
 
+vi.mock('../../src/game/ui/background', () => ({ screenBackground: vi.fn(() => ({ destroy() {} })) }));
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } }, Core: { Events: { BLUR: 'blur', HIDDEN: 'hidden' } } } }));
-afterEach(() => { vi.unstubAllGlobals(); setDisplaySettings(null); });
+afterEach(() => { vi.mocked(screenBackground).mockClear(); vi.unstubAllGlobals(); setDisplaySettings(null); });
 function mounted() {
-  const h = sceneHarness(), game = new GameScene(), events = new Signals(), background = vi.fn(), queries: string[] = [];
+  const h = sceneHarness(), game = new GameScene(), events = new Signals(), background = vi.mocked(screenBackground), queries: string[] = [];
   vi.stubGlobal('window', { addEventListener() {}, removeEventListener() {},
     matchMedia: (q: string) => { queries.push(q); return { matches: false, addEventListener() {}, removeEventListener() {} }; } });
   h.registry.set('balance', loadBalance());
   Object.assign(game, h.scene, {
     add: { ...h.scene.add, image: () => new DrawObject(), renderTexture: () => new DrawObject() },
     children: { getByName: () => null }, textures: { exists: () => false },
-    cameras: { main: { setBackgroundColor: background, fadeIn() {} } },
+    cameras: { main: { setBackgroundColor() {}, fadeIn() {} } },
     game: { events, canvas: { addEventListener() {}, removeEventListener() {} } },
   });
   vi.spyOn(game, 'startRun').mockImplementation(() => {});
@@ -31,13 +32,14 @@ it('D3-R3 GameScene never queries or subscribes to prefers-color-scheme', () => 
   expect(queries.filter(q => q.includes('color-scheme'))).toEqual([]);
 });
 it('P3b1-R3 D3-R3 settings-closed re-reads the palette: the listener recolors the camera light even with a saved dark theme', () => {
-  const { events, background } = mounted();
+  const { game, events, background } = mounted();
+  expect(background).toHaveBeenCalledWith(game, 1, true);
   darkSettings();
   expect(currentPalette()).toBe(LIGHT);
   background.mockClear();
   events.emit('settings-closed');
   expect(background).toHaveBeenCalledTimes(1);
-  expect(background).toHaveBeenCalledWith(gameBackground(LIGHT));
+  expect(background).toHaveBeenCalledWith(game, 1, true); // D3-R9 R6 dim background
 });
 it('P3b1-R3 the settings-closed listener is removed on SHUTDOWN and a scene restart does not double-register', () => {
   const first = mounted();
