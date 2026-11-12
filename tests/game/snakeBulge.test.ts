@@ -14,11 +14,11 @@ const snap = () => ({ ...createSim(loadBalance(), 1).snapshot(), snake: [{ x: 5,
 
 describe('MOT-3-R12 turn bulge', () => {
   it('bulge 0 draws no extra disc; bulge > 0 adds one disc on the first body point with the scaled radius', () => {
-    const a = probe(); drawSnake(a.g, snap(), 30, boardLook(1), 0, false, 0);
-    const b = probe(); drawSnake(b.g, snap(), 30, boardLook(1), 0, false, 0.06);
+    const a = probe(); drawSnake(a.g, snap(), 30, boardLook(1), 0, 1.2, false, 0);
+    const b = probe(); drawSnake(b.g, snap(), 30, boardLook(1), 0, 1.2, false, 0.06);
     expect(b.circles.length).toBe(a.circles.length + 1);
     const extra = b.circles.at(-1)!;
     expect(extra[0]).toBeCloseTo((4 + 0.5) * 30, 10); expect(extra[1]).toBeCloseTo((5 + 0.5) * 30, 10);
-    expect(extra[2]).toBeCloseTo(snakeWidths(30).body / 2 * 1.06, 10);
+    expect(extra[2]).toBeCloseTo(snakeWidths(30, 1.2).body / 2 * 1.06, 10);
   });
 });

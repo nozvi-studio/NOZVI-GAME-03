@@ -612,3 +612,7 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 ## 2026-11-12 — D3 U4b board art rulings (lead)
 - B1 one `BoardLook` per biome from `TOKENS.d3` (no theme, no grid); hazard outline `edge` = `woodEdge` = rock outline. B2 snake outline in every biome (dark set 1-5, light set 6). B3 capy face keeps `headCellScale` 1.2 inside the 1.4-cell head disc. B4 head stays 1.4 cells: it reaches 0.3 cell into the next cell, under half of a hazard symbol. B5 biome sweep keeps `groundA`.
 - Hazard fill colours keep their D2 values (moved to `TOKENS.d3.board`); only outlines were added/recoloured. Hedge outline is dark (white failed 3:1 on light cells). Mango body 0.86 cell, outline 1.0 cell, ripeness arc radius 0.56 cell (outside the outline).
+
+## 2026-11-12 - One head size for every character (D3-R12 amended)
+- Problem: the D3 head disc (fixed 1.4 cells + outline, about 1.6 cells) was wider than the capy face (1.2 cells), so a blue ring showed around the face.
+- Decision (owner OK 2026-11-12): the face sprite is the head. The only head size is `ui.capy.headCellScale`; the disc is derived from it (`SNAKE.headFit` 0.9 of the face at full gulp) and stays behind the face for every skin. Test: `tests/game/snakeHead.test.ts` (D3-R12). ART-003 step 6 records the rule for new skins.
