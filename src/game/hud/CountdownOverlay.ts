@@ -3,7 +3,7 @@ import { BOARD, HEIGHT, WIDTH } from '../layout';
 import { reduceMotion } from '../render/palette';
 import { FONT_TITLE, FONT_UI, TOKENS, toInt } from '../uiTokens';
 import { d3 } from '../ui/layout';
-import { butterChip } from '../ui/menuWidgets';
+import { butterChip, chipWidthMock } from '../ui/menuWidgets';
 
 // D3-R15 board px (360 wide, d3()) of the countdown digit, start chip and ramp line; popScale/popMs are the digit pop.
 const M = { digit: 170, digitStroke: 12, digitShadowY: 8, chipTop: 372, chipH: 30, chipFont: 13, chipPadX: 14, chipIcon: 16, chipIconGap: 6,
@@ -34,11 +34,9 @@ export class CountdownOverlay {
     const y = d3(M.chipTop);
     if (this.chipC === null || this.chipTitle !== card.title) { // rebuild only when the text changes
       this.chipC?.destroy();
-      const probe = this.scene.add.text(0, 0, card.title, { fontFamily: FONT_UI, fontStyle: '900', fontSize: `${d3(M.chipFont)}px` });
-      const w = 2 * M.chipPadX + M.chipIcon + M.chipIconGap + probe.width / d3(1); probe.destroy();
-      this.chipC = butterChip(this.scene, WIDTH / 2, y + d3(M.chipH / 2), w, M.chipH, card.title, M.chipFont, 'flag');
-      this.label = this.chipC.list.find(o => (o as Phaser.GameObjects.Text).text === card.title) as Phaser.GameObjects.Text | undefined;
-      this.label?.setName('countdown-card-title'); // QA name: the chip's text object
+      const w = chipWidthMock(this.scene, card.title, M.chipFont, { padX: M.chipPadX, icon: M.chipIcon, gap: M.chipIconGap });
+      this.chipC = butterChip(this.scene, WIDTH / 2, y + d3(M.chipH / 2), w, M.chipH, card.title, M.chipFont, 'flag', { tone: 'light', textName: 'countdown-card-title' }); // board: white chip
+      this.label = this.chipC.list.find(o => o.name === 'countdown-card-title') as Phaser.GameObjects.Text | undefined;
       this.chipTitle = card.title;
     }
     this.show(true); this.sub.setText(card.subtitle).setY(y + d3(M.chipH + M.subGap)).setVisible(true);

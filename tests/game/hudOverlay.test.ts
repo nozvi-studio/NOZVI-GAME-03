@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { countdownCard, pauseLayout, pauseView } from '../../src/game/hud/overlayModel';
+import { PAUSE_MOCK, countdownCard, pauseLayout, pauseView } from '../../src/game/hud/overlayModel';
 import { HEIGHT, WIDTH } from '../../src/game/layout';
 import { t } from '../../src/game/text';
 import { d3 } from '../../src/game/ui/layout';
@@ -39,7 +39,7 @@ it('UIFIX-R14 Quit run is the only pause button with the danger tone', () => {
 });
 it('D3-R15 pause panel matches the board: 300 wide, title 40, chip then buttons', () => {
   const l = pauseLayout(pauseView({ level: 3, biome: 1, hint: { key: 'hud.nextCheckpoint', level: 10 }, settingsAvailable: true }, t));
-  expect(l.w).toBe(300);
+  expect(l.w).toBe(300); expect(PAUSE_MOCK.titleSize).toBe(40);
   expect(l.chip).not.toBeNull();
   expect(l.buttons.map(b => b.id)).toEqual(['resume', 'settings', 'quit']);
   expect(l.buttons[0]!.y).toBeGreaterThan(l.chip!);

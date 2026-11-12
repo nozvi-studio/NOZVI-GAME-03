@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(hud): D3-R15 countdown chip is the light (white) board chip; shared chipWidthMock; navy gear; dead hud.countdown tokens removed.
 - feat(hud): D3-R15 mango countdown digit and butter start chip with ramp line (U5-R7).
 - feat(hud): D3-R15 pause panel (300 px card, butter chip, gear on Settings) and bigger pause glyph U5-R1 (bars 7x22).
 - feat(results): D3-R18 pure layout (flow/resultsLayout.ts, MENU.results.d3 metrics).

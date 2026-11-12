@@ -16,7 +16,7 @@ export const TOKENS = {
     scrim: '#5A3B3B', pauseScrimAlpha: 0.5, countScrimAlpha: 0.28,
     tooltip: '#5A3B3B', tooltipText: '#FFFFFF', mintCard: '#D7EBD2', mintInk: '#234B35',
     slowTint: '#8CC8F0', slowTintAlpha: 0.2, slowBoardAlpha: 0.22,
-    countdown: '#F8D468', countdownStrokePx: 22, countdownShadowY: 12, countdownSizePx: 270, cardShadowAlpha: 0.45,
+    cardShadowAlpha: 0.45,
   },
   menu: {
     logoColors: ['#F79DBB', '#F8D468', '#8CC9F0', '#97DB9B', '#C6B0F5'],

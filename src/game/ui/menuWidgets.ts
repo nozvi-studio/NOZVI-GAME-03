@@ -112,11 +112,18 @@ export function snakeHero(scene: Phaser.Scene, cx: number, top: number, wMock: n
   return { c: scene.add.container(0, 0, [g, head]), head };
 }
 
-// D3-R11 butter (secondary tone) chip of a fixed mock size, optional leading icon; static, not tappable.
-export function butterChip(scene: Phaser.Scene, cx: number, cy: number, wMock: number, hMock: number, text: string, fontMock: number, icon?: IconId): Phaser.GameObjects.Container {
-  const w = d3(wMock), h = d3(hMock), tone = TOKENS.d3.tone.secondary, lip = lipPx('chip', 'secondary', d3(1));
-  const host = hostOf(scene), key = (st: SkinState) => skinTexture(host, 'chip', 'secondary', w, h, st, d3(1));
-  const tx = scene.add.text(0, 0, text, { fontFamily: FONT_UI, fontStyle: '900', fontSize: `${d3(fontMock)}px`, color: tone.text }).setOrigin(0.5);
+/** Width in board (d3) px of a chip holding `text` at `fontMock` with a leading icon and side padding (measured with a throwaway Text). */
+export function chipWidthMock(scene: Phaser.Scene, text: string, fontMock: number, o: { padX: number; icon: number; gap: number }): number {
+  const probe = scene.add.text(0, 0, text, { fontFamily: FONT_UI, fontStyle: '900', fontSize: `${d3(fontMock)}px` });
+  const w = 2 * o.padX + o.icon + o.gap + probe.width / d3(1); probe.destroy(); return w;
+}
+
+// D3-R11 butter (secondary tone, or light via opts) chip of a fixed mock size, optional leading icon; static, not tappable.
+export function butterChip(scene: Phaser.Scene, cx: number, cy: number, wMock: number, hMock: number, text: string, fontMock: number, icon?: IconId,
+  opts: { tone?: 'secondary' | 'light'; textName?: string } = {}): Phaser.GameObjects.Container {
+  const sk = opts.tone ?? 'secondary', w = d3(wMock), h = d3(hMock), tone = TOKENS.d3.tone[sk], lip = lipPx('chip', sk, d3(1));
+  const host = hostOf(scene), key = (st: SkinState) => skinTexture(host, 'chip', sk, w, h, st, d3(1));
+  const tx = scene.add.text(0, 0, text, { fontFamily: FONT_UI, fontStyle: '900', fontSize: `${d3(fontMock)}px`, color: tone.text }).setOrigin(0.5).setName(opts.textName ?? '');
   const parts: Phaser.GameObjects.GameObject[] = [scene.add.image(0, lip, key('lip')), scene.add.image(0, 0, key('rest')), tx];
   if (icon) {
     const ico = d3(fontMock * D3_HOME.chipIconRatio), gap = d3(D3_HOME.chipIconGap), total = ico + gap + tx.width;

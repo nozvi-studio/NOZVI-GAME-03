@@ -4,10 +4,10 @@ import { HEIGHT, WIDTH } from '../layout';
 import { FONT_TITLE, FONT_UI, TOKENS, toInt } from '../uiTokens';
 import { feedbackOf } from '../ui/feedback';
 import { d3, d3m } from '../ui/layout';
-import { butterChip } from '../ui/menuWidgets';
+import { butterChip, chipWidthMock } from '../ui/menuWidgets';
 import { card, pillButton, titleText } from '../ui/widgets';
 import { hudLabel } from './draw';
-import { hudIconKey } from './hudIcons';
+import { drawIcon } from '../ui/icons';
 import { PAUSE_MOCK, pauseLayout, type PauseButtonId, type PauseView } from './overlayModel';
 
 // D3-R15 board px (360 wide, converted with d3/d3m) of the pause dialog drawing; row positions come from pauseLayout.
@@ -19,7 +19,7 @@ const IDS: readonly PauseButtonId[] = ['resume', 'settings', 'quit'];
 export class PauseOverlay {
   readonly root: Phaser.GameObjects.Container;
   private panel: Phaser.GameObjects.Container | null = null; private chipC: Phaser.GameObjects.Container | null = null;
-  private readonly title: Phaser.GameObjects.Text; private readonly subtitle: Phaser.GameObjects.Text; private readonly gear: Phaser.GameObjects.Image;
+  private readonly title: Phaser.GameObjects.Text; private readonly subtitle: Phaser.GameObjects.Text; private readonly gear: Phaser.GameObjects.Graphics;
   private readonly btn: Record<PauseButtonId, ReturnType<typeof pillButton>>;
   private shown = new Set<PauseButtonId>();
 
@@ -37,7 +37,7 @@ export class PauseOverlay {
     const quit = pillButton(scene, WIDTH / 2, 0, inner, d3m(m.secondary), '', 'overlay-quit', cb.onQuit, 'danger', { navigates: true });
     settings.text.setFontFamily(FONT_UI).setFontSize(d3(M.secondaryFont));
     quit.text.setFontSize(d3(M.quitFont));
-    this.gear = scene.add.image(0, 0, hudIconKey('settings', 'ink')).setDisplaySize(d3(M.gearIcon), d3(M.gearIcon));
+    this.gear = scene.add.graphics(); drawIcon(this.gear, 'sliders', d3(M.gearIcon), toInt(TOKENS.d3.text)); // navy like the board
     settings.c.add(this.gear);
     this.btn = { resume, settings, quit };
     this.root = scene.add.container(0, 0, [scrim, block, this.title, this.subtitle, resume.c, settings.c, quit.c]).setName('overlay').setVisible(false);
@@ -62,9 +62,7 @@ export class PauseOverlay {
     this.root.addAt(this.panel, 2);
     this.title.setText(v.title).setY(y0 + d3(lay.title)); this.subtitle.setText(v.subtitle).setY(y0 + d3(lay.subtitle));
     if (v.chip !== null && lay.chip !== null) {
-      const probe = this.scene.add.text(0, 0, v.chip, { fontFamily: FONT_UI, fontStyle: '900', fontSize: `${d3(M.chipFont)}px` });
-      const tw = probe.width / d3(1); probe.destroy();
-      const w = 2 * M.chipPadX + M.chipIcon + M.chipIconGap + tw;
+      const w = chipWidthMock(this.scene, v.chip, M.chipFont, { padX: M.chipPadX, icon: M.chipIcon, gap: M.chipIconGap });
       this.chipC = butterChip(this.scene, WIDTH / 2, y0 + d3(lay.chip + M.chipH / 2), w, M.chipH, v.chip, M.chipFont, 'flag').setName('overlay-chip');
       this.root.addAt(this.chipC, 3);
     }
