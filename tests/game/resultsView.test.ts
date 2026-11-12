@@ -1,5 +1,6 @@
-import { expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { RESULTS_BUTTONS, resultsView } from '../../src/game/flow/resultsView';
+import { t } from '../../src/game/text';
 import type { RunSummary } from '../../src/session';
 const base: RunSummary = { won: false, cause: 'fence', level: 8, startLevel: 1, levelsCleared: 7, score: 44, bestScore: 61, newBest: false,
   carriedEnergy: 0, eaten: 35, biome: 2, newCheckpoints: [], firstRun: false };
@@ -50,4 +51,26 @@ it('P3b3-R11 the title key is results.youWin for a won run and results.gameOver 
 });
 it('P3b3-R11 the biome stat reads "n/total" through the text table', () => {
   expect(resultsView(base, null, 6).stats[2]!.value).toBe('2/6');
+});
+
+const summary = (o: Partial<RunSummary>): RunSummary => ({ ...base, ...o });
+describe('D3-R18 results rows', () => {
+  it('D3-R18 orders rows checkpoint, energy, next and drops empty ones', () => {
+    const v = resultsView(summary({ newCheckpoints: [10], carriedEnergy: 35, level: 10 }), { reach: 12, requiresClear: false }, 6);
+    expect(v.rows.map(r => r.kind)).toEqual(['checkpoint', 'energy', 'next']);
+    expect(v.rows[0]).toEqual({ kind: 'checkpoint', level: 10 });
+  });
+  it('D3-R18 first run keeps only next and adds the tip (U5-R6)', () => {
+    const v = resultsView(summary({ firstRun: true, carriedEnergy: 0, newCheckpoints: [] }), { reach: 10, requiresClear: false }, 6);
+    expect(v.rows.map(r => r.kind)).toEqual(['next']);
+    expect(v.firstRunTip).toBe(t('results.firstRunTip'));
+  });
+  it('D3-R18 no milestone and nothing saved gives no rows and no tip', () => {
+    const v = resultsView(summary({ carriedEnergy: 0, newCheckpoints: [] }), null, 6);
+    expect(v.rows).toEqual([]); expect(v.firstRunTip).toBeNull();
+  });
+  it('U5-R3 ribbon text follows won', () => {
+    expect(resultsView(summary({ won: true }), null, 6).ribbon).toBe('results.youWin');
+    expect(resultsView(summary({ won: false }), null, 6).ribbon).toBe('results.gameOver');
+  });
 });
