@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs(qa): U5 Task 1 results button check (first-run Results buttons visible, no code change).
 - docs: UI D3 U5 plan (overlays + Results, rulings U5-R1..R8).
 - docs: STATUS open items after U4c.
 - docs: U4c rulings C1..C5 (DECISIONS), U4c headless QA entry (PLAYTEST), STATUS.
