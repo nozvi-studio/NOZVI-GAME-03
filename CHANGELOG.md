@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(render): D3-R25 steer feedback model (finger trail buffer, segment alpha, chevron pose; D3-R28 reduced motion).
 - feat(session): D3-R25 turn() reports acceptance; GameScene emits 'steer' for accepted turns.
 - docs: UI D3 U4c plan (steer feedback, first-input hint, value changes; D3-R25..R28).
 - feat(log): MEC-003-R22 uncaught errors and rejections are written to the run log with their stack, so an exported log shows the cause of a freeze.
