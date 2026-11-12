@@ -2,14 +2,12 @@ import { expect, it } from 'vitest';
 import { layoutColumn, ui } from '../../src/game/ui/layout';
 import { MENU } from '../../src/game/ui/menuMetrics';
 import { TOKENS } from '../../src/game/uiTokens';
-import { bootRects, isCompactHeight, logoLetters, logoSpec, loadoutCards, loadoutColumn, resultsCardTop, resultsColumn, settingsColumn, smoothPath, homeRects, type HomeRects, type Rect } from '../../src/game/ui/menuLayout';
+import { bootRects, isCompactHeight, logoLetters, logoSpec, loadoutCards, loadoutColumn, settingsColumn, smoothPath, homeRects, type HomeRects, type Rect } from '../../src/game/ui/menuLayout';
 const MIN = 0.85; // balance.ui.minShrink
 
-it('P3b3-R3 Loadout, Settings and Results fit', () => {
+it('P3b3-R3 Loadout and Settings fit', () => {
   expect(layoutColumn(loadoutColumn(MIN)).fits).toBe(true);
   expect(layoutColumn(settingsColumn(MIN)).fits).toBe(true);
-  for (const banner of [true, false]) for (const energy of [true, false])
-    expect(layoutColumn(resultsColumn({ banner, energy }, MIN)).fits).toBe(true);
 });
 it('P3b3-R3 the worst Loadout column keeps controls at scale >= 0.85', () => {
   expect(layoutColumn(loadoutColumn(MIN)).middleScale).toBeGreaterThanOrEqual(0.85);
@@ -35,17 +33,6 @@ it('P3b3-R13 smoothPath keeps the end points and stays inside the control box', 
   for (const q of p) { expect(q.x).toBeGreaterThanOrEqual(16); expect(q.x).toBeLessThanOrEqual(250); expect(q.y).toBeGreaterThanOrEqual(112); expect(q.y).toBeLessThanOrEqual(232); }
   for (let i = 1; i < p.length; i++) expect(Math.hypot(p[i]!.x - p[i - 1]!.x, p[i]!.y - p[i - 1]!.y)).toBeLessThanOrEqual(6);
 });
-it('P3b3 Results: the capy head overhang stays below the title for every column variant', () => {
-  const R = MENU.results;
-  for (const banner of [true, false]) for (const energy of [true, false]) {
-    const l = layoutColumn(resultsColumn({ banner, energy }, MIN));
-    const headTop = l.middleY + ui(resultsCardTop() - R.card.headOverlap) * l.middleScale;
-    expect(l.fits).toBe(true);
-    expect(headTop, JSON.stringify({ banner, energy })).toBeGreaterThanOrEqual(ui(R.titleY + R.titleSize) + ui(4));
-    expect(headTop).toBeGreaterThanOrEqual(0);
-  }
-});
-
 it('UIFIX-R9 compact mode starts below 700 CSS px of canvas height', () => {
   expect(isCompactHeight(640)).toBe(true);
   expect(isCompactHeight(699)).toBe(true);

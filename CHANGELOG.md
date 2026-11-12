@@ -2,6 +2,17 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: U5 QA pass, rulings (DECISIONS), UI-MOCKUPS built marks, PLAYTEST entry.
+- fix(hud): D3-R16 review: banner queue cap counts the card on screen, slot B pill text/icon ink (white on orange was 2.4:1), darker up/warn icons, D3-R2 strip contrast test.
+- feat(juice): D3-R17 death card is a RUN OVER ribbon over a 288 px panel (board metrics, layoutColumn centring kept).
+- feat(hud): D3-R16 strip cards (light panel skin, up/warn icons, gold biome chip, slot-coloured side-by-side skill pills) and U5-R2 hazard "incoming" warnings queued in the strip via BannerLayer.enqueue.
+- fix(hud): D3-R15 countdown chip is the light (white) board chip; shared chipWidthMock; navy gear; dead hud.countdown tokens removed.
+- feat(hud): D3-R15 mango countdown digit and butter start chip with ramp line (U5-R7).
+- feat(hud): D3-R15 pause panel (300 px card, butter chip, gear on Settings) and bigger pause glyph U5-R1 (bars 7x22).
+- feat(results): D3-R18 pure layout (flow/resultsLayout.ts, MENU.results.d3 metrics).
+- feat(results): D3-R18 row model and first-run tip (ResultsView.rows/firstRunTip/ribbon).
+- docs(qa): U5 Task 1 results button check (first-run Results buttons visible, no code change).
+- feat(results): D3-R18 ribbon, panel and footer (ResultsScene rebuild, U5-R3/R4/R8; resultsColumn/resultsCardTop and old ResultsView fields removed; chip tone/lead options, TOKENS.d3.stat).
 - docs: UI D3 U5 plan (overlays + Results, rulings U5-R1..R8).
 - docs: STATUS open items after U4c.
 - docs: U4c rulings C1..C5 (DECISIONS), U4c headless QA entry (PLAYTEST), STATUS.

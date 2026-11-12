@@ -39,13 +39,15 @@ export const MENU = {
     theme: { padX: 14, titleY: 25, subY: 45, tilesY: 66, tileH: 113, gap: 10, r: 20, swatch: 64, swatchTop: 10, swatchR: 14, swatchLine: 2, swatchEdgeAlpha: 0.25, snake: { dx: 12, dy: 26, w: 32, h: 12, r: 6 }, ball: { dx: 46, dy: 30, r: 10 }, labelFont: 16, labelY: 93, line: 2, lineSel: 3 },
   },
   results: {
-    cardTop: 50, cardH: 332, bannerH: 60, energyH: 64, progressH: 32, btn: 62, againH: 70, bottom: 30,
-    titleSize: 34, titleY: 24, hillPeek: 160, side: 20, btnGap: 12, againLabel: 32, againStroke: 7,
-    card: { w: 358, r: 30, pad: 16, headW: 112, headOverlap: 58, headline: 16, headlineY: 81, wrapLines: 1.6, scoreLabel: 13, scoreLabelY: 106, scoreLabelTrack: 1.3, score: 84, scoreY: 158,
-      chipY: 226, chipH: 32, chipFont: 15, chipPadL: 12, chipPadR: 16, chipGap: 6, chipIcon: 18, tilesY: 252, tileH: 62, tileGap: 8, tileR: 14, tileLabel: 12, tileLabelY: 14, tileTrack: 0.96, tileValue: 28, tileValueY: 40 },
-    row: { r: 26, padX: 20, gap: 14, icon: 30, label: 17, value: 40 },
-    banner: { r: 20, pad: 12, disc: 36, icon: 20, gap: 12, font: 19 },
-    progress: { barH: 18, gap: 10, chipH: 32, chipFont: 14, chipPadL: 10, chipPadR: 14, chipIcon: 18, chipGap: 6 },
+    d3: { baseH: 640, tShift: 0.5, ribbonDy: 18, ribbonH: 72, ribbonW: 250, panelX: 20, panelW: 320, panelDy: 76, padTop: 22, padBottom: 14,
+      headlineH: 14, headlineGap: 8, scoreLabelH: 12, scoreH: 64, bestH: 30, bestGap: 6, tilesH: 72, tilesGap: 12,
+      rowH: { checkpoint: 34, energy: 24, next: 26 }, rowGap: 10, tipH: 36, tipGap: 14,
+      primaryW: 280, primaryH: 72, primaryRatio: 0.734, secondaryW: 168, secondaryH: 48, secondaryDy: 94, panelClear: 16 },
+    // D3-R18 scene-only metrics (D3 mock px, 360 wide)
+    ribbonFont: 32, ribbonStroke: 6, rayBiome: 1, padX: 16, headlineFont: 14, scoreLabelFont: 12, scoreLabelTrack: 1.2, scoreFont: 64,
+    bestFont: 14, bestIcon: 16, bestLead: 22, tileGap: 8, tileLabelFont: 11, tileLabelY: 20, tileValueFont: 24, tileValueY: 48,
+    chipFont: 13, rowFont: 13, rowValueFont: 16, rowIcon: 20, barH: 18, nextChipH: 26, nextChipW: 52, nextChipFont: 13, tipFont: 13, tipLine: 1.35,
+    primaryLabel: 28, primaryStroke: 6, secondaryFont: 16, secondaryIcon: 20, secondaryGap: 6,
   },
 } as const;
 

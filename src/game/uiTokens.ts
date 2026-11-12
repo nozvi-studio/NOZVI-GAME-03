@@ -16,7 +16,7 @@ export const TOKENS = {
     scrim: '#5A3B3B', pauseScrimAlpha: 0.5, countScrimAlpha: 0.28,
     tooltip: '#5A3B3B', tooltipText: '#FFFFFF', mintCard: '#D7EBD2', mintInk: '#234B35',
     slowTint: '#8CC8F0', slowTintAlpha: 0.2, slowBoardAlpha: 0.22,
-    countdown: '#F8D468', countdownStrokePx: 22, countdownShadowY: 12, countdownSizePx: 270, cardShadowAlpha: 0.45,
+    cardShadowAlpha: 0.45,
   },
   menu: {
     logoColors: ['#F79DBB', '#F8D468', '#8CC9F0', '#97DB9B', '#C6B0F5'],
@@ -47,6 +47,7 @@ export const TOKENS = {
       spike: { fill: '#707A85', warn: '#D1572F' },
       bomb: { body: '#161616', blast: '#D1352F', digit: '#FFFFFF', warn: '#7A7A7A' },
       shrink: { wall: '#3A1010', hatch: '#8A2020', arrow: '#D1352F' } }, text: '#173B63', white: '#FFFFFF',
+    stat: { level: '#D6336C', eaten: '#A86A10', biome: '#1F86D8' }, tip: '#48688A', // D3-R18 Results tile value colours and first-run tip ink
     logo: { mango: '#FFD93B', mangoLine: '#8A4500' },
     tone: {
       primary: { face: ['#8DF06A', '#3FC23D', '#2EA634'], line: '#17661F', lip: '#114F18', text: '#FFFFFF', outlined: true },

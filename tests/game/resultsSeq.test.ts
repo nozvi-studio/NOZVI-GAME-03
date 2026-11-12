@@ -99,3 +99,12 @@ it('MOT-2-R9 with the real Motion, every target ends visible once the sequence h
   for (const a of adds) { for (const [k, v] of Object.entries(a)) if (typeof v === 'number' && k in targets.home) (a.targets as Record<string, number>)[k] = v; (a.onComplete as (() => void) | undefined)?.(); }
   for (const [id, t] of Object.entries(targets)) expect(t.alpha, id).toBe(1);
 });
+
+it('U5-R4 sequence runs without a head target and keeps the 1500 ms cap', () => {
+  const x = mk(); delete x.targets.head;
+  const seq = runResultsSequence(x.d, resultsTimeline(parts, m), x.targets, { text: x.text, value: 99 });
+  expect(() => x.run(m.resultsSeqMs)).not.toThrow();
+  expect(x.calls.some(c => c === 'pop:head')).toBe(false);
+  expect(m.resultsSeqMs).toBeLessThanOrEqual(1500);
+  expect(seq.done()).toBe(true);
+});

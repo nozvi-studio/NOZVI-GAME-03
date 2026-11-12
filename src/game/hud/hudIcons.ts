@@ -4,12 +4,12 @@ import { TOKENS } from '../uiTokens';
 
 // P3b2-R14 HUD glyphs as SVG textures (path data from GameD2 / SkillActiveD2 / BannersD2 / PauseD2, 24x24 viewBox).
 // Separate from ui/icons.ts (P3b-3 menu glyphs drawn with Graphics): HUD icons need per-tone textures and mockup-exact shapes.
-export type IconName = 'slowmo' | 'tailSnip' | 'shield' | 'mangoRain' | 'flag' | 'bolt' | 'star' | 'settings' | 'shrink' | 'biome' | 'mango';
+export type IconName = 'slowmo' | 'tailSnip' | 'shield' | 'mangoRain' | 'flag' | 'bolt' | 'star' | 'settings' | 'shrink' | 'biome' | 'mango' | 'up' | 'warn';
 export type IconTone = 'ink' | 'soft' | 'off' | 'active' | 'on';
 const TONE: Record<IconTone, string> = { ink: TOKENS.text.primary, soft: TOKENS.text.soft, off: TOKENS.hud.skillOffIcon, active: TOKENS.hud.skillActiveIcon, on: TOKENS.d3.white };
 export const ICON_TONES: Record<IconName, readonly IconTone[]> = {
   slowmo: ['ink', 'off', 'active', 'on'], tailSnip: ['ink', 'off', 'active', 'on'], shield: ['ink', 'off', 'active', 'on'], mangoRain: ['ink', 'off', 'active', 'on'],
-  flag: ['ink', 'soft'], bolt: ['ink'], star: ['ink'], settings: ['ink'], shrink: ['ink'], biome: ['ink'], mango: ['ink'],
+  flag: ['ink', 'soft'], bolt: ['ink'], star: ['ink'], settings: ['ink'], shrink: ['ink'], biome: ['ink'], mango: ['ink'], up: ['ink'], warn: ['ink'],
 };
 const line = (c: string, sw: number, body: string): string =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
@@ -27,6 +27,8 @@ export function hudIconSvg(n: IconName, tone: IconTone = 'ink'): string {
     case 'biome': return line(TOKENS.text.slate, 2.4, '<path d="M12 2v20M3.4 7l17.2 10M20.6 7L3.4 17M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5"/>');
     case 'bolt': return fill(TOKENS.sky.energy, '<path d="M13 2L5 13.5h6L10 22l9-12.5h-6.5L13 2z"/>');
     case 'star': return fill(TOKENS.accent.gold, '<path d="M12 2.5l2.9 6.2 6.6.8-4.9 4.6 1.3 6.6L12 17.4l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/>');
+    case 'up': return fill(TOKENS.d3.tone.primary.line, '<path d="M12 3l8 9h-5v9H9v-9H4z"/>');
+    case 'warn': return fill(TOKENS.d3.tone.skillB.line, '<path d="M12 2.5L22.5 21h-21z"/><path fill="#FFFFFF" d="M11 9h2v6h-2zM11 16.5h2v2h-2z"/>');
     case 'mango': return fill(TOKENS.d3.board.mango.body, `<ellipse cx="12" cy="14" rx="7.5" ry="8"/><path fill="${TOKENS.d3.board.mango.leaf}" d="M12 6c0-2 2-3.5 4-3.5-.2 2-1.8 3.5-4 3.5z"/>`);
   }
 }

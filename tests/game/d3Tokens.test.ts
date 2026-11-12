@@ -47,3 +47,10 @@ it('D3-R1 shape numbers are positive and ordered', () => {
   expect(s.pressedLip).toBeLessThan(s.lip);
   expect(s.pressedGloss).toBeGreaterThan(0); expect(s.pressedGloss).toBeLessThan(1);
 });
+it('D3-R2 strip card: skill pill text on its chip face (4.5:1) and icon tints on the light panel face (3:1)', () => {
+  expect(cr(D.white, mid(D.tone.skillA.face)), 'skillA').toBeGreaterThanOrEqual(4.5);
+  expect(cr(D.text, mid(D.tone.skillB.face)), 'skillB').toBeGreaterThanOrEqual(4.5); // slot B pill text and icon are ink, not white
+  const panel = mid(D.tone.light.face);
+  for (const [n, c] of Object.entries({ up: D.tone.primary.line, warn: D.tone.skillB.line, mint: TOKENS.hud.mintInk }))
+    expect(cr(c, panel), n).toBeGreaterThanOrEqual(3);
+});
