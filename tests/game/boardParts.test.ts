@@ -7,7 +7,7 @@ it('P3b1-R2 part colours match the mockup HTML', () => {
   expect(PART.wood).toEqual({ rail: toInt('#E3AC6D'), post: toInt('#CF9150') });
   expect(PART.mud).toEqual({ fill: toInt('#B8956A'), puddle: toInt('#8F6F43') });
   expect(PART.stone).toEqual({ top: toInt('#EDEFF4'), front: toInt('#A9B0C0'), warnFill: toInt('#D3D7E0'), warnDash: toInt('#FF9A1F'), chevron: toInt('#B35F00') });
-  expect(PART.hedge).toEqual({ fill: toInt('#4FBF7A'), edge: toInt('#FFFFFF'), glow: toInt('#7CF2D4') });
+  expect(PART.hedge).toEqual({ fill: toInt('#4FBF7A'), glow: toInt('#7CF2D4') });
   expect(PART.warn).toEqual({ fill: toInt('#FF5A5A'), bang: toInt('#C81E1E') });
   expect(PART.mango).toEqual({ body: toInt('#FFAB1A'), leaf: toInt('#3FC23D'), shine: toInt('#FFFFFF'), halo: toInt('#FFFFFF') });
 });

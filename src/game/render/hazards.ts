@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import type { Balance, Cell, SimSnapshot } from '../../core';
-import type { BoardLook } from './biomePalette';
+import { HAZARD_EDGES, type BoardLook } from './biomePalette';
 import { bangGeometry, chevronPoints, FENCE, HEDGE, hedgeRects, PART, ROCK, rockMetrics, TILE, WARN, type RockKind } from './boardParts';
 import { dashedRect } from './movers';
 import { newPulse, telegraphPulse, hazardKey, type TelegraphCfg, type TelegraphCtx } from './telegraph';
@@ -64,20 +64,20 @@ function drawFence(g: Graphics, cells: readonly PopCell[], cell: number, look: B
   const has = new Set(cells.map(c => `${c.x},${c.y}`)), bw = Math.max(1, cell * FENCE.edge), t = cell * FENCE.rail, r = cell * FENCE.railRadius;
   for (const c of cells) {
     const cx = (c.x + 0.5) * cell, cy = (c.y + 0.5) * cell;
-    if (has.has(`${c.x + 1},${c.y}`)) for (const dy of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx, cy + dy * cell, cell, t, r, PART.wood.rail, look.woodEdge, bw, alpha);
-    if (has.has(`${c.x},${c.y + 1}`)) for (const dx of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx + dx * cell, cy, t, cell, r, PART.wood.rail, look.woodEdge, bw, alpha);
+    if (has.has(`${c.x + 1},${c.y}`)) for (const dy of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx, cy + dy * cell, cell, t, r, PART.wood.rail, HAZARD_EDGES.fence(look), bw, alpha);
+    if (has.has(`${c.x},${c.y + 1}`)) for (const dx of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx + dx * cell, cy, t, cell, r, PART.wood.rail, HAZARD_EDGES.fence(look), bw, alpha);
   }
   for (const c of cells) {
     const w = cell * FENCE.postW * c.k, h = cell * FENCE.postH * c.k;
-    boxed(g, (c.x + 0.5) * cell - w / 2, (c.y + 0.5) * cell - h / 2, w, h, cell * FENCE.postRadius, PART.wood.post, look.woodEdge, bw, alpha);
+    boxed(g, (c.x + 0.5) * cell - w / 2, (c.y + 0.5) * cell - h / 2, w, h, cell * FENCE.postRadius, PART.wood.post, HAZARD_EDGES.fence(look), bw, alpha);
   }
 }
 
 // P3b1-R6 BiomeBoardsD2 hedge maze: glowing bars with a white edge (edge pass, then fill pass so joins have no seam).
-function drawHedge(g: Graphics, cells: readonly PopCell[], cell: number, _look: BoardLook, alpha: number): void {
+function drawHedge(g: Graphics, cells: readonly PopCell[], cell: number, look: BoardLook, alpha: number): void {
   const bars = hedgeRects(cells, cell), glow = cell * HEDGE.glow, edge = cell * HEDGE.edgeHalf, r = cell * HEDGE.radius;
   for (const q of bars) g.fillStyle(PART.hedge.glow, HEDGE.glowAlpha * alpha).fillRoundedRect(q.x - glow, q.y - glow, q.w + 2 * glow, q.h + 2 * glow, r + glow);
-  for (const q of bars) g.fillStyle(PART.hedge.edge, alpha).fillRoundedRect(q.x, q.y, q.w, q.h, r);
+  for (const q of bars) g.fillStyle(HAZARD_EDGES.hedge(look), alpha).fillRoundedRect(q.x, q.y, q.w, q.h, r);
   for (const q of bars) g.fillStyle(PART.hedge.fill, alpha).fillRoundedRect(q.x + edge, q.y + edge, q.w - 2 * edge, q.h - 2 * edge, Math.max(0, r - edge));
 }
 
@@ -95,8 +95,8 @@ export function drawTerrains(g: Graphics, terrains: SimSnapshot['terrains'], cel
         drawWarn(g, c, cell, Math.min(b.terrain.warnMs, Math.max(0, ct)), b.terrain.warnMs, look, 'rise', true, reduced, tel.cfg);
       } else if (c.vis === 'up') {
         const i = cell * TILE.inset, s = cell - 2 * i, bw = cell * TILE.border, r = cell * TILE.stoneRadius;
-        boxed(g, x + i, y + i + s * TILE.frontFrom, s, s * (1 - TILE.frontFrom), r, PART.stone.front, look.edge, bw, a);
-        boxed(g, x + i, y + i, s, s * TILE.topShare, r, PART.stone.top, look.edge, bw, a);
+        boxed(g, x + i, y + i + s * TILE.frontFrom, s, s * (1 - TILE.frontFrom), r, PART.stone.front, HAZARD_EDGES.stone(look), bw, a);
+        boxed(g, x + i, y + i, s, s * TILE.topShare, r, PART.stone.top, HAZARD_EDGES.stone(look), bw, a);
       }
     }
   }

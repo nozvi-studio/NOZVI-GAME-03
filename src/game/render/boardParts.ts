@@ -6,12 +6,21 @@ export type Pt = readonly [number, number];
 
 export const PART = {
   rock: { fill: toInt(TOKENS.d3.board.rock.body), shade: toInt(TOKENS.d3.board.rock.shade), hi: toInt(TOKENS.d3.board.rock.hi) },
-  wood: { rail: toInt('#E3AC6D'), post: toInt('#CF9150') },
-  mud: { fill: toInt('#B8956A'), puddle: toInt('#8F6F43') },
-  ice: { fill: toInt('#9ED8F2'), shine: toInt('#B8E5F7') },
-  stone: { top: toInt('#EDEFF4'), front: toInt('#A9B0C0'), warnFill: toInt('#D3D7E0'), warnDash: toInt('#FF9A1F'), chevron: toInt('#B35F00') },
+  wood: { rail: toInt(TOKENS.d3.board.wood.rail), post: toInt(TOKENS.d3.board.wood.post) },
+  mud: { fill: toInt(TOKENS.d3.board.mud.fill), puddle: toInt(TOKENS.d3.board.mud.puddle) },
+  ice: { fill: toInt(TOKENS.d3.board.ice.fill), shine: toInt(TOKENS.d3.board.ice.shine) },
+  stone: { top: toInt(TOKENS.d3.board.stone.top), front: toInt(TOKENS.d3.board.stone.front), warnFill: toInt(TOKENS.d3.board.stone.warnFill), warnDash: toInt(TOKENS.d3.board.stone.warnDash), chevron: toInt(TOKENS.d3.board.stone.chevron) },
   warn: { fill: toInt(TOKENS.d3.board.warn.fill), bang: toInt(TOKENS.d3.board.warn.bang) },
-  hedge: { fill: toInt('#4FBF7A'), edge: toInt('#FFFFFF'), glow: toInt('#7CF2D4') },
+  hedge: { fill: toInt(TOKENS.d3.board.hedge.fill), glow: toInt(TOKENS.d3.board.hedge.glow) },
+  /** Movers, cycles, blasts and the shrink ring (greybox shapes keep their geometry; only colours moved to tokens). */
+  lane: { fill: toInt(TOKENS.d3.board.lane.fill), coconut: toInt(TOKENS.d3.board.lane.coconut), coconutHi: toInt(TOKENS.d3.board.lane.coconutHi) },
+  cat: { body: toInt(TOKENS.d3.board.cat.body), ear: toInt(TOKENS.d3.board.cat.ear) },
+  chicken: { body: toInt(TOKENS.d3.board.chicken.body), beak: toInt(TOKENS.d3.board.chicken.beak) },
+  shadow: toInt(TOKENS.d3.board.shadow),
+  gate: { post: toInt(TOKENS.d3.board.gate.post), bar: toInt(TOKENS.d3.board.gate.bar), warn: toInt(TOKENS.d3.board.gate.warn) },
+  spike: { fill: toInt(TOKENS.d3.board.spike.fill), warn: toInt(TOKENS.d3.board.spike.warn) },
+  bomb: { body: toInt(TOKENS.d3.board.bomb.body), blast: toInt(TOKENS.d3.board.bomb.blast), digit: toInt(TOKENS.d3.board.bomb.digit), warn: toInt(TOKENS.d3.board.bomb.warn) },
+  shrink: { wall: toInt(TOKENS.d3.board.shrink.wall), hatch: toInt(TOKENS.d3.board.shrink.hatch), arrow: toInt(TOKENS.d3.board.shrink.arrow) },
   mango: { body: toInt(TOKENS.d3.board.mango.body), leaf: toInt(TOKENS.d3.board.mango.leaf), shine: toInt(TOKENS.d3.board.mango.shine), halo: toInt(TOKENS.d3.board.mango.halo) },
 } as const;
 
@@ -25,6 +34,8 @@ export const ROCK = { scale: { pebble: 0.5, rock: 0.82, boulder: 0.98 } as Recor
   crack: [[11, 2], [8.5, 7.5], [12, 10.5], [9, 14.5], [11, 19]] as readonly Pt[],
   /** Debris chips: top-left and side as cell fractions, plus the chip border width share of the crack width. */
   debris: { chips: [{ x: 0.86, y: 0.66, size: 0.2, radius: 0.08 }, { x: 0.02, y: 0.78, size: 0.15, radius: 0.06 }] as readonly { x: number; y: number; size: number; radius: number }[], borderShare: 0.6 } } as const;
+/** D3-R2 stroke width of an outline added to a hazard shape that had none, as a cell fraction. */
+export const BOARD_EDGE = 0.08;
 export const WARN = { ring: 0.1, inset: 0.05, radius: 0.3, tileRadius: 0.285, dash: 0.2, dashWidth: 0.095, chevronWidth: 0.13,
   fillBase: 0.3, fillGain: 0.4, riseFillFloor: 0.3 } as const;
 export const FENCE = { rail: 0.2, railHigh: -0.28, railLow: 0.08, postW: 0.4, postH: 0.7, postRadius: 0.15, edge: 0.076, railRadius: 0.04 } as const;

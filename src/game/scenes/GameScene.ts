@@ -238,10 +238,10 @@ export class GameScene extends Phaser.Scene {
     drawTiles(this.layers.ground, snapshot.tiles, cell, this.tel, this.reduced, this.look);
     drawTerrains(this.layers.terrain, snapshot.terrains, cell, this.look, this.balance, this.reduced, this.tel);
     drawHazards(this.layers.hazards, snapshot.hazards, cell, this.look, this.balance, this.reduced, this.tel);
-    drawCycles(this.layers.hazards, snapshot, cell, this.tel, this.reduced);
-    drawMovers(this.layers.hazards, snapshot, cell, this.tel, this.reduced);
-    drawBlasts(this.layers.hazards, snapshot, cell, this.tel, this.reduced);
-    drawShrink(this.layers.hazards, snapshot, cell, time, this.tel, this.reduced);
+    drawCycles(this.layers.hazards, snapshot, cell, this.tel, this.reduced, this.look);
+    drawMovers(this.layers.hazards, snapshot, cell, this.tel, this.reduced, this.look);
+    drawBlasts(this.layers.hazards, snapshot, cell, this.tel, this.reduced, this.look);
+    drawShrink(this.layers.hazards, snapshot, cell, time, this.tel, this.reduced, this.look);
     const mo = this.balance.motion;
     drawMango(this.layers.mango, snapshot, cell, p, this.look, time, this.reduced, mangoGrow(time, this.mangoBornAt, mo.popInMs, mo.overshoot, mo.popFromScale));
     drawSkillObjects(this.layers.skills, snapshot, cell, p, this.look, this.balance, time);

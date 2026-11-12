@@ -27,4 +27,9 @@ export function boardLook(biome: number): BoardLook {
   return { biome: n, frame: toInt(b.frame), groundA: toInt(b.cells[0]), groundB: toInt(b.cells[1]), outline,
     snake: { body: toInt(s.body), head: toInt(s.head), belly: toInt(s.belly) }, edge: outline.rock, woodEdge: outline.rock };
 }
+/** D3-R2 outline colour each hazard family draws with in a biome; every entry keeps >= 3:1 on both cells of all biomes. */
+export const HAZARD_EDGES: Record<'fence' | 'hedge' | 'mud' | 'ice' | 'stone' | 'coconut' | 'bomb' | 'npc' | 'spike' | 'gate' | 'shrink', (l: BoardLook) => number> = {
+  fence: l => l.woodEdge, hedge: l => l.edge, mud: l => l.woodEdge, ice: l => l.edge, stone: l => l.edge, coconut: l => l.edge,
+  bomb: l => l.outline.warn, npc: l => l.edge, spike: l => l.edge, gate: l => l.edge, shrink: l => l.outline.warn,
+};
 export const DEFAULT_LOOK: BoardLook = boardLook(1);

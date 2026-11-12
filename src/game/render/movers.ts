@@ -1,6 +1,8 @@
 import type Phaser from 'phaser';
 import type { Cell, Dir, NpcView, SimSnapshot } from '../../core';
 
+import { BOARD_EDGE, PART } from './boardParts';
+import { DEFAULT_LOOK, HAZARD_EDGES, type BoardLook } from './biomePalette';
 import { newPulse, telegraphPulse, type TelegraphCtx } from './telegraph';
 
 type Graphics = Phaser.GameObjects.Graphics;
@@ -8,10 +10,6 @@ const SCRATCH = newPulse();
 
 // Presentation constants; gameplay timing stays in balance.
 const WARN_BLINK_MS = 250;
-const LANE = { fill: 0xffd45e, line: 0x8a5a00, coconut: 0x7b4a22, coconutHi: 0xa8713c } as const;
-const CAT = { body: 0x9a9a9a, ear: 0x6f6f6f } as const;
-const CHICKEN = { body: 0xffffff, edge: 0x9a9a9a, beak: 0xf08a1c } as const;
-const SHADOW = 0x1c1c1c;
 
 /** MEC-013 §8 warning blink: 250 ms on/off; reduced motion never blinks. */
 export const blinkOn = (timeMs: number, reducedMotion: boolean): boolean =>
@@ -54,54 +52,57 @@ export function dashedRect(g: Graphics, x: number, y: number, w: number, h: numb
 }
 
 // MOT-4-R4 lane warn: fill + arrows pulse with the shared tightening rhythm (remaining = warnMs - t); never hidden, outline kept under reduced motion.
-function drawLane(g: Graphics, path: readonly Cell[], cellPx: number, tel: TelegraphCtx, reducedMotion: boolean, warn: boolean, t: number, warnMs: number): void {
+function drawLane(g: Graphics, path: readonly Cell[], cellPx: number, tel: TelegraphCtx, reducedMotion: boolean, warn: boolean, t: number, warnMs: number, line: number): void {
   const p = warn ? telegraphPulse(warnMs - t, warnMs, tel.cfg, reducedMotion, SCRATCH) : null, a = p ? (p.urgent ? 1 : p.alpha) : 1, k = p ? p.scale : 1;
   const inset = cellPx * 0.08, size = cellPx - inset * 2, dirs = pathDirs(path);
-  g.lineStyle(Math.max(1, cellPx * 0.06), LANE.line);
+  g.lineStyle(Math.max(1, cellPx * 0.06), line);
   path.forEach((c, i) => {
-    g.fillStyle(LANE.fill, warn ? 0.45 * a : 0.18).fillRect(c.x * cellPx + inset, c.y * cellPx + inset, size, size);
+    g.fillStyle(PART.lane.fill, warn ? 0.45 * a : 0.18).fillRect(c.x * cellPx + inset, c.y * cellPx + inset, size, size);
     if (warn && reducedMotion) g.strokeRect(c.x * cellPx + inset, c.y * cellPx + inset, size, size);   // solid outline under reduced motion
     const [x1, y1, x2, y2, x3, y3] = arrowTriangle(c, dirs[i]!, cellPx, k);
-    g.fillStyle(LANE.line, warn ? 0.9 * a : 0.5).fillTriangle(x1, y1, x2, y2, x3, y3);
+    g.fillStyle(line, warn ? 0.9 * a : 0.5).fillTriangle(x1, y1, x2, y2, x3, y3);
   });
 }
 
-function drawNpc(g: Graphics, n: NpcView, cellPx: number): void {
+function drawNpc(g: Graphics, n: NpcView, cellPx: number, edge: number): void {
   if (!n.cell) return;
   const x = n.cell.x * cellPx, y = n.cell.y * cellPx, cx = x + cellPx / 2, cy = y + cellPx / 2;
   if (n.variant === 'cat') {
     const inset = cellPx * 0.16, size = cellPx - inset * 2;
-    g.fillStyle(CAT.body).fillRect(x + inset, y + inset, size, size);
-    g.fillStyle(CAT.ear).fillTriangle(x + inset, y + inset, x + inset + size * 0.3, y + inset, x + inset, y + inset - cellPx * 0.18)
+    g.fillStyle(PART.cat.body).fillRect(x + inset, y + inset, size, size);
+    g.lineStyle(Math.max(1, cellPx * BOARD_EDGE), edge).strokeRect(x + inset, y + inset, size, size);   // D3-R2
+    g.fillStyle(PART.cat.ear).fillTriangle(x + inset, y + inset, x + inset + size * 0.3, y + inset, x + inset, y + inset - cellPx * 0.18)
       .fillTriangle(x + inset + size, y + inset, x + inset + size * 0.7, y + inset, x + inset + size, y + inset - cellPx * 0.18);
     return;
   }
   const d = n.dir, r = cellPx * 0.32;
-  g.fillStyle(CHICKEN.body).fillCircle(cx, cy, r);
-  g.lineStyle(Math.max(1, cellPx * 0.05), CHICKEN.edge).strokeCircle(cx, cy, r);
+  g.fillStyle(PART.chicken.body).fillCircle(cx, cy, r);
+  g.lineStyle(Math.max(1, cellPx * 0.05), edge).strokeCircle(cx, cy, r);
   const bx = cx + d.x * r, by = cy + d.y * r, tip = cellPx * 0.16, wing = cellPx * 0.09;
-  g.fillStyle(CHICKEN.beak).fillTriangle(bx + d.x * tip, by + d.y * tip, bx - d.y * wing, by + d.x * wing, bx + d.y * wing, by - d.x * wing);
+  g.fillStyle(PART.chicken.beak).fillTriangle(bx + d.x * tip, by + d.y * tip, bx - d.y * wing, by + d.x * wing, bx + d.y * wing, by - d.x * wing);
 }
 
 // MEC-013 / MEC-015 / MEC-016 section 8 greybox: lanes, rolling coconuts, patrol routes, NPCs and the bird shadow.
-export function drawMovers(g: Graphics, snap: SimSnapshot, cellPx: number, tel: TelegraphCtx, reducedMotion = false): void {
+export function drawMovers(g: Graphics, snap: SimSnapshot, cellPx: number, tel: TelegraphCtx, reducedMotion = false, look: BoardLook = DEFAULT_LOOK): void {
+  const coconutEdge = HAZARD_EDGES.coconut(look), npcEdge = HAZARD_EDGES.npc(look);
   const { coconut, npc, bird } = snap.families;
   for (const c of coconut) {
-    drawLane(g, c.path, cellPx, tel, reducedMotion, c.state === 'warn', c.t, c.warnMs);
+    drawLane(g, c.path, cellPx, tel, reducedMotion, c.state === 'warn', c.t, c.warnMs, coconutEdge);
     if (c.cell && c.state !== 'warn') {
       const cx = (c.cell.x + 0.5) * cellPx, cy = (c.cell.y + 0.5) * cellPx;
-      g.fillStyle(LANE.coconut).fillCircle(cx, cy, cellPx * 0.36).fillStyle(LANE.coconutHi).fillCircle(cx - cellPx * 0.1, cy - cellPx * 0.1, cellPx * 0.1);
+      g.fillStyle(PART.lane.coconut).fillCircle(cx, cy, cellPx * 0.36).fillStyle(PART.lane.coconutHi).fillCircle(cx - cellPx * 0.1, cy - cellPx * 0.1, cellPx * 0.1);
+      g.lineStyle(Math.max(1, cellPx * BOARD_EDGE), coconutEdge).strokeCircle(cx, cy, cellPx * 0.36);   // D3-R2
     }
   }
   for (const n of npc) {
-    drawLane(g, n.path, cellPx, tel, reducedMotion, n.state === 'warn', n.t, n.warnMs);
-    drawNpc(g, n, cellPx);
+    drawLane(g, n.path, cellPx, tel, reducedMotion, n.state === 'warn', n.t, n.warnMs, npcEdge);
+    drawNpc(g, n, cellPx, npcEdge);
   }
   if (bird) {
     // MEC-016 §8 the shadow is the warning: filled ellipse plus outline, shrinking as the steal nears.
     const k = shadowScale(bird.leftMs, bird.shadowMs), w = cellPx * (0.5 + 0.9 * k), h = w * 0.6;
     const cx = (bird.x + 0.5) * cellPx, cy = (bird.y + 0.5) * cellPx;
-    g.fillStyle(SHADOW, 0.35).fillEllipse(cx, cy, w, h);
-    g.lineStyle(Math.max(1, cellPx * 0.05), SHADOW).strokeEllipse(cx, cy, w, h);
+    g.fillStyle(PART.shadow, 0.35).fillEllipse(cx, cy, w, h);
+    g.lineStyle(Math.max(1, cellPx * 0.05), npcEdge).strokeEllipse(cx, cy, w, h);
   }
 }

@@ -1,13 +1,14 @@
 import type Phaser from 'phaser';
 import type { SimSnapshot } from '../../core';
 import { dashedRect } from './movers';
+import { BOARD_EDGE, PART } from './boardParts';
+import { DEFAULT_LOOK, HAZARD_EDGES, type BoardLook } from './biomePalette';
 import { newPulse, telegraphPulse, type TelegraphCtx } from './telegraph';
 
 type Graphics = Phaser.GameObjects.Graphics;
 const SCRATCH = newPulse();
 
 // Presentation constants.
-const BOMB = { body: 0x161616, fuse: 0xf0c040, warn: 0x7a7a7a, outline: 0xd1352f, blast: 0xd1352f, digit: 0xffffff } as const;
 const MS_PER_DIGIT = 1000;
 const BLAST_ALPHA = 0.6;
 
@@ -26,31 +27,34 @@ export const digitSegments = (digit: number): [number, number, number, number][]
 
 function drawDigit(g: Graphics, digit: number, cx: number, cy: number, cellPx: number, k = 1): void {
   const w = cellPx * 0.22 * k, h = w * 2;
-  g.lineStyle(Math.max(1.5, cellPx * 0.07 * k), BOMB.digit);
+  g.lineStyle(Math.max(1.5, cellPx * 0.07 * k), PART.bomb.digit);
   for (const [x1, y1, x2, y2] of digitSegments(digit)) g.lineBetween(cx - w / 2 + x1 * w, cy - h / 2 + y1 * w, cx - w / 2 + x2 * w, cy - h / 2 + y2 * w);
 }
 
 // MEC-017 section 8 greybox bombs: warn like a rock, landed = black circle + digit + dashed area, active = filled area.
-export function drawBlasts(g: Graphics, snap: SimSnapshot, cellPx: number, tel: TelegraphCtx, reducedMotion = false): void {
+export function drawBlasts(g: Graphics, snap: SimSnapshot, cellPx: number, tel: TelegraphCtx, reducedMotion = false, look: BoardLook = DEFAULT_LOOK): void {
+  const edge = HAZARD_EDGES.bomb(look);
   for (const b of snap.families.bomb) {
     const x = b.x * cellPx, y = b.y * cellPx, cx = x + cellPx / 2, cy = y + cellPx / 2, inset = cellPx * 0.12, size = cellPx - inset * 2;
     if (b.state === 'warn') {
       const p = telegraphPulse(b.leftMs, tel.warnMs.bomb, tel.cfg, reducedMotion, SCRATCH), a = p.urgent ? 1 : p.alpha;   // MOT-4-R3: never skipped
-      g.fillStyle(BOMB.warn, 0.55 * a).fillCircle(cx, cy, cellPx * 0.34 * p.scale);
-      g.lineStyle(Math.max(1, cellPx * 0.06), BOMB.outline, a);
+      g.fillStyle(PART.bomb.warn, 0.55 * a).fillCircle(cx, cy, cellPx * 0.34 * p.scale);
+      g.lineStyle(Math.max(1, cellPx * 0.06), edge, a);
       if (reducedMotion) g.strokeRect(x + inset, y + inset, size, size);       // solid outline under reduced motion
       else dashedRect(g, x + inset, y + inset, size, size, cellPx * 0.12);
       continue;
     }
     if (b.state === 'active') {
-      g.fillStyle(BOMB.blast, BLAST_ALPHA);
+      g.fillStyle(PART.bomb.blast, BLAST_ALPHA);
       for (const c of b.area) g.fillRect(c.x * cellPx, c.y * cellPx, cellPx, cellPx);
       continue;
     }
     const p = telegraphPulse(b.leftMs, tel.warnMs.bombCount, tel.cfg, reducedMotion, SCRATCH);
-    g.lineStyle(Math.max(1, cellPx * 0.05), BOMB.outline, p.urgent ? 1 : p.alpha);
+    g.lineStyle(Math.max(1, cellPx * 0.05), edge, p.urgent ? 1 : p.alpha);
     for (const c of b.area) dashedRect(g, c.x * cellPx + 1, c.y * cellPx + 1, cellPx - 2, cellPx - 2, cellPx * 0.14);
-    g.fillStyle(BOMB.body).fillCircle(cx, cy, cellPx * 0.4 * tel.beat(`b:${b.id}`));
+    const bodyR = cellPx * 0.4 * tel.beat(`b:${b.id}`);
+    g.fillStyle(PART.bomb.body).fillCircle(cx, cy, bodyR);
+    g.lineStyle(Math.max(1, cellPx * BOARD_EDGE), edge).strokeCircle(cx, cy, bodyR);   // D3-R2
     drawDigit(g, bombDigit(b.leftMs), cx, cy, cellPx, tel.beat(`bd:${b.id}`));
   }
 }
