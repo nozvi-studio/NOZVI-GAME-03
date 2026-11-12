@@ -107,7 +107,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'tip.checkpoint': 'Checkpoints are permanent. Your saved energy comes with you.',
   'hud.wait.touch': 'Swipe to steer!', 'hud.wait.keys': 'Press an arrow to go!', // UIFIX-R3 provisional
   'hud.nextCheckpoint': 'Next checkpoint at L{level}', 'hud.nextCheckpointClear': 'Next checkpoint: clear L{level}',
-  'hud.ramp': 'Warming up {n}',
+  'hud.ramp': 'Warming up {n}', 'hud.chipShort': 'L{level}',
   'results.best': 'Best {best}', 'results.newBest': 'New best!', 'results.carryLabel': 'Energy saved',
   'results.won': 'You cleared every level!', 'pause.quit': 'Quit run',
   'playAgain': TEXT.playAgain, 'resume': TEXT.resume, 'paused': TEXT.paused,

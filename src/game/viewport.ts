@@ -1,5 +1,7 @@
 // D3-R7 adaptive canvas height: 540 wide, height from the viewport aspect, set before new Phaser.Game.
-import { setHeight, VIEW, WIDTH } from './layout';
+import { setBoard, setHeight, VIEW, WIDTH } from './layout';
+import { boardRect } from './hud/d3HudLayout';
+import { d3, d3Height } from './ui/layout';
 
 export function viewHeight(vw: number, vh: number): number {
   if (!(vw > 0) || !(vh > 0)) return VIEW.minH;
@@ -10,6 +12,8 @@ export function initViewport(win: { innerWidth: number; innerHeight: number } | 
   typeof window !== 'undefined' ? window : undefined): number {
   const h = win ? viewHeight(win.innerWidth, win.innerHeight) : VIEW.minH;
   setHeight(h);
+  const r = boardRect(d3Height()); // D3-R9
+  setBoard({ x: d3(r.x), y: d3(r.y), size: d3(r.size) });
   return h;
 }
 

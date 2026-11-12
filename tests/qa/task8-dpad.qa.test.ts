@@ -2,10 +2,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type Phaser from 'phaser';
 import { createDpad } from '../../src/game/input/dpad';
-import { hudLayout } from '../../src/game/hud/hudLayout';
+import { d3HudLayout } from '../../src/game/hud/d3HudLayout';
+import { d3 } from '../../src/game/ui/layout';
 import { sceneHarness } from '../support/scene';
 
-const DPAD = hudLayout(true).dpad!;
+const px = (r: { x: number; y: number; w: number; h: number }) => ({ x: d3(r.x), y: d3(r.y), w: d3(r.w), h: d3(r.h) });
+const dp = d3HudLayout(640, true).dpad!;
+const DPAD = { up: px(dp.up), left: px(dp.left), right: px(dp.right), down: px(dp.down) };
 
 afterEach(() => {
   vi.unstubAllGlobals();

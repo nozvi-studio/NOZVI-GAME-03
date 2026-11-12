@@ -5,6 +5,12 @@
 ## How to capture
 Headless screenshots with `tools/qa/shot.mjs` (no dependency; uses the local Chrome, or `CHROME_PATH`). Start `npm run dev`, then run: `node tools/qa/shot.mjs size:360,640 media:light "go:http://localhost:5173/" wait:3500 shot:tmp/qa/home-360.png`. The three standard sizes are 360x640, 390x844 and 412x915. Use `media:dark` for the OS dark-mode check. Keys use DOM names (`ArrowUp`, not `Up`). Steps: `size:W,H[,DPR]`, `media:`, `go:URL`, `wait:MS`, `tap:X,Y`, `swipe:X1,Y1,X2,Y2`, `key:Name`, `shot:FILE`, `eval:JS`; any failed step exits 1.
 
+## 2026-11-12 — D3 U4a in-run HUD layout screenshot record (lead, headless)
+- Branch `feat/ui-d3-u4a-hud-layout`. Full suite 1734 pass (7 skipped, 12 todo), typecheck clean.
+- Captured with `tools/qa/shot.mjs` into `tmp/qa/u4a/`: in-run at 360x640, 390x844, 412x915 (D-pad off, locked slots, steer hint); `?debug=1&level=3` (checkpoint chip "Warming up 5", debug buttons in the bottom corners after the review fix); Pause, Settings from Pause, D-pad toggled on mid-run (R4: bottom group re-placed at once, nothing cut off at 640). Layout matches `Game-360`, `Game-390`, `GameLocked-360`; spare height on tall screens splits around the bottom group.
+- Not captured: unlocked skill buttons (purple/orange faces, rim gauge, cost badge; skills unlock by progression, not `?level`), short `L10` chip in D-pad mode (hidden during the wait prompt), cast burst. Covered by unit tests. Board art is still D2 (U4b). Mango icon in the quota row looks smaller and paler than the board (check in U4b).
+- Owner eye-check: skill button press feel, locked-slot shake + nope, D-pad toggle mid-run, low energy now shown by the bolt pulse only (bar no longer turns red).
+
 ## 2026-11-11 — D3 U3 Boot + Home screenshot record (lead, headless)
 - Branch `feat/ui-d3-u3-boot-home`. Full suite 1727 pass (7 skipped, 12 todo), typecheck clean.
 - Captured with `tools/qa/shot.mjs` into `tmp/qa/u3/`: Home fresh save at 360x640 and 390x844, Home during the PLAY sweep (sweep-c: band masked to the face), Home mid-entrance. Matches `Home-360`/`Home-390` boards (logo, hero, PLAY, hint chip with flag); no overlap or cut-off.

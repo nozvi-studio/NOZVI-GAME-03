@@ -1,7 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import type Phaser from 'phaser';
 import { SkillButtons } from '../../src/game/hud/SkillButtons';
-import { hudLayout } from '../../src/game/hud/hudLayout';
+import { d3HudLayout } from '../../src/game/hud/d3HudLayout';
 import type { SkillState, SkillView } from '../../src/game/hud/hudModel';
 import { loadBalance } from '../support/balance';
 import { sceneHarness } from '../support/scene';
@@ -14,15 +14,15 @@ const skill = (state: SkillState, charge: number): SkillView => ({ slot: 0, id: 
 const fixture = (reduced = false) => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: reduced }) });
   const h = sceneHarness();
-  const sb = new SkillButtons(h.scene as unknown as Phaser.Scene, hudLayout(false), () => {}, b);
+  const sb = new SkillButtons(h.scene as unknown as Phaser.Scene, d3HudLayout(700, false), () => {}, b);
   return { sb, adds: h.adds, slotCommands: (slot: number) => h.find(`skill-${slot}-face`).commands };
 };
 
-it('MOT-4-R11 off -> ready pops the slot (scale to releaseOvershoot over tapUpMs) and keeps the glow stroke', () => {
+it('MOT-4-R11 off -> ready pops the slot (scale to releaseOvershoot over tapUpMs) and draws the full rim gauge', () => {
   const { sb, adds, slotCommands } = fixture();
   sb.apply([skill('off', 0.5), null]); sb.apply([skill('ready', 1), null]);
   expect(adds.some(a => a.scaleX === b.motion.releaseOvershoot)).toBe(true);
-  expect(slotCommands(0).some(c => c[0] === 'strokeCircle')).toBe(true);   // the existing M.glow ring
+  expect(slotCommands(0).some(c => c[0] === 'lineStyle')).toBe(true);   // rim charge gauge at full charge (D3-R14)
 });
 it('MOT-4-R11 ready -> off dips alpha for readyDipMs with no scale change', () => {
   const { sb, adds } = fixture();

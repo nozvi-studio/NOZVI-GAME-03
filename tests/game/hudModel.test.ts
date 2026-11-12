@@ -18,7 +18,7 @@ it('P3b2-R7 GameD2 default state: level+biome, quota, score, energy, skills, che
     scoreValue: 44, quotaFill: 0.5, quotaBar: true, quotaLast: false,
     energy: { text: '35', fill: 0.35 },
     skills: [{ slot: 0, id: 'slowmo', cost: 40, state: 'off', ring: null, charge: 35 / 40 }, { slot: 1, id: 'tailSnip', cost: 30, state: 'ready', ring: null, charge: 1 }],
-    chip: { kind: 'checkpoint', text: 'Next checkpoint at L10' } });
+    chip: { kind: 'checkpoint', text: 'Next checkpoint at L10', short: 'L10' } });
 });
 it('P3b2-R7 empty slot is null; challenge level shows the star; max level shows Max', () => {
   const v = hudView(snap({ challenge: true, level: b.level.maxLevel, skills: [{ slot: 0, id: null, cost: 0, affordable: false, active: false, leftMs: 0 },
@@ -34,18 +34,23 @@ it('P3b2-R7 timed skills show a countdown ring from balance durations, Tail Snip
 });
 it('P3b2-R7 energy fill clamps; ramp chip replaces the checkpoint chip while the ramp is active', () => {
   expect(hudView(snap({ energy: 140, energyMax: 100 }), null, b, t).energy.fill).toBe(1);
-  expect(hudView(snap({ rampActive: true, rampMangoesLeft: 3, startLevel: 6 }), hint, b, t).chip).toEqual({ kind: 'ramp', text: 'Warming up 3' });
+  expect(hudView(snap({ rampActive: true, rampMangoesLeft: 3, startLevel: 6 }), hint, b, t).chip).toEqual({ kind: 'ramp', text: 'Warming up 3', short: 'L6' });
   expect(hudView(snap(), { key: 'hud.nextCheckpointClear', level: 12 }, b, t).chip?.text).toBe('Next checkpoint: clear L12');
 });
 it('P3b2-R7 MEC-008-R8 an L1 start has no ramp effect: no Warming up chip, the checkpoint hint shows instead', () => {
-  expect(hudView(snap({ rampActive: true, rampMangoesLeft: 5, startLevel: 1 }), hint, b, t).chip).toEqual({ kind: 'checkpoint', text: 'Next checkpoint at L10' });
+  expect(hudView(snap({ rampActive: true, rampMangoesLeft: 5, startLevel: 1 }), hint, b, t).chip).toEqual({ kind: 'checkpoint', text: 'Next checkpoint at L10', short: 'L10' });
   expect(hudView(snap({ rampActive: true, rampMangoesLeft: 5, startLevel: 1 }), null, b, t).chip).toBeNull();
 });
 it('UIFIX-R3 the waiting prompt takes the chip slot (over ramp and checkpoint) with touch or keyboard text', () => {
-  expect(hudView(snap(), hint, b, t, { touch: true }).chip).toEqual({ kind: 'wait', text: 'Swipe to steer!' });
-  expect(hudView(snap(), hint, b, t, { touch: false }).chip).toEqual({ kind: 'wait', text: 'Press an arrow to go!' });
+  expect(hudView(snap(), hint, b, t, { touch: true }).chip).toEqual({ kind: 'wait', text: 'Swipe to steer!', short: '' });
+  expect(hudView(snap(), hint, b, t, { touch: false }).chip).toEqual({ kind: 'wait', text: 'Press an arrow to go!', short: '' });
   expect(hudView(snap({ rampActive: true, rampMangoesLeft: 3, startLevel: 5 }), null, b, t, { touch: true }).chip?.kind).toBe('wait');
   expect(hudView(snap(), hint, b, t, null).chip?.kind).toBe('checkpoint'); // back to the checkpoint chip after the first input
+});
+it('D3-R9 R3 chip has a short L<n> form for ramp and checkpoint, none for wait', () => {
+  expect(hudView(snap(), hint, b, t).chip).toMatchObject({ kind: 'checkpoint', short: 'L10' });
+  expect(hudView(snap({ rampActive: true, rampMangoesLeft: 3, startLevel: 6 }), hint, b, t).chip).toMatchObject({ kind: 'ramp', short: 'L6' });
+  expect(hudView(snap(), hint, b, t, { touch: true }).chip).toMatchObject({ kind: 'wait', short: '' });
 });
 it('P3b2-R9 stack places items with gap, margins and padding', () => {
   const r = stack([{ h: 37.4 }, { h: 19 }, { h: 34, mt: 6 }, { h: 66, mt: 16 }, { h: 52, mt: 8 }, { h: 52 }], { gap: 6, padTop: 26, padBottom: 20 });

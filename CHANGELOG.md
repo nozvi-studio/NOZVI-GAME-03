@@ -2,6 +2,15 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs(ui): U4a screenshot record (PLAYTEST), UI-MOCKUPS Game rows built, STATUS.
+- fix(hud): ?debug=1 "+1" / "Key" buttons move to the bottom corners (`debugRects` in `D3_RUN.debug`) so they no longer cover the mango quota label; overlap test at 640 and 780.
+- refactor(ui): drop the D2 HUD layout (HUD_MOCK, hudLayout, statsRow); banners, skill tips and debug buttons use D3 rects; CODEMAP rows for the D3 HUD modules.
+- feat(ui): D3 D-pad on light round skin in four key rects, live relayout of skills/bottom/top when the D-pad setting changes mid-run (D3-R9 R4).
+- feat(ui): D3 skill buttons - skill skins by slot tone, rim charge gauge, white countdown ring, cost badge, locked empty slot with denied tap (onDenied), tap burst on cast, place() for D-pad toggle (D3-R14 R1 R21 R23 R24); new white `on` HUD icon tone.
+- feat(ui): D3 bottom group - energy bar, steer hint, checkpoint chip (D3-R9 R2 R3); HudTop temporary energy and chip removed; chip gains a short L<n> form.
+- feat(ui): D3 HUD top - light pause, level ribbon, score chip, mango bar (D3-R13); biome line removed (R5); energy pill and checkpoint chip temporarily kept in HudTop until the bottom group (Task 4).
+- feat(ui): D3 dim background in the run, per biome (D3-R9 R6); removed unused gameBackground.
+- feat(ui): D3 in-run layout table (`hud/d3HudLayout.ts`) and live `BOARD` rect set at boot (D3-R9); legacy D2 D-pad hudLayout tests skipped until U4a Task 7
 - docs(ui): U4a in-run HUD layout plan; U4 split into U4a/U4b/U4c.
 - fix(ui): D3 Home/Boot used the 390 mock unit for 360-wide board numbers (new d3()/d3m()/d3Height()).
 - docs: U3 CODEMAP rows, UI-MOCKUPS built markers, PLAYTEST screenshot record, STATUS.

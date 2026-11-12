@@ -21,3 +21,6 @@ export type ChipTransition = 'in' | 'out' | 'cross' | 'none';
 /** MOT-4-R13 arguments are chip kinds; a text-only change (ramp countdown) is quiet. */
 export const chipTransition = (prev: string | null, next: string | null): ChipTransition =>
   prev === null ? (next === null ? 'none' : 'in') : next === null ? 'out' : prev !== next ? 'cross' : 'none';
+
+/** UIFIX-R3: the wait prompt has no icon (no arrow icon exists); ramp / checkpoint chips keep the flag. */
+export const chipHasIcon = (kind: 'ramp' | 'checkpoint' | 'wait' | undefined): boolean => kind !== 'wait';

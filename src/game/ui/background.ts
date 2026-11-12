@@ -5,8 +5,8 @@ import { setBandColor } from '../viewport';
 import { toInt } from '../uiTokens';
 import { bgKey, bgSpec, paintBackground, type BgCtx } from './backgroundSpec';
 
-export function screenBackground(scene: Phaser.Scene, biome: number): Phaser.GameObjects.Image {
-  const key = bgKey(biome, WIDTH, HEIGHT), s = bgSpec(biome, WIDTH, HEIGHT);
+export function screenBackground(scene: Phaser.Scene, biome: number, dim = false): Phaser.GameObjects.Image {
+  const key = bgKey(biome, WIDTH, HEIGHT, dim), s = bgSpec(biome, WIDTH, HEIGHT, dim);
   if (!scene.textures.exists(key)) {
     const tex = scene.textures.createCanvas(key, Math.ceil(WIDTH), Math.ceil(HEIGHT));
     if (!tex) throw new Error(`background: cannot create ${key}`);

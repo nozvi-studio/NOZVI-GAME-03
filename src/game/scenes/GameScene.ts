@@ -7,7 +7,7 @@ import { clockStep, createClock } from '../flow/clock';
 import { createFlow, flowKey, flowOver, flowPause, flowStart, flowTick, flowTurn, type FlowEffect, type FlowState } from '../flow/runFlow';
 import { bindKeyboard } from '../input/keyboard';
 import { bindSwipe } from '../input/swipe';
-import { gameBackground } from '../hud/draw';
+import { screenBackground } from '../ui/background';
 import { BOARD_RADIUS, buildBoardTexture, drawBoardBorder } from '../render/board';
 import { Effects } from '../render/effects';
 import { colorOf } from '../juice/colors';
@@ -50,6 +50,7 @@ export class GameScene extends Phaser.Scene {
   private layers!: Record<'ground' | 'terrain' | 'hazards' | 'mango' | 'skills' | 'snake' | 'overlay' | 'effects', Phaser.GameObjects.Graphics>;
   private effects!: Effects;
   private capy!: CapyHead;
+  private bg?: Phaser.GameObjects.Image;
 
   constructor() { super('Game'); }
 
@@ -60,8 +61,8 @@ export class GameScene extends Phaser.Scene {
     this.palette = currentPalette();
     this.reduced = reduceMotion();
     this.prev = null; this.beats = new HitBeats(motionFor(this), this.balance.motion); this.tel = telegraphCtx(this.balance, key => this.beats.scale(key));
-    this.cameras.main.setBackgroundColor(gameBackground(this.palette));
     this.look = boardLook(1, themeOf(this.palette));
+    this.setBackground(this.look.biome);
     const image = this.add.image(0, 0, buildBoardTexture(this, this.balance, this.look)).setOrigin(0);
     this.board = this.add.container(BOARD.x, BOARD.y, [image]).setName('board');
     this.layers = {
@@ -93,7 +94,7 @@ export class GameScene extends Phaser.Scene {
     const recolor = (): void => {
       this.palette = currentPalette(); this.reduced = reduceMotion(); this.effects.setReduced(this.reduced); this.lookStale = true; // texture rebuilt on the next draw
       drawBoardBorder(this.border.clear(), this.palette);
-      this.cameras.main.setBackgroundColor(gameBackground(this.palette));
+      this.setBackground(this.look.biome);
     };
     this.game.events.on('settings-closed', recolor);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -214,11 +215,18 @@ export class GameScene extends Phaser.Scene {
       x: BOARD.x + f * px, y: BOARD.y + (i % 2 ? -1 : 1) * px / 3 * Math.abs(f), duration: dur })) });
   }
 
+  // D3-R9 R6 dim screen background per biome, below the board (depth -1000).
+  private setBackground(biome: number): void {
+    this.bg?.destroy();
+    this.bg = screenBackground(this, biome, true);
+  }
+
   private draw(snapshot: SimSnapshot, time: number): void {
     this.boardClip.setPosition(this.board.x, this.board.y);
     this.border.setPosition(this.board.x, this.board.y);
     if (this.lookStale || snapshot.biome !== this.look.biome) {
       this.look = boardLook(snapshot.biome, themeOf(this.palette)); this.lookStale = false;
+      this.setBackground(this.look.biome);
       buildBoardTexture(this, this.balance, this.look);
     }
     const cell = cellPx(this.balance), p = this.palette;

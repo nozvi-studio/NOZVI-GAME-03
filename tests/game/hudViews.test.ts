@@ -5,9 +5,11 @@ import { CountdownOverlay } from '../../src/game/hud/CountdownOverlay';
 import { PauseOverlay } from '../../src/game/hud/PauseOverlay';
 import { pauseView } from '../../src/game/hud/overlayModel';
 import { HudTop } from '../../src/game/hud/HudTop';
+import { BottomGroup } from '../../src/game/hud/BottomGroup';
 import { SkillButtons } from '../../src/game/hud/SkillButtons';
+import { d3HudLayout } from '../../src/game/hud/d3HudLayout';
 import { hudView, type HudSnap } from '../../src/game/hud/hudModel';
-import { bannerStripRect, hudLayout, STRIP_MOCK } from '../../src/game/hud/hudLayout';
+import { bannerStripRect, STRIP_MOCK } from '../../src/game/hud/hudLayout';
 import { t } from '../../src/game/text';
 import { loadBalance } from '../support/balance';
 import { DrawObject, sceneHarness } from '../support/scene';
@@ -29,25 +31,28 @@ const snap = (o: Partial<HudSnap> = {}): HudSnap => ({ level: 7, biome: 2, chall
 it('P3b2-R15 HudTop shows level, biome, quota, score, energy and the checkpoint chip; pause button is enabled only while a run is live', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
   const h = sceneHarness(), pauses: number[] = [];
-  const top = new HudTop(h.scene as unknown as Phaser.Scene, hudLayout(false), () => pauses.push(1));
-  top.apply(hudView(snap(), { key: 'hud.nextCheckpoint', level: 10 }, b, t), false, true);
-  expect(h.find('level').text).toBe('Level 7'); expect(h.find('biome').text).toBe('Rice Paddy');
-  expect(h.find('quota-done').text).toBe('3'); expect(h.find('quota-total').text).toBe('/6');
+  const top = new HudTop(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), () => pauses.push(1));
+  const bottom = new BottomGroup(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false));
+  const v = hudView(snap(), { key: 'hud.nextCheckpoint', level: 10 }, b, t);
+  top.apply(v, false, true); bottom.apply(v);
+  expect(h.find('level').text).toBe('Level 7'); expect(h.objects.some(o => o.name === 'biome')).toBe(false);   // D3-R5 no biome line
+  expect(h.find('quota-label').text).toBe('3/6');
   expect(h.find('score').text).toBe('44'); expect(h.find('energy').text).toBe('35');
-  expect(h.find('next-checkpoint').text).toBe('Next checkpoint at L10'); expect(h.find('next-checkpoint').visible).toBe(true);
+  expect(h.objects.some(o => o.text === 'Next checkpoint at L10')).toBe(true); expect(h.find('next-checkpoint').visible).toBe(true);
   h.find('pause-button').emit('pointerdown'); h.find('pause-button').emit('pointerup'); expect(pauses).toEqual([1]);
-  top.apply(hudView(snap(), null, b, t), false, false);
+  top.apply(hudView(snap(), null, b, t), false, false); bottom.apply(hudView(snap(), null, b, t));
   expect(h.find('pause-button').alpha).toBeLessThan(1); expect(h.adds.some(a => a.alpha === 0)).toBe(true);   // MOT-4-R13 the chip fades out instead of vanishing
 });
-it('P3b2-R15 SkillButtons: hidden for empty slots, pointer down casts (MEC-007-R14), off/ready/active drawn differently', () => {
+it('P3b2-R15 SkillButtons: locked empty slots, pointer down casts (MEC-007-R14), off/ready/active drawn differently', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), used: number[] = [];
-  const sk = new SkillButtons(h.scene as unknown as Phaser.Scene, hudLayout(false), s => used.push(s), b);
+  const h = sceneHarness(), used: number[] = [], denied: number[] = [];
+  const sk = new SkillButtons(h.scene as unknown as Phaser.Scene, d3HudLayout(700, false), s => used.push(s), b, s => denied.push(s));
   sk.apply(hudView(snap({ skills: [{ slot: 0, id: 'slowmo', cost: 40, affordable: false, active: false, leftMs: 0 },
     { slot: 1, id: null, cost: 0, affordable: false, active: false, leftMs: 0 }] }), null, b, t).skills);
-  expect(h.find('skill-0').visible).toBe(true); expect(h.find('skill-1').visible).toBe(false);
+  expect(h.find('skill-0').visible).toBe(true); expect(h.find('skill-1').visible).toBe(true); expect(h.find('skill-1-cost').visible).toBe(false); expect(h.find('skill-1-lock').visible).toBe(true);   // D3-R1 locked slot
   expect(h.find('skill-0-cost').text).toBe('40');
   h.find('skill-0').emit('pointerdown'); expect(used).toEqual([0]);
+  h.find('skill-1').emit('pointerdown'); expect(used).toEqual([0]); expect(denied).toEqual([1]);   // D3-R1 locked tap: onDenied, no cast
   const off = JSON.stringify(h.find('skill-0-face').commands);
   sk.apply(hudView(snap(), null, b, t).skills);
   expect(JSON.stringify(h.find('skill-0-face').commands)).toBe(off);   // slot 0 still off
@@ -60,7 +65,7 @@ it('P3b2-R15 a rejected cast shakes the button and respects reduced motion', () 
   const h = sceneHarness(); const moves: unknown[] = [];
   h.scene.tweens.add = (v: unknown) => { moves.push(v); return { stop: () => {} }; };
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const sk = new SkillButtons(h.scene as unknown as Phaser.Scene, hudLayout(false), () => {}, b);
+  const sk = new SkillButtons(h.scene as unknown as Phaser.Scene, d3HudLayout(700, false), () => {}, b);
   sk.apply(hudView(snap(), null, b, t).skills); sk.shake(0); expect(moves).toHaveLength(1);
   vi.stubGlobal('window', { matchMedia: () => ({ matches: true }) });
   sk.shake(0); expect(moves).toHaveLength(1);
@@ -117,7 +122,7 @@ it('P3b2-R13 CountdownOverlay shows the digit and the checkpoint card, hides bot
 });
 it('P3b2-R10 BannerLayer shows queued cards one after another for ui.bannerMs, then clears', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
   layer.show([{ kind: 'levelUp', title: 'Level 8', subtitle: 'Fresh start!', chip: 'Your snake shrinks to 4 segments' },
     { kind: 'biome', label: 'BIOME 3', name: 'Frozen Pond', tagline: 'Ice is slippery. Plan your turns.' }]);
   expect(h.find('banner').visible).toBe(true); expect(h.last('banner-title')!.text).toBe('Level 8');
@@ -128,7 +133,7 @@ it('P3b2-R10 BannerLayer shows queued cards one after another for ui.bannerMs, t
 });
 it('UIFIX-R1 BannerLayer draws every banner as one strip inside the board top edge, alpha ~0.85, pills sit below it', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
   const r = bannerStripRect(b.board.cols);
   layer.show([{ kind: 'levelUp', title: 'Level 8', subtitle: 'Fresh start!', chip: null }]);
   const rects = h.objects.flatMap(o => o.commands).filter(c => c[0] === 'fillRoundedRect');
@@ -141,7 +146,7 @@ it('UIFIX-R1 BannerLayer draws every banner as one strip inside the board top ed
 });
 it('P3b2-R10 a new queue replaces the old one; hide() cancels pending cards', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
   layer.show([{ kind: 'hint', text: 'Fences unlocked' }, { kind: 'hint', text: 'Second' }]);
   layer.show([{ kind: 'challenge', title: 'Challenge: Rock rain!' }]);
   expect(h.last('banner-title')!.text).toBe('Challenge: Rock rain!');
@@ -149,7 +154,7 @@ it('P3b2-R10 a new queue replaces the old one; hide() cancels pending cards', ()
 });
 it('P3b2-R11 tips last tipFactor x bannerMs; pills and the slow-mo tint follow the skill state', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
   layer.tip('Need 40 energy'); expect(h.find('tip').text).toBe('Need 40 energy'); expect(h.find('tip').visible).toBe(true);
   expect(h.delayed.at(-1)!.delay).toBe(b.ui.bannerMs * b.ui.hud.tipFactor);
   h.flush(); expect(h.find('tip').visible).toBe(false);
@@ -160,7 +165,7 @@ it('P3b2-R11 tips last tipFactor x bannerMs; pills and the slow-mo tint follow t
 });
 it('P3b2-R10 BannerLayer.hide() also hides the tip and kills the pop tween; show() keeps a tip that was just raised', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), killed: unknown[] = [], layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const h = sceneHarness(), killed: unknown[] = [], layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
   h.scene.tweens.killTweensOf = (v: unknown) => { killed.push(v); };
   layer.tip('Need 40 energy'); layer.show([{ kind: 'hint', text: 'Fences unlocked' }]);
   expect(h.find('tip').visible).toBe(true);
@@ -169,7 +174,7 @@ it('P3b2-R10 BannerLayer.hide() also hides the tip and kills the pop tween; show
 });
 it('P3b2-R10 setPills redraws a slot only when its content changes (per-frame calls are cheap)', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, hudLayout(false), b);
+  const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
   const text = h.find('pill-0'), set = vi.spyOn(text, 'setText');
   const pills = [{ slot: 0 as const, skill: 'slowmo' as const, text: 'Slow-mo · 3 s left' }];
   layer.setPills(pills); layer.setPills([...pills]); layer.setPills([...pills]);
@@ -179,26 +184,22 @@ it('P3b2-R10 setPills redraws a slot only when its content changes (per-frame ca
 });
 it('P3b2-R15 HudTop redraws the pause icon only when paused or enabled changes', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
-  const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, hudLayout(false), () => {});
-  const clear = vi.spyOn(h.find('pause-button').list[0]!, 'clear'), v = hudView(snap(), null, b, t);
+  const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), () => {});
+  const clear = vi.spyOn(h.find('pause-glyph'), 'clear'), v = hudView(snap(), null, b, t);
   top.apply(v, false, true); top.apply(v, false, true); top.apply(v, false, true);
   expect(clear).toHaveBeenCalledTimes(1);
   top.apply(v, true, true); expect(clear).toHaveBeenCalledTimes(2);
   top.apply(v, true, false); expect(clear).toHaveBeenCalledTimes(3); expect(h.find('pause-button').alpha).toBeLessThan(1);
 });
-
-it('D3-R3 HudTop level and biome titles use the light colours even with a saved dark board theme', () => {
+it('D3-R13 HudTop level ribbon text keeps its fixed white style (never recoloured) even with a saved dark board theme', () => {
   const colours: string[] = [];
   const spy = vi.spyOn(DrawObject.prototype, 'setColor').mockImplementation(function (this: DrawObject, c?: unknown) { colours.push(`${this.name}:${String(c)}`); return this; } as never);
   try {
     vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
     setDisplaySettings({ ...defaultSettings(), boardTheme: 'dark' });
-    const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, hudLayout(false), () => {});
+    const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), () => {});
     top.apply(hudView(snap(), null, b, t), false, true);
-    expect(colours).toContain(`level:${uiTheme('light').title}`); expect(colours).toContain(`biome:${uiTheme('light').soft}`);
-    colours.length = 0; setDisplaySettings({ ...defaultSettings(), boardTheme: 'light' });
-    top.apply(hudView(snap(), null, b, t), false, true);
-    expect(colours).toContain(`level:${uiTheme('light').title}`);
+    expect(h.find('level').text).toBe('Level 7'); expect(colours.filter(c => c.startsWith('level:'))).toEqual([]);
   } finally { spy.mockRestore(); setDisplaySettings(null); }
 });
 it('D3-R3 PauseOverlay draws the light card even with a saved dark board theme', () => {
@@ -215,9 +216,9 @@ it('D3-R3 PauseOverlay draws the light card even with a saved dark board theme',
 const motionCfg = b.motion;
 const topFixture = (reduced = false) => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: reduced }) });
-  const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, hudLayout(false), () => {});
-  const hv = (o: Partial<HudSnap>) => hudView(snap(o), null, b, t);
-  return { h, top, adds: h.adds, hv };
+  const h = sceneHarness(), top = new HudTop(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), () => {});
+  const hv = (o: Partial<HudSnap>) => hudView(snap(o), null, b, t), bottom = new BottomGroup(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false));
+  return { h, top, bottom, adds: h.adds, hv };
 };
 it('MOT-4-R7 a rising score ticks up through motion.ease; the first paint and a falling score jump', () => {
   const { top, adds, hv } = topFixture();
@@ -237,11 +238,11 @@ it('MOT-4-R7 under reduced motion the score jumps with no tween', () => {
   expect(top.scoreText()).toBe('40'); expect(adds.length).toBe(0);
 });
 it('MOT-4-R9 an energy spend eases in barSpendMs and a gain in barEaseMs', () => {
-  const { top, adds, hv } = topFixture();
-  top.apply(hv({ energy: 80 }), false, true); expect(adds.length).toBe(0);
-  top.apply(hv({ energy: 40 }), false, true);
+  const { bottom, adds, hv } = topFixture();
+  bottom.apply(hv({ energy: 80 })); expect(adds.length).toBe(0);
+  bottom.apply(hv({ energy: 40 }));
   expect(adds.some(a => a.duration === motionCfg.barSpendMs)).toBe(true);
-  adds.length = 0; top.apply(hv({ energy: 80 }), false, true);
+  adds.length = 0; bottom.apply(hv({ energy: 80 }));
   expect(adds.some(a => a.duration === motionCfg.barEaseMs)).toBe(true);
 });
 it('MOT-4-R12 level title change slides in once; the first title does not animate', () => {

@@ -2,85 +2,112 @@ import type Phaser from 'phaser';
 import type { Balance } from '../../core';
 import { motionFor, type Motion } from '../motion';
 import { easeMsFor, skillReadyEdge } from './hudMotion';
-import { TOKENS, toInt } from '../uiTokens';
-import { ui } from '../ui/layout';
-import { chargeSegment } from './gaugeGeometry';
-import { drawCard, hudLabel } from './draw';
+import { FONT_UI, TOKENS, toInt } from '../uiTokens';
+import { d3, ui } from '../ui/layout';
+import { drawIcon } from '../ui/icons';
+import { hostOf, lipPx, skinTexture } from '../ui/skin';
+import { denied, tapBurst } from '../ui/touchFx';
 import { hudIconKey, type IconTone } from './hudIcons';
-import type { HudLayout } from './hudLayout';
+import { D3_RUN, type D3HudLayout, type R } from './d3HudLayout';
+import { skillLook } from './skillLook';
 import type { HudView, SkillState, SkillView } from './hudModel';
 
-// Mockup px of the skill button drawing (GameD2 / SkillActiveD2).
-const M = { icon: 38, boltIcon: 12, costFont: 14, pressed: 4, shelfUp: 3, shelfDown: 7, glow: 7, ring: 46, ringW: 6, chipPadL: 8, chipPadR: 10, chipGap: 4, chargeSteps: 24, chargeArc: 48 } as const;
+const T = TOKENS.d3, K = D3_RUN.skill, B = K.badge;
+const cen = (r: R): { x: number; y: number } => ({ x: d3(r.x + r.w / 2), y: d3(r.y + r.h / 2) });
 
-interface Slot { c: Phaser.GameObjects.Container; g: Phaser.GameObjects.Graphics; icon: Phaser.GameObjects.Image; cost: Phaser.GameObjects.Text; costG: Phaser.GameObjects.Graphics; bolt: Phaser.GameObjects.Image; key: string;
+interface Slot { c: Phaser.GameObjects.Container; vis: Phaser.GameObjects.Container; lip: Phaser.GameObjects.Image; face: Phaser.GameObjects.Image;
+  icon: Phaser.GameObjects.Image; lock: Phaser.GameObjects.Graphics; gauge: Phaser.GameObjects.Graphics;
+  badge: Phaser.GameObjects.Image; cost: Phaser.GameObjects.Text; key: string; down: boolean;
   state: SkillState | null; view: SkillView | null; chargeTarget: number; shownCharge: number; charge: { v: number }; dip: { v: number } }
 
-// P3b2-R15 GameD2 / SkillActiveD2 skill buttons: off (greyed), ready (glow ring), active (pressed, countdown ring); cost chip under each.
+// D3-R14 skill buttons on the `skill` skin: tone by slot, rim charge gauge, countdown ring, cost badge, locked empty slot (R1). Redraws only on a state / charge-step change.
 export class SkillButtons {
   private readonly slots: Slot[] = [];
   private readonly motion: Motion;
-  constructor(private readonly scene: Phaser.Scene, private readonly l: HudLayout, onUse: (slot: 0 | 1) => void, private readonly b: Balance) {
-    this.motion = motionFor(scene);
+  private l: D3HudLayout;
+  /** `onDenied(slot)` fires on a tap of a locked slot (R1): the scene plays the nope sound; `onUse` is NOT called. */
+  constructor(private readonly scene: Phaser.Scene, l: D3HudLayout, onUse: (slot: 0 | 1) => void, private readonly b: Balance, onDenied?: (slot: 0 | 1) => void) {
+    this.l = l; this.motion = motionFor(scene);
+    const host = hostOf(scene), unit = ui(1), dd = d3(K.d), lip0 = lipPx('skill', 'off', unit);
     for (const slot of [0, 1] as const) {
-      const r = l.skills[slot];
-      const g = scene.add.graphics().setName(`skill-${slot}-face`), icon = scene.add.image(0, 0, hudIconKey('slowmo')).setDisplaySize(ui(M.icon), ui(M.icon));
-      const c = scene.add.container(r.cx, r.cy, [g, icon]).setName(`skill-${slot}`).setSize(2 * r.r, 2 * r.r).setInteractive({ useHandCursor: true });
-      c.on('pointerdown', (_p: unknown, _x: number, _y: number, e?: Phaser.Types.Input.EventData) => { e?.stopPropagation(); onUse(slot); }); // MEC-007-R14 reacts on pointer down
-      const costG = scene.add.graphics(), bolt = scene.add.image(0, 0, hudIconKey('bolt')).setDisplaySize(ui(M.boltIcon), ui(M.boltIcon));
-      const cost = hudLabel(scene, 0, 0, '', M.costFont, TOKENS.text.primary, 800, `skill-${slot}-cost`).setOrigin(0, 0.5);
-      this.slots.push({ c, g, icon, cost, costG, bolt, key: '', state: null, view: null, chargeTarget: -1, shownCharge: 0, charge: { v: 0 }, dip: { v: 1 } });
+      const p = cen(l.skills[slot]);
+      const lip = scene.add.image(0, lip0, skinTexture(host, 'skill', 'off', dd, dd, 'lip', unit));
+      const face = scene.add.image(0, 0, skinTexture(host, 'skill', 'off', dd, dd, 'rest', unit));
+      const icon = scene.add.image(0, 0, hudIconKey('slowmo', 'on')).setDisplaySize(d3(K.icon), d3(K.icon));
+      const lock = scene.add.graphics().setName(`skill-${slot}-lock`), gauge = scene.add.graphics().setName(`skill-${slot}-face`);
+      const badge = scene.add.image(0, 0, skinTexture(host, 'chip', 'light', d3(B.minW), d3(B.h), 'rest', unit)).setName(`skill-${slot}-badge`);
+      const cost = scene.add.text(0, 0, '', { fontFamily: FONT_UI, fontSize: `${d3(B.font)}px`, fontStyle: '900', color: T.text }).setOrigin(0.5).setName(`skill-${slot}-cost`);
+      const vis = scene.add.container(0, 0, [lip, face, icon, lock, gauge, badge, cost]).setName(`skill-${slot}-visual`);
+      const c = scene.add.container(p.x, p.y, [vis]).setName(`skill-${slot}`).setSize(dd, dd).setInteractive({ useHandCursor: true });
+      const s: Slot = { c, vis, lip, face, icon, lock, gauge, badge, cost, key: '', down: false, state: null, view: null, chargeTarget: -1, shownCharge: 0, charge: { v: 0 }, dip: { v: 1 } };
+      c.on('pointerdown', (_p: unknown, _x: number, _y: number, e?: Phaser.Types.Input.EventData) => { // MEC-007-R14 reacts on pointer down
+        e?.stopPropagation();
+        s.down = true; s.key = ''; this.paint(slot);
+        if (skillLook(s.view, slot).locked) { onDenied?.(slot); return; }   // D3-R1: locked slot, no cast
+        onUse(slot);
+      });
+      const up = (): void => { if (!s.down) return; s.down = false; s.key = ''; this.paint(slot); };
+      c.on('pointerup', up); c.on('pointerout', up);
+      this.slots.push(s);
     }
+  }
+  /** D3-R9 R4: move both buttons to a new layout (D-pad toggled mid-run); nothing is recreated. */
+  place(l: D3HudLayout): void {
+    this.l = l;
+    for (const slot of [0, 1] as const) { const p = cen(l.skills[slot]); this.slots[slot]!.c.setPosition(p.x, p.y); this.motion.rebase(this.slots[slot]!.vis); }
   }
   apply(skills: HudView['skills']): void {
     for (const slot of [0, 1] as const) this.draw(slot, skills[slot]);
   }
   private draw(slot: 0 | 1, k: SkillView | null): void {
     const s = this.slots[slot]!, cfg = this.b.motion;
-    for (const o of [s.c, s.costG, s.cost, s.bolt]) o.setVisible(k !== null);
     const edge = skillReadyEdge(s.state, k?.state ?? null); s.state = k?.state ?? null; s.view = k;
-    if (!k) { s.key = ''; return; }
-    if (edge === 'pop') this.motion.release(s.c);                                         // 1 -> releaseOvershoot -> 1 over tapUpMs (MOT-4-R11)
-    else if (edge === 'dip') { s.c.setAlpha(cfg.reducedPressAlpha); s.dip.v = cfg.reducedPressAlpha; this.motion.ease(s.dip, 1, cfg.readyDipMs, v => { s.c.setAlpha(v); }); }   // 80 ms alpha dip, no scale
+    if (!k) { s.key = ''; s.chargeTarget = -1; this.paint(slot); return; }
+    if (edge === 'pop') this.motion.release(s.vis);                                       // 1 -> releaseOvershoot -> 1 over tapUpMs (MOT-4-R11)
+    else if (edge === 'dip') { s.vis.setAlpha(cfg.reducedPressAlpha); s.dip.v = cfg.reducedPressAlpha; this.motion.ease(s.dip, 1, cfg.readyDipMs, v => { s.vis.setAlpha(v); }); }   // 80 ms alpha dip, no scale
     if (k.charge !== s.chargeTarget) {                                                    // eased charge between the quantised gauge steps
       const first = s.chargeTarget < 0, ms = first ? 0 : easeMsFor(s.chargeTarget, k.charge, cfg); s.chargeTarget = k.charge;
       this.motion.ease(s.charge, k.charge, ms, v => { s.shownCharge = v; this.paint(slot); });
     }
     this.paint(slot);
   }
+  // D3-R14 R21 R22 R1 one slot: skin face by tone, icon or lock, rim gauge or countdown ring, cost badge.
   private paint(slot: 0 | 1): void {
-    const s = this.slots[slot]!, k = s.view, r = this.l.skills[slot];
-    if (!k) return;
-    s.cost.setText(String(k.cost));
-    const fill = k.state === 'active' ? 0 : Math.round(Math.min(1, Math.max(0, s.shownCharge)) * M.chargeSteps); // UIFIX-R12 quantised gauge steps
-    const key = `${k.id}|${k.state}|${k.ring === null ? 'n' : k.ring.toFixed(2)}|${k.cost}|${fill}`;
+    const s = this.slots[slot]!, k = s.view, look = skillLook(k, slot), host = hostOf(this.scene), unit = ui(1), dd = d3(K.d), r = dd / 2;
+    const fill = !k || k.state === 'active' ? 0 : Math.round(Math.min(1, Math.max(0, s.shownCharge)) * K.chargeSteps); // UIFIX-R12 quantised gauge steps
+    const pressed = s.down || k?.state === 'active';
+    const key = `${k ? `${k.id}|${k.state}|${k.ring === null ? 'n' : k.ring.toFixed(2)}|${k.cost}` : 'locked'}|${fill}|${pressed ? 1 : 0}`;
     if (key === s.key) return;
     s.key = key;
-    const used = k.state === 'active', pressed = used ? ui(M.pressed) : 0, shelf = ui(used ? M.shelfUp : M.shelfDown);
-    const face = k.state === 'off' ? TOKENS.hud.skillOffFace : used && k.ring === null ? TOKENS.hud.skillUsedFace : TOKENS.surface.card;
-    const tone: IconTone = k.state === 'off' ? 'off' : used && k.ring !== null ? 'active' : 'ink';
-    s.icon.setTexture(hudIconKey(k.id, tone)).setPosition(0, pressed);
-    const g = s.g.clear();
-    g.fillStyle(toInt(TOKENS.hud.shelf), TOKENS.hud.shelfAlpha).fillCircle(0, pressed + shelf, r.r);
-    if (k.state === 'ready') g.lineStyle(ui(M.glow), toInt(TOKENS.hud.glow), TOKENS.hud.glowAlpha).strokeCircle(0, 0, r.r + ui(M.glow) / 2);
-    g.fillStyle(toInt(face)).fillCircle(0, pressed, r.r);
-    if (fill > 0) { // UIFIX-R12 tank fill, bottom up, clipped to the face circle
-      const pts = chargeSegment(r.r, fill / M.chargeSteps, M.chargeArc).map((p) => ({ x: p.x, y: p.y + pressed }));
-      g.fillStyle(toInt(TOKENS.hud.charge), TOKENS.hud.chargeAlpha).fillPoints(pts, true);
+    s.lip.setTexture(skinTexture(host, 'skill', look.tone, dd, dd, 'lip', unit)).setPosition(0, lipPx('skill', look.tone, unit));
+    s.face.setTexture(skinTexture(host, 'skill', look.tone, dd, dd, pressed && !look.locked ? 'pressed' : 'rest', unit));
+    const tone: IconTone = look.tone === 'off' ? 'off' : 'on';
+    s.icon.setVisible(!look.locked); if (k) s.icon.setTexture(hudIconKey(k.id, tone));
+    s.lock.clear(); s.lock.setVisible(look.locked);
+    if (look.locked) { s.lock.setPosition(0, 0); drawIcon(s.lock, 'lock', d3(K.lock), toInt(T.tone.off.text)); }
+    const g = s.gauge.clear();
+    if (fill > 0) {   // R12 charge as an arc on the rim, clockwise from 12 o'clock
+      const gr = r - d3(K.gaugeInset);
+      g.lineStyle(d3(K.gauge), toInt(T.tone.energy.face[1]!));
+      if (fill >= K.chargeSteps) g.strokeCircle(0, 0, gr); else g.beginPath().arc(0, 0, gr, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * fill / K.chargeSteps, false).strokePath();
     }
-    if (used && k.ring !== null) {
-      const rr = ui(M.ring), end = -Math.PI / 2 + Math.PI * 2 * k.ring;
-      g.lineStyle(ui(M.ringW), toInt(TOKENS.hud.ringTrack), TOKENS.hud.ringTrackAlpha).strokeCircle(0, 0, rr);
-      g.lineStyle(ui(M.ringW), toInt(TOKENS.hud.ring)).beginPath().arc(0, 0, rr, -Math.PI / 2, end, false).strokePath();
+    if (k && k.state === 'active' && k.ring !== null) {   // countdown ring, white over a faint track
+      const rr = r + d3(K.ringOut), end = -Math.PI / 2 + Math.PI * 2 * k.ring;
+      g.lineStyle(d3(K.ring), toInt(T.white), K.trackAlpha).strokeCircle(0, 0, rr);
+      g.lineStyle(d3(K.ring), toInt(T.white)).beginPath().arc(0, 0, rr, -Math.PI / 2, end, false).strokePath();
     }
-    // cost chip: bolt + number, centred under the button
-    const pad = ui(M.chipPadL), bw = ui(M.boltIcon), gap = ui(M.chipGap);
-    const cw = pad + bw + gap + s.cost.width + ui(M.chipPadR), cx = r.cx - cw / 2;
-    s.costG.clear(); drawCard(s.costG, cx, r.costY, cw, r.costH, r.costH / 2, TOKENS.surface.card, { shadowAlpha: 0 });
-    s.bolt.setPosition(cx + pad + bw / 2, r.costY + r.costH / 2); s.cost.setPosition(cx + pad + bw + gap, r.costY + r.costH / 2);
+    // cost badge (bottom right): light chip, danger chip when the skill is not affordable
+    s.badge.setVisible(!!k); s.cost.setVisible(!!k);
+    if (!k) return;
+    s.cost.setText(String(k.cost)).setColor(look.badgeNo ? T.tone.danger.text : T.text);
+    const bw = Math.max(d3(B.minW), s.cost.width + 2 * d3(B.padX)), bh = d3(B.h), bt = look.badgeNo ? 'danger' : 'light';
+    const bx = r + d3(-B.right) - bw / 2, by = r + d3(-B.bottom) - bh / 2;
+    s.badge.setTexture(skinTexture(host, 'chip', bt, bw, bh, 'rest', unit)).setPosition(bx, by); s.cost.setPosition(bx, by);
   }
   /** P3a juice adapter: centre of a skill button (JuiceHud.skillPoint). */
-  point(slot: 0 | 1): { x: number; y: number } { const r = this.l.skills[slot]; return { x: r.cx, y: r.cy }; }
-  /** MEC-006 §8 / GDD §10.4 "nope" shake on a rejected cast; skipped under reduced motion. */
-  shake(slot: 0 | 1): void { this.motion.shake(this.slots[slot]!.c); }
+  point(slot: 0 | 1): { x: number; y: number } { return cen(this.l.skills[slot]); }
+  /** D3-R24 / MEC-006 §8 / GDD §10.4 refused cast: shake the button and flash the badge; skipped shake under reduced motion. */
+  shake(slot: 0 | 1): void { const s = this.slots[slot]!; denied(this.scene, s.vis, s.badge.visible ? s.badge : undefined); }
+  /** D3-R23 successful cast: tap burst at the button centre in the slot tone. */
+  cast(slot: 0 | 1): void { const p = this.point(slot); tapBurst(this.scene, p.x, p.y, slot === 0 ? 'skillA' : 'skillB'); }
 }
