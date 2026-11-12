@@ -3,6 +3,7 @@ import type { SimSnapshot } from '../../src/core';
 import { snakeHeadPoint, snakeWidths } from '../../src/game/render/snake';
 import { SNAKE } from '../../src/game/render/boardParts';
 import { loadBalance } from '../support/balance';
+import { ART } from '../../src/game/art/capyRig';
 
 const balance = loadBalance();
 
@@ -31,4 +32,12 @@ it('D3-R12 in-game face size comes from balance ui.capy.headCellScale', () => {
   expect(balance.ui.capy.headCellScale).toBeGreaterThan(0);
   const w = snakeWidths(30, balance.ui.capy.headCellScale);
   expect(2 * (w.head * (1 + SNAKE.gulp) + w.headOutline)).toBeLessThanOrEqual(30 * balance.ui.capy.headCellScale);
+});
+
+it('D3-R12 visible face is about as wide as the 1.4-cell mockup head (wider than the body)', () => {
+  // the snake skull width in 48-unit art space; the image spans headCellScale cells.
+  const faceWidthCells = ((ART.snake.right - ART.snake.left) / 48) * balance.ui.capy.headCellScale;
+  expect(faceWidthCells).toBeGreaterThanOrEqual(1.35);
+  expect(faceWidthCells).toBeLessThanOrEqual(1.5);
+  expect(faceWidthCells).toBeGreaterThan(SNAKE.outline);
 });

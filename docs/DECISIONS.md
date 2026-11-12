@@ -616,3 +616,7 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 ## 2026-11-12 - One head size for every character (D3-R12 amended)
 - Problem: the D3 head disc (fixed 1.4 cells + outline, about 1.6 cells) was wider than the capy face (1.2 cells), so a blue ring showed around the face.
 - Decision (owner OK 2026-11-12): the face sprite is the head. The only head size is `ui.capy.headCellScale`; the disc is derived from it (`SNAKE.headFit` 0.9 of the face at full gulp) and stays behind the face for every skin. Test: `tests/game/snakeHead.test.ts` (D3-R12). ART-003 step 6 records the rule for new skins.
+
+## 2026-11-12 - Pre-U4c owner review: snake face, head size, skill gloss, PLAY sweep
+- Owner eye-check: in-game head smaller than the body; Home snake face less detailed than the board; affordable skill buttons had a full green rim and white gloss corners; PLAY sweep too fast and harsh.
+- Decision (lead, visual): the snake skin face follows the D3 Home board, not the ART-003 egg skull: oval skull, white sclera behind the pupils, light muzzle oval, top gloss, no nostrils or diamond (capy skin unchanged). `ui.capy.headCellScale` 1.2 -> 1.6 because the visible skull is ~0.88 of the 48-unit image, so 1.2 drew a ~1.05-cell head next to a 0.96-cell body. The skill rim gauge shows only while a skill is not affordable (board GameLocked). Skin gloss is clipped to the face; the skill gloss uses the board `.skill::before` inset. PLAY sweep: 1100 ms smoothstep, once every 2 pulse periods (`motion.d3.sweepEveryPulses`), soft-edged band.

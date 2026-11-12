@@ -17,7 +17,7 @@ export const SKIN_PALETTES: Record<SkinId, SkinPalette> = {
   // Blue family of the light-mode snake (render/palette.ts body 0x2b3a8f = the outline so the head edge merges into the
   // body, belly 0x5468d4 = lower face); the face stays light enough for the dark pupils. "ears" is the limb colour.
   snake: {
-    outline: '#2B3A8F', faceTop: '#7F95F0', faceBottom: '#5468D4', ears: '#5468D4', muzzle: '#9DB0F5',
+    outline: '#2B3A8F', faceTop: '#7F95F0', faceBottom: '#5468D4', ears: '#5468D4', muzzle: '#C3CEFA',
     pupil: '#17261B', nose: '#2B3A8F', blush: '#FF8FA3', highlight: '#FFFFFF', tongue: '#E5484D',
     stroke: 2, innerStroke: 1.2, featureStroke: 1.4,
   },

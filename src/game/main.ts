@@ -10,6 +10,14 @@ import { ResultsScene } from './scenes/ResultsScene';
 import { SettingsScene } from './scenes/SettingsScene';
 import { TOKENS } from './uiTokens';
 import { initViewport } from './viewport';
+import json from '../../config/balance.json';
+import { recordError } from '../meta';
+import { localStore } from './platform/localStore';
+
+// MEC-003-R22 crash capture: any uncaught error or rejection lands in the run log (exported from Home in debug).
+const logError = (message: string, stack: string): void => { recordError(localStore(), message, stack, Date.now(), json.log.maxEntries); };
+window.addEventListener('error', e => { logError(String(e.message), String((e.error as Error | undefined)?.stack ?? `${e.filename}:${e.lineno}:${e.colno}`)); });
+window.addEventListener('unhandledrejection', e => { const r = e.reason as Error | undefined; logError(String(r?.message ?? r), String(r?.stack ?? '')); });
 
 // GDD-13 portrait game bootstrap with a parallel HUD above the board.
 initViewport();

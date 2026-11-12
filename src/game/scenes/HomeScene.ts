@@ -21,6 +21,8 @@ import { butterChip, d3Logo, roundIconButton, snakeHero } from '../ui/menuWidget
 import { chip, pillButton } from '../ui/widgets';
 import { beginRun, button, label } from './ui';
 
+const SWEEP_SLICES = 6; // D3-R21 soft-edged sweep band (slice count, not a tuning value)
+
 // D3-R11 Home: background, logo, hero, optional Start-at row, PLAY, hint, link row. P3b3-R10 content rules unchanged. MEC-008 rules live in homeModel.
 export class HomeScene extends Phaser.Scene {
   private session!: Session;
@@ -76,8 +78,8 @@ export class HomeScene extends Phaser.Scene {
       else if (this.sweep) { this.sweep.t0 = time; this.sweep.cycle = -1; } // D3-R21 re-sync sweeps with the restarted pulse
     } else if (!want && this.stopPulse) { this.stopPulse(); this.stopPulse = null; this.sweep?.band.setVisible(false); }
     const s = this.sweep, g = this.playGeom;
-    if (s && g && this.stopPulse) { // D3-R21 one gloss sweep per pulse period
-      const c = sweepCycle(time, s.t0, cfg.pulsePeriodMs);
+    if (s && g && this.stopPulse) { // D3-R21 one gloss sweep every sweepEveryPulses pulse periods
+      const c = sweepCycle(time, s.t0, cfg.pulsePeriodMs * cfg.d3.sweepEveryPulses);
       if (c !== s.cycle) { s.cycle = c; s.start = time; }
       const x = sweepX(time - s.start, cfg.d3.sweepMs, g.w, g.w * cfg.d3.sweepBand);
       s.band.setVisible(x !== null); if (x !== null) s.band.setX(x);
@@ -89,9 +91,13 @@ export class HomeScene extends Phaser.Scene {
     const btn = this.playBtn, g = this.playGeom; if (!btn || !g) return;
     const d3 = (this.registry.get('balance') as Balance).motion.d3, bw = g.w * d3.sweepBand, sk = g.h / 2;
     const band = this.add.graphics().setVisible(false);
-    band.fillStyle(toInt(TOKENS.d3.white), d3.sweepAlpha);
-    band.fillPoints([new Phaser.Geom.Point(-bw / 2 + sk, -g.h / 2), new Phaser.Geom.Point(bw / 2 + sk, -g.h / 2),
-      new Phaser.Geom.Point(bw / 2 - sk, g.h / 2), new Phaser.Geom.Point(-bw / 2 - sk, g.h / 2)], true);
+    // soft edges like the board CSS gradient: stacked skewed slices, widest faintest, so alpha peaks in the middle
+    for (let i = 0; i < SWEEP_SLICES; i++) {
+      const hw = (bw / 2) * (1 - i / SWEEP_SLICES);
+      band.fillStyle(toInt(TOKENS.d3.white), d3.sweepAlpha / SWEEP_SLICES);
+      band.fillPoints([new Phaser.Geom.Point(-hw + sk, -g.h / 2), new Phaser.Geom.Point(hw + sk, -g.h / 2),
+        new Phaser.Geom.Point(hw - sk, g.h / 2), new Phaser.Geom.Point(-hw - sk, g.h / 2)], true);
+    }
     btn.add(band);
     const maskG = this.make.graphics({}, false);
     maskG.fillStyle(toInt(TOKENS.d3.white)).fillRoundedRect(btn.x - g.w / 2, btn.y - g.h / 2, g.w, g.h, ui(TOKENS.d3.shape.radiusBig));

@@ -86,10 +86,10 @@ export class SkillButtons {
     s.lock.clear(); s.lock.setVisible(look.locked);
     if (look.locked) { s.lock.setPosition(0, 0); drawIcon(s.lock, 'lock', d3(K.lock), toInt(T.tone.off.text)); }
     const g = s.gauge.clear();
-    if (fill > 0) {   // R12 charge as an arc on the rim, clockwise from 12 o'clock
+    if (fill > 0 && fill < K.chargeSteps) {   // R12 charge as an arc on the rim, clockwise from 12 o'clock; D3 board: an affordable button has no gauge
       const gr = r - d3(K.gaugeInset);
       g.lineStyle(d3(K.gauge), toInt(T.tone.energy.face[1]!));
-      if (fill >= K.chargeSteps) g.strokeCircle(0, 0, gr); else g.beginPath().arc(0, 0, gr, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * fill / K.chargeSteps, false).strokePath();
+      g.beginPath().arc(0, 0, gr, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * fill / K.chargeSteps, false).strokePath();
     }
     if (k && k.state === 'active' && k.ring !== null) {   // countdown ring, white over a faint track
       const rr = r + d3(K.ringOut), end = -Math.PI / 2 + Math.PI * 2 * k.ring;

@@ -9,6 +9,6 @@ export { applyLevelReached, applyRunWon, carryEnergy, nextMilestone } from './pr
 export type { Milestone, CheckpointsConfig, ProgressionConfig } from './progression';
 export { sanitizeLoadout } from './loadout';
 export type { UnlockTable } from './loadout';
-export { emptyLog, loadLog, nextRun, appendRecord, flushLog, LOG_KEY } from './runLog';
+export { emptyLog, loadLog, nextRun, appendRecord, flushLog, LOG_KEY , recordError, ERROR_STACK_MAX } from './runLog';
 export { summarizeLog, abandonedRuns, deathCauseReport, PLAYER_CAUSES, NON_DEATH_CAUSES } from './runLog';
 export type { LogRecord, RunLog, LogSummary, DeathCauseReport } from './runLog';
