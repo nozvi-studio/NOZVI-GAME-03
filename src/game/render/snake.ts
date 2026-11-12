@@ -1,6 +1,7 @@
 import type Phaser from 'phaser';
 import type { SimSnapshot } from '../../core';
-import type { Palette } from './palette';
+import type { BoardLook } from './biomePalette';
+import { SNAKE } from './boardParts';
 
 // ART-001 interpolated head centre in board pixels (the capy face anchors here).
 export function snakeHeadPoint(s: SimSnapshot, cell: number): { x: number; y: number } {
@@ -9,32 +10,37 @@ export function snakeHeadPoint(s: SimSnapshot, cell: number): { x: number; y: nu
   return { x: (lerp(s.headFrom.x, head.x) + 0.5) * cell, y: (lerp(s.headFrom.y, head.y) + 0.5) * cell };
 }
 
-export const SNAKE_BODY_CELL = 0.78; // body width as a fraction of a cell
-export const SNAKE_HEAD_CELL = 0.46; // head radius as a fraction of a cell
-export const SNAKE_RIM_CELL = 0.1; // UIFIX-R5 rim width as a fraction of a cell
+// D3-R12 widths in px (pure, testable).
+export function snakeWidths(cell: number): { body: number; outline: number; stripe: number; head: number; headOutline: number; belly: number } {
+  return { body: cell * SNAKE.body, outline: cell * SNAKE.outline, stripe: cell * SNAKE.stripe, head: cell * SNAKE.head,
+    headOutline: cell * SNAKE.headOutline, belly: cell * SNAKE.belly };
+}
 
-// MEC-001 interpolate the head and tail; rounded joints match the canvas stroke.
-export function drawSnake(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: number, p: Palette, gulp: number, drawFace = true, rim: number | null = null, bulge = 0): void {
+// MEC-001 interpolate the head and tail; D3-R12 outlined body, highlight stripe, 1.4-cell head disc.
+export function drawSnake(g: Phaser.GameObjects.Graphics, s: SimSnapshot, cell: number, look: BoardLook, gulp: number, drawFace = true, bulge = 0): void {
   const last = s.snake[s.snake.length - 1]!;
   const lerp = (a: number, b: number): number => a + (b - a) * s.tickAlpha;
   const center = (x: number, y: number): { x: number; y: number } => ({ x: (x + 0.5) * cell, y: (y + 0.5) * cell });
   const headPt = snakeHeadPoint(s, cell);
   const tailPt = center(lerp(s.tailFrom.x, last.x), lerp(s.tailFrom.y, last.y));
   const points = [headPt, ...s.snake.slice(1).map(c => center(c.x, c.y)), tailPt];
-  if (rim !== null) { // UIFIX-R5 bright outline under body and head (skin-agnostic: the capy face is a separate image)
-    const w = cell * SNAKE_BODY_CELL + 2 * cell * SNAKE_RIM_CELL;
-    g.lineStyle(w, rim).strokePoints(points, false); g.fillStyle(rim);
-    for (const pt of points) g.fillCircle(pt.x, pt.y, w / 2);
-    g.fillCircle(headPt.x, headPt.y, cell * SNAKE_HEAD_CELL * (1 + 0.18 * gulp) + cell * SNAKE_RIM_CELL);
+  const w = snakeWidths(cell), headR = w.head * (1 + SNAKE.gulp * gulp);
+  const pass = (color: number, width: number, pts: { x: number; y: number }[], alpha = 1): void => {
+    g.lineStyle(width, color, alpha).strokePoints(pts, false); g.fillStyle(color, alpha);
+    for (const pt of pts) g.fillCircle(pt.x, pt.y, width / 2);
+  };
+  pass(look.outline.snake, w.outline, points);
+  g.fillStyle(look.outline.snake).fillCircle(headPt.x, headPt.y, headR + w.headOutline);
+  pass(look.snake.body, w.body, points);
+  pass(look.snake.belly, w.belly, points);
+  const dy = cell * SNAKE.stripeOffset;
+  if (points.length > 1) { // highlight stripe along the back, not on the head
+    const hi = points.slice(1).map(pt => ({ x: pt.x, y: pt.y - dy }));
+    g.lineStyle(w.stripe, 0xffffff, SNAKE.stripeAlpha).strokePoints(hi, false);
   }
-  for (const [color, width] of [[p.snake, cell * SNAKE_BODY_CELL], [p.belly, cell * 0.26]]) {
-    g.lineStyle(width, color).strokePoints(points, false);
-    g.fillStyle(color);
-    for (const pt of points) g.fillCircle(pt.x, pt.y, width / 2);
-  }
-  g.fillStyle(p.snake).fillCircle(headPt.x, headPt.y, cell * SNAKE_HEAD_CELL * (1 + 0.18 * gulp));
+  g.fillStyle(look.snake.head).fillCircle(headPt.x, headPt.y, headR);
   // MOT-3-R12 one extra disc on the first body point behind the head (render-only; the head cell does not move)
-  if (bulge > 0 && points.length > 2) g.fillStyle(p.snake).fillCircle(points[1]!.x, points[1]!.y, cell * SNAKE_BODY_CELL / 2 * (1 + bulge));
+  if (bulge > 0 && points.length > 2) g.fillStyle(look.snake.body).fillCircle(points[1]!.x, points[1]!.y, w.body / 2 * (1 + bulge));
   const fx = s.dir.x, fy = s.dir.y, px = -fy, py = fx;
   if (drawFace) for (const side of [-1, 1]) {
     const ex = headPt.x + fx * cell * 0.14 + px * side * cell * 0.2;

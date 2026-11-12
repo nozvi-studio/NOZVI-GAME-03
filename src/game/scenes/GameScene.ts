@@ -241,7 +241,7 @@ export class GameScene extends Phaser.Scene {
     const mo = this.balance.motion;
     drawMango(this.layers.mango, snapshot, cell, p, this.look, time, this.reduced, mangoGrow(time, this.mangoBornAt, mo.popInMs, mo.overshoot, mo.popFromScale));
     drawSkillObjects(this.layers.skills, snapshot, cell, p, this.look, this.balance, time);
-    drawSnake(this.layers.snake, snapshot, cell, p, Math.max(this.effects.gulp, this.effects.pop), false, this.look.outline.snake,
+    drawSnake(this.layers.snake, snapshot, cell, this.look, Math.max(this.effects.gulp, this.effects.pop), false,
       this.effects.turnBulge * (this.balance.juice.events.turnBodyBulge - 1));
     this.capy.update(snapshot, time, cell, this.effects.turnDeg);
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);
