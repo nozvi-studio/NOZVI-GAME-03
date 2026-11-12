@@ -51,7 +51,7 @@ export class GameScene extends Phaser.Scene {
   private boardClip!: Phaser.GameObjects.Graphics;
   private layers!: Record<'ground' | 'terrain' | 'hazards' | 'mango' | 'skills' | 'snake' | 'overlay' | 'effects', Phaser.GameObjects.Graphics>;
   private effects!: Effects;
-  private steer!: SteerFx;
+  private steer!: SteerFx; private readonly headPt = { x: 0, y: 0 };
   private capy!: CapyHead;
   private bg?: Phaser.GameObjects.Image;
 
@@ -86,7 +86,8 @@ export class GameScene extends Phaser.Scene {
         ringMax: juice.events.ringMax, sparkleMax: juice.events.sparkleMax, overshoot: this.balance.motion.overshoot,
         sparkleRadius: juice.events.sparkleRadius, sparkleThickness: juice.events.sparkleThickness });
     this.steer = new SteerFx(this, this.board, cellPx(this.balance), this.balance.motion.d3, this.balance.motion.overshoot, this.reduced);
-    this.events.on('steer', (d: { dx: Step; dy: Step }) => this.steer.chevron(d.dx, d.dy, this.time.now)); // D3-R25
+    const onSteer = (d: { dx: Step; dy: Step }): void => this.steer.chevron(d.dx, d.dy, this.time.now); // D3-R25
+    this.events.on('steer', onSteer);
     this.capy = new CapyHead(this, this.board, this.layers.snake, this.balance.ui.capy, cellPx(this.balance), this.reduced, this.time.now);
     this.flow = createFlow();
     // P1 scene flow: the session run already exists (Home/Loadout/Results); Game opens on the P0 countdown.
@@ -108,7 +109,7 @@ export class GameScene extends Phaser.Scene {
       this.game.events.off(Phaser.Core.Events.BLUR, pause);
       this.game.events.off(Phaser.Core.Events.HIDDEN, hidden);
       this.game.events.off('settings-closed', recolor);
-      this.events.off('steer');
+      this.events.off('steer', onSteer);
       this.effects.reset();
       this.beats.clear();
       this.board.clearMask(true);
@@ -264,6 +265,7 @@ export class GameScene extends Phaser.Scene {
     drawIceArrow(this.layers.overlay, snapshot, cell, this.look);
     this.effects.draw(this.layers.effects, p);
     const h = snapshot.snake[0];
-    this.steer.update(time, h ? { x: (h.x + 0.5) * cell, y: (h.y + 0.5) * cell } : null);
+    if (h) { this.headPt.x = (h.x + 0.5) * cell; this.headPt.y = (h.y + 0.5) * cell; }
+    this.steer.update(time, h ? this.headPt : null);
   }
 }

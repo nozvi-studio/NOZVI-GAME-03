@@ -4,7 +4,7 @@ import { d3, d3m, ui } from '../ui/layout';
 import { bindPress } from '../scenes/ui';
 import { attachFeedback } from '../ui/feedback';
 import { hostOf, lipPx, skinTexture } from '../ui/skin';
-import { quotaFilled } from '../ui/barEdgeModel';
+import { quotaFlash } from '../ui/barEdgeModel';
 import { progressBar } from '../ui/widgets';
 import { hudIconKey } from './hudIcons';
 import { D3_RUN, type D3HudLayout, type R } from './d3HudLayout';
@@ -128,7 +128,7 @@ export class HudTop {
   private syncBars(quota: number): void {
     if (quota !== this.quotaTarget) {
       const prev = this.quotaTarget, jump = prev < 0 || quota < prev; this.quotaTarget = quota;
-      if (prev >= 0 && quotaFilled(prev, quota)) this.mangoBar.flash(this.scene.time.now);   // D3-R27 one flash when the quota fills
+      if (quotaFlash(prev, quota)) this.mangoBar.flash(this.scene.time.now);   // D3-R27 one flash at the level-up reset (or when full)
       if (!jump) this.bump('levelBar', this.cfg.releaseOvershoot, this.cfg.tapUpMs);   // R8 pop on a progress change
       this.motion.ease(this.quotaEase, quota, jump ? 0 : this.cfg.barEaseMs, x => { this.mangoBar.set(x, 1); });
     }
