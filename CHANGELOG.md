@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(hud): D3-R16 strip cards (light panel skin, up/warn icons, gold biome chip, slot-coloured side-by-side skill pills) and U5-R2 hazard "incoming" warnings queued in the strip via BannerLayer.enqueue.
 - fix(hud): D3-R15 countdown chip is the light (white) board chip; shared chipWidthMock; navy gear; dead hud.countdown tokens removed.
 - feat(hud): D3-R15 mango countdown digit and butter start chip with ramp line (U5-R7).
 - feat(hud): D3-R15 pause panel (300 px card, butter chip, gear on Settings) and bigger pause glyph U5-R1 (bars 7x22).

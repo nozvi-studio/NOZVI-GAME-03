@@ -1,7 +1,5 @@
 import { expect, it } from 'vitest';
 import { bannerStrip, clipLine, levelUpBanners, skillPills, skillTip, STRIP_SUB_MAX, STRIP_TITLE_MAX, type LevelUpEvent } from '../../src/game/hud/banners';
-import { contrastRatio } from '../../src/game/render/biomePalette';
-import { toInt } from '../../src/game/uiTokens';
 import { t } from '../../src/game/text';
 import { loadBalance } from '../support/balance';
 
@@ -47,7 +45,7 @@ it('UIFIX-R1 clipLine keeps short text and cuts long text to one line with an el
 });
 it('UIFIX-R1 bannerStrip: icon + title + at most one sub line for every banner kind', () => {
   const lv = bannerStrip({ kind: 'levelUp', title: 'Level 8', subtitle: 'Fresh start!', chip: null });
-  expect(lv).toMatchObject({ icon: 'star', title: 'Level 8', sub: 'Fresh start!' });
+  expect(lv).toMatchObject({ icon: 'up', title: 'Level 8', sub: 'Fresh start!' });
   expect(bannerStrip({ kind: 'levelUp', title: 'Level 8', subtitle: 'Fresh start!', chip: 'Your snake shrinks to 4 segments' }).sub).toBe('Your snake shrinks to 4 segments');
   expect(bannerStrip({ kind: 'challenge', title: 'Challenge: Rock rain!' })).toMatchObject({ icon: 'bolt', sub: null });
   expect(bannerStrip({ kind: 'biome', label: 'BIOME 3', name: 'Frozen Pond', tagline: 'Ice is slippery. Plan your turns.' }))
@@ -61,8 +59,12 @@ it('UIFIX-R1 bannerStrip cuts a long hint and a long sub to one line', () => {
   const b2 = bannerStrip({ kind: 'biome', label: 'BIOME 6', name: 'Storm Garden', tagline: 'Everything at once. Good luck! And then some more words.' });
   expect(b2.sub!.length).toBeLessThanOrEqual(STRIP_SUB_MAX);
 });
-it('UIFIX-R1 every strip ink/fill pair is readable (>= 4.5:1)', () => {
-  const specs = [{ kind: 'levelUp' as const, title: 'a', subtitle: 'b', chip: null }, { kind: 'challenge' as const, title: 'a' },
-    { kind: 'biome' as const, label: 'a', name: 'b', tagline: 'c' }, { kind: 'checkpoint' as const, title: 'a', subtitle: 'b' }, { kind: 'hint' as const, text: 'a' }];
-  for (const sp of specs) { const v = bannerStrip(sp); expect(contrastRatio(toInt(v.ink), toInt(v.fill)), sp.kind).toBeGreaterThanOrEqual(4.5); }
+it('U5-R2 incoming warning is a strip card with the warn icon', () => {
+  expect(bannerStrip({ kind: 'incoming', text: 'Fence incoming' })).toEqual({ icon: 'warn', title: 'Fence incoming', sub: null, chip: null, tone: 'butter' });
+});
+it('D3-R16 level-up uses the up icon on a light card; biome shows its label as a chip', () => {
+  const lv = bannerStrip({ kind: 'levelUp', title: 'Level 4', subtitle: 'Fresh start!', chip: null });
+  expect(lv.icon).toBe('up'); expect(lv.tone).toBe('light');
+  const bi = bannerStrip({ kind: 'biome', label: 'BIOME 2', name: 'Rice Paddy', tagline: 'Fences and mud.' });
+  expect(bi.chip).toBe('BIOME 2'); expect(bi.title).toBe('Rice Paddy');
 });

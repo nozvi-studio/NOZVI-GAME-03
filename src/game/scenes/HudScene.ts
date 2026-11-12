@@ -178,7 +178,7 @@ export class HudScene extends Phaser.Scene {
       case 'shrunk': this.shrunkTo = e.from > e.to ? e.to : null; break; // MEC-001-R4 chip only when the snake shrank
       case 'levelUp': this.onLevelUp(e, batch); break;
       case 'hazardIncoming':
-        if (e.family === 'fence' || e.family === 'maze' || e.family === 'terrain') this.banners.tip(incomingBanner(e.family));
+        if (e.family === 'fence' || e.family === 'maze' || e.family === 'terrain') this.banners.enqueue({ kind: 'incoming', text: incomingBanner(e.family) });
         break;
       case 'orbSpawned':
         if (!this.orbTipShown && this.bestLevelAtStart < 2) { this.orbTipShown = true; this.banners.tip(t('tip.orb.first')); }

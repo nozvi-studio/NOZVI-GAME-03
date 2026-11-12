@@ -150,7 +150,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
     h.flush(); expect(h.last('banner-title').text).toBe('Challenge: Rock rain!');
   });
   it('UIFIX-R1 strips never scale: a long challenge title is clipped, not shrunk', () => {
-    const h = setup(); measureText(h, 700);
+    const h = setup(); measureText(h, 400); // D3-R16 the title is Lilita: 28 characters at the board size measure about 400 px
     h.game.events.emit('sim-events', [{ type: 'levelUp', level: 5, biome: 1, challenge: true, biomeChanged: false, clearedLevelTimeMs: 1 }]);
     h.flush();
     expect(h.last('banner-title').scale).toBe(1);

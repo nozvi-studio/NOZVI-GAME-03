@@ -3,12 +3,14 @@ import type { Balance } from '../../core';
 import { BOARD, HEIGHT, WIDTH } from '../layout';
 import { reduceMotion } from '../render/palette';
 import { bannerMotion } from '../juice/juiceMap';
-import { TOKENS, toInt } from '../uiTokens';
+import { FONT_TITLE, FONT_UI, TOKENS, toInt } from '../uiTokens';
 import { d3, ui } from '../ui/layout';
-import { drawCard, hudLabel } from './draw';
+import { hostOf, lipPx, skinTexture } from '../ui/skin';
+import { chip } from '../ui/widgets';
+import { hudLabel } from './draw';
 import { bannerStrip, type BannerSpec, type SkillPill } from './banners';
 import { hudIconKey } from './hudIcons';
-import { bannerStripRect, STRIP_MOCK, skillTipPlacement, stripRows } from './hudLayout';
+import { bannerStripRect, STRIP_MOCK, skillTipPlacement } from './hudLayout';
 import type { D3HudLayout } from './d3HudLayout';
 
 // SkillActiveD2 / tip metrics in mockup px; the banner strip geometry lives in hudLayout (STRIP_MOCK).
@@ -17,6 +19,8 @@ const M = {
   shadowDy: 4,
   tip: { font: 15, padX: 28, padY: 20, minH: 46, radius: 16, floor: 60, margin: 16, tailLeft: 50, tailGap: 11, tailHalf: 9, tailH: 10 },
   pill: { h: 30, font: 14, icon: 18, padL: 10, gap: 6, padR: 14, rowGap: 6 },
+  // D3-R16 strip card metrics in 360-wide board px (d3()): icon 22, gap 8, title Lilita 15, sub Nunito 12, line-height 1.15.
+  card: { chipH: 20, icon: 22, gap: 8, title: 15, sub: 12, lineH: 1.15, unit: 0.5, titleStroke: 0 },
   tint: { radius: 20, ring: 4, ringAlpha: 0.8, inset: 2, ringInset: 6 },
 } as const;
 
@@ -24,8 +28,8 @@ const M = {
 export class BannerLayer {
   private readonly root: Phaser.GameObjects.Container; private readonly tipBox: Phaser.GameObjects.Container;
   private readonly tipG: Phaser.GameObjects.Graphics; private readonly tipText: Phaser.GameObjects.Text;
-  private readonly pills: { c: Phaser.GameObjects.Container; g: Phaser.GameObjects.Graphics; text: Phaser.GameObjects.Text; icon: Phaser.GameObjects.Image }[] = [];
-  private readonly tint: Phaser.GameObjects.Graphics; private readonly pillKeys = ['', '']; private readonly strip: ReturnType<typeof bannerStripRect>;
+  private readonly pills: { c: Phaser.GameObjects.Container; lip: Phaser.GameObjects.Image; face: Phaser.GameObjects.Image; text: Phaser.GameObjects.Text; icon: Phaser.GameObjects.Image }[] = [];
+  private readonly tint: Phaser.GameObjects.Graphics; private readonly pillKeys = ['', '']; private readonly pillW = [0, 0]; private readonly strip: ReturnType<typeof bannerStripRect>;
   private readonly enter = { k: 0 }; private queue: BannerSpec[] = []; private cardTimer?: Phaser.Time.TimerEvent; private tipTimer?: Phaser.Time.TimerEvent;
 
   constructor(private readonly scene: Phaser.Scene, private readonly l: D3HudLayout, private readonly b: Balance) {
@@ -37,15 +41,19 @@ export class BannerLayer {
     this.tipBox = scene.add.container(0, 0, [this.tipG, this.tipText]);
     this.showTip(false);
     for (const slot of [0, 1] as const) {
-      const g = scene.add.graphics(), icon = scene.add.image(0, 0, hudIconKey('slowmo', 'active')).setDisplaySize(ui(M.pill.icon), ui(M.pill.icon));
-      const text = hudLabel(scene, 0, 0, '', M.pill.font, TOKENS.text.primary, 900, `pill-${slot}`).setOrigin(0, 0.5);
-      const c = scene.add.container(0, 0, [g, icon, text]).setVisible(false);
-      this.pills.push({ c, g, text, icon });
+      const lip = scene.add.image(0, 0, '__DEFAULT'), face = scene.add.image(0, 0, '__DEFAULT'), icon = scene.add.image(0, 0, hudIconKey('slowmo', 'on')).setDisplaySize(ui(M.pill.icon), ui(M.pill.icon));
+      const text = hudLabel(scene, 0, 0, '', M.pill.font, TOKENS.d3.white, 900, `pill-${slot}`).setOrigin(0, 0.5);
+      const c = scene.add.container(0, 0, [lip, face, icon, text]).setVisible(false);
+      this.pills.push({ c, lip, face, text, icon });
     }
     this.drawTint();
   }
 
   show(queue: readonly BannerSpec[]): void { this.reset(); this.queue = [...queue]; this.next(); }
+  /** U5-R2 appends one card; a running queue is never reset, an idle strip starts a new one. A full queue drops the new card (bannerQueueMax). */
+  enqueue(spec: BannerSpec): void {
+    if (this.root.visible) { if (this.queue.length < this.b.ui.hud.bannerQueueMax) this.queue.push(spec); } else this.show([spec]);
+  }
   /** Clears the cards, their timer and pop tween; the tip is left alone (a tip may be raised just before a queue). */
   private reset(): void { this.cardTimer?.remove(); this.scene.tweens.killTweensOf(this.root); this.scene.tweens.killTweensOf(this.enter); this.root.setScale(1).setAlpha(1).setPosition(0, 0); this.queue = []; this.clear(); this.root.setVisible(false); }
   hide(): void { this.reset(); this.tipTimer?.remove(); this.showTip(false); }
@@ -68,14 +76,22 @@ export class BannerLayer {
   }
   private clear(): void { this.root.removeAll(true); }
 
+  /** D3-R16 strip card: light panel skin over the strip rect, icon (or gold chip for a biome) beside a centred title / sub block. */
   private render(s: BannerSpec): void {
-    const v = bannerStrip(s), m = STRIP_MOCK, r = this.strip, rows = stripRows(v.sub !== null, r.h);
+    const v = bannerStrip(s), m = M.card, r = this.strip, host = hostOf(this.scene), unit = d3(m.unit), cy = r.y + r.h / 2;
     const add = <T extends Phaser.GameObjects.GameObject>(o: T): T => { this.root.add(o); return o; };
-    add(this.scene.add.graphics()).fillStyle(toInt(v.fill), m.alpha).fillRoundedRect(r.x, r.y, r.w, r.h, ui(m.radius));
-    const icon = ui(m.icon), tx = r.x + ui(m.pad + m.icon + m.iconGap);
-    add(this.scene.add.image(r.x + ui(m.pad) + icon / 2, r.y + r.h / 2, hudIconKey(v.icon)).setDisplaySize(icon, icon));
-    add(hudLabel(this.scene, tx, r.y + rows.titleY, v.title, m.title, v.ink, 900, 'banner-title').setOrigin(0, 0));
-    if (v.sub !== null && rows.subY !== null) add(hudLabel(this.scene, tx, r.y + rows.subY, v.sub, m.sub, v.ink, 800, 'banner-subtitle').setOrigin(0, 0));
+    const img = (state: 'lip' | 'rest', y: number) => this.scene.add.image(r.x + r.w / 2, y, skinTexture(host, 'panel', 'light', r.w, r.h, state, unit));
+    add(img('lip', cy + lipPx('panel', 'light', unit))); add(img('rest', cy));
+    const title = this.scene.add.text(0, 0, v.title, { fontFamily: FONT_TITLE, fontSize: `${d3(m.title)}px`, color: TOKENS.d3.text }).setOrigin(0.5).setName('banner-title');
+    const sub = v.sub === null ? null : this.scene.add.text(0, 0, v.sub, { fontFamily: FONT_UI, fontSize: `${d3(m.sub)}px`, fontStyle: '800', color: TOKENS.d3.text }).setOrigin(0.5).setName('banner-subtitle');
+    const lead = v.chip !== null ? chip(this.scene, 0, 0, v.chip, '', 'banner-chip', { tone: 'mango' }) : this.scene.add.image(0, 0, hudIconKey(v.icon)).setDisplaySize(d3(m.icon), d3(m.icon));
+    const k = v.chip !== null ? d3(m.chipH) / (lead as Phaser.GameObjects.Container).height : 1; lead.setScale(k);
+    if (v.chip === null && v.tone === 'mint') (lead as Phaser.GameObjects.Image).setTint(toInt(TOKENS.hud.mintInk));
+    const leadW = v.chip !== null ? (lead as Phaser.GameObjects.Container).width * k : d3(m.icon), textW = Math.max(title.width, sub?.width ?? 0);
+    const x0 = r.x + (r.w - (leadW + d3(m.gap) + textW)) / 2, tx = x0 + leadW + d3(m.gap) + textW / 2;
+    const lh = d3(m.title) * m.lineH, sh = d3(m.sub) * m.lineH, block = sub === null ? lh : lh + sh, top = cy - block / 2;
+    lead.setPosition(x0 + leadW / 2, cy); title.setPosition(tx, top + lh / 2); sub?.setPosition(tx, top + lh + sh / 2);
+    add(lead); add(title); if (sub) add(sub);
   }
 
   /** Dark tooltip bubble; a slot adds a tail that points at that skill button (MEC-007-R12, BannersD2 skillUnlocked). */
@@ -97,20 +113,38 @@ export class BannerLayer {
   /** The text carries its own flag as well as the box, so a probe on either sees the state. */
   private showTip(on: boolean): void { this.tipBox.setVisible(on); this.tipText.setVisible(on); }
 
+  /** D3-R16 two live skill pills sit side by side centred under the strip when they fit, else stacked; each is a chip skin in its slot colour. */
   setPills(pills: readonly SkillPill[]): void {
-    const m = M.pill;
+    const m = M.pill, host = hostOf(this.scene), h = ui(m.h), unit = ui(1);
+    let changed = false;
+    const live = ([0, 1] as const).map(slot => pills.find(x => x.slot === slot) ?? null);
     for (const slot of [0, 1] as const) {
-      const p = this.pills[slot]!, spec = pills.find(x => x.slot === slot) ?? null;
-      const key = spec ? `${spec.skill}|${spec.text}|${pills.indexOf(spec)}` : '';
+      const p = this.pills[slot]!, spec = live[slot]!;
+      const key = spec ? `${spec.skill}|${spec.text}|${pills.length}` : '';
       if (key === this.pillKeys[slot]) continue;
-      this.pillKeys[slot] = key;
+      this.pillKeys[slot] = key; changed = true;
       p.c.setVisible(spec !== null); p.text.setVisible(spec !== null); if (!spec) continue;
-      p.text.setText(spec.text); p.icon.setTexture(hudIconKey(spec.skill, spec.skill === 'tailSnip' || spec.skill === 'mangoRain' ? 'ink' : 'active'));
-      const h = ui(m.h), w = ui(m.padL + m.icon + m.gap + m.padR) + p.text.width;
-      const y = this.strip.y + this.strip.h + ui(STRIP_MOCK.pillGap) + pills.indexOf(spec) * (h + ui(m.rowGap)), x = (WIDTH - w) / 2;
-      p.g.clear(); drawCard(p.g, x, y, w, h, h / 2, TOKENS.surface.card, { dy: M.shadowDy });
-      p.icon.setPosition(x + ui(m.padL + m.icon / 2), y + h / 2); p.text.setPosition(x + ui(m.padL + m.icon + m.gap), y + h / 2);
+      const tone = slot === 0 ? 'skillA' : 'skillB';
+      p.text.setText(spec.text); p.icon.setTexture(hudIconKey(spec.skill, 'on'));
+      const w = ui(m.padL + m.icon + m.gap + m.padR) + p.text.width;
+      p.lip.setTexture(skinTexture(host, 'chip', tone, w, h, 'lip', unit)); p.face.setTexture(skinTexture(host, 'chip', tone, w, h, 'rest', unit));
+      this.pillW[slot] = w;
     }
+    if (!changed) return;
+    const ws = live.map((x, i) => (x ? this.pillW[i]! : 0)), both = live[0] !== null && live[1] !== null;
+    const side = both && ws[0]! + ws[1]! + ui(m.rowGap) <= this.strip.w, y0 = this.strip.y + this.strip.h + ui(STRIP_MOCK.pillGap) + h / 2;
+    // Children carry absolute positions (the container stays at 0,0); cx, cy = pill centre.
+    const place = (slot: 0 | 1, cx: number, cy: number): void => {
+      const p = this.pills[slot]!, w = ws[slot]!, tone = slot === 0 ? 'skillA' : 'skillB';
+      p.lip.setPosition(cx, cy + lipPx('chip', tone, unit)); p.face.setPosition(cx, cy);
+      p.icon.setPosition(cx - w / 2 + ui(m.padL + m.icon / 2), cy); p.text.setPosition(cx - w / 2 + ui(m.padL + m.icon + m.gap), cy);
+    };
+    let row = 0;
+    for (const slot of [0, 1] as const) {
+      if (!live[slot]) continue;
+      if (!side) place(slot, WIDTH / 2, y0 + row++ * (h + ui(m.rowGap)));
+    }
+    if (side) { const tot = ws[0]! + ws[1]! + ui(m.rowGap), left = WIDTH / 2 - tot / 2; place(0, left + ws[0]! / 2, y0); place(1, left + ws[0]! + ui(m.rowGap) + ws[1]! / 2, y0); }
   }
   setSlowmo(on: boolean): void { this.tint.setVisible(on); }
   private drawTint(): void {

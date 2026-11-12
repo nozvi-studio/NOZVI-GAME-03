@@ -136,10 +136,9 @@ it('UIFIX-R1 BannerLayer draws every banner as one strip inside the board top ed
   const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
   const r = bannerStripRect(b.board.cols);
   layer.show([{ kind: 'levelUp', title: 'Level 8', subtitle: 'Fresh start!', chip: null }]);
-  const rects = h.objects.flatMap(o => o.commands).filter(c => c[0] === 'fillRoundedRect');
-  expect(rects.some(c => c[1] === r.x && c[2] === r.y && c[3] === r.w && c[4] === r.h)).toBe(true);
-  const fills = h.objects.flatMap(o => o.commands).filter(c => c[0] === 'fillStyle');
-  expect(fills.some(c => c[2] === STRIP_MOCK.alpha)).toBe(true);
+  // D3-R16 the strip is a light panel skin image of the strip rect size, centred on it.
+  const face = h.objects.find(o => o.name === `d3/panel/light/rest/${Math.ceil(r.w)}x${Math.ceil(r.h)}`);
+  expect(face).toBeTruthy(); expect(face!.x).toBe(r.x + r.w / 2); expect(face!.y).toBe(r.y + r.h / 2);
   layer.setPills([{ slot: 0, skill: 'slowmo', text: 'Slow-mo · 3 s left' }]);
   const pillRect = h.find('pill-0');
   expect(pillRect.y).toBeGreaterThanOrEqual(r.y + r.h);
