@@ -52,6 +52,7 @@
 - Rubble family and `skills.shield.rubbleLifeMs` removed (chore/remove-rubble-family, 2026-11-10).
 
 ## Last session summary
+- 2026-11-12 (local lead): head ring fix merged (fix/unified-head-size): head disc derived from ui.capy.headCellScale, one head size for every skin (D3-R12 amended, ART-003 step 6, DECISIONS); 1739 pass; screenshots tmp/qa/head/.
 - 2026-11-12 (local lead, cont.): U4b planned and executed (Sonnet implementers, Opus review: per-frame snake allocations removed); mango size + HUD icon fixed after screenshots. Incident: `git worktree remove --force` deleted the main node_modules through the agent junction; owner reinstalled. Rule in memory: remove the junction first, never --force.
 - 2026-11-12 (local lead): U4a executed (Tasks 1-2 in parallel worktrees, 3-7 sequential, Sonnet implementers, Opus final review: one fix, debug buttons moved to bottom corners); lead verified each merge with full suite + typecheck and a headless screenshot pass. Low minors left: literal 360/60 in HudTop/BottomGroup.
 - 2026-11-11 (local lead): Results invisible-buttons bug fixed (Motion lazy rest alpha); fixed terrain spec written + approved (after U7); D3 boards + U3 rulings H1..H6 approved; U3 Boot + Home executed via subagents (Haiku/Sonnet implementers, Sonnet reviews, Opus final), merged. Deferred minors in the U3 ledger summary (STATUS Known issues not changed).
