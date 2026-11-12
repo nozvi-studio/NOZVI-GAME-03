@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): D3 D-pad on light round skin in four key rects, live relayout of skills/bottom/top when the D-pad setting changes mid-run (D3-R9 R4).
 - feat(ui): D3 skill buttons - skill skins by slot tone, rim charge gauge, white countdown ring, cost badge, locked empty slot with denied tap (onDenied), tap burst on cast, place() for D-pad toggle (D3-R14 R1 R21 R23 R24); new white `on` HUD icon tone.
 - feat(ui): D3 bottom group - energy bar, steer hint, checkpoint chip (D3-R9 R2 R3); HudTop temporary energy and chip removed; chip gains a short L<n> form.
 - feat(ui): D3 HUD top - light pause, level ribbon, score chip, mango bar (D3-R13); biome line removed (R5); energy pill and checkpoint chip temporarily kept in HudTop until the bottom group (Task 4).
