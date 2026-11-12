@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { emptyLog, loadLog, nextRun, appendRecord, flushLog, memoryStore, LOG_KEY, deathCauseReport, abandonedRuns } from '../../src/meta';
+import { emptyLog, loadLog, nextRun, appendRecord, flushLog, memoryStore, LOG_KEY, deathCauseReport, abandonedRuns, recordError, ERROR_STACK_MAX } from '../../src/meta';
 import type { LogRecord, KeyValueStore } from '../../src/meta';
 const end = (runId: number, cause = 'rock'): LogRecord => ({ type: 'run_end', t: runId, runId, level: 3, score: 8, cause, durationMs: 100, startLevel: 1, levelsCleared: 2, won: cause === 'clear' });
 it('MEC-003-R18 run log keeps the last 500 entries and cumulative deathCounts', () => {
@@ -123,4 +123,18 @@ it('P3b2-R3 abandonedRuns lists started runs that never ended, ignoring debug ru
     { type: 'run_start', t: 4, runId: 3, startLevel: 1, startEnergy: 0, loadout: [null, null], entry: 'home', debug: true }, sStart(4, 5, 'home'), sEnd(4, 6, 'quit')]);
   expect(abandonedRuns(log)).toEqual([2]);
   expect(abandonedRuns(emptyLog())).toEqual([]);
+});
+
+it('MEC-003-R22 recordError appends an error record to the last run, survives reload and never counts as a death', () => {
+  const store = memoryStore();
+  flushLog(store, appendRecord(nextRun(emptyLog()).log, { type: 'run_start', t: 1, runId: 1, startLevel: 11, startEnergy: 100, loadout: ['shield', null], entry: 'home' }, 500));
+  expect(recordError(store, 'TypeError: x is null', 'at paint (SkillButtons.ts:98)\n'.repeat(200), 5, 500)).toBe(true);
+  const log = loadLog(store), last = log.entries[log.entries.length - 1]!;
+  expect(last).toMatchObject({ type: 'error', runId: 1, t: 5, message: 'TypeError: x is null' });
+  expect((last as { stack: string }).stack.length).toBeLessThanOrEqual(ERROR_STACK_MAX);
+  expect(log.deathCounts).toEqual({});
+});
+it('MEC-003-R22 recordError never throws on broken storage', () => {
+  const broken = { get: () => { throw new Error('no'); }, set: () => { throw new Error('no'); } };
+  expect(() => recordError(broken, 'm', '', 1, 500)).not.toThrow();
 });

@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(log): MEC-003-R22 uncaught errors and rejections are written to the run log with their stack, so an exported log shows the cause of a freeze.
 - fix(ui): pre-U4c owner review — snake face matches the D3 Home board (oval skull, white sclera, muzzle oval, top gloss; no nostrils/diamond); headCellScale 1.2 -> 1.6 so the visible head is ~1.4 cells, wider than the body (D3-R12).
 - fix(hud): affordable skill buttons drop the full rim gauge; skin gloss clipped to the face and the skill gloss inset like the board CSS (D3-R14).
 - fix(ui): Home PLAY sweep slower (1100 ms, every 2 pulses), eased and soft-edged (D3-R21).

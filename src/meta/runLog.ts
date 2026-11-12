@@ -6,6 +6,7 @@ export type LogRecord =
   | { type: 'level_up'; t: number; runId: number; level: number; levelTimeMs: number }
   | { type: 'skill_used'; t: number; runId: number; skill: string; level: number; energyBefore: number }
   | { type: 'checkpoint_unlocked'; t: number; runId: number; level: number; reachedLevel: number }
+  | { type: 'error'; t: number; runId: number; message: string; stack: string }
   | { type: 'run_end'; t: number; runId: number; level: number; score: number; cause: string; durationMs: number; startLevel: number; levelsCleared: number; won: boolean; turns?: number; context?: 'ice' | 'mud' };
 export interface RunLog { version: 1; nextRunId: number; entries: LogRecord[]; deathCounts: Record<string, number> }
 export const LOG_KEY = 'mango-snake.log';
@@ -23,6 +24,7 @@ function isRecord(v: unknown): v is LogRecord {
     case 'level_up': return numbers('level', 'levelTimeMs');
     case 'skill_used': return numbers('level', 'energyBefore') && typeof v.skill === 'string';
     case 'checkpoint_unlocked': return numbers('level', 'reachedLevel');
+    case 'error': return typeof v.message === 'string' && typeof v.stack === 'string';
     case 'run_end': return numbers('level', 'score', 'durationMs', 'startLevel', 'levelsCleared') && typeof v.cause === 'string' && typeof v.won === 'boolean'
       && (v.turns === undefined || finite(v.turns)) // turns is absent in logs written before it existed
       && (v.context === undefined || v.context === 'ice' || v.context === 'mud'); // MEC-003-R19 only tile deaths carry context
@@ -144,4 +146,13 @@ export function deathCauseReport(log: RunLog, sessionGapMs: number, limit = 0.4)
   const familyShare = shares(familyN), playerShare = shares(playerN), playerTotal = shares(baseN);
   const over = (m: Record<string, number>) => Object.keys(m).filter(k => m[k]! > limit).sort((a, b) => m[b]! - m[a]!);
   return { deaths, familyShare, playerShare, over40: over(familyShare), review: over(playerTotal) };
+}
+
+// MEC-003-R22 crash capture: an uncaught exception is appended to the log under the latest run, so an exported log carries the stack.
+export const ERROR_STACK_MAX = 1500;
+export function recordError(store: KeyValueStore, message: string, stack: string, now: number, maxEntries: number): boolean {
+  try {
+    const log = loadLog(store), runId = Math.max(1, log.nextRunId - 1);
+    return flushLog(store, appendRecord(log, { type: 'error', t: now, runId, message: message.slice(0, 300), stack: stack.slice(0, ERROR_STACK_MAX) }, maxEntries));
+  } catch { return false; }
 }
