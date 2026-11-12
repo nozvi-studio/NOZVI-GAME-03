@@ -27,7 +27,7 @@ export function hudIconSvg(n: IconName, tone: IconTone = 'ink'): string {
     case 'biome': return line(TOKENS.text.slate, 2.4, '<path d="M12 2v20M3.4 7l17.2 10M20.6 7L3.4 17M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5"/>');
     case 'bolt': return fill(TOKENS.sky.energy, '<path d="M13 2L5 13.5h6L10 22l9-12.5h-6.5L13 2z"/>');
     case 'star': return fill(TOKENS.accent.gold, '<path d="M12 2.5l2.9 6.2 6.6.8-4.9 4.6 1.3 6.6L12 17.4l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/>');
-    case 'mango': return fill(TOKENS.accent.orange, `<ellipse cx="12" cy="14" rx="7.5" ry="8"/><path fill="${TOKENS.green.deep}" d="M12 6c0-2 2-3.5 4-3.5-.2 2-1.8 3.5-4 3.5z"/>`);
+    case 'mango': return fill(TOKENS.d3.board.mango.body, `<ellipse cx="12" cy="14" rx="7.5" ry="8"/><path fill="${TOKENS.d3.board.mango.leaf}" d="M12 6c0-2 2-3.5 4-3.5-.2 2-1.8 3.5-4 3.5z"/>`);
   }
 }
 export const hudIconKey = (n: IconName, tone: IconTone = 'ink'): string => `hud-icon-${n}-${tone}`;

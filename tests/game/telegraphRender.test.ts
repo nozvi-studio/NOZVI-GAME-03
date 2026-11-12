@@ -35,7 +35,7 @@ describe('MOT-4 greybox families', () => {
   it('MOT-4-R4 ring: warn outline never hides, closed is a steady wall, fade pulses at the start rate', () => {
     for (const [state, left] of [['warn', 1500], ['warn', 100], ['closed', 4000], ['fade', 200]] as const) {
       const q = gfx(); drawShrink(q.g, ring(state, left), 20, 1234, TEL, false);
-      expect(q.count('strokeRect'), state).toBe(2);   // the two non-wall cells keep an outline on every frame
+      expect(q.count('strokeRect'), state).toBe(3);   // the two non-wall cells keep an outline on every frame, plus the D3-R2 wall outline
       expect(q.count('fillRect'), state).toBeGreaterThanOrEqual(1);   // the wall cell
     }
     const a = gfx(); drawShrink(a.g, ring('warn', 1500), 20, 0, TEL, false);

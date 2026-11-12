@@ -5,6 +5,12 @@
 ## How to capture
 Headless screenshots with `tools/qa/shot.mjs` (no dependency; uses the local Chrome, or `CHROME_PATH`). Start `npm run dev`, then run: `node tools/qa/shot.mjs size:360,640 media:light "go:http://localhost:5173/" wait:3500 shot:tmp/qa/home-360.png`. The three standard sizes are 360x640, 390x844 and 412x915. Use `media:dark` for the OS dark-mode check. Keys use DOM names (`ArrowUp`, not `Up`). Steps: `size:W,H[,DPR]`, `media:`, `go:URL`, `wait:MS`, `tap:X,Y`, `swipe:X1,Y1,X2,Y2`, `key:Name`, `shot:FILE`, `eval:JS`; any failed step exits 1.
 
+## 2026-11-12 — D3 U4b board art screenshot record (lead, headless)
+- Branch `feat/ui-d3-u4b-board-art`. Full suite 1737 pass (7 skipped, 12 todo), typecheck clean.
+- Captured with `tools/qa/shot.mjs` into `tmp/qa/u4b/`: `?debug=1&level=3/8/13/18/23/28` (one per biome) at 360x640. Seen: frame colour, drop and inner top shadow, two-tone checker without grid, D3 snake (outline dark in biomes 1-5, light in 6), mango 1 cell wide with halo after the fix wave, HUD mango icon full fruit. Matches `Biomes.png` / `Game-360.png`.
+- Not captured: hazard families (levels open in the "Warming up" ramp, hazards not yet on the board in the first seconds), rocks and warn tiles in play, head over a hazard (B4 decided by geometry: head reaches 0.3 cell into the next cell). D3-R2 contrast of every outline is unit-tested across biomes.
+- Owner eye-check: hazards in each biome (fences, hedges now dark-outlined, mud, ice, coconuts, NPCs, gates, spikes, bombs, shrink ring), mango size and arc, snake stripe on tight turns. Hazard fills keep their D2 colours (moved into tokens); a D3 fill palette would be a follow-up. Debug-only: Home "Export log" overlaps the checkpoint chip.
+
 ## 2026-11-12 — D3 U4a in-run HUD layout screenshot record (lead, headless)
 - Branch `feat/ui-d3-u4a-hud-layout`. Full suite 1734 pass (7 skipped, 12 todo), typecheck clean.
 - Captured with `tools/qa/shot.mjs` into `tmp/qa/u4a/`: in-run at 360x640, 390x844, 412x915 (D-pad off, locked slots, steer hint); `?debug=1&level=3` (checkpoint chip "Warming up 5", debug buttons in the bottom corners after the review fix); Pause, Settings from Pause, D-pad toggled on mid-run (R4: bottom group re-placed at once, nothing cut off at 640). Layout matches `Game-360`, `Game-390`, `GameLocked-360`; spare height on tall screens splits around the bottom group.

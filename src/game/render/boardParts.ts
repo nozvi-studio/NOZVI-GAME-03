@@ -1,28 +1,43 @@
-import { toInt } from '../uiTokens';
+import { TOKENS, toInt } from '../uiTokens';
 
 // P3b1-R2 board parts from Rock/Tile/FencePiece/FoodIcon/BiomeBoardsD2 (mockup HTML). Pure: no Phaser.
 export type RockKind = 'pebble' | 'rock' | 'boulder';
 export type Pt = readonly [number, number];
 
 export const PART = {
-  rock: { fill: toInt('#9AA3B8'), shade: toInt('#6B7490') },
-  wood: { rail: toInt('#E3AC6D'), post: toInt('#CF9150') },
-  mud: { fill: toInt('#B8956A'), puddle: toInt('#8F6F43') },
-  ice: { fill: toInt('#9ED8F2'), shine: toInt('#B8E5F7') },
-  stone: { top: toInt('#EDEFF4'), front: toInt('#A9B0C0'), warnFill: toInt('#D3D7E0'), warnDash: toInt('#FF9A1F'), chevron: toInt('#B35F00') },
-  warn: { fill: toInt('#FF6B5B'), dash: toInt('#E5483A'), bang: toInt('#B3261E') },
-  hedge: { fill: toInt('#4FBF7A'), edge: toInt('#FFFFFF'), glow: toInt('#7CF2D4') },
-  mango: { body: toInt('#FFA21A'), leaf: toInt('#2E9E4F'), hi: toInt('#FFD27A') },
+  rock: { fill: toInt(TOKENS.d3.board.rock.body), shade: toInt(TOKENS.d3.board.rock.shade), hi: toInt(TOKENS.d3.board.rock.hi) },
+  wood: { rail: toInt(TOKENS.d3.board.wood.rail), post: toInt(TOKENS.d3.board.wood.post) },
+  mud: { fill: toInt(TOKENS.d3.board.mud.fill), puddle: toInt(TOKENS.d3.board.mud.puddle) },
+  ice: { fill: toInt(TOKENS.d3.board.ice.fill), shine: toInt(TOKENS.d3.board.ice.shine) },
+  stone: { top: toInt(TOKENS.d3.board.stone.top), front: toInt(TOKENS.d3.board.stone.front), warnFill: toInt(TOKENS.d3.board.stone.warnFill), warnDash: toInt(TOKENS.d3.board.stone.warnDash), chevron: toInt(TOKENS.d3.board.stone.chevron) },
+  warn: { fill: toInt(TOKENS.d3.board.warn.fill), bang: toInt(TOKENS.d3.board.warn.bang) },
+  hedge: { fill: toInt(TOKENS.d3.board.hedge.fill), glow: toInt(TOKENS.d3.board.hedge.glow) },
+  /** Movers, cycles, blasts and the shrink ring (greybox shapes keep their geometry; only colours moved to tokens). */
+  lane: { fill: toInt(TOKENS.d3.board.lane.fill), coconut: toInt(TOKENS.d3.board.lane.coconut), coconutHi: toInt(TOKENS.d3.board.lane.coconutHi) },
+  cat: { body: toInt(TOKENS.d3.board.cat.body), ear: toInt(TOKENS.d3.board.cat.ear) },
+  chicken: { body: toInt(TOKENS.d3.board.chicken.body), beak: toInt(TOKENS.d3.board.chicken.beak) },
+  shadow: toInt(TOKENS.d3.board.shadow),
+  gate: { post: toInt(TOKENS.d3.board.gate.post), bar: toInt(TOKENS.d3.board.gate.bar), warn: toInt(TOKENS.d3.board.gate.warn) },
+  spike: { fill: toInt(TOKENS.d3.board.spike.fill), warn: toInt(TOKENS.d3.board.spike.warn) },
+  bomb: { body: toInt(TOKENS.d3.board.bomb.body), blast: toInt(TOKENS.d3.board.bomb.blast), digit: toInt(TOKENS.d3.board.bomb.digit), warn: toInt(TOKENS.d3.board.bomb.warn) },
+  shrink: { wall: toInt(TOKENS.d3.board.shrink.wall), hatch: toInt(TOKENS.d3.board.shrink.hatch), arrow: toInt(TOKENS.d3.board.shrink.arrow) },
+  mango: { body: toInt(TOKENS.d3.board.mango.body), leaf: toInt(TOKENS.d3.board.mango.leaf), shine: toInt(TOKENS.d3.board.mango.shine), halo: toInt(TOKENS.d3.board.mango.halo) },
 } as const;
 
 /** Fractions of one cell unless noted. */
+// D3-R12 board frame, fractions of one cell.
+export const FRAME = { pad: 0.4, radius: 1.3, groundRadius: 0.7, dropY: 0.2, dropAlpha: 0.5, shadowH: 0.5, shadowAlpha: 0.16, shadowRadius: 0.2 } as const;
 export const ROCK = { scale: { pebble: 0.5, rock: 0.82, boulder: 0.98 } as Record<RockKind, number>, aspect: 0.92,
-  edge: 0.1, band: 0.19, drop: 0.095, dropAlpha: 0.35, hiColor: 0xffffff, hiAlpha: 0.55, hiRotDeg: -20,
+  edge: 0.1, band: 0.19, drop: 0.095, dropAlpha: 0.35, hiAlpha: 0.55, hiRotDeg: -20,
   crumbleAlpha: 0.65, previewAlpha: 0.35, crackWidth: 0.075,
   /** Crack polyline in the 20-unit rock box (Rock.dc). */
   crack: [[11, 2], [8.5, 7.5], [12, 10.5], [9, 14.5], [11, 19]] as readonly Pt[],
   /** Debris chips: top-left and side as cell fractions, plus the chip border width share of the crack width. */
   debris: { chips: [{ x: 0.86, y: 0.66, size: 0.2, radius: 0.08 }, { x: 0.02, y: 0.78, size: 0.15, radius: 0.06 }] as readonly { x: number; y: number; size: number; radius: number }[], borderShare: 0.6 } } as const;
+/** D3-R2 stroke width of an outline added to a hazard shape that had none, as a cell fraction. */
+export const BOARD_EDGE = 0.08;
+/** D3-R2 thinner outline on small hazard parts (gate bar, spike triangles), as a cell fraction. */
+export const BOARD_EDGE_THIN = 0.04;
 export const WARN = { ring: 0.1, inset: 0.05, radius: 0.3, tileRadius: 0.285, dash: 0.2, dashWidth: 0.095, chevronWidth: 0.13,
   fillBase: 0.3, fillGain: 0.4, riseFillFloor: 0.3 } as const;
 export const FENCE = { rail: 0.2, railHigh: -0.28, railLow: 0.08, postW: 0.4, postH: 0.7, postRadius: 0.15, edge: 0.076, railRadius: 0.04 } as const;
@@ -30,9 +45,8 @@ export const TILE = { inset: 1 / 21, radius: 1 / 3, border: 0.095, stoneRadius: 
   /** Mud.dc puddle (fractions of the inset box) and bubbles (centre fractions of the box, radius in cell fractions). */
   mud: { puddle: { w: 0.56, h: 0.4 }, bubbles: [{ x: 0.3, y: 0.36, r: 0.0715 }, { x: 0.55, y: 0.48, r: 0.0475 }] as readonly { x: number; y: number; r: number }[] } } as const;
 export const HEDGE = { bar: 0.8, edge: 0.11, glow: 0.12, glowAlpha: 0.22, radius: 0.22, edgeHalf: 0.055 } as const;
-export const GRID_LINE = 0.1;
-export const MANGO = { box: 32, fill: 0.92, body: { cx: 16, cy: 18.5, rx: 11.5, ry: 10, rotDeg: -20 },
-  hi: { p: [[8.5, 16], [9.5, 13], [11.7, 11], [14.7, 10.4]] as readonly Pt[], width: 2.4 },
+// D3-R12 boards.html `#mango` is 0.88 cell wide (scale 1.0): fill 1.2 makes the body 0.8625 cell and the 1.16 outline 1.0 cell; the icon is centred on the body.
+export const MANGO = { halo: 0.62, haloAlpha: 0.35, outline: 1.16, arc: 0.56, shineAlpha: 0.7, shine: { x: -0.3, y: -0.3, w: 0.3, h: 0.18, rotDeg: -35 }, box: 32, fill: 1.2, body: { cx: 16, cy: 18.5, rx: 11.5, ry: 10, rotDeg: -20 },
   leaf: [[[16, 9], [17, 4.5], [21.5, 2.5], [26, 3.5]], [[26, 3.5], [25.4, 8.1], [21, 10.7], [16, 9]]] as readonly (readonly Pt[])[] } as const;
 
 /** P3b1-R2 shape id of each warning kind; every warn state is drawn with its shape, not only a colour. */
@@ -85,3 +99,6 @@ export function mangoLeaf(): Pt[] {
   const [a, b] = MANGO.leaf as readonly [readonly Pt[], readonly Pt[]];
   return [...cubic(a[0]!, a[1]!, a[2]!, a[3]!, 8), ...cubic(b[0]!, b[1]!, b[2]!, b[3]!, 8).slice(1)];
 }
+
+// D3-R12 snake, fractions of one cell (boardSvg: outline 0.96, body 0.76, stripe 0.14, head r 0.7 + 0.1 outline)
+export const SNAKE = { body: 0.76, outline: 0.96, stripe: 0.14, stripeAlpha: 0.4, stripeOffset: 0.16, head: 0.7, headOutline: 0.1, belly: 0.26, gulp: 0.18 } as const;

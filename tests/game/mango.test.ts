@@ -58,11 +58,30 @@ describe('P3b1-R8 mango art', () => {
     expect((leaf[1] as unknown[]).length).toBe(17);
     expect(calls.filter(c => c[0] === 'rotateCanvas').some(c => Math.abs((c[1] as number) + 0.349) < 0.01)).toBe(true);
     expect(calls.some(c => c[0] === 'fillStyle' && c[1] === PART.mango.body)).toBe(true);
-    expect(calls.some(c => c[0] === 'strokePoints')).toBe(true);
+    expect(calls.some(c => c[0] === 'fillStyle' && c[1] === PART.mango.shine)).toBe(true);
+  });
+  it('D3-R12 mango draws halo, outline, body, shine in that order', () => {
+    const calls = record(false), halo = calls.findIndex(c => c[0] === 'fillCircle');
+    expect(calls[halo - 1]).toEqual(['fillStyle', PART.mango.halo, 0.35]);
+    expect(calls[halo]![3]).toBeCloseTo(0.62 * 30, 10);
+    const ell = calls.map((c, i) => [c, i] as const).filter(([c]) => c[0] === 'fillEllipse');
+    const style = (i: number) => calls.slice(0, i).reverse().find(c => c[0] === 'fillStyle')!;
+    expect(style(ell[0]![1])[1]).toBe(DEFAULT_LOOK.outline.mango);
+    expect(style(ell[1]![1])[1]).toBe(PART.mango.body);
+    expect(style(ell[2]![1])).toEqual(['fillStyle', PART.mango.shine, 0.7]);
+    expect((ell[0]![0][3] as number) / (ell[1]![0][3] as number)).toBeCloseTo(1.16, 10);
+  });
+  it('D3-R12 mango body is about 0.86 cell wide and 1.0 cell with outline; ripeness arc sits outside it', () => {
+    const calls = record(false), ell = calls.filter(c => c[0] === 'fillEllipse');
+    const body = (ell[1]![3] as number) / 30, outline = (ell[0]![3] as number) / 30;
+    expect(outline).toBeGreaterThanOrEqual(0.9); expect(outline).toBeLessThanOrEqual(1.05);
+    expect(body).toBeGreaterThan(0.8);
+    const arc = calls.find(c => c[0] === 'arc')!;
+    expect(arc[3] as number).toBeGreaterThanOrEqual((outline / 2) * 30);
   });
   it('P3b1-R8 golden mango recolours the body to the gold token, normal mango keeps the body token', () => {
     const bodyFill = (golden: boolean) => {
-      const calls = record(golden), i = calls.findIndex(c => c[0] === 'fillEllipse');
+      const calls = record(golden), i = calls.findIndex((c, k) => c[0] === 'fillEllipse' && calls.slice(0, k).some(q => q[0] === 'fillEllipse'));   // second ellipse = body (first = outline)
       return calls.slice(0, i).reverse().find(c => c[0] === 'fillStyle')![1];
     };
     expect(bodyFill(true)).toBe(LIGHT.gold);

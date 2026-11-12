@@ -16,3 +16,9 @@ it('P3b2-R14 every icon/tone has a unique key and a well-formed SVG in the tone 
   expect(hudIconSvg('bolt')).toContain(TOKENS.sky.energy);
   expect(hudIconSvg('star')).toContain(TOKENS.accent.gold);
 });
+
+it('D3-R13 quota mango icon draws a body ellipse in the board mango body colour plus the leaf', () => {
+  const svg = hudIconSvg('mango'), body = TOKENS.d3.board.mango;
+  expect(svg).toMatch(new RegExp(`<g fill="${body.body}"><ellipse`));
+  expect(svg).toContain(`fill="${body.leaf}"`);
+});

@@ -1,22 +1,13 @@
-import type { BoardTheme } from '../../meta';
-import { toInt } from '../uiTokens';
+import { TOKENS, toInt } from '../uiTokens';
 
-// P3b1-R1 per-biome board look (BiomeBoardsD2). Pure: no Phaser.
+// D3-R4 per-biome board look: frame, two-tone checker of one hue, outline set (biome 6 = light set). Pure: no Phaser.
 export interface BoardLook {
-  biome: number; theme: BoardTheme; groundA: number; groundB: number;
-  grid: number; gridAlpha: number; edge: number; woodEdge: number;
-  snakeRim: number | null; // UIFIX-R5 bright snake outline, biome 6 only
+  biome: number; frame: number; groundA: number; groundB: number;
+  outline: { snake: number; mango: number; rock: number; warn: number };
+  snake: { body: number; head: number; belly: number; stripe: number };
+  edge: number; woodEdge: number; // hazard outlines (= outline.rock)
 }
-// BiomeBoardsD2 light grounds, one pair per biome (GDD §5.1 order).
-const LIGHT_GROUNDS: readonly (readonly [string, string])[] = [
-  ['#CFEBD0', '#F4E7A6'], ['#D9EDC2', '#EADFA4'], ['#DCEFFB', '#F5FBFF'],
-  ['#EBDDBC', '#DCC79B'], ['#F8D2A6', '#F0BF8A'], ['#3B3363', '#332C58'],
-];
 const STORM = 6;
-const STORM_RIM = '#7CF2D4';
-const NAVY_EDGE = '#2B3248', WHITE = '#FFFFFF', WOOD_EDGE = '#4A2E1B';
-const DARK_BASE = '#131D15', DARK_MIX = 0.7;                 // lead decision 1
-const GRID = { light: { color: '#FFFFFF', alpha: 0.5 }, dark: { color: '#FFFFFF', alpha: 0.1 }, storm: { color: '#7CF2D4', alpha: 0.28 } } as const;
 
 export function mixInt(a: number, b: number, t: number): number {
   const ch = (s: number): number => Math.round(((a >> s) & 255) * (1 - t) + ((b >> s) & 255) * t);
@@ -29,15 +20,16 @@ export function contrastRatio(a: number, b: number): number {
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
 }
 
-export function boardLook(biome: number, theme: BoardTheme): BoardLook {
+export function boardLook(biome: number): BoardLook {
   const n = Math.min(STORM, Math.max(1, Math.round(biome)));
-  const [a, b] = LIGHT_GROUNDS[n - 1]!;
-  const storm = n === STORM, dark = theme === 'dark' && !storm;
-  const groundA = dark ? mixInt(toInt(a), toInt(DARK_BASE), DARK_MIX) : toInt(a);
-  const groundB = dark ? mixInt(toInt(b), toInt(DARK_BASE), DARK_MIX) : toInt(b);
-  const grid = storm ? GRID.storm : theme === 'dark' ? GRID.dark : GRID.light;
-  const edge = toInt(storm || theme === 'dark' ? WHITE : NAVY_EDGE);
-  return { biome: n, theme, groundA, groundB, grid: toInt(grid.color), gridAlpha: grid.alpha, edge,
-    woodEdge: storm || theme === 'dark' ? edge : toInt(WOOD_EDGE), snakeRim: storm ? toInt(STORM_RIM) : null };
+  const b = TOKENS.d3.biomes[n - 1]!, o = n === STORM ? TOKENS.d3.outlineStorm : TOKENS.d3.outline, s = TOKENS.d3.snake;
+  const outline = { snake: toInt(o.snake), mango: toInt(o.mango), rock: toInt(o.rock), warn: toInt(o.warn) };
+  return { biome: n, frame: toInt(b.frame), groundA: toInt(b.cells[0]), groundB: toInt(b.cells[1]), outline,
+    snake: { body: toInt(s.body), head: toInt(s.head), belly: toInt(s.belly), stripe: toInt(s.stripe) }, edge: outline.rock, woodEdge: outline.rock };
 }
-export const DEFAULT_LOOK: BoardLook = boardLook(1, 'light');
+/** D3-R2 outline colour each hazard family draws with in a biome; every entry keeps >= 3:1 on both cells of all biomes. */
+export const HAZARD_EDGES: Record<'fence' | 'hedge' | 'mud' | 'ice' | 'stone' | 'coconut' | 'bomb' | 'npc' | 'spike' | 'gate' | 'shrink', (l: BoardLook) => number> = {
+  fence: l => l.woodEdge, hedge: l => l.edge, mud: l => l.woodEdge, ice: l => l.edge, stone: l => l.edge, coconut: l => l.edge,
+  bomb: l => l.outline.warn, npc: l => l.edge, spike: l => l.edge, gate: l => l.edge, shrink: l => l.outline.warn,
+};
+export const DEFAULT_LOOK: BoardLook = boardLook(1);

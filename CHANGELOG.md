@@ -2,6 +2,15 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs(ui): U4b screenshot record, CODEMAP/UI-MOCKUPS rows, DECISIONS B1..B5, STATUS.
+- fix(ui): D3 U4b review — snake draw no longer allocates per frame (cached widths, reused stripe polyline, hoisted pass), stripe colour moved to tokens, thin hazard outline width named in boardParts, fence edge hoisted.
+- fix(ui): D3 board mango is 1.0 cell wide with outline (was 0.77), centred on its body, ripeness arc at 0.56 cell; HUD quota mango icon uses the board mango body and leaf colours (D3-R12, D3-R13)
+- feat(ui): D3 hazard families recoloured from `TOKENS.d3.board` and outlined from `HAZARD_EDGES`; board outlines keep >= 3:1 on all biomes (D3-R12, D3-R2)
+- feat(ui): D3 mango (halo, outline, shine), pebble rocks and warn tiles from `TOKENS.d3.board` and the board outline set (D3-R12, D3-R2)
+- feat(ui): D3 snake - 1.4-cell head, outlined body in every biome, highlight stripe; `drawSnake` takes `BoardLook` (D3-R12)
+- feat(ui): D3 board frame with drop and inner top shadow (D3-R12).
+- feat(ui): D3 board look per biome (`boardLook(biome)`: frame, checker cells, outline set, snake colours), checker ground without grid lines (D3-R4).
+- docs(ui): U4b board art plan (rulings B1..B5).
 - docs(ui): U4a screenshot record (PLAYTEST), UI-MOCKUPS Game rows built, STATUS.
 - fix(hud): ?debug=1 "+1" / "Key" buttons move to the bottom corners (`debugRects` in `D3_RUN.debug`) so they no longer cover the mango quota label; overlap test at 640 and 780.
 - refactor(ui): drop the D2 HUD layout (HUD_MOCK, hudLayout, statsRow); banners, skill tips and debug buttons use D3 rects; CODEMAP rows for the D3 HUD modules.

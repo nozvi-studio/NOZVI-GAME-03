@@ -1,6 +1,6 @@
 import type Phaser from 'phaser';
 import type { Balance, Cell, SimSnapshot } from '../../core';
-import type { BoardLook } from './biomePalette';
+import { HAZARD_EDGES, type BoardLook } from './biomePalette';
 import { bangGeometry, chevronPoints, FENCE, HEDGE, hedgeRects, PART, ROCK, rockMetrics, TILE, WARN, type RockKind } from './boardParts';
 import { dashedRect } from './movers';
 import { newPulse, telegraphPulse, hazardKey, type TelegraphCfg, type TelegraphCtx } from './telegraph';
@@ -19,20 +19,20 @@ export function boxed(g: Graphics, x: number, y: number, w: number, h: number, r
 export function drawRock(g: Graphics, c: Cell, size: number, look: BoardLook, alpha = 1, kind: RockKind = 'rock', crumble = false): void {
   const m = rockMetrics(kind, size), a = crumble ? alpha * ROCK.crumbleAlpha : alpha;
   const bw = m.d - 2 * m.edge, bh = m.h - 2 * m.edge;
-  g.fillStyle(look.edge, ROCK.dropAlpha * a).fillEllipse(c.x, c.y + m.drop, m.d, m.h);
-  g.fillStyle(look.edge, a).fillEllipse(c.x, c.y, m.d, m.h);
+  g.fillStyle(look.outline.rock, ROCK.dropAlpha * a).fillEllipse(c.x, c.y + m.drop, m.d, m.h);
+  g.fillStyle(look.outline.rock, a).fillEllipse(c.x, c.y, m.d, m.h);
   g.fillStyle(PART.rock.shade, a).fillEllipse(c.x, c.y, bw, bh);
   g.fillStyle(PART.rock.fill, a).fillEllipse(c.x, c.y - m.band / 2, bw, bh - m.band);
   g.save().translateCanvas(c.x + m.hl.dx, c.y + m.hl.dy).rotateCanvas(m.hl.rot);
-  g.fillStyle(ROCK.hiColor, ROCK.hiAlpha * a).fillEllipse(0, 0, m.hl.w, m.hl.h);
+  g.fillStyle(PART.rock.hi, ROCK.hiAlpha * a).fillEllipse(0, 0, m.hl.w, m.hl.h);
   g.restore();
   if (!crumble) return;
   const ox = c.x - m.d / 2, oy = c.y - m.d / 2, s = m.d / 20;
   const crack = ROCK.crack;
-  g.lineStyle(Math.max(1, size * ROCK.crackWidth), look.edge, a);
+  g.lineStyle(Math.max(1, size * ROCK.crackWidth), look.outline.rock, a);
   for (let i = 0; i < crack.length - 1; i++) g.lineBetween(ox + crack[i]![0] * s, oy + crack[i]![1] * s, ox + crack[i + 1]![0] * s, oy + crack[i + 1]![1] * s);
   const x0 = c.x - size / 2, y0 = c.y - size / 2, bd = Math.max(1, size * ROCK.crackWidth * ROCK.debris.borderShare);
-  for (const k of ROCK.debris.chips) boxed(g, x0 + size * k.x, y0 + size * k.y, size * k.size, size * k.size, size * k.radius, PART.rock.fill, look.edge, bd, a);
+  for (const k of ROCK.debris.chips) boxed(g, x0 + size * k.x, y0 + size * k.y, size * k.size, size * k.size, size * k.radius, PART.rock.fill, look.outline.rock, bd, a);
 }
 
 // P3b1-R5 outline ring, dashes and the "!" / chevron never depend on colour or blink alone; MOT-4-R1/R2/R6 the rhythm now comes from the shared
@@ -42,8 +42,8 @@ export function drawWarn(g: Graphics, c: Cell, cell: number, ms: number, warnMs:
   const p = telegraphPulse(warnMs - ms, warnMs, cfg, reduced, SCRATCH);
   const off = jitter && !reduced ? Math.sin(ms / 28) * cell * 0.04 : 0;
   const x = c.x * cell + off, y = c.y * cell, ring = cell * WARN.ring, inset = cell * WARN.inset, size = cell - 2 * inset;
-  const hazard = kind === 'hazard', a = p.urgent ? 1 : p.alpha, hard = hazard ? PART.warn.dash : PART.stone.warnDash;
-  g.lineStyle(ring, look.edge, 1).strokeRoundedRect(x - ring / 2, y - ring / 2, cell + ring, cell + ring, cell * WARN.radius + ring / 2);
+  const hazard = kind === 'hazard', a = p.urgent ? 1 : p.alpha, hard = hazard ? look.outline.warn : PART.stone.warnDash, ringColor = hazard ? look.outline.warn : look.edge;
+  g.lineStyle(ring, ringColor, 1).strokeRoundedRect(x - ring / 2, y - ring / 2, cell + ring, cell + ring, cell * WARN.radius + ring / 2);
   g.fillStyle(p.urgent ? hard : hazard ? PART.warn.fill : PART.stone.warnFill, (WARN.fillBase + WARN.fillGain * p.progress) * a + (hazard ? 0 : WARN.riseFillFloor))
     .fillRoundedRect(x + inset, y + inset, size, size, cell * WARN.tileRadius);
   g.lineStyle(Math.max(1, cell * WARN.dashWidth), hard, a);
@@ -61,23 +61,23 @@ export function drawWarn(g: Graphics, c: Cell, cell: number, ms: number, warnMs:
 
 // P3b1-R6 FencePiece.dc: rails run from a post to the right/lower neighbour, posts are drawn after every rail.
 function drawFence(g: Graphics, cells: readonly PopCell[], cell: number, look: BoardLook, alpha: number): void {
-  const has = new Set(cells.map(c => `${c.x},${c.y}`)), bw = Math.max(1, cell * FENCE.edge), t = cell * FENCE.rail, r = cell * FENCE.railRadius;
+  const has = new Set(cells.map(c => `${c.x},${c.y}`)), edge = HAZARD_EDGES.fence(look), bw = Math.max(1, cell * FENCE.edge), t = cell * FENCE.rail, r = cell * FENCE.railRadius;
   for (const c of cells) {
     const cx = (c.x + 0.5) * cell, cy = (c.y + 0.5) * cell;
-    if (has.has(`${c.x + 1},${c.y}`)) for (const dy of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx, cy + dy * cell, cell, t, r, PART.wood.rail, look.woodEdge, bw, alpha);
-    if (has.has(`${c.x},${c.y + 1}`)) for (const dx of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx + dx * cell, cy, t, cell, r, PART.wood.rail, look.woodEdge, bw, alpha);
+    if (has.has(`${c.x + 1},${c.y}`)) for (const dy of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx, cy + dy * cell, cell, t, r, PART.wood.rail, edge, bw, alpha);
+    if (has.has(`${c.x},${c.y + 1}`)) for (const dx of [FENCE.railHigh, FENCE.railLow]) boxed(g, cx + dx * cell, cy, t, cell, r, PART.wood.rail, edge, bw, alpha);
   }
   for (const c of cells) {
     const w = cell * FENCE.postW * c.k, h = cell * FENCE.postH * c.k;
-    boxed(g, (c.x + 0.5) * cell - w / 2, (c.y + 0.5) * cell - h / 2, w, h, cell * FENCE.postRadius, PART.wood.post, look.woodEdge, bw, alpha);
+    boxed(g, (c.x + 0.5) * cell - w / 2, (c.y + 0.5) * cell - h / 2, w, h, cell * FENCE.postRadius, PART.wood.post, edge, bw, alpha);
   }
 }
 
 // P3b1-R6 BiomeBoardsD2 hedge maze: glowing bars with a white edge (edge pass, then fill pass so joins have no seam).
-function drawHedge(g: Graphics, cells: readonly PopCell[], cell: number, _look: BoardLook, alpha: number): void {
+function drawHedge(g: Graphics, cells: readonly PopCell[], cell: number, look: BoardLook, alpha: number): void {
   const bars = hedgeRects(cells, cell), glow = cell * HEDGE.glow, edge = cell * HEDGE.edgeHalf, r = cell * HEDGE.radius;
   for (const q of bars) g.fillStyle(PART.hedge.glow, HEDGE.glowAlpha * alpha).fillRoundedRect(q.x - glow, q.y - glow, q.w + 2 * glow, q.h + 2 * glow, r + glow);
-  for (const q of bars) g.fillStyle(PART.hedge.edge, alpha).fillRoundedRect(q.x, q.y, q.w, q.h, r);
+  for (const q of bars) g.fillStyle(HAZARD_EDGES.hedge(look), alpha).fillRoundedRect(q.x, q.y, q.w, q.h, r);
   for (const q of bars) g.fillStyle(PART.hedge.fill, alpha).fillRoundedRect(q.x + edge, q.y + edge, q.w - 2 * edge, q.h - 2 * edge, Math.max(0, r - edge));
 }
 
@@ -95,8 +95,8 @@ export function drawTerrains(g: Graphics, terrains: SimSnapshot['terrains'], cel
         drawWarn(g, c, cell, Math.min(b.terrain.warnMs, Math.max(0, ct)), b.terrain.warnMs, look, 'rise', true, reduced, tel.cfg);
       } else if (c.vis === 'up') {
         const i = cell * TILE.inset, s = cell - 2 * i, bw = cell * TILE.border, r = cell * TILE.stoneRadius;
-        boxed(g, x + i, y + i + s * TILE.frontFrom, s, s * (1 - TILE.frontFrom), r, PART.stone.front, look.edge, bw, a);
-        boxed(g, x + i, y + i, s, s * TILE.topShare, r, PART.stone.top, look.edge, bw, a);
+        boxed(g, x + i, y + i + s * TILE.frontFrom, s, s * (1 - TILE.frontFrom), r, PART.stone.front, HAZARD_EDGES.stone(look), bw, a);
+        boxed(g, x + i, y + i, s, s * TILE.topShare, r, PART.stone.top, HAZARD_EDGES.stone(look), bw, a);
       }
     }
   }
