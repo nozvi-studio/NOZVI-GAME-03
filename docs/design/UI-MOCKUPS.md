@@ -27,11 +27,11 @@ The token table lives in the spec §4 (D3-R1, R4) and in code as `TOKENS.d3`; `t
 | `GameLocked` | `GameLocked-360`, `-360-2` | `hud/SkillButtons.ts`, `hud/skillLook.ts` | U4a (built) |
 | `GameHint` | `GameHint-360`, `-360-2` | `input/steerFx.ts`, `input/steerFxModel.ts` | U4 |
 | `Biomes` | `Biomes` | `render/biomePalette.ts`, `render/boardParts.ts`, `ui/background.ts` | U3, U4b (built) |
-| `Pause` | `Pause-360` | `hud/PauseOverlay.ts` | U5 |
-| `Countdown` | `Countdown-360` | `hud/CountdownOverlay.ts` | U5 |
-| `Banners` | `Banners-360`, `-360-2..4` | `hud/BannerLayer.ts` | U5 |
-| `Death` | `Death-360` | `juice/DeathCard.ts` | U5 |
-| `Results`, `ResultsFirstRun` | `Results-360`, `Results-390`, `ResultsFirstRun-360` | `scenes/ResultsScene.ts`, `flow/resultsView.ts` | U5 |
+| `Pause` | `Pause-360` | `hud/PauseOverlay.ts` | U5 (built) |
+| `Countdown` | `Countdown-360` | `hud/CountdownOverlay.ts` | U5 (built) |
+| `Banners` | `Banners-360`, `-360-2..4` | `hud/BannerLayer.ts` | U5 (built) |
+| `Death` | `Death-360` | `juice/DeathCard.ts` | U5 (built) |
+| `Results`, `ResultsFirstRun` | `Results-360`, `Results-390`, `ResultsFirstRun-360` | `scenes/ResultsScene.ts`, `flow/resultsView.ts` | U5 (built) |
 | `Loadout` | `Loadout-360` | `scenes/LoadoutScene.ts` | U6 |
 | `Settings` | `Settings-360` | `scenes/SettingsScene.ts`, `ui/icons.ts` | U6 |
 | `States` | `States` | `ui/skin/*`, `ui/widgets.ts`, `ui/touchFx.ts` | U1 |

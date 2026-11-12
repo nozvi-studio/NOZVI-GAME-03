@@ -5,6 +5,11 @@
 ## How to capture
 Headless screenshots with `tools/qa/shot.mjs` (no dependency; uses the local Chrome, or `CHROME_PATH`). Start `npm run dev`, then run: `node tools/qa/shot.mjs size:360,640 media:light "go:http://localhost:5173/" wait:3500 shot:tmp/qa/home-360.png`. The three standard sizes are 360x640, 390x844 and 412x915. Use `media:dark` for the OS dark-mode check. Keys use DOM names (`ArrowUp`, not `Up`). Steps: `size:W,H[,DPR]`, `media:`, `go:URL`, `wait:MS`, `tap:X,Y`, `swipe:X1,Y1,X2,Y2`, `key:Name`, `shot:FILE`, `eval:JS`; any failed step exits 1.
 
+## 2026-11-12 — U5 overlays + Results screenshot record (lead, headless)
+- Branch `feat/u5-overlays-results`. Captured with `tools/qa/shot.mjs` into `tmp/qa/u5/` (`t4-*` Results, `t5-*` Pause with/without chip and in-run, `t6-*` Countdown L1/checkpoint, `t7-*` banners, level-up, biome, checkpoint, next, `t8-*` Death with motion on/off, `t9-*` Results at 360x640 and 540x1170 from `?debug=1&level=8/9`). Results at 540x1170 keeps the panel top-aligned, buttons in the lower 45%.
+- Not captured: Results with checkpoint + energy rows and Results won (the debug "+1"/"Key" taps did not reach L10 in the headless run, so only the next-checkpoint row was seen), incoming warning card, two skill pills, mint checkpoint card, two-line death, reduced-motion death, most states at 540x1170. Console errors were not read (no console hook in `shot.mjs`).
+- Owner eye-check: pause glyph size (asked bigger); incoming warning card in the top strip (asked); Results button press feel and layout vs the board; Death ribbon readability; countdown digit position (about 14 board px lower than the board); chipless pause (unit-tested only); the uncaptured states above.
+
 ## 2026-11-12 — D3 U5 Task 1 Results button check (lead, headless)
 - U5 Task 1: first-run Results buttons visible (headless Chrome 360x640, empty storage, ~13 s after the wall death) and tappable (Play again started run 2, Home returned to Home), the 2026-11-11 Motion lazy-alpha fix holds. Same with an existing save (second death). Screenshots in `tmp/qa/u5/`. No `window` game handle exists, so alpha/visible were judged from pixels and taps. Real-browser 60 fps pass left to the owner.
 

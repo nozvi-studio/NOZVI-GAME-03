@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: U5 QA pass, rulings (DECISIONS), UI-MOCKUPS built marks, PLAYTEST entry.
 - fix(hud): D3-R16 review: banner queue cap counts the card on screen, slot B pill text/icon ink (white on orange was 2.4:1), darker up/warn icons, D3-R2 strip contrast test.
 - feat(juice): D3-R17 death card is a RUN OVER ribbon over a 288 px panel (board metrics, layoutColumn centring kept).
 - feat(hud): D3-R16 strip cards (light panel skin, up/warn icons, gold biome chip, slot-coloured side-by-side skill pills) and U5-R2 hazard "incoming" warnings queued in the strip via BannerLayer.enqueue.
