@@ -1,5 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { BOARD } from '../../src/game/layout';
+import { BOARD, cellPx } from '../../src/game/layout';
+import { FRAME } from '../../src/game/render/boardParts';
 import { GameScene } from '../../src/game/scenes/GameScene';
 import type { Effects } from '../../src/game/render/effects';
 import { LIGHT, currentPalette, setDisplaySettings } from '../../src/game/render/palette';
@@ -53,7 +54,7 @@ it('P3b1-R3 the settings-closed listener is removed on SHUTDOWN and a scene rest
   second.events.emit('settings-closed');
   expect(second.background).toHaveBeenCalledTimes(1);        // exactly one listener per create()
 });
-it('GDD-13 gameplay and floating scores clip inside rounded board while the outline stays above them', () => {
+it('GDD-13 gameplay and floating scores clip inside rounded board while the frame stays below them', () => {
   const h = sceneHarness(), game = new GameScene(), native = new Signals();
   vi.stubGlobal('window', { addEventListener: native.on.bind(native), removeEventListener: native.off.bind(native),
     matchMedia: () => ({ matches: false, addEventListener() {}, removeEventListener() {} }) });
@@ -68,12 +69,12 @@ it('GDD-13 gameplay and floating scores clip inside rounded board while the outl
   game.create();
   const content = h.find('board'), border = h.find('board-border'), clip = h.find('board-clip');
   expect(content).toBeDefined();
-  expect(clip.commands).toContainEqual(['fillRoundedRect', 0, 0, BOARD.size, BOARD.size, 18]);
-  // Phaser documents masking on root containers; the external border must stay separate.
+  expect(clip.commands).toContainEqual(['fillRoundedRect', 0, 0, BOARD.size, BOARD.size, cellPx(loadBalance()) * FRAME.groundRadius]);
+  // Phaser documents masking on root containers; the frame must stay separate.
   expect(content.mask).toBeDefined(); expect(border.mask).toBeUndefined();
   expect(content.list).not.toContain(border);
   // Exercise the real score effect owned by GameScene against the renderer boundary double.
   (game as unknown as { effects: Effects }).effects.floatText(0, 0, 1, false);
   expect(content.list.at(-1)?.text).toBe('+1');
-  expect(h.objects.indexOf(border)).toBeGreaterThan(h.objects.indexOf(content));
+  expect(h.objects.indexOf(border)).toBeLessThan(h.objects.indexOf(content));
 });

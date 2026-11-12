@@ -16,6 +16,8 @@ export const PART = {
 } as const;
 
 /** Fractions of one cell unless noted. */
+// D3-R12 board frame, fractions of one cell.
+export const FRAME = { pad: 0.4, radius: 1.3, groundRadius: 0.7, dropY: 0.2, dropAlpha: 0.5, shadowH: 0.5, shadowAlpha: 0.16, shadowRadius: 0.2 } as const;
 export const ROCK = { scale: { pebble: 0.5, rock: 0.82, boulder: 0.98 } as Record<RockKind, number>, aspect: 0.92,
   edge: 0.1, band: 0.19, drop: 0.095, dropAlpha: 0.35, hiColor: 0xffffff, hiAlpha: 0.55, hiRotDeg: -20,
   crumbleAlpha: 0.65, previewAlpha: 0.35, crackWidth: 0.075,
