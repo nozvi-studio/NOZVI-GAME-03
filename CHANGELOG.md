@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: UI D3 U5 plan (overlays + Results, rulings U5-R1..R8).
 - docs: STATUS open items after U4c.
 - docs: U4c rulings C1..C5 (DECISIONS), U4c headless QA entry (PLAYTEST), STATUS.
 - feat(hud): D3-R27 bar leading edge, mango full flash and skill-ready gloss sweep (none under reduced motion, D3-R28); `glossBand` shared with Home; balance `motion.d3.flashMs`.
