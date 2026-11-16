@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(skin): selection ring texture, 4 px mango outline + 2 px lift, cached separately from skin states (D3-R21, U6-R2).
 - feat(ui): one icon stroke token (TOKENS.d3.shape.iconStroke 2.6) for menu and HUD icons; new check icon (D3-R19, U6-R1).
 - refactor(results): drop dead head timeline item; Results literals move to TOKENS.d3.results and MENU.results (U5 follow-up).
 - fix(hud): run-start banners append (enqueueAll) so a hazard incoming card is no longer dropped; pure bannerQueue rules tested (U5-R2).
