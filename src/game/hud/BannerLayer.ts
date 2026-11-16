@@ -9,6 +9,7 @@ import { hostOf, lipPx, skinTexture } from '../ui/skin';
 import { chip } from '../ui/widgets';
 import { hudLabel } from './draw';
 import { bannerStrip, type BannerSpec, type SkillPill } from './banners';
+import { advanceBanners, enqueueBanners, IDLE_BANNERS, startBanners, type BannerQueueState } from './bannerQueue';
 import { hudIconKey } from './hudIcons';
 import { bannerStripRect, STRIP_MOCK, skillTipPlacement } from './hudLayout';
 import type { D3HudLayout } from './d3HudLayout';
@@ -30,7 +31,7 @@ export class BannerLayer {
   private readonly tipG: Phaser.GameObjects.Graphics; private readonly tipText: Phaser.GameObjects.Text;
   private readonly pills: { c: Phaser.GameObjects.Container; lip: Phaser.GameObjects.Image; face: Phaser.GameObjects.Image; text: Phaser.GameObjects.Text; icon: Phaser.GameObjects.Image }[] = [];
   private readonly tint: Phaser.GameObjects.Graphics; private readonly pillKeys = ['', '']; private readonly pillW = [0, 0]; private readonly strip: ReturnType<typeof bannerStripRect>;
-  private readonly enter = { k: 0 }; private queue: BannerSpec[] = []; private cardTimer?: Phaser.Time.TimerEvent; private tipTimer?: Phaser.Time.TimerEvent;
+  private readonly enter = { k: 0 }; private q: BannerQueueState = IDLE_BANNERS; private cardTimer?: Phaser.Time.TimerEvent; private tipTimer?: Phaser.Time.TimerEvent;
 
   constructor(private readonly scene: Phaser.Scene, private readonly l: D3HudLayout, private readonly b: Balance) {
     this.strip = bannerStripRect(b.board.cols);
@@ -49,20 +50,23 @@ export class BannerLayer {
     this.drawTint();
   }
 
-  show(queue: readonly BannerSpec[]): void { this.reset(); this.queue = [...queue]; this.next(); }
-  /** U5-R2 appends one card; a running queue is never reset, an idle strip starts a new one. The card on screen counts toward bannerQueueMax; a full strip drops the new card. */
-  enqueue(spec: BannerSpec): void {
-    if (this.root.visible) { if (this.queue.length + 1 < this.b.ui.hud.bannerQueueMax) this.queue.push(spec); } else this.show([spec]);
+  private bannerMax = (): number => this.b.ui.hud.bannerQueueMax;
+  show(queue: readonly BannerSpec[]): void { this.reset(); this.q = startBanners(queue, this.bannerMax()); this.present(); }
+  /** U5-R2: one card appended, a running queue is never reset. */
+  enqueue(spec: BannerSpec): void { this.enqueueAll([spec]); }
+  /** U6-R11: run-start banners append behind whatever is running. */
+  enqueueAll(specs: readonly BannerSpec[]): void {
+    const wasIdle = this.q.shown === null; this.q = enqueueBanners(this.q, specs, this.bannerMax());
+    if (wasIdle) this.present();
   }
   /** Clears the cards, their timer and pop tween; the tip is left alone (a tip may be raised just before a queue). */
-  private reset(): void { this.cardTimer?.remove(); this.scene.tweens.killTweensOf(this.root); this.scene.tweens.killTweensOf(this.enter); this.root.setScale(1).setAlpha(1).setPosition(0, 0); this.queue = []; this.clear(); this.root.setVisible(false); }
+  private reset(): void { this.cardTimer?.remove(); this.scene.tweens.killTweensOf(this.root); this.scene.tweens.killTweensOf(this.enter); this.root.setScale(1).setAlpha(1).setPosition(0, 0); this.q = IDLE_BANNERS; this.clear(); this.root.setVisible(false); }
   hide(): void { this.reset(); this.tipTimer?.remove(); this.showTip(false); }
-  private next(): void {
-    const spec = this.queue.shift();
+  private present(): void {
+    const spec = this.q.shown;
     if (!spec) { this.clear(); this.root.setVisible(false); return; }
-    this.clear(); this.render(spec); this.root.setVisible(true);
-    this.enterMotion();
-    this.cardTimer = this.scene.time.delayedCall(this.b.ui.bannerMs, () => this.next());
+    this.clear(); this.render(spec); this.root.setVisible(true); this.enterMotion();
+    this.cardTimer = this.scene.time.delayedCall(this.b.ui.bannerMs, () => { this.q = advanceBanners(this.q); this.present(); });
   }
   /** P3a-R8 slide + scale-in (soft fade when reduced); the root scales about (0,0), so the pivot is compensated to keep the card centred. */
   private enterMotion(): void {
