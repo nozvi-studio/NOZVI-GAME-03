@@ -2,8 +2,9 @@
 export const D3_RUN = {
   short: { h: 640, top: 0 }, tall: { h: 780, top: 37 },
   side: 10, boardTop: 112, boardSize: 340,
-  // BAND-R1 banner band between the mango row and the board: the board sits `h` lower than boardTop; `below` keeps the card off the board frame.
-  band: { h: 30, below: 7 },
+  // BAND-R1 banner band between the mango row and the board: the board sits `push` lower than boardTop; the band ends `below` above the board
+  // (7 px board frame + 4 px clear), which leaves 3 px clear under the mango row.
+  band: { h: 30, below: 11, push: 36 },
   pause: { x: 12, y: 12, d: 48 }, ribbon: { w: 160, h: 51, y: 10, font: 22, stroke: 4 }, score: { right: 12, y: 14, h: 40, icon: 22, font: 17, padX: 12, gap: 6 },
   mango: { y: 70, h: 34, side: 14, icon: 34, gap: 8, barH: 26, labelW: 44, labelFont: 18, shadowY: 2 },
   bottom: { block: 146, gapMin: 24, spareShare: 0.45 },
@@ -34,7 +35,7 @@ const topOff = (hm: number): number => { const D = D3_RUN; return D.short.top + 
 // D3-R9 + BAND-R1 board rect in board px: under the top bar and the banner band. On short canvases the square shrinks (and stays centred)
 // so the larger of the two bottom groups still fits; the size never depends on the D-pad setting.
 export function boardRect(hm: number): { x: number; y: number; size: number } {
-  const D = D3_RUN, y = D.boardTop + D.band.h + topOff(hm);
+  const D = D3_RUN, y = D.boardTop + D.band.push + topOff(hm);
   const need = Math.max(D.bottom.gapMin + D.bottom.block, D.dpad.gap + D.dpad.block);
   const size = Math.min(D.boardSize, hm - y - need);
   return { x: (W - size) / 2, y, size };

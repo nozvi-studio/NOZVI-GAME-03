@@ -9,7 +9,7 @@ import { d3HudLayout } from '../../src/game/hud/d3HudLayout';
 it('BAND-R1 banner strip sits in the band above the board: board wide, 30 board px high, never on a board cell', () => {
   const r = bannerStripRect();
   expect(r.x).toBe(BOARD.x); expect(r.w).toBe(BOARD.size); expect(r.h).toBe(d3(30));
-  expect(r.y + r.h + d3(7)).toBeCloseTo(BOARD.y); expect(r.y + r.h).toBeLessThan(BOARD.y); expect(STRIP_MOCK.alpha).toBeCloseTo(0.85);
+  expect(r.y + r.h + d3(11)).toBeCloseTo(BOARD.y); expect(r.y + r.h).toBeLessThan(BOARD.y); expect(STRIP_MOCK.alpha).toBeCloseTo(0.85);
 });
 it('UIFIX-R1 strip rows (title + one sub line) fit inside the strip height', () => {
   const r = bannerStripRect();

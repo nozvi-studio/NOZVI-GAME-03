@@ -26,6 +26,6 @@ describe.each([960, 1170])('D3-R7 layouts at HEIGHT %i', (h) => {
   });
   it(`D3-R7 the board never grows at ${h}`, () => {
     setHeight(h);
-    expect(BOARD.x).toBeCloseTo(d3(21)); expect(BOARD.y).toBeCloseTo(d3(142)); expect(BOARD.size).toBeCloseTo(d3(318));   // BAND-R1 default board = boardRect(640)
+    expect(BOARD.x).toBeCloseTo(d3(24)); expect(BOARD.y).toBeCloseTo(d3(148)); expect(BOARD.size).toBeCloseTo(d3(312));   // BAND-R1 default board = boardRect(640)
   });
 });
