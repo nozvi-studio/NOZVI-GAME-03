@@ -1,5 +1,6 @@
 import { effectiveTick } from '../skills';
 import type { CauseKey, Cell, Dir, FamilyKey, HazardFamily, HitKind, SimState, StepCtx, TileKind } from '../types';
+import { breachTerrain } from './fixedTerrain';
 import { headHitAt, solidFamilyWithPriority, tileAt } from './queries';
 import { FAMILIES } from './registry';
 
@@ -11,11 +12,18 @@ export type HeadCellResult =
 
 // MEC-004-R6 snake-move solid and head-hit stage.
 export function resolveHeadCell(s: SimState, x: number, y: number, ctx: StepCtx): HeadCellResult {
+  // MEC-019-R7 invulnerable: only the closed shrinking ring still kills (the board edge is checked by the caller).
+  if (s.invuln) {
+    const ring = FAMILIES.find(f => f.key === 'shrink');
+    return ring?.solidAt(s, x, y) ? { kind: 'death', cause: 'shrink' } : { kind: 'clear' };
+  }
   const solid = solidFamilyWithPriority(s, x, y);
   const hit = solid ? { family: solid, kind: 'mover' as const } : headHitAt(s, x, y);
   if (!hit || hit.family.cause === null) return { kind: 'clear' };
   // MEC-013-R5 / MEC-015-R7 head entry emits the same mover contact event as update-time entry (coconut and npc).
   if (hit.kind === 'mover' && (hit.family.key === 'coconut' || hit.family.key === 'npc')) ctx.emit({ type: 'moverHit', family: hit.family.key, x, y });
+  // MEC-019-R6 Shield on fixed terrain breaches an area instead of one cell and does not bonk.
+  if (s.shield && hit.family.key === 'fixedTerrain') { breachTerrain(s, ctx, x, y); return { kind: 'broke', family: 'fixedTerrain' }; }
   if (s.shield && (hit.kind === 'area' || hit.family.breakable)) {
     consumeShield(s, ctx, hit.family, x, y, hit.kind, s.dir);
     return { kind: hit.kind === 'area' ? 'absorbed' : 'broke', family: hit.family.key };
@@ -26,6 +34,7 @@ export function resolveHeadCell(s: SimState, x: number, y: number, ctx: StepCtx)
 // MEC-004-R8 update-time hit dispatch.
 export function applyHeadHit(s: SimState, ctx: StepCtx, key: FamilyKey, x: number, y: number, kind: HitKind, dir: Dir): void {
   if (s.status !== 'playing') return;
+  if (s.invuln) return; // MEC-019-R7 update-time hits pass through
   const family = FAMILIES.find(f => f.key === key);
   if (!family || family.cause === null) return;
   if (s.shield && (kind === 'area' || family.breakable)) {

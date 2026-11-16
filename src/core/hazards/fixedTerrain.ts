@@ -1,6 +1,6 @@
 // src/core/hazards/fixedTerrain.ts - MEC-019 fixed terrain family: live cells of the current template.
 import type { Balance } from '../balance';
-import { diffLayout, layoutFor } from '../fixedTerrain';
+import { breachCells, diffLayout, layoutFor } from '../fixedTerrain';
 import { placeMango } from '../mango';
 import { rngFrom } from '../rng';
 import type { FixedTerrainCell, HazardFamily, SimSnapshot, SimState, StepCtx } from '../types';
@@ -42,7 +42,8 @@ export const fixedTerrain: HazardFamily = {
       return true;
     });
   },
-  onBreak() { /* a Shield pass leaves the fixed cell in place; required of every breakable family (MEC-006-R24) */ },
+  // Intentional no-op: a Shield hit on fixed terrain goes through the breach branch in resolveHeadCell (MEC-019-R6), never the generic branch; onBreak exists only because the registry requires it on every breakable family (MEC-006-R24).
+  onBreak() { /* no-op */ },
   snapshot: s => structuredClone(s.families.fixedTerrain),
   solidAt: (s, x, y) => at(s, x, y)?.state === 'solid',
   bfsWallAt: (s, x, y) => { const c = at(s, x, y); return !!c && c.state !== 'crumble'; },
@@ -72,4 +73,19 @@ export function changeTerrain(s: SimState, b: Balance, ctx: StepCtx): void {
   }
   ctx.emit({ type: 'terrainChanged', templateId: next.templateId, name: next.name, variant: next.variant, newTemplate: next.templateId !== st.templateId });
   st.templateId = next.templateId; st.variant = next.variant;
+}
+
+// MEC-019-R6 Shield on terrain: consume the Shield, break the terrain cells in the area ahead, start invulnerability; no bonk pause.
+export function breachTerrain(s: SimState, ctx: StepCtx, x: number, y: number): void {
+  const sh = ctx.balance.skills.shield, st = s.families.fixedTerrain;
+  const area = breachCells(s.snake[0]!, s.dir, sh.terrainBreach.w, sh.terrainBreach.len);
+  const hit = (c: { x: number; y: number }) => area.some(a => a.x === c.x && a.y === c.y);
+  const broken = st.cells.filter(c => c.state !== 'crumble' && hit(c)).map(c => ({ x: c.x, y: c.y }));
+  st.cells = st.cells.filter(c => c.state === 'crumble' || !hit(c));
+  s.shield = null;
+  ctx.emit({ type: 'skillEnded', skill: 'shield', reason: 'consumed' });
+  ctx.emit({ type: 'shieldBroke', x, y, family: 'fixedTerrain' });
+  ctx.emit({ type: 'terrainBreached', cells: broken });
+  s.invuln = { leftMs: sh.invulnMs };
+  ctx.emit({ type: 'invulnStarted', ms: sh.invulnMs });
 }

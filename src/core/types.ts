@@ -62,6 +62,9 @@ export type SimEvent =
   | { type: 'skillEnded'; skill: SkillId; reason: 'timeout' | 'consumed' }
   | { type: 'tailSnipped'; cut: number; cells: Cell[] }
   | { type: 'shieldBroke'; x: number; y: number; family: FamilyKey }
+  | { type: 'terrainBreached'; cells: Cell[] }
+  | { type: 'invulnStarted'; ms: number }
+  | { type: 'invulnEnded' }
   | { type: 'rainDrop'; x: number; y: number }
   | { type: 'rainDropSkipped' }
   | { type: 'rainMangoExpired'; x: number; y: number }
@@ -105,6 +108,7 @@ export interface SimState {
   slowmo: { leftMs: number } | null;
   levelUpSlow: LevelUpSlow | null;
   shield: { leftMs: number } | null;
+  invuln: { leftMs: number } | null;
   rain: RainState | null;
   rainMangoes: RainMango[];
   rainBudgets: { castId: number; left: number }[];
@@ -176,6 +180,7 @@ export interface SimSnapshot {
   levelUpSlow: LevelUpSlow | null;
   snipWall: readonly { x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }[];
   shield: { leftMs: number } | null;
+  invuln: { leftMs: number } | null;
   rain: { leftMs: number; dropsLeft: number } | null;
   rainMangoes: readonly { x: number; y: number; leftMs: number }[];
   energy: number;

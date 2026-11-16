@@ -34,8 +34,9 @@ export function stepSnake(s: SimState, b: Balance, rng: Rng): void {
   const nx = head.x + s.dir.x, ny = head.y + s.dir.y;
   const eating = s.mango !== null && s.mango.x === nx && s.mango.y === ny;
   const body = eating ? s.snake : s.snake.slice(0, -1);
+  // MEC-019-R7 an invulnerable snake passes through its own body
   let cause: CauseKey | null = !inBounds(b.board.cols, b.board.rows, nx, ny) ? 'wall'
-    : body.some(c => c.x === nx && c.y === ny) ? 'self'
+    : !s.invuln && body.some(c => c.x === nx && c.y === ny) ? 'self'
     : null;
   // MEC-004-R6 only reach the solid/head-hit stage after wall and self checks.
   if (cause === null) {
