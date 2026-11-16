@@ -7,6 +7,7 @@ import type { MoverState } from './hazards/blocks/mover';
 import type { SpikeGroup } from './hazards/spike';
 import type { GateInstance } from './hazards/gate';
 import type { BombInstance } from './hazards/bomb';
+import type { TerrainKind } from './fixedTerrain';
 
 export type Step = -1 | 0 | 1;
 export interface Dir { x: Step; y: Step }
@@ -21,8 +22,8 @@ export interface LevelRow {
   from: number; to: number; weights: Partial<Record<FamilyKey, number>>;
   rockShapes: string[]; fenceShapes: string[]; rottenRocks: boolean;
 }
-export type CauseKey = 'wall' | 'self' | 'rotten' | 'rock' | 'fence' | 'maze' | 'ground' | 'snipWall' | 'coconut' | 'gate' | 'spike' | 'cat' | 'chicken' | 'bomb' | 'shrink';
-export type FamilyKey = TableFamily | 'rottenRock' | 'snipWall' | 'coconut' | 'gate' | 'spike' | 'npc' | 'bird' | 'bomb';
+export type CauseKey = 'wall' | 'self' | 'rotten' | 'rock' | 'fence' | 'maze' | 'ground' | 'snipWall' | 'coconut' | 'gate' | 'spike' | 'cat' | 'chicken' | 'bomb' | 'shrink' | 'terrain';
+export type FamilyKey = TableFamily | 'rottenRock' | 'snipWall' | 'coconut' | 'gate' | 'spike' | 'npc' | 'bird' | 'bomb' | 'fixedTerrain';
 export type TileKind = 'mud' | 'ice';
 export type HitKind = 'mover' | 'area';
 export interface HitCtx { hitHead(family: FamilyKey, x: number, y: number, kind: HitKind, dir: Dir): void }
@@ -44,6 +45,9 @@ export interface TerrainHazard { family: 'terrain'; t: number; lifeMs: number; c
 export interface LevelUpSlow { factor: number; easeMs: number; leftMs: number }
 export interface RottenRock { family: 'rottenRock'; x: number; y: number; state: 'solid' | 'crumble'; leftMs: number }
 export interface SnipWall { family: 'snipWall'; cells: Cell[]; state: 'solid' | 'crumble'; leftMs: number }
+/** MEC-019 one fixed terrain cell; leftMs counts the warn or crumble time down (0 while solid or waiting). */
+export interface FixedTerrainCell { x: number; y: number; kind: TerrainKind; state: 'warn' | 'solid' | 'crumble'; leftMs: number }
+export interface FixedTerrainState { templateId: string | null; variant: number; cells: FixedTerrainCell[] }
 export type HazardInstance = TimedHazard | TerrainHazard | RottenRock | SnipWall;
 export interface RainState { castId: number; leftMs: number; elapsedMs: number; drops: number; dropped: number }
 export interface RainMango { x: number; y: number; ageMs: number; castId: number }
@@ -85,7 +89,7 @@ export type SimEvent =
 
 /** All Sim state. Plain JSON data only: no closures, Map/Set or class instances. */
 export interface SimState {
-  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; mud: { patches: TilePatch[]; nextId: number }; ice: { patches: TilePatch[]; nextId: number }; coconut: { rolls: { id: number; lane: 'row' | 'col'; index: number; mover: MoverState }[]; nextId: number }; gate: { gates: GateInstance[]; nextId: number }; spike: { groups: SpikeGroup[]; nextId: number }; npc: { npcs: { id: number; variant: 'cat' | 'chicken'; mover: MoverState }[]; nextId: number }; bird: { target: BirdTarget | null }; bomb: { bombs: BombInstance[]; nextId: number }; shrink: ShrinkState };
+  families: { rock: TimedHazard[]; fence: TimedHazard[]; maze: TimedHazard[]; terrain: TerrainHazard[]; rottenRock: RottenRock[]; snipWall: SnipWall[]; mud: { patches: TilePatch[]; nextId: number }; ice: { patches: TilePatch[]; nextId: number }; coconut: { rolls: { id: number; lane: 'row' | 'col'; index: number; mover: MoverState }[]; nextId: number }; gate: { gates: GateInstance[]; nextId: number }; spike: { groups: SpikeGroup[]; nextId: number }; npc: { npcs: { id: number; variant: 'cat' | 'chicken'; mover: MoverState }[]; nextId: number }; bird: { target: BirdTarget | null }; bomb: { bombs: BombInstance[]; nextId: number }; shrink: ShrinkState; fixedTerrain: FixedTerrainState };
   nextHazardSeq: number;
   snake: Cell[];               // head first
   dir: Dir;
@@ -125,6 +129,7 @@ export interface SimState {
   outcome: Outcome | null;
   events: SimEvent[];          // pending, emptied by drainEvents()
   rng: RngState;
+  terrainSeed: number;
 }
 
 export interface MangoView { x: number; y: number; golden: boolean; leftMs: number; totalMs: number; ageMs: number }
@@ -189,6 +194,7 @@ export interface SimSnapshot {
   eatenInRun: number;
   hazards: readonly HazardView[];
   terrains: readonly TerrainView[];
+  fixedTerrain: { name: string | null; cells: readonly FixedTerrainCell[] };
   score: number;
   level: number;
   progress: number;

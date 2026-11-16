@@ -24,6 +24,7 @@ import { npcSnapshot } from './hazards/npc';
 import { birdSnapshot } from './hazards/bird';
 import { bombSnapshot } from './hazards/bomb';
 import { shrinkSnapshot } from './hazards/shrink';
+import { applyStartTerrain, fixedTerrainSnapshot } from './hazards/fixedTerrain';
 
 const toDir = ([x, y]: Pair): Dir => ({ x: x as Step, y: y as Step });
 const states = new WeakMap<Sim, SimState>();
@@ -45,19 +46,21 @@ export function initialState(b: Balance, seed: number, options: SimOptions = {})
     throw new RangeError('loadout must have two slots, unique unlocked skill ids or null, and an empty locked slot');
   }
   const snake = b.snake.start.map(([x, y]) => ({ x, y }));
-  return {
+  const state: SimState = {
     snake, dir: toDir(b.snake.startDir), queue: [],
     headFrom: { ...snake[0]! }, tailFrom: { ...snake[snake.length - 1]! },
     acc: 0, tickMs: levelTickMs(b, 1), mango: null,
-    families: { rock: [], fence: [], maze: [], terrain: [], rottenRock: [], snipWall: [], mud: { patches: [], nextId: 1 }, ice: { patches: [], nextId: 1 }, coconut: { rolls: [], nextId: 1 }, gate: { gates: [], nextId: 1 }, spike: { groups: [], nextId: 1 }, npc: { npcs: [], nextId: 1 }, bird: { target: null }, bomb: { bombs: [], nextId: 1 }, shrink: { active: null, cooldownMs: 0 } }, nextHazardSeq: 0,
+    families: { rock: [], fence: [], maze: [], terrain: [], rottenRock: [], snipWall: [], mud: { patches: [], nextId: 1 }, ice: { patches: [], nextId: 1 }, coconut: { rolls: [], nextId: 1 }, gate: { gates: [], nextId: 1 }, spike: { groups: [], nextId: 1 }, npc: { npcs: [], nextId: 1 }, bird: { target: null }, bomb: { bombs: [], nextId: 1 }, shrink: { active: null, cooldownMs: 0 }, fixedTerrain: { templateId: null, variant: 0, cells: [] } }, nextHazardSeq: 0,
     energy, orbs: [], orbSpawnMs: 0, rampActive: true, rampEaten: 0,
     bestLevel, loadout: [loadout[0], loadout[1]], slowmo: null, levelUpSlow: null,
     shield: null, rain: null, rainMangoes: [], rainBudgets: [], nextCastId: 1,
     spawnInMs: b.director.firstSpawnMs, mazeCooldownMs: 0, score: 0, eatenInRun: 0, retryMs: 0, level, progress: 0,
     levelTimeMs: 0, timeMs: 0,
     startLevel: level, levelsCleared: 0, eatenInLevel: 0,
-    status: 'playing', outcome: null, events: [], rng: seedRng(seed),
+    status: 'playing', outcome: null, events: [], rng: seedRng(seed), terrainSeed: seed,
   };
+  applyStartTerrain(state, b);
+  return state;
 }
 
 // MEC-004 one 1 ms step in prototype frame() order (L997-1004).
@@ -121,6 +124,7 @@ function snapshotOf(s: SimState, b: Balance): SimSnapshot {
       type: h.family, state: h.state, t: h.t, warnMs: h.warnMs, lifeMs: h.lifeMs, cells: h.cells.map(cell => ({ ...cell })),
       ...(h.kind ? { kind: h.kind } : {}),
     })),
+    fixedTerrain: fixedTerrainSnapshot(s, b),
     terrains: s.families.terrain.map(t => ({ t: t.t, lifeMs: t.lifeMs, cells: t.cells.map(({ x, y, vis, delay }) => ({ x, y, vis, delay })) })),
     score: s.score, level: s.level, progress: s.progress, need: needFor(b, s.level), tickMs: s.tickMs,
     biome: biome(b, s.level), challenge: isChallenge(b, s.level),

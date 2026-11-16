@@ -15,6 +15,7 @@ export const CAUSE_TEXT: Record<CauseKey, string> = {
   rotten: 'You hit a rock left by a rotten mango.', rock: 'A falling rock got you.',
   fence: 'You ran into a fence.', maze: 'You ran into a hedge.', ground: 'The ground rose in front of you.',
   snipWall: 'You hit your discarded tail.',
+  terrain: 'You ran into the terrain.', // MEC-019 provisional
   coconut: 'Hit by a coconut.', // OQ-B6 provisional
   gate: 'Crushed by a gate.', // OQ-B6 provisional
   spike: 'Spiked.', // OQ-B6 provisional
@@ -51,6 +52,7 @@ export const DEATH_LINES: Record<CauseKey, readonly string[]> = {
   maze: ['Lost in the hedge.', 'The hedge keeps its secrets.'],
   ground: ['The ground had other plans.', 'Hills happen. Watch your step.'],
   snipWall: ['You cut it. You hit it.', 'Your own snip bit back.'],
+  terrain: ['The map does not move. You did.', 'That wall was on the map.'], // MEC-019 provisional
   coconut: ['Bonked by a coconut.', 'Coconut incoming. Too late.'],
   gate: ['The gate said no.', 'Closed just in time. Not yours.'],
   spike: ['Spikes: pointy and rude.', 'Ouch. Spikes up.'],
