@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { colorOf } from '../../src/game/juice/colors';
-import { LIGHT, DARK, P1_COLORS } from '../../src/game/render/palette';
+import { LIGHT, P1_COLORS } from '../../src/game/render/palette';
 import { trimOldest } from '../../src/game/juice/juiceMap';
 import { Effects } from '../../src/game/render/effects';
 import { DrawObject, sceneHarness } from '../support/scene';
 
 describe('P3a-R11 caps and colours', () => {
   it('every ColorId resolves to a number in both themes', () => {
-    for (const p of [LIGHT, DARK]) for (const id of ['food', 'gold', 'rock', 'snake', 'danger', 'orb', 'slowmo', 'tailSnip', 'shield', 'mangoRain'] as const)
+    for (const p of [LIGHT]) for (const id of ['food', 'gold', 'rock', 'snake', 'danger', 'orb', 'slowmo', 'tailSnip', 'shield', 'mangoRain'] as const)
       expect(Number.isInteger(colorOf(id, p)), id).toBe(true);
     expect(colorOf('slowmo', LIGHT)).toBe(P1_COLORS.slowmo);
   });

@@ -158,9 +158,9 @@ export class BannerLayer {
   }
   setSlowmo(on: boolean): void { this.tint.setVisible(on); }
   private drawTint(): void {
-    const h = TOKENS.hud, m = M.tint, r = ui(m.radius), ins = ui(m.inset);
-    this.tint.fillStyle(toInt(h.slowTint), h.slowTintAlpha).fillRect(0, 0, WIDTH, HEIGHT)
-      .fillStyle(toInt(h.slowTint), h.slowBoardAlpha).fillRoundedRect(BOARD.x, BOARD.y, BOARD.size, BOARD.size, r)
-      .lineStyle(ui(m.ring), toInt(h.ring), m.ringAlpha).strokeRoundedRect(BOARD.x + ins, BOARD.y + ins, BOARD.size - 2 * ins, BOARD.size - 2 * ins, r - ui(m.ringInset) / 3);
+    const m = M.tint, r = ui(m.radius), ins = ui(m.inset);
+    this.tint.fillStyle(toInt(TOKENS.hud.slowTint), TOKENS.hud.slowTintAlpha).fillRect(0, 0, WIDTH, HEIGHT)
+      .fillStyle(toInt(TOKENS.hud.slowTint), TOKENS.hud.slowBoardAlpha).fillRoundedRect(BOARD.x, BOARD.y, BOARD.size, BOARD.size, r)
+      .lineStyle(ui(m.ring), toInt(TOKENS.hud.ring), m.ringAlpha).strokeRoundedRect(BOARD.x + ins, BOARD.y + ins, BOARD.size - 2 * ins, BOARD.size - 2 * ins, r - ui(m.ringInset) / 3);
   }
 }

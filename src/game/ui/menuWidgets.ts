@@ -6,7 +6,7 @@ import type { MotionTarget } from '../motion/motionCore';
 import { attachFeedback } from './feedback';
 import type { FeedbackKind } from './feedbackModel';
 import { drawIcon, type IconId } from './icons';
-import { d3, hitSize, ui, type ColumnLayout } from './layout';
+import { d3, hitSize, ui } from './layout';
 import { logoLetters, logoSpec, type LogoLine } from './menuLayout';
 import { D3_HERO, D3_HOME, MENU } from './menuMetrics';
 import { heroBody, heroHighlight } from './heroSpec';
@@ -18,11 +18,6 @@ import { titleText } from './widgets';
 
 // Menu-only widgets (P3b3). Origin convention follows the P3-0 kit: pills and chips are centred, cards and bars are top-left.
 
-/** Container for the middle block: local x centred on WIDTH/2, local y 0 = top of the block, uniformly scaled (spec D2). */
-export function scaledBlock(scene: Phaser.Scene, l: ColumnLayout): Phaser.GameObjects.Container {
-  return scene.add.container(WIDTH / 2 * (1 - l.middleScale), l.middleY).setScale(l.middleScale);
-}
-export function bgCream(scene: Phaser.Scene): void { scene.cameras.main.setBackgroundColor(toInt(TOKENS.surface.cream)); }
 
 /** MOT-1-R6 optional feedback for a zone widget: the visual is animated, the zone (hit area) never is. */
 export interface TapFx { visual: MotionTarget | MotionTarget[]; kind: FeedbackKind; navigates?: boolean }

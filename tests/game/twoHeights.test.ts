@@ -2,11 +2,9 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { d3HudLayout } from '../../src/game/hud/d3HudLayout';
 import { BOARD, HEIGHT, setHeight, VIEW, WIDTH } from '../../src/game/layout';
 import { previewRects } from '../../src/game/ui/artPreviewLayout';
-import { d3, d3Height, layoutColumn } from '../../src/game/ui/layout';
-import { loadoutColumn, settingsColumn } from '../../src/game/ui/menuLayout';
+import { d3, d3Height } from '../../src/game/ui/layout';
 
 const boardBottomMock = (): number => (BOARD.y + BOARD.size) * 360 / WIDTH;
-const MIN = 0.85; // balance.ui.minShrink
 afterEach(() => setHeight(VIEW.minH));
 
 describe.each([960, 1170])('D3-R7 layouts at HEIGHT %i', (h) => {
@@ -16,18 +14,6 @@ describe.each([960, 1170])('D3-R7 layouts at HEIGHT %i', (h) => {
       const l = d3HudLayout(d3Height(), dpad), rs = [l.skills[0], l.skills[1], ...(l.dpad ? [l.dpad.up, l.dpad.down] : [])];
       expect(l.energy.bar.y).toBeGreaterThanOrEqual(boardBottomMock());
       for (const r of rs) expect(d3(r.y + r.h)).toBeLessThanOrEqual(HEIGHT);
-    }
-  });
-  it(`D3-R7 every menu column fits without shrinking below minShrink at ${h}`, () => {
-    setHeight(h);
-    const specs = [
-      loadoutColumn(MIN), loadoutColumn(MIN, true), settingsColumn(MIN),
-    ];
-    for (const s of specs) {
-      const c = layoutColumn(s);
-      expect(c.fits).toBe(true);
-      expect(c.bottomY).toBeLessThanOrEqual(HEIGHT);
-      expect(c.middleY).toBeGreaterThanOrEqual(0);
     }
   });
   it(`D3-R7 art preview boxes stay inside the canvas at ${h}`, () => {

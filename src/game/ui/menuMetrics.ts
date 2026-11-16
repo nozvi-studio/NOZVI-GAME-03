@@ -24,19 +24,10 @@ export const MENU = {
   hill: { w: 530, topH: 260, topDy: 130, bottomH: 240, bottomDy: 150 },
   logo: { size: 66, lineH: 63, overlap: 4, shadowY: 6, height: 128 },
   loadout: {
-    slotsH: 156, slotCircle: 84, chipsH: 44, cardH: 80, cardGap: 10, cards: 4, goH: 78, goBottom: 30,
-    cardW: 358, cardR: 22, slotsR: 26, slotsPadTop: 16, slotsEdge: 8, slotCol: 150, slotRing: 7, slotShelf: 7, ringAlpha: 0.85, shelfAlpha: 0.3, slotIcon: 44, slotGap: 8,
-    slotLabel: 12, slotName: 15, slotLabelTrack: 1, titleFont: 24, chipFont: 15, chipPad: 14, chipIcon: 20, chipIconGap: 8,
-    pickRing: 3, disc: 52, discIcon: 28, padX: 14, textGap: 12, nameFont: 17, nameGap: 3, descFont: 13, costH: 22, costFont: 13, costPadL: 6, costPadR: 8, costGap: 8, costIcon: 12,
-    badgeH: 26, badgeFont: 12, badgePad: 10, badgeReserve: 70, lockIcon: 13, lockGap: 5, goW: 350, goLabel: 46, goStroke: 8,
-    compactBelowCssH: 700, compact: { cardH: 64, cardGap: 8 }, // UIFIX-R9 compact skill cards on short screens
     // D3-R19 / U6 mock-px (360 wide) board metrics for loadoutLayout.
     d3: { baseH: 640, backX: 12, backY: 12, round: 48, titleY: 16, titleH: 40, titleSide: 60, titleFont: 30, slotY: 74, slotSize: 78, slotGap: 20, slotLabelDy: 86, slotLabelH: 14, slotLabelFont: 12, chipsMinH: 700, chipsH: 32, chipsGap: 12, cardsTop: 190, cardX: 12, cardW: 336, cardH: 80, cardGap: 9, goX: 60, goH: 72, goBottom: 10, goClear: 16, topExtraMax: 20, gapExtraMax: 10, padL: 10, padR: 12, disc: 54, discIcon: 28, textGap: 10, nameFont: 19, descFont: 12, descLine: 1.2, costH: 26, costFont: 13, costIcon: 14, pickGap: 5, badgeFont: 13, chipIcon: 14, slotIcon: 38, lockedAlpha: 0.85, goLabel: 28, goStroke: 6 },
   },
   settings: {
-    rowH: 72, rows: 4, divider: 2, captionH: 16,
-    cardW: 358, radius: 26, tileInset: 2, titleDy: 14, subDy: 2, captionDy: 8, gap: 14, pad: 16, tile: 44, tileR: 14, icon: 24, textGap: 12, subW: 185, titleFont: 17, subFont: 13, valueFont: 14, headFont: 24,
-    sw: { w: 48, h: 28, knob: 10, line: 2 }, // read by settingsColumn until Task 8
     // D3-R19 / U6 mock-px (360 wide) board metrics for settingsLayout.
     d3: { backX: 12, backY: 12, round: 48, titleY: 14, titleH: 44, titleSide: 60, titleFont: 34, panelX: 14, panelY: 84, panelPadY: 4, rowH: 76, divider: 2, rowPadX: 12, tile: 44, tileR: 14, tileLine: 3, icon: 26, textGap: 10, titleFontRow: 16, subFont: 12, subW: 170, toggleW: 60, toggleH: 34, knob: 34, captionGap: 14, captionH: 16, captionFont: 13 },
   },

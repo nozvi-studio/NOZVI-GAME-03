@@ -1,5 +1,5 @@
 import { WIDTH } from '../layout';
-import { hitSize, ui, type ColumnSpec } from './layout';
+import { hitSize, ui } from './layout';
 import { TOKENS } from '../uiTokens';
 import { D3_BOOT, D3_HOME, D3_LOGO, MENU } from './menuMetrics';
 
@@ -10,28 +10,9 @@ export function headerButton(side: 'left' | 'right'): HeaderButton {
   return { cx: side === 'left' ? off : WIDTH - off, cy: ui(MENU.padTop + MENU.round / 2), hit: hitSize(ui(MENU.round)) };
 }
 
-type Spec = ColumnSpec;
-const head = MENU.padTop + MENU.round; // 66
 /** Trail samples per px of corner arc (smooth enough at phone width, cheap to draw). */
 const ARC_SAMPLES_PER_PX = 1.6;
 
-/** UIFIX-R9 canvas CSS height below which Loadout cards use the compact metrics. */
-export const isCompactHeight = (cssHeight: number): boolean => cssHeight < MENU.loadout.compactBelowCssH;
-export function loadoutCards(compact: boolean): { cardH: number; cardGap: number } {
-  const l = MENU.loadout;
-  return compact ? l.compact : { cardH: l.cardH, cardGap: l.cardGap };
-}
-/** P3b3-R3 Loadout: header on top, Go! pinned bottom; slots, chips and the 4 cards in the middle (the mockup note line is dropped, C9). UIFIX-R9: compact cards. */
-export function loadoutColumn(minShrink: number, compact = false): Spec {
-  const l = MENU.loadout, g = MENU.gap, c = loadoutCards(compact);
-  const middle = g + l.slotsH + g + l.chipsH + g + l.cards * c.cardH + (l.cards - 1) * c.cardGap;
-  return { top: head, middle, bottom: l.goBottom + l.goH + g, minShrink };
-}
-export function settingsColumn(minShrink: number): Spec {
-  const s = MENU.settings, g = MENU.section;
-  const rows = s.rows * s.rowH; // each row box is rowH tall and includes its divider
-  return { top: head, middle: g + rows + g + s.captionH, bottom: 0, minShrink };
-}
 // D3-R10 Boot rects (mock px): board positions shifted down by half the spare height.
 export function bootRects(hm: number): { logo: Rect & { scale: number }; bar: Rect; text: Rect } {
   const B = D3_BOOT, off = Math.max(0, (hm - B.h) / 2);

@@ -1,4 +1,4 @@
-import { defaultSettings, resolveDisplay, type BoardTheme, type Settings } from '../../meta';
+import { defaultSettings, resolveDisplay, type Settings } from '../../meta';
 export type Palette = Record<
   'bg' | 'boardA' | 'boardB' | 'snake' | 'belly' | 'food' | 'leaf' | 'rock' | 'rockHi' |
   'danger' | 'warn' | 'gold' | 'wood' | 'woodHi' | 'hedge' | 'hedgeHi' | 'earth' | 'earthSide' |
@@ -10,13 +10,6 @@ export const LIGHT: Palette = {
   warn: 0xef8414, gold: 0xf7c62f, wood: 0x7e4f24, woodHi: 0xb07a42, hedge: 0x2f5a24,
   hedgeHi: 0x4f8a3c, earth: 0xb98352, earthSide: 0x6f4a2b, ink: 0x22311a, panel: 0xfafcf4,
 };
-// removed in U6 with the D2 tokens
-export const DARK: Palette = {
-  bg: 0x131d15, boardA: 0x2d4b27, boardB: 0x284322, snake: 0x93a5ff, belly: 0xc3ccff,
-  food: 0xffb548, leaf: 0x7cc35e, rock: 0x6e6a60, rockHi: 0x938e80, danger: 0xff6b5b,
-  warn: 0xffa940, gold: 0xffe066, wood: 0xb98550, woodHi: 0xdcae78, hedge: 0x86b663,
-  hedgeHi: 0xb1d98f, earth: 0xb48659, earthSide: 0x5e3f26, ink: 0xe6f0dc, panel: 0x131d15,
-};
 
 // GDD-13 follow the prototype's system theme and accessibility preferences.
 const media = (q: string): boolean => typeof window !== 'undefined' && !!window.matchMedia?.(q).matches;
@@ -27,8 +20,6 @@ export const setDisplaySettings = (s: Settings | null): void => { saved = s; };
 const display = () => resolveDisplay(saved ?? defaultSettings(), osDisplay());
 /** D3-R3 the UI and the board always render the light look; the saved board theme and the OS scheme are ignored. */
 export const currentPalette = (): Palette => LIGHT;
-/** P3b1-R1 the board theme that matches a palette. */
-export const themeOf = (_p: Palette): BoardTheme => 'light';
 export const reduceMotion = (): boolean => display().reducedMotion;
 
 // MEC-006 §8 greybox colors for orbs, skills, slow-mo and shield.

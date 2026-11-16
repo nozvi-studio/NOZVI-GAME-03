@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- refactor(ui): remove dead D2 tokens, UI_THEME/DARK dark theme, D2 loadout/settings metrics and column helpers; tokenGuard test fails on any unread TOKENS key (D3-R1, D3-R3, U6-R10).
 - feat(settings): one D3 panel, bar-style toggles with round knob, dim-rays background, no theme card (D3-R19, D3-R3, U6-R6/R7/R8)
 - feat(loadout): D3 panels, skill-skin slots, selection ring, cost and pick chips, locked card faded with lock disc (D3-R19/R21, U6-R2/R3/R9)
 - feat(loadout): pure D3 layout (loadoutLayout) and skill tone view model, chips only when hm >= 700 (D3-R19, U6-R3/R4/R5)
