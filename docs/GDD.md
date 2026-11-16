@@ -204,10 +204,10 @@ All meta currency is earned by playing. **No real-money purchases** (owner decis
 - **Duplicates:** a skin you already own converts to coins (Common 60, Rare 150, Epic 400).
 
 ### 8.3 Skins & coins (MEC-011)
-- **Skin = chibi head icon + body made of same-colored blocks** that grows like the snake (cheap to produce: one head drawing per skin + a color). Launch set proposal: Snake (default), Dog, Cat, Capybara, + 8 more (e.g. Duck, Frog, Panda, Fox, Pig, Axolotl, Hamster, Mango-cat).
+- **Skin = chibi head icon + body made of same-colored blocks** that grows like the snake (cheap to produce: one head drawing per skin + a color). First batch (owner 2026-11-16, P4a): Snake (default), Ginger Cat, Pup, Tuxedo Cat (Common), Capybara (Rare). Later batches: e.g. Duck, Frog, Panda, Fox, Pig, Axolotl, Hamster, Mango-cat.
 - Rarity shows in presentation, not power (skins never change gameplay): Common = head + color · Rare = + eat effect / trail particles · Epic = + animated head, custom death reaction and sound.
 - **Coins** buy any skin directly in the shop (Common 300, Rare 800, Epic 2000), so the player always has a deterministic path to the skin they want.
-- Equip from the Skins screen; the equipped skin is shown on Home.
+- Equip from the Characters screen; the equipped skin is shown on Home. Buying a skin equips it at once, with no confirm dialog (MEC-011). Exact rules: `docs/superpowers/specs/2026-11-16-p4a-skins-design.md`.
 - **Reason to come back tomorrow:** **OPEN (owner)** — candidates: daily seeded run with a marble bonus, daily free marbles, endless mode after L30, new skin sets per season.
 
 ### 8.4 Save data (local)
@@ -264,7 +264,7 @@ Big phases; each phase gets **one spec set + one plan** (Superpowers `brainstorm
 | **P1 New core loop** | M1 | MEC-001 length reset, MEC-003 30-level/biome structure (using existing obstacle families only), MEC-006 energy + 4 skills, MEC-007 loadout, MEC-008 checkpoint; death causes logged locally | **Playtest:** 5 testers, ≥ 3 of them replay ≥ 3 times unprompted; skills used in ≥ 50% of runs. If it fails, iterate P1 — do not move on | new obstacle families, art, meta |
 | **P2 Content** | M1 | New obstacle families of §5.4, challenge levels, fairness checks per family, director tuning per biome | All 30 levels playable to the end; no death cause > 40%; fairness tests pass | art, meta |
 | **P3 Juice & art** | M2 | Style tile → asset production, §10.4 table, biome palettes, death lines, UI screens | Feedback table done; readable on a 5" phone; 60 fps on a mid-range phone | meta |
-| **P4 Meta** | M3 | MEC-009 results + marbles, MEC-010 marble machine (Matter.js physics), MEC-011 skins + coins + shop, save migration | Run → marbles → machine → skin loop complete; measured drop rates match published odds (test); first skin within 2–3 runs in playtest | monetization |
+| **P4 Meta** | M3 | In two parts (owner 2026-11-16): **P4a** MEC-011 skins + coins + shop, save migration (coins only from a debug grant until P4b); **P4b** MEC-009 results + marbles, MEC-010 marble machine (Matter.js physics) | Run → marbles → machine → skin loop complete; measured drop rates match published odds (test); first skin within 2–3 runs in playtest | monetization |
 | **P5 Ship** | M4 | Performance, analytics events (§12), web build for portals (and optional app wrapper), store/portal assets | Ships on the chosen platform; no blocker bugs | new mechanics |
 
 ## 12. Success metrics & playtest [REQUIRED]
