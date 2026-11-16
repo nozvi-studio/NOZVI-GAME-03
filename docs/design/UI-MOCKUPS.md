@@ -32,9 +32,9 @@ The token table lives in the spec §4 (D3-R1, R4) and in code as `TOKENS.d3`; `t
 | `Banners` | `Banners-360`, `-360-2..4` | `hud/BannerLayer.ts` | U5 (built) |
 | `Death` | `Death-360` | `juice/DeathCard.ts` | U5 (built) |
 | `Results`, `ResultsFirstRun` | `Results-360`, `Results-390`, `ResultsFirstRun-360` | `scenes/ResultsScene.ts`, `flow/resultsView.ts` | U5 (built) |
-| `Loadout` | `Loadout-360` | `scenes/LoadoutScene.ts` | U6 |
-| `Settings` | `Settings-360` | `scenes/SettingsScene.ts`, `ui/icons.ts` | U6 |
-| `States` | `States` | `ui/skin/*`, `ui/widgets.ts`, `ui/touchFx.ts` | U1 |
+| `Loadout` | `Loadout-360` | `scenes/LoadoutScene.ts`, `flow/loadoutLayout.ts` | U6 (built) |
+| `Settings` | `Settings-360` | `scenes/SettingsScene.ts`, `flow/settingsLayout.ts`, `ui/icons.ts` | U6 (built) |
+| `States` | `States` | `ui/skin/*` (incl. `ringSpec.ts`), `ui/widgets.ts`, `ui/touchFx.ts` | U1, ring U6 (built) |
 | `MarbleMachine`, `MarbleWheel` | `MarbleMachineD3`, `MarbleWheelD3` | none (P4, mockup only) | — |
 
 Board notes that are decisions, not decoration:
