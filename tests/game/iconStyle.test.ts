@@ -7,7 +7,7 @@ const S = TOKENS.d3.shape.iconStroke;
 it('D3-R19 every menu icon draws its outline with the shared stroke width', () => {
   for (const id of ICON_IDS) {
     const widths: number[] = [], g: Record<string, unknown> = {};
-    for (const k of ['fillStyle', 'fillCircle', 'strokeCircle', 'fillRoundedRect', 'fillTriangle', 'lineBetween', 'beginPath', 'moveTo', 'lineTo', 'strokePath', 'closePath', 'fillPath'])
+    for (const k of ['fillStyle', 'fillCircle', 'strokeCircle', 'fillRoundedRect', 'fillTriangle', 'lineBetween', 'beginPath', 'moveTo', 'lineTo', 'strokePath', 'closePath', 'fillPath', 'arc'])
       g[k] = vi.fn(() => g);
     g.lineStyle = vi.fn((w: number) => { widths.push(w); return g; });
     drawIcon(g as never, id, 48, 0x123456);

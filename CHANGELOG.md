@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(ui): sound icon draws the speaker cone to the right of the box with two concentric wave arcs (D3-R19).
 - docs: U6 QA pass, rulings (DECISIONS), CODEMAP rows, UI-MOCKUPS built marks, PLAYTEST entry.
 - refactor(ui): remove dead D2 tokens, UI_THEME/DARK dark theme, D2 loadout/settings metrics and column helpers; tokenGuard test fails on any unread TOKENS key (D3-R1, D3-R3, U6-R10).
 - feat(settings): one D3 panel, bar-style toggles with round knob, dim-rays background, no theme card (D3-R19, D3-R3, U6-R6/R7/R8)
