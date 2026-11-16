@@ -8,6 +8,6 @@ export const VIEW = { minH: 960, maxH: 1200 } as const;
 export let HEIGHT: number = VIEW.minH;
 export function setHeight(h: number): void { HEIGHT = h; }
 /** D3-R9 live binding (canvas px), set by initViewport from boardRect; read inside functions only (guard: tests/game/heightGuard.test.ts). */
-export let BOARD: { x: number; y: number; size: number } = { x: 15, y: 168, size: 510 };
+export let BOARD: { x: number; y: number; size: number } = { x: 31.5, y: 213, size: 477 };
 export function setBoard(b: { x: number; y: number; size: number }): void { BOARD = b; }
 export const cellPx = (b: Balance): number => BOARD.size / b.board.cols;

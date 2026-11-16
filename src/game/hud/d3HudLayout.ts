@@ -2,6 +2,8 @@
 export const D3_RUN = {
   short: { h: 640, top: 0 }, tall: { h: 780, top: 37 },
   side: 10, boardTop: 112, boardSize: 340,
+  // BAND-R1 banner band between the mango row and the board: the board sits `h` lower than boardTop; `below` keeps the card off the board frame.
+  band: { h: 30, below: 7 },
   pause: { x: 12, y: 12, d: 48 }, ribbon: { w: 160, h: 51, y: 10, font: 22, stroke: 4 }, score: { right: 12, y: 14, h: 40, icon: 22, font: 17, padX: 12, gap: 6 },
   mango: { y: 70, h: 34, side: 14, icon: 34, gap: 8, barH: 26, labelW: 44, labelFont: 18, shadowY: 2 },
   bottom: { block: 146, gapMin: 24, spareShare: 0.45 },
@@ -16,7 +18,7 @@ export const D3_RUN = {
 
 export interface R { x: number; y: number; w: number; h: number }
 export interface D3HudLayout {
-  board: R; pause: R; ribbon: R; score: { right: number; y: number; h: number };
+  board: R; band: R; pause: R; ribbon: R; score: { right: number; y: number; h: number };
   mango: { icon: R; bar: R; label: R };
   skills: readonly [R, R]; energy: { icon: R; bar: R; label: R };
   hint: R | null; chip: { cx: number; right: number | null; y: number; h: number; short: boolean };
@@ -29,9 +31,13 @@ export function debugRects(hm: number): { next: R; key: R } {
   return { next: { x: G.side, y, w: G.nextW, h: G.h }, key: { x: W - G.side - G.keyW, y, w: G.keyW, h: G.h } };
 }
 const topOff = (hm: number): number => { const D = D3_RUN; return D.short.top + (D.tall.top - D.short.top) * (hm - D.short.h) / (D.tall.h - D.short.h); };
-// D3-R9 board rect in board px: full width minus the side padding, under the top bar.
+// D3-R9 + BAND-R1 board rect in board px: under the top bar and the banner band. On short canvases the square shrinks (and stays centred)
+// so the larger of the two bottom groups still fits; the size never depends on the D-pad setting.
 export function boardRect(hm: number): { x: number; y: number; size: number } {
-  const D = D3_RUN; return { x: D.side, y: D.boardTop + topOff(hm), size: D.boardSize };
+  const D = D3_RUN, y = D.boardTop + D.band.h + topOff(hm);
+  const need = Math.max(D.bottom.gapMin + D.bottom.block, D.dpad.gap + D.dpad.block);
+  const size = Math.min(D.boardSize, hm - y - need);
+  return { x: (W - size) / 2, y, size };
 }
 const row = (x: number, y: number, w: number, h: number, iconW: number, gap: number, labelW: number): { icon: R; bar: R; label: R } => ({
   icon: { x, y: y + (h - iconW) / 2, w: iconW, h: iconW },
@@ -46,6 +52,7 @@ export function d3HudLayout(hm: number, dpad: boolean): D3HudLayout {
   mango.icon = { x: M.side, y: mrowY, w: M.icon, h: M.icon };
   const base = {
     board: { x: b.x, y: b.y, w: b.size, h: b.size },
+    band: { x: b.x, y: b.y - D.band.below - D.band.h, w: b.size, h: D.band.h },
     pause: { x: D.pause.x, y: T + D.pause.y, w: D.pause.d, h: D.pause.d },
     ribbon: { x: (W - D.ribbon.w) / 2, y: T + D.ribbon.y, w: D.ribbon.w, h: D.ribbon.h },
     score: { right: D.score.right, y: T + D.score.y, h: D.score.h }, mango,

@@ -40,7 +40,7 @@ The token table lives in the spec §4 (D3-R1, R4) and in code as `TOKENS.d3`; `t
 Board notes that are decisions, not decoration:
 - `GameDpad`: with the D-pad on, the energy bar sits above the bottom group and the checkpoint becomes a short chip (`L10`) on the same row.
 - `GameLocked`: an unaffordable skill keeps its icon and cost badge on the `off` tone; the energy gauge runs on the rim.
-- `Banners`: all four kinds stay inside the existing banner strip (top 1.5 rows of the board, UIFIX-R1).
+- `Banners`: all four kinds stay inside the banner strip. Since 2026-11-16 (BAND-R1, owner) the strip is a 30 px band between the mango row and the board, never on a board cell; the board sits 30 px lower than on the boards and shrinks on canvases shorter than 670 board px. The PNG boards still show the old strip on the top 1.5 board rows.
 - `ResultsFirstRun`: same panel as `Results`; rows without a value are absent and `TEXT.start` fills the last line.
 - `Settings`: four rows, no Board theme card (D3-R3).
 
