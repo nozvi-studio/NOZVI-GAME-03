@@ -38,7 +38,8 @@ describe('MOT-2-R9 resultsTimeline', () => {
   const at = (tl: ReturnType<typeof resultsTimeline>, item: string) => tl.find(x => x.item === item)!.atMs;
   it('MOT-2-R9 matches the spec times and ends exactly at resultsSeqMs', () => {
     const tl = resultsTimeline(all, m);
-    expect(at(tl, 'title')).toBe(0); expect(at(tl, 'head')).toBe(80); expect(at(tl, 'card')).toBe(120);
+    expect(at(tl, 'title')).toBe(0); expect(tl.some(x => x.item === 'head')).toBe(false);
+    expect(at(tl, 'card')).toBe(120); // U5-R4: no head target above
     expect(at(tl, 'score')).toBe(200); expect(at(tl, 'stat0')).toBe(400); expect(at(tl, 'stat2')).toBe(400 + 2 * m.staggerMs);
     expect(at(tl, 'best')).toBe(200 + m.countUpMs);
     expect(at(tl, 'energy')).toBe(700); expect(at(tl, 'banner')).toBe(700 + m.staggerMs); expect(at(tl, 'next')).toBe(700 + 2 * m.staggerMs);

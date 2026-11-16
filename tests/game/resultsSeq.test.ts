@@ -16,7 +16,7 @@ function mk(over: Partial<{ reduced: boolean; off: boolean }> = {}) {
     return t as never;
   };
   const targets: Record<string, ReturnType<typeof made>> = {};
-  for (const k of ['title', 'head', 'card', 'headline', 'scoreLabel', 'score', 'stat0', 'stat1', 'stat2', 'best', 'bestStar', 'energy', 'banner', 'next', 'home', 'again']) targets[k] = made(k);
+  for (const k of ['title', 'card', 'headline', 'scoreLabel', 'score', 'stat0', 'stat1', 'stat2', 'best', 'bestStar', 'energy', 'banner', 'next', 'home', 'again']) targets[k] = made(k);
   const text = { shown: '', setText(s: string) { text.shown = s; return text; } };
   const d: SeqDeps = {
     motion: {
@@ -100,11 +100,12 @@ it('MOT-2-R9 with the real Motion, every target ends visible once the sequence h
   for (const [id, t] of Object.entries(targets)) expect(t.alpha, id).toBe(1);
 });
 
-it('U5-R4 sequence runs without a head target and keeps the 1500 ms cap', () => {
-  const x = mk(); delete x.targets.head;
-  const seq = runResultsSequence(x.d, resultsTimeline(parts, m), x.targets, { text: x.text, value: 99 });
-  expect(() => x.run(m.resultsSeqMs)).not.toThrow();
-  expect(x.calls.some(c => c === 'pop:head')).toBe(false);
+it('U5-R4 sequence has no head item and keeps the 1500 ms cap', () => {
+  const x = mk();
+  const tl = resultsTimeline(parts, m);
+  expect(tl.some(i => i.item === 'head')).toBe(false);
+  const seq = runResultsSequence(x.d, tl, x.targets, { text: x.text, value: 99 });
+  x.run(m.resultsSeqMs);
   expect(m.resultsSeqMs).toBeLessThanOrEqual(1500);
   expect(seq.done()).toBe(true);
 });

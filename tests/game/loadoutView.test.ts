@@ -28,7 +28,7 @@ it('P3b3-R8 cards carry cost and unlock level from balance; locked cards have no
 it('P3b3-R9 one slot and "Pick a skill" below the second-slot level, two slots after', () => {
   const one = loadoutView(model(3, ['slowmo', null]), b, { level: 1, carried: 0 });
   expect(one.titleKey).toBe('loadout.titleOne');
-  expect(one.slots).toEqual([{ index: 0, skill: 'slowmo', active: true }]);
+  expect(one.slots).toEqual([{ index: 0, skill: 'slowmo', active: true, tone: 'skillA' }]);
   const two = loadoutView(model(6, ['slowmo', 'tailSnip']), b, { level: 1, carried: 0 });
   expect(two.titleKey).toBe('loadout.title');
   expect(two.slots.map(s => s.active)).toEqual([true, false]);
@@ -40,4 +40,10 @@ it('P3b3-R9 tapping a card moves the active slot ring', () => {
 it('P3b3-R9 start chips: chosen level always, energy only when carried > 0', () => {
   expect(loadoutView(model(6, ['slowmo', 'tailSnip']), b, { level: 6, carried: 25 })).toMatchObject({ startAt: 6, energy: 25 });
   expect(loadoutView(model(6, ['slowmo', 'tailSnip']), b, { level: 1, carried: 0 }).energy).toBeNull();
+});
+it('U6-R3 slot and card tones follow the skill; empty slots and locked cards are off', () => {
+  const v = loadoutView(model(6, ['slowmo', null]), b, { level: 1, carried: 0 });
+  expect(v.slots.map(s => s.tone)).toEqual(['skillA', 'off']);
+  expect(v.cards.find(c => c.id === 'mangoRain')!.tone).toBe('off');
+  expect(v.cards.find(c => c.id === 'tailSnip')!.tone).toBe('skillB');
 });

@@ -1,12 +1,13 @@
 import type Phaser from 'phaser';
+import { TOKENS } from '../uiTokens';
 // P3b3-R14 small glyphs for menu buttons and cards, drawn with Graphics primitives (replaces the mockup SVGs).
-export const ICON_IDS = ['back', 'sliders', 'lock', 'bolt', 'flag', 'home', 'slowmo', 'tailSnip', 'shield', 'mangoRain', 'sound', 'haptics', 'dpad', 'motion'] as const;
+export const ICON_IDS = ['back', 'sliders', 'lock', 'bolt', 'flag', 'home', 'slowmo', 'tailSnip', 'shield', 'mangoRain', 'sound', 'haptics', 'dpad', 'motion', 'check'] as const;
 export type IconId = typeof ICON_IDS[number];
-type G = Pick<Phaser.GameObjects.Graphics, 'fillStyle' | 'lineStyle' | 'fillCircle' | 'strokeCircle' | 'fillRoundedRect' | 'fillTriangle' | 'lineBetween' | 'beginPath' | 'moveTo' | 'lineTo' | 'strokePath' | 'closePath' | 'fillPath'>;
+type G = Pick<Phaser.GameObjects.Graphics, 'fillStyle' | 'lineStyle' | 'fillCircle' | 'strokeCircle' | 'fillRoundedRect' | 'fillTriangle' | 'lineBetween' | 'beginPath' | 'moveTo' | 'lineTo' | 'strokePath' | 'closePath' | 'fillPath' | 'arc'>;
 
 /** Draws `id` centred on (0,0) inside a `size` box. */
 export function drawIcon(g: G, id: IconId, size: number, color: number): void {
-  const u = size / 24, w = 2.4 * u;
+  const u = size / 24, w = TOKENS.d3.shape.iconStroke * u;
   g.fillStyle(color); g.lineStyle(w, color);
   const poly = (pts: number[][], fill: boolean): void => {
     g.beginPath(); g.moveTo(pts[0]![0]! * u, pts[0]![1]! * u);
@@ -29,11 +30,12 @@ export function drawIcon(g: G, id: IconId, size: number, color: number): void {
       g.strokeCircle(-8 * u, -7 * u, 2.5 * u); g.strokeCircle(-8 * u, 7 * u, 2.5 * u); break;
     case 'shield': poly([[0, -10], [8, -6], [7, 3], [0, 10], [-7, 3], [-8, -6]], true); break;
     case 'mangoRain': g.fillCircle(-6 * u, -5 * u, 3 * u); g.fillCircle(5 * u, -2 * u, 3 * u); g.fillCircle(-1 * u, 6 * u, 3 * u); break;
-    case 'sound':
-      g.fillTriangle(-4 * u, -4 * u, -4 * u, 4 * u, -10 * u, 0); g.fillRoundedRect(-10 * u, -3 * u, 5 * u, 6 * u, 1 * u);
-      g.lineBetween(2 * u, -5 * u, 5 * u, -8 * u); g.lineBetween(3 * u, 0, 9 * u, 0); g.lineBetween(2 * u, 5 * u, 5 * u, 8 * u); break;
+    case 'sound': // D3-R19 box left, cone widening right from the box edge, two concentric wave arcs
+      g.fillRoundedRect(-10 * u, -3 * u, 5 * u, 6 * u, 1 * u); g.fillTriangle(-5 * u, -3 * u, -5 * u, 3 * u, 0, 7 * u); g.fillTriangle(-5 * u, -3 * u, 0, -7 * u, 0, 7 * u);
+      for (const r of [4, 8]) { g.beginPath(); g.arc(-1 * u, 0, r * u, -0.9, 0.9, false); g.strokePath(); } break;
     case 'haptics': g.fillRoundedRect(-4 * u, -8 * u, 8 * u, 16 * u, 2 * u); g.lineBetween(-8 * u, -4 * u, -8 * u, 4 * u); g.lineBetween(8 * u, -4 * u, 8 * u, 4 * u); break;
     case 'dpad': g.fillRoundedRect(-3 * u, -9 * u, 6 * u, 18 * u, 2 * u); g.fillRoundedRect(-9 * u, -3 * u, 18 * u, 6 * u, 2 * u); break;
     case 'motion': g.strokeCircle(0, 0, 8.5 * u); g.beginPath(); g.moveTo(0, -4.5 * u); g.lineTo(0, 0); g.lineTo(3 * u, 2 * u); g.strokePath(); break;
+    case 'check': g.beginPath(); g.moveTo(-7 * u, 0); g.lineTo(-2 * u, 5 * u); g.lineTo(7 * u, -5 * u); g.strokePath(); break;
   }
 }

@@ -1,17 +1,7 @@
 import { expect, it } from 'vitest';
-import { layoutColumn, ui } from '../../src/game/ui/layout';
-import { MENU } from '../../src/game/ui/menuMetrics';
+import { ui } from '../../src/game/ui/layout';
 import { TOKENS } from '../../src/game/uiTokens';
-import { bootRects, isCompactHeight, logoLetters, logoSpec, loadoutCards, loadoutColumn, settingsColumn, smoothPath, homeRects, type HomeRects, type Rect } from '../../src/game/ui/menuLayout';
-const MIN = 0.85; // balance.ui.minShrink
-
-it('P3b3-R3 Loadout and Settings fit', () => {
-  expect(layoutColumn(loadoutColumn(MIN)).fits).toBe(true);
-  expect(layoutColumn(settingsColumn(MIN)).fits).toBe(true);
-});
-it('P3b3-R3 the worst Loadout column keeps controls at scale >= 0.85', () => {
-  expect(layoutColumn(loadoutColumn(MIN)).middleScale).toBeGreaterThanOrEqual(0.85);
-});
+import { bootRects, logoLetters, logoSpec, smoothPath, homeRects, type HomeRects, type Rect } from '../../src/game/ui/menuLayout';
 it('P3b3-R13 logo letters alternate tilt and cycle the mockup colours', () => {
   const a = logoLetters('MANGO', 0);
   expect(a.map(l => l.ch).join('')).toBe('MANGO');
@@ -32,22 +22,6 @@ it('P3b3-R13 smoothPath keeps the end points and stays inside the control box', 
   expect(p[p.length - 1]).toEqual(pts[4]);
   for (const q of p) { expect(q.x).toBeGreaterThanOrEqual(16); expect(q.x).toBeLessThanOrEqual(250); expect(q.y).toBeGreaterThanOrEqual(112); expect(q.y).toBeLessThanOrEqual(232); }
   for (let i = 1; i < p.length; i++) expect(Math.hypot(p[i]!.x - p[i - 1]!.x, p[i]!.y - p[i - 1]!.y)).toBeLessThanOrEqual(6);
-});
-it('UIFIX-R9 compact mode starts below 700 CSS px of canvas height', () => {
-  expect(isCompactHeight(640)).toBe(true);
-  expect(isCompactHeight(699)).toBe(true);
-  expect(isCompactHeight(700)).toBe(false);
-  expect(isCompactHeight(960)).toBe(false);
-});
-it('UIFIX-R9 compact cards are shorter but still hold the icon disc, and the column scales up', () => {
-  const full = loadoutCards(false), small = loadoutCards(true);
-  expect(full).toEqual({ cardH: MENU.loadout.cardH, cardGap: MENU.loadout.cardGap });
-  expect(small.cardH).toBeLessThan(full.cardH);
-  expect(small.cardH).toBeGreaterThanOrEqual(MENU.loadout.disc + 8);     // 4 px margin above and below the disc
-  expect(small.cardGap).toBeLessThanOrEqual(full.cardGap);
-  const a = layoutColumn(loadoutColumn(MIN)), b = layoutColumn(loadoutColumn(MIN, true));
-  expect(b.fits).toBe(true);
-  expect(b.middleScale).toBeGreaterThan(a.middleScale);                  // text is larger on short phones
 });
 
 it('D3-R11 logoSpec: MANGO yellow with mango line, SNAKE white with ink line, ink drop under both', () => {

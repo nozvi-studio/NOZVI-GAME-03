@@ -1,33 +1,27 @@
 // P3-0-R1 D2 design tokens (UI-MOCKUPS §3, PaletteD2). Pure: no Phaser.
 export const TOKENS = {
-  surface: { cream: '#F8F2E8', card: '#FFFCF6', white: '#FFFFFF', sand: '#EFE6D8', stone: '#E3DCD2', peach: '#FBE3C8' },
-  text: { primary: '#5A3B3B', soft: '#8A6A6A', faint: '#B79F8A', slate: '#3F4D5E', logoOutline: '#6B4C82', walnut: '#B98558' },
-  green: { face: '#79D391', shade: '#5DB878', deep: '#4A9A63', line: '#3E7A52', mint: '#CFEBD0', mint2: '#C2E4C6' },
-  accent: { orange: '#F4A157', orangeDeep: '#DB8238', butter: '#F8D468', gold: '#FFC845', pink: '#F6C2D3', periwinkle: '#8EA0FF' },
-  sky: { top: '#B3DEF3', bottom: '#9DD3EE', silhouette: '#C4E7F7', stat: '#BCDDF4', lavender: '#C6B0F5', energy: '#3CC6DA' },
-  snake: { body: '#6F93F5', shade: '#3F63D1', belly: '#E4ECFF' },
+  surface: { cream: '#F8F2E8', card: '#FFFCF6', white: '#FFFFFF', stone: '#E3DCD2' },
+  text: { primary: '#5A3B3B', soft: '#8A6A6A', slate: '#3F4D5E' },
+  green: { face: '#79D391', deep: '#4A9A63', line: '#3E7A52' },
+  accent: { orange: '#F4A157', orangeDeep: '#DB8238', butter: '#F8D468', gold: '#FFC845' },
+  sky: { top: '#B3DEF3', bottom: '#9DD3EE', energy: '#3CC6DA' },
+  snake: { body: '#6F93F5', belly: '#E4ECFF' },
   shadow: { card: { y: 4, blur: 10, spread: -3, color: '#6E5046', alpha: 0.15 } },
   title: { strokePx: 9, shadowY: 6 },
-  screen: { w: 390, h: 844, sidePad: 16 },
+  screen: { w: 390 },
   hud: {
-    skillOffFace: '#E9F1F7', skillOffIcon: '#9DB1C2', skillActiveIcon: '#2E7F93', skillUsedFace: '#EFE6D8',
-    charge: '#97DB9B', chargeAlpha: 0.7, glow: '#FFE98A', glowAlpha: 0.85, shelf: '#508CB4', shelfAlpha: 0.3,
-    ring: '#3CC6DA', ringTrack: '#FFFFFF', ringTrackAlpha: 0.75, energyTrack: '#D9EEF3', quota: '#2E9E5B',
-    scrim: '#5A3B3B', pauseScrimAlpha: 0.5, countScrimAlpha: 0.28,
-    tooltip: '#5A3B3B', tooltipText: '#FFFFFF', mintCard: '#D7EBD2', mintInk: '#234B35',
-    slowTint: '#8CC8F0', slowTintAlpha: 0.2, slowBoardAlpha: 0.22,
-    cardShadowAlpha: 0.45,
+    skillOffIcon: '#9DB1C2', skillActiveIcon: '#2E7F93', glow: '#FFE98A', glowAlpha: 0.85,
+    pauseScrimAlpha: 0.5, countScrimAlpha: 0.28,
+    tooltip: '#5A3B3B', tooltipText: '#FFFFFF', mintInk: '#234B35',
+    ring: '#3CC6DA', slowTint: '#8CC8F0', slowTintAlpha: 0.2, slowBoardAlpha: 0.22,
   },
   menu: {
     logoColors: ['#F79DBB', '#F8D468', '#8CC9F0', '#97DB9B', '#C6B0F5'],
-    heroBands: ['#F6C2D3', '#FBE19A', '#BCDDF4'], heroBandStops: [0.34, 0.67],
-    statButter: '#FBE19A', bestSoft: '#FFF3D1', mintBanner: '#D7EBD2', mintBannerText: '#234B35',
-    slotRing: '#FFE98A', pickRing: '#7FC98C', costChip: '#E6F5F8', rowDivider: '#F3EBDD',
-    cardEdgeDark: '#46584B', // UIFIX-R14 edge of Settings cards and toggle tracks on the dark card (#2B3A2F)
-    themeLight: ['#CFEBD0', '#C2E4C6'], themeDark: ['#3B4A5A', '#33414F'],
   },
   // D3-R1/R4 "Juicy" visual language (spec 2026-11-10-ui-d3-juicy-design.md §4). Mock px for shape numbers.
   d3: {
+    divider: '#C6DAEA', // D3-R19 Settings row divider
+    results: { energyIcon: '#22B8E6', nextIcon: '#F5A400' }, // Results board colours of the bolt and the next-checkpoint flag
     bg: { stops: ['#7FD8FF', '#3FB2F2', '#1F86D8'], centerY: 0.38, rayAlpha: 0.13, dimRays: 0.5, rayDeg: 9,
       rayCenterY: 0.46, rx: 1.2, ry: 0.7, midStop: 0.45 },
     ink: '#145A9C', inkDeep: '#0F4578', board: { frameShadow: '#000000',
@@ -63,11 +57,10 @@ export const TOKENS = {
       energy: { face: ['#8FF0FF', '#22B8E6', '#22B8E6'], line: '#0B5E7A', lip: '#0B5E7A', text: '#FFFFFF', outlined: true },
     },
     shape: { line: 3, lineBig: 4, lip: 4, lipSkill: 6, lipBig: 8, pressedLip: 1, glossTop: 0.55, glossBottom: 0.08, glossFrac: 0.36,
-      pressedGloss: 0.5, radiusBig: 28, radiusPanel: 22, selectedRing: 4, selectedLift: 2 },
+      pressedGloss: 0.5, radiusBig: 28, radiusPanel: 22, selectedRing: 4, selectedLift: 2, iconStroke: 2.6 },
     snake: { body: '#6F7DFF', head: '#7F8CFF', belly: '#CFD6FF', stripe: '#FFFFFF', blush: '#FF8FB1', tongue: '#FF5A7A', eye: '#1C1447' },
     outline: { snake: '#2B2F9E', mango: '#8A4500', rock: '#4A5563', warn: '#C81E1E' },
     outlineStorm: { snake: '#7CF2D4', mango: '#FFF3C4', rock: '#D5DCE6', warn: '#FF9A9A' },
-    stormIndex: 5,
     biomes: [
       { bg: ['#7FD8FF', '#3FB2F2', '#1F86D8'], frame: '#1D6B2A', cells: ['#A6E25A', '#93D648'] },
       { bg: ['#8FE8D8', '#3CC4B4', '#1C9A8E'], frame: '#7A6A1C', cells: ['#E3E07A', '#D2D062'] },
@@ -80,14 +73,6 @@ export const TOKENS = {
   danger: { text: '#B3261E', line: '#E0A39B' }, // UIFIX-R12/R14 soft red: short-of-energy cost, Quit run
 } as const;
 export type D3Tone = keyof typeof TOKENS.d3.tone;
-export type UiThemeName = 'light' | 'dark';
-export interface UiTheme { bg: string; title: string; soft: string; card: string; ink: string; cardSoft: string }
-/** UIFIX-R4 text/card colours per resolved theme. Dark: light ink on a raised dark-green card (contrast >= 4.5:1, tested). */
-export const UI_THEME: Record<UiThemeName, UiTheme> = {
-  light: { bg: TOKENS.surface.cream, title: TOKENS.text.primary, soft: TOKENS.text.soft, card: TOKENS.surface.card, ink: TOKENS.text.primary, cardSoft: TOKENS.text.soft },
-  dark: { bg: '#131D15', title: '#F3EFE4', soft: '#C9C2B0', card: '#2B3A2F', ink: '#F3EFE4', cardSoft: '#C9C2B0' },
-};
-export const uiTheme = (name: UiThemeName): UiTheme => UI_THEME[name];
 export const FONT_UI = 'Nunito, system-ui, sans-serif';
 export const FONT_TITLE = '"Lilita One", Nunito, system-ui, sans-serif';
 export function toInt(hex: string): number {

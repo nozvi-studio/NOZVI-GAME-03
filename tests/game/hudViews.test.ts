@@ -15,7 +15,6 @@ import { loadBalance } from '../support/balance';
 import { DrawObject, sceneHarness } from '../support/scene';
 import { setDisplaySettings } from '../../src/game/render/palette';
 import { defaultSettings } from '../../src/meta';
-import { toInt, uiTheme } from '../../src/game/uiTokens';
 
 vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTDOWN: 'shutdown' } },
   Geom: { Rectangle: Object.assign(class { constructor(..._a: number[]) {} }, { Contains: () => false }) } } }));
@@ -207,10 +206,8 @@ it('D3-R3 PauseOverlay draws the light card even with a saved dark board theme',
   try {
     const h = sceneHarness(), o = new PauseOverlay(h.scene as unknown as Phaser.Scene, { onResume() {}, onSettings() {}, onQuit() {} });
     o.show(pauseView({ level: 7, biome: 2, hint: null, settingsAvailable: true }, t));
-    const fills = h.objects.flatMap(x => x.commands).filter(c => c[0] === 'fillStyle').map(c => c[1]);
     expect(h.objects.some(x => x.texture.startsWith('d3/panel/light/rest/'))).toBe(true); // panel skin image present
     expect(h.find('overlay-title')).toBeDefined();
-    expect(fills).not.toContain(toInt(uiTheme('dark').card)); // D3-R3/R15: the panel is the light card skin, never the saved dark board theme
   } finally { setDisplaySettings(null); }
 });
 

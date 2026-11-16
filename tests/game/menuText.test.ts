@@ -9,8 +9,6 @@ it('P3b3-R2 menu strings use mockup copy', () => {
   expect(t('settings.dpad.sub')).toBe('Show arrows between the skill buttons');
   expect(t('settings.motion')).toBe('Reduced motion');
   expect(t('settings.motion.sub')).toBe('No shaking, softer flashes');
-  expect(t('settings.theme')).toBe('Board theme');
-  expect(t('settings.theme.sub')).toBe('Changes the ground colours on every level');
   expect(t('settings.autosave')).toBe('Changes save automatically');
   expect(t('home.startAt', { level: 6 })).toBe('Start at L6');
   expect(t('home.startL1')).toBe('Start from L1');

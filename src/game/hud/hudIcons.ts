@@ -11,20 +11,20 @@ export const ICON_TONES: Record<IconName, readonly IconTone[]> = {
   slowmo: ['ink', 'off', 'active', 'on'], tailSnip: ['ink', 'off', 'active', 'on'], shield: ['ink', 'off', 'active', 'on'], mangoRain: ['ink', 'off', 'active', 'on'],
   flag: ['ink', 'soft'], bolt: ['ink'], star: ['ink'], settings: ['ink'], shrink: ['ink'], biome: ['ink'], mango: ['ink'], up: ['ink'], warn: ['ink'],
 };
-const line = (c: string, sw: number, body: string): string =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
+const line = (c: string, body: string): string =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="${TOKENS.d3.shape.iconStroke}" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
 const fill = (c: string, body: string): string => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="${c}">${body}</g></svg>`;
 export function hudIconSvg(n: IconName, tone: IconTone = 'ink'): string {
   const c = TONE[tone];
   switch (n) {
-    case 'slowmo': return line(c, 2.4, '<circle cx="12" cy="13.5" r="8"/><path d="M12 9v4.8l3 1.8M9.5 3h5"/>');
-    case 'tailSnip': return line(c, 2.4, '<circle cx="6.5" cy="17.5" r="2.7"/><circle cx="17.5" cy="17.5" r="2.7"/><path d="M8.2 15.5L17 4M15.8 15.5L7 4"/>');
-    case 'shield': return line(c, 2.4, '<path d="M12 3l8 3v5.5c0 5-3.4 8.5-8 9.5-4.6-1-8-4.5-8-9.5V6z"/><path d="M8.8 12l2.2 2.2 4.2-4.4"/>');
-    case 'mangoRain': return line(c, 2.4, '<path d="M7 14a4 4 0 0 1 .5-8 5 5 0 0 1 9.5 1.5A3.3 3.3 0 0 1 17 14z"/><path d="M8 17.5v2M12 17v3M16 17.5v2"/>');
-    case 'flag': return line(c, 2.6, '<path d="M6 21V4M6 4h12l-3 4.5L18 13H6"/>');
-    case 'settings': return line(c, 2.6, '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.4"/><circle cx="8" cy="17" r="2.4"/>');
-    case 'shrink': return line(c, 2.6, '<path d="M3 12h6M15 12h6M6.5 9L9.5 12l-3 3M17.5 9L14.5 12l3 3"/>');
-    case 'biome': return line(TOKENS.text.slate, 2.4, '<path d="M12 2v20M3.4 7l17.2 10M20.6 7L3.4 17M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5"/>');
+    case 'slowmo': return line(c, '<circle cx="12" cy="13.5" r="8"/><path d="M12 9v4.8l3 1.8M9.5 3h5"/>');
+    case 'tailSnip': return line(c, '<circle cx="6.5" cy="17.5" r="2.7"/><circle cx="17.5" cy="17.5" r="2.7"/><path d="M8.2 15.5L17 4M15.8 15.5L7 4"/>');
+    case 'shield': return line(c, '<path d="M12 3l8 3v5.5c0 5-3.4 8.5-8 9.5-4.6-1-8-4.5-8-9.5V6z"/><path d="M8.8 12l2.2 2.2 4.2-4.4"/>');
+    case 'mangoRain': return line(c, '<path d="M7 14a4 4 0 0 1 .5-8 5 5 0 0 1 9.5 1.5A3.3 3.3 0 0 1 17 14z"/><path d="M8 17.5v2M12 17v3M16 17.5v2"/>');
+    case 'flag': return line(c, '<path d="M6 21V4M6 4h12l-3 4.5L18 13H6"/>');
+    case 'settings': return line(c, '<path d="M4 7h9M19 7h1M4 17h1M11 17h9"/><circle cx="16" cy="7" r="2.4"/><circle cx="8" cy="17" r="2.4"/>');
+    case 'shrink': return line(c, '<path d="M3 12h6M15 12h6M6.5 9L9.5 12l-3 3M17.5 9L14.5 12l3 3"/>');
+    case 'biome': return line(TOKENS.text.slate, '<path d="M12 2v20M3.4 7l17.2 10M20.6 7L3.4 17M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5"/>');
     case 'bolt': return fill(TOKENS.sky.energy, '<path d="M13 2L5 13.5h6L10 22l9-12.5h-6.5L13 2z"/>');
     case 'star': return fill(TOKENS.accent.gold, '<path d="M12 2.5l2.9 6.2 6.6.8-4.9 4.6 1.3 6.6L12 17.4l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/>');
     case 'up': return fill(TOKENS.d3.tone.primary.line, '<path d="M12 3l8 9h-5v9H9v-9H4z"/>');

@@ -22,8 +22,7 @@ import { FONT_TITLE, FONT_UI, TOKENS, toInt } from '../uiTokens';
 import { beginRun } from './ui';
 
 const R = MENU.results, M = { ...R.d3, ...R }, D = TOKENS.d3; // M: layout metrics plus scene-only metrics
-const NEXT_CHIP_CLEAR_W = 84; // "Clear L12" is wider than "L12" (mock px)
-const ENERGY_ICON = D.tone.energy.face[1], NEXT_ICON = '#F5A400'; // board colours of the bolt and the next-checkpoint flag
+const ENERGY_ICON = D.results.energyIcon, NEXT_ICON = D.results.nextIcon;
 const st = (size: number, color: string, weight: '800' | '900' = '800'): Phaser.Types.GameObjects.Text.TextStyle =>
   ({ fontFamily: FONT_UI, fontStyle: weight, fontSize: `${d3(size)}px`, color });
 
@@ -106,8 +105,8 @@ export class ResultsScene extends Phaser.Scene {
   private best(root: Phaser.GameObjects.Container, v: ResultsView, cx: number, cy: number): void {
     const label = v.bestChip.key === 'results.newBest' ? t('results.newBest') : t('results.best', v.bestChip.vars);
     const c = chip(this, cx, cy, label, '', 'results-best-chip', { tone: v.bestChip.gold ? 'mango' : 'light', lead: M.bestLead });
-    const star = this.add.graphics().setPosition(cx - c.width / 2 + d3(M.padX / 2 + M.bestIcon / 2 - 4), cy).fillStyle(toInt(D.tone.mango.face[1])).fillCircle(0, 0, d3(M.bestIcon) / 2);
-    star.lineStyle(d3(2), toInt(D.tone.mango.line)).strokeCircle(0, 0, d3(M.bestIcon) / 2);
+    const star = this.add.graphics().setPosition(cx - c.width / 2 + d3(M.padX / 2 + M.bestIcon / 2 + M.bestStarDx), cy).fillStyle(toInt(D.tone.mango.face[1])).fillCircle(0, 0, d3(M.bestIcon) / 2);
+    star.lineStyle(d3(M.bestStarLine), toInt(D.tone.mango.line)).strokeCircle(0, 0, d3(M.bestIcon) / 2);
     root.setName('results-best'); // kept on the root as before (QA name)
     this.targets.best = captureGroup(this, root, { x: cx, y: cy }, () => root.add([c, star]), 'results-best-group');
     if (v.bestChip.gold) this.targets.bestStar = star; // only a new best pulses (and is hidden first) the plain chip's star is static
@@ -123,9 +122,9 @@ export class ResultsScene extends Phaser.Scene {
         this.add.text(x0 + d3(M.rowIcon + M.rowGap), cy, t('results.carryLabel'), st(M.rowFont, D.text)).setOrigin(0, 0.5).setName('results-carry'),
         this.add.text(x0 + w, cy, String(r.value), st(M.rowValueFont, D.text, '900')).setOrigin(1, 0.5)]));
     } else {
-      const cw = r.requiresClear ? NEXT_CHIP_CLEAR_W : M.nextChipW, bx = M.rowIcon + M.rowGap, barW = l.panel.w - 2 * M.padX - bx - cw - M.rowGap;
+      const cw = r.requiresClear ? M.nextChipClearW : M.nextChipW, bx = M.rowIcon + M.rowGap, barW = l.panel.w - 2 * M.padX - bx - cw - M.rowGap;
       group('next', at, () => {
-        const bar = progressBar(this, x0 + d3(bx), cy - d3(M.barH) / 2, d3m(barW), d3m(M.barH), TOKENS.accent.orange); bar.set(r.fill, 1);
+        const bar = progressBar(this, x0 + d3(bx), cy - d3(M.barH) / 2, d3m(barW), d3m(M.barH), TOKENS.d3.tone.mango.face[1]); bar.set(r.fill, 1);
         root.add([icon('flag', x0, NEXT_ICON), bar.g,
           butterChip(this, x0 + w - d3(cw) / 2, cy, cw, M.nextChipH, t(r.requiresClear ? 'results.nextCpClear' : 'results.nextCp', { level: r.level }), M.nextChipFont)]);
       });

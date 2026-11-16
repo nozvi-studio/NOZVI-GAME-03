@@ -130,7 +130,7 @@ export class HudScene extends Phaser.Scene {
   // Held until the countdown's 'go' so the card does not sit under the digit and expire during the countdown.
   private showRunStart(): void { this.startBanner = runStartLines(this.gameScene.snapshot() ?? { level: 0, challenge: false }, t); }
   private flushRunStart(): void {
-    if (this.startBanner.length) this.banners.show(this.startBanner.map(title => ({ kind: 'challenge' as const, title })));
+    if (this.startBanner.length) this.banners.enqueueAll(this.startBanner.map(title => ({ kind: 'challenge' as const, title })));
     this.startBanner = [];
   }
 

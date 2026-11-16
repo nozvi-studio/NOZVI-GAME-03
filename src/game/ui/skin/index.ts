@@ -2,3 +2,4 @@
 export * from './skinSpec';
 export * from './skinPaint';
 export * from './skinTextures';
+export * from './ringSpec';

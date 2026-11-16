@@ -1,9 +1,12 @@
 import type { Balance, SkillId } from '../../core';
 import type { LoadoutEditState } from './loadoutEdit';
+export type SkillTone = 'skillA' | 'skillB' | 'off';
+// U6-R3 skill identity colour: two tones alternate over the four skills.
+export const SKILL_TONE: Record<SkillId, 'skillA' | 'skillB'> = { slowmo: 'skillA', tailSnip: 'skillB', shield: 'skillA', mangoRain: 'skillB' };
 export interface SkillCardView { id: SkillId; nameKey: string; locked: boolean; cost: number; unlockLevel: number;
-  desc: { key: string; vars: Record<string, number> } | null; slot: 0 | 1 | null }
+  desc: { key: string; vars: Record<string, number> } | null; slot: 0 | 1 | null; tone: SkillTone }
 export interface LoadoutView { titleKey: 'loadout.title' | 'loadout.titleOne';
-  slots: { index: 0 | 1; skill: SkillId | null; active: boolean }[]; cards: SkillCardView[]; startAt: number; energy: number | null }
+  slots: { index: 0 | 1; skill: SkillId | null; active: boolean; tone: SkillTone }[]; cards: SkillCardView[]; startAt: number; energy: number | null }
 const sec = (ms: number): number => ms / 1000;
 // P3b3-R8 card copy is generated from balance (spec §2): no typed numbers.
 export function skillDesc(id: SkillId, b: Balance): { key: string; vars: Record<string, number> } {
@@ -19,11 +22,11 @@ export function skillDesc(id: SkillId, b: Balance): { key: string; vars: Record<
 export function loadoutView(e: LoadoutEditState, b: Balance, ctx: { level: number; carried: number }): LoadoutView {
   return {
     titleKey: e.slotCount === 2 ? 'loadout.title' : 'loadout.titleOne',
-    slots: ([0, 1] as const).filter(i => i < e.slotCount).map(i => ({ index: i, skill: e.selection[i], active: e.activeSlot === i })),
+    slots: ([0, 1] as const).filter(i => i < e.slotCount).map(i => ({ index: i, skill: e.selection[i], active: e.activeSlot === i, tone: e.selection[i] ? SKILL_TONE[e.selection[i]!] : 'off' })),
     cards: b.loadout.order.map(id => {
       const locked = !e.unlocked.includes(id), s = e.selection.indexOf(id);
       return { id, nameKey: `skill.${id}.name`, locked, cost: b.skills[id].cost, unlockLevel: b.skills[id].unlockLevel,
-        desc: locked ? null : skillDesc(id, b), slot: s === 0 || s === 1 ? s : null };
+        desc: locked ? null : skillDesc(id, b), slot: s === 0 || s === 1 ? s : null, tone: locked ? 'off' : SKILL_TONE[id] };
     }),
     startAt: ctx.level, energy: ctx.carried > 0 ? ctx.carried : null,
   };

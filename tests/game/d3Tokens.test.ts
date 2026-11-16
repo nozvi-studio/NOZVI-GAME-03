@@ -30,7 +30,7 @@ it('D3-R2 outlined display type reaches 4.5:1 between fill and outline', () => {
 });
 it('D3-R2 board outlines reach 3:1 on both cells of every biome', () => {
   D.biomes.forEach((b, i) => {
-    const set = i === D.stormIndex ? D.outlineStorm : D.outline;
+    const set = i === D.biomes.length - 1 ? D.outlineStorm : D.outline;
     for (const [part, c] of Object.entries(set)) for (const cell of b.cells) {
       expect(cr(c, cell), `biome ${i + 1} ${part} on ${cell}`).toBeGreaterThanOrEqual(3);
     }

@@ -2,6 +2,16 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(ui): sound icon draws the speaker cone to the right of the box with two concentric wave arcs (D3-R19).
+- docs: U6 QA pass, rulings (DECISIONS), CODEMAP rows, UI-MOCKUPS built marks, PLAYTEST entry.
+- refactor(ui): remove dead D2 tokens, UI_THEME/DARK dark theme, D2 loadout/settings metrics and column helpers; tokenGuard test fails on any unread TOKENS key (D3-R1, D3-R3, U6-R10).
+- feat(settings): one D3 panel, bar-style toggles with round knob, dim-rays background, no theme card (D3-R19, D3-R3, U6-R6/R7/R8)
+- feat(loadout): D3 panels, skill-skin slots, selection ring, cost and pick chips, locked card faded with lock disc (D3-R19/R21, U6-R2/R3/R9)
+- feat(loadout): pure D3 layout (loadoutLayout) and skill tone view model, chips only when hm >= 700 (D3-R19, U6-R3/R4/R5)
+- feat(skin): selection ring texture, 4 px mango outline + 2 px lift, cached separately from skin states (D3-R21, U6-R2).
+- feat(ui): one icon stroke token (TOKENS.d3.shape.iconStroke 2.6) for menu and HUD icons; new check icon (D3-R19, U6-R1).
+- refactor(results): drop dead head timeline item; Results literals move to TOKENS.d3.results and MENU.results (U5 follow-up).
+- fix(hud): run-start banners append (enqueueAll) so a hazard incoming card is no longer dropped; pure bannerQueue rules tested (U5-R2).
 - docs: STATUS after U5 merge.
 - docs: U5 QA pass, rulings (DECISIONS), UI-MOCKUPS built marks, PLAYTEST entry.
 - fix(hud): D3-R16 review: banner queue cap counts the card on screen, slot B pill text/icon ink (white on orange was 2.4:1), darker up/warn icons, D3-R2 strip contrast test.

@@ -126,8 +126,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'settings.haptics': 'Haptics', 'settings.haptics.sub': 'Buzz when you eat or crash',
   'settings.dpad': 'On-screen D-pad', 'settings.dpad.sub': 'Show arrows between the skill buttons',
   'settings.motion': 'Reduced motion', 'settings.motion.sub': 'No shaking, softer flashes',
-  'settings.theme': 'Board theme', 'settings.theme.sub': 'Changes the ground colours on every level',
-  'settings.light': 'Light', 'settings.dark': 'Dark', 'settings.autosave': 'Changes save automatically',
+  'settings.autosave': 'Changes save automatically',
   'results.scoreLabel': 'SCORE', 'results.levelLabel': 'LEVEL', 'results.eatenLabel': 'EATEN', 'results.biomeLabel': 'BIOME',
   'results.biomeOf': '{b}/{n}', 'results.nextCp': 'L{level}', 'results.nextCpClear': 'Clear L{level}', 'results.gameOver': 'GAME OVER',
   'results.youWin': 'YOU WIN!', // provisional
