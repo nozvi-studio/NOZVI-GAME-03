@@ -64,7 +64,7 @@ export const TOKENS = {
       energy: { face: ['#8FF0FF', '#22B8E6', '#22B8E6'], line: '#0B5E7A', lip: '#0B5E7A', text: '#FFFFFF', outlined: true },
     },
     shape: { line: 3, lineBig: 4, lip: 4, lipSkill: 6, lipBig: 8, pressedLip: 1, glossTop: 0.55, glossBottom: 0.08, glossFrac: 0.36,
-      pressedGloss: 0.5, radiusBig: 28, radiusPanel: 22, selectedRing: 4, selectedLift: 2 },
+      pressedGloss: 0.5, radiusBig: 28, radiusPanel: 22, selectedRing: 4, selectedLift: 2, iconStroke: 2.6 },
     snake: { body: '#6F7DFF', head: '#7F8CFF', belly: '#CFD6FF', stripe: '#FFFFFF', blush: '#FF8FB1', tongue: '#FF5A7A', eye: '#1C1447' },
     outline: { snake: '#2B2F9E', mango: '#8A4500', rock: '#4A5563', warn: '#C81E1E' },
     outlineStorm: { snake: '#7CF2D4', mango: '#FFF3C4', rock: '#D5DCE6', warn: '#FF9A9A' },

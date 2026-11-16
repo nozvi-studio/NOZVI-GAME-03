@@ -1,12 +1,13 @@
 import type Phaser from 'phaser';
+import { TOKENS } from '../uiTokens';
 // P3b3-R14 small glyphs for menu buttons and cards, drawn with Graphics primitives (replaces the mockup SVGs).
-export const ICON_IDS = ['back', 'sliders', 'lock', 'bolt', 'flag', 'home', 'slowmo', 'tailSnip', 'shield', 'mangoRain', 'sound', 'haptics', 'dpad', 'motion'] as const;
+export const ICON_IDS = ['back', 'sliders', 'lock', 'bolt', 'flag', 'home', 'slowmo', 'tailSnip', 'shield', 'mangoRain', 'sound', 'haptics', 'dpad', 'motion', 'check'] as const;
 export type IconId = typeof ICON_IDS[number];
 type G = Pick<Phaser.GameObjects.Graphics, 'fillStyle' | 'lineStyle' | 'fillCircle' | 'strokeCircle' | 'fillRoundedRect' | 'fillTriangle' | 'lineBetween' | 'beginPath' | 'moveTo' | 'lineTo' | 'strokePath' | 'closePath' | 'fillPath'>;
 
 /** Draws `id` centred on (0,0) inside a `size` box. */
 export function drawIcon(g: G, id: IconId, size: number, color: number): void {
-  const u = size / 24, w = 2.4 * u;
+  const u = size / 24, w = TOKENS.d3.shape.iconStroke * u;
   g.fillStyle(color); g.lineStyle(w, color);
   const poly = (pts: number[][], fill: boolean): void => {
     g.beginPath(); g.moveTo(pts[0]![0]! * u, pts[0]![1]! * u);
@@ -35,5 +36,6 @@ export function drawIcon(g: G, id: IconId, size: number, color: number): void {
     case 'haptics': g.fillRoundedRect(-4 * u, -8 * u, 8 * u, 16 * u, 2 * u); g.lineBetween(-8 * u, -4 * u, -8 * u, 4 * u); g.lineBetween(8 * u, -4 * u, 8 * u, 4 * u); break;
     case 'dpad': g.fillRoundedRect(-3 * u, -9 * u, 6 * u, 18 * u, 2 * u); g.fillRoundedRect(-9 * u, -3 * u, 18 * u, 6 * u, 2 * u); break;
     case 'motion': g.strokeCircle(0, 0, 8.5 * u); g.beginPath(); g.moveTo(0, -4.5 * u); g.lineTo(0, 0); g.lineTo(3 * u, 2 * u); g.strokePath(); break;
+    case 'check': g.beginPath(); g.moveTo(-7 * u, 0); g.lineTo(-2 * u, 5 * u); g.lineTo(7 * u, -5 * u); g.strokePath(); break;
   }
 }
