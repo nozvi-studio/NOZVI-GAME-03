@@ -25,7 +25,7 @@ Rules: the core holds no player-facing strings (events carry keys; `src/game/tex
 3. `levelTimeMs += 1`.
 4. Director (P0, with MEC-003-R4/R14 inputs; skipped while `mango = null` (MEC-003-R13) or while a level-up slowdown is active (MEC-003-R11)).
 5. Timed rock/fence/maze instances update together in serialized spawn order (MEC-004-R2, preserves P1 events), then terrain, `rottenRock` MEC-002-R7, `snipWall` MEC-006-R22 in registry order.
-6. Skill effect timers: Slow-mo, Shield (`skillEnded` on timeout; MEC-006-R16). Tail Snip "active" is derived from the `snipWall` family (MEC-006-R14).
+6. Skill effect timers: Slow-mo, Shield (`skillEnded` on timeout; MEC-006-R16), invulnerability timer (MEC-019-R7). Tail Snip "active" is derived from the `snipWall` family (MEC-006-R14).
 7. Level-up slowdown: `leftMs −= 1`, set to null at 0 (MEC-003-R22).
 8. Speed: `base = rampActive ? rampTick(rampEaten) : levelTickMs(level)` (MEC-008-R8, MEC-003-R3); `eff = round(base × max(slowmo ? tickFactor : 1, curFactor))` (MEC-006-R17, `curFactor` from MEC-003-R22); if `eff` changed, `acc = min(acc, eff)` (MEC-006-R18).
 9. Mango: `ageMs += 1` and rot expiry (MEC-002-R6), then placement retry (MEC-002-R9).
@@ -33,7 +33,7 @@ Rules: the core holds no player-facing strings (events carry keys; `src/game/tex
 11. Rain: rain mango age and expire, then drop schedule (MEC-006-R29..R31).
 12. `acc += 1`; if `acc ≥ eff`: `acc −= eff` and run the snake step:
     1. Take one queued turn; compute the new head (P0).
-    2. Collision in P0 order `wall → self → solid cell`; the solid-cell stage asks families in registry order `solidAt` (first hit gives `cause`); Shield break per MEC-006-R25..R28 (sets `acc` for the bonk).
+    2. Collision in P0 order `wall → self → solid cell`; the solid-cell stage asks families in registry order `solidAt` (first hit gives `cause`); Shield break per MEC-006-R25..R28 (sets `acc` for the bonk). While invulnerable (MEC-019-R7) only the board edge and a closed shrinking ring kill; a Shield hit on solid fixed terrain breaches an area and starts invulnerability instead of a bonk (MEC-019-R6).
     3. Move. If the head is on the regular mango → eat (MEC-002-R3/R5); else on a rain mango → eat rain (MEC-006-R32); else on an orb → orb (MEC-006-R8).
     4. After eating any mango: ramp counter (MEC-008-R8); then, if `progress ≥ need`: level 30 → run win (MEC-003-R6); else the level-up chain (MEC-001-R4/R5; MEC-003-R7: director reset, slowdown start, events; MEC-007-R12), then, if the regular mango was eaten, place the next one (MEC-002-R8). The tick accumulator is kept at a level up (MEC-001-R9).
 
@@ -44,4 +44,4 @@ All randomness uses the core RNG in this order. Determinism contract unchanged (
 MEC-006-R35 points here.
 
 ## Hazard family registry
-`src/core/hazards/registry.ts`: `FAMILIES = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily]` (ordered), one state-level `HazardFamily` per `FamilyKey`. Each descriptor exposes spawn/update/snapshot, solid/BFS/reserved queries, count, cause/cap metadata and Shield breakability. `queries.ts` owns registry-order composite queries; P1 collision boundaries retain rotten-rock-first priority (MEC-002-R7). Each family's JSON instances live in `SimState.families[key]`; timed instances carry `spawnSeq` assigned from `nextHazardSeq`, preserving cross-family update and snapshot order through clone/restore. `family.ts` composes the unchanged instance rules into descriptors. `SpawnCtx`/`StepCtx` are per-call views, never stored in state. There is no level-end hook (MEC-004-R16).
+`src/core/hazards/registry.ts`: `FAMILIES = [ROCK, FENCE, MAZE, TERRAIN, rottenRockFamily, snipWallFamily]` (ordered; later phases append mud, ice, coconut, gate, spike, npc, bird, bomb, shrink and `fixedTerrain`, MEC-019), one state-level `HazardFamily` per `FamilyKey`. Each descriptor exposes spawn/update/snapshot, solid/BFS/reserved queries, count, cause/cap metadata and Shield breakability. `queries.ts` owns registry-order composite queries; P1 collision boundaries retain rotten-rock-first priority (MEC-002-R7). Each family's JSON instances live in `SimState.families[key]`; timed instances carry `spawnSeq` assigned from `nextHazardSeq`, preserving cross-family update and snapshot order through clone/restore. `family.ts` composes the unchanged instance rules into descriptors. `SpawnCtx`/`StepCtx` are per-call views, never stored in state. There is no level-end hook (MEC-004-R16).

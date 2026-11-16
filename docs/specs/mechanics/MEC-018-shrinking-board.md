@@ -46,6 +46,7 @@ Save fields: none.
 7. **No reachable mango before the start:** MEC-004-R12 does not reject (the mango was already unreachable).
 8. **Terrain or maze already active at the offer time:** R9, never offered.
 9. **Slow-mo and Shield:** no interaction; Slow-mo does not slow the lifecycle.
+10. **Fixed terrain (MEC-019):** the ring is never blocked by fixed terrain, because no template tile lies on the outer ring (MEC-019-R15). A closed ring still kills an invulnerable snake (MEC-019-R7); Shield does not break it.
 
 ## 6. Interactions with other mechanics
 - **MEC-002:** the mango is displaced and the ring is `reserved` (MEC-004-R3); mango placement and the fair-rock check treat the ring as BFS wall.

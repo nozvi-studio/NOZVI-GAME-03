@@ -1,6 +1,6 @@
 # Fixed terrain - design (MEC-019)
 
-Status: Draft. Owner approved each section in chat 2026-11-11; spec awaits owner review. IDs: `TER-R<n>` (become `MEC-019-R<n>` when the mechanic spec is written in the plan). Scheduled **after the UI D3 phases (U3..U7)** (owner 2026-11-11).
+Status: Approved (owner 2026-11-16); implemented by plan 2026-11-16-fixed-terrain.md; rule IDs are MEC-019-R<n> (the `TER-R<n>` below are the design names). Scheduled **after the UI D3 phases (U3..U7)** (owner 2026-11-11).
 
 ## 1. Goal
 Owner 2026-11-11: hazards appear in random, meaningless places. Add hand-drawn terrain: a few rock rows and fences that stay fixed for 2-3 levels, so each part of a biome reads as a small map with a style and clear corridors. Normal hazards keep falling as today.

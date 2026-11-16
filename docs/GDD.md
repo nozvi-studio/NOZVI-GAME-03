@@ -43,6 +43,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 | MEC-015 | Patrolling cat / chicken on a visible back-and-forth route (L21) | Timing | P2b | `docs/specs/mechanics/MEC-015-patrol-npcs.md` | Proposed |
 | MEC-016 | Mango-thief bird: shadow on the mango, steals it if not eaten in time (L22) | Time pressure, never lethal | P2b | `docs/specs/mechanics/MEC-016-mango-thief-bird.md` | Proposed |
 | MEC-017 | Timed bombs: countdown, then a plus-shaped blast for one tick (L23) | Area avoidance | P2b | `docs/specs/mechanics/MEC-017-timed-bombs.md` | Proposed |
+| MEC-019 | Fixed terrain: hand-drawn rock and fence maps per level segment, Shield breach, short invulnerability | Pathing | P3 | `docs/specs/mechanics/MEC-019-terrain.md` | Implemented |
 | MEC-004 | Obstacle families + director + fairness rules (warn → solid → crumble, never on snake, always a path) | Escalating, readable danger | P0 (port), P2 (new families) | to write (template 03) | Partly implemented (rocks, fences, rising ground, mazes) |
 | MEC-006 | Energy orbs, energy bar, 4 skills with energy cost and side effects | Clever escapes and farming at a cost | P1 | `docs/specs/mechanics/MEC-006-energy-skills.md` | Implemented (P1) |
 | MEC-007 | Skill loadout: pick 2 of the unlocked skills before a run | Strategy before the run; uncluttered phone controls | P1 | `docs/specs/mechanics/MEC-007-loadout.md` | Implemented (P1) |
@@ -116,6 +117,8 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 | Timed bombs | 3-2-1 countdown then a plus-shaped blast (1 turn of danger) | Area avoidance | 5+ | No |
 | Hedge mazes | Large maze grows from warned cells | Pathing under pressure | 6 | Yes |
 | Shrinking board | Border closes in by one ring for a few seconds, then reopens | Space pressure | 6 | No |
+
+Fixed terrain (all biomes): each biome has two hand-drawn rock and fence maps that stay fixed for 2-3 levels and change with a warn and crumble at a level up; see `docs/specs/mechanics/MEC-019-terrain.md`.
 
 **Never use:** reversed controls, wind that pushes the snake, fog that hides the board, unwarned instant hazards. They take control away and make deaths feel unfair.
 
