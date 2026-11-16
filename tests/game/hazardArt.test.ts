@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { drawHazards, drawRock, drawTerrains, drawWarn } from '../../src/game/render/hazards';
+import { boxed, drawFence, drawHazards, drawRock, drawTerrains, drawWarn } from '../../src/game/render/hazards';
 import { boardLook } from '../../src/game/render/biomePalette';
 import { loadBalance } from '../support/balance';
 import { gfx } from '../support/gfx';
@@ -158,4 +158,31 @@ it('MOT-4-R5 a live rock is enlarged by the hit beat scale and returns to size a
   const look = boardLook(1), live = rockHazard('solid');
   const sized = (k: number) => { const q = gfx(); drawHazards(q.g, live, 30, look, b, false, { ...TEL, beat: () => k }); return q.calls.find(c => c[0] === 'fillEllipse')!; };
   expect(sized(1.12)[3] as number).toBeGreaterThan(sized(1)[3] as number);
+});
+
+// MEC-019 lag fix: Phaser does not clamp a rounded-rect radius; a radius above half the side self-intersects the path and earcut stalls for seconds.
+describe('P3b1-R4 rounded boxes stay valid at any crumble scale', () => {
+  const valid = (calls: readonly (readonly unknown[])[]): void => {
+    const rects = calls.filter(c => c[0] === 'fillRoundedRect');
+    expect(rects.length).toBeGreaterThan(0);
+    for (const c of rects) {
+      const [w, h, r] = [c[3] as number, c[4] as number, c[5] as number];
+      expect(w).toBeGreaterThan(0); expect(h).toBeGreaterThan(0);
+      expect(r).toBeLessThanOrEqual(Math.min(w, h) / 2 + 1e-9);
+    }
+  };
+  it('crumbling fence posts (k 1 .. 0.15) never get a radius above half their size', () => {
+    for (const k of [1, 0.6, 0.4, 0.2, 0.15]) {
+      const p = gfx();
+      drawFence(p.g, [{ x: 3, y: 4, k }, { x: 4, y: 4, k }, { x: 4, y: 5, k }], 30, boardLook(2), k);
+      valid(p.calls);
+    }
+  });
+  it('boxed() clamps the radius and skips a box with no area', () => {
+    const p = gfx(); boxed(p.g, 0, 0, 1.8, 3.1, 4.4, 1, 2, 1, 1); valid(p.calls);
+    const q = gfx(); boxed(q.g, 0, 0, 0, 5, 2, 1, 2, 1, 1); expect(q.count('fillRoundedRect')).toBe(0);
+  });
+  it('crumbling rock debris chips stay valid at a small rock size', () => {
+    const p = gfx(); drawRock(p.g, { x: 50, y: 50 }, 30 * 0.15, boardLook(1), 0.15, 'rock', true); valid(p.calls);
+  });
 });
