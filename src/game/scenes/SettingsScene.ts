@@ -3,26 +3,27 @@ import type { Balance } from '../../core';
 import { resolveDisplay } from '../../meta/settings';
 import type { Session } from '../../session';
 import { createSynth, type Synth } from '../audio/synth';
-import { applySettings, settingsCardEdge, settingsExit, settingsView, SETTINGS_CLOSED, toggleTrackStyle, togglePatch, type SettingsEntry, type SettingsToggle } from '../flow/settingsView';
-import { HEIGHT, WIDTH } from '../layout';
+import { applySettings, settingsExit, settingsView, SETTINGS_CLOSED, trackAlpha, togglePatch, type SettingsEntry, type SettingsToggle } from '../flow/settingsView';
+import { knobTravel, settingsLayout } from '../flow/settingsLayout';
+import { WIDTH } from '../layout';
 import { settingsOrder } from '../flow/entranceOrder';
 import { captureGroup, enter, goTo, motionFor, type EntranceTargets } from '../motion';
-import { currentPalette, osDisplay, reduceMotion, themeOf } from '../render/palette';
+import { osDisplay, reduceMotion } from '../render/palette';
 import { t } from '../text';
+import { screenBackground } from '../ui/background';
 import { runSlide } from '../ui/feedbackCore';
-import { borderColor, knobX, trackColor } from '../ui/feedbackModel';
+import { knobX } from '../ui/feedbackModel';
 import { drawIcon } from '../ui/icons';
-import { layoutColumn, ui } from '../ui/layout';
-import { headerButton, settingsColumn } from '../ui/menuLayout';
+import { d3, d3Height, d3m } from '../ui/layout';
 import { MENU } from '../ui/menuMetrics';
-import { roundIconButton, scaledBlock, tap } from '../ui/menuWidgets';
-import { FONT_UI, TOKENS, toInt, uiTheme, type UiTheme } from '../uiTokens';
+import { roundIconButton, tap } from '../ui/menuWidgets';
+import { hostOf, skinTexture } from '../ui/skin';
+import { card, titleText } from '../ui/widgets';
+import { FONT_UI, TOKENS, toInt, type D3Tone } from '../uiTokens';
 
-const M = MENU.settings;
-// SettingsD2 row icon tiles: sound blue, haptics pink, D-pad mint, reduced motion yellow.
-const TILE: Record<SettingsToggle, string> = { sound: TOKENS.sky.stat, haptics: TOKENS.accent.pink, dpad: TOKENS.green.mint, reducedMotion: TOKENS.menu.statButter };
-const label = (size: number, weight: '800' | '900', color: string): Phaser.Types.GameObjects.Text.TextStyle =>
-  ({ fontFamily: FONT_UI, fontStyle: weight, fontSize: `${ui(size)}px`, color });
+const M = MENU.settings.d3, D = TOKENS.d3;
+// D3-R19 row icon tiles: sound energy blue, haptics purple, D-pad green, reduced motion mango.
+const TILE: Record<SettingsToggle, D3Tone> = { sound: 'energy', haptics: 'skillA', dpad: 'primary', reducedMotion: 'mango' };
 
 /** MOT-1-R8 start state of a switch on rebuild: the previous value when known, else the current one (no slide). */
 export const slideFrom = (prev: ReadonlyMap<string, boolean>, id: string, on: boolean): boolean => prev.get(id) ?? on;
@@ -36,7 +37,7 @@ export class SettingsScene extends Phaser.Scene {
   private body?: Phaser.GameObjects.Container;
   private closing = false; private targets: EntranceTargets = {};
   private prev = new Map<string, boolean>(); private slides: (() => void)[] = [];
-  private head!: Phaser.GameObjects.Text; private veil?: Phaser.GameObjects.Rectangle;
+  private head!: Phaser.GameObjects.Text; private bg!: Phaser.GameObjects.Image;
   constructor() { super('Settings'); }
   private cancelSlides(): void { for (const stop of this.slides.splice(0)) stop(); }
   init(data: SettingsEntry): void { this.entry = data ?? {}; }
@@ -45,12 +46,11 @@ export class SettingsScene extends Phaser.Scene {
     this.closing = false;
     this.session = this.registry.get('session') as Session;
     this.synth = createSynth(); this.synth.setOn(this.session.save().settings.sound);
-    // Overlay: a full-screen rect (theme background) that swallows taps on the paused board underneath.
-    if (this.entry.overlay) this.veil = this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, toInt(this.theme().bg)).setInteractive();
-    if (this.veil) { this.veil.setAlpha(0); motionFor(this).fadeIn(this.veil); } // MOT-2-R4
-    const back = headerButton('left'), headY = back.cy;
-    const backBtn = roundIconButton(this, back.cx, back.cy, MENU.round, 'back', 'settings-back', () => this.back());
-    this.head = this.add.text(WIDTH / 2, headY, t('settings.title'), label(M.headFont, '900', TOKENS.text.primary)).setOrigin(0.5);
+    this.bg = screenBackground(this, 0, true); // U6-R8 dim rays; in overlay mode it also swallows taps on the paused board underneath
+    if (this.entry.overlay) { this.bg.setInteractive(); this.bg.setAlpha(0); motionFor(this).fadeIn(this.bg); } // MOT-2-R4
+    const l = settingsLayout(d3Height(), 4);
+    const backBtn = roundIconButton(this, d3(l.back.x + l.back.w / 2), d3(l.back.y + l.back.h / 2), d3m(l.back.w), 'back', 'settings-back', () => this.back());
+    this.head = titleText(this, WIDTH / 2, d3(l.title.y + l.title.h / 2), t('settings.title'), d3m(M.titleFont)).setName('settings-title');
     const keys = this.input.keyboard;
     const onKey = (e: KeyboardEvent): void => { if (e.code === 'Escape') { e.preventDefault(); this.back(); } };
     keys?.on('keydown', onKey);
@@ -58,12 +58,8 @@ export class SettingsScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cancelSlides());
     this.targets = { back: backBtn, title: this.head }; // MOT-2-R5; build() adds card, rows and caption
     this.build();
-    if (!this.entry.overlay) enter(this, settingsOrder(M.rows), this.targets); // MOT-2-R3/R5 full screen only; build() after change() never re-enters (R6)
+    if (!this.entry.overlay) enter(this, settingsOrder(4), this.targets); // MOT-2-R3/R5 full screen only; build() after change() never re-enters (R6)
   }
-
-  private theme(): UiTheme { return uiTheme(themeOf(currentPalette())); }
-  // UIFIX-R4: screen background, overlay veil and heading follow the board theme; re-run on every build.
-  private applyTheme(): void { const th = this.theme(); this.cameras.main.setBackgroundColor(toInt(th.bg)); this.veil?.setFillStyle(toInt(th.bg)); this.head?.setColor(th.title); }
 
   private back(): void {
     if (this.closing) return; // a double tap or Escape plus tap must close once
@@ -72,8 +68,8 @@ export class SettingsScene extends Phaser.Scene {
     const x = settingsExit(this.entry);
     if (x.action === 'start') goTo(this, x.scene, undefined, 'back');
     else {
-      const close = (): void => { this.game.events.emit(SETTINGS_CLOSED); this.scene.stop(); }; // MOT-2-R4 overlay: veil fade only, no camera fade
-      if (this.veil) { motionFor(this).fadeOut(this.veil); this.time.delayedCall(this.fadeMs(), close); } else close();
+      const close = (): void => { this.game.events.emit(SETTINGS_CLOSED); this.scene.stop(); }; // MOT-2-R4 overlay: background fade only, no camera fade
+      if (this.entry.overlay && this.bg) { motionFor(this).fadeOut(this.bg); this.time.delayedCall(this.fadeMs(), close); } else close();
     }
   }
   private fadeMs(): number { const b = this.registry.get('balance') as Balance; return reduceMotion() ? b.juice.reduced.softMs : b.motion.fadeMs; }
@@ -85,56 +81,48 @@ export class SettingsScene extends Phaser.Scene {
     this.build();
   }
 
-  // Rebuilds the middle block from the view model (cheap: 5 rows).
+  // Rebuilds the panel from the view model (cheap: 4 rows).
   private build(): void {
-    this.applyTheme(); const th = this.theme();
     this.body?.destroy(true); this.cancelSlides();
-    const minShrink = (this.registry.get('balance') as Balance).ui.minShrink;
     const slideMs = (this.registry.get('balance') as Balance).motion.toggleSlideMs;
-    const blk = (this.body = scaledBlock(this, layoutColumn(settingsColumn(minShrink))));
+    const blk = (this.body = this.add.container(0, 0));
     const s = this.session.save().settings, d = resolveDisplay(s, osDisplay());
-    const v = settingsView(s, d), g = ui(M.gap), pad = ui(M.pad);
-    const cardW = ui(M.cardW), cardX = WIDTH / 2 - cardW / 2, rad = ui(M.radius);
-    const rowsH = M.rows * M.rowH;
-    let y = g;
+    const v = settingsView(s, d), l = settingsLayout(d3Height(), v.rows.length), host = hostOf(this), unit = d3(1);
     const t_: EntranceTargets = {};
-    const rows = this.add.graphics(); blk.add(rows); t_.card = rows; // the shared card background fades with the title
-    rows.fillStyle(toInt(th.card)).fillRoundedRect(cardX, y, cardW, ui(rowsH), rad);
-    rows.lineStyle(ui(M.sw.line), toInt(settingsCardEdge('light'))).strokeRoundedRect(cardX, y, cardW, ui(rowsH), rad); // UIFIX-R14
+    const panel = card(this, d3(l.panel.x), d3(l.panel.y), d3m(l.panel.w), d3m(l.panel.h)); blk.add(panel); t_.card = panel; // the panel fades with the title
     v.rows.forEach((r, i) => {
-      const top = y + ui(i * M.rowH), cy = top + ui(M.rowH / 2);
-      if (i > 0) rows.fillStyle(toInt(TOKENS.menu.rowDivider)).fillRect(cardX, top, cardW, ui(M.divider));
+      const row = l.rows[i]!, cy = d3(row.y + row.h / 2);
+      if (i > 0) blk.add(this.add.rectangle(WIDTH / 2, d3(row.y - M.divider / 2), d3(row.w - 2 * M.rowPadX), d3(M.divider), toInt(D.divider)));
       // MOT-2-R5 Settings entrances only translate and fade, so the group anchor is the origin: children keep their absolute coordinates
       // (the switch paint() sets absolute knob x on every slide frame).
       t_[`row${i}`] = captureGroup(this, blk, { x: 0, y: 0 }, () => {
-      const half = ui(M.tile / 2), tileX = cardX + pad - ui(M.tileInset) + half;
-      const tile = this.add.graphics().setPosition(tileX, cy); blk.add(tile);
-      tile.fillStyle(toInt(TILE[r.id])).fillRoundedRect(-half, -half, ui(M.tile), ui(M.tile), ui(M.tileR));
-      const ic = this.add.graphics().setPosition(tileX, cy); blk.add(ic);
-      drawIcon(ic, r.icon, ui(M.icon), toInt(th.ink));
-      const tx = tileX + half + ui(M.textGap);
-      blk.add(this.add.text(tx, cy - ui(M.titleDy), t(r.titleKey), label(M.titleFont, '900', th.ink)).setOrigin(0, 0.5));
-      blk.add(this.add.text(tx, cy - ui(M.subDy), t(r.subKey), { ...label(M.subFont, '800', th.cardSoft), wordWrap: { width: ui(M.subW) } }).setOrigin(0, 0));
-      const swW = ui(M.sw.w), swH = ui(M.sw.h), swX = cardX + cardW - pad - swW / 2;
-      blk.add(this.add.text(swX - swW / 2 - ui(M.textGap), cy, t(r.valueKey), label(M.valueFont, '900', th.ink)).setOrigin(1, 0.5));
-      // Track and knob are separate objects so the knob can slide and squash (MOT-1-R8). Track: green on / sand off; 2 px inset outline per state (SettingsD2).
-      const sw = this.add.graphics().setPosition(swX, cy); blk.add(sw);
-      const lw = ui(M.sw.line), iw = swW - lw, ih = swH - lw, kpx = ui(M.sw.knob);
-      const ts = toggleTrackStyle(r.on, 'light'), fts = toggleTrackStyle(slideFrom(this.prev, r.id, r.on), 'light'); // UIFIX-R14 POL-02
-      const kg = this.add.graphics(), kc = this.add.container(swX + knobX(r.on, 1, kpx), cy, [kg]); blk.add(kc);
-      const paint = (p: number): void => { // p = slide progress 0..1; 1 is the final look
-        kc.x = swX + knobX(r.on, p, kpx);
-        sw.clear().fillStyle(trackColor(toInt(fts.fill), toInt(ts.fill), p)).fillRoundedRect(-swW / 2, -swH / 2, swW, swH, swH / 2)
-          .lineStyle(lw, borderColor(toInt(fts.border), toInt(ts.border), p)).strokeRoundedRect(-iw / 2, -ih / 2, iw, ih, ih / 2);
-        kg.clear().fillStyle(toInt(p < 0.5 ? fts.knob : ts.knob)).fillCircle(0, 0, kpx);
-      };
-      if (slideFrom(this.prev, r.id, r.on) !== r.on && !reduceMotion()) this.slides.push(runSlide(this, slideMs, paint));
-      else paint(1); // unchanged switches and reduced motion draw once at rest
-      blk.add(tap(this, WIDTH / 2, cy, cardW, ui(M.rowH), `settings-${r.id}`, () => this.change(togglePatch(s, d, r.id)), { visual: kg, kind: 'switch' }));
+        const tr = l.tile[i]!, tx = d3(tr.x + tr.w / 2), tone = D.tone[TILE[r.id]], ts = d3(tr.w);
+        const tile = this.add.graphics().setPosition(tx, cy); blk.add(tile);
+        tile.fillStyle(toInt(tone.face[1])).fillRoundedRect(-ts / 2, -ts / 2, ts, ts, d3(M.tileR)).lineStyle(d3(M.tileLine), toInt(tone.line)).strokeRoundedRect(-ts / 2, -ts / 2, ts, ts, d3(M.tileR));
+        const ic = this.add.graphics().setPosition(tx, cy); blk.add(ic);
+        drawIcon(ic, r.icon, d3(M.icon), toInt(D.white));
+        const textX = d3(tr.x + tr.w + M.textGap);
+        blk.add(this.add.text(textX, cy - d3(2), t(r.titleKey), { fontFamily: FONT_UI, fontStyle: '900', fontSize: `${d3(M.titleFontRow)}px`, color: D.text }).setOrigin(0, 1));
+        blk.add(this.add.text(textX, cy, t(r.subKey), { fontFamily: FONT_UI, fontStyle: '800', fontSize: `${d3(M.subFont)}px`, color: D.tip, wordWrap: { width: d3(M.subW) } }).setOrigin(0, 0));
+        // U6-R7 two bar tracks cross-fade; the round knob slides (MOT-1-R8).
+        const tg = l.toggle[i]!, swX = d3(tg.x + tg.w / 2), w = d3(tg.w), h = d3(tg.h), k = d3(M.knob);
+        const trackOn = this.add.image(swX, cy, skinTexture(host, 'bar', 'primary', w, h, 'rest', unit));
+        const trackOff = this.add.image(swX, cy, skinTexture(host, 'bar', 'off', w, h, 'rest', unit));
+        const kn = this.add.image(0, 0, skinTexture(host, 'round', 'light', k, k, 'rest', unit));
+        const kc = this.add.container(swX + knobX(r.on, 1, d3(knobTravel(M.toggleW, M.knob))), cy, [kn]);
+        blk.add([trackOff, trackOn, kc]);
+        const from = slideFrom(this.prev, r.id, r.on);
+        const paint = (p: number): void => { // p = slide progress 0..1; 1 is the final look
+          kc.x = swX + knobX(r.on, p, d3(knobTravel(M.toggleW, M.knob)));
+          const a = trackAlpha(from, r.on, p); trackOn.setAlpha(a); trackOff.setAlpha(1 - a);
+        };
+        if (from !== r.on && !reduceMotion()) this.slides.push(runSlide(this, slideMs, paint));
+        else paint(1); // unchanged switches and reduced motion draw once at rest
+        blk.add(tap(this, WIDTH / 2, cy, d3(row.w), d3(row.h), `settings-${r.id}`, () => this.change(togglePatch(s, d, r.id)), { visual: kc, kind: 'switch' }));
       });
     });
-    y += ui(rowsH) + g;
-    const caption = this.add.text(WIDTH / 2, y + ui(M.captionDy), t('settings.autosave'), label(M.subFont, '800', th.soft)).setOrigin(0.5);
+    const caption = this.add.text(WIDTH / 2, d3(l.caption.y + l.caption.h / 2), t('settings.autosave'),
+      { fontFamily: FONT_UI, fontStyle: '800', fontSize: `${d3(M.captionFont)}px`, color: D.white }).setOrigin(0.5);
     blk.add(caption); t_.caption = caption;
     Object.assign(this.targets, t_);
     v.rows.forEach(r => this.prev.set(r.id, r.on));

@@ -34,11 +34,11 @@ export const MENU = {
     d3: { baseH: 640, backX: 12, backY: 12, round: 48, titleY: 16, titleH: 40, titleSide: 60, titleFont: 30, slotY: 74, slotSize: 78, slotGap: 20, slotLabelDy: 86, slotLabelH: 14, slotLabelFont: 12, chipsMinH: 700, chipsH: 32, chipsGap: 12, cardsTop: 190, cardX: 12, cardW: 336, cardH: 80, cardGap: 9, goX: 60, goH: 72, goBottom: 10, goClear: 16, topExtraMax: 20, gapExtraMax: 10, padL: 10, padR: 12, disc: 54, discIcon: 28, textGap: 10, nameFont: 19, descFont: 12, descLine: 1.2, costH: 26, costFont: 13, costIcon: 14, pickGap: 5, badgeFont: 13, chipIcon: 14, slotIcon: 38, lockedAlpha: 0.85, goLabel: 28, goStroke: 6 },
   },
   settings: {
-    rowH: 72, rows: 4, divider: 2, themeCardH: 194, captionH: 16,
+    rowH: 72, rows: 4, divider: 2, captionH: 16,
     cardW: 358, radius: 26, tileInset: 2, titleDy: 14, subDy: 2, captionDy: 8, gap: 14, pad: 16, tile: 44, tileR: 14, icon: 24, textGap: 12, subW: 185, titleFont: 17, subFont: 13, valueFont: 14, headFont: 24,
-    sw: { w: 48, h: 28, knob: 10, line: 2 },
-    // SettingsD2 theme card: padding 16/14, tiles 113 high with a 64 px rounded swatch; edge = 2 px inset at 25% ink.
-    theme: { padX: 14, titleY: 25, subY: 45, tilesY: 66, tileH: 113, gap: 10, r: 20, swatch: 64, swatchTop: 10, swatchR: 14, swatchLine: 2, swatchEdgeAlpha: 0.25, snake: { dx: 12, dy: 26, w: 32, h: 12, r: 6 }, ball: { dx: 46, dy: 30, r: 10 }, labelFont: 16, labelY: 93, line: 2, lineSel: 3 },
+    sw: { w: 48, h: 28, knob: 10, line: 2 }, // read by settingsColumn until Task 8
+    // D3-R19 / U6 mock-px (360 wide) board metrics for settingsLayout.
+    d3: { backX: 12, backY: 12, round: 48, titleY: 14, titleH: 44, titleSide: 60, titleFont: 34, panelX: 14, panelY: 84, panelPadY: 4, rowH: 76, divider: 2, rowPadX: 12, tile: 44, tileR: 14, tileLine: 3, icon: 26, textGap: 10, titleFontRow: 16, subFont: 12, subW: 170, toggleW: 60, toggleH: 34, knob: 34, captionGap: 14, captionH: 16, captionFont: 13 },
   },
   results: {
     d3: { baseH: 640, tShift: 0.5, ribbonDy: 18, ribbonH: 72, ribbonW: 250, panelX: 20, panelW: 320, panelDy: 76, padTop: 22, padBottom: 14,

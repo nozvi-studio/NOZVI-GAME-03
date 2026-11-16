@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { applySettings, settingsCardEdge, settingsExit, settingsView, SETTINGS_CLOSED, toggleTrackStyle, togglePatch } from '../../src/game/flow/settingsView';
+import { applySettings, settingsExit, settingsView, SETTINGS_CLOSED, togglePatch } from '../../src/game/flow/settingsView';
 import { defaultSettings } from '../../src/meta/settings';
 import { currentPalette, LIGHT, setDisplaySettings } from '../../src/game/render/palette';
 const os = { dark: false, reducedMotion: false };
@@ -44,11 +44,6 @@ it('P3b3-R7 applySettings saves immediately; D3-R3 the palette stays light', () 
   expect(updateSettings).toHaveBeenCalledWith({ dpad: true });
   expect(currentPalette()).toBe(LIGHT);
 });
-it('UIFIX-R14 toggle track border equals the card edge in both themes and both states', () => {
-  for (const theme of ['light', 'dark'] as const)
-    for (const on of [true, false]) expect(toggleTrackStyle(on, theme).border).toBe(settingsCardEdge(theme));
-});
-it('UIFIX-R14 on and off tracks differ by fill so state never relies on the border', () => {
-  expect(toggleTrackStyle(true, 'light').fill).not.toBe(toggleTrackStyle(false, 'light').fill);
-  expect(toggleTrackStyle(true, 'dark').fill).not.toBe(toggleTrackStyle(false, 'dark').fill);
+it('D3-R3 settings rows contain no theme row', () => {
+  expect(settingsView(defaultSettings(), disp).rows.map(r => r.id)).toEqual(['sound', 'haptics', 'dpad', 'reducedMotion']);
 });

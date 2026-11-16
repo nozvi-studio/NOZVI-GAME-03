@@ -1,6 +1,5 @@
 import type { DisplayPrefs, Settings } from '../../meta';
 import type { IconId } from '../ui/icons';
-import { TOKENS } from '../uiTokens';
 export { applySettings } from './settingsApply';
 
 export type SettingsToggle = 'sound' | 'haptics' | 'dpad' | 'reducedMotion';
@@ -26,13 +25,8 @@ export function settingsView(s: Settings, d: DisplayPrefs): SettingsView {
 export function togglePatch(s: Settings, d: DisplayPrefs, id: SettingsToggle): Partial<Settings> {
   return id === 'reducedMotion' ? { reducedMotion: !d.reducedMotion } : { [id]: !s[id] } as Partial<Settings>;
 }
-export type SettingsTheme = 'light' | 'dark';
-/** UIFIX-R14 POL-02: one edge colour for the Settings cards and toggle tracks. */
-export const settingsCardEdge = (theme: SettingsTheme): string => theme === 'dark' ? TOKENS.menu.cardEdgeDark : TOKENS.surface.stone;
-/** UIFIX-R14 toggle track: fill and knob carry the on/off state, the border is the shared card edge. */
-export function toggleTrackStyle(on: boolean, theme: SettingsTheme): { fill: string; border: string; knob: string } {
-  return { fill: on ? TOKENS.green.face : TOKENS.surface.sand, border: settingsCardEdge(theme), knob: on ? TOKENS.surface.white : TOKENS.text.soft };
-}
+/** U6-R7 alpha of the ON track image at slide progress p (the OFF image is drawn at 1 - alpha). */
+export const trackAlpha = (fromOn: boolean, on: boolean, p: number): number => fromOn === on ? (on ? 1 : 0) : on ? p : 1 - p;
 
 // P3b3-R7 Back from Home starts the caller scene; as an overlay over a paused run it just closes.
 export function settingsExit(e: SettingsEntry): SettingsExit {

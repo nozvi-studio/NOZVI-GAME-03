@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(settings): one D3 panel, bar-style toggles with round knob, dim-rays background, no theme card (D3-R19, D3-R3, U6-R6/R7/R8)
 - feat(loadout): D3 panels, skill-skin slots, selection ring, cost and pick chips, locked card faded with lock disc (D3-R19/R21, U6-R2/R3/R9)
 - feat(loadout): pure D3 layout (loadoutLayout) and skill tone view model, chips only when hm >= 700 (D3-R19, U6-R3/R4/R5)
 - feat(skin): selection ring texture, 4 px mango outline + 2 px lift, cached separately from skin states (D3-R21, U6-R2).
