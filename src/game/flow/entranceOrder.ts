@@ -29,14 +29,13 @@ export function entranceEndMs(count: number, cfg: Pick<MotionBalance, 'staggerMs
 export type SeqKind = 'pop' | 'slide' | 'fade' | 'count' | 'pulse';
 export interface SeqItem { item: string; atMs: number; kind: SeqKind }
 /** MOT-2-R9 fixed offsets from the spec, in ms from the sequence start (timeline constants, not tunables). */
-export const RESULTS_AT = { title: 0, head: 80, card: 120, score: 200, tiles: 400, plainBest: 600, blocks: 700 } as const;
+export const RESULTS_AT = { title: 0, card: 120, score: 200, tiles: 400, plainBest: 600, blocks: 700 } as const;
 export interface ResultsParts { newBest: boolean; energy: boolean; banner: boolean; next: boolean; again: boolean; marbles?: boolean }
 
 /** MOT-2-R9 Results sequence: ends exactly at resultsSeqMs (the last footer pop settles at it). Absent parts are skipped without gaps. */
 export function resultsTimeline(p: ResultsParts, cfg: Pick<MotionBalance, 'staggerMs' | 'staggerCapMs' | 'popInMs' | 'countUpMs' | 'resultsSeqMs'>): SeqItem[] {
   const out: SeqItem[] = [
     { item: 'title', atMs: RESULTS_AT.title, kind: 'pop' },
-    { item: 'head', atMs: RESULTS_AT.head, kind: 'pop' },
     { item: 'card', atMs: RESULTS_AT.card, kind: 'pop' },
     { item: 'headline', atMs: RESULTS_AT.card, kind: 'fade' },
     { item: 'scoreLabel', atMs: RESULTS_AT.card, kind: 'fade' },

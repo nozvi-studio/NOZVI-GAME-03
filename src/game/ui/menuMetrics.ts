@@ -48,6 +48,7 @@ export const MENU = {
     bestFont: 14, bestIcon: 16, bestLead: 22, tileGap: 8, tileLabelFont: 11, tileLabelY: 20, tileValueFont: 24, tileValueY: 48,
     chipFont: 13, rowFont: 13, rowValueFont: 16, rowIcon: 20, barH: 18, nextChipH: 26, nextChipW: 52, nextChipFont: 13, tipFont: 13, tipLine: 1.35,
     primaryLabel: 28, primaryStroke: 6, secondaryFont: 16, secondaryIcon: 20, secondaryGap: 6,
+    nextChipClearW: 84, bestStarDx: -4, bestStarLine: 2, // "Clear L12" chip is wider than "L12"; best-chip star nudge and outline
   },
 } as const;
 

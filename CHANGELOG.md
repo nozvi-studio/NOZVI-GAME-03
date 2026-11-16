@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- refactor(results): drop dead head timeline item; Results literals move to TOKENS.d3.results and MENU.results (U5 follow-up).
 - fix(hud): run-start banners append (enqueueAll) so a hazard incoming card is no longer dropped; pure bannerQueue rules tested (U5-R2).
 - docs: STATUS after U5 merge.
 - docs: U5 QA pass, rulings (DECISIONS), UI-MOCKUPS built marks, PLAYTEST entry.
