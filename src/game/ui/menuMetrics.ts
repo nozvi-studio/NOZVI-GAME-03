@@ -30,6 +30,8 @@ export const MENU = {
     pickRing: 3, disc: 52, discIcon: 28, padX: 14, textGap: 12, nameFont: 17, nameGap: 3, descFont: 13, costH: 22, costFont: 13, costPadL: 6, costPadR: 8, costGap: 8, costIcon: 12,
     badgeH: 26, badgeFont: 12, badgePad: 10, badgeReserve: 70, lockIcon: 13, lockGap: 5, goW: 350, goLabel: 46, goStroke: 8,
     compactBelowCssH: 700, compact: { cardH: 64, cardGap: 8 }, // UIFIX-R9 compact skill cards on short screens
+    // D3-R19 / U6 mock-px (360 wide) board metrics for loadoutLayout.
+    d3: { baseH: 640, backX: 12, backY: 12, round: 48, titleY: 16, titleH: 40, titleSide: 60, titleFont: 30, slotY: 74, slotSize: 78, slotGap: 20, slotLabelDy: 86, slotLabelH: 14, slotLabelFont: 12, chipsMinH: 700, chipsH: 32, chipsGap: 12, cardsTop: 190, cardX: 12, cardW: 336, cardH: 80, cardGap: 9, goX: 60, goH: 72, goBottom: 10, goClear: 16, topExtraMax: 20, gapExtraMax: 10, padL: 10, padR: 12, disc: 54, discIcon: 28, textGap: 10, nameFont: 19, descFont: 12, descLine: 1.2, costH: 26, costFont: 13, costIcon: 14, pickGap: 5, badgeFont: 13 },
   },
   settings: {
     rowH: 72, rows: 4, divider: 2, themeCardH: 194, captionH: 16,

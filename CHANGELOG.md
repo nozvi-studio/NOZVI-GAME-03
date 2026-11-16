@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(loadout): pure D3 layout (loadoutLayout) and skill tone view model, chips only when hm >= 700 (D3-R19, U6-R3/R4/R5)
 - feat(skin): selection ring texture, 4 px mango outline + 2 px lift, cached separately from skin states (D3-R21, U6-R2).
 - feat(ui): one icon stroke token (TOKENS.d3.shape.iconStroke 2.6) for menu and HUD icons; new check icon (D3-R19, U6-R1).
 - refactor(results): drop dead head timeline item; Results literals move to TOKENS.d3.results and MENU.results (U5 follow-up).
