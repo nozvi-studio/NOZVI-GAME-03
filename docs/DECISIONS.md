@@ -633,3 +633,7 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - Ledger rulings: missing skin tones (gold/butter/mint/skillA/skillB) use the nearest D3 tone instead of new tokens. Task 1 browser check was headless (`tools/qa/shot.mjs`); device check goes to the owner. No task reviewer for the docs-only evidence commit. First run plus a new checkpoint shows no first-run tip (checkpoint row precedence).
 - Deviations from the plan, board is authority: the countdown chip is light (white), not butter. PAUSE_MOCK uses gap 0 and subtitleMt 6. Skill pills are solid skill-colour chips below the strip (board has white bordered chips in the strip row) to keep UIFIX-R1/R2 occlusion safe. Strip cards use the light panel with a tinted icon (no butter/mint tones). Slot-B pill text is ink and the up/warn icons are darker for D3-R2 contrast (white on orange was 2.4:1). Board-px metrics use `d3()`/`d3m()` units.
 - Consequence: pill and card styling can be restyled later; a first-run player reaching L10 misses one help line.
+
+## 2026-11-16 - D3 boards approved (owner)
+- Choice: owner approved the D3 boards (`docs/design/mockups/d3/boards.html`) on 2026-11-16, closing the U0 owner gate retroactively for U3..U5 and opening U6.
+- Consequence: U6 (Loadout, Settings, icon set, selected state, dead D2 token removal) is planned next; boards stay the visual authority.
