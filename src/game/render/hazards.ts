@@ -60,7 +60,7 @@ export function drawWarn(g: Graphics, c: Cell, cell: number, ms: number, warnMs:
 }
 
 // P3b1-R6 FencePiece.dc: rails run from a post to the right/lower neighbour, posts are drawn after every rail.
-function drawFence(g: Graphics, cells: readonly PopCell[], cell: number, look: BoardLook, alpha: number): void {
+export function drawFence(g: Graphics, cells: readonly PopCell[], cell: number, look: BoardLook, alpha: number): void {
   const has = new Set(cells.map(c => `${c.x},${c.y}`)), edge = HAZARD_EDGES.fence(look), bw = Math.max(1, cell * FENCE.edge), t = cell * FENCE.rail, r = cell * FENCE.railRadius;
   for (const c of cells) {
     const cx = (c.x + 0.5) * cell, cy = (c.y + 0.5) * cell;

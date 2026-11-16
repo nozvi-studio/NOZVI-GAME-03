@@ -68,7 +68,8 @@ export const bestLine = (kind: 'start' | 'over', best: number, newBest = false, 
 
 // P1 keyed strings: MEC-003/006/007/008 §8 plus cause.* (MEC-003-R20 quit, clear).
 const KEYED: Readonly<Record<string, string>> = {
-  'banner.levelUp': 'Level {n}', 'banner.freshStart': 'Fresh start!',
+  'banner.levelUp': 'Level {n}', 'banner.terrain': 'Map: {name}', // MEC-019 provisional
+  'banner.freshStart': 'Fresh start!',
   'banner.biome.1': 'Mango Orchard', 'banner.biome.2': 'Rice Paddy', 'banner.biome.3': 'Frozen Pond',
   'banner.biome.4': 'Rocky Hills', 'banner.biome.5': 'Backyard', 'banner.biome.6': 'Storm Garden',
   'banner.new.rock': 'Rocks unlocked', 'banner.new.rottenRock': 'Rotten mangoes turn to rock!',

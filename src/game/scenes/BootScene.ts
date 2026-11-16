@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import json from '../../../config/balance.json';
-import { parseBalance } from '../../core';
+import terrainJson from '../../../config/terrain.json';
+import { parseBalance, withTerrain } from '../../core';
 import { createSession } from '../../session';
 import { SKIN_IDS, activeSkin } from '../art/skins';
 import { preloadSkins } from '../art/capyTextures';
@@ -53,7 +54,7 @@ export class BootScene extends Phaser.Scene {
   // GDD-13 validate config, then create the run session (P1-D1) and open Home.
   create(): void {
     this.setProgress(1);
-    const balance = parseBalance(structuredClone(json));
+    const balance = withTerrain(parseBalance(structuredClone(json)), structuredClone(terrainJson));
     this.registry.set('balance', balance);
     const store = localStore();
     this.registry.set('store', store);

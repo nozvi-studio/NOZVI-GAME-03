@@ -16,6 +16,7 @@ import { colorOf } from '../juice/colors';
 import type { BoardVisual, JuiceInput } from '../juice/types';
 import { isTurn, mangoSpawnInput, newSparkleClock, sparkleStep } from '../juice/derived';
 import { drawHazards, drawTerrains } from '../render/hazards';
+import { drawFixedTerrain, invulnAlpha } from '../render/fixedTerrain';
 import { drawMango } from '../render/mango';
 import { mangoGrow } from '../motion/curves';
 import { boardLook, type BoardLook } from '../render/biomePalette';
@@ -250,6 +251,7 @@ export class GameScene extends Phaser.Scene {
     for (const layer of Object.values(this.layers)) layer.clear();
     drawTiles(this.layers.ground, snapshot.tiles, cell, this.tel, this.reduced, this.look);
     drawTerrains(this.layers.terrain, snapshot.terrains, cell, this.look, this.balance, this.reduced, this.tel);
+    drawFixedTerrain(this.layers.hazards, snapshot.fixedTerrain, cell, this.look, this.balance, this.reduced, this.tel);
     drawHazards(this.layers.hazards, snapshot.hazards, cell, this.look, this.balance, this.reduced, this.tel);
     drawCycles(this.layers.hazards, snapshot, cell, this.tel, this.reduced, this.look);
     drawMovers(this.layers.hazards, snapshot, cell, this.tel, this.reduced, this.look);
@@ -260,6 +262,8 @@ export class GameScene extends Phaser.Scene {
     drawSkillObjects(this.layers.skills, snapshot, cell, p, this.look, this.balance, time);
     drawSnake(this.layers.snake, snapshot, cell, this.look, Math.max(this.effects.gulp, this.effects.pop), this.balance.ui.capy.headCellScale, false,
       this.effects.turnBulge * (this.balance.juice.events.turnBodyBulge - 1));
+    const blink = invulnAlpha(snapshot.invuln, time, this.reduced, this.balance.ui); // MEC-019-R7
+    this.layers.snake.setAlpha(blink); this.capy.setAlpha(blink);
     this.capy.update(snapshot, time, cell, this.effects.turnDeg);
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);
     drawIceArrow(this.layers.overlay, snapshot, cell, this.look);
