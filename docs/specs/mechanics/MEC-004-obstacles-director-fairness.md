@@ -23,7 +23,7 @@
   |---|---|---|
   | `key` | `FamilyKey` | registry key, also the `level.table` weight key |
   | `cause` | `CauseKey \| null` | cause of death for its solid/hit cells (null: never lethal) |
-  | `capClass` | `'small' \| 'big' \| 'modifier' \| 'none'` | director class (R8); `none` = created by another mechanic (rotten rock, snip wall) |
+  | `capClass` | `'small' \| 'big' \| 'modifier' \| 'none'` | director class (R8); `none` = created by another mechanic (rotten rock, snip wall, fixed terrain) |
   | `maxActiveKey` | config path or null | max simultaneous instances (e.g. `terrain.maxActive`, `mud.maxActive`) |
   | `breakable` | boolean | Shield may break its solid/hit cells (MEC-006, P2 design §9) |
 - Config: `fairness.*`, `hazard.crumbleMs`, family groups `rock`, `fence`, `maze`, `terrain` (P0 values as changed by MEC-003 §9), new family groups in MEC-012…018.
