@@ -10,6 +10,7 @@ import { ResultsScene } from './scenes/ResultsScene';
 import { SettingsScene } from './scenes/SettingsScene';
 import { TOKENS } from './uiTokens';
 import { initViewport } from './viewport';
+import { isDebug } from './flow/debugFlag';
 import json from '../../config/balance.json';
 import { recordError } from '../meta';
 import { localStore } from './platform/localStore';
@@ -32,4 +33,6 @@ new Phaser.Game({
   scene: [BootScene, HomeScene, LoadoutScene, GameScene, HudScene, ResultsScene, SettingsScene, ArtPreviewScene],
   input: { activePointers: 2 },
   render: { antialias: true },
+  // MEC-003-R21 ?debug=1 only: QA handle for headless drivers (tools/qa/shot.mjs `eval:`), e.g. __game.registry.get('session').debugSkipTo(8).
+  callbacks: { postBoot: game => { if (isDebug(window.location.search)) (window as unknown as { __game?: Phaser.Game }).__game = game; } },
 });

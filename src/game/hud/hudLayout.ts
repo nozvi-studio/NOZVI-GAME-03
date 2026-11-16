@@ -1,11 +1,12 @@
 import { BOARD, WIDTH } from '../layout';
 import { d3, ui } from '../ui/layout';
-import type { D3HudLayout } from './d3HudLayout';
+import { D3_RUN, type D3HudLayout } from './d3HudLayout';
 
-/** UIFIX-R1 banner strip metrics (mockup px) and the strip rect inside the board (game px). */
-export const STRIP_MOCK = { cells: 1.5, alpha: 0.85, radius: 10, pad: 10, icon: 22, iconGap: 8, title: 15, sub: 11, pillGap: 6 } as const;
-export function bannerStripRect(cols: number): { x: number; y: number; w: number; h: number } {
-  return { x: BOARD.x, y: BOARD.y, w: BOARD.size, h: STRIP_MOCK.cells * BOARD.size / cols };
+/** UIFIX-R1 banner strip metrics (mockup px). BAND-R1: the strip rect is the banner band above the board (game px), never on a board cell. */
+export const STRIP_MOCK = { alpha: 0.85, radius: 10, pad: 10, icon: 22, iconGap: 8, title: 15, sub: 11, pillGap: 6 } as const;
+export function bannerStripRect(): { x: number; y: number; w: number; h: number } {
+  const h = d3(D3_RUN.band.h);
+  return { x: BOARD.x, y: BOARD.y - d3(D3_RUN.band.below) - h, w: BOARD.size, h };
 }
 /** UIFIX-R1 text row offsets (game px from the strip top): title alone is centred; with a sub line the pair is centred as one block. */
 export function stripRows(hasSub: boolean, h: number): { titleY: number; subY: number | null } {

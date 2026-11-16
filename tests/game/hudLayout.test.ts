@@ -6,13 +6,13 @@ import { BOARD, WIDTH } from '../../src/game/layout';
 import { d3, d3Height, ui } from '../../src/game/ui/layout';
 import { d3HudLayout } from '../../src/game/hud/d3HudLayout';
 
-it('UIFIX-R1 banner strip is flush with the board top edge, board wide, ~1.5 cells high', () => {
-  const b = loadBalance(), r = bannerStripRect(b.board.cols);
-  expect(r.x).toBe(BOARD.x); expect(r.y).toBe(BOARD.y); expect(r.w).toBe(BOARD.size);
-  expect(r.h).toBeCloseTo(1.5 * cellPx(b), 5); expect(STRIP_MOCK.alpha).toBeCloseTo(0.85);
+it('BAND-R1 banner strip sits in the band above the board: board wide, 30 board px high, never on a board cell', () => {
+  const r = bannerStripRect();
+  expect(r.x).toBe(BOARD.x); expect(r.w).toBe(BOARD.size); expect(r.h).toBe(d3(30));
+  expect(r.y + r.h + d3(11)).toBeCloseTo(BOARD.y); expect(r.y + r.h).toBeLessThan(BOARD.y); expect(STRIP_MOCK.alpha).toBeCloseTo(0.85);
 });
 it('UIFIX-R1 strip rows (title + one sub line) fit inside the strip height', () => {
-  const r = bannerStripRect(loadBalance().board.cols);
+  const r = bannerStripRect();
   const two = stripRows(true, r.h), one = stripRows(false, r.h);
   expect(two.titleY).toBeGreaterThanOrEqual(0); expect(two.subY!).toBeGreaterThan(two.titleY);
   expect(two.subY! + ui(STRIP_MOCK.sub)).toBeLessThanOrEqual(r.h);

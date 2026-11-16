@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(hud): banner cards sit in a 30 px band between the mango row and the board, never on a board cell; the board sits 36 px lower (4 px clear around the card) and shrinks on short canvases (BAND-R1, supersedes the UIFIX-R1 strip position). Debug: `window.__game` with `?debug=1`.
 - fix(render): rounded boxes clamp their corner radius and skip empty boxes; crumbling fence posts no longer stall the frame for seconds at a terrain change (MEC-019, P3b1-R4).
 - feat: fixed terrain (MEC-019): 12 hand-drawn maps, level-up change, Shield breach, invulnerability. Docs: `docs/specs/mechanics/MEC-019-terrain.md`, specs MEC-003/004/006/018, GDD §5, ARCHITECTURE, maps, DECISIONS.
 - docs: fixed terrain (MEC-019) implementation plan `docs/superpowers/plans/2026-11-16-fixed-terrain.md`; docs map rows for the design and the plan.

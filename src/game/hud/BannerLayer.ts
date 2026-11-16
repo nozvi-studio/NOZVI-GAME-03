@@ -25,7 +25,7 @@ const M = {
   tint: { radius: 20, ring: 4, ringAlpha: 0.8, inset: 2, ringInset: 6 },
 } as const;
 
-// UIFIX-R1 banner strip (level-up, challenge, biome, checkpoint, hint), tips and SkillActiveD2 pills / slow-mo tint.
+// UIFIX-R1 + BAND-R1 banner strip in the band above the board (level-up, challenge, biome, checkpoint, hint), tips and SkillActiveD2 pills / slow-mo tint.
 export class BannerLayer {
   private readonly root: Phaser.GameObjects.Container; private readonly tipBox: Phaser.GameObjects.Container;
   private readonly tipG: Phaser.GameObjects.Graphics; private readonly tipText: Phaser.GameObjects.Text;
@@ -34,7 +34,7 @@ export class BannerLayer {
   private readonly enter = { k: 0 }; private q: BannerQueueState = IDLE_BANNERS; private cardTimer?: Phaser.Time.TimerEvent; private tipTimer?: Phaser.Time.TimerEvent;
 
   constructor(private readonly scene: Phaser.Scene, private readonly l: D3HudLayout, private readonly b: Balance) {
-    this.strip = bannerStripRect(b.board.cols);
+    this.strip = bannerStripRect();
     this.tint = scene.add.graphics().setName('slowmo-tint').setVisible(false);
     this.root = scene.add.container(0, 0).setName('banner').setVisible(false);
     this.tipG = scene.add.graphics();
@@ -73,7 +73,7 @@ export class BannerLayer {
     const m = bannerMotion(this.b, reduceMotion()), r = this.strip, px = r.x + r.w / 2, py = r.y + r.h / 2, st = this.enter;
     const apply = (k: number): void => {
       const s = m.scaleFrom + (1 - m.scaleFrom) * k;
-      this.root.setAlpha(k).setScale(s).setPosition(px * (1 - s), py * (1 - s) + m.slidePx * (1 - k));
+      this.root.setAlpha(k).setScale(s).setPosition(px * (1 - s), py * (1 - s) - m.slidePx * (1 - k));   // BAND-R1 slides in from above, never across the board
     };
     this.scene.tweens.killTweensOf(st); st.k = 0; apply(0);
     this.scene.tweens.add({ targets: st, k: 1, duration: m.inMs, ease: m.slidePx > 0 ? 'Back.easeOut' : 'Linear', onUpdate: () => apply(st.k), onComplete: () => apply(1) });
