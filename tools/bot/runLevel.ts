@@ -5,12 +5,14 @@ import type { CauseKey, SimEvent, SimState, TileKind } from '../../src/core/type
 import { BOT, SAMPLE_EVERY_MS } from './botConfig';
 import { chooseMove } from './policy';
 
-export interface LevelResult { level: number; seed: number; outcome: 'clear' | 'death' | 'timeout'; cause?: CauseKey; context?: TileKind; biome: number }
+export interface LevelResult { level: number; seed: number; outcome: 'clear' | 'death' | 'timeout'; cause?: CauseKey; context?: TileKind; biome: number; terrain?: string }
 
 // MEC-004-R19 headless bot: one level from startLevel; a levelUp counts as an immediate clear (flow B).
 export function runLevel(balance: Balance, level: number, seed: number, onSecond?: (s: SimState) => void): LevelResult {
   const sim = createSimInternal(balance, seed, { startLevel: level }, {});
-  const s = stateOf(sim), base = { level, seed, biome: biome(balance, level) };
+  const s = stateOf(sim);
+  const startTerrain = s.families.fixedTerrain.templateId;
+  const base = { level, seed, biome: biome(balance, level), ...(startTerrain ? { terrain: startTerrain } : {}) };
   const scan = (events: SimEvent[]): LevelResult | null => {
     for (const e of events) {
       if (e.type === 'levelUp' || e.type === 'runWon') return { ...base, outcome: 'clear' };

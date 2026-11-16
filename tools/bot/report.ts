@@ -38,5 +38,14 @@ export function formatReport(results: readonly LevelResult[]): { markdown: strin
       if (c / deaths.length > WARN_SHARE) warnings.push(`WARN biome ${b}: ${cause} ${pct(c, deaths.length)}% of deaths (> ${WARN_SHARE * PERCENT}%)`);
     }
   }
+  // MEC-019-R14 terrain deaths per template.
+  const templates = [...new Set(results.flatMap(r => (r.terrain ? [r.terrain] : [])))].sort();
+  if (templates.length) {
+    out.push('', '### Terrain deaths per template', '| template | terrain deaths | all deaths | share |', '|---|---|---|---|');
+    for (const id of templates) {
+      const deaths = results.filter(r => r.terrain === id && r.outcome === 'death'), hit = deaths.filter(r => r.cause === 'terrain').length;
+      out.push(`| ${id} | ${hit} | ${deaths.length} | ${deaths.length ? pct(hit, deaths.length) : 0}% |`);
+    }
+  }
   return { markdown: out.join('\n'), warnings };
 }

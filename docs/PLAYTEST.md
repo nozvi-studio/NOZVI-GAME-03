@@ -5,6 +5,11 @@
 ## How to capture
 Headless screenshots with `tools/qa/shot.mjs` (no dependency; uses the local Chrome, or `CHROME_PATH`). Start `npm run dev`, then run: `node tools/qa/shot.mjs size:360,640 media:light "go:http://localhost:5173/" wait:3500 shot:tmp/qa/home-360.png`. The three standard sizes are 360x640, 390x844 and 412x915. Use `media:dark` for the OS dark-mode check. Keys use DOM names (`ArrowUp`, not `Up`). Steps: `size:W,H[,DPR]`, `media:`, `go:URL`, `wait:MS`, `tap:X,Y`, `swipe:X1,Y1,X2,Y2`, `key:Name`, `shot:FILE`, `eval:JS`; any failed step exits 1.
 
+## 2026-11-16 - MEC-019 terrain bot report (PENDING)
+- Branch `feat/fixed-terrain`. Fuzz mode (`vitest run --mode fuzz tests/core/fixedTerrainFuzz.test.ts`): 14 tests pass in 6m28s (13 levels x 3 seeds: no mango, orb, rock, fence or maze cell ever shares a cell with a solid terrain cell).
+- Picture board: `node tools/terrain/board.mjs` writes `docs/design/terrain/board.html`; headless capture to `tmp/qa/terrain/board.png` checked, grids render (12 templates x 4 variants in the file; the first 9 seen in the 1200x2400 capture).
+- `npm run bot:report` was started once and killed by the host for low memory before it finished, so the per-template terrain table, the zero-clear levels, the WARN lines and the MEC-019-R14 verdict (terrain share per biome vs 40%) are **not yet recorded**. Re-run when memory is free.
+
 ## 2026-11-16 - D3 U6 Loadout + Settings screenshot record (headless)
 - Branch `feat/u6-loadout-settings`. Captured with `tools/qa/shot.mjs` into `tmp/qa/u6/` at 360x640 and 360x780: Home, Loadout (slot 1 ring, slot 2 ring after a tap, locked card, chips at 780), Settings full screen (640, 780, one toggle), Pause, Settings overlay from Pause, HUD with skill icons, Results. Loadout route: seed `localStorage['mango-snake.save']` with `{version:3,data:{bestLevel:12,...}}`, reload, tap "Pick 2 skills" on Home (Loadout shows only once a skill is unlocked).
 - Matches `Loadout-360` / `Settings-360`: panels, skill-skin slots, ring, cost and pick chips, bar toggles, caption under the panel. HUD icons not clipped at stroke 2.6. Not captured: mid-slide toggle frame, one-slot / no-skill Loadout, all-picked, 540-wide sizes, console errors, d3 texture key count (no game handle; run `Object.keys(game.textures.list).filter(k => k.startsWith('d3/')).length` in the owner device pass).
