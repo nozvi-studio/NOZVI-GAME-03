@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: fixed terrain (MEC-019) implementation plan `docs/superpowers/plans/2026-11-16-fixed-terrain.md`; docs map rows for the design and the plan.
 - fix(ui): sound icon draws the speaker cone to the right of the box with two concentric wave arcs (D3-R19).
 - docs: U6 QA pass, rulings (DECISIONS), CODEMAP rows, UI-MOCKUPS built marks, PLAYTEST entry.
 - refactor(ui): remove dead D2 tokens, UI_THEME/DARK dark theme, D2 loadout/settings metrics and column helpers; tokenGuard test fails on any unread TOKENS key (D3-R1, D3-R3, U6-R10).
