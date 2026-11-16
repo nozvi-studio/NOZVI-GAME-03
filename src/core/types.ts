@@ -76,6 +76,7 @@ export type SimEvent =
   | { type: 'mangoDeferred' }
   | { type: 'shrunk'; from: number; to: number; removed: Cell[] }
   | { type: 'levelUp'; level: number; biome: number; challenge: boolean; biomeChanged: boolean; unlocked?: IntroKey; clearedLevelTimeMs: number }
+  | { type: 'terrainChanged'; templateId: string; name: string; variant: number; newTemplate: boolean }
   | { type: 'runWon'; score: number; timeMs: number }
   | { type: 'landed'; hazardType: TimedKey }
   | { type: 'dust'; x: number; y: number }

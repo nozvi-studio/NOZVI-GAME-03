@@ -1,7 +1,11 @@
 // src/core/hazards/fixedTerrain.ts - MEC-019 fixed terrain family: live cells of the current template.
 import type { Balance } from '../balance';
-import { layoutFor } from '../fixedTerrain';
-import type { FixedTerrainCell, HazardFamily, SimSnapshot, SimState } from '../types';
+import { diffLayout, layoutFor } from '../fixedTerrain';
+import { placeMango } from '../mango';
+import { rngFrom } from '../rng';
+import type { FixedTerrainCell, HazardFamily, SimSnapshot, SimState, StepCtx } from '../types';
+import { reservedByFamilies } from './queries';
+import { FAMILIES } from './registry';
 
 const at = (s: SimState, x: number, y: number): FixedTerrainCell | undefined =>
   s.families.fixedTerrain.cells.find(c => c.x === x && c.y === y);
@@ -24,7 +28,20 @@ export function fixedTerrainSnapshot(s: SimState, b: Balance): SimSnapshot['fixe
 export const fixedTerrain: HazardFamily = {
   key: 'fixedTerrain', cause: 'terrain', capClass: 'none', maxActiveKey: null, breakable: true,
   spawn: () => null,
-  update() { /* Task 3 adds the warn and crumble timers */ },
+  // MEC-019-R4 crumbling cells disappear; a warning cell turns solid when its time is over and the cell is clear (FT-7).
+  update(s, ctx) {
+    const st = s.families.fixedTerrain;
+    if (st.cells.every(c => c.state === 'solid')) return;
+    const others = FAMILIES.filter(f => f.key !== 'fixedTerrain');
+    st.cells = st.cells.filter(c => {
+      if (c.state === 'solid') return true;
+      if (c.leftMs > 0) c.leftMs -= 1;
+      if (c.leftMs > 0) return true;
+      if (c.state === 'crumble') return false;
+      if (!ctx.snakeOn(c.x, c.y) && !reservedByFamilies(s, c.x, c.y, others)) c.state = 'solid';
+      return true;
+    });
+  },
   onBreak() { /* a Shield pass leaves the fixed cell in place; required of every breakable family (MEC-006-R24) */ },
   snapshot: s => structuredClone(s.families.fixedTerrain),
   solidAt: (s, x, y) => at(s, x, y)?.state === 'solid',
@@ -32,3 +49,27 @@ export const fixedTerrain: HazardFamily = {
   reservedAt: (s, x, y) => !!at(s, x, y),
   count: s => s.families.fixedTerrain.cells.length,
 };
+
+// MEC-019-R4 called from the level-up chain: diff the live cells against the new level's layout.
+export function changeTerrain(s: SimState, b: Balance, ctx: StepCtx): void {
+  if (!b.terrainSet) return;
+  const st = s.families.fixedTerrain, next = layoutFor(b.terrainSet, b, s.level, s.terrainSeed);
+  if (next.templateId === st.templateId && next.variant === st.variant) return;
+  const live = st.cells.filter(c => c.state !== 'crumble'), d = diffLayout(live, next.tiles);
+  const fading = st.cells.filter(c => c.state === 'crumble' && !next.tiles.some(n => n.x === c.x && n.y === c.y));
+  st.cells = [...d.keep, ...fading,
+    ...d.crumble.map(c => ({ ...c, state: 'crumble' as const, leftMs: b.hazard.crumbleMs })),
+    ...d.warn.map(c => ({ ...c, state: 'warn' as const, leftMs: b.fixedTerrain.warnMs }))];
+  const fresh = (x: number, y: number) => d.warn.some(c => c.x === x && c.y === y);
+  // FT-7 pickups on new cells: orbs and rain mangoes expire, the regular mango is placed again.
+  s.orbs = s.orbs.filter(o => { if (!fresh(o.x, o.y)) return true; ctx.emit({ type: 'orbExpired', x: o.x, y: o.y }); return false; });
+  s.rainMangoes = s.rainMangoes.filter(m => { if (!fresh(m.x, m.y)) return true; ctx.emit({ type: 'rainMangoExpired', x: m.x, y: m.y }); return false; });
+  const m = s.mango, head = s.snake[0]!;
+  if (m && fresh(m.x, m.y) && !(m.x === head.x && m.y === head.y)) { // a mango under the head is the one being eaten
+    const from = { x: m.x, y: m.y };
+    placeMango(s, b, rngFrom(s.rng));
+    ctx.emit({ type: 'mangoDisplaced', from, to: s.mango ? { x: s.mango.x, y: s.mango.y } : null });
+  }
+  ctx.emit({ type: 'terrainChanged', templateId: next.templateId, name: next.name, variant: next.variant, newTemplate: next.templateId !== st.templateId });
+  st.templateId = next.templateId; st.variant = next.variant;
+}
