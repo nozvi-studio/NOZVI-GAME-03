@@ -2,6 +2,8 @@
 export { parseBalance } from './balance';
 export type { Balance, MotionBalance, Pair, RockShapeKey, FenceShapeKey, FenceKind, MazeLayout } from './balance';
 export type * from './types';
+export { withTerrain, parseTerrain } from './fixedTerrain';
+export type { TerrainSet, TerrainTemplate, TerrainTile, TerrainKind, Variant } from './fixedTerrain';
 export { createSim, restoreSim } from './sim';
 export { biome, isChallenge, quota, levelTickMs, directorIntervalMs, smallHazardCap, familyRow, enabledFamilies, introducedAt, keyLevels, nextKeyLevel, fenceFirstLevel, needFor, tickMsFor } from './level';
 export { FAMILIES } from './hazards/registry';

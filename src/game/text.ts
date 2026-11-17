@@ -15,6 +15,7 @@ export const CAUSE_TEXT: Record<CauseKey, string> = {
   rotten: 'You hit a rock left by a rotten mango.', rock: 'A falling rock got you.',
   fence: 'You ran into a fence.', maze: 'You ran into a hedge.', ground: 'The ground rose in front of you.',
   snipWall: 'You hit your discarded tail.',
+  terrain: 'You ran into the terrain.', // MEC-019 provisional
   coconut: 'Hit by a coconut.', // OQ-B6 provisional
   gate: 'Crushed by a gate.', // OQ-B6 provisional
   spike: 'Spiked.', // OQ-B6 provisional
@@ -51,6 +52,7 @@ export const DEATH_LINES: Record<CauseKey, readonly string[]> = {
   maze: ['Lost in the hedge.', 'The hedge keeps its secrets.'],
   ground: ['The ground had other plans.', 'Hills happen. Watch your step.'],
   snipWall: ['You cut it. You hit it.', 'Your own snip bit back.'],
+  terrain: ['The map does not move. You did.', 'That wall was on the map.'], // MEC-019 provisional
   coconut: ['Bonked by a coconut.', 'Coconut incoming. Too late.'],
   gate: ['The gate said no.', 'Closed just in time. Not yours.'],
   spike: ['Spikes: pointy and rude.', 'Ouch. Spikes up.'],
@@ -66,7 +68,8 @@ export const bestLine = (kind: 'start' | 'over', best: number, newBest = false, 
 
 // P1 keyed strings: MEC-003/006/007/008 §8 plus cause.* (MEC-003-R20 quit, clear).
 const KEYED: Readonly<Record<string, string>> = {
-  'banner.levelUp': 'Level {n}', 'banner.freshStart': 'Fresh start!',
+  'banner.levelUp': 'Level {n}', 'banner.terrain': 'Map: {name}', // MEC-019 provisional
+  'banner.freshStart': 'Fresh start!',
   'banner.biome.1': 'Mango Orchard', 'banner.biome.2': 'Rice Paddy', 'banner.biome.3': 'Frozen Pond',
   'banner.biome.4': 'Rocky Hills', 'banner.biome.5': 'Backyard', 'banner.biome.6': 'Storm Garden',
   'banner.new.rock': 'Rocks unlocked', 'banner.new.rottenRock': 'Rotten mangoes turn to rock!',

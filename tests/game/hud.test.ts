@@ -154,7 +154,7 @@ describe('P1 HUD flow, audio and session wiring', () => {
     h.game.events.emit('sim-events', [{ type: 'levelUp', level: 5, biome: 1, challenge: true, biomeChanged: false, clearedLevelTimeMs: 1 }]);
     h.flush();
     expect(h.last('banner-title').scale).toBe(1);
-    expect(h.last('banner-title').width * h.last('banner-title').scale).toBeLessThanOrEqual(bannerStripRect(b.board.cols).w);
+    expect(h.last('banner-title').width * h.last('banner-title').scale).toBeLessThanOrEqual(bannerStripRect().w);
   });
   it('MEC-003 §8 a run that starts on a challenge level shows the challenge banner when the countdown ends', () => {
     const h = setup({ bestLevel: 12, unlockedCheckpoints: [4, 5] }, { startLevel: 5 });

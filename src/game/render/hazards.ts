@@ -11,8 +11,12 @@ type PopCell = { x: number; y: number; k: number };
 
 // P3b1-R4 two-layer rounded box: edge colour underneath, fill inset by the border width (CSS border-box look).
 export function boxed(g: Graphics, x: number, y: number, w: number, h: number, r: number, fill: number, edge: number, bw: number, alpha: number): void {
-  g.fillStyle(edge, alpha).fillRoundedRect(x, y, w, h, r);
-  g.fillStyle(fill, alpha).fillRoundedRect(x + bw, y + bw, w - 2 * bw, h - 2 * bw, Math.max(0, r - bw));
+  // Phaser does not clamp the radius: above half the side the path self-intersects and earcut stalls for seconds (crumbling fence posts, MEC-019).
+  if (w <= 0 || h <= 0) return;
+  g.fillStyle(edge, alpha).fillRoundedRect(x, y, w, h, Math.min(r, w / 2, h / 2));
+  const iw = w - 2 * bw, ih = h - 2 * bw;
+  if (iw <= 0 || ih <= 0) return;
+  g.fillStyle(fill, alpha).fillRoundedRect(x + bw, y + bw, iw, ih, Math.min(Math.max(0, r - bw), iw / 2, ih / 2));
 }
 
 // P3b1-R4 Rock.dc: drop shadow, edge ring, shaded body, top face, rotated highlight; crumble adds crack and two debris chips.
@@ -60,7 +64,7 @@ export function drawWarn(g: Graphics, c: Cell, cell: number, ms: number, warnMs:
 }
 
 // P3b1-R6 FencePiece.dc: rails run from a post to the right/lower neighbour, posts are drawn after every rail.
-function drawFence(g: Graphics, cells: readonly PopCell[], cell: number, look: BoardLook, alpha: number): void {
+export function drawFence(g: Graphics, cells: readonly PopCell[], cell: number, look: BoardLook, alpha: number): void {
   const has = new Set(cells.map(c => `${c.x},${c.y}`)), edge = HAZARD_EDGES.fence(look), bw = Math.max(1, cell * FENCE.edge), t = cell * FENCE.rail, r = cell * FENCE.railRadius;
   for (const c of cells) {
     const cx = (c.x + 0.5) * cell, cy = (c.y + 0.5) * cell;

@@ -133,7 +133,7 @@ it('P3b2-R10 BannerLayer shows queued cards one after another for ui.bannerMs, t
 it('UIFIX-R1 BannerLayer draws every banner as one strip inside the board top edge, alpha ~0.85, pills sit below it', () => {
   vi.stubGlobal('window', { matchMedia: () => ({ matches: false }) });
   const h = sceneHarness(), layer = new BannerLayer(h.scene as unknown as Phaser.Scene, d3HudLayout(640, false), b);
-  const r = bannerStripRect(b.board.cols);
+  const r = bannerStripRect();
   layer.show([{ kind: 'levelUp', title: 'Level 8', subtitle: 'Fresh start!', chip: null }]);
   // D3-R16 the strip is a light panel skin image of the strip rect size, centred on it.
   const face = h.objects.find(o => o.name === `d3/panel/light/rest/${Math.ceil(r.w)}x${Math.ceil(r.h)}`);

@@ -3,7 +3,7 @@ import { boardRect, d3HudLayout, debugRects, type R } from '../../src/game/hud/d
 
 const HM = [640, 700, 780, 800];
 const rects = (l: ReturnType<typeof d3HudLayout>): [string, R][] => {
-  const out: [string, R][] = [['board', l.board], ['pause', l.pause], ['ribbon', l.ribbon], ['mangoBar', l.mango.bar],
+  const out: [string, R][] = [['board', l.board], ['band', l.band], ['pause', l.pause], ['ribbon', l.ribbon], ['mangoBar', l.mango.bar],
     ['skillA', l.skills[0]], ['skillB', l.skills[1]], ['energyBar', l.energy.bar]];
   if (l.hint) out.push(['hint', l.hint]);
   if (l.dpad) for (const k of ['up', 'left', 'right', 'down'] as const) out.push([k, l.dpad[k]]);
@@ -11,9 +11,18 @@ const rects = (l: ReturnType<typeof d3HudLayout>): [string, R][] => {
 };
 const overlap = (a: R, b: R) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
-it('D3-R9 board: 10 px sides, 340 wide, top 112 on 640 and 149 on 780', () => {
-  expect(boardRect(640)).toEqual({ x: 10, y: 112, size: 340 });
-  expect(boardRect(780).y).toBeCloseTo(149);
+it('D3-R9 BAND-R1 board: 36 px under the old top (148 on 640, 185 on 780); 340 wide with 10 px sides once the canvas is tall enough', () => {
+  expect(boardRect(640)).toEqual({ x: 24, y: 148, size: 312 });   // short canvas: the square shrinks, stays centred
+  const tall = boardRect(780); expect(tall.y).toBeCloseTo(185); expect(tall.size).toBe(340); expect(tall.x).toBe(10);
+  expect(boardRect(680).size).toBe(340); expect(boardRect(670).size).toBeLessThan(340);
+});
+it('BAND-R1 the banner band is 30 px high, board wide, 11 px above the board (frame 7 + 4 clear) and 3 px below the mango row, D-pad on and off', () => {
+  for (const hm of HM) for (const dpad of [false, true]) {
+    const l = d3HudLayout(hm, dpad);
+    expect(l.band.h).toBe(30); expect(l.band.x).toBe(l.board.x); expect(l.band.w).toBe(l.board.w);
+    expect(l.band.y + l.band.h + 11).toBeCloseTo(l.board.y);
+    expect(l.band.y).toBeCloseTo(l.mango.icon.y + l.mango.icon.h + 3);
+  }
 });
 it('D3-R9 every rect is inside the canvas and nothing overlaps, D-pad on and off', () => {
   for (const hm of HM) for (const dpad of [false, true]) {
@@ -28,12 +37,12 @@ it('D3-R8 Pause, skills and D-pad keys are at least 48 px', () => {
     for (const r of taps) { expect(r.w).toBeGreaterThanOrEqual(48); expect(r.h).toBeGreaterThanOrEqual(48); }
   }
 });
-it('D3-R9 board anchors on 640: skills at y 476, energy bar 112..248, chip top 576', () => {
+it('D3-R9 board anchors on 640: skills at y 484, energy bar 112..248, chip top 584', () => {
   const l = d3HudLayout(640, false);
-  expect(l.skills[0]).toEqual({ x: 22, y: 476, w: 78, h: 78 });
+  expect(l.skills[0]).toEqual({ x: 22, y: 484, w: 78, h: 78 });
   expect(l.skills[1].x + l.skills[1].w).toBe(338);
   expect(l.energy.bar.x).toBeGreaterThanOrEqual(112); expect(l.energy.bar.x + l.energy.bar.w + 6 + 24).toBeCloseTo(248);
-  expect(l.chip.y).toBe(576); expect(l.chip.short).toBe(false); expect(l.hint).not.toBeNull();
+  expect(l.chip.y).toBe(584); expect(l.chip.short).toBe(false); expect(l.hint).not.toBeNull();
 });
 it('D3-R9 spare height on tall screens goes around the bottom group, not into one band', () => {
   const short = d3HudLayout(640, false), tall = d3HudLayout(780, false);

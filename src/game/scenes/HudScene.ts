@@ -177,6 +177,9 @@ export class HudScene extends Phaser.Scene {
     for (const e of events) { batch.push(e); switch (e.type) {
       case 'shrunk': this.shrunkTo = e.from > e.to ? e.to : null; break; // MEC-001-R4 chip only when the snake shrank
       case 'levelUp': this.onLevelUp(e, batch); break;
+      case 'terrainChanged': // MEC-019-R9, FT-8: name only when the template changes
+        if (e.newTemplate) this.banners.enqueue({ kind: 'hint', text: t('banner.terrain', { name: e.name }) });
+        break;
       case 'hazardIncoming':
         if (e.family === 'fence' || e.family === 'maze' || e.family === 'terrain') this.banners.enqueue({ kind: 'incoming', text: incomingBanner(e.family) });
         break;

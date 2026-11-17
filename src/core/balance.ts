@@ -1,6 +1,7 @@
 // src/core/balance.ts — Balance type + parseBalance (design §6). GDD-7
 import type { HazardFamily, LevelRow } from './types';
 import { DEFAULT_FAMILIES } from './hazards/registry';
+import type { TerrainSet } from './fixedTerrain';
 
 export type Pair = [number, number];
 export type RockShapeKey = 'single' | 'lineH' | 'lineV' | 'corner' | 'block';
@@ -80,6 +81,9 @@ export interface Balance {
     waveLenRand: number; waveWidth: number; waveDelayMs: number; checkerSize: number; maxActive: number;
 
   };
+  fixedTerrain: { warnMs: number; maxFraction: number; firstMaxCells: number; startAhead: number; firstSegmentLevels: number; minFreeLanes: number };
+  /** MEC-019 parsed templates; absent = no fixed terrain (attached by withTerrain). */
+  terrainSet?: TerrainSet;
   director: {
     firstSpawnMs: number; intervalBaseMs: number; intervalPerLevelMs: number; intervalMinMs: number;
     capBase: number; capPerLevels: number; capMax: number; challengeIntervalFactor: number; challengeCapBonus: number;
@@ -88,7 +92,7 @@ export interface Balance {
   skills: {
     slowmo: { cost: number; durationMs: number; tickFactor: number; unlockLevel: number };
     tailSnip: { cost: number; minLength: number; wallLifeMs: number; unlockLevel: number };
-    shield: { cost: number; durationMs: number; bonkPauseTicks: number; unlockLevel: number };
+    shield: { cost: number; durationMs: number; bonkPauseTicks: number; unlockLevel: number; invulnMs: number; terrainBreach: { w: number; len: number } };
     mangoRain: { cost: number; durationMs: number; dropsMin: number; dropsMax: number; barCapFraction: number; mangoLifeMs: number; mangoBlinkMs: number; unlockLevel: number };
   };
   loadout: { slots: number; secondSlotLevel: number; order: import('./types').SkillId[] };
@@ -97,7 +101,7 @@ export interface Balance {
   flow: { countdownMs: number; countdownDigits: number; maxFrameDeltaMs: number };
   ui: {
     bannerMs: number; swipeMinPx: number; swipeBoardFactor: number; fontLoadTimeoutMs: number; minShrink: number;
-    terrainFadeInMs: number; hazardFlickerMs: number;
+    terrainFadeInMs: number; hazardFlickerMs: number; invulnBlinkMs: number; invulnLowAlpha: number; terrainCrumbleMinScale: number;
     capy: { breathPeriodMs: number; breathAmp: number; blinkMs: number; blinkMinGapMs: number; blinkMaxGapMs: number;
       eatOpenMs: number; eatChewMs: number; gulpScaleX: number; gulpScaleY: number;
       deadDroopMs: number; deadRotDeg: number; deadDropPx: number; headCellScale: number;
@@ -223,6 +227,7 @@ const SPEC: Spec = {
     waveLenRand: 'int+', waveWidth: 'int+', waveDelayMs: 'int0', checkerSize: 'int+', maxActive: 'int+',
 
   },
+  fixedTerrain: { warnMs: 'int+', maxFraction: 'prob', firstMaxCells: 'int+', startAhead: 'int+', firstSegmentLevels: 'int+', minFreeLanes: 'int0' },
   director: {
     firstSpawnMs: 'int+', intervalBaseMs: 'int+', intervalPerLevelMs: 'int0', intervalMinMs: 'int+', capBase: 'int0',
     capPerLevels: 'int+', capMax: 'int+', challengeIntervalFactor: 'num+', challengeCapBonus: 'int0',
@@ -231,7 +236,7 @@ const SPEC: Spec = {
   skills: {
     slowmo: { cost: 'int+', durationMs: 'int+', tickFactor: 'num+', unlockLevel: 'int+' },
     tailSnip: { cost: 'int+', minLength: 'int+', wallLifeMs: 'int+', unlockLevel: 'int+' },
-    shield: { cost: 'int+', durationMs: 'int+', bonkPauseTicks: 'int+', unlockLevel: 'int+' },
+    shield: { cost: 'int+', durationMs: 'int+', bonkPauseTicks: 'int+', unlockLevel: 'int+', invulnMs: 'int+', terrainBreach: { w: 'int+', len: 'int+' } },
     mangoRain: { cost: 'int+', durationMs: 'int+', dropsMin: 'int+', dropsMax: 'int+', barCapFraction: 'prob', mangoLifeMs: 'int+', mangoBlinkMs: 'int+', unlockLevel: 'int+' },
   },
   loadout: { slots: 'int+', secondSlotLevel: 'int+', order: namesOf(['slowmo', 'tailSnip', 'shield', 'mangoRain']) },
@@ -243,7 +248,7 @@ const SPEC: Spec = {
   flow: { countdownMs: 'int+', countdownDigits: 'int+', maxFrameDeltaMs: 'int+' },
   ui: {
     bannerMs: 'int+', swipeMinPx: 'num+', swipeBoardFactor: 'prob', fontLoadTimeoutMs: 'int+', minShrink: 'prob',
-    terrainFadeInMs: 'int+', hazardFlickerMs: 'int+',
+    terrainFadeInMs: 'int+', hazardFlickerMs: 'int+', invulnBlinkMs: 'int+', invulnLowAlpha: 'prob', terrainCrumbleMinScale: 'prob',
     capy: { breathPeriodMs: 'int+', breathAmp: 'prob', blinkMs: 'int+', blinkMinGapMs: 'int+', blinkMaxGapMs: 'int+',
       eatOpenMs: 'int+', eatChewMs: 'int+', gulpScaleX: 'num+', gulpScaleY: 'num+',
       deadDroopMs: 'int+', deadRotDeg: 'num0', deadDropPx: 'num0', headCellScale: 'num+',
@@ -311,6 +316,9 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (b.speed.minMs > b.speed.startMs) fail('speed.minMs', 'must be ≤ speed.startMs');
   if (b.mango.rotMinMs > b.mango.rotBaseMs) fail('mango.rotMinMs', 'must be ≤ mango.rotBaseMs');
   if (b.terrain.upMs + b.terrain.warnMs >= b.terrain.periodMs) fail('terrain.periodMs', 'must be > upMs + warnMs');
+  if (b.skills.shield.terrainBreach.w % 2 === 0) fail('skills.shield.terrainBreach.w', 'must be odd');
+  if (b.fixedTerrain.firstSegmentLevels >= b.level.perBiome) fail('fixedTerrain.firstSegmentLevels', 'must be < level.perBiome');
+  if (b.fixedTerrain.warnMs < b.fairness.minWarnMs) fail('fixedTerrain.warnMs', 'must be >= fairness.minWarnMs');
   // MEC-004-R13 warning time uses the L1 base tick, independent of slow effects.
   const minWarnMs = Math.max(b.fairness.minWarnMs, b.fairness.minWarnTicks * b.speed.startMs);
   for (const family of ['rock', 'fence', 'maze', 'terrain', 'mud', 'ice', 'coconut', 'gate', 'spike', 'npc', 'bomb'] as const) {

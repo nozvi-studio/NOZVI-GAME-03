@@ -23,7 +23,7 @@
   |---|---|---|
   | `key` | `FamilyKey` | registry key, also the `level.table` weight key |
   | `cause` | `CauseKey \| null` | cause of death for its solid/hit cells (null: never lethal) |
-  | `capClass` | `'small' \| 'big' \| 'modifier' \| 'none'` | director class (R8); `none` = created by another mechanic (rotten rock, snip wall) |
+  | `capClass` | `'small' \| 'big' \| 'modifier' \| 'none'` | director class (R8); `none` = created by another mechanic (rotten rock, snip wall, fixed terrain) |
   | `maxActiveKey` | config path or null | max simultaneous instances (e.g. `terrain.maxActive`, `mud.maxActive`) |
   | `breakable` | boolean | Shield may break its solid/hit cells (MEC-006, P2 design §9) |
 - Config: `fairness.*`, `hazard.crumbleMs`, family groups `rock`, `fence`, `maze`, `terrain` (P0 values as changed by MEC-003 §9), new family groups in MEC-012…018.
@@ -31,7 +31,7 @@
 
 ## 4. Rules
 ### Registry
-- **MEC-004-R1 Registry.** `src/core/hazards/registry.ts` exports `FAMILIES: readonly HazardFamily[]` in this fixed order: `rock, fence, maze, terrain, rottenRock, snipWall, mud, ice` (P2b appends `coconut, gate, spike, npc, bird, bomb`; P2c appends `shrink`). Every loop over families (update, queries, director options, snapshot) uses this order. `parseBalance` rejects a `level.table` weight key that is not a registry key with `capClass ≠ 'none'`.
+- **MEC-004-R1 Registry.** `src/core/hazards/registry.ts` exports `FAMILIES: readonly HazardFamily[]` in this fixed order: `rock, fence, maze, terrain, rottenRock, snipWall, mud, ice` (P2b appends `coconut, gate, spike, npc, bird, bomb`; P2c appends `shrink`; MEC-019 appends `fixedTerrain`, which is `capClass: 'none'` and never offered by the director; the director excludes terrain cells through `reservedAt`, MEC-019-R8). Every loop over families (update, queries, director options, snapshot) uses this order. `parseBalance` rejects a `level.table` weight key that is not a registry key with `capClass ≠ 'none'`.
 - **MEC-004-R2 Interface.** P0 members (`key`, `spawn`, `update`, `snapshot`, `solidAt`, `bfsWallAt`, `reservedAt`, `breakable`) keep their P0 meaning, except that `spawn` now returns the new instance's own cells (`Cell[]`, without helper cells such as an ice ring) on success and `null` on failure (P0 returned a boolean; the director and the fairness harness need the cells). P2a adds the descriptor fields of §3 and these optional members (missing = never / no-op):
   - `tileAt(s, x, y): TileKind | null`: ground tile kind of an **active** tile cell (`'mud' | 'ice'`).
   - `headHit(s, x, y): 'mover' | 'area' | null`: the cell holds a lethal non-solid object for a head moving in (`'mover'`: a mover's cell; `'area'`: an active blast cell).

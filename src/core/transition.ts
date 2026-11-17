@@ -1,4 +1,5 @@
 import type { Balance } from './balance';
+import { changeTerrain } from './hazards/fixedTerrain';
 import { biome, introducedAt, isChallenge, quota } from './level';
 import { rampOnLevelUp } from './ramp';
 import { applyMidRunUnlocks } from './skills';
@@ -20,6 +21,7 @@ export function startLevelUp(s: SimState, b: Balance, ctx: StepCtx): void {
   const unlocked = introducedAt(b, s.level);
   ctx.emit({ type: 'levelUp', level: s.level, biome: biome(b, s.level), challenge: isChallenge(b, s.level),
     biomeChanged: biome(b, s.level) !== oldBiome, ...(unlocked ? { unlocked } : {}), clearedLevelTimeMs: cleared });
+  changeTerrain(s, b, ctx); // MEC-019-R4 after levelUp, before rampEnded
   rampOnLevelUp(s, ctx);
   applyMidRunUnlocks(s, b, ctx);
 }
