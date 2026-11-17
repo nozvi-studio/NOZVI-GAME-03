@@ -137,6 +137,10 @@ it('MEC-007 section 9 parseBalance rejects decreasing unlock levels and duplicat
   expect(() => loadBalance(j => j.skills.tailSnip.unlockLevel = 2)).toThrow();
   expect(() => loadBalance(j => j.loadout.order[1] = 'slowmo')).toThrow();
 });
+it('MEC-011-R2 parseBalance rejects an unknown skin id and a zero price', () => {
+  expect(() => loadBalance(j => j.skins.order.push('dragon'))).toThrow();
+  expect(() => loadBalance(j => j.skins.prices.common = 0)).toThrow();
+});
 it('MEC-002 section 9 parseBalance rejects rotMinMs > rotBaseMs and goldenRotFactor 0', () => {
   expect(() => loadBalance(j => j.mango.rotMinMs = 8001)).toThrow();
   expect(() => loadBalance(j => j.mango.goldenRotFactor = 0)).toThrow();

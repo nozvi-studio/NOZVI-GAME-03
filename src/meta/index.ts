@@ -12,3 +12,5 @@ export type { UnlockTable } from './loadout';
 export { emptyLog, loadLog, nextRun, appendRecord, flushLog, LOG_KEY , recordError, ERROR_STACK_MAX } from './runLog';
 export { summarizeLog, abandonedRuns, deathCauseReport, PLAYER_CAUSES, NON_DEATH_CAUSES } from './runLog';
 export type { LogRecord, RunLog, LogSummary, DeathCauseReport } from './runLog';
+export { DEFAULT_SKIN, defaultSkinState, skinRarity, skinPrice, buySkin, equipSkin, addCoins, sanitizeSkins } from './skins';
+export type { SkinRarity, SkinsConfig, SkinState, BuyResult } from './skins';
