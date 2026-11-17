@@ -669,3 +669,8 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 ## 2026-11-17 - Pre-MEC-019 SimStates are unsupported
 - `restoreSim` does not default `fixedTerrain`, `invuln` or `terrainSeed`. Every caller restores states made by the current `createSim` (tests, fuzz, fairness timeline); no saved or fixture state predates MEC-019. Old states are not supported; add defaults with a test if one ever appears.
 - `terrainCrumbleMinScale` (balance `ui`) replaces the render constant for the smallest crumbling fence post.
+## 2026-11-16 - P4a skins before the economy (owner)
+- Context: the owner wants skins planned now on the capy rig, with a livelier Characters screen than the flat `SkinBuyD2` / `SkinsD3` boards.
+- Choice: P4 splits into P4a (MEC-011 skins, coins, shop) and P4b (MEC-009 marbles, MEC-010 machine and wheel). In P4a coins come only from a `?debug=1` grant (GDD 8.2 unchanged). First batch: Snake, Ginger Cat, Pup, Tuxedo Cat (Common 300), Capybara (Rare 800, eat sparkle + leaf trail); no Epic yet. Characters screen = direction A (stage + shelf) of `docs/design/mockups/d3/skins.html`. Buy equips at once, no confirm dialog. P4a code may start before the P3 exit. Design: `docs/superpowers/specs/2026-11-16-p4a-skins-design.md`.
+- Alternatives: economy first (machine is the riskiest part, skins arrive late); runs pay coins directly for now (GDD change, rebalance later); unlock by milestones (second unlock path).
+- Open for P4b: the D2/D3 marble mockups use slots `2 / WHEEL 15% / SKIN 5% / 5 / 2` and a wheel multiplier, GDD 8.2 says `10 / 25 / Mystery / 25 / 10` with no wheel; the owner must pick one before MEC-010.
