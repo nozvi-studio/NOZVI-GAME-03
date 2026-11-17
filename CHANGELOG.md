@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- docs: P4a skins (MEC-011) implementation plan `docs/superpowers/plans/2026-11-16-p4a-skins.md`; docs map row.
 - docs: P4a skins design `docs/superpowers/specs/2026-11-16-p4a-skins-design.md` (MEC-011); GDD 8.3 first skin batch and buy rule, GDD 11 P4 split into P4a / P4b; DECISIONS; docs map row.
 - docs: P4a Characters screen direction study `docs/design/mockups/d3/skins.html` (3 directions, PNGs) and its generator `tools/design/skins-board.mjs`.
 - fix(hud): banner cards sit in a 30 px band between the mango row and the board, never on a board cell; the board sits 36 px lower (4 px clear around the card) and shrinks on short canvases (BAND-R1, supersedes the UIFIX-R1 strip position). Debug: `window.__game` with `?debug=1`.

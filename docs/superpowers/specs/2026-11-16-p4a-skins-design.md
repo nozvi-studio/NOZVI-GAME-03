@@ -1,5 +1,5 @@
 # P4a Skins: design (MEC-011)
-Status: **Draft, owner approved the design in chat 2026-11-16; spec review pending.** Rule IDs `MEC-011-R<n>`; the mechanic spec `docs/specs/mechanics/MEC-011-skins.md` is written from this file in the plan's docs task and then owns the rules.
+Status: **Approved (owner 2026-11-17).** Plan: `docs/superpowers/plans/2026-11-16-p4a-skins.md`. Rule IDs `MEC-011-R<n>`; the mechanic spec `docs/specs/mechanics/MEC-011-skins.md` is written from this file in the plan's docs task and then owns the rules.
 
 ## 1. Goal and scope
 Players collect chibi pet skins for the snake. P4a ships the whole skin loop except the way coins are earned.
