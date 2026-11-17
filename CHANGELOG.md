@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(art): Ginger, Pup and Tuxedo skins on the shared rig, settable active skin, `SKIN_BODY` and `SKIN_EFFECTS` (MEC-011, ART-003).
 - feat(save): save v4 with coins, owned skins and equipped skin (migration 3 to 4, load repair); session skin API `skinsModel`, `buySkin`, `equipSkin`, `debugAddCoins` (MEC-011).
 - feat(meta): MEC-011 skin catalogue, buy and equip rules (`src/meta/skins.ts`), `skins` balance block and schema.
 - fix(terrain): MEC-019 review fixes: warn cells wait under mangoes, Variant type, layoutFor/parseTerrain errors, crumble scale in balance ui
