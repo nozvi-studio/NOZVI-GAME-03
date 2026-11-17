@@ -6,7 +6,6 @@ import { drawFence, drawRock, drawWarn } from './hazards';
 import type { TelegraphCtx } from './telegraph';
 
 type Graphics = Phaser.GameObjects.Graphics;
-const MIN_CRUMBLE_SCALE = 0.15;
 
 export function drawFixedTerrain(g: Graphics, view: SimSnapshot['fixedTerrain'], cell: number, look: BoardLook, b: Balance, reduced: boolean, tel: TelegraphCtx): void {
   const fences: { x: number; y: number; k: number }[] = [];
@@ -17,7 +16,7 @@ export function drawFixedTerrain(g: Graphics, view: SimSnapshot['fixedTerrain'],
     }
     const crumble = c.state === 'crumble', a = crumble ? Math.max(0, c.leftMs / b.hazard.crumbleMs) : 1;
     if (c.kind === 'R') drawRock(g, { x: (c.x + 0.5) * cell, y: (c.y + 0.5) * cell }, cell, look, a, 'rock', crumble);
-    else if (crumble) drawFence(g, [{ x: c.x, y: c.y, k: Math.max(MIN_CRUMBLE_SCALE, a) }], cell, look, a);
+    else if (crumble) drawFence(g, [{ x: c.x, y: c.y, k: Math.max(b.ui.terrainCrumbleMinScale, a) }], cell, look, a);
     else fences.push({ x: c.x, y: c.y, k: 1 });
   }
   if (fences.length) drawFence(g, fences, cell, look, 1);

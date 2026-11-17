@@ -2,7 +2,7 @@ import { effectiveTick } from '../skills';
 import type { CauseKey, Cell, Dir, FamilyKey, HazardFamily, HitKind, SimState, StepCtx, TileKind } from '../types';
 import { breachTerrain } from './fixedTerrain';
 import { headHitAt, solidFamilyWithPriority, tileAt } from './queries';
-import { FAMILIES } from './registry';
+import { FAMILIES, FAMILY } from './registry';
 
 export type HeadCellResult =
   | { kind: 'clear' }
@@ -14,7 +14,7 @@ export type HeadCellResult =
 export function resolveHeadCell(s: SimState, x: number, y: number, ctx: StepCtx): HeadCellResult {
   // MEC-019-R7 invulnerable: only the closed shrinking ring still kills (the board edge is checked by the caller).
   if (s.invuln) {
-    const ring = FAMILIES.find(f => f.key === 'shrink');
+    const ring = FAMILY.shrink;
     return ring?.solidAt(s, x, y) ? { kind: 'death', cause: 'shrink' } : { kind: 'clear' };
   }
   const solid = solidFamilyWithPriority(s, x, y);

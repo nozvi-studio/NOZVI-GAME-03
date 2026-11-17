@@ -41,7 +41,8 @@ export function transform(tiles: readonly TerrainTile[], v: Variant, cols: numbe
 }
 
 export function layoutFor(set: TerrainSet, b: Balance, level: number, seed: number): TerrainLayout {
-  const seg = segmentOf(b, level), t = set.templates.find(x => x.biome === seg.biome && x.segment === seg.segment)!;
+  const seg = segmentOf(b, level), t = set.templates.find(x => x.biome === seg.biome && x.segment === seg.segment);
+  if (!t) throw new Error(`layoutFor: no terrain template for biome ${seg.biome} segment ${seg.segment}`);
   const variant = variantFor(b, level, seed);
   return { templateId: t.id, name: t.name, variant, tiles: transform(t.tiles, variant, b.board.cols, b.board.rows) };
 }
@@ -112,6 +113,8 @@ export function parseTerrain(json: unknown, b: Balance): TerrainSet {
     });
     return { id: t.id as string, biome: t.biome as number, segment: t.segment as 1 | 2, name: t.name as string, tiles };
   });
+  if (!Number.isInteger(b.level.maxLevel) || !Number.isInteger(b.level.perBiome) || b.level.perBiome <= 0 || b.level.maxLevel % b.level.perBiome !== 0)
+    fail('level.maxLevel and level.perBiome must be integers and maxLevel a multiple of perBiome');
   const biomes = b.level.maxLevel / b.level.perBiome;
   for (let bi = 1; bi <= biomes; bi++) for (const seg of [1, 2])
     if (templates.filter(t => t.biome === bi && t.segment === seg).length !== 1) fail(`biome ${bi} segment ${seg} needs exactly one template`);

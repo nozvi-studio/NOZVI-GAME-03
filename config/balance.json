@@ -88,7 +88,7 @@
   "flow": { "countdownMs": 1500, "countdownDigits": 3, "maxFrameDeltaMs": 100 },
   "ui": {
     "bannerMs": 1800, "swipeMinPx": 18, "swipeBoardFactor": 0.05, "fontLoadTimeoutMs": 2000, "minShrink": 0.85,
-    "terrainFadeInMs": 600, "hazardFlickerMs": 1500, "invulnBlinkMs": 120, "invulnLowAlpha": 0.45
+    "terrainFadeInMs": 600, "hazardFlickerMs": 1500, "invulnBlinkMs": 120, "invulnLowAlpha": 0.45, "terrainCrumbleMinScale": 0.15
     , "capy": { "breathPeriodMs": 1600, "breathAmp": 0.03, "blinkMs": 120, "blinkMinGapMs": 2000, "blinkMaxGapMs": 4000,
     "eatOpenMs": 80, "eatChewMs": 120, "gulpScaleX": 1.12, "gulpScaleY": 0.9,
     "deadDroopMs": 300, "deadRotDeg": 12, "deadDropPx": 4, "headCellScale": 1.6,

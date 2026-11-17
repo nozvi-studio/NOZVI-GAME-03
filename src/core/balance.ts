@@ -101,7 +101,7 @@ export interface Balance {
   flow: { countdownMs: number; countdownDigits: number; maxFrameDeltaMs: number };
   ui: {
     bannerMs: number; swipeMinPx: number; swipeBoardFactor: number; fontLoadTimeoutMs: number; minShrink: number;
-    terrainFadeInMs: number; hazardFlickerMs: number; invulnBlinkMs: number; invulnLowAlpha: number;
+    terrainFadeInMs: number; hazardFlickerMs: number; invulnBlinkMs: number; invulnLowAlpha: number; terrainCrumbleMinScale: number;
     capy: { breathPeriodMs: number; breathAmp: number; blinkMs: number; blinkMinGapMs: number; blinkMaxGapMs: number;
       eatOpenMs: number; eatChewMs: number; gulpScaleX: number; gulpScaleY: number;
       deadDroopMs: number; deadRotDeg: number; deadDropPx: number; headCellScale: number;
@@ -248,7 +248,7 @@ const SPEC: Spec = {
   flow: { countdownMs: 'int+', countdownDigits: 'int+', maxFrameDeltaMs: 'int+' },
   ui: {
     bannerMs: 'int+', swipeMinPx: 'num+', swipeBoardFactor: 'prob', fontLoadTimeoutMs: 'int+', minShrink: 'prob',
-    terrainFadeInMs: 'int+', hazardFlickerMs: 'int+', invulnBlinkMs: 'int+', invulnLowAlpha: 'prob',
+    terrainFadeInMs: 'int+', hazardFlickerMs: 'int+', invulnBlinkMs: 'int+', invulnLowAlpha: 'prob', terrainCrumbleMinScale: 'prob',
     capy: { breathPeriodMs: 'int+', breathAmp: 'prob', blinkMs: 'int+', blinkMinGapMs: 'int+', blinkMaxGapMs: 'int+',
       eatOpenMs: 'int+', eatChewMs: 'int+', gulpScaleX: 'num+', gulpScaleY: 'num+',
       deadDroopMs: 'int+', deadRotDeg: 'num0', deadDropPx: 'num0', headCellScale: 'num+',

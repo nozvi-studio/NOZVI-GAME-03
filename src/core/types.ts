@@ -7,7 +7,7 @@ import type { MoverState } from './hazards/blocks/mover';
 import type { SpikeGroup } from './hazards/spike';
 import type { GateInstance } from './hazards/gate';
 import type { BombInstance } from './hazards/bomb';
-import type { TerrainKind } from './fixedTerrain';
+import type { TerrainKind, Variant } from './fixedTerrain';
 
 export type Step = -1 | 0 | 1;
 export interface Dir { x: Step; y: Step }
@@ -47,7 +47,7 @@ export interface RottenRock { family: 'rottenRock'; x: number; y: number; state:
 export interface SnipWall { family: 'snipWall'; cells: Cell[]; state: 'solid' | 'crumble'; leftMs: number }
 /** MEC-019 one fixed terrain cell; leftMs counts the warn or crumble time down (0 while solid or waiting). */
 export interface FixedTerrainCell { x: number; y: number; kind: TerrainKind; state: 'warn' | 'solid' | 'crumble'; leftMs: number }
-export interface FixedTerrainState { templateId: string | null; variant: number; cells: FixedTerrainCell[] }
+export interface FixedTerrainState { templateId: string | null; variant: Variant; cells: FixedTerrainCell[] }
 export type HazardInstance = TimedHazard | TerrainHazard | RottenRock | SnipWall;
 export interface RainState { castId: number; leftMs: number; elapsedMs: number; drops: number; dropped: number }
 export interface RainMango { x: number; y: number; ageMs: number; castId: number }

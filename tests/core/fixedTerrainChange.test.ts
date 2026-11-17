@@ -56,6 +56,18 @@ describe('MEC-019-R4 terrain change at a level up', () => {
     sim.advance(200 + g.hazard.crumbleMs + 1);
     expect(cellsOf(s, 'solid').some(c => c.x === w.x && c.y === w.y)).toBe(true);
   });
+  it('MEC-019 FT-7 a warning cell waits while a mango or rain mango is on it', () => {
+    for (const rain of [false, true]) {
+      const sim = frozen(2, 11), s = stateOf(sim);
+      sim.debugSkipTo(3);
+      const w = cellsOf(s, 'warn')[0]!;
+      if (rain) s.rainMangoes.push({ x: w.x, y: w.y, ageMs: 0, castId: 1 });
+      else s.mango = { ...s.mango!, x: w.x, y: w.y };
+      sim.advance(g.fixedTerrain.warnMs + 5);
+      expect(cellsOf(s, 'warn').some(c => c.x === w.x && c.y === w.y)).toBe(true);
+      expect(cellsOf(s, 'solid').some(c => c.x === w.x && c.y === w.y)).toBe(false);
+    }
+  });
   it('FT-7 orbs and rain mangoes on new cells expire and the mango moves', () => {
     const sim = frozen(2, 11), s = stateOf(sim), next = layoutFor(g.terrainSet!, g, 3, 11);
     const fresh = next.tiles.filter(n => !s.families.fixedTerrain.cells.some(c => c.x === n.x && c.y === n.y));

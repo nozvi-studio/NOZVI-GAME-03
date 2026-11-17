@@ -10,6 +10,9 @@ import { FAMILIES } from './registry';
 const at = (s: SimState, x: number, y: number): FixedTerrainCell | undefined =>
   s.families.fixedTerrain.cells.find(c => c.x === x && c.y === y);
 
+const mangoOn = (s: SimState, x: number, y: number): boolean =>
+  (!!s.mango && s.mango.x === x && s.mango.y === y) || s.rainMangoes.some(m => m.x === x && m.y === y);
+
 // MEC-019-R3 the start level's layout is solid before the first step (also for a checkpoint start).
 export function applyStartTerrain(s: SimState, b: Balance): void {
   if (!b.terrainSet) return;
@@ -38,7 +41,7 @@ export const fixedTerrain: HazardFamily = {
       if (c.leftMs > 0) c.leftMs -= 1;
       if (c.leftMs > 0) return true;
       if (c.state === 'crumble') return false;
-      if (!ctx.snakeOn(c.x, c.y) && !reservedByFamilies(s, c.x, c.y, others)) c.state = 'solid';
+      if (!ctx.snakeOn(c.x, c.y) && !mangoOn(s, c.x, c.y) && !reservedByFamilies(s, c.x, c.y, others)) c.state = 'solid';
       return true;
     });
   },
