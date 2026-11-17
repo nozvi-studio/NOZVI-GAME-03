@@ -1,10 +1,11 @@
 import { afterEach, expect, it, vi } from 'vitest';
+import { activeSkin, setActiveSkin } from '../../src/game/art/skins';
 import { BootScene } from '../../src/game/scenes/BootScene';
 import { defaultSave, defaultSettings, SAVE_KEY } from '../../src/meta';
 import { currentPalette, LIGHT, setDisplaySettings } from '../../src/game/render/palette';
 const flush = () => new Promise(r => setTimeout(r, 0));
 vi.mock('phaser', () => ({ default: { Scene: class {} } }));
-afterEach(() => { vi.unstubAllGlobals(); setDisplaySettings(null); });
+afterEach(() => { vi.unstubAllGlobals(); setDisplaySettings(null); setActiveSkin('snake'); });
 it('MEC-008-R12 Boot passes balance rules so v2 progress survives loading', () => {
   const data = { ...defaultSave(), bestLevel: 14, carriedEnergy: 18, unlockedCheckpoints: [4], lastLoadout: ['shield', 'slowmo'] };
   vi.stubGlobal('window', { localStorage: { getItem: (key: string) => key === SAVE_KEY ? JSON.stringify({ version: 2, data }) : null } });
@@ -33,4 +34,18 @@ it('D3-R3 Boot ignores the saved board theme: the palette stays light', async ()
   scene.create();
   await flush();
   expect(currentPalette()).toBe(LIGHT);
+});
+it('MEC-011-R9 Boot sets the equipped skin from the save and loads its textures before leaving', async () => {
+  const data = { ...defaultSave(), coins: 0, ownedSkins: ['snake', 'capy'], equippedSkin: 'capy' };
+  vi.stubGlobal('window', { localStorage: { getItem: (key: string) => key === SAVE_KEY ? JSON.stringify({ version: 4, data }) : null } });
+  const started: string[] = [];
+  const scene = new BootScene();
+  const loaded: string[] = [];
+  const load = { svg: (k: string) => { loaded.push(k); }, once: (_e: string, cb: () => void) => { cb(); }, start() {} };
+  Object.assign(scene, { registry: new Map(), scene: { start: (k: string) => started.push(k), launch() {} }, textures: { exists: () => false }, load });
+  scene.create();
+  await flush();
+  expect(activeSkin()).toBe('capy');
+  expect(loaded).toContain('capy/head/idle/board');
+  expect(started).toEqual(['Home']);
 });

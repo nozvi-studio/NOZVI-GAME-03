@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import { boardLook, contrastRatio, DEFAULT_LOOK, mixInt } from '../../src/game/render/biomePalette';
 import { TOKENS, toInt } from '../../src/game/uiTokens';
+import { SKIN_BODY } from '../../src/game/art/skins';
 
 it('D3-R4 B1 each biome takes frame and cells from TOKENS.d3.biomes', () => {
   for (let n = 1; n <= 6; n++) {
@@ -26,4 +27,11 @@ it('P3b1-R1 contrastRatio is the WCAG ratio and mixInt blends', () => {
   expect(contrastRatio(0xffffff, 0x000000)).toBeCloseTo(21, 1);
   expect(contrastRatio(0x808080, 0x808080)).toBeCloseTo(1, 5);
   expect(mixInt(0x000000, 0xffffff, 0)).toBe(0);
+});
+it('MEC-011-R4 the board look takes the snake colours from the skin; the snake skin keeps the D3 tokens', () => {
+  const base = boardLook(2, 'snake'), capy = boardLook(2, 'capy'), storm = boardLook(6, 'capy');
+  expect(base.snake.body).toBe(toInt(TOKENS.d3.snake.body)); expect(base.outline.snake).toBe(toInt(TOKENS.d3.outline.snake));
+  expect(capy.snake.body).toBe(toInt(SKIN_BODY.capy!.body)); expect(capy.outline.snake).toBe(toInt(SKIN_BODY.capy!.outline));
+  expect(storm.outline.snake).toBe(toInt(SKIN_BODY.capy!.outlineStorm));
+  expect(capy.outline.mango).toBe(base.outline.mango); // only the snake entries change
 });
