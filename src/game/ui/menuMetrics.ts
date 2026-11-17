@@ -47,9 +47,9 @@ export const MENU = {
 
 /** D3-R11 Home anchors (mock px, 360 wide). `short` = Home 360x640 board, `tall` = Home 390x844 board scaled by 360/390. */
 export const D3_HOME = {
-  short: { h: 640, chip: 14, logo: 52, hero: 186, heroW: 318, play: 408, start: 512, links: 574, linkSide: 22, linkW: 152 },
+  short: { h: 640, chip: 11, logo: 52, hero: 186, heroW: 318, play: 408, start: 512, links: 574, linkSide: 22, linkW: 152 },
   tall: { h: 779, chip: 48, logo: 103, hero: 258, heroW: 343, play: 517, start: 617, links: 679, linkSide: 28, linkW: 146 },
-  side: 14, round: 48, bestH: 40, bestW: 132, bestDy: 2, logoScale: 0.92, heroAspect: 2 / 3,
+  side: 14, charGap: 8, round: 48, bestH: 40, bestW: 132, bestDy: 2, logoScale: 0.92, heroAspect: 2 / 3,
   playX: 40, playH: 84, startX: 70, startH: 48, arrow: 48, arrowGap: 6, linkH: 48, linkFont: 15, hintX: 40, hintH: 36,
   carryInset: 8, chipIconRatio: 1.2, chipIconGap: 6,
 } as const;

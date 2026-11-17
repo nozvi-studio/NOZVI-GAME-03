@@ -75,7 +75,7 @@ export function smoothPath(pts: readonly Pt[], r: number, step: number): Pt[] {
 export interface Rect { x: number; y: number; w: number; h: number }
 export interface HomeFlags { start: boolean; stepper: boolean; l1: boolean; loadout: boolean; hint: boolean }
 export interface HomeRects {
-  best: Rect; settings: Rect; logo: Rect & { scale: number }; hero: Rect; play: Rect;
+  best: Rect; settings: Rect; characters: Rect; logo: Rect & { scale: number }; hero: Rect; play: Rect;
   start?: Rect; prev?: Rect; next?: Rect; hint?: Rect; l1?: Rect; loadout?: Rect;
 }
 // D3-R11/R7 Home rects in mock px for a canvas `hm` mock px tall: anchors interpolate (and extrapolate up to 800) between the two boards.
@@ -86,6 +86,7 @@ export function homeRects(hm: number, f: HomeFlags): HomeRects {
   const r: HomeRects = {
     best: { x: D.side, y: at('chip') + D.bestDy, w: D.bestW, h: D.bestH },
     settings: { x: W - D.side - D.round, y: at('chip'), w: D.round, h: D.round },
+    characters: { x: W - D.side - 2 * D.round - D.charGap, y: at('chip'), w: D.round, h: D.round },
     // inked text box only (D3_LOGO.textTop..textBottom); the logo viewBox top is y - textTop * scale
     logo: { x: (W - D3_LOGO.inkW * D.logoScale) / 2, y: at('logo') + D3_LOGO.textTop * D.logoScale, w: D3_LOGO.inkW * D.logoScale,
       h: (D3_LOGO.textBottom - D3_LOGO.textTop) * D.logoScale, scale: D.logoScale },

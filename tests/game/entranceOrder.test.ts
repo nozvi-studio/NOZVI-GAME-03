@@ -1,18 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import json from '../../config/balance.json';
 import { staggerDelay } from '../../src/game/motion/curves';
-import { HOME_ORDER, entranceEndMs, loadoutOrder, resultsTimeline, settingsOrder } from '../../src/game/flow/entranceOrder';
+import { HOME_ORDER, entranceEndMs, loadoutOrder, resultsTimeline, settingsOrder, charactersOrder } from '../../src/game/flow/entranceOrder';
 
 const m = json.motion;
 const ids = (o: { id: string }[]): string[] => o.map(s => s.id);
 
 describe('MOT-2 entrance orders', () => {
-  it('MOT-2-R5 D3-R11 Home order is gear, best, logo lines, hero, stepper, play, hint, links', () => {
-    expect(ids(HOME_ORDER)).toEqual(['gear', 'best', 'logo1', 'logo2', 'hero', 'stepper', 'play', 'hint', 'links']);
+  it('MOT-2-R5 D3-R11 Home order is gear, characters, best, logo lines, hero, stepper, play, hint, links', () => {
+    expect(ids(HOME_ORDER)).toEqual(['gear', 'characters', 'best', 'logo1', 'logo2', 'hero', 'stepper', 'play', 'hint', 'links']);
     expect(HOME_ORDER[0]).toMatchObject({ motion: 'pop' });
-    expect(HOME_ORDER[1]).toMatchObject({ motion: 'pop' });
-    expect(HOME_ORDER[2]).toMatchObject({ motion: 'slide', from: 'up' });
-    expect(HOME_ORDER[6]).toMatchObject({ motion: 'slide', from: 'down' });
+    expect(HOME_ORDER[1]).toMatchObject({ motion: 'pop' }); // MEC-011-R20 characters pops with the gear
+    expect(HOME_ORDER[3]).toMatchObject({ motion: 'slide', from: 'up' });
+    expect(HOME_ORDER[7]).toMatchObject({ motion: 'slide', from: 'down' });
   });
   it('MOT-2-R5 Loadout order follows the list and every card past index 6 enters at the cap', () => {
     const o = loadoutOrder(12);
@@ -26,6 +26,9 @@ describe('MOT-2 entrance orders', () => {
   });
   it('MOT-2-R5 Settings order is back, title, card, rows, caption', () => {
     expect(ids(settingsOrder(4))).toEqual(['back', 'title', 'card', 'row0', 'row1', 'row2', 'row3', 'caption']);
+  });
+  it('MEC-011-R20 Characters order is back, title, coins, hero, ribbon, shelf, action', () => {
+    expect(ids(charactersOrder)).toEqual(['back', 'title', 'coins', 'hero', 'ribbon', 'shelf', 'action']);
   });
   it('MOT-2-R5 entranceEndMs is the last delay plus the longest motion', () => {
     expect(entranceEndMs(8, m)).toBe(staggerDelay(7, m.staggerMs, m.staggerCapMs) + Math.max(m.popInMs, m.slideInMs));

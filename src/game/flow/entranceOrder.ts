@@ -9,8 +9,8 @@ const pop = (id: string): EntranceStep => ({ id, motion: 'pop' });
 const slide = (id: string, from: Dir | 'nav'): EntranceStep => ({ id, motion: 'slide', from });
 const fade = (id: string): EntranceStep => ({ id, motion: 'fade' });
 
-/** D3-R11 / MOT-2-R5 Home: gear and Best pop, logo slides from the top, hero pops, the rest slides up from below. */
-export const HOME_ORDER: EntranceStep[] = [pop('gear'), pop('best'), slide('logo1', 'up'), slide('logo2', 'up'), pop('hero'),
+/** D3-R11 / MOT-2-R5 Home: gear, Characters and Best pop, logo slides from the top, hero pops, the rest slides up from below. */
+export const HOME_ORDER: EntranceStep[] = [pop('gear'), pop('characters'), pop('best'), slide('logo1', 'up'), slide('logo2', 'up'), pop('hero'),
   slide('stepper', 'down'), slide('play', 'down'), slide('hint', 'down'), slide('links', 'down')];
 
 /** MOT-2-R5 Loadout: back, title, slots, start chips, one slide per card in list order, action last. */
@@ -20,6 +20,9 @@ export const loadoutOrder = (cardCount: number): EntranceStep[] => [pop('back'),
 /** MOT-2-R5 Settings (full screen): back, title, card background, rows, caption. */
 export const settingsOrder = (rowCount: number): EntranceStep[] => [pop('back'), fade('title'), fade('card'),
   ...Array.from({ length: rowCount }, (_, i) => slide(`row${i}`, 'nav')), fade('caption')];
+
+/** MEC-011-R20 Characters: back, title, coin chip, hero, ribbon, token shelf, action button. */
+export const charactersOrder: EntranceStep[] = [pop('back'), fade('title'), pop('coins'), pop('hero'), pop('ribbon'), slide('shelf', 'down'), pop('action')];
 
 /** MOT-2-R8 time from the first entrance frame until the last of `count` items has settled. */
 export function entranceEndMs(count: number, cfg: Pick<MotionBalance, 'staggerMs' | 'staggerCapMs' | 'popInMs' | 'slideInMs'>): number {

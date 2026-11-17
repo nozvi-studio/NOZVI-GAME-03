@@ -11,7 +11,7 @@ import { logoLetters, logoSpec, type LogoLine } from './menuLayout';
 import { D3_HERO, D3_HOME, MENU } from './menuMetrics';
 import { heroBody, heroHighlight } from './heroSpec';
 import { headKey } from '../art/capyRig';
-import { activeSkin } from '../art/skins';
+import { SKIN_BODY, activeSkin } from '../art/skins';
 import { hostOf, lipPx, skinTexture, type SkinState } from './skin';
 import { tapBurst } from './touchFx';
 import { titleText } from './widgets';
@@ -93,7 +93,7 @@ export function snakeHero(scene: Phaser.Scene, cx: number, top: number, wMock: n
   const sh = at(H.shadow.x, H.shadow.y);
   g.fillStyle(toInt(d.inkDeep), H.shadow.alpha).fillEllipse(sh.x, sh.y, 2 * H.shadow.rx * k, 2 * H.shadow.ry * k);
   const body = heroBody(H.step);
-  for (const [col, w] of [[d.outline.snake, H.outlineW], [d.snake.body, H.bodyW]] as const) {
+  for (const [col, w] of [[SKIN_BODY[activeSkin()]?.outline ?? d.outline.snake, H.outlineW], [SKIN_BODY[activeSkin()]?.body ?? d.snake.body, H.bodyW]] as const) {
     g.fillStyle(toInt(col)); for (const p of body) { const q = at(p.x, p.y); g.fillCircle(q.x, q.y, w * k / 2); }
   }
   const hl = heroHighlight(H.step).map(p => at(p.x, p.y)); g.lineStyle(H.hiW * k, toInt(d.white), H.hiAlpha); g.beginPath(); hl.forEach((q, i) => i ? g.lineTo(q.x, q.y) : g.moveTo(q.x, q.y)); g.strokePath();

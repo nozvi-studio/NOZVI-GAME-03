@@ -87,3 +87,11 @@ it('D3-R10 bootRects: board positions at 640, group centred on taller canvases, 
   expect(b.bar.y - a.bar.y).toBeCloseTo(70); expect(b.logo.y - a.logo.y).toBeCloseTo(70);
   for (const hm of [640, 779, 800]) { const r = bootRects(hm); expect(r.text.y + r.text.h).toBeLessThanOrEqual(hm); }
 });
+it('MEC-011-R20 Home has a Characters button left of Settings in the top row, 48 px, clear of the Best chip', () => {
+  for (const hm of [640, 700, 780, 800]) {
+    const r = homeRects(hm, { start: true, stepper: true, l1: true, loadout: true, hint: false });
+    expect(r.characters.w).toBeGreaterThanOrEqual(48); expect(r.characters.y).toBe(r.settings.y);
+    expect(r.characters.x + r.characters.w).toBeLessThanOrEqual(r.settings.x);
+    expect(r.characters.x).toBeGreaterThanOrEqual(r.best.x + r.best.w);
+  }
+});
