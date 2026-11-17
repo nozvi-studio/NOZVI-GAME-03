@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(ui): Characters view model, layout and provisional strings (`charactersView`, `charactersLayout`); `SkinsModel` exported from `src/session` (MEC-011-R14..R17, R21).
 - feat(game): the equipped skin drives the snake colours (`boardLook(biome, skin)`) and the head in the run and on Home; Boot applies the save and loads missing skin textures (`ensureSkinTextures`) (MEC-011-R4, R9).
 - feat(art): Ginger, Pup and Tuxedo skins on the shared rig, settable active skin, `SKIN_BODY` and `SKIN_EFFECTS` (MEC-011, ART-003).
 - feat(save): save v4 with coins, owned skins and equipped skin (migration 3 to 4, load repair); session skin API `skinsModel`, `buySkin`, `equipSkin`, `debugAddCoins` (MEC-011).
