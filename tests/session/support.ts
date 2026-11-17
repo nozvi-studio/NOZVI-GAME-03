@@ -4,7 +4,7 @@ import { memoryStore, SAVE_KEY } from '../../src/meta';
 import { loadBalance } from '../support/balance';
 
 export const b = loadBalance();
-export const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax };
+export const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax, skins: b.skins };
 export const baseSave = { bestScore: 0, settings: { sound: true }, bestLevel: 0, fullClear: false,
   unlockedCheckpoints: [] as number[], carriedEnergy: 0, lastLoadout: [null, null] as (string | null)[] };
 

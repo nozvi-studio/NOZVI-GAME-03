@@ -9,7 +9,7 @@ it('P3b3-R4 updateSettings persists immediately and keeps other fields', () => {
   s.updateSettings({ dpad: true, boardTheme: 'dark' });
   expect(s.save().settings).toEqual({ ...defaultSettings(), dpad: true, boardTheme: 'dark' });
   const b = loadBalance();
-  const again = load(store, { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax });
+  const again = load(store, { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax, skins: b.skins });
   expect(again.settings.boardTheme).toBe('dark');
   expect(JSON.parse(store.get(SAVE_KEY)!).data.settings.dpad).toBe(true);
 });

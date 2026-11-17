@@ -1,7 +1,8 @@
 import { expect, it } from 'vitest';
 import { defaultSave, defaultSettings, load, memoryStore, save, SAVE_KEY, SAVE_VERSION } from '../../src/meta';
 import type { KeyValueStore } from '../../src/meta';
-const rules = { skillIds: ['slowmo', 'tailSnip', 'shield', 'mangoRain'], maxLevel: 30, carryMax: 50 };
+import { loadBalance } from '../support/balance';
+const rules = { skillIds: ['slowmo', 'tailSnip', 'shield', 'mangoRain'], maxLevel: 30, carryMax: 50, skins: loadBalance().skins };
 const from = (data: unknown, version = SAVE_VERSION) => load(memoryStore({ [SAVE_KEY]: JSON.stringify({ version, data }) }), rules);
 it('MEC-008-R12 v2 round trip writes the versioned envelope', () => {
   const st = memoryStore(); const data = { ...defaultSave(), bestScore: 42, settings: { ...defaultSettings(), sound: false } };
@@ -56,4 +57,25 @@ it('MEC-008-R12 loading an older save keeps a one-time backup of the raw envelop
 it('MEC-008-R12 a current-version or corrupt save writes no backup', () => {
   const st = memoryStore(); save(st, defaultSave()); load(st, rules); load(memoryStore({ [SAVE_KEY]: '{' }), rules);
   expect(Object.keys(st.dump())).toEqual([SAVE_KEY]);
+});
+it('MEC-011-R11 a v3 save migrates to v4 with 0 coins and the snake owned and equipped', () => {
+  const store = memoryStore();
+  store.set(SAVE_KEY, JSON.stringify({ version: 3, data: { ...defaultSave(), bestScore: 42, coins: undefined } }));
+  const d = load(store, rules);
+  expect(d.bestScore).toBe(42);
+  expect(d.coins).toBe(0); expect(d.ownedSkins).toEqual(['snake']); expect(d.equippedSkin).toBe('snake');
+  expect(store.get(`${SAVE_KEY}.v3.bak`)).not.toBeNull();
+});
+it('MEC-011-R11 v4 round trip keeps coins, owned skins and the equipped skin', () => {
+  const store = memoryStore();
+  save(store, { ...defaultSave(), coins: 120, ownedSkins: ['snake', 'capy'], equippedSkin: 'capy' });
+  expect(JSON.parse(store.get(SAVE_KEY)!).version).toBe(4);
+  const d = load(store, rules);
+  expect([d.coins, d.ownedSkins, d.equippedSkin]).toEqual([120, ['snake', 'capy'], 'capy']);
+});
+it('MEC-011-R12 load repairs skin fields', () => {
+  const store = memoryStore();
+  store.set(SAVE_KEY, JSON.stringify({ version: 4, data: { ...defaultSave(), coins: -3, ownedSkins: ['dragon'], equippedSkin: 'pup' } }));
+  const d = load(store, rules);
+  expect([d.coins, d.ownedSkins, d.equippedSkin]).toEqual([0, ['snake'], 'snake']);
 });

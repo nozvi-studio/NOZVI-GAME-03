@@ -53,7 +53,7 @@ function createTestHud(initialBest = 10, soundEnabled = true) {
   });
 
   const b = loadBalance();
-  const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax };
+  const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax, skins: b.skins };
   const store = memoryStore();
   const data = defaultSave();
   data.bestScore = initialBest;

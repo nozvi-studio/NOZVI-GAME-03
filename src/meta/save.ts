@@ -1,9 +1,10 @@
 import type { KeyValueStore } from './storage';
 import { defaultSettings, validSettings } from './settings';
 import type { Settings } from './settings';
+import { defaultSkinState, sanitizeSkins, type SkinsConfig } from './skins';
 
 export const SAVE_KEY = 'mango-snake.save';
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 /** P0 save callers can still write the original fields during the staged P1 rollout. */
 export interface SaveData { bestScore: number; settings: Settings }
 export interface SaveDataV2 extends SaveData {
@@ -12,13 +13,15 @@ export interface SaveDataV2 extends SaveData {
   unlockedCheckpoints: number[];
   carriedEnergy: number;
   lastLoadout: readonly [string | null, string | null];
+  /** MEC-011-R5 */
+  coins: number; ownedSkins: string[]; equippedSkin: string;
 }
-export interface SaveRules { skillIds: readonly string[]; maxLevel: number; carryMax: number }
+export interface SaveRules { skillIds: readonly string[]; maxLevel: number; carryMax: number; skins: SkinsConfig }
 export type Migration = (data: unknown) => unknown;
 
 // MEC-008-R12 each call owns its nested default values.
 export const defaultSave = (): SaveDataV2 => ({ bestScore: 0, settings: defaultSettings(),
-  bestLevel: 0, fullClear: false, unlockedCheckpoints: [], carriedEnergy: 0, lastLoadout: [null, null] });
+  bestLevel: 0, fullClear: false, unlockedCheckpoints: [], carriedEnergy: 0, lastLoadout: [null, null], ...defaultSkinState() });
 
 function object(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -28,6 +31,7 @@ function object(value: unknown): value is Record<string, unknown> {
 export const MIGRATIONS: Record<number, Migration> = {
   1: d => object(d) ? { ...defaultSave(), bestScore: d.bestScore, settings: d.settings } : null,
   2: d => object(d) ? { ...d, settings: validSettings(d.settings) } : null,
+  3: d => object(d) ? { ...d, ...defaultSkinState() } : null, // MEC-011-R11
 };
 
 function bounded(value: unknown, max: number): number {
@@ -49,6 +53,7 @@ function validated(data: Record<string, unknown>, rules?: SaveRules): SaveDataV2
   const slots = data.lastLoadout;
   if (Array.isArray(slots) && slots.length === 2 && slots.every(id => id === null || typeof id === 'string' && rules.skillIds.includes(id)))
     out.lastLoadout = [slots[0], slots[1]];
+  Object.assign(out, sanitizeSkins(data, rules.skins)); // MEC-011-R12
   return out;
 }
 
@@ -90,7 +95,7 @@ function newerOnDisk(store: KeyValueStore): boolean {
   } catch { return false; }
 }
 
-// MEC-008-R12 writes the complete v3 envelope; storage errors are swallowed.
+// MEC-008-R12 writes the complete current envelope; storage errors are swallowed.
 export function save(store: KeyValueStore, data: SaveDataV2): boolean;
 export function save(store: KeyValueStore, data: SaveData): boolean;
 export function save(store: KeyValueStore, data: SaveData): boolean {
