@@ -98,9 +98,13 @@ const startPilot0 = (page, { chase, ms }) => page.evaluate(({ chase, ms }) => {
     n.snake.slice(0, -1).forEach(add);
     n.hazards.forEach((h) => h.cells.forEach(add)); n.terrains.forEach((t) => t.cells.forEach(add));
     n.fixedTerrain.cells.forEach(add); n.rottenRocks.forEach(add); n.snipWall.forEach(add);
+    const f = n.families; // late-game families: closed/warned shrink ring, spikes, gates, coconut and NPC cells (their lanes are not predicted)
+    f.shrink?.cells.forEach((c) => { if (c.on !== false) add(c); });
+    f.spike.forEach((s) => s.cells.forEach(add)); f.gate.forEach((g) => { g.fence.forEach(add); g.gate.forEach(add); });
+    [...f.coconut, ...f.npc].forEach((m) => add(m.cell)); f.bomb.forEach((b) => (b.cells ?? []).forEach(add));
     const hd = n.snake[0], back = k(hd.x - n.dir.x, hd.y - n.dir.y);
     const free = (x, y) => x >= 0 && y >= 0 && x < W && y < H && !bad.has(k(x, y));
-    const targets = new Set([...(chase && n.mango ? [k(n.mango.x, n.mango.y)] : []), ...n.rainMangoes.map((m) => k(m.x, m.y))]);
+    const targets = new Set([...(chase && n.mango ? [k(n.mango.x, n.mango.y)] : []), ...n.rainMangoes.map((m) => k(m.x, m.y)), ...(chase ? n.orbs.map((m) => k(m.x, m.y)) : [])]);
     const room = (sx, sy) => { // flood-fill size from a cell (capped)
       const seen = new Set([k(sx, sy), k(hd.x, hd.y)]), q = [[sx, sy]]; let c = 0;
       while (q.length && c++ < 300) { const [x, y] = q.shift(); D.forEach(([dx, dy]) => { const a = x + dx, b = y + dy; if (free(a, b) && !seen.has(k(a, b))) { seen.add(k(a, b)); q.push([a, b]); } }); }

@@ -21,6 +21,32 @@ async function waitEvent(page, type, ms = 20000) {
   return false;
 }
 const note = (tag, ...a) => console.log(tag, ...a);
+/** Text currently visible in the banner strip band of the HUD (empty when no card is showing). */
+const bannerSig = (page) => page.evaluate(() => {
+  const out = [], walk = (o) => {
+    if (!o.visible || (o.alpha ?? 1) < 0.3) return;
+    if (o.type === 'Text' && o.text && !/^\d+(\/\d+)?( mangoes)?$/.test(o.text)) { const m = o.getWorldTransformMatrix(); if (m.ty > 150 && m.ty < 270) out.push(o.text.replace(/\n/g, ' / ')); }
+    if (o.list) o.list.forEach(walk);
+  };
+  window.__game.scene.getScene('Hud').children.list.forEach(walk); return out.join(' | ');
+});
+/** Poll the banner strip for `ms`; take a shot whenever its text changes to something new (cards queue one after another). */
+async function watchBanners(o, prefix, ms, seenSigs = new Set()) {
+  const t0 = Date.now(); let n = 0; const got = [];
+  while (Date.now() - t0 < ms) {
+    const s = await bannerSig(o.page);
+    if (s && !seenSigs.has(s)) { seenSigs.add(s); n++; const slug = s.replace(/[^A-Za-z0-9]+/g, '-').slice(0, 40); got.push(await o.shot(`${prefix}-${String(n).padStart(2, '0')}-${slug}_${o.tag}.png`)); }
+    await sleep(60);
+  }
+  return got;
+}
+/** Back-to-back shots until the Results scene appears (or `max` shots): the end of a run in 200 ms steps. */
+async function seq(o, prefix, max) {
+  for (let i = 1; i <= max; i++) {
+    await o.shot(`${prefix}-${String(i).padStart(2, '0')}_${o.tag}.png`);
+    if ((await active(o.page)).includes('Results')) break;
+  }
+}
 const frames = async (o, prefix, n, gap = 0) => { for (let i = 1; i <= n; i++) { await o.shot(`${prefix}-${String(i).padStart(2, "0")}_${o.tag}.png`); if (gap) await sleep(gap); } };
 
 const scenarios = {
@@ -76,7 +102,7 @@ const scenarios = {
   // Skill-ready gloss sweep: veteran save, full energy, both skills affordable; burst over the pulse period.
   async skillready(o, tag) {
     const { page } = o; await play(page); await sleep(500);
-    await frames(o, `U4c-skill-ready-sweep`, 10, 150);
+    await frames(o, `U4c-skill-ready-sweep`, 32, 60);
     await startRun(page); await startPilot(page); await sleep(500); await frames(o, `U4c-skill-ready-sweep-running`, 4, 150); await stopPilot(page);
   },
   // Reduced motion: waiting (static finger), run (no trail/sweep), skill pills, death.
@@ -85,11 +111,9 @@ const scenarios = {
     await startRun(page); await startPilot(page); await sleep(700);
     await session(page, 's.useSkill(0)'); await sleep(500); await o.shot(`MOT-reduced-shield-active_${tag}.png`);
     await skipTo(page, 13); await frames(o, `MOT-reduced-levelup`, 3);
-    await stopPilot(page); // let the snake hit a wall
-    await waitEvent(page, 'shieldBroke', 8000).catch(() => {}); await frames(o, `MOT-reduced-shield-break-invuln`, 3);
-    for (let i = 0; i < 40 && (await status(page)) !== 'over'; i++) await sleep(250);
-    await sleep(900); await frames(o, `MOT-reduced-death`, 3, 300);
-    await waitScene(page, 'Results', 20000).catch(() => {}); await sleep(2500); await o.shot(`MOT-reduced-results_${tag}.png`);
+    await stopPilot(page); // let the shielded snake hit a wall (shield break + invulnerable blink), then die at the next one
+    await seq(o, `MOT-reduced-end`, 30);
+    await waitScene(page, 'Results', 20000).catch(() => {}); await sleep(3500); await o.shot(`MOT-reduced-results_${tag}.png`);
   },
   // Normal motion death card (+ two-line wrap check) and the first-run Results (empty storage).
   async death(o, tag) {
@@ -134,23 +158,36 @@ const scenarios = {
   async skills(o, tag) {
     const { page } = o; await play(page); await sleep(500);
     await o.shot(`U5-skills-ready_${tag}.png`);
-    await startRun(page); await startPilot(page); await spy(page); await sleep(500);
-    await session(page, 's.useSkill(0)'); await sleep(200); await frames(o, `SHIELD-active`, 3);
-    await session(page, 's.useSkill(1)'); await sleep(200); await frames(o, `U5-two-skill-pills`, 3);
-    await stopPilot(page); // no steering: the shielded snake bumps a wall
-    const broke = await waitEvent(page, 'shieldBroke', 12000); note(tag, 'shieldBroke', broke);
-    await frames(o, `INVULN-shield-break-blink`, 8);
-    note(tag, 'invuln', JSON.stringify((await snap(page)).invuln));
+    await startRun(page); await startPilot(page); await spy(page);
+    // Shield (50) + Slow-mo (40) need 90 energy; the carried energy is 50, so the pilot collects orbs (+15 each) first.
+    for (let i = 0; i < 400 && (await snap(page)).energy < 90 && (await status(page)) === 'playing'; i++) await sleep(250);
+    const e = (await snap(page)).energy; note(tag, 'energy before casts', e, await status(page));
+    await session(page, 's.useSkill(0)'); await sleep(150); await frames(o, `SHIELD-active`, 3);
+    await session(page, 's.useSkill(1)'); await sleep(150); await frames(o, `U5-two-skill-pills`, 3);
+    note(tag, 'skills', JSON.stringify((await snap(page)).skills.map((k) => [k.id, k.active])));
+    await stopPilot(page); // no steering: the shielded snake bumps a wall -> shield break -> invulnerable blink
+    await seq(o, `INVULN-shield-break-blink`, 30);
+    note(tag, 'shieldBroke seen', await seen(page, 'shieldBroke'));
+  },
+  // Real (non-debug) run from the L8 checkpoint to L10: mint checkpoint card, then a death with the checkpoint + energy rows on Results.
+  async checkpoint(o, tag) {
+    const { page } = o; await play(page); note(tag, 'start level', (await snap(page)).level, 'debug handle only, run is not marked debug');
+    await startRun(page); await startPilot(page); await spy(page); const sigs = new Set(), t0 = Date.now();
+    while ((await snap(page)).level < 10 && Date.now() - t0 < 240000 && (await status(page)) !== 'over') { await watchBanners(o, 'U5-checkpoint-run-L' + (await snap(page)).level, 2000, sigs); }
+    note(tag, 'level', (await snap(page)).level, await status(page));
+    note(tag, await watchBanners(o, 'U5-checkpoint-L10', 9000, sigs));
+    await stopPilot(page); await seq(o, `U5-checkpoint-end`, 30);
+    await waitScene(page, 'Results', 20000).catch(() => {}); await sleep(3500); await o.shot(`U5-results-checkpoint-energy_${tag}.png`);
   },
   // Incoming warning card + checkpoint card: pilot through L10..L12 and L25..L26 and shoot when the event fires.
   async cards(o, tag) {
     const { page } = o; await play(page); await startRun(page); await startPilot(page); await spy(page); await sleep(300);
-    const grab = async (type, name, tries = 1) => {
-      if (await waitEvent(page, type, 25000)) { await frames(o, name, 3); return true; } return false;
-    };
-    note(tag, 'skip to 10', await skipTo(page, 10)); await frames(o, `U5-cards-skipTo10`, 4);
-    note(tag, 'skip to 11', await skipTo(page, 11)); await frames(o, `U5-cards-skipTo11`, 4);
-    const inc = await grab('hazardIncoming', 'U5-incoming-card'); note(tag, 'hazardIncoming seen', inc);
+    const sigs = new Set();
+    note(tag, 'skip to 10', await skipTo(page, 10)); note(tag, await watchBanners(o, 'U5-cards-L10', 7000, sigs));
+    note(tag, 'skip to 11', await skipTo(page, 11)); note(tag, await watchBanners(o, 'U5-cards-L11', 9000, sigs));
+    note(tag, 'skip to 25', await skipTo(page, 25)); note(tag, await watchBanners(o, 'U5-cards-L25', 7000, sigs));
+    note(tag, 'skip to 26', await skipTo(page, 26)); note(tag, await watchBanners(o, 'U5-cards-L26', 9000, sigs));
+    note(tag, 'incoming watch', await watchBanners(o, 'U5-cards-incoming', 40000, sigs));
     const evs = await page.evaluate(() => [...new Set(window.__ev.map((e) => e.type))]); note(tag, 'events seen', evs.join(','));
   },
 };
@@ -169,6 +206,7 @@ const cfg = {
   boards28: { query: '?debug=1&level=28', save: veteran(), run: 'boards', level: 'L28' },
   skills: { query: '?debug=1&level=12', save: veteran() },
   cards: { query: '?debug=1&level=9', save: veteran() },
+  checkpoint: { query: '?debug=1', save: veteran({ bestLevel: 9, unlockedCheckpoints: [8], carriedEnergy: 50 }) },
 };
 
 const browser = await chromium.launch();
