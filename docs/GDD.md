@@ -282,6 +282,7 @@ Big phases; each phase gets **one spec set + one plan** (Superpowers `brainstorm
 - The current `prototype/mango-snake-hard.html` remains as a reference until P0 reaches parity, then it is frozen.
 
 ## Parking lot (ideas not in scope)
+- **Marble machine wheel (2026-11-19):** the D2/D3 mockups show a WHEEL slot with a multiplier; owner chose GDD 8.2 slots without a wheel for P4b. Revisit after P4b playtest.
 - **Owner wants (2026-11-07), after core gameplay + UI are done:** leaderboard and play streak (daily streak) as the reason to come back (§8). Not scheduled; needs brainstorming + a GDD change when picked up.
 - Wrap zones (MEC-005), teleport portals, one-way arrow tiles, rival AI snake competing for mangoes, fake mango with a learnable tell, banana peel, lawnmower sweep.
 - Endless mode after L30, daily seeded run, online leaderboard, seasonal skin sets, voiced death lines, Vietnamese localization.
