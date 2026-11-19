@@ -1,5 +1,5 @@
 import { it } from 'vitest';
-import { loadGameBalance } from '../../tests/support/balance';
+import { loadBalance, loadGameBalance } from '../../tests/support/balance';
 import { boardSizeVerdict, median, reachableFreeCells, type BoardSizeResult } from './boardSize';
 import { BOT, PERCENT } from './botConfig';
 import { formatReport } from './report';
@@ -16,7 +16,8 @@ const clearRate = (rs: readonly LevelResult[], from: number, to: number) => {
 };
 
 it.skipIf(import.meta.env.MODE !== 'bot')('MEC-004-R19 bot report L1-30', () => {
-  const b = loadGameBalance(), results: LevelResult[] = [], samples = new Map<number, number[]>();
+  // VITE_BOT_NO_TERRAIN=1: harness-only A/B switch, skips withTerrain so MEC-019 fixed terrain is absent.
+  const b = import.meta.env.VITE_BOT_NO_TERRAIN ? loadBalance() : loadGameBalance(), results: LevelResult[] = [], samples = new Map<number, number[]>();
   const boardCells = b.board.cols * b.board.rows;
   for (let l = BOT.levels.from; l <= BOT.levels.to; l++) for (let seed = 1; seed <= BOT.seeds; seed++) {
     const keep = (BOARD_LEVELS as readonly number[]).includes(l);

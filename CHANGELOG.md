@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- chore(bot): `VITE_BOT_NO_TERRAIN=1` harness-only switch for the bot report; PLAYTEST 20-seed terrain A/B (MEC-019-R14 pass, terrain not the cause of late-game clears).
 - fix(terrain): MEC-019 review fixes: warn cells wait under mangoes, Variant type, layoutFor/parseTerrain errors, crumble scale in balance ui
 - docs: P4a skins (MEC-011) implementation plan `docs/superpowers/plans/2026-11-16-p4a-skins.md`; docs map row.
 - docs: P4a skins design `docs/superpowers/specs/2026-11-16-p4a-skins-design.md` (MEC-011); GDD 8.3 first skin batch and buy rule, GDD 11 P4 split into P4a / P4b; DECISIONS; docs map row.

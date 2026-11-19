@@ -5,6 +5,15 @@
 ## How to capture
 Headless screenshots with `tools/qa/shot.mjs` (no dependency; uses the local Chrome, or `CHROME_PATH`). Start `npm run dev`, then run: `node tools/qa/shot.mjs size:360,640 media:light "go:http://localhost:5173/" wait:3500 shot:tmp/qa/home-360.png`. The three standard sizes are 360x640, 390x844 and 412x915. Use `media:dark` for the OS dark-mode check. Keys use DOM names (`ArrowUp`, not `Up`). Steps: `size:W,H[,DPR]`, `media:`, `go:URL`, `wait:MS`, `tap:X,Y`, `swipe:X1,Y1,X2,Y2`, `key:Name`, `shot:FILE`, `eval:JS`; any failed step exits 1.
 
+## 2026-11-18 - MEC-019 terrain A/B bot report (20 seeds, cloud)
+- Base `version/v0.3` at 7961cd9. Cloud host (4 cores, 15 GB). Two 20-seed runs of `npm run bot:report`, split by level range (`VITE_BOT_FROM` / `VITE_BOT_TO`, 4 parallel runs each, about 45 min): with terrain (default) and without terrain (`VITE_BOT_NO_TERRAIN=1`, new harness-only switch in `tools/bot/report.test.ts`: the bot uses `loadBalance()` instead of `loadGameBalance()`, so `withTerrain` is skipped; `src/` and `config/balance.json` unchanged).
+- **MEC-019-R14: pass.** Terrain deaths 0 of 146 deaths in all 12 templates (the bot treats terrain as walls; the owner playtest stays the real check).
+- **Terrain is not the cause of the low late-game clears.** Clears L21-30: 84 / 200 with terrain, 90 / 200 without. Per level (with / without): L20 8/8, L21 11/10, L22 13/10, L23 10/11, L24 10/13, L25 5/8, L26 9/8, L27 11/6, L28 4/11, L29 7/6, L30 4/7. No level has 0 clears in either run. The 20-seed spread per level is about +-3 clears, so only L28 (4 vs 11) stands out; recheck L28 if the owner playtest also finds it hard.
+- Both runs are below the P2c record (L21-25 50%, L26-30 36%): with terrain L21-25 49%, L26-30 35%; without 52% / 38%. So the 2026-11-16 5-seed drop was noise.
+- Death causes (with terrain): biome 4 coconut 22 of 27 (81%; 100% without terrain), biome 5 chicken 33%, coconut 22%, bomb 20%; biome 6 coconut 28%, fence 25%, cat 20%. WARN lines (both runs): biome 3 fence 100%, biome 4 coconut > 40%; biome 2 fence 50% (terrain run only). The coconut line is the open P2 tuning item (STATUS owner batch); it does not come from terrain.
+- Board size: not measured (each split run covers fewer than both L25 and L30).
+- Full fuzz matrix (`npm run test:fuzz`): NOT finished. Only `rock` per-family fuzz completed (pass, 1437 s); the run was lost in a container restart. Still open.
+
 ## 2026-11-16 - MEC-019 terrain bot report (5 seeds; 20-seed run pending)
 - Branch `feat/fixed-terrain`. Fuzz mode (`vitest run --mode fuzz tests/core/fixedTerrainFuzz.test.ts`): 14 tests pass in 6m28s (13 levels x 3 seeds: no mango, orb, rock, fence or maze cell ever shares a cell with a solid terrain cell).
 - Picture board: `node tools/terrain/board.mjs` writes `docs/design/terrain/board.html`; headless capture to `tmp/qa/terrain/board.png` checked, grids render (12 templates x 4 variants in the file; the first 9 seen in the 1200x2400 capture).
