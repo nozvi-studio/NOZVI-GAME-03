@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- chore(qa): `tools/qa/eyepack.mjs` Playwright eye-check driver; `shot.mjs` writes browser console and page errors next to the shots and gains until/burst/levelup steps.
 - docs: owner rulings 2026-11-19 in DECISIONS (Home PLAY-only direction, P4b slots per GDD 8.2, P2c OQ-C1..C5 confirmed, no Shield invulnerability on normal hazards); marble wheel to GDD Parking lot.
 - chore(bot): `VITE_BOT_NO_TERRAIN=1` harness-only switch for the bot report; PLAYTEST 20-seed terrain A/B (MEC-019-R14 pass, terrain not the cause of late-game clears).
 - fix(terrain): MEC-019 review fixes: warn cells wait under mangoes, Variant type, layoutFor/parseTerrain errors, crumble scale in balance ui
