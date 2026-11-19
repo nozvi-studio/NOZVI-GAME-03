@@ -6,7 +6,7 @@
 // requests of every page are appended to <outDir>/console.log (tagged by scenario and size).
 import {
   chromium, openPage, seedScript, veteran, settings, sleep, waitScene, play, tapAt, burst, session, snap, status, active,
-  startPilot, stopPilot, startRun, tapUntilScene, HOME_GEAR, HOME_PICK, HOME_PLAY,
+  startPilot, stopPilot, hook, touchApi, startRun, tapUntilScene, HOME_GEAR, HOME_PICK, HOME_PLAY,
 } from './eyepack-lib.mjs';
 
 const out = process.argv[2] ?? 'tmp/qa/eyecheck';
@@ -14,11 +14,7 @@ const only = process.argv.slice(3);
 const SIZES = (process.env.EYEPACK_SIZES ?? '540x960,360x640').split(',').map((s) => { const [a, d] = s.split('@'); return [...a.split('x').map(Number), Number(d ?? 1)]; });
 
 const skipTo = (page, n) => session(page, `s.debugSkipTo(${n})`);
-/** Logs every sim event type seen by session.frame() into window.__ev (name + timestamp) so a shot can wait for it. */
-const spy = (page) => page.evaluate(() => {
-  const s = window.__game.registry.get('session'), orig = s.frame.bind(s); window.__ev = [];
-  s.frame = (ms) => { const ev = orig(ms); for (const e of ev) window.__ev.push({ ...e, at: performance.now() }); return ev; };
-});
+const spy = hook; // window.__ev records every sim event type seen by session.frame()
 const seen = (page, type) => page.evaluate((t) => window.__ev.some((e) => e.type === t), type);
 async function waitEvent(page, type, ms = 20000) {
   for (let t = 0; t < ms; t += 100) { if (await seen(page, type)) return true; await sleep(100); }
@@ -46,14 +42,30 @@ const scenarios = {
     await o.shot(`U4c-wait-finger-hint-1_${tag}.png`); await sleep(500); await o.shot(`U4c-wait-finger-hint-2_${tag}.png`);
     const [w, h] = [page.viewportSize().width, page.viewportSize().height];
     await startPilot(page, { chase: false });
-    await page.mouse.move(w * 0.5, h * 0.62); await page.mouse.down();
-    await page.mouse.move(w * 0.5, h * 0.55); await page.mouse.move(w * 0.4, h * 0.5);
-    await o.shot(`U4c-swipe-trail-mid-drag-1_${tag}.png`);
-    await page.mouse.move(w * 0.3, h * 0.47); await o.shot(`U4c-swipe-trail-mid-drag-2_${tag}.png`);
-    await page.mouse.move(w * 0.25, h * 0.45); await page.mouse.up();
-    await frames(o, `U4c-swipe-after-chevron`, 4);
+    const tc = await touchApi(page);
+    // The trail fades within a few frames, so keep the finger moving (a slow curve, then a jitter) while the shots are taken.
+    await tc.down(w * 0.5, h * 0.62);
+    let stop = false;
+    const drag = (async () => {
+      for (let i = 0; !stop; i++) {
+        const t = Math.min(i / 30, 1), x = w * (0.5 - 0.25 * t) + (i % 2), y = h * (0.62 - 0.14 * Math.sin(t * Math.PI / 2)) + (i % 2);
+        await tc.move(x, y); await sleep(16);
+      }
+    })();
+    await sleep(350); await o.shot(`U4c-swipe-trail-mid-drag-1_${tag}.png`);
+    await sleep(150); await o.shot(`U4c-swipe-trail-mid-drag-2_${tag}.png`);
+    stop = true; await drag; await tc.up();
+    await frames(o, `U4c-swipe-after-chevron`, 4); note(tag, 'frames', JSON.stringify(await page.evaluate(() => window.__fr))); note(tag, 'pilot turns', JSON.stringify(await page.evaluate(() => window.__turns)), await status(page));
     await spy(page); const ok = await skipTo(page, 2); note(tag, 'level-up skipTo 2', ok);
     await frames(o, `U4c-levelup-flash`, 6);
+    // Stretched variant: the real trail (120 ms) and chevron (160 ms) are gone before a SwiftShader screenshot (about 200 ms), so for
+    // these shots ONLY the lifetimes are stretched to 1500 ms (runtime tweak of the loaded balance object; not a repo change).
+    await page.evaluate(() => { const d = window.__game.registry.get('balance').motion.d3; d.trailMs = 1500; d.chevronMs = 1500; });
+    const tc2 = await touchApi(page); stop = false;
+    await tc2.down(w * 0.5, h * 0.62);
+    const drag2 = (async () => { for (let i = 0; !stop; i++) { const t = Math.min(i / 20, 1); await tc2.move(w * (0.5 + 0.2 * t) + (i % 2), h * (0.62 - 0.1 * t)); await sleep(16); } })();
+    await sleep(500); await o.shot(`U4c-swipe-trail-STRETCHED-1_${tag}.png`); await sleep(200); await o.shot(`U4c-swipe-trail-STRETCHED-2_${tag}.png`);
+    stop = true; await drag2; await tc2.up(); await frames(o, `U4c-swipe-chevron-STRETCHED`, 3);
     await stopPilot(page);
   },
   // D-pad mode (finger hidden, round D-pad visible) on the waiting screen and mid-run.
@@ -164,11 +176,11 @@ let failures = 0;
 for (const name of Object.keys(cfg)) {
   if (only.length && !only.includes(name)) continue;
   for (const size of SIZES) {
-    const tag = `${size[0]}`;
+    const tag = `${size[0]}`; const sz = `${size[0]}x${size[1]}`;
     let o;
     try {
       const c = cfg[name];
-      o = await openPage(browser, out, size, c.query, `${name}@${size.join('x')}`, seedScript(c.save));
+      o = await openPage(browser, out, size, c.query, `${name}@${sz}`, seedScript(c.save));
       o.level = c.level; o.tag = tag;
       await scenarios[c.run ?? name](o, tag);
     } catch (e) { failures++; console.error(`eyepack: ${name} ${size.join('x')} FAILED: ${e.message}`); try { await o?.shot(`FAILED-${name}_${tag}.png`); } catch { /* ignore */ } }

@@ -1,6 +1,6 @@
 // tools/qa/eyepack-lib.mjs — Playwright helpers for the owner eye-check screenshot pack (see eyepack.mjs).
 import { createRequire } from 'node:module';
-import { appendFileSync, mkdirSync } from 'node:fs';
+import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 const require = createRequire(import.meta.url);
 export const { chromium } = require('playwright');
@@ -20,7 +20,12 @@ export async function openPage(browser, outDir, size, query, tag, init) {
   page.on('pageerror', (e) => log('pageerror', e.stack ?? String(e)));
   page.on('requestfailed', (r) => log('requestfailed', `${r.url()} ${r.failure()?.errorText}`));
   await page.goto(BASE + query);
-  return { ctx, page, shot: async (name) => { await page.screenshot({ path: join(outDir, name) }); return name; } };
+  // Direct DevTools capture: much quicker than page.screenshot under SwiftShader, which matters for transient effects (trail, chevron, flashes).
+  const cdp = await ctx.newCDPSession(page);
+  return { ctx, page, shot: async (name) => {
+    const r = await cdp.send('Page.captureScreenshot', { format: 'png' });
+    writeFileSync(join(outDir, name), Buffer.from(r.data, 'base64')); return name;
+  } };
 }
 
 export const active = (page) => page.evaluate(() => window.__game.scene.getScenes(true).map((s) => s.scene.key));
@@ -47,11 +52,14 @@ export const swipe = async (page, f1, f2, steps = 2) => {
 export const HOME_PLAY = [0.5, 0.703], HOME_GEAR = [0.894, 0.059], HOME_PICK = [0.73, 0.934], HOME_L1 = [0.25, 0.934];
 export const DIR = { up: [[0.5, 0.55], [0.5, 0.42]], down: [[0.5, 0.45], [0.5, 0.58]], left: [[0.55, 0.5], [0.42, 0.5]], right: [[0.45, 0.5], [0.58, 0.5]] };
 
-/** Tap until the scene `key` is active (taps during an entrance animation are ignored, and SwiftShader is slow). */
-export async function tapUntilScene(page, f, key, tries = 8) {
+/** Wait until the active scene list differs from `before` (scene slides are slow under SwiftShader). */
+const changed = async (page, before, ms = 9000) => { for (let t = 0; t < ms; t += 200) { if ((await active(page)).join() !== before) return true; await sleep(200); } return false; };
+/** Tap once, wait for the scene to change; repeat only if nothing happened (taps during an entrance animation are ignored). */
+export async function tapUntilScene(page, f, key, tries = 5) {
   for (let i = 0; i < tries; i++) {
-    if ((await active(page)).includes(key)) return;
-    await tapAt(page, ...f); await sleep(1500);
+    const before = (await active(page)).join();
+    if (before.includes(key)) return;
+    await tapAt(page, ...f); await changed(page, before);
   }
   if (!(await active(page)).includes(key)) throw new Error(`tapUntilScene: ${key} never became active`);
 }
@@ -60,11 +68,11 @@ export const LOADOUT_GO = [0.5, 0.92];
 export async function play(page, onLoadout) {
   await waitScene(page, 'Home'); await sleep(2500);
   for (let i = 0; i < 8; i++) {
-    const sc = await active(page);
+    const sc = await active(page), before = sc.join();
     if (sc.includes('Game')) break;
     if (sc.includes('Loadout')) { if (onLoadout) { await onLoadout(page); onLoadout = null; } await tapAt(page, ...LOADOUT_GO); }
     else await tapAt(page, ...HOME_PLAY);
-    await sleep(1500);
+    await changed(page, before);
   }
   await page.waitForFunction(() => window.__game.scene.getScene('Game')?.flow?.status === 'waiting', null, { timeout: 15000 });
 }
@@ -79,11 +87,12 @@ export async function burst(o, prefix, n, gap = 0) {
  * survives the slow headless frame rate while screenshots are taken. Steers through session.turn(); stop with stopPilot().
  * Not a real bot: it ignores moving hazards (coconuts, NPCs, bombs).
  */
-export const startPilot = (page, { chase = true, ms = 40 } = {}) => page.evaluate(({ chase, ms }) => {
-  clearInterval(window.__pilot);
+export const startPilot = async (page, { chase = true, ms = 40 } = {}) => { await hook(page); return startPilot0(page, { chase, ms }); };
+const startPilot0 = (page, { chase, ms }) => page.evaluate(({ chase, ms }) => {
   const W = 17, H = 17, D = [[0, -1], [1, 0], [0, 1], [-1, 0]], k = (x, y) => x + ',' + y;
-  window.__pilot = setInterval(() => {
-    const s = window.__game.registry.get('session'); let n; try { n = s.snapshot(); } catch { return; }
+  const s = window.__game.registry.get('session');
+  window.__decide = () => {
+    let n; try { n = s.snapshot(); } catch { return; }
     if (n.status !== 'playing' || !n.snake.length) return;
     const bad = new Set(), add = (c) => { if (c && Number.isInteger(c.x)) bad.add(k(c.x, c.y)); };
     n.snake.slice(0, -1).forEach(add);
@@ -112,9 +121,34 @@ export const startPilot = (page, { chase = true, ms = 40 } = {}) => page.evaluat
       const r = room(x, y), score = (r < n.snake.length + 4 ? -1000 : 0) - dist(x, y) * 10 + Math.min(r, 60) / 10 + (dx === n.dir.x && dy === n.dir.y ? 1 : 0);
       if (!best || score > best.score) best = { dx, dy, score };
     }
-    if (best && !(best.dx === n.dir.x && best.dy === n.dir.y)) s.turn(best.dx, best.dy);
-  }, ms);
+    if (best && !(best.dx === n.dir.x && best.dy === n.dir.y)) { const ok = s.turn(best.dx, best.dy); window.__turns = (window.__turns ?? []).concat([[hd.x, hd.y, best.dx, best.dy, ok]]).slice(-12); }
+  };
+  window.__pilotOn = true;
 }, { chase, ms });
-export const stopPilot = (page) => page.evaluate(() => clearInterval(window.__pilot));
+export const stopPilot = (page) => page.evaluate(() => { window.__pilotOn = false; });
+/**
+ * Idempotent session.frame() hook: records every sim event type in window.__ev, and (while the pilot is on) runs the pilot before each
+ * <= 30 ms slice of the frame, because under SwiftShader one frame can span several sim ticks.
+ */
+export const hook = (page) => page.evaluate(() => {
+  if (window.__hooked) return; window.__hooked = true; window.__ev = [];
+  const s = window.__game.registry.get('session'), orig = s.frame.bind(s);
+  s.frame = (ms) => {
+    window.__fr = (window.__fr ?? []).concat([[Math.round(ms), window.__pilotOn ? 1 : 0]]).slice(-30);
+    const evs = []; let rest = ms;
+    while (rest > 0) { const c = Math.min(rest, 30); if (window.__pilotOn) { try { window.__decide?.(); } catch (e) { console.error("pilot: " + e.message); window.__pilotOn = false; } } evs.push(...orig(c)); rest -= c; }
+    for (const e of evs) window.__ev.push({ ...e, at: performance.now() });
+    return evs;
+  };
+});
 /** Start the run (the first input leaves the waiting state) with a key press: much cheaper than a synthetic swipe under SwiftShader. */
 export const startRun = async (page, key = 'ArrowUp') => { await page.keyboard.press(key); };
+
+/** Real touch events through CDP (the steer trail may only answer to touch pointers, not to page.mouse). */
+export async function touchApi(page) {
+  const c = await page.context().newCDPSession(page);
+  // Mouse-type pointer events through CDP (no actionability waits). CDP touch events did not reach Phaser in this setup.
+  let at = [0, 0];
+  const m = (type, x, y, extra = {}) => { at = [x, y]; return c.send('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1, ...extra }); };
+  return { down: (x, y) => m('mousePressed', x, y, { buttons: 1 }), move: (x, y) => m('mouseMoved', x, y, { buttons: 1 }), up: () => m('mouseReleased', at[0], at[1]) };
+}
