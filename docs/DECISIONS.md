@@ -682,3 +682,10 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 - (3) P2c OQ-C1..C5 provisional defaults confirmed as written in `docs/superpowers/plans/2026-11-04-p2c-shrink-challenge-tuning.md` (shrink cooldown 20000 / weight 2 from L27; "Challenge: <name>!" + star; challenge changes only interval x0.8 and cap +2; P2 exit playtest 2 testers, >= 30 runs, >= 10 reaching biome 4; OQ-C5: the lead tunes config-only with a bot report and re-tests, owner decides only if two tuning rounds fail).
 - (4) Invulnerability after a Shield hit on a normal hazard: no (unchanged; only after a Shield hit on terrain, TER-R7).
 - Process: Superpowers is not installed in the cloud session; owner approved running design -> plan -> TDD -> verify manually (AGENTS §4).
+
+## 2026-11-19 - Invulnerable blink as one composite (owner bug "odd round dots")
+- Context: owner saw round dots under the snake body (reported as "Invisibility"; there is no such skill, it is the MEC-019-R7 invulnerable blink after a Shield break). Root cause: `setAlpha(0.45)` on the snake Graphics and the capy face image fades every shape on its own; the overlapping strokes, joint discs and the head disc under the face add up and show as dots and a ring.
+- Choice: below full alpha, `applySnakeFade` draws the opaque snake layer and the capy face into a board-sized RenderTexture (`snake-fade`, placed right after the face in the board container, so the board mask and layer order hold) and fades that texture; at full alpha nothing extra is drawn. `CapyHead.setAlpha` removed. Spec R7 numbers unchanged.
+- Alternatives: blink by visibility on/off (no fade, and reduced motion would hide the snake for the whole timer); fake transparency by mixing snake colours toward the ground (the checker would not show through; the face image cannot be lightened by tint).
+- Evidence: headless crops before (`tmp/qa/eyecheck-2026-11-19/INVULN-closeup-*`) and after (`tmp/qa/invuln-fix/crops.png`).
+
