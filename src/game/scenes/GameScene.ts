@@ -31,6 +31,7 @@ import { drawShrink } from '../render/shrink';
 import { enter, motionFor } from '../motion';
 import { HitBeats, telegraphEdges } from '../render/hitBeat';
 import { telegraphCtx, type TelegraphCtx } from '../render/telegraph';
+import { applySnakeFade } from '../render/snakeFade';
 
 export class GameScene extends Phaser.Scene {
   balance!: Balance;
@@ -54,6 +55,7 @@ export class GameScene extends Phaser.Scene {
   private effects!: Effects;
   private steer!: SteerFx; private readonly headPt = { x: 0, y: 0 };
   private capy!: CapyHead;
+  private snakeFade!: Phaser.GameObjects.RenderTexture; // MEC-019-R7 blink composite
   private bg?: Phaser.GameObjects.Image;
 
   constructor() { super('Game'); }
@@ -90,6 +92,8 @@ export class GameScene extends Phaser.Scene {
     const onSteer = (d: { dx: Step; dy: Step }): void => this.steer.chevron(d.dx, d.dy, this.time.now); // D3-R25
     this.events.on('steer', onSteer);
     this.capy = new CapyHead(this, this.board, this.layers.snake, this.balance.ui.capy, cellPx(this.balance), this.reduced, this.time.now);
+    this.snakeFade = this.add.renderTexture(0, 0, BOARD.size, BOARD.size).setOrigin(0).setName('snake-fade').setVisible(false);
+    this.board.addAt(this.snakeFade, this.board.getIndex(this.capy.image) + 1);
     this.flow = createFlow();
     // P1 scene flow: the session run already exists (Home/Loadout/Results); Game opens on the P0 countdown.
     this.apply(flowStart(this.flow, this.balance));
@@ -262,9 +266,9 @@ export class GameScene extends Phaser.Scene {
     drawSkillObjects(this.layers.skills, snapshot, cell, p, this.look, this.balance, time);
     drawSnake(this.layers.snake, snapshot, cell, this.look, Math.max(this.effects.gulp, this.effects.pop), this.balance.ui.capy.headCellScale, false,
       this.effects.turnBulge * (this.balance.juice.events.turnBodyBulge - 1));
-    const blink = invulnAlpha(snapshot.invuln, time, this.reduced, this.balance.ui); // MEC-019-R7
-    this.layers.snake.setAlpha(blink); this.capy.setAlpha(blink);
     this.capy.update(snapshot, time, cell, this.effects.turnDeg);
+    const blink = invulnAlpha(snapshot.invuln, time, this.reduced, this.balance.ui); // MEC-019-R7
+    applySnakeFade(blink, [this.layers.snake, this.capy.image], this.snakeFade);
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);
     drawIceArrow(this.layers.overlay, snapshot, cell, this.look);
     this.effects.draw(this.layers.effects, p);

@@ -21,8 +21,6 @@ export class CapyHead {
     this.state = createCapyAnim(now, cfg, rnd, activeSkin());
   }
 
-  setAlpha(a: number): void { this.image.setAlpha(a); } // MEC-019-R7 invulnerable blink; nothing else sets this image's alpha
-
   eat(now: number): void { this.state = capyEat(this.state, now); }
   die(now: number): void { this.state = capyDie(this.state, now); }
   reset(now: number): void { this.state = createCapyAnim(now, this.cfg, rnd, activeSkin()); }
