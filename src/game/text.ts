@@ -146,6 +146,15 @@ const KEYED: Readonly<Record<string, string>> = {
   'banner.biomeTagline.1': 'Rocks drop from the trees.', 'banner.biomeTagline.2': 'Fences and mud. Mind the rows.',
   'banner.biomeTagline.3': 'Ice is slippery. Plan your turns.', 'banner.biomeTagline.4': 'Coconuts roll and spikes pop.',
   'banner.biomeTagline.5': 'Cats, chickens and bombs!', 'banner.biomeTagline.6': 'Everything at once. Good luck!',
+  'characters.title': 'CHARACTERS', 'characters.equipped': 'Equipped', 'characters.owned': 'Owned', 'characters.equip': 'EQUIP', // MEC-011 provisional
+  'characters.buy': 'BUY {n}', 'characters.need': 'Need {n} more', 'characters.soon': 'Soon', // MEC-011 provisional
+  'characters.shelf': 'TAP TO PREVIEW · {n}/{total} OWNED', 'characters.debugCoins': '+{n}', 'home.characters': 'Characters', // MEC-011 provisional
+  'skin.snake.name': 'Mango Snake', 'skin.snake.perk': 'The classic. Eyes follow the food.', // MEC-011 provisional
+  'skin.ginger.name': 'Ginger Cat', 'skin.ginger.perk': 'Orange cat energy. One brain cell.', // MEC-011 provisional
+  'skin.pup.name': 'Pup', 'skin.pup.perk': 'Good boy. Will chase every mango.', // MEC-011 provisional
+  'skin.tuxedo.name': 'Tuxedo Cat', 'skin.tuxedo.perk': 'Dressed for dinner. Dinner is mango.', // MEC-011 provisional
+  'skin.capy.name': 'Capybara', 'skin.capy.perk': 'Sparkle bite · Leaf trail', // MEC-011 provisional
+  'rarity.default': 'Default', 'rarity.common': 'Common', 'rarity.rare': '★ Rare', // MEC-011 provisional
   'skill.pill.timed': '{skill} · {s} s left', 'skill.pill.wall': '{skill} · rock wall for {s} s',
 };
 

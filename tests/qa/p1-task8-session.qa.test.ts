@@ -25,7 +25,7 @@ import { createSim, type SimEvent, type Loadout, type SkillId, type CauseKey } f
 import { loadBalance } from '../support/balance';
 
 const b = loadBalance();
-const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax };
+const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax, skins: b.skins };
 
 /**
  * Standard unsteered snake wall death ms:

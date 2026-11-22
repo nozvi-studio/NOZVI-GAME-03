@@ -3,7 +3,7 @@ Status: Draft (boards await the owner's eye-check, 2026-11-10). Spec: `docs/supe
 
 ## 1. What this is
 - The D3 boards in `docs/design/mockups/d3/` are the visual source of truth for every screen: `boards.html` (all boards, static HTML/SVG), `d3.css` (shared styles, CSS variables named after the tokens), `png/` (one capture per board).
-- `directions.html` is the direction study (section A was chosen by the owner). `skins.html` is the P4a Characters screen direction study (A stage + shelf, B card grid, C one skin per page; PNGs `png/CharactersA/B/C.png`; owner choice pending; replaces the flat `SkinsD3` / `SkinBuyD2` boards). `marble.html` holds the P4 marble machine and wheel mockups; they are linked from `boards.html` and are not built in U1..U7.
+- `directions.html` is the direction study (section A was chosen by the owner). `skins.html` is the P4a Characters screen direction study (section A stage + shelf was chosen by the owner on 2026-11-16 and built in P4a; PNG `png/CharactersA.png`; replaces the flat `SkinsD3` / `SkinBuyD2` boards). `marble.html` holds the P4 marble machine and wheel mockups; they are linked from `boards.html` and are not built in U1..U7.
 - The D2 files (`mockups/html`, `mockups/src`, `mockups/png`) stay as history. Do not copy colours, shapes or layout from them.
 - Boards are drawn at 360x640 CSS px (the 9:16 canvas); Home, Game and Results also at 390x844. Numbers on the boards are mock px.
 
@@ -34,6 +34,7 @@ The token table lives in the spec §4 (D3-R1, R4) and in code as `TOKENS.d3`; `t
 | `Results`, `ResultsFirstRun` | `Results-360`, `Results-390`, `ResultsFirstRun-360` | `scenes/ResultsScene.ts`, `flow/resultsView.ts` | U5 (built) |
 | `Loadout` | `Loadout-360` | `scenes/LoadoutScene.ts`, `flow/loadoutLayout.ts` | U6 (built) |
 | `Settings` | `Settings-360` | `scenes/SettingsScene.ts`, `flow/settingsLayout.ts`, `ui/icons.ts` | U6 (built) |
+| `Characters` | `CharactersA` (`skins.html` section A) | `scenes/CharactersScene.ts`, `flow/charactersView.ts`, `flow/charactersLayout.ts` | P4a (built) |
 | `States` | `States` | `ui/skin/*` (incl. `ringSpec.ts`), `ui/widgets.ts`, `ui/touchFx.ts` | U1, ring U6 (built) |
 | `MarbleMachine`, `MarbleWheel` | `MarbleMachineD3`, `MarbleWheelD3` | none (P4, mockup only) | — |
 

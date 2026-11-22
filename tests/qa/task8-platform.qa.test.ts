@@ -72,7 +72,7 @@ describe('QA Task 8: Platform LocalStore Adapter (Black-Box)', () => {
     const rules: SaveRules = {
       skillIds: ['slowmo', 'tailSnip', 'shield', 'mangoRain'],
       maxLevel: 30,
-      carryMax: 50,
+      carryMax: 50, skins: { order: ['snake', 'ginger', 'pup', 'tuxedo', 'capy'], rare: ['capy'], prices: { common: 300, rare: 800 } },
     };
     const data: SaveDataV2 = {
       bestScore: 99,
@@ -81,7 +81,7 @@ describe('QA Task 8: Platform LocalStore Adapter (Black-Box)', () => {
       fullClear: false,
       unlockedCheckpoints: [4],
       carriedEnergy: 30,
-      lastLoadout: ['slowmo', null],
+      lastLoadout: ['slowmo', null], coins: 0, ownedSkins: ['snake'], equippedSkin: 'snake',
     };
     const ok = save(store, data);
     expect(ok).toBe(true);

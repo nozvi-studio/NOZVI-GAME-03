@@ -61,6 +61,7 @@ export const TOKENS = {
     snake: { body: '#6F7DFF', head: '#7F8CFF', belly: '#CFD6FF', stripe: '#FFFFFF', blush: '#FF8FB1', tongue: '#FF5A7A', eye: '#1C1447' },
     outline: { snake: '#2B2F9E', mango: '#8A4500', rock: '#4A5563', warn: '#C81E1E' },
     outlineStorm: { snake: '#7CF2D4', mango: '#FFF3C4', rock: '#D5DCE6', warn: '#FF9A9A' },
+    skinFx: { spark: '#FFE36B', leaf: '#6FBF4A', leafEdge: '#2F7A2A' }, // MEC-011-R22/R23 rare skin particles
     biomes: [
       { bg: ['#7FD8FF', '#3FB2F2', '#1F86D8'], frame: '#1D6B2A', cells: ['#A6E25A', '#93D648'] },
       { bg: ['#8FE8D8', '#3CC4B4', '#1C9A8E'], frame: '#7A6A1C', cells: ['#E3E07A', '#D2D062'] },

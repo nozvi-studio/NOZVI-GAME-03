@@ -22,7 +22,7 @@ vi.mock('../../src/game/audio/synth', () => ({ createSynth: () => sound }));
 afterEach(() => { vi.unstubAllGlobals(); vi.clearAllMocks(); setDisplaySettings(null); });
 
 const b = loadBalance();
-const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax };
+const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax, skins: b.skins };
 const base = { bestScore: 5, settings: { sound: true }, bestLevel: 0, fullClear: false,
   unlockedCheckpoints: [] as number[], carriedEnergy: 0, lastLoadout: [null, null] };
 

@@ -96,6 +96,7 @@ export interface Balance {
     mangoRain: { cost: number; durationMs: number; dropsMin: number; dropsMax: number; barCapFraction: number; mangoLifeMs: number; mangoBlinkMs: number; unlockLevel: number };
   };
   loadout: { slots: number; secondSlotLevel: number; order: import('./types').SkillId[] };
+  skins: { order: string[]; rare: string[]; prices: { common: number; rare: number }; debugGrant: number };
   checkpoints: { milestones: { reach: number; start: number; requiresClear?: boolean }[]; carryRatio: number; carryMax: number; rampMangoes: number };
   log: { maxEntries: number; sessionGapMs: number };
   flow: { countdownMs: number; countdownDigits: number; maxFrameDeltaMs: number };
@@ -129,6 +130,10 @@ export interface Balance {
       goFlashAlpha: number; goFlashMs: number; spawnPuffCount: number; spawnPuffLifeMs: number;
       turnTiltDeg: number; turnMs: number; turnBodyBulge: number;
       sparkleEveryMs: number; sparkleLifeMs: number; sparkleRadius: number; sparkleRingRadius: number; sparkleThickness: number; sparkleMax: number;
+    };
+    skinFx: {
+      eat: { count: number; lifeMs: number; spreadCells: number; sizeCells: number };
+      trail: { everyMs: number; lifeMs: number; max: number; sizeCells: number; driftCells: number };
     };
   };
   motion: MotionBalance;
@@ -171,6 +176,7 @@ const namesOf = (allowed: readonly string[], allowEmpty = false) => (v: unknown,
   if (!Array.isArray(v) || (!allowEmpty && v.length === 0) || !v.every(n => typeof n === 'string' && allowed.includes(n)))
     fail(path, `must be a non-empty list of ${allowed.join(' | ')}`);
 };
+const SKIN_NAMES = ['snake', 'ginger', 'pup', 'tuxedo', 'capy'] as const; // MEC-011-R2 skin ids known to the balance
 const recordOf = (keys: readonly string[], item: Check): Spec => Object.fromEntries(keys.map(k => [k, item]));
 const timed: Spec = { warnMs: 'int+', lifeMs: 'int+', lifeRandMs: 'int0' };
 const groundTiles: Spec = { ...timed, tries: 'int+', maxActive: 'int+', mirrorChance: 'prob',
@@ -240,6 +246,7 @@ const SPEC: Spec = {
     mangoRain: { cost: 'int+', durationMs: 'int+', dropsMin: 'int+', dropsMax: 'int+', barCapFraction: 'prob', mangoLifeMs: 'int+', mangoBlinkMs: 'int+', unlockLevel: 'int+' },
   },
   loadout: { slots: 'int+', secondSlotLevel: 'int+', order: namesOf(['slowmo', 'tailSnip', 'shield', 'mangoRain']) },
+  skins: { order: namesOf(SKIN_NAMES), rare: namesOf(SKIN_NAMES, true), prices: { common: 'int+', rare: 'int+' }, debugGrant: 'int+' },
   checkpoints: { milestones: listOf((v, path) => {
     check(v, { reach: 'int+', start: 'int+' }, path);
     if (isObj(v) && v.requiresClear !== undefined) check(v.requiresClear, 'bool', path + '.requiresClear');
@@ -274,6 +281,10 @@ const SPEC: Spec = {
       goFlashAlpha: 'prob', goFlashMs: 'int+', spawnPuffCount: 'int0', spawnPuffLifeMs: 'int+',
       turnTiltDeg: 'num0', turnMs: 'int+', turnBodyBulge: 'num+',
       sparkleEveryMs: 'int+', sparkleLifeMs: 'int+', sparkleRadius: 'prob', sparkleRingRadius: 'prob', sparkleThickness: 'prob', sparkleMax: 'int+',
+    },
+    skinFx: {
+      eat: { count: 'int+', lifeMs: 'int+', spreadCells: 'num+', sizeCells: 'num+' },
+      trail: { everyMs: 'int+', lifeMs: 'int+', max: 'int+', sizeCells: 'num+', driftCells: 'num0' },
     },
   },
   motion: {

@@ -2,6 +2,15 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(ui): P4a review fixes — `CharactersScene` unsubscribes skin-load callback and clears `body` on `SHUTDOWN`, centres hero container for `popIn`; `BootScene` detaches progress listener before post-boot skin load; `GameScene` reuses `tailPt` scratch point (MEC-011).
+- docs: MEC-011 skins spec (`docs/specs/mechanics/MEC-011-skins.md`), ART-003 status/Q2-Q3 closed, GDD/CODEMAP/README/UI-MOCKUPS/DECISIONS/PLAYTEST/STATUS updated for P4a completion.
+- feat(juice): Rare skin eat sparkle and leaf trail (`skinFxModel`, `drawSkinFx`, `balance.juice.skinFx`, `TOKENS.d3.skinFx`), wired in `GameScene` below terrain and hazards (MEC-011-R22..R25).
+- feat(ui): Characters screen (`CharactersScene`: stage, token shelf, one action button, debug +coins) and Home entry button (`face` icon, `homeRects().characters`, Home top row moved up 3 mock px on the short board); Home hero tube takes the equipped skin colours (MEC-011-R14..R21).
+- feat(ui): Characters view model, layout and provisional strings (`charactersView`, `charactersLayout`); `SkinsModel` exported from `src/session` (MEC-011-R14..R17, R21).
+- feat(game): the equipped skin drives the snake colours (`boardLook(biome, skin)`) and the head in the run and on Home; Boot applies the save and loads missing skin textures (`ensureSkinTextures`) (MEC-011-R4, R9).
+- feat(art): Ginger, Pup and Tuxedo skins on the shared rig, settable active skin, `SKIN_BODY` and `SKIN_EFFECTS` (MEC-011, ART-003).
+- feat(save): save v4 with coins, owned skins and equipped skin (migration 3 to 4, load repair); session skin API `skinsModel`, `buySkin`, `equipSkin`, `debugAddCoins` (MEC-011).
+- feat(meta): MEC-011 skin catalogue, buy and equip rules (`src/meta/skins.ts`), `skins` balance block and schema.
 - fix(terrain): MEC-019 review fixes: warn cells wait under mangoes, Variant type, layoutFor/parseTerrain errors, crumble scale in balance ui
 - docs: P4a skins (MEC-011) implementation plan `docs/superpowers/plans/2026-11-16-p4a-skins.md`; docs map row.
 - docs: P4a skins design `docs/superpowers/specs/2026-11-16-p4a-skins-design.md` (MEC-011); GDD 8.3 first skin batch and buy rule, GDD 11 P4 split into P4a / P4b; DECISIONS; docs map row.

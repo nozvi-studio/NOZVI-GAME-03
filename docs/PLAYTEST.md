@@ -5,6 +5,16 @@
 ## How to capture
 Headless screenshots with `tools/qa/shot.mjs` (no dependency; uses the local Chrome, or `CHROME_PATH`). Start `npm run dev`, then run: `node tools/qa/shot.mjs size:360,640 media:light "go:http://localhost:5173/" wait:3500 shot:tmp/qa/home-360.png`. The three standard sizes are 360x640, 390x844 and 412x915. Use `media:dark` for the OS dark-mode check. Keys use DOM names (`ArrowUp`, not `Up`). Steps: `size:W,H[,DPR]`, `media:`, `go:URL`, `wait:MS`, `tap:X,Y`, `swipe:X1,Y1,X2,Y2`, `key:Name`, `shot:FILE`, `eval:JS`; any failed step exits 1.
 
+## 2026-11-22 — P4a skins (MEC-011) headless QA record (owner eye-check pending)
+- Branch `feat/p4a-skins`. Full suite: 1897 passed (20 skipped, 12 todo), typecheck clean.
+- Captured with `tools/qa/shot.mjs` into `tmp/qa/p4a/`:
+  - Art previews (`?debug=1&artPreview=1&skin=<id>`): `art-ginger.png`, `art-pup.png`, `art-tuxedo.png`.
+  - Home & run with equipped Capy: `home-360.png`, `home-capy.png`, `home-capy-360.png`, `run-capy-360.png` (Home Characters button left of Settings, Capy hero tube + head, brown body + outline on board).
+  - Characters screen (`360x640`, `360x780`, `540`): `chars-360-1-entry.png` through `chars-360-5-ginger-buy.png`, `chars-360x780-entry.png`, `chars-540-entry.png`, `chars-540-capy.png`. Matches `docs/design/mockups/d3/png/CharactersA.png`: no cut-off, no overlap, action button in lower 45%, token states + selection ring + debug `+500` flow verified.
+  - Rare skin effects (`?debug=1&level=3`, 360x640): `fx-capy-1.png`..`fx-capy-3.png` show fading green leaf trail behind the moving Capy tail; `fx-snake-1.png` shows 0 particles (`live: 0`); debug run log checked with 0 `error` records.
+- Not captured headless: eat sparkle burst mid-frame (unit-tested in `tests/game/skinFxModel.test.ts` and wired on `'ate'` in `GameScene.ts`), buy celebration animation frames, reduced-motion fade, storm biome (L28) with all 5 skins, device 60 fps feel.
+- **Owner eye-check: PENDING** — three new heads (`ginger`, `pup`, `tuxedo`) at board size on a 5" phone (`?debug=1&artPreview=1`), stage idle bob and buy celebration feel, Rare effect amounts (eat sparkle + leaf trail), body/outline colours on every biome, provisional strings (`characters.*`, `skin.*`, `rarity.*`, `home.characters`).
+
 ## 2026-11-16 - MEC-019 terrain bot report (5 seeds; 20-seed run pending)
 - Branch `feat/fixed-terrain`. Fuzz mode (`vitest run --mode fuzz tests/core/fixedTerrainFuzz.test.ts`): 14 tests pass in 6m28s (13 levels x 3 seeds: no mango, orb, rock, fence or maze cell ever shares a cell with a solid terrain cell).
 - Picture board: `node tools/terrain/board.mjs` writes `docs/design/terrain/board.html`; headless capture to `tmp/qa/terrain/board.png` checked, grids render (12 templates x 4 variants in the file; the first 9 seen in the 1200x2400 capture).

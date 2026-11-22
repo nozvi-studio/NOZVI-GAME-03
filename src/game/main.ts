@@ -8,6 +8,7 @@ import { HudScene } from './scenes/HudScene';
 import { LoadoutScene } from './scenes/LoadoutScene';
 import { ResultsScene } from './scenes/ResultsScene';
 import { SettingsScene } from './scenes/SettingsScene';
+import { CharactersScene } from './scenes/CharactersScene';
 import { TOKENS } from './uiTokens';
 import { initViewport } from './viewport';
 import { isDebug } from './flow/debugFlag';
@@ -30,7 +31,7 @@ new Phaser.Game({
   // D3-R10 first frame matches the Boot/Home background (biome 1 outer stop)
   backgroundColor: TOKENS.d3.biomes[0]!.bg[2],
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [BootScene, HomeScene, LoadoutScene, GameScene, HudScene, ResultsScene, SettingsScene, ArtPreviewScene],
+  scene: [BootScene, HomeScene, LoadoutScene, GameScene, HudScene, ResultsScene, SettingsScene, CharactersScene, ArtPreviewScene],
   input: { activePointers: 2 },
   render: { antialias: true },
   // MEC-003-R21 ?debug=1 only: QA handle for headless drivers (tools/qa/shot.mjs `eval:`), e.g. __game.registry.get('session').debugSkipTo(8).

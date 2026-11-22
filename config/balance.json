@@ -121,7 +121,8 @@
       "goFlashAlpha": 0.2, "goFlashMs": 260, "spawnPuffCount": 5, "spawnPuffLifeMs": 300,
       "turnTiltDeg": 10, "turnMs": 140, "turnBodyBulge": 1.06,
       "sparkleEveryMs": 700, "sparkleLifeMs": 420, "sparkleRadius": 0.2, "sparkleRingRadius": 0.47, "sparkleThickness": 0.06, "sparkleMax": 3
-    }
+    },
+    "skinFx": { "eat": { "count": 6, "lifeMs": 420, "spreadCells": 0.9, "sizeCells": 0.22 }, "trail": { "everyMs": 140, "lifeMs": 700, "max": 10, "sizeCells": 0.2, "driftCells": 0.25 } }
   },
   "motion": {
     "tapDownMs": 80, "tapUpMs": 180, "pressScale": 0.94, "releaseOvershoot": 1.06, "hoverScale": 1.03, "reducedPressAlpha": 0.85,
@@ -144,6 +145,7 @@
     "shield": { "cost": 50, "durationMs": 5000, "bonkPauseTicks": 3, "unlockLevel": 11, "invulnMs": 2000, "terrainBreach": { "w": 3, "len": 4 } },
     "mangoRain": { "cost": 80, "durationMs": 6000, "dropsMin": 6, "dropsMax": 10, "barCapFraction": 0.5, "mangoLifeMs": 8000, "mangoBlinkMs": 2000, "unlockLevel": 16 } },
   "loadout": { "slots": 2, "secondSlotLevel": 6, "order": ["slowmo","tailSnip","shield","mangoRain"] },
+  "skins": { "order": ["snake","ginger","pup","tuxedo","capy"], "rare": ["capy"], "prices": { "common": 300, "rare": 800 }, "debugGrant": 500 },
   "checkpoints": { "milestones": [ {"reach":10,"start":4}, {"reach":15,"start":6}, {"reach":20,"start":8}, {"reach":25,"start":10}, {"reach":30,"start":12,"requiresClear":true} ], "carryRatio": 0.5, "carryMax": 50, "rampMangoes": 5 },
   "log": { "maxEntries": 500, "sessionGapMs": 600000 }
 }

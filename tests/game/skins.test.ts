@@ -1,10 +1,10 @@
 // @ts-ignore node typings are not installed; vitest runs on Node
 import { createHash } from 'node:crypto';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import json from '../../config/balance.json';
 import { parseBalance } from '../../src/core';
 import { BODY_POSES, EXPRESSIONS, bodyKey, bodySvg, headKey, headSvg, skinExpressions } from '../../src/game/art/capyRig';
-import { SKIN_IDS, activeSkin } from '../../src/game/art/skins';
+import { SKIN_EFFECTS, SKIN_IDS, activeSkin, setActiveSkin } from '../../src/game/art/skins';
 import { preloadSkins } from '../../src/game/art/capyTextures';
 
 const sha = (s: string): string => createHash('sha1').update(s).digest('hex').slice(0, 12);
@@ -20,9 +20,30 @@ const CAPY_HASH: Record<string, string> = {
 };
 
 describe('ART-003 skins', () => {
-  it('ART-003 skin ids and activeSkin() default to snake', () => {
-    expect([...SKIN_IDS].sort()).toEqual(['capy', 'snake']);
+  afterEach(() => setActiveSkin('snake'));
+  it('ART-003 MEC-011-R1 five skin ids in balance order; activeSkin defaults to snake and can be set', () => {
+    expect([...SKIN_IDS]).toEqual(parseBalance(json).skins.order);
     expect(activeSkin()).toBe('snake');
+    setActiveSkin('capy'); expect(activeSkin()).toBe('capy');
+    setActiveSkin('dragon'); expect(activeSkin()).toBe('snake');
+  });
+  it('MEC-011-R3 each new skin has its own ears and no part of another animal', () => {
+    for (const skin of ['ginger', 'tuxedo'] as const) {
+      const svg = headSvg(skin, 'idle');
+      expect(svg, skin).toContain('data-part="ear-tri"'); expect(svg).toContain('data-part="whisker"');
+      expect(svg).not.toContain('data-part="sclera"'); expect(svg).not.toContain('data-part="gloss"');
+    }
+    expect(headSvg('ginger', 'idle')).toContain('data-part="stripe"');
+    expect(headSvg('tuxedo', 'idle')).toContain('data-part="blaze"');
+    expect(headSvg('pup', 'idle')).toContain('data-part="ear-flop"');
+    expect(headSvg('pup', 'idle')).not.toContain('data-part="whisker"');
+  });
+  it('MEC-011-R3 new skins use the 12 shared expressions (no tongue set)', () => {
+    for (const skin of ['ginger', 'pup', 'tuxedo'] as const) expect(skinExpressions(skin)).toEqual(skinExpressions('capy'));
+  });
+  it('MEC-011-R25 only the rare skin has effects', () => {
+    expect(SKIN_EFFECTS.capy).toEqual({ eat: true, trail: true });
+    for (const skin of ['snake', 'ginger', 'pup', 'tuxedo'] as const) expect(SKIN_EFFECTS[skin]).toEqual({ eat: false, trail: false });
   });
 
   it('ART-003 capy skin svg output is unchanged', () => {
@@ -52,7 +73,7 @@ describe('ART-003 skins', () => {
       // ART-003: eyes and mouth are shared anchors; nostrils and muzzle belong to the skin.
       if (skin === 'capy') { expect(attr(svg, 'nostril', 'cx')).toEqual(['20.6', '27.4']); expect(attr(svg, 'muzzle', 'cy')).toEqual(['34']); }
       // D3 Home board snake: white sclera behind each pupil, light muzzle oval, top gloss, no nostrils or diamond.
-      else { expect(attr(svg, 'sclera', 'cx')).toEqual(['14.4', '33.6']); expect(attr(svg, 'muzzle', 'cy')).toEqual(['33.4']); expect(svg).toContain('data-part="gloss"');
+      else if (skin === 'snake') { expect(attr(svg, 'sclera', 'cx')).toEqual(['14.4', '33.6']); expect(attr(svg, 'muzzle', 'cy')).toEqual(['33.4']); expect(svg).toContain('data-part="gloss"');
         expect(svg).not.toContain('data-part="nostril"'); expect(svg).not.toContain('data-part="ear"'); expect(svg).not.toContain('data-part="diamond"'); }
       expect(svg).toMatch(/data-part="mouth"[^>]*data-y="37.6"/);
       expect(attr(svg, 'face', 'stroke-width')).toEqual(['2']);

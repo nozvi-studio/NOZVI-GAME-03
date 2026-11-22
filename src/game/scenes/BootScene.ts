@@ -3,8 +3,8 @@ import json from '../../../config/balance.json';
 import terrainJson from '../../../config/terrain.json';
 import { parseBalance, withTerrain } from '../../core';
 import { createSession } from '../../session';
-import { SKIN_IDS, activeSkin } from '../art/skins';
-import { preloadSkins } from '../art/capyTextures';
+import { SKIN_IDS, activeSkin, setActiveSkin, type SkinId } from '../art/skins';
+import { ensureSkinTextures, preloadSkins } from '../art/capyTextures';
 import { preloadHudIcons } from '../hud/hudIcons';
 import { bootView } from '../flow/bootView';
 import { isArtPreview } from '../flow/debugFlag';
@@ -26,12 +26,14 @@ type BootRender = (v: ReturnType<typeof bootView>) => void;
 
 export class BootScene extends Phaser.Scene {
   private view?: BootRender;
+  private preloaded: readonly SkinId[] = [activeSkin()];
   constructor() { super('Boot'); }
   // ART-001 capy textures are ready before any scene draws.
   preload(): void {
-    preloadSkins(this.load, isArtPreview(typeof location === 'undefined' ? '' : location.search) ? SKIN_IDS : [activeSkin()]); preloadHudIcons(this.load);
+    this.preloaded = isArtPreview(typeof location === 'undefined' ? '' : location.search) ? SKIN_IDS : [activeSkin()];
+    preloadSkins(this.load, this.preloaded); preloadHudIcons(this.load);
     this.buildView(); // P3b3-R12 logo, hero and progress bar are drawn while assets load
-    this.load.on('progress', (p: number) => this.setProgress(p));
+    this.load.on('progress', this.setProgress);
   }
   private setProgress = (p: number): void => { this.view?.(bootView(p)); };
 
@@ -53,6 +55,7 @@ export class BootScene extends Phaser.Scene {
   }
   // GDD-13 validate config, then create the run session (P1-D1) and open Home.
   create(): void {
+    this.load?.off?.('progress', this.setProgress);
     this.setProgress(1);
     const balance = withTerrain(parseBalance(structuredClone(json)), structuredClone(terrainJson));
     this.registry.set('balance', balance);
@@ -62,6 +65,7 @@ export class BootScene extends Phaser.Scene {
     const session = createSession({ balance, store,
       newSeed: () => (Math.random() * 2 ** 31) >>> 0, now: () => Date.now() });
     this.registry.set('session', session);
+    setActiveSkin(session.skinsModel().equipped); // MEC-011-R9
     const save = session.save();
     this.registry.set('save', save);
     setDisplaySettings(save.settings); // P3-0-R5
@@ -71,7 +75,8 @@ export class BootScene extends Phaser.Scene {
     const waitStart = performance.now(); // MOT-2-R7
     void waitForFonts(fontSet, UI_FONT_SPECS, balance.ui.fontLoadTimeoutMs).then(() => {
       const hold = bootHoldMs(performance.now() - waitStart, balance.motion.fadeMs);
-      const go = (): void => { goTo(this, next, undefined, 'start'); }; // fade only: Boot has no spatial relation to Home (ruling 1); ArtPreview gets the same fade
+      const start = (): void => { goTo(this, next, undefined, 'start'); }; // fade only: Boot has no spatial relation to Home (ruling 1); ArtPreview gets the same fade
+      const go = (): void => { if (this.preloaded.includes(activeSkin())) start(); else ensureSkinTextures(this, [activeSkin()], start); }; // MEC-011-R9 the equipped skin's textures exist before Home
       if (hold > 0 && this.time) this.time.delayedCall(hold, go); else go();
     }); // P3-0-R6
   }

@@ -3,15 +3,16 @@ import { createSim, unlockedSkills, slotCount, unlockTable } from '../core/index
 import type { Balance, CauseKey, Loadout, Sim, SimEvent, SimSnapshot, SkillId, TileKind } from '../core/index';
 import {
   load, save as writeSave, validSettings, applyLevelReached, applyRunWon, carryEnergy, nextMilestone, sanitizeLoadout,
-  loadLog, nextRun, appendRecord, flushLog,
+  loadLog, nextRun, appendRecord, flushLog, buySkin as buy, equipSkin as equip, addCoins, skinPrice, skinRarity,
 } from '../meta/index';
-import type { KeyValueStore, LogRecord, RunLog, SaveDataV2, Settings } from '../meta/index';
+import type { KeyValueStore, LogRecord, RunLog, SaveDataV2, Settings, SkinRarity, SkinState } from '../meta/index';
 
 export interface SessionDeps { balance: Balance; store: KeyValueStore; newSeed(): number; now(): number }
 export interface HomeModel {
   checkpoints: number[]; defaultStart: number; carriedEnergy: number;
   nextMilestone: { reach: number; requiresClear: boolean } | null; showLoadout: boolean;
 }
+export interface SkinsModel { coins: number; equipped: string; skins: { id: string; rarity: SkinRarity; price: number; owned: boolean }[] }
 export interface LoadoutModel { unlocked: SkillId[]; slotCount: 1 | 2; selection: Loadout }
 export interface RunSummary {
   won: boolean; cause: CauseKey | 'clear' | 'quit'; level: number; startLevel: number;
@@ -24,6 +25,12 @@ export interface Session {
   homeModel(): HomeModel;
   loadoutModel(): LoadoutModel;
   confirmLoadout(l: Loadout): void;
+  /** MEC-011 skins: catalogue with ownership, buy, equip; every change is saved at once (R13). */
+  skinsModel(): SkinsModel;
+  buySkin(id: string): { ok: boolean; reason?: 'owned' | 'coins' | 'unknown' };
+  equipSkin(id: string): boolean;
+  /** MEC-011-R10 debug only: the caller checks `?debug=1`. */
+  debugAddCoins(): void;
   startRun(startLevel: number, entry?: 'home' | 'results', debug?: boolean): void;
   lastStartLevel(): number | null;
   frame(ms: number): SimEvent[];
@@ -65,13 +72,14 @@ export function processEvents(session: Session, events: SimEvent[]): void {
 // P1-D1 session flow: MEC-008-R1..R7, MEC-007-R1..R13, MEC-003-R19/R20.
 export function createSession(deps: SessionDeps): Session {
   const b = deps.balance;
-  const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax };
+  const rules = { skillIds: b.loadout.order, maxLevel: b.level.maxLevel, carryMax: b.checkpoints.carryMax, skins: b.skins };
   let data: SaveDataV2 = load(deps.store, rules);
   let log: RunLog = loadLog(deps.store);
   let run: RunState | null = null;
   let lastStart: number | null = null;
   let lastDebug = false;
 
+  const skinState = (): SkinState => ({ coins: data.coins, ownedSkins: data.ownedSkins, equippedSkin: data.equippedSkin });
   const persist = (d: SaveDataV2) => { data = d; writeSave(deps.store, data); };
   const record = (rec: RecordBody) => {
     if (!run) return;
@@ -148,6 +156,21 @@ export function createSession(deps: SessionDeps): Session {
     loadoutModel() { // MEC-007-R3
       return { unlocked: unlockedSkills(b, bestLevel()), slotCount: slotCount(b, bestLevel()), selection: currentLoadout() };
     },
+    skinsModel() { // MEC-011-R5
+      return { coins: data.coins, equipped: data.equippedSkin,
+        skins: b.skins.order.map(id => ({ id, rarity: skinRarity(b.skins, id), price: skinPrice(b.skins, id), owned: data.ownedSkins.includes(id) })) };
+    },
+    buySkin(id) { // MEC-011-R6, R13
+      const r = buy(skinState(), id, b.skins);
+      if (!r.ok) return { ok: false, reason: r.reason };
+      persist({ ...data, ...r.state }); return { ok: true };
+    },
+    equipSkin(id) { // MEC-011-R7, R13
+      const r = equip(skinState(), id);
+      if (r.ok && r.state.equippedSkin !== data.equippedSkin) persist({ ...data, ...r.state });
+      return r.ok;
+    },
+    debugAddCoins() { persist({ ...data, ...addCoins(skinState(), b.skins.debugGrant) }); }, // MEC-011-R10
     confirmLoadout(l) { persist({ ...data, lastLoadout: [l[0], l[1]] }); }, // MEC-007-R9
     startRun(startLevel, entry = 'home', debug = false) { // MEC-008-R5, MEC-007-R10, MEC-003-R21 debug start
       const dbg = debug || (entry === 'results' && lastDebug && startLevel === lastStart);

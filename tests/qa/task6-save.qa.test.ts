@@ -33,7 +33,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
       fullClear: false,
       unlockedCheckpoints: [],
       carriedEnergy: 0,
-      lastLoadout: [null, null],
+      lastLoadout: [null, null], coins: 0, ownedSkins: ['snake'], equippedSkin: 'snake',
     });
   });
 
@@ -67,7 +67,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
     const rules: SaveRules = {
       skillIds: ['slowmo', 'tailSnip', 'shield', 'mangoRain'],
       maxLevel: 30,
-      carryMax: 50,
+      carryMax: 50, skins: { order: ['snake', 'ginger', 'pup', 'tuxedo', 'capy'], rare: ['capy'], prices: { common: 300, rare: 800 } },
     };
     const data: SaveDataV2 = {
       bestScore: 42,
@@ -76,7 +76,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
       fullClear: false,
       unlockedCheckpoints: [4, 6],
       carriedEnergy: 25,
-      lastLoadout: ['slowmo', 'tailSnip'],
+      lastLoadout: ['slowmo', 'tailSnip'], coins: 0, ownedSkins: ['snake'], equippedSkin: 'snake',
     };
     const ok = save(store, data);
     expect(ok).toBe(true);
@@ -93,7 +93,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
     };
     save(store, data);
     expect(SAVE_KEY).toBe('mango-snake.save');
-    expect(SAVE_VERSION).toBe(3);
+    expect(SAVE_VERSION).toBe(4);
     const raw = store.get(SAVE_KEY);
     expect(raw).not.toBeNull();
     const parsed = JSON.parse(raw!);
@@ -211,7 +211,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
     const rules: SaveRules = {
       skillIds: ['slowmo', 'tailSnip', 'shield', 'mangoRain'],
       maxLevel: 30,
-      carryMax: 50,
+      carryMax: 50, skins: { order: ['snake', 'ginger', 'pup', 'tuxedo', 'capy'], rare: ['capy'], prices: { common: 300, rare: 800 } },
     };
     // Invalid bestScore resets to default 0 while valid settings are preserved
     const invalidScores = ['100', -5, 12.34, NaN, undefined];
@@ -267,7 +267,7 @@ describe('QA Task 6: Save Skeleton (Black-Box)', () => {
       fullClear: false,
       carriedEnergy: 50,
       unlockedCheckpoints: [4, 10],
-      lastLoadout: [null, null],
+      lastLoadout: [null, null], coins: 0, ownedSkins: ['snake'], equippedSkin: 'snake',
     });
   });
 

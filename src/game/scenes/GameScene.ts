@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { Balance, SimEvent, SimSnapshot, Step } from '../../core';
 import type { Session } from '../../session';
 import { CapyHead } from '../art/capyHead';
+import { activeSkin, SKIN_EFFECTS } from '../art/skins';
 import { BOARD, cellPx } from '../layout';
 import { clockStep, createClock } from '../flow/clock';
 import { createFlow, flowKey, flowOver, flowPause, flowStart, flowTick, flowTurn, type FlowEffect, type FlowState } from '../flow/runFlow';
@@ -28,6 +29,8 @@ import { drawMovers } from '../render/movers';
 import { drawCycles } from '../render/cycles';
 import { drawBlasts } from '../render/blasts';
 import { drawShrink } from '../render/shrink';
+import { drawSkinFx } from '../render/skinFx';
+import { createSkinFx, skinFxEat, skinFxStep, skinFxTrail, type SkinFxState } from '../render/skinFxModel';
 import { enter, motionFor } from '../motion';
 import { HitBeats, telegraphEdges } from '../render/hitBeat';
 import { telegraphCtx, type TelegraphCtx } from '../render/telegraph';
@@ -50,9 +53,10 @@ export class GameScene extends Phaser.Scene {
   private board!: Phaser.GameObjects.Container;
   private border!: Phaser.GameObjects.Graphics;
   private boardClip!: Phaser.GameObjects.Graphics;
-  private layers!: Record<'ground' | 'terrain' | 'hazards' | 'mango' | 'skills' | 'snake' | 'overlay' | 'effects', Phaser.GameObjects.Graphics>;
+  private layers!: Record<'ground' | 'skinFx' | 'terrain' | 'hazards' | 'mango' | 'skills' | 'snake' | 'overlay' | 'effects', Phaser.GameObjects.Graphics>;
   private effects!: Effects;
-  private steer!: SteerFx; private readonly headPt = { x: 0, y: 0 };
+  private skinFx!: SkinFxState;
+  private steer!: SteerFx; private readonly headPt = { x: 0, y: 0 }; private readonly tailPt = { x: 0, y: 0 };
   private capy!: CapyHead;
   private bg?: Phaser.GameObjects.Image;
 
@@ -74,7 +78,7 @@ export class GameScene extends Phaser.Scene {
     drawBoardShadow(shadow, this.look, BOARD.size, cellPx(this.balance));
     this.board = this.add.container(BOARD.x, BOARD.y, [image, shadow]).setName('board');
     this.layers = {
-      ground: this.add.graphics(), terrain: this.add.graphics(), hazards: this.add.graphics(), mango: this.add.graphics(),
+      ground: this.add.graphics(), skinFx: this.add.graphics(), terrain: this.add.graphics(), hazards: this.add.graphics(), mango: this.add.graphics(),
       skills: this.add.graphics(), snake: this.add.graphics(), overlay: this.add.graphics(), effects: this.add.graphics(),
     };
     this.board.add(Object.values(this.layers));
@@ -86,6 +90,7 @@ export class GameScene extends Phaser.Scene {
       { maxParticles: juice.perf.maxParticles, maxFloats: juice.perf.maxFloats, gulpMs: juice.gulpMs,
         ringMax: juice.events.ringMax, sparkleMax: juice.events.sparkleMax, overshoot: this.balance.motion.overshoot,
         sparkleRadius: juice.events.sparkleRadius, sparkleThickness: juice.events.sparkleThickness });
+    this.skinFx = createSkinFx(juice.skinFx, SKIN_EFFECTS[activeSkin()], this.reduced); // MEC-011-R22..R25
     this.steer = new SteerFx(this, this.board, cellPx(this.balance), this.balance.motion.d3, this.balance.motion.overshoot, this.reduced);
     const onSteer = (d: { dx: Step; dy: Step }): void => this.steer.chevron(d.dx, d.dy, this.time.now); // D3-R25
     this.events.on('steer', onSteer);
@@ -101,7 +106,9 @@ export class GameScene extends Phaser.Scene {
     this.game.events.on(Phaser.Core.Events.BLUR, pause);
     this.game.events.on(Phaser.Core.Events.HIDDEN, hidden);
     const recolor = (): void => {
-      this.palette = currentPalette(); this.reduced = reduceMotion(); this.effects.setReduced(this.reduced); this.steer.setReduced(this.reduced); this.lookStale = true; // texture rebuilt on the next draw
+      this.palette = currentPalette(); this.reduced = reduceMotion(); this.effects.setReduced(this.reduced); this.steer.setReduced(this.reduced);
+      this.skinFx = createSkinFx(this.balance.juice.skinFx, SKIN_EFFECTS[activeSkin()], this.reduced); // MEC-011-R24
+      this.lookStale = true; // texture rebuilt on the next draw
       drawBoardFrame(this.border.clear(), this.look, BOARD.size, cellPx(this.balance));
       this.setBackground(this.look.biome);
     };
@@ -123,6 +130,7 @@ export class GameScene extends Phaser.Scene {
     this.mangoBornAt = this.time.now;
     this.hadMango = false; this.sparkle = newSparkleClock(); // MOT-3-R11 the first mango of a run pops with a puff
     this.effects.reset();
+    this.skinFx = createSkinFx(this.balance.juice.skinFx, SKIN_EFFECTS[activeSkin()], this.reduced);
     this.steer.reset();
     this.capy.reset(this.time.now);
     this.clock = createClock();
@@ -175,7 +183,7 @@ export class GameScene extends Phaser.Scene {
     }
     const snapshot = this.snapshot()!;
     this.beats.play(telegraphEdges(this.prev, snapshot)); this.prev = snapshot;
-    this.handleEvents(events);
+    this.handleEvents(events, snapshot, time);
     this.derive(snapshot, events, dt);
     this.events.emit('sim-events', events);
     if (snapshot.status === 'over' && this.flow.status !== 'over') {
@@ -186,10 +194,15 @@ export class GameScene extends Phaser.Scene {
     this.draw(snapshot, time);
   }
 
-  private handleEvents(events: SimEvent[]): void {
+  private handleEvents(events: SimEvent[], snapshot: SimSnapshot, time: number): void {
     for (const event of events) {
       switch (event.type) {
-        case 'ate': this.capy.eat(this.time.now); this.mangoBornAt = this.time.now; this.effects.clearSparkles(); break;
+        case 'ate': {
+          this.capy.eat(this.time.now); this.mangoBornAt = this.time.now; this.effects.clearSparkles();
+          const h = snapshot.snake[0];
+          if (h) skinFxEat(this.skinFx, time, { x: h.x + 0.5, y: h.y + 0.5 }, Math.random); // MEC-011-R22 presentation RNG only
+          break;
+        }
         case 'rotted': this.mangoBornAt = this.time.now; this.effects.clearSparkles(); break;
         case 'died': this.capy.die(this.time.now); break;
       }
@@ -250,6 +263,9 @@ export class GameScene extends Phaser.Scene {
     const cell = cellPx(this.balance), p = this.palette;
     for (const layer of Object.values(this.layers)) layer.clear();
     drawTiles(this.layers.ground, snapshot.tiles, cell, this.tel, this.reduced, this.look);
+    const tail = snapshot.snake[snapshot.snake.length - 1];
+    if (tail) { this.tailPt.x = tail.x + 0.5; this.tailPt.y = tail.y + 0.5; skinFxTrail(this.skinFx, time, this.tailPt, this.flow.status === 'playing', Math.random); } // MEC-011-R23 presentation RNG only
+    drawSkinFx(this.layers.skinFx, skinFxStep(this.skinFx, time), time, cell); // MEC-011-R22/R23/R24
     drawTerrains(this.layers.terrain, snapshot.terrains, cell, this.look, this.balance, this.reduced, this.tel);
     drawFixedTerrain(this.layers.hazards, snapshot.fixedTerrain, cell, this.look, this.balance, this.reduced, this.tel);
     drawHazards(this.layers.hazards, snapshot.hazards, cell, this.look, this.balance, this.reduced, this.tel);

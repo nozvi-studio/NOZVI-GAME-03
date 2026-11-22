@@ -1,7 +1,7 @@
 import type Phaser from 'phaser';
 import { TOKENS } from '../uiTokens';
 // P3b3-R14 small glyphs for menu buttons and cards, drawn with Graphics primitives (replaces the mockup SVGs).
-export const ICON_IDS = ['back', 'sliders', 'lock', 'bolt', 'flag', 'home', 'slowmo', 'tailSnip', 'shield', 'mangoRain', 'sound', 'haptics', 'dpad', 'motion', 'check'] as const;
+export const ICON_IDS = ['back', 'sliders', 'lock', 'bolt', 'flag', 'home', 'slowmo', 'tailSnip', 'shield', 'mangoRain', 'sound', 'haptics', 'dpad', 'motion', 'check', 'face'] as const;
 export type IconId = typeof ICON_IDS[number];
 type G = Pick<Phaser.GameObjects.Graphics, 'fillStyle' | 'lineStyle' | 'fillCircle' | 'strokeCircle' | 'fillRoundedRect' | 'fillTriangle' | 'lineBetween' | 'beginPath' | 'moveTo' | 'lineTo' | 'strokePath' | 'closePath' | 'fillPath' | 'arc'>;
 
@@ -37,5 +37,6 @@ export function drawIcon(g: G, id: IconId, size: number, color: number): void {
     case 'dpad': g.fillRoundedRect(-3 * u, -9 * u, 6 * u, 18 * u, 2 * u); g.fillRoundedRect(-9 * u, -3 * u, 18 * u, 6 * u, 2 * u); break;
     case 'motion': g.strokeCircle(0, 0, 8.5 * u); g.beginPath(); g.moveTo(0, -4.5 * u); g.lineTo(0, 0); g.lineTo(3 * u, 2 * u); g.strokePath(); break;
     case 'check': g.beginPath(); g.moveTo(-7 * u, 0); g.lineTo(-2 * u, 5 * u); g.lineTo(7 * u, -5 * u); g.strokePath(); break;
+    case 'face': g.strokeCircle(0, 0, 9 * u); g.fillCircle(-3.5 * u, -2.5 * u, 1.3 * u); g.fillCircle(3.5 * u, -2.5 * u, 1.3 * u); g.beginPath(); g.arc(0, 1 * u, 4.5 * u, 0.4, Math.PI - 0.4, false); g.strokePath(); break;
   }
 }

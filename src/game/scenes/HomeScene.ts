@@ -47,6 +47,8 @@ export class HomeScene extends Phaser.Scene {
     const gearBtn = roundIconButton(this, px(R.settings).cx, px(R.settings).cy, d3m(D3_HOME.round), 'sliders', 'home-settings',
       () => { this.synth.play('uiTap'); goTo(this, 'Settings', { returnTo: 'Home' }, 'forward'); });
     this.targets.gear = gearBtn;
+    this.targets.characters = roundIconButton(this, px(R.characters).cx, px(R.characters).cy, d3m(D3_HOME.round), 'face', 'home-characters', // MEC-011-R20
+      () => { this.synth.play('uiTap'); goTo(this, 'Characters', { debug: isDebug(window.location.search) }, 'forward'); }, false, { navigates: true });
     const best = this.extras().best;
     if (best !== null) {
       const bc = chip(this, 0, px(R.best).cy, t('home.best', { n: best }), '', 'home-best'); bc.setX(d3(R.best.x) + bc.width / 2);

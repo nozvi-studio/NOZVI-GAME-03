@@ -11,3 +11,12 @@ export function preloadSkins(load: Phaser.Loader.LoaderPlugin, skins: readonly S
       load.svg(bodyKey(skin, p), svgDataUrl(bodySvg(skin, p)), { width: CAPY_BODY_SIZE.w, height: CAPY_BODY_SIZE.h });
   }
 }
+
+// MEC-011 load the head and body textures of skins that are not in the texture manager yet (Characters screen, equipped skin at boot).
+export function ensureSkinTextures(scene: Phaser.Scene, skins: readonly SkinId[], done: () => void): void {
+  const missing = skins.filter(s => !scene.textures.exists(headKey(s, 'idle', 'board')));
+  if (missing.length === 0) { done(); return; }
+  preloadSkins(scene.load, missing);
+  scene.load.once('complete', done);
+  scene.load.start();
+}

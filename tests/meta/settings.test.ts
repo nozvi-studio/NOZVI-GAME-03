@@ -15,10 +15,10 @@ it('P3-0-R4 resolveDisplay: explicit choice wins, null follows the OS', () => {
     .toEqual({ theme: 'light', reducedMotion: false });
 });
 it('P3-0-R4 v2 saves migrate to v3 keeping sound and progress', () => {
-  expect(SAVE_VERSION).toBe(3);
+  expect(SAVE_VERSION).toBe(4);
   const kv = memoryStore({ [SAVE_KEY]: JSON.stringify({ version: 2, data: { bestScore: 5, settings: { sound: false },
     bestLevel: 7, fullClear: false, unlockedCheckpoints: [6], carriedEnergy: 10, lastLoadout: [null, null] } }) });
-  const s = load(kv, { skillIds: ['slowmo'], maxLevel: 30, carryMax: 50 });
+  const s = load(kv, { skillIds: ['slowmo'], maxLevel: 30, carryMax: 50, skins: { order: ['snake', 'ginger', 'pup', 'tuxedo', 'capy'], rare: ['capy'], prices: { common: 300, rare: 800 } } });
   expect(s.settings).toEqual({ ...defaultSettings(), sound: false });
   expect(s.bestLevel).toBe(7);
 });

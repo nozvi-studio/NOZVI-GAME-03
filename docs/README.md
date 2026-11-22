@@ -1,5 +1,5 @@
 # Docs map (read this instead of scanning docs/)
-Updated: 2026-11-16
+Updated: 2026-11-22
 
 ## 1. Document index
 Only files listed here exist. Status: Draft / Approved / Deprecated.
@@ -28,7 +28,7 @@ Only files listed here exist. Status: Draft / Approved / Deprecated.
 | UI-D3-PLANS | `docs/superpowers/plans/2026-11-10-ui-d3-roadmap.md`, `-u0-boards-tokens.md`, `-u1-skin-kit.md` | D3 roadmap U0..U7 (task lists, shared interfaces), detailed plans for U0 and U1; plans for U2..U7 are written at each phase start | Draft |
 | TERRAIN-DESIGN | `docs/superpowers/specs/2026-11-11-fixed-terrain-design.md` | Fixed terrain design (TER-R1..R14, now MEC-019-R<n>): segments, variants, level-up change, Shield breach, invulnerability, fairness | Approved |
 | P4A-SKINS | `docs/superpowers/specs/2026-11-16-p4a-skins-design.md` | P4a skins design (MEC-011-R1..R25): 5 skins, ownership, coins, equip, save v4, Characters screen direction A (`docs/design/mockups/d3/skins.html`), Rare presentation | Approved |
-| P4A-SKINS-PLAN | `docs/superpowers/plans/2026-11-16-p4a-skins.md` | P4a skins (MEC-011) implementation plan: 8 tasks (rules, save v4 + session, 3 new skins, run colours, Characters view/layout, scene + Home entry, Rare effects, docs) | Draft |
+| P4A-SKINS-PLAN | `docs/superpowers/plans/2026-11-16-p4a-skins.md` | P4a skins (MEC-011) implementation plan: 8 tasks (rules, save v4 + session, 3 new skins, run colours, Characters view/layout, scene + Home entry, Rare effects, docs) | Approved |
 | TERRAIN-PLAN | `docs/superpowers/plans/2026-11-16-fixed-terrain.md` | Fixed terrain (MEC-019) implementation plan: 7 tasks, lead rulings FT-1..FT-8 (family key `fixedTerrain`, cause `terrain`) | Approved |
 | P3-UIFIX-PLANS | `docs/superpowers/plans/2026-11-07-p3-uifix-wave1.md`, `-wave2.md`, `-wave3.md` | UI fix plans: wave 1 occlusion + color, wave 2 layout, wave 3 polish + agy re-review | Draft |
 | ART-001 | `docs/specs/art/ART-001-character-coordinate-system.md` | Character anchors, look rules, action list, asset folders and production routes (capy reference) | Draft |
@@ -41,6 +41,7 @@ Only files listed here exist. Status: Draft / Approved / Deprecated.
 | MEC-006 | `docs/specs/mechanics/MEC-006-energy-skills.md` | Energy orbs, energy bar, 4 skills | Approved |
 | MEC-007 | `docs/specs/mechanics/MEC-007-loadout.md` | Skill loadout | Approved |
 | MEC-008 | `docs/specs/mechanics/MEC-008-checkpoints.md` | Checkpoints, energy carry-over, save v2 | Approved |
+| MEC-011 | `docs/specs/mechanics/MEC-011-skins.md` | Skins, coins, shop, equip, Characters screen, Rare effects (P4a) | Implemented |
 | MEC-012 | `docs/specs/mechanics/MEC-012-ground-tiles.md` | Mud and ice ground tiles | Approved |
 | MEC-013 | `docs/specs/mechanics/MEC-013-rolling-coconuts.md` | Rolling coconuts on telegraphed lanes | Approved |
 | MEC-014 | `docs/specs/mechanics/MEC-014-gates-spikes.md` | Gates on a rhythm and spike traps on a global beat | Approved |

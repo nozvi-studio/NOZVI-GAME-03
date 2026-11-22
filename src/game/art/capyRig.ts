@@ -48,6 +48,11 @@ export const ART = {
   // ART-003 snake head: an egg-shaped skull (wide at the eyes, narrower snout), no ears, no capy muzzle.
   snake: { top: 6.4, bottom: 45.2, left: 2.8, right: 45.2, scleraR: 5.4, muzzle: { cy: 33.4, rx: 11.6, ry: 7.6 }, gloss: { cx: 19, cy: 12.6, rx: 8.4, ry: 3.2, alpha: 0.35 },
     tongueStem: 4.8, tongueFork: 2.4, tongueSpread: 1.7, tongueStroke: 1.9, body: { coilY: 64, coilRx: 20, coilRy: 8, tailX: 41, tailY: 62 } },
+  // MEC-011-R3 cat ears (triangles), dog flop ears, cat muzzle and nose, whiskers, ginger stripes, tuxedo blaze.
+  cat: { earL: 'M6 20L7 3.5L20 11Z', earR: 'M42 20L41 3.5L28 11Z', innerL: 'M9.5 14L10 8L15 11Z', innerR: 'M38.5 14L38 8L33 11Z', inner: '#FFC9D4',
+    muzzle: { cy: 34.4, rx: 9.6, ry: 7 }, nose: 'M21.8 30.6h4.4l-2.2 2.6Z', noseFill: '#FF8FA3',
+    whiskers: 'M3 31l7 1.5M3 36l7-1M45 31l-7 1.5M45 36l-7-1', stripes: 'M20 10.5v5M24 10v6.5M28 10.5v5', stripeFill: '#C96F1E', blaze: 'M24 11c3 4 4 9 4 14h-8c0-5 1-10 4-14Z' },
+  dog: { earL: 'M7 12c-6 2-7 14-3 20 3 3 7 0 7-5V14Z', earR: 'M41 12c6 2 7 14 3 20-3 3-7 0-7-5V14Z', muzzle: { cy: 34.4, rx: 9.6, ry: 7 }, nose: 'M21.4 30.2h5.2l-2.6 3Z' },
 } as const;
 
 const n = (v: number): string => String(+v.toFixed(2));
@@ -114,6 +119,20 @@ function earsAndHead(skin: SkinId, P: SkinPalette): string {
       + `<g data-layer="head"><path data-part="face" d="${snakeHeadPath()}" fill="url(#face)" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/>`
       + `<ellipse data-part="gloss" cx="${k.gloss.cx}" cy="${k.gloss.cy}" rx="${k.gloss.rx}" ry="${k.gloss.ry}" fill="${P.highlight}" opacity="${k.gloss.alpha}"/></g>`;
   }
+  const face = `<rect data-part="face" x="${h.x}" y="${h.y}" width="${n(h.w)}" height="${n(h.h)}" rx="${h.r}" fill="url(#face)" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/>`;
+  const tri = (d: string): string => `<path data-part="ear-tri" d="${d}" fill="${P.ears}" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/>`;
+  if (skin === 'ginger' || skin === 'tuxedo') {
+    const c = ART.cat;
+    const mark = skin === 'ginger'
+      ? `<path data-part="stripe" d="${c.stripes}" fill="none" stroke="${c.stripeFill}" stroke-width="2" stroke-linecap="round"/>`
+      : `<path data-part="blaze" d="${c.blaze}" fill="${P.muzzle}"/>`;
+    return `<g data-layer="ears">${tri(c.earL)}${tri(c.earR)}<path d="${c.innerL}" fill="${c.inner}"/><path d="${c.innerR}" fill="${c.inner}"/></g>`
+      + `<g data-layer="head">${face}${mark}</g>`;
+  }
+  if (skin === 'pup') {
+    const flop = (d: string): string => `<path data-part="ear-flop" d="${d}" fill="${P.ears}" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/>`;
+    return `<g data-layer="ears">${flop(ART.dog.earL)}${flop(ART.dog.earR)}</g><g data-layer="head">${face}</g>`;
+  }
   return `<g data-layer="ears">${ART.ears.map(x => `<circle data-part="ear" cx="${n(x)}" cy="${n(ART.earY)}" r="${ART.earR}" fill="${P.ears}" stroke="${o}" stroke-width="${P.stroke}"/>`).join('')}</g>`
     + `<g data-layer="head"><rect data-part="face" x="${h.x}" y="${h.y}" width="${n(h.w)}" height="${n(h.h)}" rx="${h.r}" fill="url(#face)" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/></g>`;
 }
@@ -124,6 +143,15 @@ function snakeJawAndNostrils(P: SkinPalette): string {
   return `<g data-layer="muzzle"><ellipse data-part="muzzle" cx="${ART.cx}" cy="${m.cy}" rx="${m.rx}" ry="${m.ry}" fill="${P.muzzle}"/></g><g data-layer="nose"></g>`;
 }
 
+/** MEC-011-R3 cat and dog muzzle: small light oval, triangle nose; cats add whiskers (drawn in the nose layer, over the muzzle). */
+function petMuzzleAndNose(skin: 'ginger' | 'pup' | 'tuxedo', P: SkinPalette): string {
+  const cat = skin !== 'pup', m = cat ? ART.cat.muzzle : ART.dog.muzzle;
+  const nose = `<path data-part="nose" d="${cat ? ART.cat.nose : ART.dog.nose}" fill="${cat ? ART.cat.noseFill : P.nose}" stroke="${P.outline}" stroke-width="0.8" stroke-linejoin="round"/>`;
+  const whiskers = cat ? `<path data-part="whisker" d="${ART.cat.whiskers}" fill="none" stroke="${P.outline}" stroke-width="1" stroke-linecap="round"/>` : '';
+  return `<g data-layer="muzzle"><ellipse data-part="muzzle" cx="${ART.cx}" cy="${m.cy}" rx="${m.rx}" ry="${m.ry}" fill="${P.muzzle}" stroke="${P.outline}" stroke-width="${P.innerStroke}"/></g>`
+    + `<g data-layer="nose">${nose}${whiskers}</g>`;
+}
+
 // ART-001 head layers back to front: ears, head, blush, muzzle, nose, eyes, (tongue), mouth.
 function headLayers(skin: SkinId, e: CapyExpression): string {
   const P = SKIN_PALETTES[skin], x = EXPRESSIONS[e], m = ART.muzzle, o = P.outline;
@@ -131,7 +159,7 @@ function headLayers(skin: SkinId, e: CapyExpression): string {
   return `<defs><linearGradient id="face" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${P.faceTop}"/><stop offset="1" stop-color="${P.faceBottom}"/></linearGradient></defs>`
     + earsAndHead(skin, P)
     + `<g data-layer="blush">${[-1, 1].map(s => `<ellipse cx="${n(ART.cx + s * ART.cheekDx)}" cy="${ART.cheekY}" rx="${ART.cheekRx}" ry="${ART.cheekRy}" fill="${P.blush}" opacity="0.8"/>`).join('')}</g>`
-    + (skin === 'snake' ? snakeJawAndNostrils(P) : `<g data-layer="muzzle"><ellipse data-part="muzzle" cx="${m.x}" cy="${m.y}" rx="${m.rx}" ry="${m.ry}" fill="${P.muzzle}" stroke="${o}" stroke-width="${P.innerStroke}"/></g>`
+    + (skin === 'snake' ? snakeJawAndNostrils(P) : skin !== 'capy' ? petMuzzleAndNose(skin, P) : `<g data-layer="muzzle"><ellipse data-part="muzzle" cx="${m.x}" cy="${m.y}" rx="${m.rx}" ry="${m.ry}" fill="${P.muzzle}" stroke="${o}" stroke-width="${P.innerStroke}"/></g>`
     + `<g data-layer="nose">${ART.nostrils.map(nx => `<ellipse data-part="nostril" cx="${n(nx)}" cy="${n(ART.noseY)}" rx="${ART.nostrilRx}" ry="${ART.nostrilRy}" fill="${P.nose}"/>`).join('')}</g>`)
     + eyes(x.eyes, P, skin === 'snake') + (t ? tongue(t, P) : '') + mouth(x.mouth, P);
 }

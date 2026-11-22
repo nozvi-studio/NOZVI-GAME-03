@@ -60,7 +60,7 @@ const UNLOCK_TABLE: UnlockTable<SkillId> = {
 const SAVE_RULES: SaveRules = {
   skillIds: ['slowmo', 'tailSnip', 'shield', 'mangoRain'],
   maxLevel: 30,
-  carryMax: 50,
+  carryMax: 50, skins: { order: ['snake', 'ginger', 'pup', 'tuxedo', 'capy'], rare: ['capy'], prices: { common: 300, rare: 800 } },
 };
 
 describe('QA P1 Task 2: Meta Modules (Black-Box)', () => {
@@ -77,7 +77,7 @@ describe('QA P1 Task 2: Meta Modules (Black-Box)', () => {
       fullClear: false,
       unlockedCheckpoints: [],
       carriedEnergy: 0,
-      lastLoadout: [null, null],
+      lastLoadout: [null, null], coins: 0, ownedSkins: ['snake'], equippedSkin: 'snake',
     });
   });
 
@@ -91,7 +91,7 @@ describe('QA P1 Task 2: Meta Modules (Black-Box)', () => {
       fullClear: false,
       unlockedCheckpoints: [],
       carriedEnergy: 0,
-      lastLoadout: [null, null],
+      lastLoadout: [null, null], coins: 0, ownedSkins: ['snake'], equippedSkin: 'snake',
     });
   });
 
@@ -117,7 +117,7 @@ describe('QA P1 Task 2: Meta Modules (Black-Box)', () => {
       fullClear: false,
       unlockedCheckpoints: [],
       carriedEnergy: 0,
-      lastLoadout: [null, null],
+      lastLoadout: [null, null], coins: 0, ownedSkins: ['snake'], equippedSkin: 'snake',
     });
   });
 
@@ -253,7 +253,7 @@ describe('QA P1 Task 2: Meta Modules (Black-Box)', () => {
       fullClear: false,
       unlockedCheckpoints: [4, 6],
       carriedEnergy: 20,
-      lastLoadout: ['slowmo', 'tailSnip'],
+      lastLoadout: ['slowmo', 'tailSnip'], coins: 0, ownedSkins: ['snake'], equippedSkin: 'snake',
     };
     expect(save(store, saveState)).toBe(true);
 
