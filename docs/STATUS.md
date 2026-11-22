@@ -1,9 +1,9 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-22 **Milestone:** M2 P3 + P4a on `version/v0.3` / `feat/p4a-skins`; P4a (MEC-011) implemented (8/8 tasks, pending final review + merge into `version/v0.3`); UI D3 U7 is next; P2 exit (`version/v0.2`) still waits on owner playtest. **Version branches:** `version/v0.3` (P3/P4a), `version/v0.2` (P2 exit).
+**Updated:** 2026-11-22 **Milestone:** M2 P3 + P4a on `version/v0.3`; P4a skins (MEC-011) merged into `version/v0.3` (owner eye-check pending); UI D3 U7 is next; P2 exit (`version/v0.2`) still waits on owner playtest. **Version branches:** `version/v0.3` (P3/P4a), `version/v0.2` (P2 exit).
 
 ## Now (in progress)
-- [x] **P4a skins (MEC-011): all 8 tasks implemented on `feat/p4a-skins`** (1897 pass, typecheck clean). Spec `docs/specs/mechanics/MEC-011-skins.md`, plan `docs/superpowers/plans/2026-11-16-p4a-skins.md`, QA record in `PLAYTEST.md`, screenshots in `tmp/qa/p4a/`. **RESUME HERE (P4a):** final review on `feat/p4a-skins`, merge into `version/v0.3` (`--no-ff`), owner browser eye-check (3 new heads at board size, idle bob + buy celebration, Rare eat sparkle + leaf trail, biome colours, provisional strings).
+- [x] **P4a skins (MEC-011): merged into `version/v0.3`** (8 tasks + final review fixes, 1897 pass, typecheck clean). Spec `docs/specs/mechanics/MEC-011-skins.md`, plan `docs/superpowers/plans/2026-11-16-p4a-skins.md`, QA record in `PLAYTEST.md`, screenshots in `tmp/qa/p4a/`. Pending: owner browser eye-check (3 new heads at board size, idle bob + buy celebration, Rare eat sparkle + leaf trail, biome colours, provisional strings).
 - [ ] **UI D3 "Juicy" redesign:** U0..U6 merged into `version/v0.3`. **RESUME HERE (D3):** write U7 plan (audit + exit): Loadout back/go/title resize, Pause checkpoint chip drawn twice (U5 bug), Loadout boundary tests hm 641-700, HudScene banner wiring test, texture key budget audit (<= 120), U2 Task 5 sharpness spike (non-blocking).
 - [x] **Fixed terrain (MEC-019): merged into `version/v0.3`** (`fe3a67b`; spec `docs/specs/mechanics/MEC-019-terrain.md`, rulings FT-1..FT-8, BAND-R1 banner band). Pending: owner eye-check (`docs/design/terrain/board.html`, level-up change, Shield breach, provisional strings), 20-seed `npm run bot:report` vs no-terrain comparison before tuning, design §5 question (invuln on normal Shield hit).
 - [x] **P3 (0, 3b-1/2/3, 3a), UIFIX waves 1-3, Motion (MOT-0..4): merged into `version/v0.3`.** Pending **P3 exit (owner):** device pass (60 fps mid-range phone, 360x640 readability, juice/motion/D3 eye-check) + provisional string batch + merge `version/v0.3` into `dev`.
@@ -11,11 +11,11 @@
 - [ ] **Owner notes 2026-11-17 (backlog, after P4a):** (1) redesign terrain template `b4s2` Avalanche Steps; (2) Home: remove "Start from level 1", 2-skill pick and "Start Energy", keep only PLAY (needs spec impact check); (3) better Shield visual effect; (4) bug: odd round dots under snake body during Invisibility.
 
 ## Next (ordered, max 5)
-1. Final review of `feat/p4a-skins` and merge into `version/v0.3` (`git merge --no-ff`).
-2. UI D3 U7 (audit + exit) plan and execution on `version/v0.3`.
-3. Owner device/browser eye-check for P3 exit + P4a + fixed terrain; string batch review.
-4. P4b (MEC-009 marbles, MEC-010 marble machine) — **blocked** on owner choice of marble slot odds (mockups `2 / WHEEL 15% / SKIN 5% / 5 / 2` vs GDD §8.2 `10 / 25 / Mystery / 25 / 10`).
-5. P2 exit playtest verdict + overnight full fuzz (`npm run test:fuzz`) → merge `version/v0.2` and `version/v0.3` into `dev`.
+1. UI D3 U7 (audit + exit) plan and execution on `version/v0.3`.
+2. Owner device/browser eye-check for P3 exit + P4a + fixed terrain; string batch review.
+3. P4b (MEC-009 marbles, MEC-010 marble machine) — **blocked** on owner choice of marble slot odds (mockups `2 / WHEEL 15% / SKIN 5% / 5 / 2` vs GDD §8.2 `10 / 25 / Mystery / 25 / 10`).
+4. P2 exit playtest verdict + overnight full fuzz (`npm run test:fuzz`) → merge `version/v0.2` and `version/v0.3` into `dev`.
+5. Owner notes 2026-11-17 backlog (`b4s2` redesign, Home simplification spec, Shield VFX, Invisibility dots bug).
 
 ## Blockers / open decisions
 - **P4b blocker:** marble machine slot odds mismatch between mockups and GDD §8.2 (DECISIONS 2026-11-16).

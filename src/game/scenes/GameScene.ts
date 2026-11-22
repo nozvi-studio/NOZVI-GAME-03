@@ -56,7 +56,7 @@ export class GameScene extends Phaser.Scene {
   private layers!: Record<'ground' | 'skinFx' | 'terrain' | 'hazards' | 'mango' | 'skills' | 'snake' | 'overlay' | 'effects', Phaser.GameObjects.Graphics>;
   private effects!: Effects;
   private skinFx!: SkinFxState;
-  private steer!: SteerFx; private readonly headPt = { x: 0, y: 0 };
+  private steer!: SteerFx; private readonly headPt = { x: 0, y: 0 }; private readonly tailPt = { x: 0, y: 0 };
   private capy!: CapyHead;
   private bg?: Phaser.GameObjects.Image;
 
@@ -264,7 +264,7 @@ export class GameScene extends Phaser.Scene {
     for (const layer of Object.values(this.layers)) layer.clear();
     drawTiles(this.layers.ground, snapshot.tiles, cell, this.tel, this.reduced, this.look);
     const tail = snapshot.snake[snapshot.snake.length - 1];
-    if (tail) skinFxTrail(this.skinFx, time, { x: tail.x + 0.5, y: tail.y + 0.5 }, this.flow.status === 'playing', Math.random); // MEC-011-R23 presentation RNG only
+    if (tail) { this.tailPt.x = tail.x + 0.5; this.tailPt.y = tail.y + 0.5; skinFxTrail(this.skinFx, time, this.tailPt, this.flow.status === 'playing', Math.random); } // MEC-011-R23 presentation RNG only
     drawSkinFx(this.layers.skinFx, skinFxStep(this.skinFx, time), time, cell); // MEC-011-R22/R23/R24
     drawTerrains(this.layers.terrain, snapshot.terrains, cell, this.look, this.balance, this.reduced, this.tel);
     drawFixedTerrain(this.layers.hazards, snapshot.fixedTerrain, cell, this.look, this.balance, this.reduced, this.tel);

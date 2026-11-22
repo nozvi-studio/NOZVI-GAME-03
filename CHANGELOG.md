@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(ui): P4a review fixes — `CharactersScene` unsubscribes skin-load callback and clears `body` on `SHUTDOWN`, centres hero container for `popIn`; `BootScene` detaches progress listener before post-boot skin load; `GameScene` reuses `tailPt` scratch point (MEC-011).
 - docs: MEC-011 skins spec (`docs/specs/mechanics/MEC-011-skins.md`), ART-003 status/Q2-Q3 closed, GDD/CODEMAP/README/UI-MOCKUPS/DECISIONS/PLAYTEST/STATUS updated for P4a completion.
 - feat(juice): Rare skin eat sparkle and leaf trail (`skinFxModel`, `drawSkinFx`, `balance.juice.skinFx`, `TOKENS.d3.skinFx`), wired in `GameScene` below terrain and hazards (MEC-011-R22..R25).
 - feat(ui): Characters screen (`CharactersScene`: stage, token shelf, one action button, debug +coins) and Home entry button (`face` icon, `homeRects().characters`, Home top row moved up 3 mock px on the short board); Home hero tube takes the equipped skin colours (MEC-011-R14..R21).

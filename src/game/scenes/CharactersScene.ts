@@ -45,8 +45,14 @@ export class CharactersScene extends Phaser.Scene {
     const keys = this.input.keyboard;
     const onKey = (e: KeyboardEvent): void => { if (e.code === 'Escape') { e.preventDefault(); this.back(); } };
     keys?.on('keydown', onKey);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { keys?.off('keydown', onKey); this.stopIdle(); });
-    ensureSkinTextures(this, SKIN_IDS, () => { if (this.body) this.build(); }); // other heads load here, not at boot
+    const onSkinsLoaded = (): void => { if (!this.closing && this.body && (this.sys?.isActive() ?? true)) this.build(); };
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      keys?.off('keydown', onKey);
+      this.load?.off?.('complete', onSkinsLoaded);
+      this.stopIdle();
+      this.body = undefined;
+    });
+    ensureSkinTextures(this, SKIN_IDS, onSkinsLoaded); // other heads load here, not at boot
     this.build();
     enter(this, charactersOrder, this.targets); // MOT-2-R3/R5
   }
@@ -91,7 +97,7 @@ export class CharactersScene extends Phaser.Scene {
     // Stage: podium, hero tube and head.
     const sx = d3(l.stage.x), sy = d3(l.stage.y + l.stage.h - C.stageH + C.hero.dy);
     blk.add(card(this, d3(l.podium.x), d3(l.podium.y), d3m(l.podium.w), d3m(l.podium.h)));
-    const hero = this.drawHero(v.preview, sx, sy); blk.add(hero); this.targets.hero = hero;
+    const hero = this.drawHero(v.preview, sx, sy, cx, d3(l.stage.y + l.stage.h / 2)); blk.add(hero); this.targets.hero = hero;
     // Ribbon with the skin name, rarity chip and perk.
     const r = l.ribbon, rw = d3(r.w), rh = d3(r.h), ry = d3(r.y + r.h / 2);
     const rimg = (state: 'lip' | 'rest', y: number) => this.add.image(0, y, skinTexture(host, 'ribbon', 'ribbon', rw, rh, state, unit));
@@ -128,18 +134,19 @@ export class CharactersScene extends Phaser.Scene {
     parent.add(g);
   }
 
-  // R14 tube along the board path in the skin colours, the large head over its end, idle bob (R19).
-  private drawHero(skin: string, sx: number, sy: number): Phaser.GameObjects.Container {
-    const H = C.hero, c = this.add.container(0, 0), g = this.add.graphics(), k = d3(1), id = isSkinId(skin) ? skin : 'snake', pal = SKIN_BODY[id], sh = H.shadow;
-    g.fillStyle(toInt(D.inkDeep), sh.alpha).fillEllipse(sx + sh.x * k, sy + sh.y * k, 2 * sh.rx * k, 2 * sh.ry * k);
+  // R14 tube along the board path in the skin colours, the large head over its end, idle bob (R19). Centred at (ox, oy) so popIn scales from the hero centre.
+  private drawHero(skin: string, sx: number, sy: number, ox: number, oy: number): Phaser.GameObjects.Container {
+    const H = C.hero, c = this.add.container(ox, oy), g = this.add.graphics(), k = d3(1), id = isSkinId(skin) ? skin : 'snake', pal = SKIN_BODY[id], sh = H.shadow;
+    const dx = sx - ox, dy = sy - oy;
+    g.fillStyle(toInt(D.inkDeep), sh.alpha).fillEllipse(dx + sh.x * k, dy + sh.y * k, 2 * sh.rx * k, 2 * sh.ry * k);
     const pts = heroPath();
     for (const [col, w] of [[pal?.outline ?? D.outline.snake, H.outlineW], [pal?.body ?? D.snake.body, H.bodyW]] as const) {
-      g.fillStyle(toInt(col)); for (const p of pts) g.fillCircle(sx + p.x * k, sy + p.y * k, w * k / 2);
+      g.fillStyle(toInt(col)); for (const p of pts) g.fillCircle(dx + p.x * k, dy + p.y * k, w * k / 2);
     }
     c.add(g);
     const key = headKey(id, 'idle', 'large');
     if (this.textures.exists(key)) {
-      const head = this.add.image(sx + H.head.x * k, sy + H.head.y * k, key).setDisplaySize(H.head.w * k, H.head.w * k).setName('chars-hero');
+      const head = this.add.image(dx + H.head.x * k, dy + H.head.y * k, key).setDisplaySize(H.head.w * k, H.head.w * k).setName('chars-hero');
       c.add(head);
       if (!reduceMotion()) {
         const tw = this.tweens.add({ targets: head, y: head.y - H.bob * k, angle: H.tilt, duration: H.idleMs, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });

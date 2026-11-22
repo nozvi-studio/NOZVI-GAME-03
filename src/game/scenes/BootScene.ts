@@ -33,7 +33,7 @@ export class BootScene extends Phaser.Scene {
     this.preloaded = isArtPreview(typeof location === 'undefined' ? '' : location.search) ? SKIN_IDS : [activeSkin()];
     preloadSkins(this.load, this.preloaded); preloadHudIcons(this.load);
     this.buildView(); // P3b3-R12 logo, hero and progress bar are drawn while assets load
-    this.load.on('progress', (p: number) => this.setProgress(p));
+    this.load.on('progress', this.setProgress);
   }
   private setProgress = (p: number): void => { this.view?.(bootView(p)); };
 
@@ -55,6 +55,7 @@ export class BootScene extends Phaser.Scene {
   }
   // GDD-13 validate config, then create the run session (P1-D1) and open Home.
   create(): void {
+    this.load?.off?.('progress', this.setProgress);
     this.setProgress(1);
     const balance = withTerrain(parseBalance(structuredClone(json)), structuredClone(terrainJson));
     this.registry.set('balance', balance);
