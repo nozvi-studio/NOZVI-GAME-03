@@ -50,7 +50,7 @@ Each row gets its own spec before its phase is implemented. Status: Implemented 
 | MEC-008 | Checkpoints: milestone levels unlock a later start level for new runs, speed ramp, partial energy carry-over | No full reset after a death; makes energy farming meaningful | P1 | `docs/specs/mechanics/MEC-008-checkpoints.md` | Implemented (P1) |
 | MEC-009 | Run results & marble reward formula | Every run pays out | P4 | to write | Proposed |
 | MEC-010 | Marble machine (pachinko): pegs, bumpers, prize slots, PUSH, public odds, pity | Juicy reward moment; collection driver | P4 | to write | Proposed |
-| MEC-011 | Skins, coins, duplicates, shop, equip | Long-term goal; self-expression | P4 | to write | Proposed |
+| MEC-011 | Skins, coins, duplicates, shop, equip | Long-term goal; self-expression | P4 | `docs/specs/mechanics/MEC-011-skins.md` | Implemented (P4a; duplicates in P4b) |
 | MEC-005 | Wrap zones (edge segments the snake passes through) | Escape routes | — | — | Parked (not in the owner's 2026-11-03 design; see Parking lot) |
 
 ## 3. Controls & input [REQUIRED]
@@ -207,7 +207,7 @@ All meta currency is earned by playing. **No real-money purchases** (owner decis
 - **Skin = chibi head icon + body made of same-colored blocks** that grows like the snake (cheap to produce: one head drawing per skin + a color). First batch (owner 2026-11-16, P4a): Snake (default), Ginger Cat, Pup, Tuxedo Cat (Common), Capybara (Rare). Later batches: e.g. Duck, Frog, Panda, Fox, Pig, Axolotl, Hamster, Mango-cat.
 - Rarity shows in presentation, not power (skins never change gameplay): Common = head + color · Rare = + eat effect / trail particles · Epic = + animated head, custom death reaction and sound.
 - **Coins** buy any skin directly in the shop (Common 300, Rare 800, Epic 2000), so the player always has a deterministic path to the skin they want.
-- Equip from the Characters screen; the equipped skin is shown on Home. Buying a skin equips it at once, with no confirm dialog (MEC-011). Exact rules: `docs/superpowers/specs/2026-11-16-p4a-skins-design.md`.
+- Equip from the Characters screen; the equipped skin is shown on Home. Buying a skin equips it at once, with no confirm dialog (MEC-011). Exact rules: `docs/specs/mechanics/MEC-011-skins.md`.
 - **Reason to come back tomorrow:** **OPEN (owner)** — candidates: daily seeded run with a marble bonus, daily free marbles, endless mode after L30, new skin sets per season.
 
 ### 8.4 Save data (local)

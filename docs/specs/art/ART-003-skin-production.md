@@ -1,5 +1,5 @@
 # ART-003 — Skin production guide (reference: Capybara)
-Status: **Draft — owner has not fully approved (2026-11-07).** Rules for skins (price, rarity, shop) live in GDD §8.3 / MEC-011; this file only says how to make the art.
+Status: **Draft — owner has not fully approved (2026-11-07); three P4a skins (`ginger`, `pup`, `tuxedo`) produced on the shared rig (2026-11-17).** Rules for skins (price, rarity, shop) live in GDD §8.3 / `docs/specs/mechanics/MEC-011-skins.md`; this file only says how to make the art.
 
 ## 1. Inputs per skin
 - One reference image or mood board in `assets/raw/reference/<skin>-*.png` (rights checked before commit).
@@ -31,12 +31,12 @@ Current code is capy-specific: `capyRig.ts` (`capyHeadSvg`, `capyBodySvg`, `CAPY
 - Split into a shared rig (anchors, eye/mouth variants, expression table, builder) + a per-skin definition (palette, ear/muzzle/extra shapes).
 - Keys and preload take a skin id; `CapyHead` becomes a generic head view fed by the selected skin (MEC-011 save).
 - Preview scene lists every skin.
-Done: `art/skins.ts` (ids, palettes, `activeSkin()`), `headSvg/bodySvg(skin, ...)`, `headKey/bodyKey(skin, ...)`, `preloadSkins`, per-skin pose state, preview `&skin=` switch. Still open: the save-backed skin choice (MEC-011, P4) and the `CapyHead`/`capy*.ts` renames.
+Done: `art/skins.ts` (5 ids, palettes, `SKIN_BODY`, `SKIN_EFFECTS`, settable `activeSkin()`), `headSvg/bodySvg(skin, ...)`, `headKey/bodyKey(skin, ...)`, `preloadSkins`/`ensureSkinTextures`, per-skin pose state, preview `&skin=` switch, and save-backed skin choice (MEC-011, P4a). Still open: the `CapyHead`/`capy*.ts` renames.
 
 ## 5. Fallback raster route
 If a skin cannot be drawn well as SVG, use the ART-001 §6 raster pipeline (ART-002 style brief per skin) on the same anchors.
 
 ## 6. Open questions (owner)
 - Q1. Approve this guide as the default for all launch skins?
-- Q2. Order of the next skins (GDD §8.3 proposal: Dog, Cat, then the rest)?
-- Q3. Body block color: one per skin, or derived from the head palette?
+- Q2. ~~Order of the next skins~~ — **Closed (2026-11-16, P4a):** Ginger Cat, Pup, Tuxedo Cat produced on the shared rig alongside Snake and Capybara.
+- Q3. ~~Body block color~~ — **Closed (2026-11-17, P4a):** one explicit body/outline/storm-outline colour set per skin in `SKIN_BODY` (`src/game/art/skins.ts`), contrast-tested across all 6 biomes (`tests/game/boardContrast.test.ts`).
