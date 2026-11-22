@@ -121,7 +121,8 @@
       "goFlashAlpha": 0.2, "goFlashMs": 260, "spawnPuffCount": 5, "spawnPuffLifeMs": 300,
       "turnTiltDeg": 10, "turnMs": 140, "turnBodyBulge": 1.06,
       "sparkleEveryMs": 700, "sparkleLifeMs": 420, "sparkleRadius": 0.2, "sparkleRingRadius": 0.47, "sparkleThickness": 0.06, "sparkleMax": 3
-    }
+    },
+    "skinFx": { "eat": { "count": 6, "lifeMs": 420, "spreadCells": 0.9, "sizeCells": 0.22 }, "trail": { "everyMs": 140, "lifeMs": 700, "max": 10, "sizeCells": 0.2, "driftCells": 0.25 } }
   },
   "motion": {
     "tapDownMs": 80, "tapUpMs": 180, "pressScale": 0.94, "releaseOvershoot": 1.06, "hoverScale": 1.03, "reducedPressAlpha": 0.85,

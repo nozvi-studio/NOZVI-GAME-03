@@ -131,6 +131,10 @@ export interface Balance {
       turnTiltDeg: number; turnMs: number; turnBodyBulge: number;
       sparkleEveryMs: number; sparkleLifeMs: number; sparkleRadius: number; sparkleRingRadius: number; sparkleThickness: number; sparkleMax: number;
     };
+    skinFx: {
+      eat: { count: number; lifeMs: number; spreadCells: number; sizeCells: number };
+      trail: { everyMs: number; lifeMs: number; max: number; sizeCells: number; driftCells: number };
+    };
   };
   motion: MotionBalance;
 }
@@ -277,6 +281,10 @@ const SPEC: Spec = {
       goFlashAlpha: 'prob', goFlashMs: 'int+', spawnPuffCount: 'int0', spawnPuffLifeMs: 'int+',
       turnTiltDeg: 'num0', turnMs: 'int+', turnBodyBulge: 'num+',
       sparkleEveryMs: 'int+', sparkleLifeMs: 'int+', sparkleRadius: 'prob', sparkleRingRadius: 'prob', sparkleThickness: 'prob', sparkleMax: 'int+',
+    },
+    skinFx: {
+      eat: { count: 'int+', lifeMs: 'int+', spreadCells: 'num+', sizeCells: 'num+' },
+      trail: { everyMs: 'int+', lifeMs: 'int+', max: 'int+', sizeCells: 'num+', driftCells: 'num0' },
     },
   },
   motion: {
