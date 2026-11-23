@@ -20,13 +20,19 @@ export function createPhaserPort(game: Phaser.Game): PhaserPort {
   const activeScene = (): Phaser.Scene | undefined =>
     game.scene.getScenes(true)[0] ?? game.scene.getScene('Home') ?? game.scene.getScene('Boot');
 
+  // uiHost may sleep the Phaser loop while a DOM screen is up; loader and scene
+  // transitions need ticks, so wake it before any Phaser work (else deadlock).
+  const wake = (): void => { (game as { loop?: { wake?: () => void } }).loop?.wake?.(); };
+
   return {
     ensureSkins(skins: readonly SkinId[], done: () => void): void {
+      wake();
       const sc = activeScene();
       if (!sc) { done(); return; }
       ensureSkinTextures(sc, skins, done);
     },
     startScene(key, data): void {
+      wake();
       const sc = activeScene();
       if (!sc) return;
       if (key === 'Game') {

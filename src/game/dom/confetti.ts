@@ -19,9 +19,9 @@ const SHAPES = ['circle', 'bar', 'star'] as const;
 type Shape = (typeof SHAPES)[number];
 
 const SHAPE_SVG: Record<Shape, string> = {
-  circle: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="10" height="10"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>',
-  bar: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 8" width="12" height="7"><rect x="1" y="1" width="12" height="6" rx="3" fill="currentColor"/></svg>',
-  star: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" width="12" height="12"><path d="M7 0.5L8.9 5.1L13.5 7L8.9 8.9L7 13.5L5.1 8.9L0.5 7L5.1 5.1Z" fill="currentColor"/></svg>',
+  circle: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="14" height="14"><circle cx="6" cy="6" r="5" fill="currentColor"/></svg>',
+  bar: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 8" width="16" height="9"><rect x="1" y="1" width="12" height="6" rx="3" fill="currentColor"/></svg>',
+  star: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" width="16" height="16"><path d="M7 0.5L8.9 5.1L13.5 7L8.9 8.9L7 13.5L5.1 8.9L0.5 7L5.1 5.1Z" fill="currentColor"/></svg>',
 };
 
 // D4-P2-R5 zero-dependency celebration particles.

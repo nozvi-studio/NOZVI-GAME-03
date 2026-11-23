@@ -56,6 +56,16 @@ describe('D4-P2-R2 tapered ribbon', () => {
     const deg = { p0: { x: 10, y: 10 }, c1: { x: 10, y: 10 }, c2: { x: 10, y: 10 }, p3: { x: 10, y: 10 } };
     expect(bezierTangent(deg, 0)).toEqual({ x: 1, y: 0 });
   });
+
+  it('D4-P2-R2 neck and tail end-cap arcs use sweep-flag 0 so caps bulge outward (no fishtail/chin notch)', () => {
+    const r = taperedRibbon(HERO.spine, HERO.widthNeck, HERO.widthTail, HERO.samples);
+    const arcs = [...r.path.matchAll(/A(\S+) (\S+) (\S+) (\S+) (\S+) /g)];
+    expect(arcs).toHaveLength(2);
+    for (const a of arcs) {
+      expect(a[4]).toBe('0'); // large-arc
+      expect(a[5]).toBe('0'); // sweep
+    }
+  });
 });
 
 describe('D4-P2-R2 hero svg', () => {

@@ -100,8 +100,9 @@ export function createHomeScreen(deps: HomeScreenDeps = {}): ScreenRender {
     const heroWrap = el('div', 'd4-home-hero-wrap');
     const hero = createHeroStage(heroWrap, { skin: activeSkin(), clock });
     hero.el.addEventListener('pointerdown', () => synth.play('uiTap'));
+    heroWrap.appendChild(bubble); // anchored above the hero head, not the mango+hero row
     stageRow.append(mango, heroWrap);
-    heroSection.append(bubble, stageRow);
+    heroSection.append(stageRow);
 
     // Primary PLAY CTA + Passive Status Pill
     const actions = el('div', 'd4-home-actions');

@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(ui): D4-P3 QA fixes — `phaserPort` wakes a slept Phaser loop before `ensureSkins`/`startScene` (goTo deadlock), outward end-cap arcs in `taperedRibbon` (no fishtail/chin notch), non-shrinking icon buttons and centered 3-column Characters header with debug pill under coins, Home bubble anchored above the hero head and darker MANGO wordmark, larger confetti, inline SVG favicon.
 - feat(ui): D4-P3 live DOM Characters & Simplified Home screens (`bridge.ts`, `screenParts.ts`, `screens.css`, `charactersScreen.ts`, `homeScreen.ts`, `installSummarize.ts`), thin `HomeScene`/`CharactersScene` shims via `phaserPort.ts`, `ensureSkinTextures` preload guard on `startRun`/`beginRun`, `#FAF9F5` boot background (`TOKENS.d4.bg`), and simplified `homeModel` per owner ruling (D4-P3-R1..R3, MEC-008-R4).
 - docs: Claude CLI implementation plan for `D4-P4` (`docs/superpowers/plans/2026-11-23-d4-p4-menus-and-overlays.md`).
 - feat(art,ui): D4-P2 Duolingo vector rig & 3-tier motion — flat cel-shaded skins (`skins.ts`, `capyRig.ts`, zero SVG ids, dual catchlights, capy leaf), pure tapered Bezier `heroSvg.ts`, `motionTokens.ts`, injectable `clock.ts`, `motion.css`, live `heroStage.ts` (breathing, auto-blink, eye tracking, poke/celebrate/denied/hurt), `animate.ts` (`staggerEnter`, `countUp`, `shakeDenied`), `confetti.ts` (`CelebrationFx`), and live 5-skin `stylebook.html` preview (D4-P2-R1..R5).

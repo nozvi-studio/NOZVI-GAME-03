@@ -32,6 +32,27 @@ describe('D4-P3-R3 PhaserPort and beginRun skin texture preload', () => {
     expect(done).toHaveBeenCalledTimes(1);
   });
 
+  it('D4-P3-R3 ensureSkins and startScene wake a slept Phaser loop before doing Phaser work', () => {
+    const order: string[] = [];
+    const fakeScene = { textures: { exists: () => false }, load: {} };
+    const game = {
+      loop: { wake: vi.fn(() => order.push('wake')) },
+      scene: {
+        getScenes: () => { order.push('getScenes'); return [fakeScene]; },
+        getScene: () => fakeScene,
+      },
+    };
+    h.goTo.mockImplementation(() => order.push('goTo'));
+    const port = createPhaserPort(game as never);
+    port.ensureSkins(['capy'], () => {});
+    expect(order.slice(0, 2)).toEqual(['wake', 'getScenes']);
+    expect(h.ensureCalls).toHaveLength(1);
+    order.length = 0;
+    port.startScene('Characters', undefined);
+    expect(order).toEqual(['wake', 'getScenes', 'goTo']);
+    expect(game.loop.wake).toHaveBeenCalledTimes(2);
+  });
+
   it('D4-P3-R3 beginRun preloads the active skin before starting Game', () => {
     setActiveSkin('ginger');
     const startRun = vi.fn();

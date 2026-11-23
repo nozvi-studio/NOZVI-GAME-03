@@ -56,9 +56,9 @@ export function taperedRibbon(c: CubicCurve, w0: number, w1: number, samples: nu
   const l0 = left[0]!, rEnd = right[steps]!, lEnd = left[steps]!, r0 = right[0]!;
   let d = `M${fmt(l0.x)} ${fmt(l0.y)}`;
   for (let i = 1; i <= steps; i++) d += ` L${fmt(left[i]!.x)} ${fmt(left[i]!.y)}`;
-  d += ` A${fmt(rTail)} ${fmt(rTail)} 0 0 1 ${fmt(rEnd.x)} ${fmt(rEnd.y)}`;
+  d += ` A${fmt(rTail)} ${fmt(rTail)} 0 0 0 ${fmt(rEnd.x)} ${fmt(rEnd.y)}`;
   for (let i = steps - 1; i >= 0; i--) d += ` L${fmt(right[i]!.x)} ${fmt(right[i]!.y)}`;
-  d += ` A${fmt(rNeck)} ${fmt(rNeck)} 0 0 1 ${fmt(l0.x)} ${fmt(l0.y)} Z`;
+  d += ` A${fmt(rNeck)} ${fmt(rNeck)} 0 0 0 ${fmt(l0.x)} ${fmt(l0.y)} Z`;
   void lEnd;
   return { left, right, path: d };
 }
