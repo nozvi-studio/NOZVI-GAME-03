@@ -1,0 +1,311 @@
+/* D4-P1-R3 tactile flat primitives — colours only via tokens.css vars. */
+
+#ui-root {
+  position: fixed;
+  z-index: 2;
+  pointer-events: none;
+  box-sizing: border-box;
+  font-family: var(--font-ui);
+  color: var(--d4-ink);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#ui-root *,
+#ui-root *::before,
+#ui-root *::after {
+  box-sizing: border-box;
+}
+
+#ui-root [data-ui-active] {
+  pointer-events: auto;
+  width: 100%;
+  height: 100%;
+}
+
+/* Tactile Flat Button */
+.d4-btn {
+  --face: var(--d4-green-face);
+  --lip-color: var(--d4-green-lip);
+  --ink: var(--d4-card);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: var(--hit-min);
+  padding: 0 var(--sp-4);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--face);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 var(--lip) 0 var(--lip-color);
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+
+.d4-btn:active,
+.d4-btn.is-pressed {
+  transform: translateY(2px);
+  box-shadow: 0 var(--lip-pressed) 0 var(--lip-color);
+}
+
+.d4-btn--cta {
+  min-height: 56px;
+  width: 100%;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.d4-btn--green {
+  --face: var(--d4-green-face);
+  --lip-color: var(--d4-green-lip);
+  --ink: var(--d4-card);
+}
+
+.d4-btn--gold {
+  --face: var(--d4-gold-face);
+  --lip-color: var(--d4-gold-lip);
+  --ink: var(--d4-gold-ink);
+}
+
+.d4-btn--sky {
+  --face: var(--d4-sky-face);
+  --lip-color: var(--d4-sky-lip);
+  --ink: var(--d4-card);
+}
+
+.d4-btn--purple {
+  --face: var(--d4-purple-face);
+  --lip-color: var(--d4-purple-lip);
+  --ink: var(--d4-card);
+}
+
+.d4-btn--red {
+  --face: var(--d4-red-face);
+  --lip-color: var(--d4-red-lip);
+  --ink: var(--d4-card);
+}
+
+.d4-btn--neutral {
+  --face: var(--d4-card);
+  --lip-color: var(--d4-border-strong);
+  --ink: var(--d4-ink);
+  border: 2px solid var(--d4-border);
+}
+
+.d4-btn--disabled,
+.d4-btn:disabled {
+  background: var(--d4-disabled-bg);
+  color: var(--d4-disabled-ink);
+  border: 0;
+  box-shadow: none;
+  cursor: default;
+}
+
+.d4-btn--disabled:active,
+.d4-btn--disabled.is-pressed,
+.d4-btn:disabled:active,
+.d4-btn:disabled.is-pressed {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Round Icon Button */
+.d4-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--hit-min);
+  height: var(--hit-min);
+  padding: 0;
+  border: 2px solid var(--d4-border);
+  border-radius: var(--radius-pill);
+  background: var(--d4-card);
+  color: var(--d4-ink);
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 3px 0 var(--d4-border);
+  transition: transform 90ms ease, box-shadow 90ms ease;
+}
+
+.d4-icon-btn:active,
+.d4-icon-btn.is-pressed {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--d4-border);
+}
+
+/* Passive Status Chip (no drop lip — never mimics a clickable button) */
+.d4-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 32px;
+  padding: var(--sp-1) var(--sp-3);
+  border: 1.5px solid var(--d4-border);
+  border-radius: var(--radius-pill);
+  background: var(--d4-surface);
+  color: var(--d4-ink);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.d4-chip--gold {
+  background: var(--d4-gold-tint);
+  border-color: var(--d4-gold-face);
+  color: var(--d4-gold-ink);
+}
+
+.d4-chip--sky {
+  background: var(--d4-sky-tint);
+  border-color: var(--d4-sky-face);
+  color: var(--d4-sky-lip);
+}
+
+.d4-chip--purple {
+  background: var(--d4-purple-tint);
+  border-color: var(--d4-purple-face);
+  color: var(--d4-purple-lip);
+}
+
+.d4-chip--green {
+  background: var(--d4-green-tint);
+  border-color: var(--d4-green-face);
+  color: var(--d4-green-lip);
+}
+
+.d4-chip--red {
+  background: var(--d4-red-tint);
+  border-color: var(--d4-red-face);
+  color: var(--d4-red-lip);
+}
+
+/* Tactile Card (4px depth; nested cards lose borders/depth) */
+.d4-card {
+  background: var(--d4-card);
+  border: 2px solid var(--d4-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 var(--lip) 0 var(--d4-border);
+  padding: var(--sp-4);
+}
+
+.d4-card .d4-card {
+  border: 0;
+  box-shadow: none;
+}
+
+/* Mascot Speech Bubble */
+.d4-bubble {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-2) var(--sp-3);
+  border: 2px solid var(--d4-border);
+  border-radius: var(--radius-md);
+  background: var(--d4-card);
+  color: var(--d4-ink);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.d4-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 10px;
+  height: 10px;
+  background: var(--d4-card);
+  border-right: 2px solid var(--d4-border);
+  border-bottom: 2px solid var(--d4-border);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* Flat Duolingo-Style Pill Toggle */
+.d4-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 52px;
+  height: 30px;
+  padding: 3px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--d4-disabled-bg);
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+
+.d4-toggle::after {
+  content: '';
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  background: var(--d4-card);
+  transform: translateX(0);
+  transition: transform 180ms ease;
+}
+
+.d4-toggle[aria-checked='true'] {
+  background: var(--d4-green-face);
+}
+
+.d4-toggle[aria-checked='true']::after {
+  transform: translateX(22px);
+}
+
+/* Typography Helpers */
+.d4-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  text-shadow: 0 3px 0 var(--d4-border-strong);
+}
+
+.d4-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle Tropical Leaf & Mango Silhouette Backdrop (3.5% opacity) */
+.d4-backdrop-pattern {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--d4-bg);
+}
+
+.d4-backdrop-pattern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-repeat: repeat;
+  background-size: 96px 96px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cpath d='M24 18c8 0 14 7 14 16 0 10-7 17-15 17-7 0-13-6-13-15 0-10 6-18 14-18Z' fill='%233C3C3C'/%3E%3Cpath d='M26 15c3-5 8-7 13-6-2 5-6 8-13 6Z' fill='%233C3C3C'/%3E%3Cpath d='M64 56c10-2 19 4 21 13-9 4-19 1-23-7-1-2-1-5 2-6Z' fill='%233C3C3C'/%3E%3C/svg%3E");
+}
+
+/* Reduced Motion Override */
+.reduced-motion,
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  transition: none !important;
+  animation: none !important;
+}

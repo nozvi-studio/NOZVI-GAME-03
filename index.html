@@ -9,12 +9,14 @@
   @font-face { font-family: Nunito; font-weight: 800; font-display: swap; src: url(/fonts/nunito-latin-800.woff2) format('woff2'); }
   @font-face { font-family: Nunito; font-weight: 900; font-display: swap; src: url(/fonts/nunito-latin-900.woff2) format('woff2'); }
   @font-face { font-family: 'Lilita One'; font-weight: 400; font-display: swap; src: url(/fonts/lilita-one-latin-400.woff2) format('woff2'); }
-  html, body { margin: 0; height: 100%; background: #1F86D8; overscroll-behavior: none; }
+  /* Matches --d4-bg before tokens.css finishes loading. */
+  html, body { margin: 0; height: 100%; background: #FAF9F5; overscroll-behavior: none; }
   #game { width: 100vw; height: 100dvh; touch-action: none; user-select: none; -webkit-user-select: none; }
 </style>
 </head>
 <body>
 <div id="game"></div>
+<div id="ui-root" aria-live="polite"></div>
 <script type="module" src="/src/game/main.ts"></script>
 </body>
 </html>

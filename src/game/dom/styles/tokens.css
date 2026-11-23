@@ -1,0 +1,63 @@
+/* D4-P1-R2 / R4 Duolingo Modern tokens — single source for every D4 colour. */
+:root {
+  /* 60% Warm Neutral Canvas & Surfaces */
+  --d4-bg: #FAF9F5;
+  --d4-surface: #F2EFE9;
+  --d4-card: #FFFFFF;
+  --d4-border: #E5E2DC;
+  --d4-border-strong: #D2CEC6;
+
+  /* 30% Ink & Passive States */
+  --d4-ink: #3C3C3C;
+  --d4-ink-muted: #777777;
+  --d4-disabled-bg: #E5E2DC;
+  --d4-disabled-ink: #AFAFAF;
+
+  /* 10% Semantic Accents (face / 4px lip / light tint) */
+  --d4-green-face: #58CC02;
+  --d4-green-lip: #46A302;
+  --d4-green-tint: #D7FFB8;
+
+  --d4-gold-face: #FFC800;
+  --d4-gold-lip: #E5A400;
+  --d4-gold-tint: #FFF5CC;
+  --d4-gold-ink: #6B4400;
+
+  --d4-sky-face: #1CB0F6;
+  --d4-sky-lip: #1899D6;
+  --d4-sky-tint: #DDF4FF;
+
+  --d4-purple-face: #CE82FF;
+  --d4-purple-lip: #A568CC;
+  --d4-purple-tint: #F3E5FF;
+
+  --d4-red-face: #FF4B4B;
+  --d4-red-lip: #EA2B2B;
+  --d4-red-tint: #FFDFE0;
+
+  /* 8pt Spacing Scale */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+
+  /* Typography */
+  --font-display: 'Lilita One', Nunito, sans-serif;
+  --font-ui: Nunito, system-ui, sans-serif;
+
+  /* Shape & Tactile Depth */
+  --radius-md: 16px;
+  --radius-pill: 999px;
+  --lip: 4px;
+  --lip-pressed: 2px;
+  --hit-min: 48px;
+
+  /* Stage Sync Defaults (overwritten by stageSync.ts) */
+  --stage-w: 360px;
+  --stage-h: 640px;
+  --stage-scale: 1;
+  --board-top: 0%;
+  --board-h: 100%;
+}

@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mango Snake — D4 Duolingo Modern Stylebook</title>
+<link rel="stylesheet" href="../../../../src/game/dom/styles/tokens.css">
+<link rel="stylesheet" href="../../../../src/game/dom/styles/components.css">
+<style>
+  @font-face { font-family: Nunito; font-weight: 700; font-display: swap; src: url(/fonts/nunito-latin-700.woff2) format('woff2'); }
+  @font-face { font-family: Nunito; font-weight: 800; font-display: swap; src: url(/fonts/nunito-latin-800.woff2) format('woff2'); }
+  @font-face { font-family: Nunito; font-weight: 900; font-display: swap; src: url(/fonts/nunito-latin-900.woff2) format('woff2'); }
+  @font-face { font-family: 'Lilita One'; font-weight: 400; font-display: swap; src: url(/fonts/lilita-one-latin-400.woff2) format('woff2'); }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: var(--sp-6);
+    background: var(--d4-surface);
+    color: var(--d4-ink);
+    font-family: var(--font-ui);
+  }
+  .sb-wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: var(--sp-6); }
+  .sb-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-4); }
+  .sb-section { display: grid; gap: var(--sp-4); }
+  .sb-section h2 { margin: 0; font-size: 18px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; color: var(--d4-ink-muted); }
+
+  .sb-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--sp-3); }
+  .sb-swatch { border-radius: var(--radius-md); overflow: hidden; border: 2px solid var(--d4-border); background: var(--d4-card); }
+  .sb-swatch__color { height: 56px; border-bottom: 2px solid var(--d4-border); }
+  .sb-swatch__meta { padding: var(--sp-2) var(--sp-3); font-size: 12px; font-weight: 800; display: grid; gap: 2px; }
+  .sb-swatch__hex { color: var(--d4-ink-muted); font-variant-numeric: tabular-nums; }
+
+  .sb-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
+  .sb-icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: var(--sp-2); }
+  .sb-icon-tile { display: grid; justify-items: center; gap: var(--sp-1); padding: var(--sp-3) var(--sp-2); border-radius: var(--radius-md); background: var(--d4-card); border: 2px solid var(--d4-border); font-size: 11px; font-weight: 800; color: var(--d4-ink-muted); }
+  .sb-icon-tile svg { color: var(--d4-ink); }
+
+  .sb-phones { display: flex; flex-wrap: wrap; gap: var(--sp-6); align-items: flex-start; }
+  .sb-phone-group { display: grid; gap: var(--sp-2); }
+  .sb-phone-label { font-size: 13px; font-weight: 900; color: var(--d4-ink-muted); }
+  .sb-phone-pair { display: flex; flex-wrap: wrap; gap: var(--sp-4); }
+  .sb-phone {
+    border-radius: 28px;
+    border: 4px solid var(--d4-border-strong);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--d4-bg);
+    box-shadow: 0 8px 0 var(--d4-border);
+  }
+  .sb-phone--640 { width: 360px; height: 640px; }
+  .sb-phone--780 { width: 360px; height: 780px; }
+
+  /* Mockup Screen Layout */
+  .mk-screen { flex: 1; display: flex; flex-direction: column; padding: var(--sp-3) var(--sp-4) var(--sp-4); gap: var(--sp-3); }
+  .mk-header { display: flex; align-items: center; justify-content: space-between; min-height: 48px; gap: var(--sp-2); }
+  .mk-header-title { font-size: 20px; font-weight: 900; color: var(--d4-ink); }
+  .mk-stage {
+    flex: 1;
+    min-height: 180px;
+    max-height: 260px;
+    margin: auto 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    position: relative;
+  }
+  .mk-halo {
+    width: 148px;
+    height: 148px;
+    border-radius: var(--radius-pill);
+    background: var(--d4-sky-tint);
+    display: grid;
+    place-items: center;
+    border: 2px solid var(--d4-border);
+  }
+  .mk-halo--rare { background: var(--d4-purple-tint); }
+  .mk-placeholder-mascot {
+    width: 92px;
+    height: 92px;
+    border-radius: var(--radius-pill);
+    background: var(--d4-green-face);
+    border: 4px solid var(--d4-green-lip);
+    display: grid;
+    place-items: center;
+    color: var(--d4-card);
+    font-weight: 900;
+    font-size: 13px;
+  }
+  .mk-identity { text-align: center; display: grid; gap: var(--sp-1); justify-items: center; }
+  .mk-identity-row { display: flex; align-items: center; gap: var(--sp-2); }
+  .mk-skin-name { font-size: 24px; font-weight: 900; }
+  .mk-perk { font-size: 13px; font-weight: 700; color: var(--d4-ink-muted); }
+
+  .mk-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); }
+  .mk-tile {
+    position: relative;
+    height: 72px;
+    padding: var(--sp-1) var(--sp-2);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--d4-border);
+    background: var(--d4-card);
+    box-shadow: 0 3px 0 var(--d4-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    cursor: pointer;
+    font-family: var(--font-ui);
+    color: var(--d4-ink);
+  }
+  .mk-tile--selected { border-color: var(--d4-sky-face); background: var(--d4-sky-tint); box-shadow: 0 3px 0 var(--d4-sky-lip); }
+  .mk-tile__badge { position: absolute; top: 5px; right: 5px; width: 18px; height: 18px; border-radius: var(--radius-pill); display: grid; place-items: center; background: var(--d4-surface); color: var(--d4-ink-muted); }
+  .mk-tile__badge--ok { background: var(--d4-green-face); color: var(--d4-card); }
+  .mk-tile__dot { width: 32px; height: 32px; border-radius: var(--radius-pill); background: var(--d4-surface); border: 2px solid var(--d4-border-strong); display: grid; place-items: center; font-size: 11px; font-weight: 900; }
+  .mk-tile__foot { font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 3px; color: var(--d4-ink-muted); }
+
+  .mk-wordmark { text-align: center; display: grid; gap: 2px; }
+  .mk-wordmark__top { font-size: 46px; color: var(--d4-gold-face); }
+  .mk-wordmark__bot { font-size: 40px; color: var(--d4-ink); }
+  .mk-home-footer { display: grid; gap: var(--sp-3); justify-items: center; }
+</style>
+</head>
+<body>
+<div class="sb-wrap">
+  <header class="sb-header">
+    <div>
+      <h1 class="d4-title" style="font-size: 36px;">D4 DUOLINGO MODERN</h1>
+      <div style="font-weight: 800; color: var(--d4-ink-muted);">Mango Snake — Phase 1 Visual Stylebook (live tokens.css + components.css + icons.ts)</div>
+    </div>
+    <label class="d4-chip" style="gap: var(--sp-3); padding: var(--sp-2) var(--sp-3);">
+      <span>Reduced motion</span>
+      <button type="button" class="d4-toggle" role="switch" aria-checked="false" data-qa="sb-reduced-motion" aria-label="Toggle reduced motion"></button>
+    </label>
+  </header>
+
+  <section class="sb-section d4-card" data-qa="sb-palette">
+    <h2>1. Warm 60-30-10 Palette</h2>
+    <div class="sb-swatches" id="swatch-grid"></div>
+  </section>
+
+  <section class="sb-section d4-card" data-qa="sb-type">
+    <h2>2. Typography Ladder</h2>
+    <div class="sb-row" style="align-items: baseline; gap: var(--sp-6);">
+      <span class="d4-title" style="font-size: 40px; color: var(--d4-gold-face);">MANGO SNAKE</span>
+      <span class="d4-title" style="font-size: 32px; color: var(--d4-green-face);">NEW BEST!</span>
+      <span class="d4-title" style="font-size: 32px; color: var(--d4-sky-face);">VICTORY!</span>
+      <span class="d4-title" style="font-size: 32px; color: var(--d4-red-face);">GAME OVER</span>
+    </div>
+    <div style="display: grid; gap: var(--sp-2);">
+      <div style="font-size: 24px; font-weight: 900;">Heading 24px / Nunito 900 — Capybara</div>
+      <div style="font-size: 16px; font-weight: 800;">Body &amp; Button 16px / Nunito 800 — Pick your companion</div>
+      <div style="font-size: 13px; font-weight: 700; color: var(--d4-ink-muted);">Caption &amp; Perk 13px / Nunito 700 muted — Sparkle bite · Leaf trail (zero text-stroke)</div>
+      <div class="d4-num" style="font-size: 28px; font-weight: 900;">Tabular Numerals: 00,450 · 01,280 · 99,999</div>
+    </div>
+  </section>
+
+  <section class="sb-section d4-card" data-qa="sb-components">
+    <h2>3. Tactile Flat Components</h2>
+    <div class="sb-row">
+      <button type="button" class="d4-btn d4-btn--green" data-qa="sb-btn-green"><span data-icon="play" data-size="18"></span> Play</button>
+      <button type="button" class="d4-btn d4-btn--gold" data-qa="sb-btn-gold"><span data-icon="coin" data-size="18"></span> Buy 300</button>
+      <button type="button" class="d4-btn d4-btn--sky" data-qa="sb-btn-sky"><span data-icon="bolt" data-size="18"></span> Skill</button>
+      <button type="button" class="d4-btn d4-btn--purple" data-qa="sb-btn-purple"><span data-icon="star" data-size="18"></span> Rare</button>
+      <button type="button" class="d4-btn d4-btn--red" data-qa="sb-btn-red">Quit run</button>
+      <button type="button" class="d4-btn d4-btn--neutral" data-qa="sb-btn-neutral"><span data-icon="home" data-size="18"></span> Home</button>
+      <button type="button" class="d4-btn d4-btn--disabled" disabled data-qa="sb-btn-disabled"><span data-icon="check" data-size="18"></span> Equipped</button>
+    </div>
+    <div class="sb-row">
+      <button type="button" class="d4-icon-btn" data-qa="sb-icon-back" aria-label="Back"><span data-icon="back"></span></button>
+      <button type="button" class="d4-icon-btn" data-qa="sb-icon-chars" aria-label="Characters"><span data-icon="characters"></span></button>
+      <button type="button" class="d4-icon-btn" data-qa="sb-icon-settings" aria-label="Settings"><span data-icon="settings"></span></button>
+      <span class="d4-chip"><span data-icon="flag" data-size="16"></span> Next checkpoint at L10</span>
+      <span class="d4-chip d4-chip--gold"><span data-icon="coin" data-size="16"></span> 1,250</span>
+      <span class="d4-chip d4-chip--sky"><span data-icon="bolt" data-size="16"></span> 40</span>
+      <span class="d4-chip d4-chip--purple"><span data-icon="star" data-size="14"></span> Rare</span>
+      <span class="d4-bubble">Ready for L10!</span>
+      <button type="button" class="d4-toggle" role="switch" aria-checked="true" data-qa="sb-toggle-demo" aria-label="Sound toggle demo"></button>
+    </div>
+    <div class="d4-card d4-backdrop-pattern" style="padding: var(--sp-4);">
+      <div style="font-weight: 800; margin-bottom: var(--sp-2);">Outer tactile card (4px depth) with tropical backdrop pattern</div>
+      <div class="d4-card" style="background: var(--d4-surface); padding: var(--sp-3);">Nested `.d4-card` automatically drops border &amp; shadow (no boxes-in-boxes).</div>
+    </div>
+  </section>
+
+  <section class="sb-section d4-card" data-qa="sb-icons">
+    <h2>4. Inline SVG Icon Kit (22 icons from icons.ts)</h2>
+    <div class="sb-icons" id="icon-grid"></div>
+  </section>
+
+  <section class="sb-section">
+    <h2>5. Phone Mockups — Characters &amp; Home (360×640 &amp; 360×780)</h2>
+    <div class="sb-phones">
+      <div class="sb-phone-group" data-qa="sb-mock-640">
+        <div class="sb-phone-label">Compact Phone — 360×640</div>
+        <div class="sb-phone-pair" id="pair-640"></div>
+      </div>
+      <div class="sb-phone-group" data-qa="sb-mock-780">
+        <div class="sb-phone-label">Modern Tall Phone — 360×780</div>
+        <div class="sb-phone-pair" id="pair-780"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<template id="tpl-characters">
+  <div class="mk-screen d4-backdrop-pattern" data-qa="mk-characters">
+    <div class="mk-header">
+      <button type="button" class="d4-icon-btn" data-qa="mk-chars-back" aria-label="Back"><span data-icon="back"></span></button>
+      <div class="mk-header-title">Characters</div>
+      <span class="d4-chip d4-chip--gold"><span data-icon="coin" data-size="16"></span> 450</span>
+    </div>
+    <div class="mk-stage">
+      <span class="d4-bubble">Tap me!</span>
+      <div class="mk-halo mk-halo--rare"><div class="mk-placeholder-mascot">CAPY P2</div></div>
+    </div>
+    <div class="mk-identity">
+      <div class="mk-identity-row">
+        <span class="mk-skin-name">Capybara</span>
+        <span class="d4-chip d4-chip--purple"><span data-icon="star" data-size="13"></span> Rare</span>
+      </div>
+      <div class="mk-perk">Sparkle bite · Leaf trail</div>
+    </div>
+    <div class="mk-grid">
+      <button type="button" class="mk-tile" data-qa="mk-skin-snake">
+        <span class="mk-tile__badge mk-tile__badge--ok"><span data-icon="check" data-size="11"></span></span>
+        <span class="mk-tile__dot">SNK</span>
+        <span class="mk-tile__foot">Equipped</span>
+      </button>
+      <button type="button" class="mk-tile" data-qa="mk-skin-ginger">
+        <span class="mk-tile__badge"><span data-icon="lock" data-size="11"></span></span>
+        <span class="mk-tile__dot">GNG</span>
+        <span class="mk-tile__foot"><span data-icon="coin" data-size="11"></span>300</span>
+      </button>
+      <button type="button" class="mk-tile" data-qa="mk-skin-pup">
+        <span class="mk-tile__badge"><span data-icon="lock" data-size="11"></span></span>
+        <span class="mk-tile__dot">PUP</span>
+        <span class="mk-tile__foot"><span data-icon="coin" data-size="11"></span>300</span>
+      </button>
+      <button type="button" class="mk-tile" data-qa="mk-skin-tuxedo">
+        <span class="mk-tile__badge"><span data-icon="lock" data-size="11"></span></span>
+        <span class="mk-tile__dot">TUX</span>
+        <span class="mk-tile__foot"><span data-icon="coin" data-size="11"></span>300</span>
+      </button>
+      <button type="button" class="mk-tile mk-tile--selected" data-qa="mk-skin-capy">
+        <span class="mk-tile__badge"><span data-icon="lock" data-size="11"></span></span>
+        <span class="mk-tile__dot">CPY</span>
+        <span class="mk-tile__foot"><span data-icon="coin" data-size="11"></span>800</span>
+      </button>
+      <button type="button" class="mk-tile" disabled data-qa="mk-skin-soon">
+        <span class="mk-tile__dot">?</span>
+        <span class="mk-tile__foot">Soon</span>
+      </button>
+    </div>
+    <button type="button" class="d4-btn d4-btn--disabled d4-btn--cta" disabled data-qa="mk-chars-cta"><span data-icon="lock" data-size="18"></span> Need 350 more</button>
+  </div>
+</template>
+
+<template id="tpl-home">
+  <div class="mk-screen d4-backdrop-pattern" data-qa="mk-home">
+    <div class="mk-header">
+      <span></span>
+      <div class="sb-row" style="gap: var(--sp-2);">
+        <button type="button" class="d4-icon-btn" data-qa="mk-home-chars" aria-label="Characters"><span data-icon="characters"></span></button>
+        <button type="button" class="d4-icon-btn" data-qa="mk-home-settings" aria-label="Settings"><span data-icon="settings"></span></button>
+      </div>
+    </div>
+    <div class="mk-wordmark">
+      <div class="d4-title mk-wordmark__top">MANGO</div>
+      <div class="d4-title mk-wordmark__bot">SNAKE</div>
+    </div>
+    <div class="mk-stage">
+      <span class="d4-bubble">Ready for L10!</span>
+      <div class="sb-row" style="gap: var(--sp-4);">
+        <span data-icon="mango" data-size="44"></span>
+        <div class="mk-halo"><div class="mk-placeholder-mascot">HERO P2</div></div>
+      </div>
+    </div>
+    <div class="mk-home-footer">
+      <button type="button" class="d4-btn d4-btn--green d4-btn--cta" data-qa="mk-home-play"><span data-icon="play" data-size="20"></span> Play</button>
+      <span class="d4-chip"><span data-icon="flag" data-size="15"></span> Next checkpoint at L10</span>
+    </div>
+  </div>
+</template>
+
+<script type="module">
+  import { ICON_NAMES, icon } from '../../../../src/game/dom/icons.ts';
+
+  const SWATCHES = [
+    '--d4-bg', '--d4-surface', '--d4-card', '--d4-border', '--d4-border-strong',
+    '--d4-ink', '--d4-ink-muted', '--d4-disabled-bg', '--d4-disabled-ink',
+    '--d4-green-face', '--d4-green-lip', '--d4-green-tint',
+    '--d4-gold-face', '--d4-gold-lip', '--d4-gold-tint',
+    '--d4-sky-face', '--d4-sky-lip', '--d4-sky-tint',
+    '--d4-purple-face', '--d4-purple-lip', '--d4-purple-tint',
+    '--d4-red-face', '--d4-red-lip', '--d4-red-tint',
+  ];
+
+  const cs = getComputedStyle(document.documentElement);
+  const swGrid = document.getElementById('swatch-grid');
+  for (const name of SWATCHES) {
+    const val = cs.getPropertyValue(name).trim();
+    const card = document.createElement('div');
+    card.className = 'sb-swatch';
+    card.innerHTML = `<div class="sb-swatch__color" style="background: var(${name});"></div><div class="sb-swatch__meta"><span>${name}</span><span class="sb-swatch__hex">${val}</span></div>`;
+    swGrid.appendChild(card);
+  }
+
+  const iconGrid = document.getElementById('icon-grid');
+  for (const name of ICON_NAMES) {
+    const tile = document.createElement('div');
+    tile.className = 'sb-icon-tile';
+    tile.innerHTML = `${icon(name, { size: 26 })}<span>${name}</span>`;
+    iconGrid.appendChild(tile);
+  }
+
+  function mountPair(id, sizeClass) {
+    const pair = document.getElementById(id);
+    for (const tplId of ['tpl-characters', 'tpl-home']) {
+      const phone = document.createElement('div');
+      phone.className = `sb-phone ${sizeClass}`;
+      phone.appendChild(document.getElementById(tplId).content.cloneNode(true));
+      pair.appendChild(phone);
+    }
+  }
+  mountPair('pair-640', 'sb-phone--640');
+  mountPair('pair-780', 'sb-phone--780');
+
+  for (const el of document.querySelectorAll('[data-icon]')) {
+    const name = el.getAttribute('data-icon');
+    const size = Number(el.getAttribute('data-size') || '22');
+    el.innerHTML = icon(name, { size });
+  }
+
+  for (const sw of document.querySelectorAll('[role="switch"]')) {
+    sw.addEventListener('click', () => {
+      const next = sw.getAttribute('aria-checked') !== 'true';
+      sw.setAttribute('aria-checked', String(next));
+      if (sw.getAttribute('data-qa') === 'sb-reduced-motion') {
+        document.body.classList.toggle('reduced-motion', next);
+      }
+    });
+  }
+</script>
+</body>
+</html>

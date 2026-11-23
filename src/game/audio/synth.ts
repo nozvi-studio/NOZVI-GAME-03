@@ -29,20 +29,56 @@ export const SFX_TONES: Record<SfxName, Tone[]> = {
   checkpoint: [523, 659, 784, 1046, 784, 1046].map((f, i): Tone => [f, i === 5 ? .3 : .12, 'square', .05, 0, .4 + i * .09]),
 };
 
+// D4-P1-R6 one AudioContext and one mute flag for DOM and Phaser layers.
+let audio: AudioContext | null = null;
+let on = true;
+
+const needsResume = (ctx: AudioContext): boolean => {
+  const s = ctx.state as string;
+  return s === 'suspended' || s === 'interrupted';
+};
+
+function ac(): AudioContext | null {
+  try {
+    if (!audio) {
+      if (typeof window === 'undefined') return null;
+      const Audio = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!Audio) return null;
+      audio = new Audio();
+    }
+    if (needsResume(audio)) void audio.resume().catch(() => {});
+    return audio;
+  } catch { return null; }
+}
+
+// D4-P1-R6 synchronous capturing gesture unlock + iOS visibilitychange resume.
+export function installAudioUnlock(
+  target: Pick<EventTarget, 'addEventListener' | 'removeEventListener'> | undefined = typeof window !== 'undefined' ? window : undefined,
+  doc: Pick<Document, 'addEventListener' | 'removeEventListener' | 'visibilityState'> | undefined = typeof document !== 'undefined' ? document : undefined,
+): () => void {
+  const onGesture = (): void => { ac(); };
+  const onVis = (): void => {
+    if (doc?.visibilityState === 'visible' && audio && needsResume(audio)) {
+      void audio.resume().catch(() => {});
+    }
+  };
+  target?.addEventListener('pointerdown', onGesture, true);
+  target?.addEventListener('keydown', onGesture, true);
+  doc?.addEventListener('visibilitychange', onVis);
+  return () => {
+    target?.removeEventListener('pointerdown', onGesture, true);
+    target?.removeEventListener('keydown', onGesture, true);
+    doc?.removeEventListener('visibilitychange', onVis);
+  };
+}
+
+export function __resetAudioForTests(): void {
+  audio = null;
+  on = true;
+}
+
 // GDD-13 tiny synth and independent haptics, ported from prototype L238–264.
 export function createSynth(): Synth {
-  let audio: AudioContext | null = null, on = true;
-  const ac = (): AudioContext | null => {
-    try {
-      if (!audio) {
-        const Audio = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-        if (!Audio) return null;
-        audio = new Audio();
-      }
-      if (audio.state === 'suspended') void audio.resume().catch(() => {});
-      return audio;
-    } catch { return null; }
-  };
   const tone = ([freq, dur, type, vol, slideTo, delay]: Tone): void => {
     if (!on) return;
     const a = ac(); if (!a) return;
