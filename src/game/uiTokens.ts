@@ -41,7 +41,7 @@ export const TOKENS = {
       spike: { fill: '#707A85', warn: '#D1572F' },
       bomb: { body: '#161616', blast: '#D1352F', digit: '#FFFFFF', warn: '#7A7A7A' },
       shrink: { wall: '#3A1010', hatch: '#8A2020', arrow: '#D1352F' } }, text: '#173B63', white: '#FFFFFF',
-    stat: { level: '#D6336C', eaten: '#A86A10', biome: '#1F86D8' }, tip: '#48688A', // D3-R18 Results tile value colours and first-run tip ink
+    tip: '#48688A', // D3-R18 first-run tip ink
     logo: { mango: '#FFD93B', mangoLine: '#8A4500' },
     tone: {
       primary: { face: ['#8DF06A', '#3FC23D', '#2EA634'], line: '#17661F', lip: '#114F18', text: '#FFFFFF', outlined: true },

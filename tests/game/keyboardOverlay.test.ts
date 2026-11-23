@@ -3,13 +3,13 @@ import { bindKeyboard } from '../../src/game/input/keyboard';
 vi.mock('phaser', () => ({ default: { Scenes: { Events: { SHUTDOWN: 'shutdown' } } } }));
 afterEach(() => vi.unstubAllGlobals());
 
-function setup(settingsActive: boolean) {
+function setup(settingsActive: boolean, modalOpen = false) {
   let handler: (e: KeyboardEvent) => void = () => {};
   vi.stubGlobal('window', { addEventListener: (_: string, h: typeof handler) => { handler = h; }, removeEventListener() {} });
   const flowKey = vi.fn(), turn = vi.fn();
   const scene = { sys: { isActive: () => true }, scene: { isActive: (k: string) => k === 'Settings' && settingsActive },
     events: { once() {}, emit() {} }, flowKey, turn };
-  bindKeyboard(scene as never);
+  bindKeyboard(scene as never, () => modalOpen);
   const preventDefault = vi.fn();
   return { press: (code: string) => handler({ code, preventDefault } as unknown as KeyboardEvent), flowKey, turn, preventDefault };
 }
@@ -19,6 +19,13 @@ it('P3b3-R7 game keys are ignored while the Settings overlay is active', () => {
   k.press('Space'); k.press('Escape'); k.press('ArrowUp');
   expect(k.flowKey).not.toHaveBeenCalled();
   expect(k.turn).not.toHaveBeenCalled();
+});
+it('D4-P4-R5 game keys are ignored without preventDefault while a DOM modal overlay is open', () => {
+  const k = setup(false, true);
+  k.press('Space'); k.press('Escape'); k.press('ArrowUp');
+  expect(k.flowKey).not.toHaveBeenCalled();
+  expect(k.turn).not.toHaveBeenCalled();
+  expect(k.preventDefault).not.toHaveBeenCalled();
 });
 it('MEC-001 keys still reach the game without the overlay', () => {
   const k = setup(false);

@@ -34,6 +34,7 @@ import { createSkinFx, skinFxEat, skinFxStep, skinFxTrail, type SkinFxState } fr
 import { enter, motionFor } from '../motion';
 import { HitBeats, telegraphEdges } from '../render/hitBeat';
 import { telegraphCtx, type TelegraphCtx } from '../render/telegraph';
+import { bridgeOf } from './phaserPort';
 
 export class GameScene extends Phaser.Scene {
   balance!: Balance;
@@ -99,7 +100,7 @@ export class GameScene extends Phaser.Scene {
     // P1 scene flow: the session run already exists (Home/Loadout/Results); Game opens on the P0 countdown.
     this.apply(flowStart(this.flow, this.balance));
     const zone = this.add.zone(BOARD.x, BOARD.y, BOARD.size, BOARD.size).setOrigin(0).setInteractive();
-    bindKeyboard(this);
+    bindKeyboard(this, () => bridgeOf(this)?.overlays.isModalOpen() ?? false);
     bindSwipe(this, zone);
     const pause = (): void => { this.apply(flowPause(this.flow)); };
     const hidden = (): void => { pause(); this.session.hidden(); }; // MEC-008-R7 provisional carry

@@ -82,4 +82,55 @@ describe('D4-P3-R3 ui bridge', () => {
     host.dispose();
     root.remove();
   });
+
+  it('D4-P4-R4 overlays port mounts pause/death modals, keeps countdown passive, and openSettingsOverlay emits settings-closed once', () => {
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+    const hooks = makeHooks();
+    const host = createUiHost(root, hooks);
+    const session = createSession({ balance: loadBalance(), store: memoryStore(), newSeed: () => 1, now: () => 0 });
+    const synth = { unlock: vi.fn(), setOn: vi.fn(), play: vi.fn(), buzz: vi.fn() };
+    const emit = vi.fn();
+    const port: PhaserPort = { ensureSkins: (_s, d) => d(), startScene: vi.fn(), emit };
+    let closeOverlay: (() => void) | null = null;
+    const bridge = createUiBridge({
+      host, root, session, synth, t, port,
+      screens: {
+        settings: (_el, ctx) => { closeOverlay = ctx.params?.onClosed as () => void; },
+      },
+      activeSkin: () => 'snake', debug: false,
+    });
+
+    // Passive countdown never sets isModalOpen()
+    bridge.overlays.countdown(3, { title: 'L1', subtitle: 'Ready' });
+    expect(bridge.overlays.isModalOpen()).toBe(false);
+    expect(root.querySelector('.d4-countdown-layer')).not.toBeNull();
+
+    // Pause opens modal
+    const onResume = vi.fn();
+    bridge.overlays.showPause(
+      { title: 'PAUSED', subtitle: 'Level 1 · Garden', chip: null, buttons: [{ id: 'resume', label: 'Resume', tone: 'green' }] },
+      { onResume, onSettings: vi.fn(), onQuit: vi.fn() },
+    );
+    expect(bridge.overlays.isModalOpen()).toBe(true);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    expect(onResume).toHaveBeenCalledTimes(1);
+
+    // Settings overlay closes idempotently and emits settings-closed once
+    const onClosed = vi.fn();
+    bridge.openSettingsOverlay(onClosed);
+    expect(bridge.overlays.isModalOpen()).toBe(true);
+    closeOverlay!();
+    closeOverlay!();
+    expect(emit).toHaveBeenCalledWith('settings-closed');
+    expect(emit).toHaveBeenCalledTimes(1);
+    expect(onClosed).toHaveBeenCalledTimes(1);
+    expect(bridge.overlays.isModalOpen()).toBe(false);
+
+    // hideAll removes countdown layer
+    bridge.overlays.hideAll();
+    expect(root.querySelector('.d4-countdown-layer')).toBeNull();
+    host.dispose();
+    root.remove();
+  });
 });

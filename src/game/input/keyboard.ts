@@ -5,10 +5,12 @@ import { keyAction } from './keyMap';
 // GDD-13 keyboard and HUD use the same run-flow and turn paths.
 // MEC-001 turns are queued on the native keydown itself (like swipe), not via Phaser's
 // keyboard plugin, which buffers DOM key events and only dispatches them on the next game step.
-export function bindKeyboard(scene: GameScene): void {
+// D4-P4-R5 when a DOM modal overlay is open, return before keyAction and without preventDefault.
+export function bindKeyboard(scene: GameScene, modal: () => boolean = () => false): void {
   const onKey = (event: KeyboardEvent): void => {
     if (!scene.sys.isActive()) return;
     if (scene.scene.isActive('Settings')) return; // the Settings overlay owns the keyboard while it is open
+    if (modal()) return;
     const action = keyAction(event.code);
     if (!action) return;
     event.preventDefault();

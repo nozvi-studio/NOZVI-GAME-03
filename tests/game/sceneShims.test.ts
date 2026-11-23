@@ -12,6 +12,9 @@ vi.mock('phaser', () => ({ default: { Scene: class {}, Scenes: { Events: { SHUTD
 
 import { CharactersScene } from '../../src/game/scenes/CharactersScene';
 import { HomeScene } from '../../src/game/scenes/HomeScene';
+import { LoadoutScene } from '../../src/game/scenes/LoadoutScene';
+import { ResultsScene } from '../../src/game/scenes/ResultsScene';
+import { SettingsScene } from '../../src/game/scenes/SettingsScene';
 
 function fakeScene(bridge: unknown) {
   const listeners: Record<string, (() => void)[]> = {};
@@ -64,6 +67,48 @@ describe('D4-P3-R3 HomeScene & CharactersScene thin shims', () => {
     // Shim without bridge is a safe no-op
     const headless = Object.assign(new HomeScene(), fakeScene(undefined));
     expect(() => headless.create()).not.toThrow();
+
+    host.dispose();
+    root.remove();
+  });
+
+  it('D4-P4-R1/R2/R3 ResultsScene, SettingsScene and LoadoutScene shims open/close token-safely', () => {
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+    const hooks: LoopHooks = {
+      sleep: vi.fn(), wake: vi.fn(), inputEnabled: vi.fn(), keyboardCapture: vi.fn(), canvasVisible: vi.fn(),
+    };
+    const host = createUiHost(root, hooks);
+    const session = createSession({ balance: loadBalance(), store: memoryStore(), newSeed: () => 1, now: () => 0 });
+    const bridge = createUiBridge({
+      host, session, synth: { unlock: vi.fn(), setOn: vi.fn(), play: vi.fn(), buzz: vi.fn() }, t,
+      port: { ensureSkins: (_s, d) => d(), startScene: vi.fn(), emit: vi.fn() },
+      screens: {
+        results: el => { el.textContent = 'RESULTS'; },
+        settings: el => { el.textContent = 'SETTINGS'; },
+        loadout: el => { el.textContent = 'LOADOUT'; },
+      },
+      activeSkin: () => 'snake', debug: false,
+    });
+
+    const results = Object.assign(new ResultsScene(), fakeScene(bridge));
+    const loadout = Object.assign(new LoadoutScene(), fakeScene(bridge));
+    const settings = Object.assign(new SettingsScene(), fakeScene(bridge));
+
+    results.create();
+    expect(host.activeId()).toBe('results');
+    loadout.init({ level: 5 });
+    loadout.create();
+    results.events.emit('shutdown');
+    expect(host.activeId()).toBe('loadout');
+
+    settings.init({ returnTo: 'Home' });
+    settings.create();
+    loadout.events.emit('shutdown');
+    expect(host.activeId()).toBe('settings');
+
+    settings.events.emit('shutdown');
+    expect(host.activeId()).toBeNull();
 
     host.dispose();
     root.remove();

@@ -27,8 +27,11 @@ function mountHome(opts: { debug?: boolean; debugLevel?: number | null; checkpoi
   const clock = new FakeClock();
   const bridge: UiBridge = {
     session, synth, t,
-    open: () => Symbol('x'), close: () => true, startRun,
-    goSettings, goCharacters, goHome: vi.fn(), pause: vi.fn(), resume: vi.fn(), quitToHome: vi.fn(),
+    overlays: { isModalOpen: () => false, showPause: vi.fn(), hidePause: vi.fn(), countdown: vi.fn(), deathCard: vi.fn(), hideAll: vi.fn() },
+    open: () => Symbol('x'), close: () => true, startRun, playAgain: vi.fn(),
+    goSettings, goCharacters, goLoadout: vi.fn(), goHome: vi.fn(),
+    openSettingsOverlay: vi.fn(), syncReducedMotion: vi.fn(),
+    pause: vi.fn(), resume: vi.fn(), quitToHome: vi.fn(),
   };
   const screen = createHomeScreen({
     debugLevel: () => opts.debugLevel ?? null,

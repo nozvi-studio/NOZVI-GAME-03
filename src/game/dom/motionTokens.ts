@@ -24,4 +24,6 @@ export const MOTION = {
   confettiMax: 18,
   confettiMs: 900,
   confettiSpreadPx: 120,
+  countUpMs: 560,
+  countdownGoMs: 420,
 } as const;

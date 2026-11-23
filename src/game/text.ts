@@ -139,6 +139,9 @@ const KEYED: Readonly<Record<string, string>> = {
   'results.youWin': 'YOU WIN!', // provisional
   'results.firstRunTip': 'Fill the bar with mangoes to level up. Each level brings new obstacles.',
   'results.nextRunAt': 'Next run starts at L{level}!', 'results.home': 'Home',
+  'results.d4.victory': 'VICTORY!', 'results.d4.newBest': 'NEW BEST!', 'results.d4.gameOver': 'GAME OVER',
+  'results.d4.newRecord': 'New record!', 'results.skills': 'Skills',
+  'countdown.go': 'GO!', 'death.tapContinue': 'Tap to continue',
   'logo.mango': 'MANGO', 'logo.snake': 'SNAKE', 'home.prev': '◀', 'home.next': '▶',
   'boot.loading': 'Loading… {n}%',
   // P3b-2 HUD and overlay strings (provisional, owner-question batch)

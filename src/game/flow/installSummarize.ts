@@ -2,7 +2,7 @@
 import type { Balance } from '../../core';
 import { deathCauseReport, summarizeLog, type RunLog } from '../../meta';
 
-export function installSummarize(balance: Balance, win: { __summarize?: (json: string) => unknown } = window as unknown as { __summarize?: (json: string) => unknown }): void {
+export function installSummarize(balance: Balance, win: { __summarize?: (json: string) => unknown }): void {
   win.__summarize = (json: string) => {
     const log = JSON.parse(json) as RunLog;
     return {

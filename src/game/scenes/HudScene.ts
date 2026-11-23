@@ -34,17 +34,21 @@ import { runStartLines } from '../hudText';
 import { pillButton } from '../ui/widgets';
 import { d3, d3Height, d3m } from '../ui/layout';
 import { incomingBanner, t } from '../text';
+import { MOTION } from '../dom/motionTokens';
+import type { UiBridge } from '../dom/uiBridge';
 import type { GameScene } from './GameScene';
+import { bridgeOf } from './phaserPort';
 
 type HudHint = ReturnType<typeof homeView>['hint'];
 
-// P3b-2: wiring only. Models in src/game/hud/*, views draw them; this scene owns events, sounds, haptics, flow and session calls.
+// P3b-2 / D4-P4-R4: wiring only. Models in src/game/hud/*, views draw them; this scene owns events, sounds, haptics, flow and session calls.
 export class HudScene extends Phaser.Scene {
   private gameScene!: GameScene; private session!: Session; private balance!: Balance; private synth!: Synth;
+  private bridge: UiBridge | null = null;
   private top!: HudTop; private bottom!: BottomGroup; private skills!: SkillButtons; private pause!: PauseOverlay; private count!: CountdownOverlay; private banners!: BannerLayer;
   private pad!: ReturnType<typeof createDpad>; private dpadOn = false; private touch = false;
   private heading = ''; private hint: HudHint = null; private cpCount = 0; private bestLevelAtStart = 0; private orbTipShown = false; private leaving = false; private juice!: JuicePlayer;
-  private haptics = true; private startBanner: string[] = []; private shrunkTo: number | null = null; private overTimer?: Phaser.Time.TimerEvent;
+  private haptics = true; private startBanner: string[] = []; private shrunkTo: number | null = null; private overTimer?: Phaser.Time.TimerEvent; private goTimer?: Phaser.Time.TimerEvent;
   private debugKey: { c: Phaser.GameObjects.Container } | null = null; private debugNext: { c: Phaser.GameObjects.Container } | null = null;
 
   constructor() { super('Hud'); }
@@ -52,6 +56,7 @@ export class HudScene extends Phaser.Scene {
   create(): void {
     this.gameScene = this.scene.get('Game') as GameScene;
     this.session = this.registry.get('session') as Session; this.balance = this.registry.get('balance') as Balance;
+    this.bridge = bridgeOf(this);
     const save = this.session.save(); // pad geometry always computed (dpadKeys); visibility follows settings.dpad
     this.cpCount = save.unlockedCheckpoints.length; this.bestLevelAtStart = save.bestLevel; this.readHint();
     this.touch = !!this.sys.game?.device?.input?.touch; this.orbTipShown = false; this.leaving = false; this.heading = ''; this.shrunkTo = null;
@@ -73,7 +78,7 @@ export class HudScene extends Phaser.Scene {
       settings: () => this.session.save().settings, reduced: reduceMotion,
       headCell: () => { const s = this.gameScene.snapshot(); const h = s?.snake[0]; return h ? { x: h.x, y: h.y } : null; }, // MOT-3-R8
       seed: () => { const s = this.gameScene.snapshot(); return s ? deathSeed(s.score, s.level, s.timeMs) : 0; },
-      makeCard: () => new DeathCard(this, this.balance, reduceMotion()), later: (ms, fn) => this.time.delayedCall(ms, fn), onDone: () => this.leave() });
+      makeCard: () => this.makeDeathCard(), later: (ms, fn) => this.time.delayedCall(ms, fn), onDone: () => this.leave() });
     this.count = new CountdownOverlay(this);
     this.pause = new PauseOverlay(this, {
       onResume: () => { this.applySettings(); this.gameScene.apply(flowResume(this.gameScene.flow, this.balance)); },
@@ -87,8 +92,8 @@ export class HudScene extends Phaser.Scene {
     const hidden = (): void => { if (document.hidden) { pause(); this.session.hidden(); } };
     const reread = (): void => { this.applySettings(); this.refresh(); }; // handoff 3: settings changed in the overlay
     const keys = this.input.keyboard;
-    const onKey = (e: KeyboardEvent): void => { // MEC-007-R14/R15; the Settings overlay owns the keyboard while open (handoff 1)
-      if (this.scene.isActive('Settings')) return;
+    const onKey = (e: KeyboardEvent): void => { // MEC-007-R14/R15; the Settings overlay or DOM modal owns the keyboard while open (D4-P4-R5)
+      if (this.scene.isActive('Settings') || this.bridge?.overlays.isModalOpen()) return;
       const slot = skillSlotForKey(e.code, e.repeat); if (slot === null) return;
       e.preventDefault(); this.useSkill(slot);
     };
@@ -103,7 +108,7 @@ export class HudScene extends Phaser.Scene {
       this.gameScene.events.off('run-over', over); this.gameScene.events.off('toggle-sound', toggle);
       this.game.events.off(SETTINGS_CLOSED, reread);
       keys?.off('keydown', onKey); window.removeEventListener('blur', pause); document.removeEventListener('visibilitychange', hidden);
-      this.overTimer?.remove(); this.juice.destroy(); this.banners.hide();
+      this.overTimer?.remove(); this.goTimer?.remove(); this.juice.destroy(); this.banners.hide(); this.bridge?.overlays.hideAll();
     });
     this.refresh(); this.showRunStart();
     enter(this, [], {}); // MOT-2-R11 camera fade-in, same as Game; also re-arms goTo on this reused scene instance
@@ -124,7 +129,39 @@ export class HudScene extends Phaser.Scene {
   }
   /** Handoff 2: every vibration goes through the haptics setting. */
   private buzz(pattern: number | number[]): void { if (this.haptics) this.synth.buzz(pattern); }
-  private settingsAvailable(): boolean { const s = this.scene.get('Settings'); return s !== null && s !== undefined; }
+  private settingsAvailable(): boolean {
+    if (this.bridge) return true;
+    const s = this.scene.get('Settings');
+    return s !== null && s !== undefined;
+  }
+
+  private makeDeathCard(): { show(line: string): void; armSkip(onSkip: () => void): void; destroy(): void } {
+    if (!this.bridge) return new DeathCard(this, this.balance, reduceMotion());
+    const bridge = this.bridge;
+    const lockMs = this.balance.juice.death.skipLockMs;
+    let skipFn: (() => void) | null = null;
+    let pendingSkip = false;
+    return {
+      show(line: string): void {
+        bridge.overlays.deathCard({ text: line }, lockMs, () => {
+          if (skipFn) skipFn();
+          else pendingSkip = true;
+        });
+      },
+      armSkip(onSkip: () => void): void {
+        skipFn = onSkip;
+        if (pendingSkip) {
+          pendingSkip = false;
+          onSkip();
+        }
+      },
+      destroy(): void {
+        skipFn = null;
+        pendingSkip = false;
+        bridge.overlays.hideAll();
+      },
+    };
+  }
 
   // MEC-003 §8 run-start banner (challenge level at run start). Hud is (re)launched once per run start, after Game emitted newRun.
   // Held until the countdown's 'go' so the card does not sit under the digit and expire during the countdown.
@@ -154,20 +191,53 @@ export class HudScene extends Phaser.Scene {
 
   private onFlow(effect: FlowEffect): void {
     switch (effect.type) {
-      case 'newRun': this.overTimer?.remove(); this.banners.hide(); this.synth.unlock(); this.showRunStart(); break; // MEC-003 §8
-      case 'hideOverlay': this.pause.hide(); this.count.hide(); break;
-      case 'showPaused': this.count.hide(); this.showPause(); break;
+      case 'newRun': this.overTimer?.remove(); this.goTimer?.remove(); this.banners.hide(); this.synth.unlock(); this.showRunStart(); break; // MEC-003 §8
+      case 'hideOverlay':
+        this.goTimer?.remove();
+        if (this.bridge) { this.bridge.overlays.hidePause(); this.bridge.overlays.countdown(null, null); }
+        else { this.pause.hide(); this.count.hide(); }
+        break;
+      case 'showPaused':
+        this.goTimer?.remove();
+        if (this.bridge) this.bridge.overlays.countdown(null, null);
+        else this.count.hide();
+        this.showPause();
+        break;
       case 'tick': {
+        this.goTimer?.remove();
         const s = this.gameScene.snapshot();
-        this.count.tick(effect.n, s ? countdownCard(s, !this.gameScene.flow.started, this.balance, t) : null); this.synth.play('tick'); break;
+        const card = s ? countdownCard(s, !this.gameScene.flow.started, this.balance, t) : null;
+        if (this.bridge) this.bridge.overlays.countdown(effect.n, card);
+        else this.count.tick(effect.n, card);
+        this.synth.play('tick');
+        break;
       }
-      case 'go': this.count.hide(); this.synth.play('go'); this.flushRunStart(); break; // MEC-001-R2
+      case 'go':
+        this.goTimer?.remove();
+        if (this.bridge) {
+          this.bridge.overlays.countdown('go', null);
+          this.goTimer = this.time.delayedCall(MOTION.countdownGoMs, () => this.bridge?.overlays.countdown(null, null));
+        } else {
+          this.count.hide();
+        }
+        this.synth.play('go');
+        this.flushRunStart();
+        break; // MEC-001-R2
     }
     this.refresh();
   }
   private showPause(): void {
     const s = this.gameScene.snapshot(); if (!s) return;
-    this.pause.show(pauseView({ level: s.level, biome: s.biome, hint: homeView(this.session.homeModel()).hint, settingsAvailable: this.settingsAvailable() }, t));
+    const v = pauseView({ level: s.level, biome: s.biome, hint: homeView(this.session.homeModel()).hint, settingsAvailable: this.settingsAvailable() }, t);
+    if (this.bridge) {
+      this.bridge.overlays.showPause(v, {
+        onResume: () => { this.applySettings(); this.gameScene.apply(flowResume(this.gameScene.flow, this.balance)); },
+        onSettings: () => this.bridge?.openSettingsOverlay(() => { this.applySettings(); this.refresh(); this.showPause(); }),
+        onQuit: () => { this.bridge?.overlays.hideAll(); this.session.quit(); this.toResults(0); }, // MEC-003-R20, MEC-008-R6
+      });
+    } else {
+      this.pause.show(v);
+    }
   }
 
   // P1 HUD event mapping (MEC-003/006/007/008 §8) with the P3b-2 banner/tip views. Sounds, haptics and visuals come from the JuicePlayer (P3a).
@@ -225,7 +295,10 @@ export class HudScene extends Phaser.Scene {
 
   private onOver(s: SimSnapshot): void {
     if (this.leaving) return; // the Quit path already left
-    this.banners.hide(); this.count.hide();
+    this.goTimer?.remove();
+    this.banners.hide();
+    if (this.bridge) this.bridge.overlays.countdown(null, null);
+    else this.count.hide();
     this.juice.runOver(s.outcome?.won ?? false); // P3a-R7 the death sequence was started by the `died` event; a win waits the same total
   }
   private leave(): void {

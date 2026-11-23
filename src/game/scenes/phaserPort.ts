@@ -8,6 +8,9 @@ import { createSynth } from '../audio/synth';
 import { createUiBridge } from '../dom/bridge';
 import { charactersScreen } from '../dom/screens/charactersScreen';
 import { createHomeScreen } from '../dom/screens/homeScreen';
+import { loadoutScreen } from '../dom/screens/loadoutScreen';
+import { resultsScreen } from '../dom/screens/resultsScreen';
+import { settingsScreen } from '../dom/screens/settingsScreen';
 import type { PhaserPort, UiBridge } from '../dom/uiBridge';
 import type { UiHost } from '../dom/uiHost';
 import { debugStartLevel, isDebug } from '../flow/debugFlag';
@@ -42,6 +45,9 @@ export function createPhaserPort(game: Phaser.Game): PhaserPort {
       }
       goTo(sc, key, data, key === 'Home' ? 'back' : 'forward');
     },
+    emit(event: string): void {
+      game.events.emit(event);
+    },
   };
 }
 
@@ -57,15 +63,28 @@ export function bridgeOf(scene: { registry: { get(k: string): unknown; set?(k: s
   const debug = typeof location !== 'undefined' && isDebug(location.search);
   const home = createHomeScreen({
     debugLevel: () => (balance && typeof location !== 'undefined' ? debugStartLevel(location.search, balance.level.maxLevel) : null),
-    onInstallSummarize: () => { if (balance) installSummarize(balance); },
+    onInstallSummarize: () => {
+      if (balance && typeof window !== 'undefined') {
+        installSummarize(balance, window as unknown as { __summarize?: (json: string) => unknown });
+      }
+    },
   });
+  const root = typeof document !== 'undefined' ? document.getElementById('ui-root') ?? undefined : undefined;
   const bridge = createUiBridge({
     host,
+    root,
     session,
+    balance,
     synth,
     t,
     port: createPhaserPort(scene.game),
-    screens: { home, characters: charactersScreen },
+    screens: {
+      home,
+      characters: charactersScreen,
+      results: resultsScreen,
+      settings: settingsScreen,
+      loadout: loadoutScreen,
+    },
     activeSkin,
     debug,
   });

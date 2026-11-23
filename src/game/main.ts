@@ -3,6 +3,7 @@ import './dom/styles/tokens.css';
 import './dom/styles/components.css';
 import './dom/styles/motion.css';
 import './dom/styles/screens.css';
+import './dom/styles/overlays.css';
 import { installAudioUnlock } from './audio/synth';
 import { startStageSync } from './dom/stageSync';
 import type { LoopHooks } from './dom/uiBridge';
@@ -81,7 +82,7 @@ new Phaser.Game({
           };
         },
       });
-      game.registry.set('uiHost', createUiHost(root, hooks, { bandLock: on => setBandLock(on) }));
+      game.registry.set('uiHost', createUiHost(root, hooks, { bandLock: on => setBandLock(on, TOKENS.d4.bg) }));
     },
   },
 });

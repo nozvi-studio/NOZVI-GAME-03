@@ -1,0 +1,236 @@
+/* D4-P4-R4 frosted modal overlays & passive countdown layer — colours only via tokens.css vars. */
+
+.d4-scrim {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: var(--sp-4);
+}
+
+.d4-scrim.is-frost {
+  background: var(--d4-scrim-frost);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.d4-scrim.is-light {
+  background: var(--d4-scrim-light);
+}
+
+@keyframes d4-sheet-pop {
+  0% { opacity: 0; transform: scale(0.92) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.d4-sheet {
+  width: 100%;
+  max-width: 320px;
+  padding: var(--sp-6) var(--sp-4) var(--sp-4);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--d4-border);
+  background: var(--d4-card);
+  box-shadow: 0 6px 0 var(--d4-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  text-align: center;
+}
+
+.d4-sheet.is-pop {
+  animation: d4-sheet-pop 240ms var(--ease-spring) 1;
+}
+
+.d4-settings-sheet {
+  padding: var(--sp-4);
+  align-items: stretch;
+  text-align: left;
+}
+
+.d4-settings-sheet .d4-settings-header {
+  width: 100%;
+}
+
+.d4-settings-sheet .d4-settings-card {
+  width: 100%;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+}
+
+.d4-settings-sheet .d4-settings-note {
+  margin: var(--sp-1) 0 0;
+  text-align: center;
+}
+
+.d4-pause-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--d4-ink);
+  line-height: 1;
+}
+
+.d4-pause-sub {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--d4-ink-muted);
+}
+
+.d4-pause-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  width: 100%;
+  margin-top: var(--sp-2);
+}
+
+.d4-btn--coral {
+  --face: var(--d4-red-tint);
+  --lip-color: var(--d4-red-face);
+  --ink: var(--d4-red-lip);
+  border: 2px solid var(--d4-red-face);
+}
+
+/* Passive Countdown Layer (outside UiHost; pointer-events: none so MEC-001-R2 turns count) */
+.d4-countdown-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+}
+
+.d4-countdown-layer.is-active {
+  background: var(--d4-scrim-light);
+}
+
+@keyframes d4-count-pulse {
+  0% { opacity: 0.4; transform: scale(1.38); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.d4-countdown-n {
+  font-family: var(--font-display);
+  font-size: 88px;
+  line-height: 1;
+  color: var(--d4-gold-face);
+  text-shadow: 0 5px 0 var(--d4-gold-lip);
+}
+
+.d4-countdown-n.is-pulse {
+  animation: d4-count-pulse 320ms var(--ease-spring) 1;
+}
+
+.d4-countdown-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--d4-border);
+  background: var(--d4-card);
+  color: var(--d4-ink);
+}
+
+.d4-countdown-card-title {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.d4-countdown-card-sub {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--d4-ink-muted);
+}
+
+/* DeathCard Overlay */
+.d4-death-scrim {
+  cursor: pointer;
+}
+
+.d4-death-scrim.is-locked {
+  cursor: default;
+}
+
+.d4-death-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 34px;
+  color: var(--d4-red-face);
+  text-shadow: 0 3px 0 var(--d4-red-tint);
+}
+
+.d4-death-line {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--d4-ink);
+  line-height: 1.35;
+}
+
+.d4-death-hint {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--d4-ink-muted);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.d4-death-hint.is-ready {
+  opacity: 1;
+}
+
+/* Toggle Switch (48px accessible hit target wrapper) */
+.d4-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--hit-min);
+  min-height: var(--hit-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.d4-toggle-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 52px;
+  height: 30px;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--d4-disabled-bg);
+  transition: background-color var(--d4-dur-toggle) ease;
+}
+
+.d4-toggle-knob {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  background: var(--d4-card);
+  transform: translateX(0);
+  transition: transform var(--d4-dur-toggle) ease;
+}
+
+.d4-toggle-btn[aria-checked='true'] .d4-toggle-track {
+  background: var(--d4-green-face);
+}
+
+.d4-toggle-btn[aria-checked='true'] .d4-toggle-knob {
+  transform: translateX(22px);
+}

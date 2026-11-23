@@ -49,10 +49,14 @@
 
   /* Shape & Tactile Depth */
   --radius-md: 16px;
+  --radius-lg: 24px;
   --radius-pill: 999px;
   --lip: 4px;
   --lip-pressed: 2px;
   --hit-min: 48px;
+  --d4-scrim-frost: rgba(20, 25, 35, 0.35);
+  --d4-scrim-light: rgba(250, 249, 245, 0.42);
+  --d4-dur-toggle: 180ms;
 
   /* Stage Sync Defaults (overwritten by stageSync.ts) */
   --stage-w: 360px;

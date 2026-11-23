@@ -23,6 +23,7 @@ describe('D4-P1-R1 / R6 / D4-P3-R3 index.html and main.ts wiring', () => {
     expect(main).toContain("import './dom/styles/components.css'");
     expect(main).toContain("import './dom/styles/motion.css'");
     expect(main).toContain("import './dom/styles/screens.css'");
+    expect(main).toContain("import './dom/styles/overlays.css'");
     expect(main).toContain('noAudio: true');
     expect(main).toContain('installAudioUnlock(');
     expect(main).toContain('startStageSync(');

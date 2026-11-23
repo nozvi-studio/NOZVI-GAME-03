@@ -20,8 +20,11 @@ function mountChars(debug = false) {
   const clock = new FakeClock();
   const bridge: UiBridge = {
     session, synth, t,
-    open: () => Symbol('x'), close: () => true, startRun: vi.fn(),
-    goSettings: vi.fn(), goCharacters: vi.fn(), goHome, pause: vi.fn(), resume: vi.fn(), quitToHome: vi.fn(),
+    overlays: { isModalOpen: () => false, showPause: vi.fn(), hidePause: vi.fn(), countdown: vi.fn(), deathCard: vi.fn(), hideAll: vi.fn() },
+    open: () => Symbol('x'), close: () => true, startRun: vi.fn(), playAgain: vi.fn(),
+    goSettings: vi.fn(), goCharacters: vi.fn(), goLoadout: vi.fn(), goHome,
+    openSettingsOverlay: vi.fn(), syncReducedMotion: vi.fn(),
+    pause: vi.fn(), resume: vi.fn(), quitToHome: vi.fn(),
   };
   const cleanup = charactersScreen(root, { bridge, debug, clock }) || (() => {});
   return { root, session, synth, goHome, clock, cleanup, balance };
