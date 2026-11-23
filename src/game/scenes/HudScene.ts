@@ -319,8 +319,9 @@ export class HudScene extends Phaser.Scene {
   private refresh(): void {
     const s = this.gameScene.snapshot(); if (!s) return;
     const status = this.gameScene.flow.status, v = hudView(s, this.hint, this.balance, t, status === 'waiting' ? { touch: this.touch } : null);
-    this.top.apply(v, status === 'paused', status !== 'ready' && status !== 'over');
-    this.bottom.apply(v);
+    const storm = s.biome === 6;
+    this.top.apply(v, status === 'paused', status !== 'ready' && status !== 'over', storm);
+    this.bottom.apply(v, storm);
     this.skills.apply(v.skills);
     this.banners.setPills(skillPills(s.skills, this.balance, t)); this.banners.setSlowmo(s.slowmo !== null);
     this.debugNext?.c.setVisible(s.level < this.balance.level.maxLevel); this.debugKey?.c.setVisible(nextKeyLevel(s.level, this.balance) !== null);

@@ -2,19 +2,27 @@ import type Phaser from 'phaser';
 import type { Balance } from '../../core';
 import { BOARD, cellPx } from '../layout';
 import type { BoardLook } from './biomePalette';
+import { mixInt } from './biomePalette';
 import { FRAME } from './boardParts';
+import { D4_RUN } from '../hud/d3HudLayout';
 import { TOKENS, toInt } from '../uiTokens';
 
 export interface RoundRect { x: number; y: number; w: number; h: number; r: number; color: number; alpha: number }
 
-// D3-R12 frame: overhang, drop shadow and inner top shadow, board px relative to the board origin.
+// D4-P5-R1 rounded tactile board frame with 4px darker bottom lip, no heavy dark border.
 export function frameRects(look: BoardLook, size: number, cell: number): { drop: RoundRect; frame: RoundRect; shadow: RoundRect } {
-  const pad = FRAME.pad * cell, w = size + 2 * pad;
-  const frame: RoundRect = { x: -pad, y: -pad, w, h: w, r: FRAME.radius * cell, color: look.frame, alpha: 1 };
+  const d4run = TOKENS.d4run;
+  const scale = cell > 0 ? cell / 24 : 1;
+  const pad = Math.min(FRAME.pad * cell, D4_RUN.board.stroke * scale);
+  const lip = D4_RUN.board.lip * scale;
+  const r = D4_RUN.board.radius * scale;
+  const w = size + 2 * pad;
+  const frame: RoundRect = { x: -pad, y: -pad, w, h: w, r, color: look.frame, alpha: 1 };
+  const lipColor = mixInt(look.frame, toInt(d4run.hud.ink), 0.28);
   return {
-    drop: { ...frame, y: frame.y + FRAME.dropY * cell, color: toInt(TOKENS.d3.inkDeep), alpha: FRAME.dropAlpha },
+    drop: { ...frame, y: frame.y + lip, color: lipColor, alpha: 1 },
     frame,
-    shadow: { x: 0, y: 0, w: size, h: FRAME.shadowH * cell, r: FRAME.shadowRadius * cell, color: toInt(TOKENS.d3.board.frameShadow), alpha: FRAME.shadowAlpha },
+    shadow: { x: 0, y: 0, w: size, h: FRAME.shadowH * cell, r: FRAME.shadowRadius * cell, color: toInt(TOKENS.d3.board.frameShadow), alpha: FRAME.shadowAlpha * 0.5 },
   };
 }
 

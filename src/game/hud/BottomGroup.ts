@@ -5,7 +5,7 @@ import { progressBar } from '../ui/widgets';
 import { butterChip } from '../ui/menuWidgets';
 import { D3_HOME } from '../ui/menuMetrics';
 import { hudIconKey } from './hudIcons';
-import { D3_RUN, type D3HudLayout, type R } from './d3HudLayout';
+import { badgeRects, D3_RUN, hintPlacement, type D3HudLayout, type R } from './d3HudLayout';
 import type { HudView } from './hudModel';
 import type { HudTarget, Pt } from '../juice/types';
 import type { Balance } from '../../core';
@@ -31,15 +31,19 @@ export class BottomGroup {
   private pos: Pt = { x: 0, y: 0 };
   private readonly finger: Phaser.GameObjects.Graphics; private touch = false; private reduced = false; private fingerOn = false;
   private placedText = ''; private fingerX = 0; private fingerY = 0;
+  private stormKey: boolean | null = null;
 
   constructor(private readonly scene: Phaser.Scene, private l: D3HudLayout) {
+    const d4run = TOKENS.d4run;
     const e = l.energy, ec = cen(e.icon), lc = cen(e.label), E = D3_RUN.energy, H = D3_RUN.hint;
     this.energyIcon = scene.add.image(ec.x, ec.y, hudIconKey('bolt')).setDisplaySize(d3(e.icon.w), d3(e.icon.h));
-    this.bar = progressBar(scene, d3(e.bar.x), d3(e.bar.y), d3m(e.bar.w), d3m(e.bar.h), T.tone.energy.face[0]);
-    this.energy = scene.add.text(lc.x, lc.y, '', { fontFamily: FONT_UI, fontSize: `${d3(E.font)}px`, fontStyle: '900', color: T.white })
-      .setOrigin(0.5).setShadow(0, d3(E.shadowY), T.inkDeep, 0, false, true).setName('energy');
-    this.hint = scene.add.text(0, 0, '', { fontFamily: FONT_UI, fontSize: `${d3(H.font)}px`, fontStyle: '900', color: T.white })
-      .setOrigin(0.5).setShadow(0, d3(H.shadowY), T.inkDeep, 0, false, true).setName('steer-hint').setVisible(false);
+    this.bar = progressBar(scene, d3(e.bar.x), d3(e.bar.y), d3m(e.bar.w), d3m(e.bar.h), d4run.energy.fill, {
+      flat: { track: d4run.energy.track, fill: d4run.energy.fill, border: d4run.energy.trackBorder },
+    });
+    this.energy = scene.add.text(lc.x, lc.y, '', { fontFamily: FONT_UI, fontSize: `${d3(E.font)}px`, fontStyle: '900', color: d4run.hud.labelLight })
+      .setOrigin(0.5).setName('energy');
+    this.hint = scene.add.text(0, 0, '', { fontFamily: FONT_UI, fontSize: `${d3(H.font)}px`, fontStyle: '900', color: d4run.hud.labelLight })
+      .setOrigin(0.5).setName('steer-hint').setVisible(false);
     this.chipBox = scene.add.container(0, 0).setVisible(false).setName('next-checkpoint');   // one animated target
     this.motion = motionFor(scene); this.cfg = (scene.registry.get('balance') as Balance).motion;
     this.finger = this.buildFinger();
@@ -50,10 +54,13 @@ export class BottomGroup {
 
   /** D3-R9 R4: re-place everything on a new layout (D-pad toggled mid-run); nothing is recreated except the sized bar and the chip. */
   place(l: D3HudLayout): void {
+    const d4run = TOKENS.d4run;
     this.l = l;
     const e = l.energy, ec = cen(e.icon), lc = cen(e.label);
     this.energyIcon.setPosition(ec.x, ec.y).setDisplaySize(d3(e.icon.w), d3(e.icon.h)); this.energy.setPosition(lc.x, lc.y);
-    this.bar.g.destroy(); this.bar = progressBar(this.scene, d3(e.bar.x), d3(e.bar.y), d3m(e.bar.w), d3m(e.bar.h), T.tone.energy.face[0]);
+    this.bar.g.destroy(); this.bar = progressBar(this.scene, d3(e.bar.x), d3(e.bar.y), d3m(e.bar.w), d3m(e.bar.h), d4run.energy.fill, {
+      flat: { track: d4run.energy.track, fill: d4run.energy.fill, border: d4run.energy.trackBorder },
+    });
     this.bar.set(this.energyShown, 1);
     this.pos = cen(e.bar); this.placeHint();
     for (const o of [this.energyIcon, this.energy]) this.motion.rebase(o);
@@ -61,9 +68,16 @@ export class BottomGroup {
     this.syncHint(this.last);
   }
 
-  apply(v: HudView): void {
+  apply(v: HudView, storm = false): void {
+    const d4run = TOKENS.d4run;
     this.last = v;
     this.energy.setText(v.energy.text);
+    if (this.stormKey !== storm) {
+      this.stormKey = storm;
+      const col = storm ? d4run.hud.labelStorm : d4run.hud.labelLight;
+      this.energy.setColor(col);
+      this.hint.setColor(col);
+    }
     if (v.energy.fill !== this.energyTarget) {
       const first = this.energyTarget < 0, ms = first ? 0 : easeMsFor(this.energyTarget, v.energy.fill, this.cfg); this.energyTarget = v.energy.fill;
       this.motion.ease(this.energyEase, v.energy.fill, ms, x => { this.energyShown = x; this.bar.set(x, 1); });
@@ -102,8 +116,13 @@ export class BottomGroup {
 
   private placeHint(): void {
     const h = this.l.hint; if (!h) return;
-    this.placedText = this.hint.text; this.hint.setPosition(d3(h.x + h.w / 2), d3(h.y + h.h / 2));
-    this.fingerX = this.hint.x - d3(FINGER.gap) - this.hint.width / 2; this.fingerY = this.hint.y + d3(FINGER.dy);
+    this.placedText = this.hint.text;
+    const hintW = this.hint.width / d3(1);
+    const p = hintPlacement(this.l, hintW, FINGER, badgeRects(this.l), this.cfg.d3.hintTravelPx);
+    if (!p) return;
+    this.hint.setPosition(d3(p.hint.cx), d3(p.hint.cy));
+    this.fingerX = d3(p.finger.x);
+    this.fingerY = d3(p.finger.y);
   }
   /** D3-R9 R2/R3: the wait prompt is white text under the energy bar; no hint slot in D-pad mode, so it is hidden there. */
   private syncHint(v: HudView | null): void {

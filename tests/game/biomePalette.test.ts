@@ -3,10 +3,15 @@ import { boardLook, contrastRatio, DEFAULT_LOOK, mixInt } from '../../src/game/r
 import { TOKENS, toInt } from '../../src/game/uiTokens';
 import { SKIN_BODY } from '../../src/game/art/skins';
 
-it('D3-R4 B1 each biome takes frame and cells from TOKENS.d3.biomes', () => {
+it('D4-P5-R1 each biome takes frame and cells from TOKENS.d4run', () => {
   for (let n = 1; n <= 6; n++) {
-    const l = boardLook(n), b = TOKENS.d3.biomes[n - 1]!;
-    expect(l).toMatchObject({ biome: n, frame: toInt(b.frame), groundA: toInt(b.cells[0]), groundB: toInt(b.cells[1]) });
+    const l = boardLook(n);
+    expect(l).toMatchObject({
+      biome: n,
+      frame: toInt(TOKENS.d4run.frame[n - 1]!),
+      groundA: toInt(TOKENS.d4run.cells[n - 1]![0]),
+      groundB: toInt(TOKENS.d4run.cells[n - 1]![1]),
+    });
   }
 });
 it('D3-R4 B1 B2 biome 6 uses the light outline set, others the dark set; edge = rock outline', () => {

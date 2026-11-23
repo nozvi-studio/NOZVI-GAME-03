@@ -21,12 +21,14 @@ export function contrastRatio(a: number, b: number): number {
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
 }
 
-// MEC-011-R4 the snake colours of a look come from the equipped skin; the default skin keeps the D3 tokens.
+// MEC-011-R4 / D4-P5-R1 softened low-chroma checker; outlines keep >= 3:1 on both cells.
 export function boardLook(biome: number, skin: SkinId = activeSkin()): BoardLook {
   const n = Math.min(STORM, Math.max(1, Math.round(biome)));
-  const b = TOKENS.d3.biomes[n - 1]!, o = n === STORM ? TOKENS.d3.outlineStorm : TOKENS.d3.outline, body = SKIN_BODY[skin], s = body ?? TOKENS.d3.snake;
+  const d4run = TOKENS.d4run;
+  const cells = d4run.cells[n - 1]!, frameHex = d4run.frame[n - 1]!;
+  const o = n === STORM ? TOKENS.d3.outlineStorm : TOKENS.d3.outline, body = SKIN_BODY[skin], s = body ?? TOKENS.d3.snake;
   const outline = { snake: toInt(body ? (n === STORM ? body.outlineStorm : body.outline) : o.snake), mango: toInt(o.mango), rock: toInt(o.rock), warn: toInt(o.warn) };
-  return { biome: n, frame: toInt(b.frame), groundA: toInt(b.cells[0]), groundB: toInt(b.cells[1]), outline,
+  return { biome: n, frame: toInt(frameHex), groundA: toInt(cells[0]), groundB: toInt(cells[1]), outline,
     snake: { body: toInt(s.body), head: toInt(s.head), belly: toInt(s.belly), stripe: toInt(s.stripe) }, edge: outline.rock, woodEdge: outline.rock };
 }
 /** D3-R2 outline colour each hazard family draws with in a biome; every entry keeps >= 3:1 on both cells of all biomes. */

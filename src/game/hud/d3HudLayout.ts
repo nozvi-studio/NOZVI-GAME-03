@@ -17,9 +17,16 @@ export const D3_RUN = {
   debug: { nextW: 52, keyW: 64, h: 24, side: 10, bottom: 4 },
 } as const;
 
+// D4-P5-R1/R2 flat Duolingo Modern in-run metrics (360-wide board px).
+export const D4_RUN = {
+  board: { radius: 14, lip: 4, stroke: 5 },
+  top: { pause: 48, pauseLip: 4, pillH: 40, pillLip: 4, pillFont: 20, pillPadX: 18, border: 2, bar: { h: 20, radius: 10 } },
+  skill: { lip: 4, badgeFont: 14, badgeBorder: 2 },
+} as const;
+
 export interface R { x: number; y: number; w: number; h: number }
 export interface D3HudLayout {
-  board: R; band: R; pause: R; ribbon: R; score: { right: number; y: number; h: number };
+  board: R; band: R; pause: R; level: R; ribbon: R; score: { right: number; y: number; h: number };
   mango: { icon: R; bar: R; label: R };
   skills: readonly [R, R]; energy: { icon: R; bar: R; label: R };
   hint: R | null; chip: { cx: number; right: number | null; y: number; h: number; short: boolean };
@@ -51,10 +58,12 @@ export function d3HudLayout(hm: number, dpad: boolean): D3HudLayout {
   const M = D.mango, mrowY = T + M.y, mw = W - 2 * M.side;
   const mango = row(M.side, mrowY + (M.h - M.barH) / 2, mw, M.barH, M.icon, M.gap, M.labelW);
   mango.icon = { x: M.side, y: mrowY, w: M.icon, h: M.icon };
+  const levelRect: R = { x: (W - D.ribbon.w) / 2, y: T + D.score.y, w: D.ribbon.w, h: D4_RUN.top.pillH };
   const base = {
     board: { x: b.x, y: b.y, w: b.size, h: b.size },
     band: { x: b.x, y: b.y - D.band.below - D.band.h, w: b.size, h: D.band.h },
     pause: { x: D.pause.x, y: T + D.pause.y, w: D.pause.d, h: D.pause.d },
+    level: levelRect,
     ribbon: { x: (W - D.ribbon.w) / 2, y: T + D.ribbon.y, w: D.ribbon.w, h: D.ribbon.h },
     score: { right: D.score.right, y: T + D.score.y, h: D.score.h }, mango,
   };
@@ -77,4 +86,41 @@ export function d3HudLayout(hm: number, dpad: boolean): D3HudLayout {
     hint: null,
     chip: { cx: W - D.chip.rightDpad, right: D.chip.rightDpad, y: g + D.chip.dyDpad, h: D.chip.hDpad, short: true },
     dpad: { up: key(W / 2, g + P.upDy), left: key(W / 2 - P.dx, g + P.midDy), right: key(W / 2 + P.dx, g + P.midDy), down: key(W / 2, g + P.downDy) } };
+}
+
+// D4-P5-R2 single source of truth for skill cost badge geometry (shared by SkillButtons.paint and hintPlacement).
+export function badgeRectForSlot(slot: R, costW = 16): R {
+  const B = D3_RUN.skill.badge;
+  const bw = Math.max(B.minW, costW + 2 * B.padX), bh = B.h;
+  const cx = slot.x + slot.w / 2, cy = slot.y + slot.h / 2, r = slot.w / 2;
+  return { x: cx + r - B.right - bw, y: cy + r - B.bottom - bh, w: bw, h: bh };
+}
+
+export function badgeRects(l: D3HudLayout, costW = 16): readonly [R, R] {
+  return [badgeRectForSlot(l.skills[0], costW), badgeRectForSlot(l.skills[1], costW)];
+}
+
+const overlaps = (a: R, b: R, pad = 2): boolean =>
+  a.x - pad < b.x + b.w && a.x + a.w + pad > b.x && a.y - pad < b.y + b.h && a.y + a.h + pad > b.y;
+
+// D4-P5-R2 first-input finger + hint placement that never enters a skill button or its cost badge.
+export function hintPlacement(
+  l: D3HudLayout,
+  hintW: number,
+  finger: { tip: number; bodyW: number; bodyH: number; gap: number; dy: number },
+  badges: readonly R[],
+  swingDx = 12,
+): { hint: { cx: number; cy: number }; finger: { x: number; y: number } } | null {
+  if (!l.hint) return null;
+  const cx = l.hint.x + l.hint.w / 2, cy = l.hint.y + l.hint.h / 2;
+  const obstacles: R[] = [l.skills[0], l.skills[1], ...badges];
+  const halfW = Math.max(finger.tip, finger.bodyW / 2) + Math.abs(swingDx);
+  const clear = (fx: number, fy: number): boolean => {
+    const box: R = { x: fx - halfW, y: fy - finger.tip, w: halfW * 2, h: finger.tip + Math.max(finger.tip, finger.bodyH) };
+    return obstacles.every(o => !overlaps(box, o));
+  };
+  const leftX = cx - finger.gap - hintW / 2, rightX = cx + finger.gap + hintW / 2, sideY = cy + finger.dy;
+  if (clear(leftX, sideY)) return { hint: { cx, cy }, finger: { x: leftX, y: sideY } };
+  if (clear(rightX, sideY)) return { hint: { cx, cy }, finger: { x: rightX, y: sideY } };
+  return { hint: { cx, cy }, finger: { x: cx, y: cy - finger.bodyH - 2 } };
 }

@@ -82,19 +82,45 @@ export function titleText(scene: Phaser.Scene, x: number, y: number, text: strin
   }).setOrigin(0.5).setShadow(0, ui(TOKENS.title.shadowY), D.inkDeep, 0, true, true);
 }
 
-// D3-R6 bar: track image plus a cropped fill image; `fill` picks the fill tone (energy colour -> energy, anything else -> mango).
-export function progressBar(scene: Phaser.Scene, x: number, y: number, wMock: number, hMock: number, fill: string):
+// D3-R6 / D4-P5-R2 bar: flat rounded vector bar when opts.flat is set, else D3 skin image bar.
+export function progressBar(scene: Phaser.Scene, x: number, y: number, wMock: number, hMock: number, fill: string,
+  opts?: { flat?: { track: string; fill: string; border?: string } }):
   { g: Phaser.GameObjects.Container; set(value: number, max: number): void; edge(now: number): void; flash(now: number): void } {
-  const w = ui(wMock), h = ui(hMock), pad = ui(S.line), fw = w - 2 * pad, fh = h - 2 * pad;
+  const w = ui(wMock), h = ui(hMock), pad = opts?.flat ? ui(2) : ui(S.line), fw = w - 2 * pad, fh = h - 2 * pad;
+  const cfg = scene.registry.get('balance') ? motionCfgFor(scene) : null;
+  const flashG = scene.add.graphics().setAlpha(0);
+  flashG.fillStyle(toInt(D.white), 1).fillRoundedRect(pad, pad, fw, fh, fh / 2);
+
+  if (opts?.flat) {
+    const f = opts.flat;
+    const trackG = scene.add.graphics();
+    trackG.fillStyle(toInt(f.track), 1).fillRoundedRect(0, 0, w, h, h / 2);
+    if (f.border) trackG.lineStyle(ui(1.5), toInt(f.border), 1).strokeRoundedRect(0, 0, w, h, h / 2);
+    const fillG = scene.add.graphics();
+    const g = scene.add.container(x, y, [trackG, fillG, flashG]);
+    let flashAt = -1;
+    const set = (value: number, max: number): void => {
+      const px = barFill(value, max, fw);
+      fillG.clear();
+      if (px > 0) fillG.fillStyle(toInt(f.fill), 1).fillRoundedRect(pad, pad, Math.max(fh, px), fh, fh / 2);
+    };
+    const edge = (now: number): void => {
+      if (!cfg || flashAt < 0) return;
+      const a = flashAlpha(now - flashAt, cfg.d3.flashMs);
+      flashG.setAlpha(a);
+      if (a === 0) flashAt = -1;
+    };
+    const flash = (now: number): void => { if (!cfg) return; flashAt = now; flashG.setAlpha(1); };
+    set(0, 1);
+    return { g, set, edge, flash };
+  }
+
   const tone: SkinTone = toInt(fill) === toInt(D.tone.energy.face[0]) || toInt(fill) === toInt(TOKENS.sky.energy) ? 'energy' : 'mango';
   const track = skinImage(scene, w / 2, h / 2, 'bar', 'track', w, h, 'rest');
   const fillImg = skinImage(scene, w / 2, h / 2, 'bar', tone, fw, fh, 'rest');
-  // D3-R27 prebuilt value-change cues: a leading-edge sliver (alpha only) and a full-bar flash; absent when no balance is loaded (art preview).
-  const cfg = scene.registry.get('balance') ? motionCfgFor(scene) : null;
   const edgeW = cfg ? ui(cfg.d3.edgePx) : 0;
-  const edgeG = scene.add.graphics().setAlpha(0), flashG = scene.add.graphics().setAlpha(0);
+  const edgeG = scene.add.graphics().setAlpha(0);
   edgeG.fillStyle(toInt(D.white), 1).fillRect(0, 0, edgeW, fh); edgeG.setPosition(pad, pad);
-  flashG.fillStyle(toInt(D.white), 1).fillRoundedRect(pad, pad, fw, fh, fh / 2);
   const g = scene.add.container(x, y, [track, fillImg, flashG, edgeG]);
   let lastPx = -1, movedAt = -1e9, flashAt = -1, edgeLit = false, curPx = 0;
   const set = (value: number, max: number): void => {

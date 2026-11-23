@@ -73,6 +73,55 @@ export const TOKENS = {
   },
   danger: { text: '#B3261E', line: '#E0A39B' }, // UIFIX-R12/R14 soft red: short-of-energy cost, Quit run
   d4: { bg: '#FAF9F5' }, // D4-P3-R3 mirrors --d4-bg in src/game/dom/styles/tokens.css
+  // D4-P5-R1/R2 in-run Phaser tokens (TS mirror of tokens.css; Phaser cannot read CSS custom properties).
+  d4run: {
+    bg: [
+      ['#EDF4EA', '#DFEBDA'], // Biome 1: calm sage orchard
+      ['#F2F0E4', '#E7E3D2'], // Biome 2: warm bamboo parchment
+      ['#EDF3F7', '#DDE8F0'], // Biome 3: glacial sky
+      ['#F4EFE8', '#EAE2D7'], // Biome 4: warm desert sand
+      ['#ECF3ED', '#DCE9DE'], // Biome 5: botanical meadow
+      ['#3A3268', '#251E4A'], // Biome 6: Storm indigo (>= 10:1 with white HUD text)
+    ],
+    cells: [
+      ['#C5DFAD', '#B8D49E'], // Biome 1: soft sage checker
+      ['#E2DFB4', '#D7D3A3'], // Biome 2: soft straw checker
+      ['#CFE3F0', '#C1D9EA'], // Biome 3: soft ice checker
+      ['#E7D5BE', '#DEC8AE'], // Biome 4: soft sand checker
+      ['#E8D0B9', '#DEC2A8'], // Biome 5: soft terracotta checker
+      ['#3F3670', '#362E63'], // Biome 6: Storm dark indigo (luminance <= 0.06)
+    ],
+    frame: ['#7EA868', '#ABA368', '#7FA4C2', '#B59472', '#B88D6E', '#241D4A'],
+    hud: {
+      surface: '#FFFFFF',
+      ink: '#4B4B4B',
+      border: '#E5E2DC',
+      lip: '#D6D2CA',
+      mango: '#FFC800',
+      track: '#E5E2DC',
+      labelLight: '#4B4B4B',
+      labelStorm: '#FFFFFF',
+    },
+    badge: {
+      ready: '#1CB0F6',
+      short: '#AFAFAF',
+      text: '#163042', // >= 5.8:1 on both #1CB0F6 and #AFAFAF
+    },
+    skill: {
+      slotA: '#CE82FF',
+      slotALip: '#A560D6',
+      slotB: '#FF9600',
+      slotBLip: '#CC7800',
+      off: '#E5E5E5',
+      offLip: '#C8C8C8',
+      offIcon: '#AFAFAF',
+    },
+    energy: {
+      fill: '#1CB0F6',
+      track: '#E5E2DC',
+      trackBorder: '#D6D2CA',
+    },
+  },
 } as const;
 export type D3Tone = keyof typeof TOKENS.d3.tone;
 export const FONT_UI = 'Nunito, system-ui, sans-serif';
