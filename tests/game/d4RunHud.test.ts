@@ -27,15 +27,15 @@ describe('D4-P5-R1 / R2 flat in-run HUD & board frame rules', () => {
     expect(allHud).not.toMatch(/'ribbon'/);
   });
 
-  it('D4-P5-R2 top bar, energy and semantic badge tokens match D4 palette with >= 3:1 badge text contrast', () => {
+  it('D4-P5-R2 top bar, energy and semantic badge tokens match Mystic palette with >= 3:1 badge text contrast', () => {
     const { hud, badge, energy } = TOKENS.d4run;
     expect(hud.surface).toBe('#FFFFFF');
-    expect(hud.mango).toBe('#FFC800');
-    expect(hud.track).toBe('#E5E2DC');
-    expect(energy.fill).toBe('#1CB0F6');
-    expect(energy.track).toBe('#E5E2DC');
-    expect(badge.ready).toBe('#1CB0F6');
-    expect(badge.short).toBe('#AFAFAF');
+    expect(hud.mango).toBe('#FFD43B');
+    expect(hud.track).toBe('#E6F7F5');
+    expect(energy.fill).toBe('#00E5FF');
+    expect(energy.track).toBe('#E6F7F5');
+    expect(badge.ready).toBe('#18D2F5');
+    expect(badge.short).toBe('#94A3B8');
     expect(badge.ready).not.toBe(TOKENS.danger.text);
     expect(badge.short).not.toBe(TOKENS.danger.text);
     expect(contrastRatio(toInt(badge.text), toInt(badge.ready))).toBeGreaterThanOrEqual(3);

@@ -4,6 +4,7 @@ import './dom/styles/components.css';
 import './dom/styles/motion.css';
 import './dom/styles/screens.css';
 import './dom/styles/overlays.css';
+import './dom/styles/mystic.css';
 import { installAudioUnlock } from './audio/synth';
 import { startStageSync } from './dom/stageSync';
 import type { LoopHooks } from './dom/uiBridge';

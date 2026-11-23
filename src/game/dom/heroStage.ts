@@ -303,6 +303,7 @@ function createPortraitStage(container: HTMLElement, opts: HeroStageOpts): HeroS
   const img = doc.createElement('img');
   img.className = 'd4-hero-img';
   img.alt = '';
+  img.setAttribute('decoding', 'async');
   img.setAttribute('draggable', 'false');
   const shadow = doc.createElement('div');
   shadow.className = 'd4-hero-shadow';

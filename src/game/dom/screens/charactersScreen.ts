@@ -5,6 +5,8 @@ import { isReducedMotion, shakeDenied, staggerEnter } from '../animate';
 import { burstConfetti } from '../confetti';
 import { createHeroStage, skinPortraitUrl } from '../heroStage';
 import { icon } from '../icons';
+import { mountMysticBackdrop } from '../mysticBackdrop';
+import { mysticButtonIcon, mysticPageTitleSvg } from '../mysticIcons';
 import type { ScreenRender } from '../uiBridge';
 import { coinPill, ctaButton, el, roundIconBtn } from './screenParts';
 
@@ -32,14 +34,18 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
 
   const screen = el('div', 'd4-screen d4-chars d4-backdrop-pattern');
 
-  // Header
-  const header = el('header', 'd4-chars-header');
+  // Top bar + Title
+  const top = el('header', 'd4-chars-top');
   const backBtn = roundIconBtn('back', 'chars-back', t('loadout.back'), () => {
     synth.play('uiTap');
     bridge.goHome();
   });
-  const title = el('h1', 'd4-chars-title', { 'data-qa': 'chars-title' });
-  title.textContent = t('characters.title');
+  backBtn.innerHTML = mysticButtonIcon('back');
+  const title = el('h1', 'd4-chars-title d4-mystic-title-wrap');
+  const titleSr = el('span', 'd4-sr-only', { 'data-qa': 'chars-title' });
+  titleSr.textContent = t('characters.title');
+  title.innerHTML = mysticPageTitleSvg(t('characters.title'));
+  title.appendChild(titleSr);
   const coinsWrap = el('div', 'd4-chars-coins-wrap');
   const coins = coinPill('chars-coins', session.skinsModel().coins);
   coinsWrap.appendChild(coins.el);
@@ -57,7 +63,7 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
     });
     coinsWrap.appendChild(dbg);
   }
-  header.append(backBtn, title, coinsWrap);
+  top.append(backBtn, title, coinsWrap);
 
   // Adaptive Showcase Stage
   const stage = el('section', 'd4-chars-stage', { 'data-qa': 'chars-stage' });
@@ -67,14 +73,13 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
   const hero = createHeroStage(heroWrap, { skin: preview, mode: 'portrait', clock });
   hero.el.addEventListener('pointerdown', () => synth.play('uiTap'));
 
-  // Identity Block
+  // Identity Block (clean name + rarity only, no perk subtitle)
   const identity = el('div', 'd4-chars-identity');
   const idRow = el('div', 'd4-chars-id-row');
   const nameEl = el('span', 'd4-chars-name', { 'data-qa': 'chars-name' });
   const rarityEl = el('span', 'd4-chip', { 'data-qa': 'chars-rarity' });
-  const perkEl = el('div', 'd4-chars-perk', { 'data-qa': 'chars-perk' });
   idRow.append(nameEl, rarityEl);
-  identity.append(idRow, perkEl);
+  identity.append(idRow);
 
   // 3x2 Grid
   const grid = el('div', 'd4-chars-grid');
@@ -90,7 +95,7 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
     });
     const badge = el('span', 'd4-tile-badge');
     const thumb = el('span', 'd4-tile-thumb');
-    thumb.appendChild(el('img', 'd4-tile-img', { src: skinPortraitUrl(id), alt: '', draggable: 'false' }));
+    thumb.appendChild(el('img', 'd4-tile-img', { src: skinPortraitUrl(id), alt: '', decoding: 'async', draggable: 'false' }));
     const foot = el('span', 'd4-tile-foot');
     btn.append(badge, thumb, foot);
     btn.addEventListener('click', () => {
@@ -128,7 +133,8 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
   const footer = el('footer', 'd4-chars-footer');
   let actionBtn: HTMLButtonElement | null = null;
 
-  screen.append(header, stage, identity, grid, footer);
+  screen.append(top, stage, identity, grid, footer);
+  const disposeBackdrop = mountMysticBackdrop(screen);
   root.appendChild(screen);
 
   const onAction = (): void => {
@@ -166,7 +172,6 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
     nameEl.textContent = v.name;
     rarityEl.className = RARITY_CLS[v.rarity] ?? 'd4-chip';
     rarityEl.textContent = t(`rarity.${v.rarity}`);
-    perkEl.textContent = v.perk;
 
     for (const tok of v.tokens) {
       if (!isSkinId(tok.id)) continue;
@@ -212,6 +217,7 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
     coins.cancel();
     hero.destroy();
     for (const d of confettiDisposers) d();
+    disposeBackdrop();
     screen.remove();
   };
 };

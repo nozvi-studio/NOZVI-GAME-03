@@ -21,13 +21,13 @@ export function contrastRatio(a: number, b: number): number {
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
 }
 
-// MEC-011-R4 / D4-P5-R1 softened low-chroma checker; outlines keep >= 3:1 on both cells.
+// MEC-011-R4 / Mystic Art Direction deep-rich 6-biome boards; luminous outlines keep >= 3.9:1 on all cells.
 export function boardLook(biome: number, skin: SkinId = activeSkin()): BoardLook {
   const n = Math.min(STORM, Math.max(1, Math.round(biome)));
   const d4run = TOKENS.d4run;
   const cells = d4run.cells[n - 1]!, frameHex = d4run.frame[n - 1]!;
-  const o = n === STORM ? TOKENS.d3.outlineStorm : TOKENS.d3.outline, body = SKIN_BODY[skin], s = body ?? TOKENS.d3.snake;
-  const outline = { snake: toInt(body ? (n === STORM ? body.outlineStorm : body.outline) : o.snake), mango: toInt(o.mango), rock: toInt(o.rock), warn: toInt(o.warn) };
+  const o = TOKENS.d3.outlineStorm, body = SKIN_BODY[skin], s = body ?? TOKENS.d3.snake;
+  const outline = { snake: toInt(body ? body.outlineStorm : o.snake), mango: toInt(o.mango), rock: toInt(o.rock), warn: toInt(o.warn) };
   return { biome: n, frame: toInt(frameHex), groundA: toInt(cells[0]), groundB: toInt(cells[1]), outline,
     snake: { body: toInt(s.body), head: toInt(s.head), belly: toInt(s.belly), stripe: toInt(s.stripe) }, edge: outline.rock, woodEdge: outline.rock };
 }

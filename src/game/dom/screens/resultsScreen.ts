@@ -1,4 +1,4 @@
-// D4-P4-R1 Results DOM screen over resultsView (no nested boxes, mascot payoff, odometer, confetti). Pure: no Phaser.
+// D4-P4-R1 Results DOM screen over resultsView (Aqua Marsh Mystic concept, mascot payoff, odometer, confetti). Pure: no Phaser.
 import { biome } from '../../../core';
 import { activeSkin } from '../../art/skins';
 import { resultsView } from '../../flow/resultsView';
@@ -8,6 +8,8 @@ import { burstConfetti } from '../confetti';
 import { createHeroStage } from '../heroStage';
 import { icon } from '../icons';
 import { MOTION } from '../motionTokens';
+import { mountMysticBackdrop } from '../mysticBackdrop';
+import { mysticBoltIcon, mysticButtonIcon, mysticPageTitleSvg, mysticPlayIcon } from '../mysticIcons';
 import type { ScreenRender } from '../uiBridge';
 import { ctaButton, el, roundIconBtn } from './screenParts';
 
@@ -21,6 +23,21 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
   const confettiDisposers: (() => void)[] = [];
 
   const screen = el('div', 'd4-screen d4-results d4-backdrop-pattern');
+
+  // Top-right quick buttons (Characters crown + Settings gear, matching Home & game-over.png)
+  const navBar = el('div', 'd4-results-nav');
+  const charsBtn = roundIconBtn('characters', 'results-characters', t('home.characters'), () => {
+    synth.play('uiTap');
+    bridge.goCharacters();
+  });
+  charsBtn.innerHTML = mysticButtonIcon('crown');
+  const settingsBtn = roundIconBtn('settings', 'results-settings', t('home.settings'), () => {
+    synth.play('uiTap');
+    bridge.goSettings();
+  });
+  settingsBtn.innerHTML = mysticButtonIcon('settings');
+  navBar.append(charsBtn, settingsBtn);
+
   const top = el('div', 'd4-results-top');
 
   // Mascot reaction + bubble
@@ -45,23 +62,22 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
   hero.el.addEventListener('pointerdown', () => synth.play('uiTap'));
   stage.append(bubble, heroWrap);
 
-  // Outcome Display Title (Lilita One)
-  const titleEl = el('h1', 'd4-results-title', { 'data-qa': 'results-title' });
-  if (isWin) {
-    titleEl.textContent = t('results.d4.victory');
-    titleEl.classList.add('is-win');
-  } else if (isGold) {
-    titleEl.textContent = t('results.d4.newBest');
-    titleEl.classList.add('is-gold');
-  } else {
-    titleEl.textContent = t('results.d4.gameOver');
-  }
+  // Outcome Display Title (chunky SVG matching game-over.png)
+  const titleText = isWin ? t('results.d4.victory') : isGold ? t('results.d4.newBest') : t('results.d4.gameOver');
+  const titleTone = isWin ? 'green' : isGold ? 'gold' : 'white';
+  const titleEl = el('h1', 'd4-results-title d4-mystic-title-wrap');
+  if (isWin) titleEl.classList.add('is-win');
+  else if (isGold) titleEl.classList.add('is-gold');
+  const titleSr = el('span', 'd4-sr-only', { 'data-qa': 'results-title' });
+  titleSr.textContent = titleText;
+  titleEl.innerHTML = mysticPageTitleSvg(titleText, titleTone);
+  titleEl.appendChild(titleSr);
 
   // Odometer Score + Best Pill
   const scoreWrap = el('div', 'd4-results-score-wrap');
   const scoreEl = el('div', 'd4-results-score', { 'data-qa': 'results-score' });
   scoreEl.textContent = '0';
-  const bestPill = el('div', isGold ? 'd4-chip d4-chip--gold is-gold' : 'd4-chip', { 'data-qa': 'results-best' });
+  const bestPill = el('div', isGold ? 'd4-chip d4-chip--gold is-gold' : 'd4-chip d4-results-best-pill', { 'data-qa': 'results-best' });
   bestPill.innerHTML = icon('trophy', { size: 15 });
   const bestTxt = el('span');
   bestTxt.textContent = v ? t(v.bestChip.key, v.bestChip.vars) : '';
@@ -70,7 +86,7 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
 
   top.append(stage, titleEl, scoreWrap);
 
-  // 3-Column Hairline Stat Strip (no nested boxes)
+  // 3-Column White Tactile Stat Card (LEVEL / EATEN / BIOME)
   const stats = el('div', 'd4-results-stats', { 'data-qa': 'results-stats' });
   for (const s of v?.stats ?? []) {
     const col = el('div', 'd4-results-stat');
@@ -102,13 +118,13 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
     } else if (r.kind === 'next') {
       const prog = el('div', 'd4-results-progress', { 'data-qa': 'results-progress' });
       const barRow = el('div', 'd4-results-bar-row');
-      const flagWrap = el('span');
-      flagWrap.innerHTML = icon('flag', { size: 16 });
+      const flagWrap = el('span', 'd4-results-flag-orb');
+      flagWrap.innerHTML = icon('flag', { size: 15 });
       const bar = el('div', 'd4-results-bar');
       const fill = el('div', 'd4-results-bar-fill');
       fill.style.setProperty('--fill', `${Math.round(r.fill * 100)}%`);
       bar.appendChild(fill);
-      const lvlChip = el('span', 'd4-chip d4-chip--gold');
+      const lvlChip = el('span', 'd4-chip d4-chip--gold d4-results-cp-chip');
       lvlChip.textContent = r.requiresClear ? t('results.nextCpClear', { level: r.level }) : t('results.nextCp', { level: r.level });
       barRow.append(flagWrap, bar, lvlChip);
       prog.appendChild(barRow);
@@ -121,21 +137,23 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
     rows.appendChild(tip);
   }
 
-  // Footer Actions: Play Again + Home + compact Skills button (when any skill unlocked)
+  // Footer Actions: Play Again + Home + Cyan Skills Orb (when any skill unlocked)
   const footer = el('footer', 'd4-results-footer');
   const again = (): void => {
     synth.play('uiTap');
     bridge.playAgain();
   };
-  const againBtn = ctaButton('results-again', t('playAgain'), 'green', again, 'play');
+  const againBtn = ctaButton('results-again', t('playAgain'), 'green', again);
+  againBtn.insertAdjacentHTML('afterbegin', mysticPlayIcon());
   againBtn.classList.add('d4-home-play');
+  if (!isReducedMotion(root)) againBtn.classList.add('is-idle');
 
   const subRow = el('div', 'd4-results-sub-actions');
   const homeBtn = el('button', 'd4-btn d4-btn--neutral d4-results-home-btn', {
     type: 'button',
     'data-qa': 'results-home',
   });
-  homeBtn.innerHTML = `${icon('home', { size: 18 })}<span>${t('results.home')}</span>`;
+  homeBtn.innerHTML = `${icon('home', { size: 20 })}<span>${t('results.home')}</span>`;
   homeBtn.addEventListener('click', () => {
     synth.play('uiTap');
     bridge.goHome();
@@ -148,11 +166,14 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
       synth.play('uiTap');
       bridge.goLoadout();
     });
+    skillsBtn.innerHTML = mysticBoltIcon();
+    skillsBtn.classList.add('d4-results-skills-orb');
     subRow.appendChild(skillsBtn);
   }
   footer.append(againBtn, subRow);
 
-  screen.append(top, stats, rows, footer);
+  screen.append(navBar, top, stats, rows, footer);
+  const disposeBackdrop = mountMysticBackdrop(screen);
   root.appendChild(screen);
 
   // Trigger mascot reaction & score odometer
@@ -188,6 +209,7 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
     document.removeEventListener('keydown', onKeyDown);
     hero.destroy();
     for (const d of confettiDisposers) d();
+    disposeBackdrop();
     screen.remove();
   };
 };

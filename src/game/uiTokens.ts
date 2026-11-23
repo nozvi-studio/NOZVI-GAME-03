@@ -60,7 +60,7 @@ export const TOKENS = {
       pressedGloss: 0.5, radiusBig: 28, radiusPanel: 22, selectedRing: 4, selectedLift: 2, iconStroke: 2.6 },
     snake: { body: '#6F7DFF', head: '#7F8CFF', belly: '#CFD6FF', stripe: '#FFFFFF', blush: '#FF8FB1', tongue: '#FF5A7A', eye: '#1C1447' },
     outline: { snake: '#2B2F9E', mango: '#8A4500', rock: '#4A5563', warn: '#C81E1E' },
-    outlineStorm: { snake: '#7CF2D4', mango: '#FFF3C4', rock: '#D5DCE6', warn: '#FF9A9A' },
+    outlineStorm: { snake: '#7CF2D4', mango: '#FFF3C4', rock: '#E5EDF5', warn: '#FFD4D4' },
     skinFx: { spark: '#FFE36B', leaf: '#6FBF4A', leafEdge: '#2F7A2A' }, // MEC-011-R22/R23 rare skin particles
     biomes: [
       { bg: ['#7FD8FF', '#3FB2F2', '#1F86D8'], frame: '#1D6B2A', cells: ['#A6E25A', '#93D648'] },
@@ -73,53 +73,53 @@ export const TOKENS = {
   },
   danger: { text: '#B3261E', line: '#E0A39B' }, // UIFIX-R12/R14 soft red: short-of-energy cost, Quit run
   d4: { bg: '#FAF9F5' }, // D4-P3-R3 mirrors --d4-bg in src/game/dom/styles/tokens.css
-  // D4-P5-R1/R2 in-run Phaser tokens (TS mirror of tokens.css; Phaser cannot read CSS custom properties).
+  // Mystic Art Direction in-run Phaser tokens (6 deep-rich biomes, >= 3.9:1 contrast on 6x5x11 matrix).
   d4run: {
     bg: [
-      ['#EDF4EA', '#DFEBDA'], // Biome 1: calm sage orchard
-      ['#F2F0E4', '#E7E3D2'], // Biome 2: warm bamboo parchment
-      ['#EDF3F7', '#DDE8F0'], // Biome 3: glacial sky
-      ['#F4EFE8', '#EAE2D7'], // Biome 4: warm desert sand
-      ['#ECF3ED', '#DCE9DE'], // Biome 5: botanical meadow
-      ['#3A3268', '#251E4A'], // Biome 6: Storm indigo (>= 10:1 with white HUD text)
+      ['#0A4D53', '#083D42'], // Biome 1: Aqua Marsh
+      ['#3B1254', '#240938'], // Biome 2: Berry Jelly
+      ['#0B3B5B', '#07273E'], // Biome 3: Mint Frost
+      ['#6E2E10', '#4A1D08'], // Biome 4: Sunny Pop
+      ['#1E1B4B', '#110E33'], // Biome 5: Indigo Plaza
+      ['#13092B', '#090418'], // Biome 6: Cosmic Fruit (Storm)
     ],
     cells: [
-      ['#C5DFAD', '#B8D49E'], // Biome 1: soft sage checker
-      ['#E2DFB4', '#D7D3A3'], // Biome 2: soft straw checker
-      ['#CFE3F0', '#C1D9EA'], // Biome 3: soft ice checker
-      ['#E7D5BE', '#DEC8AE'], // Biome 4: soft sand checker
-      ['#E8D0B9', '#DEC2A8'], // Biome 5: soft terracotta checker
-      ['#3F3670', '#362E63'], // Biome 6: Storm dark indigo (luminance <= 0.06)
+      ['#0F665E', '#14776E'], // Biome 1: Aqua Marsh checker
+      ['#4E1C6B', '#5B227C'], // Biome 2: Berry Jelly checker
+      ['#125875', '#186787'], // Biome 3: Mint Frost checker
+      ['#7E3B12', '#8E4417'], // Biome 4: Sunny Pop checker
+      ['#2B2873', '#343187'], // Biome 5: Indigo Plaza checker
+      ['#24144D', '#2E1A61'], // Biome 6: Cosmic Fruit checker (luminance <= 0.03)
     ],
-    frame: ['#7EA868', '#ABA368', '#7FA4C2', '#B59472', '#B88D6E', '#241D4A'],
+    frame: ['#093F43', '#2F0D45', '#09324A', '#54210A', '#181540', '#120829'],
     hud: {
       surface: '#FFFFFF',
-      ink: '#4B4B4B',
-      border: '#E5E2DC',
-      lip: '#D6D2CA',
-      mango: '#FFC800',
-      track: '#E5E2DC',
-      labelLight: '#4B4B4B',
+      ink: '#0D3B42',
+      border: '#0A3E44',
+      lip: '#072C31',
+      mango: '#FFD43B',
+      track: '#E6F7F5',
+      labelLight: '#FFFFFF',
       labelStorm: '#FFFFFF',
     },
     badge: {
-      ready: '#1CB0F6',
-      short: '#AFAFAF',
-      text: '#163042', // >= 5.8:1 on both #1CB0F6 and #AFAFAF
+      ready: '#18D2F5',
+      short: '#94A3B8',
+      text: '#0D3B42',
     },
     skill: {
-      slotA: '#CE82FF',
-      slotALip: '#A560D6',
-      slotB: '#FF9600',
-      slotBLip: '#CC7800',
-      off: '#E5E5E5',
-      offLip: '#C8C8C8',
-      offIcon: '#AFAFAF',
+      slotA: '#18D2F5',
+      slotALip: '#0086AD',
+      slotB: '#B062FF',
+      slotBLip: '#6D28D9',
+      off: '#3D5E64',
+      offLip: '#243E43',
+      offIcon: '#9EC2C6',
     },
     energy: {
-      fill: '#1CB0F6',
-      track: '#E5E2DC',
-      trackBorder: '#D6D2CA',
+      fill: '#00E5FF',
+      track: '#E6F7F5',
+      trackBorder: '#0A3E44',
     },
   },
 } as const;

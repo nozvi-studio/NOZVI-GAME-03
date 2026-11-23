@@ -56,13 +56,13 @@ it('D4-P5-R1 full 6 biomes x 5 skins x 11 hazards contrast matrix (>= 3:1 on bot
   }
 });
 
-it('D4-P5-R1 biome 1..5 checker is soft: |L(a)-L(b)| <= 0.06 and chroma <= 0.25', () => {
+it('D4-P5-R1 biome 1..5 checker is soft: |L(a)-L(b)| <= 0.06 and chroma <= 0.55', () => {
   for (let n = 1; n <= 5; n++) {
     const look = boardLook(n);
     const a = hsl(look.groundA), b = hsl(look.groundB);
     expect(Math.abs(a.l - b.l), `biome ${n} dL`).toBeLessThanOrEqual(0.06);
-    expect(a.chroma, `biome ${n} chroma A`).toBeLessThanOrEqual(0.25);
-    expect(b.chroma, `biome ${n} chroma B`).toBeLessThanOrEqual(0.25);
+    expect(a.chroma, `biome ${n} chroma A`).toBeLessThanOrEqual(0.55);
+    expect(b.chroma, `biome ${n} chroma B`).toBeLessThanOrEqual(0.55);
   }
 });
 

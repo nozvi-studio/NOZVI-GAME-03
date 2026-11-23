@@ -45,22 +45,17 @@ function mountHome(opts: { debug?: boolean; debugLevel?: number | null; checkpoi
 describe('D4-P3-R2 Simplified Home DOM screen', () => {
   afterEach(() => setActiveSkin('snake'));
 
-  it('D4-P3-R2 shows wordmark, bubble, equipped hero, PLAY and status; no stepper/L1/loadout/best', () => {
+  it('D4-P3-R2 shows wordmark, equipped hero and PLAY only; no bubble, mango, status pill or removed controls', () => {
     setActiveSkin('capy');
     const { root, clock, cleanup } = mountHome();
     expect(root.querySelector('[data-qa="hero-capy"]')).not.toBeNull();
-    expect(root.querySelector('[data-qa="home-bubble"]')?.textContent).toBe("Let's eat!");
     expect(root.querySelector('[data-qa="home-play"]')).not.toBeNull();
-    const status = root.querySelector('[data-qa="home-status"]')!;
-    expect(status.tagName).not.toBe('BUTTON');
-    expect(status.getAttribute('role')).toBeNull();
-    for (const removed of ['home-prev', 'home-next', 'home-l1', 'home-loadout', 'home-best']) {
+    for (const removed of ['home-bubble', 'home-mango', 'home-status', 'home-prev', 'home-next', 'home-l1', 'home-loadout', 'home-best']) {
       expect(root.querySelector(`[data-qa="${removed}"]`)).toBeNull();
     }
     clock.advance(100);
     const img = root.querySelector<HTMLImageElement>('.d4-hero-img')!;
     expect(img.getAttribute('src')).toBe('/skins/capy.webp');
-    expect(img.style.getPropertyValue('--lean-x')).toMatch(/^-[\d.]+px$/); // leans toward the mango on the left
     cleanup();
     root.remove();
     expect(clock.pending()).toBe(0);
@@ -68,7 +63,6 @@ describe('D4-P3-R2 Simplified Home DOM screen', () => {
 
   it('D4-P3-R2 PLAY uses highest checkpoint or debug level; Characters dot reflects affordability', () => {
     const { root, startRun, goCharacters, goSettings, cleanup } = mountHome({ checkpoints: [5, 10], coins: 500 });
-    expect(root.querySelector('[data-qa="home-bubble"]')?.textContent).toBe('Ready for L10!');
     expect(root.querySelector('[data-qa="home-chars-dot"]')).not.toBeNull();
     root.querySelector<HTMLButtonElement>('[data-qa="home-play"]')?.click();
     expect(startRun).toHaveBeenCalledWith(10, false);

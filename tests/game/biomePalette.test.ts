@@ -14,8 +14,8 @@ it('D4-P5-R1 each biome takes frame and cells from TOKENS.d4run', () => {
     });
   }
 });
-it('D3-R4 B1 B2 biome 6 uses the light outline set, others the dark set; edge = rock outline', () => {
-  expect(boardLook(1).outline.snake).toBe(toInt(TOKENS.d3.outline.snake));
+it('D3-R4 B1 B2 all 6 dark-rich Mystic biomes use luminous outlines; edge = rock outline', () => {
+  expect(boardLook(1).outline.snake).toBe(toInt(TOKENS.d3.outlineStorm.snake));
   expect(boardLook(6).outline.snake).toBe(toInt(TOKENS.d3.outlineStorm.snake));
   for (const n of [1, 6]) expect(boardLook(n).edge).toBe(boardLook(n).outline.rock);
 });
@@ -35,8 +35,8 @@ it('P3b1-R1 contrastRatio is the WCAG ratio and mixInt blends', () => {
 });
 it('MEC-011-R4 the board look takes the snake colours from the skin; the snake skin keeps the D3 tokens', () => {
   const base = boardLook(2, 'snake'), capy = boardLook(2, 'capy'), storm = boardLook(6, 'capy');
-  expect(base.snake.body).toBe(toInt(TOKENS.d3.snake.body)); expect(base.outline.snake).toBe(toInt(TOKENS.d3.outline.snake));
-  expect(capy.snake.body).toBe(toInt(SKIN_BODY.capy!.body)); expect(capy.outline.snake).toBe(toInt(SKIN_BODY.capy!.outline));
+  expect(base.snake.body).toBe(toInt(TOKENS.d3.snake.body)); expect(base.outline.snake).toBe(toInt(TOKENS.d3.outlineStorm.snake));
+  expect(capy.snake.body).toBe(toInt(SKIN_BODY.capy!.body)); expect(capy.outline.snake).toBe(toInt(SKIN_BODY.capy!.outlineStorm));
   expect(storm.outline.snake).toBe(toInt(SKIN_BODY.capy!.outlineStorm));
   expect(capy.outline.mango).toBe(base.outline.mango); // only the snake entries change
 });

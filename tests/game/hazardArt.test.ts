@@ -92,13 +92,13 @@ it('P3b1-R6 a lone fence cell is one post; two horizontally joined cells add two
   expect(last[3]).toBeCloseTo(30 * 0.4 - 2 * 30 * 0.076);                    // last box is a post fill
 });
 
-it('D3-R4 B1 fences use the biome rock outline: dark set on biome 2, light set on biome 6', () => {
+it('D3-R4 B1 fences use the biome rock outline across all dark-rich Mystic biomes', () => {
   const a = gfx(), z = gfx();
   drawHazards(a.g, fenceHazard([{ x: 1, y: 1 }]), 30, boardLook(2), b, false, TEL);
   drawHazards(z.g, fenceHazard([{ x: 1, y: 1 }]), 30, boardLook(6), b, false, TEL);
   expect(a.calls.find(c => c[0] === 'fillStyle')![1]).toBe(boardLook(2).woodEdge);
   expect(z.calls.find(c => c[0] === 'fillStyle')![1]).toBe(boardLook(6).woodEdge);
-  expect(boardLook(2).woodEdge).not.toBe(boardLook(6).woodEdge);
+  expect(boardLook(2).woodEdge).toBe(boardLook(2).outline.rock);
 });
 
 it('P3b1-R6 a maze hazard draws glow, edge and fill passes over every bar', () => {

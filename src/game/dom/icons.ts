@@ -14,7 +14,7 @@ const ICON_SIZE = 24;
 const PATHS: Record<IconName, string> = {
   back: '<path d="M15 6l-6 6 6 6"/>',
   settings: '<circle cx="12" cy="12" r="3.2" fill="currentColor" fill-opacity="0.2"/><path d="M12 2.8v2.4M12 18.8v2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M2.8 12h2.4M18.8 12h2.4M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/><circle cx="12" cy="12" r="5.5"/>',
-  characters: '<circle cx="12" cy="8.5" r="4" fill="currentColor" fill-opacity="0.2"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/>',
+  characters: '<path d="M3.5 17.5L5.5 7.5l4.2 3.8L12 5.5l2.3 5.8 4.2-3.8 2 10H3.5Z" fill="currentColor" fill-opacity="0.22"/><path d="M4.5 20h15"/>',
   coin: '<circle cx="12" cy="12" r="9" style="fill:var(--d4-gold-face);stroke:var(--d4-gold-lip)"/><circle cx="12" cy="12" r="5.2" style="stroke:var(--d4-gold-ink)" fill="none"/>',
   lock: '<rect x="5" y="11" width="14" height="10" rx="3" fill="currentColor" fill-opacity="0.2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',

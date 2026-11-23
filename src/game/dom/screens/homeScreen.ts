@@ -5,7 +5,8 @@ import { canAffordUnowned, homeView } from '../../flow/homeModel';
 import { isReducedMotion, staggerEnter } from '../animate';
 import { systemClock } from '../clock';
 import { createHeroStage } from '../heroStage';
-import { icon } from '../icons';
+import { mountMysticBackdrop } from '../mysticBackdrop';
+import { mysticButtonIcon, mysticPlayIcon, mysticWordmarkSvg } from '../mysticIcons';
 import type { ScreenRender } from '../uiBridge';
 import { ctaButton, el, roundIconBtn } from './screenParts';
 
@@ -70,6 +71,7 @@ export function createHomeScreen(deps: HomeScreenDeps = {}): ScreenRender {
       synth.play('uiTap');
       bridge.goCharacters();
     });
+    charsBtn.innerHTML = mysticButtonIcon('crown');
     charsBtn.classList.add('d4-home-chars-btn');
     if (canAffordUnowned(skins)) {
       charsBtn.appendChild(el('span', 'd4-dot', { 'data-qa': 'home-chars-dot', 'aria-hidden': 'true' }));
@@ -78,33 +80,24 @@ export function createHomeScreen(deps: HomeScreenDeps = {}): ScreenRender {
       synth.play('uiTap');
       bridge.goSettings();
     });
+    settingsBtn.innerHTML = mysticButtonIcon('settings');
     topRight.append(charsBtn, settingsBtn);
     top.appendChild(topRight);
 
-    // Wordmark
+    // Wordmark (chunky rounded-stroke SVG matching main-menu.png)
     const wordmark = el('div', 'd4-home-wordmark');
-    const wmTop = el('div', 'd4-title d4-home-wordmark-top');
-    wmTop.textContent = t('logo.mango');
-    const wmBot = el('div', 'd4-title d4-home-wordmark-bot');
-    wmBot.textContent = t('logo.snake');
-    wordmark.append(wmTop, wmBot);
+    wordmark.innerHTML = mysticWordmarkSvg(t('logo.mango'), t('logo.snake'));
 
-    // Hero Center
+    // Hero Center (clean mascot portrait only — no bubble, no mango)
     const heroSection = el('section', 'd4-home-hero');
-    const bubble = el('div', 'd4-bubble', { 'data-qa': 'home-bubble' });
-    bubble.textContent = t(v.bubble.key, { level: v.bubble.level });
-
     const stageRow = el('div', 'd4-home-stage-row');
-    const mango = el('div', 'd4-home-mango', { 'data-qa': 'home-mango', 'aria-hidden': 'true' });
-    mango.innerHTML = icon('mango', { size: 46 });
     const heroWrap = el('div', 'd4-home-hero-wrap');
     const hero = createHeroStage(heroWrap, { skin: activeSkin(), mode: 'portrait', clock });
     hero.el.addEventListener('pointerdown', () => synth.play('uiTap'));
-    heroWrap.append(bubble, mango); // bubble centered above the head; mango floats beside it
     stageRow.append(heroWrap);
     heroSection.append(stageRow);
 
-    // Primary PLAY CTA + Passive Status Pill
+    // Primary PLAY CTA only (no checkpoint pill)
     const actions = el('div', 'd4-home-actions');
     const play = (): void => {
       const dbgLvl = deps.debugLevel
@@ -113,38 +106,15 @@ export function createHomeScreen(deps: HomeScreenDeps = {}): ScreenRender {
       if (dbgLvl !== null) bridge.startRun(dbgLvl, true);
       else bridge.startRun(v.playLevel, false);
     };
-    const playBtn = ctaButton('home-play', t('home.playBig'), 'green', play, 'play');
+    const playBtn = ctaButton('home-play', t('home.playBig'), 'green', play);
+    playBtn.insertAdjacentHTML('afterbegin', mysticPlayIcon());
     playBtn.classList.add('d4-home-play');
     if (!isReducedMotion(root)) playBtn.classList.add('is-idle');
-
-    const status = el('div', 'd4-chip d4-home-status', { 'data-qa': 'home-status' });
-    status.innerHTML = icon('flag', { size: 15 });
-    const statusText = el('span');
-    statusText.textContent = t(v.status.key, { level: v.status.level });
-    status.appendChild(statusText);
-    actions.append(playBtn, status);
+    actions.append(playBtn);
 
     screen.append(top, wordmark, heroSection, actions);
+    const disposeBackdrop = mountMysticBackdrop(screen);
     root.appendChild(screen);
-
-    // Eye tracking toward the mango on the left
-    let trackRaf: number | null = null;
-    let phase = 0;
-    const trackOnce = (): void => {
-      hero.lookAt(-36, -6 + Math.sin(phase) * 5);
-    };
-    if (isReducedMotion(screen)) {
-      trackOnce();
-    } else {
-      const tick = (): void => {
-        trackRaf = null;
-        phase += 0.08;
-        trackOnce();
-        trackRaf = clock.raf(tick);
-      };
-      trackOnce();
-      trackRaf = clock.raf(tick);
-    }
 
     // Enter / Space starts a run only when focus is not on a button (prevents double-fire)
     const onKeyDown = (e: KeyboardEvent): void => {
@@ -159,10 +129,10 @@ export function createHomeScreen(deps: HomeScreenDeps = {}): ScreenRender {
 
     return () => {
       cancelStagger();
-      if (trackRaf !== null) clock.cancelRaf(trackRaf);
       document.removeEventListener('keydown', onKeyDown);
       fallbackBox?.remove();
       hero.destroy();
+      disposeBackdrop();
       screen.remove();
     };
   };
