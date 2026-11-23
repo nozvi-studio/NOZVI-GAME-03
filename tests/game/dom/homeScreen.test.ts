@@ -55,7 +55,9 @@ describe('D4-P3-R2 Simplified Home DOM screen', () => {
       expect(root.querySelector(`[data-qa="${removed}"]`)).toBeNull();
     }
     clock.advance(100);
-    expect(root.querySelector('[data-part="pupil"]')?.getAttribute('transform')).toContain('translate(');
+    const img = root.querySelector<HTMLImageElement>('.d4-hero-img')!;
+    expect(img.getAttribute('src')).toBe('/skins/capy.webp');
+    expect(img.style.getPropertyValue('--lean-x')).toMatch(/^-[\d.]+px$/); // leans toward the mango on the left
     cleanup();
     root.remove();
     expect(clock.pending()).toBe(0);

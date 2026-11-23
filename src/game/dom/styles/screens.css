@@ -69,9 +69,11 @@
   transition: background-color 220ms ease;
 }
 
+/* Portrait sized slightly larger than the halo so the plump head fills it and the chin overlaps its rim. */
 .d4-chars-hero-wrap {
   position: relative;
-  width: 210px;
+  width: 196px;
+  margin-top: calc(-1 * var(--sp-2));
   z-index: 1;
 }
 
@@ -189,16 +191,20 @@
 }
 
 .d4-tile-thumb {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
 }
 
-.d4-tile-thumb svg {
-  width: 38px;
-  height: 38px;
+.d4-tile-img {
+  width: 40px;
+  height: 40px;
   display: block;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
 }
 
 .d4-tile-foot {
@@ -311,14 +317,24 @@
 
 .d4-home-hero-wrap {
   position: relative;
-  width: 210px;
+  width: min(200px, 52vw);
+  margin-top: var(--sp-6);
 }
 
-/* Bubble sits directly above the hero head (head is at the hero's upper-left). */
+/* Floating mango sits beside the portrait head, on the left (the hero leans toward it). */
+.d4-home-hero-wrap > .d4-home-mango {
+  position: absolute;
+  top: 38%;
+  right: 100%;
+  margin-right: calc(-1 * var(--sp-2));
+  z-index: 2;
+}
+
+/* Bubble is centered directly above the portrait head. */
 .d4-home-hero-wrap > .d4-bubble {
   position: absolute;
   bottom: 100%;
-  left: 22%;
+  left: 50%;
   transform: translateX(-50%);
   margin-bottom: var(--sp-1);
   white-space: nowrap;

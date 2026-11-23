@@ -14,7 +14,29 @@ export interface HeroStageOpts {
   reduceMotion?: () => boolean;
   interactive?: boolean;
   label?: string;
+  /** 'svg' (default) = D4-P2 live vector rig; 'portrait' = D4-P3 WebP mascot head portrait. */
+  mode?: HeroMode;
 }
+
+export type HeroMode = 'portrait' | 'svg';
+
+// D4-P3 mascot head portrait asset (public/skins/<skin>.webp).
+export function skinPortraitUrl(skin: SkinId): string {
+  return '/skins/' + skin + '.webp';
+}
+
+const PORTRAIT_REACT_CLS: Record<HeroReaction, string> = {
+  poke: 'is-jelly',
+  celebrate: 'is-hop',
+  denied: 'is-recoil',
+  hurt: 'is-hurt',
+};
+
+const PORTRAIT_REACT_MS: Record<Exclude<HeroReaction, 'hurt'>, number> = {
+  poke: MOTION.pokeMs,
+  celebrate: MOTION.celebrateMs,
+  denied: MOTION.deniedMs,
+};
 
 export interface HeroStage {
   readonly el: HTMLElement;
@@ -29,6 +51,7 @@ const fmt = (v: number): string => String(+v.toFixed(3));
 
 // D4-P2-R3 live hero micro-animations on direct SVG DOM.
 export function createHeroStage(container: HTMLElement, opts: HeroStageOpts): HeroStage {
+  if (opts.mode === 'portrait') return createPortraitStage(container, opts);
   const clock = opts.clock ?? systemClock;
   const interactive = opts.interactive ?? true;
   let skin: SkinId = opts.skin;
@@ -252,6 +275,150 @@ export function createHeroStage(container: HTMLElement, opts: HeroStageOpts): He
       destroyed = true;
       clearBlink();
       clearReactionTimers();
+      clearLookRaf();
+      if (interactive) el.removeEventListener('pointerdown', onPointerDown);
+      el.remove();
+    },
+  };
+}
+
+// D4-P3 portrait hero: WebP mascot head with CSS idle float/breath, lerped 3D lean via CSS vars and class-driven reactions.
+function createPortraitStage(container: HTMLElement, opts: HeroStageOpts): HeroStage {
+  const clock = opts.clock ?? systemClock;
+  const interactive = opts.interactive ?? true;
+  const doc = container.ownerDocument;
+  let skin: SkinId = opts.skin;
+  let destroyed = false;
+  let reactEndId: number | null = null;
+  let lookRafId: number | null = null;
+  let curOx = 0, curOy = 0, targetOx = 0, targetOy = 0;
+
+  const isReduced = (): boolean => (opts.reduceMotion ? opts.reduceMotion() : container.closest('.reduced-motion') !== null);
+
+  const el = doc.createElement('div');
+  el.className = 'd4-hero d4-hero--portrait';
+  el.setAttribute('role', 'img');
+  const portrait = doc.createElement('div');
+  portrait.className = 'd4-hero-portrait';
+  const img = doc.createElement('img');
+  img.className = 'd4-hero-img';
+  img.alt = '';
+  img.setAttribute('draggable', 'false');
+  const shadow = doc.createElement('div');
+  shadow.className = 'd4-hero-shadow';
+  shadow.setAttribute('aria-hidden', 'true');
+  portrait.append(img, shadow);
+  el.appendChild(portrait);
+  container.appendChild(el);
+
+  const renderSkin = (): void => {
+    el.dataset.qa = `hero-${skin}`;
+    el.setAttribute('aria-label', opts.label ?? skin);
+    el.classList.toggle('is-live', !isReduced());
+    img.setAttribute('src', skinPortraitUrl(skin));
+  };
+
+  const applyLean = (): void => {
+    const k = 1 / MOTION.lookMax;
+    img.style.setProperty('--lean-x', `${fmt(curOx * k * MOTION.portraitLeanPx)}px`);
+    img.style.setProperty('--lean-y', `${fmt(curOy * k * MOTION.portraitLeanPx)}px`);
+    img.style.setProperty('--lean-r', `${fmt(curOx * k * MOTION.portraitTiltDeg)}deg`);
+  };
+
+  const clearReaction = (): void => {
+    if (reactEndId !== null) { clock.clearTimeout(reactEndId); reactEndId = null; }
+    el.classList.remove(...Object.values(PORTRAIT_REACT_CLS));
+    delete el.dataset.reaction;
+  };
+
+  const clearLookRaf = (): void => {
+    if (lookRafId !== null) { clock.cancelRaf(lookRafId); lookRafId = null; }
+  };
+
+  const stepLook = (): void => {
+    lookRafId = null;
+    if (destroyed) return;
+    curOx += (targetOx - curOx) * MOTION.lookLerp;
+    curOy += (targetOy - curOy) * MOTION.lookLerp;
+    if (Math.hypot(targetOx - curOx, targetOy - curOy) < 0.02) {
+      curOx = targetOx;
+      curOy = targetOy;
+      applyLean();
+      return;
+    }
+    applyLean();
+    lookRafId = clock.raf(stepLook);
+  };
+
+  const lookAt = (dx: number, dy: number): void => {
+    if (destroyed) return;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 1e-6) {
+      targetOx = 0;
+      targetOy = 0;
+    } else {
+      const mag = MOTION.lookMax * Math.min(1, dist / MOTION.lookFullAt);
+      targetOx = (dx / dist) * mag;
+      targetOy = (dy / dist) * mag;
+    }
+    clearLookRaf();
+    if (isReduced()) {
+      curOx = targetOx;
+      curOy = targetOy;
+      applyLean();
+      return;
+    }
+    lookRafId = clock.raf(stepLook);
+  };
+
+  const react = (kind: HeroReaction): void => {
+    if (destroyed) return;
+    clearReaction();
+    el.dataset.reaction = kind;
+    // Reduced motion keeps only the static dim for hurt; no movement classes.
+    if (kind === 'hurt' || !isReduced()) {
+      void el.offsetWidth; // restart the CSS animation on rapid repeats
+      el.classList.add(PORTRAIT_REACT_CLS[kind]);
+    }
+    if (kind === 'hurt') return; // sticky until setExpression / setSkin
+    reactEndId = clock.setTimeout(() => {
+      reactEndId = null;
+      clearReaction();
+    }, PORTRAIT_REACT_MS[kind]);
+  };
+
+  const onPointerDown = (e: PointerEvent): void => {
+    if (!interactive || destroyed) return;
+    const rect = el.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      lookAt(e.clientX - (rect.left + rect.width / 2), e.clientY - (rect.top + rect.height / 2));
+    }
+    react('poke');
+  };
+
+  if (interactive) el.addEventListener('pointerdown', onPointerDown);
+  renderSkin();
+  applyLean();
+
+  return {
+    el,
+    setSkin(next: SkinId): void {
+      if (destroyed) return;
+      skin = next;
+      clearReaction();
+      renderSkin();
+    },
+    setExpression(): void {
+      // Portraits have one baked face; a new resting expression only clears a sticky reaction.
+      if (destroyed) return;
+      clearReaction();
+    },
+    lookAt,
+    react,
+    destroy(): void {
+      if (destroyed) return;
+      destroyed = true;
+      clearReaction();
       clearLookRaf();
       if (interactive) el.removeEventListener('pointerdown', onPointerDown);
       el.remove();

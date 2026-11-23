@@ -98,10 +98,10 @@ export function createHomeScreen(deps: HomeScreenDeps = {}): ScreenRender {
     const mango = el('div', 'd4-home-mango', { 'data-qa': 'home-mango', 'aria-hidden': 'true' });
     mango.innerHTML = icon('mango', { size: 46 });
     const heroWrap = el('div', 'd4-home-hero-wrap');
-    const hero = createHeroStage(heroWrap, { skin: activeSkin(), clock });
+    const hero = createHeroStage(heroWrap, { skin: activeSkin(), mode: 'portrait', clock });
     hero.el.addEventListener('pointerdown', () => synth.play('uiTap'));
-    heroWrap.appendChild(bubble); // anchored above the hero head, not the mango+hero row
-    stageRow.append(mango, heroWrap);
+    heroWrap.append(bubble, mango); // bubble centered above the head; mango floats beside it
+    stageRow.append(heroWrap);
     heroSection.append(stageRow);
 
     // Primary PLAY CTA + Passive Status Pill

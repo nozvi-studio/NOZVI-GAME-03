@@ -1,10 +1,9 @@
 // D4-P3-R1 Characters DOM screen over charactersView (MEC-011-R14..R21). Pure: no Phaser.
-import { headSvg } from '../../art/capyRig';
 import { isSkinId, setActiveSkin, type SkinId } from '../../art/skins';
 import { charactersView } from '../../flow/charactersView';
 import { isReducedMotion, shakeDenied, staggerEnter } from '../animate';
 import { burstConfetti } from '../confetti';
-import { createHeroStage } from '../heroStage';
+import { createHeroStage, skinPortraitUrl } from '../heroStage';
 import { icon } from '../icons';
 import type { ScreenRender } from '../uiBridge';
 import { coinPill, ctaButton, el, roundIconBtn } from './screenParts';
@@ -65,7 +64,7 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
   const halo = el('div', 'd4-chars-halo');
   const heroWrap = el('div', 'd4-chars-hero-wrap');
   stage.append(halo, heroWrap);
-  const hero = createHeroStage(heroWrap, { skin: preview, clock });
+  const hero = createHeroStage(heroWrap, { skin: preview, mode: 'portrait', clock });
   hero.el.addEventListener('pointerdown', () => synth.play('uiTap'));
 
   // Identity Block
@@ -91,7 +90,7 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
     });
     const badge = el('span', 'd4-tile-badge');
     const thumb = el('span', 'd4-tile-thumb');
-    thumb.innerHTML = headSvg(id, 'idle');
+    thumb.appendChild(el('img', 'd4-tile-img', { src: skinPortraitUrl(id), alt: '', draggable: 'false' }));
     const foot = el('span', 'd4-tile-foot');
     btn.append(badge, thumb, foot);
     btn.addEventListener('click', () => {

@@ -11,6 +11,9 @@ export const MOTION = {
   celebrateMs: 800,
   deniedMs: 400,
   hurtMs: 900,
+  // D4-P3 portrait mode: px of lean / deg of tilt per unit of look offset (look offset max = lookMax).
+  portraitLeanPx: 2.5,
+  portraitTiltDeg: 1.8,
   pokeSquash: [[1.08, 0.92], [0.96, 1.04], [1, 1]] as const,
   staggerMs: 35,
   staggerRisePx: 12,

@@ -54,12 +54,111 @@
   animation: d4-breath-head var(--breath-ms) ease-in-out infinite;
 }
 
-.d4-hero.is-hop {
+.d4-hero:not(.d4-hero--portrait).is-hop {
   animation: d4-hero-hop 520ms var(--ease-spring) 1;
 }
 
-.d4-hero.is-recoil {
+.d4-hero:not(.d4-hero--portrait).is-recoil {
   animation: d4-hero-recoil 320ms var(--ease-out-quart) 1;
+}
+
+/* D4-P3 portrait hero. Lean vars (--lean-x/y/r) are set by heroStage lookAt and compose with every keyframe. */
+@keyframes d4-portrait-float {
+  0%, 100% { transform: translate(var(--lean-x), var(--lean-y)) rotate(var(--lean-r)) scale(1, 1); }
+  50% { transform: translate(var(--lean-x), calc(var(--lean-y) - 6px)) rotate(var(--lean-r)) scale(1.015, 1.03); }
+}
+
+@keyframes d4-portrait-shadow {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.55; }
+  50% { transform: translateX(-50%) scale(0.86); opacity: 0.38; }
+}
+
+@keyframes d4-portrait-jelly {
+  0% { transform: translate(var(--lean-x), var(--lean-y)) rotate(var(--lean-r)) scale(1, 1); }
+  18% { transform: translate(var(--lean-x), calc(var(--lean-y) + 4px)) rotate(var(--lean-r)) scale(1.14, 0.86); }
+  38% { transform: translate(var(--lean-x), calc(var(--lean-y) - 4px)) rotate(var(--lean-r)) scale(0.9, 1.1); }
+  58% { transform: translate(var(--lean-x), var(--lean-y)) rotate(var(--lean-r)) scale(1.05, 0.95); }
+  78% { transform: translate(var(--lean-x), var(--lean-y)) rotate(var(--lean-r)) scale(0.98, 1.02); }
+  100% { transform: translate(var(--lean-x), var(--lean-y)) rotate(var(--lean-r)) scale(1, 1); }
+}
+
+@keyframes d4-portrait-hop {
+  0% { transform: translate(var(--lean-x), var(--lean-y)) scale(1, 1); }
+  15% { transform: translate(var(--lean-x), calc(var(--lean-y) + 5px)) scale(1.1, 0.9); }
+  45% { transform: translate(var(--lean-x), calc(var(--lean-y) - 26px)) rotate(-4deg) scale(0.94, 1.08); }
+  65% { transform: translate(var(--lean-x), calc(var(--lean-y) - 18px)) rotate(4deg) scale(1, 1); }
+  85% { transform: translate(var(--lean-x), calc(var(--lean-y) + 3px)) scale(1.06, 0.94); }
+  100% { transform: translate(var(--lean-x), var(--lean-y)) scale(1, 1); }
+}
+
+@keyframes d4-portrait-recoil {
+  0%, 100% { transform: translate(var(--lean-x), var(--lean-y)) rotate(0deg); }
+  20% { transform: translate(calc(var(--lean-x) - 8px), var(--lean-y)) rotate(-7deg) scale(0.96, 1.03); }
+  45% { transform: translate(calc(var(--lean-x) + 6px), var(--lean-y)) rotate(5deg); }
+  70% { transform: translate(calc(var(--lean-x) - 3px), var(--lean-y)) rotate(-2deg); }
+}
+
+.d4-hero-portrait {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.d4-hero-img {
+  --lean-x: 0px;
+  --lean-y: 0px;
+  --lean-r: 0deg;
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  transform-origin: 50% 85%;
+  transform: translate(var(--lean-x), var(--lean-y)) rotate(var(--lean-r));
+  transition: filter 200ms ease;
+}
+
+.d4-hero-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  width: 56%;
+  height: 9%;
+  border-radius: var(--radius-pill);
+  background: var(--d4-ink);
+  opacity: 0.5;
+  filter: blur(6px);
+  transform: translateX(-50%);
+}
+
+.d4-hero--portrait.is-live .d4-hero-img {
+  animation: d4-portrait-float var(--breath-ms) ease-in-out infinite;
+}
+
+.d4-hero--portrait.is-live .d4-hero-shadow {
+  animation: d4-portrait-shadow var(--breath-ms) ease-in-out infinite;
+}
+
+.d4-hero--portrait.is-jelly .d4-hero-img {
+  animation: d4-portrait-jelly 600ms var(--ease-spring) 1;
+}
+
+.d4-hero--portrait.is-hop .d4-hero-img {
+  animation: d4-portrait-hop 800ms var(--ease-spring) 1;
+}
+
+.d4-hero--portrait.is-recoil .d4-hero-img {
+  animation: d4-portrait-recoil 400ms var(--ease-out-quart) 1;
+}
+
+.d4-hero--portrait.is-hurt .d4-hero-img {
+  animation: none;
+  filter: grayscale(0.7) brightness(0.8);
+  transform: translate(var(--lean-x), calc(var(--lean-y) + 4px)) rotate(-10deg);
 }
 
 .d4-enter {
@@ -87,6 +186,15 @@
 .reduced-motion .d4-hero.is-recoil {
   animation: none !important;
   transform: none !important;
+}
+
+.reduced-motion .d4-hero--portrait .d4-hero-img,
+.reduced-motion .d4-hero--portrait .d4-hero-shadow {
+  animation: none !important;
+}
+
+.reduced-motion .d4-hero--portrait.is-hurt .d4-hero-img {
+  transform: none;
 }
 
 .reduced-motion .d4-enter {

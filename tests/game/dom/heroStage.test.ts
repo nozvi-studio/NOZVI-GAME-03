@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, expect, it } from 'vitest';
-import { createHeroStage } from '../../../src/game/dom/heroStage';
+import { createHeroStage, skinPortraitUrl } from '../../../src/game/dom/heroStage';
+import { MOTION } from '../../../src/game/dom/motionTokens';
 import { SKIN_IDS } from '../../../src/game/art/skins';
 import { FakeClock } from './fakeClock';
 
@@ -113,6 +114,97 @@ describe('D4-P2-R3 HeroStage', () => {
     snake.el.dispatchEvent(new Event('pointerdown'));
     expect(snake.el.innerHTML).toContain('data-part="tongue"');
     snake.destroy();
+    expect(clock.pending()).toBe(0);
+  });
+});
+
+describe('D4-P3 HeroStage portrait mode', () => {
+  const leanX = (hero: { el: HTMLElement }): number =>
+    parseFloat(hero.el.querySelector<HTMLElement>('.d4-hero-img')!.style.getPropertyValue('--lean-x'));
+
+  it('D4-P3 skinPortraitUrl maps each skin to its WebP asset', () => {
+    for (const skin of SKIN_IDS) expect(skinPortraitUrl(skin)).toBe(`/skins/${skin}.webp`);
+  });
+
+  it('D4-P3 portrait renders img + shadow without svg, and setSkin swaps the src', () => {
+    const clock = new FakeClock();
+    const box = document.createElement('div');
+    const hero = createHeroStage(box, { skin: 'pup', mode: 'portrait', clock });
+    const img = hero.el.querySelector<HTMLImageElement>('.d4-hero-portrait > img.d4-hero-img')!;
+    expect(img.getAttribute('src')).toBe('/skins/pup.webp');
+    expect(img.getAttribute('alt')).toBe('');
+    expect(img.getAttribute('draggable')).toBe('false');
+    expect(hero.el.querySelector('.d4-hero-shadow')?.getAttribute('aria-hidden')).toBe('true');
+    expect(hero.el.querySelector('svg')).toBeNull();
+    expect(hero.el.dataset.qa).toBe('hero-pup');
+    expect(hero.el.classList.contains('is-live')).toBe(true);
+    expect(clock.pending()).toBe(0); // no blink timers in portrait mode
+    hero.setSkin('tuxedo');
+    expect(img.getAttribute('src')).toBe('/skins/tuxedo.webp');
+    expect(hero.el.dataset.qa).toBe('hero-tuxedo');
+    hero.destroy();
+    expect(box.children.length).toBe(0);
+  });
+
+  it('D4-P3 portrait lookAt eases a clamped lean on .d4-hero-img and jumps under reduced motion', () => {
+    const clock = new FakeClock();
+    const box = document.createElement('div');
+    const hero = createHeroStage(box, { skin: 'ginger', mode: 'portrait', clock });
+    hero.lookAt(1000, 0);
+    clock.frame();
+    expect(leanX(hero)).toBeGreaterThan(0);
+    expect(leanX(hero)).toBeLessThan(MOTION.portraitLeanPx);
+    clock.advance(1000);
+    expect(leanX(hero)).toBeCloseTo(MOTION.portraitLeanPx, 1);
+    const img = hero.el.querySelector<HTMLElement>('.d4-hero-img')!;
+    expect(parseFloat(img.style.getPropertyValue('--lean-r'))).toBeCloseTo(MOTION.portraitTiltDeg, 1);
+    hero.destroy();
+    expect(clock.pending()).toBe(0);
+
+    const rm = createHeroStage(box, { skin: 'ginger', mode: 'portrait', clock, reduceMotion: () => true });
+    expect(rm.el.classList.contains('is-live')).toBe(false);
+    rm.lookAt(-1000, 0);
+    expect(leanX(rm)).toBeCloseTo(-MOTION.portraitLeanPx, 2);
+    rm.destroy();
+  });
+
+  it('D4-P3 portrait reactions toggle classes + data-reaction, hurt is sticky, reduced motion skips movement', () => {
+    const clock = new FakeClock();
+    const box = document.createElement('div');
+    const hero = createHeroStage(box, { skin: 'capy', mode: 'portrait', clock });
+    hero.react('poke');
+    expect(hero.el.dataset.reaction).toBe('poke');
+    expect(hero.el.classList.contains('is-jelly')).toBe(true);
+    clock.advance(MOTION.pokeMs);
+    expect(hero.el.dataset.reaction).toBeUndefined();
+    expect(hero.el.classList.contains('is-jelly')).toBe(false);
+
+    hero.react('celebrate');
+    expect(hero.el.classList.contains('is-hop')).toBe(true);
+    hero.react('denied'); // replaces celebrate
+    expect(hero.el.classList.contains('is-hop')).toBe(false);
+    expect(hero.el.classList.contains('is-recoil')).toBe(true);
+    clock.advance(MOTION.deniedMs);
+    expect(hero.el.dataset.reaction).toBeUndefined();
+
+    hero.react('hurt');
+    clock.advance(5000);
+    expect(hero.el.classList.contains('is-hurt')).toBe(true);
+    hero.setExpression('idle');
+    expect(hero.el.classList.contains('is-hurt')).toBe(false);
+
+    hero.el.dispatchEvent(new Event('pointerdown'));
+    expect(hero.el.dataset.reaction).toBe('poke');
+    hero.destroy();
+    expect(clock.pending()).toBe(0);
+
+    const rm = createHeroStage(box, { skin: 'capy', mode: 'portrait', clock, reduceMotion: () => true });
+    rm.react('celebrate');
+    expect(rm.el.dataset.reaction).toBe('celebrate');
+    expect(rm.el.classList.contains('is-hop')).toBe(false);
+    rm.react('hurt');
+    expect(rm.el.classList.contains('is-hurt')).toBe(true);
+    rm.destroy();
     expect(clock.pending()).toBe(0);
   });
 });
