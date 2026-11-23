@@ -1,0 +1,348 @@
+/* D4-P3 Characters & Simplified Home screen layouts — colours only via tokens.css vars. */
+
+.d4-screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: var(--d4-bg);
+  overflow: hidden;
+}
+
+/* Characters Screen (D4-P3-R1) */
+.d4-chars-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  height: 56px;
+  padding: var(--sp-2) var(--sp-4) 0;
+  flex: 0 0 auto;
+}
+
+.d4-chars-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--d4-ink);
+}
+
+.d4-chars-coins-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.d4-chars-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 200px;
+  max-height: 260px;
+  margin: auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.d4-chars-halo {
+  position: absolute;
+  width: 176px;
+  height: 176px;
+  border-radius: var(--radius-pill);
+  background: var(--halo, var(--d4-sky-tint));
+  transition: background-color 220ms ease;
+}
+
+.d4-chars-hero-wrap {
+  position: relative;
+  width: 210px;
+  z-index: 1;
+}
+
+@keyframes d4-stage-swap {
+  0% { transform: scale(0.92); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.d4-chars-hero-wrap.is-swap {
+  animation: d4-stage-swap 240ms var(--ease-spring) 1;
+}
+
+.d4-chars-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  min-height: 68px;
+  padding: 0 var(--sp-4);
+  text-align: center;
+  flex: 0 0 auto;
+}
+
+.d4-chars-id-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+}
+
+.d4-chars-name {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--d4-ink);
+  line-height: 1.1;
+}
+
+.d4-chars-perk {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--d4-ink-muted);
+  line-height: 1.25;
+}
+
+.d4-chars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 72px;
+  gap: 8px;
+  padding: 0 var(--sp-4);
+  flex: 0 0 auto;
+}
+
+.d4-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  height: 72px;
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--d4-border);
+  background: var(--d4-card);
+  box-shadow: 0 3px 0 var(--d4-border);
+  color: var(--d4-ink);
+  font-family: var(--font-ui);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 120ms var(--ease-spring), border-color 140ms ease, background-color 140ms ease;
+}
+
+.d4-tile:disabled {
+  background: var(--d4-surface);
+  color: var(--d4-ink-muted);
+  box-shadow: none;
+  cursor: default;
+}
+
+.d4-tile.is-selected {
+  border-color: var(--d4-sky-face);
+  background: var(--d4-sky-tint);
+  box-shadow: 0 3px 0 var(--d4-sky-lip);
+}
+
+@keyframes d4-tile-pop {
+  0% { transform: scale(0.95); }
+  60% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+.d4-tile.is-pop {
+  animation: d4-tile-pop 220ms var(--ease-spring) 1;
+}
+
+.d4-tile-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  display: grid;
+  place-items: center;
+  background: var(--d4-surface);
+  color: var(--d4-ink-muted);
+}
+
+.d4-tile-badge.is-equipped {
+  background: var(--d4-green-face);
+  color: var(--d4-card);
+}
+
+.d4-tile-thumb {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+}
+
+.d4-tile-thumb svg {
+  width: 38px;
+  height: 38px;
+  display: block;
+}
+
+.d4-tile-foot {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--d4-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.d4-chars-footer {
+  padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  flex: 0 0 auto;
+}
+
+.d4-chars-footer .d4-cta {
+  min-height: 52px;
+}
+
+.d4-cta.is-green {
+  background: var(--d4-green-face);
+  color: var(--d4-card);
+  box-shadow: 0 var(--lip) 0 var(--d4-green-lip);
+}
+
+.d4-cta.is-flat {
+  background: var(--d4-disabled-bg);
+  color: var(--d4-disabled-ink);
+  box-shadow: none;
+}
+
+.d4-debug-pill {
+  min-height: 32px;
+  padding: 0 var(--sp-2);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+/* Simplified Home Screen (D4-P3-R2) */
+.d4-home {
+  padding: var(--sp-3) var(--sp-4) var(--sp-6);
+  gap: var(--sp-3);
+}
+
+.d4-home-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--hit-min);
+  flex: 0 0 auto;
+}
+
+.d4-home-top-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-left: auto;
+}
+
+.d4-home-chars-btn {
+  position: relative;
+}
+
+.d4-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--d4-green-face);
+  border: 2px solid var(--d4-card);
+}
+
+.d4-home-wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.d4-home-wordmark-top {
+  font-size: 48px;
+  color: var(--d4-gold-face);
+}
+
+.d4-home-wordmark-bot {
+  font-size: 42px;
+  color: var(--d4-ink);
+}
+
+.d4-home-hero {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+}
+
+.d4-home-stage-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+}
+
+.d4-home-hero-wrap {
+  width: 210px;
+}
+
+@keyframes d4-mango-bob {
+  0%, 100% { transform: translateY(0px) rotate(-4deg); }
+  50% { transform: translateY(-7px) rotate(4deg); }
+}
+
+.d4-home-mango {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: d4-mango-bob 2200ms ease-in-out infinite;
+}
+
+.d4-home-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  flex: 0 0 auto;
+}
+
+@keyframes d4-play-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}
+
+.d4-home-play {
+  min-height: 56px;
+  width: 100%;
+}
+
+.d4-home-play.is-idle {
+  animation: d4-play-pulse 2400ms ease-in-out infinite;
+}
+
+.d4-home-status {
+  background: var(--d4-surface);
+  border: 1.5px solid var(--d4-border);
+  box-shadow: none;
+}
+
+.d4-home-export-toast {
+  position: absolute;
+  left: 50%;
+  bottom: var(--sp-4);
+  transform: translateX(-50%);
+}

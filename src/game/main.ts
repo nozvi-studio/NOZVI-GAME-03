@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import './dom/styles/tokens.css';
 import './dom/styles/components.css';
 import './dom/styles/motion.css';
+import './dom/styles/screens.css';
 import { installAudioUnlock } from './audio/synth';
 import { startStageSync } from './dom/stageSync';
 import type { LoopHooks } from './dom/uiBridge';
@@ -39,8 +40,8 @@ new Phaser.Game({
   height: HEIGHT,
   // D4-P1-R6 single AudioContext lives in synth.ts
   audio: { noAudio: true },
-  // D3-R10 first frame matches the Boot/Home background (biome 1 outer stop)
-  backgroundColor: TOKENS.d3.biomes[0]!.bg[2],
+  // D4-P3-R3 first frame matches the D4 DOM background (no blue flash)
+  backgroundColor: TOKENS.d4.bg,
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   scene: [BootScene, HomeScene, LoadoutScene, GameScene, HudScene, ResultsScene, SettingsScene, CharactersScene, ArtPreviewScene],
   input: { activePointers: 2 },

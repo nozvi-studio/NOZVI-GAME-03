@@ -14,7 +14,6 @@ import { localStore } from '../platform/localStore';
 import { setDisplaySettings } from '../render/palette';
 import { t } from '../text';
 import { UI_FONT_SPECS, drawThenSwap, waitForFonts } from '../ui/fonts';
-import { screenBackground } from '../ui/background';
 import { d3, d3Height, d3m, ui } from '../ui/layout';
 import { bootRects } from '../ui/menuLayout';
 import { D3_BOOT } from '../ui/menuMetrics';
@@ -37,9 +36,9 @@ export class BootScene extends Phaser.Scene {
   }
   private setProgress = (p: number): void => { this.view?.(bootView(p)); };
 
-  // D3-R10 Boot: background, logo, mango progress bar and "Loading… N%"; the logo draws at once and swaps to Lilita when the fonts load (UIFIX-R8).
+  // D4-P3-R3 Boot: calm #FAF9F5 background, logo, mango progress bar and "Loading… N%".
   private buildView(): void {
-    screenBackground(this, 1);
+    this.cameras?.main?.setBackgroundColor?.(TOKENS.d4.bg);
     const R = bootRects(d3Height()), cx = WIDTH / 2;
     const bar = progressBar(this, d3(R.bar.x), d3(R.bar.y), d3m(R.bar.w), d3m(R.bar.h), TOKENS.d3.tone.mango.face[0]);
     const text = this.add.text(cx, d3(R.text.y + R.text.h / 2), '', { fontFamily: FONT_UI, fontStyle: '800', fontSize: `${d3(D3_BOOT.textFont)}px`, color: TOKENS.d3.white }).setOrigin(0.5);

@@ -72,6 +72,7 @@ export const TOKENS = {
     ],
   },
   danger: { text: '#B3261E', line: '#E0A39B' }, // UIFIX-R12/R14 soft red: short-of-energy cost, Quit run
+  d4: { bg: '#FAF9F5' }, // D4-P3-R3 mirrors --d4-bg in src/game/dom/styles/tokens.css
 } as const;
 export type D3Tone = keyof typeof TOKENS.d3.tone;
 export const FONT_UI = 'Nunito, system-ui, sans-serif';

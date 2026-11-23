@@ -124,6 +124,10 @@ const KEYED: Readonly<Record<string, string>> = {
   'skill.mangoRain.desc': '{min} to {max} extra mangoes over {s} s', // provisional
   'home.best': 'Best {n}', 'home.playBig': 'PLAY', 'home.loadoutOne': 'Pick 1 skill', 'home.loadoutTwo': 'Pick 2 skills', // D3-R11 provisional
   'home.startAt': 'Start at L{level}', 'home.startL1': 'Start from L1', 'home.startEnergy': 'Start energy {e}',
+  'home.bubble.ready': 'Ready for L{level}!', 'home.bubble.first': "Let's eat!",
+  'home.status.next': 'Next checkpoint at L{level}', 'home.status.nextClear': 'Next checkpoint: clear L{level}',
+  'home.status.startsAt': 'Starts at L{level}',
+  'home.settings': 'Settings',
   'settings.title': 'Settings', 'settings.on': 'On', 'settings.off': 'Off',
   'settings.sound': 'Sound', 'settings.sound.sub': 'Music and effects',
   'settings.haptics': 'Haptics', 'settings.haptics.sub': 'Buzz when you eat or crash',

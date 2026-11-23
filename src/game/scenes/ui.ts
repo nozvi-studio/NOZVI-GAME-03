@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import type { Session } from '../../session';
+import { ensureSkinTextures } from '../art/capyTextures';
+import { activeSkin } from '../art/skins';
 import { goTo } from '../motion';
 import { currentPalette, type Palette } from '../render/palette';
 import { attachFeedback } from '../ui/feedback';
@@ -53,9 +55,13 @@ export function paintButton(b: Button, p: Palette, fill = p.panel, line = 3): vo
     .lineStyle(line, p.ink).strokeRoundedRect(-b.w / 2, -b.h / 2, b.w, b.h, 12);
 }
 
-/** P1 scene flow: start a session run, then open Game + Hud (the countdown starts in GameScene). */
+/** P1 scene flow / D4-P3-R3: preload the equipped skin textures, start a session run, then open Game + Hud. */
 export function beginRun(scene: Phaser.Scene, level: number, entry: 'home' | 'results' = 'home', debug = false): void {
-  const session = scene.registry.get('session') as Session;
-  session.startRun(level, entry, debug);
-  goTo(scene, 'Game', undefined, 'start', { after: () => scene.scene.launch('Hud') }); // MOT-2-R11 order: startRun, start Game, launch Hud
+  const launch = (): void => {
+    const session = scene.registry.get('session') as Session;
+    session.startRun(level, entry, debug);
+    goTo(scene, 'Game', undefined, 'start', { after: () => scene.scene.launch('Hud') }); // MOT-2-R11 order: startRun, start Game, launch Hud
+  };
+  if (scene.textures && scene.load) ensureSkinTextures(scene, [activeSkin()], launch);
+  else launch();
 }

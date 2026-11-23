@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 // Vite raw glob: no @types/node needed.
 const sources = import.meta.glob('../../src/game/scenes/*.ts', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const files = Object.entries(sources).map(([path, src]) => ({ name: path.split('/').pop()!, src }));
-// ui.ts has no create(); BootScene runs once per page load and is never re-entered, so it needs no re-arm.
-const EXEMPT_FROM_ENTER = ['ui.ts', 'BootScene.ts'];
+// ui.ts and phaserPort.ts have no create(); BootScene runs once per page load and is never re-entered, so it needs no re-arm.
+const EXEMPT_FROM_ENTER = ['ui.ts', 'phaserPort.ts', 'BootScene.ts'];
 
 describe('MOT-2-R1 no direct scene.start in menu scenes', () => {
   it('MOT-2-R1 only transition.ts calls scene.start', () => {

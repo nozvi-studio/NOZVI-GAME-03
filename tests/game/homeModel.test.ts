@@ -1,60 +1,55 @@
-// tests/game/homeModel.test.ts
-import { describe, it, expect } from 'vitest';
-import { homeExtras, homeView, stepCheckpoint } from '../../src/game/flow/homeModel';
-import type { HomeModel } from '../../src/session';
-const base: HomeModel = { checkpoints: [], defaultStart: 1, carriedEnergy: 0,
-  nextMilestone: { reach: 4, requiresClear: false }, showLoadout: false };
-describe('homeModel', () => {
-  it('MEC-008-R4 home shows only Play without checkpoints', () => {
-    const v = homeView(base);
-    expect(v.primary).toEqual({ key: 'home.play', level: 1 });
-    expect(v.secondaryL1).toBe(false);
-    expect(v.stepper).toEqual([]);
-  });
-  it('MEC-008-R4 home defaults to the highest unlocked checkpoint and offers L1', () => {
-    const m = { ...base, checkpoints: [4, 8], defaultStart: 8 };
-    const v = homeView(m);
-    expect(v.primary).toEqual({ key: 'home.playCheckpoint', level: 8 });
-    expect(v.secondaryL1).toBe(true);
-    expect(v.stepper).toEqual([4, 8]);
-    expect(homeView(m, 4).primary.level).toBe(4);
-    expect(stepCheckpoint(m, 8, -1)).toBe(4);
-    expect(stepCheckpoint(m, 4, -1)).toBe(4);
-    expect(stepCheckpoint(m, 8, 1)).toBe(8);
-  });
-  it('MEC-008-R11 next milestone hint is L10, then L15, then clear L30, then hidden', () => {
-    expect(homeView({ ...base, nextMilestone: { reach: 10, requiresClear: false } }).hint)
-      .toEqual({ key: 'hud.nextCheckpoint', level: 10 });
-    expect(homeView({ ...base, nextMilestone: { reach: 15, requiresClear: false } }).hint)
-      .toEqual({ key: 'hud.nextCheckpoint', level: 15 });
-    expect(homeView({ ...base, nextMilestone: { reach: 30, requiresClear: true } }).hint)
-      .toEqual({ key: 'hud.nextCheckpointClear', level: 30 });
-    expect(homeView({ ...base, nextMilestone: null }).hint).toBeNull();
-  });
-  it('MEC-008 §8 home carry line only when carriedEnergy > 0', () => {
-    expect(homeView(base).carry).toBeNull();
-    expect(homeView({ ...base, carriedEnergy: 18 }).carry).toBe(18);
-  });
-});
+// tests/game/homeModel.test.ts — MEC-008-R4 D4-P3 simplified Home (owner ruling 2026-11-23)
+import { describe, expect, it } from 'vitest';
+import { canAffordUnowned, homeView } from '../../src/game/flow/homeModel';
+import type { HomeModel, SkinsModel } from '../../src/session';
 
-describe('homeModel P3b3 menu flags', () => {
-  it('P3b3-R10 first-run Home is compact: big Play, no chips, no stepper', () => {
+const base: HomeModel = {
+  checkpoints: [],
+  defaultStart: 1,
+  carriedEnergy: 0,
+  nextMilestone: { reach: 10, requiresClear: false },
+  showLoadout: false,
+};
+
+describe('homeModel (D4-P3 simplified Home)', () => {
+  it('MEC-008-R4 simplified Home plays L1 without checkpoints', () => {
     const v = homeView(base);
-    expect(v).toMatchObject({ compact: true, startAt: null, extras: false, showStepper: false });
+    expect(v.playLevel).toBe(1);
   });
-  it('P3b3-R10 carried energy alone keeps Play normal size and shows only the energy chip row', () => {
-    const v = homeView({ ...base, carriedEnergy: 25 });
-    expect(v).toMatchObject({ compact: false, startAt: null, extras: true, carry: 25, secondaryL1: false });
+
+  it('MEC-008-R4 simplified Home plays the highest unlocked checkpoint', () => {
+    const v = homeView({ ...base, checkpoints: [5, 10], defaultStart: 10 });
+    expect(v.playLevel).toBe(10);
   });
-  it('P3b3-R10 with checkpoints Home shows Start at Lx, Start from L1 and a stepper only for 2+ checkpoints (C1, C2)', () => {
-    const one = homeView({ ...base, checkpoints: [4], defaultStart: 4 });
-    expect(one).toMatchObject({ compact: false, startAt: 4, extras: true, showStepper: false, secondaryL1: true });
-    const two = homeView({ ...base, checkpoints: [4, 6], defaultStart: 6 }, 4);
-    expect(two).toMatchObject({ startAt: 4, showStepper: true });
+
+  it('MEC-008-R11 status pill shows next checkpoint L10, then L15, then clear L30, then Starts at', () => {
+    expect(homeView({ ...base, nextMilestone: { reach: 10, requiresClear: false } }).status)
+      .toEqual({ key: 'home.status.next', level: 10 });
+    expect(homeView({ ...base, nextMilestone: { reach: 15, requiresClear: false } }).status)
+      .toEqual({ key: 'home.status.next', level: 15 });
+    expect(homeView({ ...base, nextMilestone: { reach: 30, requiresClear: true } }).status)
+      .toEqual({ key: 'home.status.nextClear', level: 30 });
+    expect(homeView({ ...base, checkpoints: [30], defaultStart: 30, nextMilestone: null }).status)
+      .toEqual({ key: 'home.status.startsAt', level: 30 });
   });
-  it('D3-R11 H5 H2 homeExtras: Best only above 0, loadout label by slot count, none without loadout', () => {
-    expect(homeExtras(0, false, 1)).toEqual({ best: null, loadoutKey: null });
-    expect(homeExtras(1240, true, 2)).toEqual({ best: 1240, loadoutKey: 'home.loadoutTwo' });
-    expect(homeExtras(5, true, 1).loadoutKey).toBe('home.loadoutOne');
+
+  it('D4-P3-R2 bubble says Lets eat on first run and Ready for Ln otherwise', () => {
+    expect(homeView(base).bubble).toEqual({ key: 'home.bubble.first', level: 1 });
+    expect(homeView({ ...base, checkpoints: [10], defaultStart: 10 }).bubble)
+      .toEqual({ key: 'home.bubble.ready', level: 10 });
+  });
+
+  it('D4-P3-R2 canAffordUnowned only when coins cover an unowned skin price', () => {
+    const mk = (coins: number, ownedAll = false): SkinsModel => ({
+      coins,
+      equipped: 'snake',
+      skins: [
+        { id: 'snake', rarity: 'default', price: 0, owned: true },
+        { id: 'ginger', rarity: 'common', price: 300, owned: ownedAll },
+      ],
+    });
+    expect(canAffordUnowned(mk(299))).toBe(false);
+    expect(canAffordUnowned(mk(300))).toBe(true);
+    expect(canAffordUnowned(mk(999, true))).toBe(false);
   });
 });
