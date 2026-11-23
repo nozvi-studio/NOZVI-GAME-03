@@ -2,6 +2,8 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- feat(art,ui): D4-P2 Duolingo vector rig & 3-tier motion — flat cel-shaded skins (`skins.ts`, `capyRig.ts`, zero SVG ids, dual catchlights, capy leaf), pure tapered Bezier `heroSvg.ts`, `motionTokens.ts`, injectable `clock.ts`, `motion.css`, live `heroStage.ts` (breathing, auto-blink, eye tracking, poke/celebrate/denied/hurt), `animate.ts` (`staggerEnter`, `countUp`, `shakeDenied`), `confetti.ts` (`CelebrationFx`), and live 5-skin `stylebook.html` preview (D4-P2-R1..R5).
+- docs: Claude CLI implementation plan for `D4-P3` (`docs/superpowers/plans/2026-11-23-d4-p3-characters-and-home.md`).
 - feat(ui): D4-P1 "Duolingo Modern" foundation — `happy-dom` devDependency, `src/game/dom/` (`tokens.css`, `components.css`, 22 inline SVG `icons.ts`, rAF-throttled `stageSync.ts`, `setBandLock`, token-based `uiHost.ts` + typed `uiBridge.ts`), singleton `AudioContext` + shared mute flag in `synth.ts`, `index.html`/`main.ts` `#ui-root` + `noAudio: true` wiring, and interactive `docs/design/mockups/d4/stylebook.html` (D4-P1-R1..R7).
 - docs: D4 "Duolingo Modern" umbrella spec, 5 phase specs (`D4-P1`..`D4-P5`), and Claude CLI implementation plans for `D4-P1` and `D4-P2` (`docs/superpowers/specs/`, `docs/superpowers/plans/`, `docs/README.md`, `docs/DECISIONS.md`).
 - fix(ui): P4a review fixes — `CharactersScene` unsubscribes skin-load callback and clears `body` on `SHUTDOWN`, centres hero container for `popIn`; `BootScene` detaches progress listener before post-boot skin load; `GameScene` reuses `tailPt` scratch point (MEC-011).

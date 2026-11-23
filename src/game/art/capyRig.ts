@@ -1,5 +1,5 @@
 // Pure skin SVG rig on the ART-001 48-unit anchors. No Phaser import.
-// ART-003: eyes, mouth, expressions and anchors are shared; a skin owns its palette and head shape (skins.ts).
+// ART-003 / D4-P2-R1: flat cel-shaded Duolingo vector rig with zero SVG ids/defs.
 import { SKIN_PALETTES, type SkinId, type SkinPalette } from './skins';
 
 export type EyeVariant = 'open' | 'blink' | 'closed' | 'x' | 'half';
@@ -40,22 +40,31 @@ export const CAPY_BODY_SIZE = { w: 256, h: 384 } as const;
 export const CAPY = SKIN_PALETTES.capy;
 export const ART = {
   head: { x: 3.6, y: 9.6, w: 40.8, h: 34.8, r: 16.8 }, ears: [11.4, 36.6], earY: 11.4, earR: 5.5,
-  eyeY: 20.4, eyeDx: 9.6, pupilR: 3.2, glintR: 1.1, eyeHalfW: 3,
+  eyeY: 20.4, eyeDx: 9.6, pupilR: 3.6, glintR: 1.2, glint2R: 0.65, eyeHalfW: 3,
   cheekY: 30, cheekDx: 15, cheekRx: 4, cheekRy: 2.6,
   noseY: 30.6, nostrils: [20.6, 27.4], nostrilRx: 1.6, nostrilRy: 1.2,
   muzzle: { x: 24, y: 34, rx: 12.6, ry: 8.4 }, mouthY: 37.6, mouthHalfW: 3.5, cx: 24,
-  body: { cx: 24, cy: 56, rx: 17, ry: 14, feetY: 68, feetDx: 9, footRx: 6, footRy: 3, armY: 50, armWinY: 40, armDx: 18, armRx: 4, armRy: 3 },
+  // D4-P2-R1 flat cel-shading crown highlight and lower-cheek shade contained inside face silhouette
+  crown: { y: 14.2, rx: 10.5, ry: 3.1 },
+  shade: { y: 38.2, rx: 13.5, ry: 4.2 },
+  leaf: { d: 'M24.2 10.6C25.4 4.8 31.4 2.4 35.8 4.4C33.6 9.4 28.8 11.8 24.2 10.6Z', vein: 'M25.6 9.6Q29.8 7.2 33.6 5.4' },
+  body: { cx: 24, cy: 56, rx: 17, ry: 14, feetY: 68, feetDx: 9, footRx: 6, footRy: 3, armY: 50, armWinY: 40, armDx: 18, armRx: 4, armRy: 3,
+    chestBlaze: 'M24 44c3.2 4.5 4.2 10 3.2 17h-6.4c-1-7 0-12.5 3.2-17Z' },
   // ART-003 snake head: an egg-shaped skull (wide at the eyes, narrower snout), no ears, no capy muzzle.
-  snake: { top: 6.4, bottom: 45.2, left: 2.8, right: 45.2, scleraR: 5.4, muzzle: { cy: 33.4, rx: 11.6, ry: 7.6 }, gloss: { cx: 19, cy: 12.6, rx: 8.4, ry: 3.2, alpha: 0.35 },
+  snake: { top: 6.4, bottom: 45.2, left: 2.8, right: 45.2, scleraR: 5.4, muzzle: { cy: 33.4, rx: 11.6, ry: 7.6 }, gloss: { cx: 19, cy: 12.6, rx: 8.4, ry: 3.2 },
     tongueStem: 4.8, tongueFork: 2.4, tongueSpread: 1.7, tongueStroke: 1.9, body: { coilY: 64, coilRx: 20, coilRy: 8, tailX: 41, tailY: 62 } },
   // MEC-011-R3 cat ears (triangles), dog flop ears, cat muzzle and nose, whiskers, ginger stripes, tuxedo blaze.
-  cat: { earL: 'M6 20L7 3.5L20 11Z', earR: 'M42 20L41 3.5L28 11Z', innerL: 'M9.5 14L10 8L15 11Z', innerR: 'M38.5 14L38 8L33 11Z', inner: '#FFC9D4',
+  cat: { earL: 'M6 20L7 3.5L20 11Z', earR: 'M42 20L41 3.5L28 11Z', innerL: 'M9.5 14L10 8L15 11Z', innerR: 'M38.5 14L38 8L33 11Z',
     muzzle: { cy: 34.4, rx: 9.6, ry: 7 }, nose: 'M21.8 30.6h4.4l-2.2 2.6Z', noseFill: '#FF8FA3',
     whiskers: 'M3 31l7 1.5M3 36l7-1M45 31l-7 1.5M45 36l-7-1', stripes: 'M20 10.5v5M24 10v6.5M28 10.5v5', stripeFill: '#C96F1E', blaze: 'M24 11c3 4 4 9 4 14h-8c0-5 1-10 4-14Z' },
-  dog: { earL: 'M7 12c-6 2-7 14-3 20 3 3 7 0 7-5V14Z', earR: 'M41 12c6 2 7 14 3 20-3 3-7 0-7-5V14Z', muzzle: { cy: 34.4, rx: 9.6, ry: 7 }, nose: 'M21.4 30.2h5.2l-2.6 3Z' },
+  dog: { earL: 'M7 12c-6 2-7 14-3 20 3 3 7 0 7-5V14Z', earR: 'M41 12c6 2 7 14 3 20-3 3-7 0-7-5V14Z',
+    innerL: 'M6.8 15.2c-3.2 1.4-3.8 9.2-1.4 13.2 1.4 1.6 3.6 0 3.6-2.8V16.6Z',
+    innerR: 'M41.2 15.2c3.2 1.4 3.8 9.2 1.4 13.2-1.4 1.6-3.6 0-3.6-2.8V16.6Z',
+    muzzle: { cy: 34.4, rx: 9.6, ry: 7 }, nose: 'M21.4 30.2h5.2l-2.6 3Z' },
 } as const;
 
-const n = (v: number): string => String(+v.toFixed(2));
+export const fmt = (v: number): string => String(+v.toFixed(2));
+const n = fmt;
 const eyeXs = [ART.cx - ART.eyeDx, ART.cx + ART.eyeDx];
 
 function eyes(v: EyeVariant, P: SkinPalette, sclera = false): string {
@@ -64,9 +73,13 @@ function eyes(v: EyeVariant, P: SkinPalette, sclera = false): string {
     `<path d="${d}" fill="none" stroke="${P.pupil}" stroke-width="${lw}" stroke-linecap="round" stroke-linejoin="round"/>`;
   const one = (x: number): string => {
     switch (v) {
+      // D4-P2-R1 dual catchlights inside a translatable pupil group (cx/cy retained for ART-001 anchors).
       case 'open': return (sclera ? `<circle data-part="sclera" cx="${n(x)}" cy="${n(y)}" r="${ART.snake.scleraR}" fill="${P.highlight}" stroke="${P.outline}" stroke-width="${P.innerStroke}"/>` : '')
-        + `<circle data-part="pupil" cx="${n(x)}" cy="${n(y)}" r="${ART.pupilR}" fill="${P.pupil}"/>`
-        + `<circle cx="${n(x + 1)}" cy="${n(y - 1.1)}" r="${ART.glintR}" fill="${P.highlight}"/>`;
+        + `<g data-part="pupil" data-cx="${n(x)}" data-cy="${n(y)}" cx="${n(x)}" cy="${n(y)}">`
+        + `<circle cx="${n(x)}" cy="${n(y)}" r="${ART.pupilR}" fill="${P.pupil}"/>`
+        + `<circle data-part="glint" cx="${n(x + 1.1)}" cy="${n(y - 1.2)}" r="${ART.glintR}" fill="${P.highlight}"/>`
+        + `<circle data-part="glint" cx="${n(x - 1.2)}" cy="${n(y + 1.1)}" r="${ART.glint2R}" fill="${P.highlight}"/>`
+        + '</g>';
       case 'blink': return `<g data-part="pupil" cx="${n(x)}" cy="${n(y)}">${line(`M${n(x - w)} ${n(y)} Q${n(x)} ${n(y + 1.2)} ${n(x + w)} ${n(y)}`)}</g>`;
       case 'closed': return `<g data-part="pupil" cx="${n(x)}" cy="${n(y)}">${line(`M${n(x - w)} ${n(y + 1)} L${n(x)} ${n(y - 1.6)} L${n(x + w)} ${n(y + 1)}`)}</g>`;
       case 'x': return `<g data-part="pupil" cx="${n(x)}" cy="${n(y)}">${line(`M${n(x - 2.4)} ${n(y - 2.4)} L${n(x + 2.4)} ${n(y + 2.4)} M${n(x + 2.4)} ${n(y - 2.4)} L${n(x - 2.4)} ${n(y + 2.4)}`)}</g>`;
@@ -110,31 +123,42 @@ function snakeHeadPath(): string {
 }
 const KAPPA = 0.5523; // cubic Bezier circle constant (geometry, not tuning)
 
-// ART-003 per-skin ears + head shape (the layers that differ). Capy output is byte-identical to the pre-skin rig.
+function celLayers(P: SkinPalette): string {
+  return `<ellipse data-part="crown" cx="${ART.cx}" cy="${ART.crown.y}" rx="${ART.crown.rx}" ry="${ART.crown.ry}" fill="${P.crown}"/>`
+    + `<ellipse data-part="shade" cx="${ART.cx}" cy="${ART.shade.y}" rx="${ART.shade.rx}" ry="${ART.shade.ry}" fill="${P.shade}"/>`;
+}
+
+// ART-003 / D4-P2-R1 per-skin ears + flat cel-shaded head shape (no SVG gradients/ids).
 function earsAndHead(skin: SkinId, P: SkinPalette): string {
   const h = ART.head, o = P.outline;
   if (skin === 'snake') {
     const k = ART.snake;
     return '<g data-layer="ears"></g>'
-      + `<g data-layer="head"><path data-part="face" d="${snakeHeadPath()}" fill="url(#face)" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/>`
-      + `<ellipse data-part="gloss" cx="${k.gloss.cx}" cy="${k.gloss.cy}" rx="${k.gloss.rx}" ry="${k.gloss.ry}" fill="${P.highlight}" opacity="${k.gloss.alpha}"/></g>`;
+      + `<g data-layer="head"><path data-part="face" d="${snakeHeadPath()}" fill="${P.faceTop}" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/>`
+      + celLayers(P)
+      + `<ellipse data-part="gloss" cx="${k.gloss.cx}" cy="${k.gloss.cy}" rx="${k.gloss.rx}" ry="${k.gloss.ry}" fill="${P.crown}"/></g>`;
   }
-  const face = `<rect data-part="face" x="${h.x}" y="${h.y}" width="${n(h.w)}" height="${n(h.h)}" rx="${h.r}" fill="url(#face)" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/>`;
+  const face = `<rect data-part="face" x="${h.x}" y="${h.y}" width="${n(h.w)}" height="${n(h.h)}" rx="${h.r}" fill="${P.faceTop}" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/>`;
   const tri = (d: string): string => `<path data-part="ear-tri" d="${d}" fill="${P.ears}" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/>`;
   if (skin === 'ginger' || skin === 'tuxedo') {
     const c = ART.cat;
     const mark = skin === 'ginger'
       ? `<path data-part="stripe" d="${c.stripes}" fill="none" stroke="${c.stripeFill}" stroke-width="2" stroke-linecap="round"/>`
       : `<path data-part="blaze" d="${c.blaze}" fill="${P.muzzle}"/>`;
-    return `<g data-layer="ears">${tri(c.earL)}${tri(c.earR)}<path d="${c.innerL}" fill="${c.inner}"/><path d="${c.innerR}" fill="${c.inner}"/></g>`
-      + `<g data-layer="head">${face}${mark}</g>`;
+    return `<g data-layer="ears">${tri(c.earL)}${tri(c.earR)}<path data-part="ear-inner" d="${c.innerL}" fill="${P.innerEar}"/><path data-part="ear-inner" d="${c.innerR}" fill="${P.innerEar}"/></g>`
+      + `<g data-layer="head">${face}${celLayers(P)}${mark}</g>`;
   }
   if (skin === 'pup') {
     const flop = (d: string): string => `<path data-part="ear-flop" d="${d}" fill="${P.ears}" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/>`;
-    return `<g data-layer="ears">${flop(ART.dog.earL)}${flop(ART.dog.earR)}</g><g data-layer="head">${face}</g>`;
+    return `<g data-layer="ears">${flop(ART.dog.earL)}${flop(ART.dog.earR)}<path data-part="ear-inner" d="${ART.dog.innerL}" fill="${P.innerEar}"/><path data-part="ear-inner" d="${ART.dog.innerR}" fill="${P.innerEar}"/></g>`
+      + `<g data-layer="head">${face}${celLayers(P)}</g>`;
   }
-  return `<g data-layer="ears">${ART.ears.map(x => `<circle data-part="ear" cx="${n(x)}" cy="${n(ART.earY)}" r="${ART.earR}" fill="${P.ears}" stroke="${o}" stroke-width="${P.stroke}"/>`).join('')}</g>`
-    + `<g data-layer="head"><rect data-part="face" x="${h.x}" y="${h.y}" width="${n(h.w)}" height="${n(h.h)}" rx="${h.r}" fill="url(#face)" stroke="${o}" stroke-width="${P.stroke}" stroke-linejoin="round"/></g>`;
+  const leaf = P.leaf && P.leafVein
+    ? `<g data-layer="leaf"><path data-part="leaf" d="${ART.leaf.d}" fill="${P.leaf}" stroke="${P.leafVein}" stroke-width="1.3" stroke-linejoin="round"/><path data-part="leaf-vein" d="${ART.leaf.vein}" fill="none" stroke="${P.leafVein}" stroke-width="1" stroke-linecap="round"/></g>`
+    : '';
+  return `<g data-layer="ears">${ART.ears.map(x => `<circle data-part="ear" cx="${n(x)}" cy="${n(ART.earY)}" r="${ART.earR}" fill="${P.ears}" stroke="${o}" stroke-width="${P.stroke}"/><circle data-part="ear-inner" cx="${n(x)}" cy="${n(ART.earY + 0.5)}" r="2.7" fill="${P.innerEar}"/>`).join('')}</g>`
+    + leaf
+    + `<g data-layer="head">${face}${celLayers(P)}</g>`;
 }
 
 /** ART-003 / D3 Home board: snake muzzle = a light oval under the eyes (no outline), no nostrils. */
@@ -152,12 +176,11 @@ function petMuzzleAndNose(skin: 'ginger' | 'pup' | 'tuxedo', P: SkinPalette): st
     + `<g data-layer="nose">${nose}${whiskers}</g>`;
 }
 
-// ART-001 head layers back to front: ears, head, blush, muzzle, nose, eyes, (tongue), mouth.
-function headLayers(skin: SkinId, e: CapyExpression): string {
+// D4-P2-R1 flat cel layers, no defs or ids (zero DOM collisions). Back to front: ears, (leaf), head, blush, muzzle, nose, eyes, (tongue), mouth.
+export function headLayersSvg(skin: SkinId, e: CapyExpression): string {
   const P = SKIN_PALETTES[skin], x = EXPRESSIONS[e], m = ART.muzzle, o = P.outline;
   const t: TongueVariant | undefined = 'tongue' in x ? x.tongue : undefined;
-  return `<defs><linearGradient id="face" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${P.faceTop}"/><stop offset="1" stop-color="${P.faceBottom}"/></linearGradient></defs>`
-    + earsAndHead(skin, P)
+  return earsAndHead(skin, P)
     + `<g data-layer="blush">${[-1, 1].map(s => `<ellipse cx="${n(ART.cx + s * ART.cheekDx)}" cy="${ART.cheekY}" rx="${ART.cheekRx}" ry="${ART.cheekRy}" fill="${P.blush}" opacity="0.8"/>`).join('')}</g>`
     + (skin === 'snake' ? snakeJawAndNostrils(P) : skin !== 'capy' ? petMuzzleAndNose(skin, P) : `<g data-layer="muzzle"><ellipse data-part="muzzle" cx="${m.x}" cy="${m.y}" rx="${m.rx}" ry="${m.ry}" fill="${P.muzzle}" stroke="${o}" stroke-width="${P.innerStroke}"/></g>`
     + `<g data-layer="nose">${ART.nostrils.map(nx => `<ellipse data-part="nostril" cx="${n(nx)}" cy="${n(ART.noseY)}" rx="${ART.nostrilRx}" ry="${ART.nostrilRy}" fill="${P.nose}"/>`).join('')}</g>`)
@@ -168,7 +191,7 @@ const wrap = (vb: string, inner: string): string => `<svg xmlns="http://www.w3.o
 
 // ART-003 head for one expression of one skin (front facing, 48 x 48).
 export function headSvg(skin: SkinId, e: CapyExpression): string {
-  return wrap('0 0 48 48', headLayers(skin, e));
+  return wrap('0 0 48 48', headLayersSvg(skin, e));
 }
 
 // ART-003 body pose (Skins/Results only): body behind, head on the same anchors.
@@ -183,12 +206,10 @@ export function bodySvg(skin: SkinId, p: CapyBodyPose): string {
   const coil = `${blob(b.cx, k.coilY, k.coilRx, k.coilRy)}${blob(k.tailX, p === 'win' ? k.tailY - 8 : k.tailY, 3.4, 5)}`;
   const limbs = `${blob(b.cx - b.feetDx, b.feetY, b.footRx, b.footRy)}${blob(b.cx + b.feetDx, b.feetY, b.footRx, b.footRy)}`
     + `${blob(b.cx - b.armDx, armY, b.armRx, b.armRy)}${blob(b.cx + b.armDx, armY, b.armRx, b.armRy)}`;
+  const chest = skin === 'tuxedo' ? `<path data-part="blaze" d="${b.chestBlaze}" fill="${P.muzzle}"/>` : '';
   const body = `<g data-layer="body">${skin === 'snake' ? coil : limbs}`
-    + `<ellipse cx="${b.cx}" cy="${b.cy}" rx="${b.rx}" ry="${b.ry}" fill="url(#face)" stroke="${o}" stroke-width="${st}"/></g>`;
-  const head = headLayers(skin, p === 'win' ? 'win' : 'idle');
-  // defs come from headLayers; body is drawn first so the head overlaps it.
-  const defsEnd = head.indexOf('</defs>') + '</defs>'.length;
-  return wrap('0 0 48 72', head.slice(0, defsEnd) + body + head.slice(defsEnd));
+    + `<ellipse cx="${b.cx}" cy="${b.cy}" rx="${b.rx}" ry="${b.ry}" fill="${P.faceBottom}" stroke="${o}" stroke-width="${st}"/>${chest}</g>`;
+  return wrap('0 0 48 72', body + headLayersSvg(skin, p === 'win' ? 'win' : 'idle'));
 }
 
 export const capyHeadSvg = (e: CapyExpression): string => headSvg('capy', e);

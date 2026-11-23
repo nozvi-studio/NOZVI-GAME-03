@@ -33,4 +33,21 @@ describe('D4-P1-R7 interactive visual stylebook', () => {
       expect(sw, sw).toMatch(/data-qa="[^"]+"/);
     }
   });
+
+  it('D4-P2 stylebook links motion.css, mounts live heroes for all 5 skins, and includes motion demos', () => {
+    expect(html).toContain('href="../../../../src/game/dom/styles/motion.css"');
+    expect(html).toContain('heroStage.ts');
+    expect(html).toContain('animate.ts');
+    expect(html).toContain('confetti.ts');
+    expect(html).toContain('SKIN_IDS');
+    for (const skin of ['snake', 'ginger', 'pup', 'tuxedo', 'capy']) {
+      expect(html).toContain(`data-qa="sb-hero-${skin}"`);
+      for (const kind of ['poke', 'celebrate', 'denied', 'hurt']) {
+        expect(html).toContain(`data-qa="sb-hero-${skin}-${kind}"`);
+      }
+    }
+    for (const demo of ['sb-confetti', 'sb-countup', 'sb-shake', 'sb-stagger']) {
+      expect(html).toContain(`data-qa="${demo}"`);
+    }
+  });
 });

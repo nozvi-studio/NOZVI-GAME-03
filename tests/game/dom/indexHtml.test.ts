@@ -16,6 +16,7 @@ describe('D4-P1-R1 / R6 index.html and main.ts wiring', () => {
   it('D4-P1-R6 main.ts imports D4 CSS, disables Phaser audio, and wires unlock, stageSync and uiHost', () => {
     expect(main).toContain("import './dom/styles/tokens.css'");
     expect(main).toContain("import './dom/styles/components.css'");
+    expect(main).toContain("import './dom/styles/motion.css'");
     expect(main).toContain('noAudio: true');
     expect(main).toContain('installAudioUnlock(');
     expect(main).toContain('startStageSync(');

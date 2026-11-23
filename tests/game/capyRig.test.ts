@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BODY_POSES, CAPY_EXPRESSIONS, EXPRESSIONS, capyBodyKey, capyBodySvg, capyHeadKey, capyHeadSvg, svgDataUrl, ART } from '../../src/game/art/capyRig';
+import { SKIN_PALETTES } from '../../src/game/art/skins';
 
 const attr = (svg: string, part: string, name: string): string[] =>
   [...svg.matchAll(new RegExp(`data-part="${part}"[^>]*?\\s${name}="([^"]+)"`, 'g'))].map(m => m[1]!);
@@ -37,16 +38,22 @@ describe('ART-001 capy rig', () => {
     expect(svg).toMatch(/data-part="mouth"[^>]*data-y="37.6"/);
   });
 
-  it('ART-001 outline is dark brown, 2 on head and ears, 1.2 on the muzzle', () => {
+  it('ART-001 D4-P2-R1 outline is the warm capy outline, 2 on head and ears, 1.2 on the muzzle', () => {
     const svg = capyHeadSvg('idle');
     expect(attr(svg, 'face', 'stroke-width')).toEqual(['2']);
     expect(attr(svg, 'ear', 'stroke-width')).toEqual(['2', '2']);
     expect(attr(svg, 'muzzle', 'stroke-width')).toEqual(['1.2']);
-    expect(attr(svg, 'face', 'stroke')).toEqual(['#4A2E1B']);
+    expect(SKIN_PALETTES.capy.outline).toBe('#7A4A26');
+    expect(SKIN_PALETTES.capy.outline).not.toBe('#4A2E1B');
+    expect(attr(svg, 'face', 'stroke')).toEqual([SKIN_PALETTES.capy.outline]);
   });
 
-  it('ART-001 no leaf, stem or text in any head', () => {
-    for (const e of CAPY_EXPRESSIONS) expect(capyHeadSvg(e)).not.toMatch(/<text|leaf|stem/);
+  it('ART-001 D4-P2-R1 capy heads carry exactly one leaf accent and no text', () => {
+    for (const e of CAPY_EXPRESSIONS) {
+      const svg = capyHeadSvg(e);
+      expect(svg).not.toMatch(/<text|stem/);
+      expect(svg.match(/data-part="leaf"/g)?.length).toBe(1);
+    }
   });
 
   it('ART-001 body poses include the head and a body below y 44.4', () => {

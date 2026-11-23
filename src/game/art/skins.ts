@@ -6,13 +6,20 @@ export const isSkinId = (id: string): id is SkinId => (SKIN_IDS as readonly stri
 export interface SkinPalette {
   outline: string; faceTop: string; faceBottom: string; ears: string; muzzle: string;
   pupil: string; nose: string; blush: string; highlight: string; tongue: string;
+  // D4-P2-R1 flat cel shading
+  crown: string;
+  shade: string;
+  innerEar: string;
+  leaf: string | null;
+  leafVein: string | null;
   stroke: number; innerStroke: number; featureStroke: number;
 }
 
 export const SKIN_PALETTES: Record<SkinId, SkinPalette> = {
   capy: {
-    outline: '#4A2E1B', faceTop: '#D6AB7C', faceBottom: '#C79A6B', ears: '#B1865A', muzzle: '#B1865A',
-    pupil: '#17261B', nose: '#4A2E1B', blush: '#FF8FA3', highlight: '#FFFFFF', tongue: '#E5484D',
+    outline: '#7A4A26', faceTop: '#D9AE80', faceBottom: '#C79A6B', ears: '#B8895C', muzzle: '#E8CBA8',
+    pupil: '#17261B', nose: '#6B3E20', blush: '#FF8FA3', highlight: '#FFFFFF', tongue: '#E5484D',
+    crown: '#E8C59E', shade: '#C59565', innerEar: '#EBC2A4', leaf: '#58CC02', leafVein: '#46A302',
     stroke: 2, innerStroke: 1.2, featureStroke: 1.4,
   },
   // Blue family of the light-mode snake (render/palette.ts body 0x2b3a8f = the outline so the head edge merges into the
@@ -20,14 +27,27 @@ export const SKIN_PALETTES: Record<SkinId, SkinPalette> = {
   snake: {
     outline: '#2B3A8F', faceTop: '#7F95F0', faceBottom: '#5468D4', ears: '#5468D4', muzzle: '#C3CEFA',
     pupil: '#17261B', nose: '#2B3A8F', blush: '#FF8FA3', highlight: '#FFFFFF', tongue: '#E5484D',
+    crown: '#A6B6F7', shade: '#637BE0', innerEar: '#A6B6F7', leaf: null, leafVein: null,
     stroke: 2, innerStroke: 1.2, featureStroke: 1.4,
   },
-  ginger: { outline: '#7A3E12', faceTop: '#FFB866', faceBottom: '#F6A04D', ears: '#F6A04D', muzzle: '#FFF4E3',
-    pupil: '#17261B', nose: '#7A3E12', blush: '#FF8FA3', highlight: '#FFFFFF', tongue: '#E5484D', stroke: 2, innerStroke: 1.2, featureStroke: 1.4 },
-  pup: { outline: '#6B4423', faceTop: '#F4D9AE', faceBottom: '#E9C48F', ears: '#9A6236', muzzle: '#FFF7EA',
-    pupil: '#17261B', nose: '#3A2414', blush: '#FF8FA3', highlight: '#FFFFFF', tongue: '#E5484D', stroke: 2, innerStroke: 1.2, featureStroke: 1.4 },
-  tuxedo: { outline: '#1B1F2A', faceTop: '#59627A', faceBottom: '#454D63', ears: '#454D63', muzzle: '#FFFFFF',
-    pupil: '#0E1118', nose: '#1B1F2A', blush: '#FF8FA3', highlight: '#FFFFFF', tongue: '#E5484D', stroke: 2, innerStroke: 1.2, featureStroke: 1.4 },
+  ginger: {
+    outline: '#A3541C', faceTop: '#FFB866', faceBottom: '#F6A04D', ears: '#F6A04D', muzzle: '#FFF4E3',
+    pupil: '#17261B', nose: '#A3541C', blush: '#FF8FA3', highlight: '#FFFFFF', tongue: '#E5484D',
+    crown: '#FFD094', shade: '#ED9842', innerEar: '#FFD4DD', leaf: null, leafVein: null,
+    stroke: 2, innerStroke: 1.2, featureStroke: 1.4,
+  },
+  pup: {
+    outline: '#8A5A30', faceTop: '#F4D9AE', faceBottom: '#E9C48F', ears: '#A86D3E', muzzle: '#FFF7EA',
+    pupil: '#17261B', nose: '#5C3A1E', blush: '#FF8FA3', highlight: '#FFFFFF', tongue: '#E5484D',
+    crown: '#FBE8C8', shade: '#E2BC84', innerEar: '#C98E5C', leaf: null, leafVein: null,
+    stroke: 2, innerStroke: 1.2, featureStroke: 1.4,
+  },
+  tuxedo: {
+    outline: '#2E3448', faceTop: '#59627A', faceBottom: '#454D63', ears: '#454D63', muzzle: '#FFFFFF',
+    pupil: '#0E1118', nose: '#2E3448', blush: '#FF8FA3', highlight: '#FFFFFF', tongue: '#E5484D',
+    crown: '#747E99', shade: '#485068', innerEar: '#FFC9D4', leaf: null, leafVein: null,
+    stroke: 2, innerStroke: 1.2, featureStroke: 1.4,
+  },
 };
 
 // MEC-011-R4 in-run body colours per skin (null = the D3 snake tokens). `outlineStorm` is used on the dark storm biome.

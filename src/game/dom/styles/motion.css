@@ -1,0 +1,96 @@
+/* D4-P2-R3/R4 spring motion — timings mirror src/game/dom/motionTokens.ts */
+:root {
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-quart: cubic-bezier(0.22, 1, 0.36, 1);
+  --breath-ms: 2600ms;
+  --stagger-ms: 35ms;
+  --stagger-rise: 12px;
+  --enter-ms: 320ms;
+}
+
+@keyframes d4-breath-body {
+  0%, 100% { transform: translateY(0px) scaleY(1); }
+  50% { transform: translateY(-2.5px) scaleY(1.018); }
+}
+
+@keyframes d4-breath-head {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-2.5px) rotate(1.8deg); }
+}
+
+@keyframes d4-hero-hop {
+  0% { transform: translateY(0) scale(1, 1); }
+  20% { transform: translateY(3px) scale(1.06, 0.93); }
+  55% { transform: translateY(-14px) scale(0.96, 1.06); }
+  80% { transform: translateY(2px) scale(1.03, 0.97); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+@keyframes d4-hero-recoil {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  65% { transform: translateX(4px); }
+}
+
+.d4-hero {
+  display: block;
+  width: 100%;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.d4-hero svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.d4-hero.is-live [data-layer='body'] {
+  animation: d4-breath-body var(--breath-ms) ease-in-out infinite;
+}
+
+.d4-hero.is-live [data-hero-head] {
+  animation: d4-breath-head var(--breath-ms) ease-in-out infinite;
+}
+
+.d4-hero.is-hop {
+  animation: d4-hero-hop 520ms var(--ease-spring) 1;
+}
+
+.d4-hero.is-recoil {
+  animation: d4-hero-recoil 320ms var(--ease-out-quart) 1;
+}
+
+.d4-enter {
+  opacity: 0;
+  transform: translateY(var(--stagger-rise));
+}
+
+.d4-enter.is-in {
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--enter-ms) var(--ease-out-quart), transform var(--enter-ms) var(--ease-out-quart);
+  transition-delay: var(--d4-delay, 0ms);
+}
+
+.d4-confetti-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.reduced-motion .d4-hero.is-live [data-layer],
+.reduced-motion .d4-hero.is-live [data-hero-head],
+.reduced-motion .d4-hero.is-hop,
+.reduced-motion .d4-hero.is-recoil {
+  animation: none !important;
+  transform: none !important;
+}
+
+.reduced-motion .d4-enter {
+  opacity: 1;
+  transform: none;
+  transition: none !important;
+}

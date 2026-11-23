@@ -3,20 +3,21 @@ import { createHash } from 'node:crypto';
 import { afterEach, describe, expect, it } from 'vitest';
 import json from '../../config/balance.json';
 import { parseBalance } from '../../src/core';
-import { BODY_POSES, EXPRESSIONS, bodyKey, bodySvg, headKey, headSvg, skinExpressions } from '../../src/game/art/capyRig';
-import { SKIN_EFFECTS, SKIN_IDS, activeSkin, setActiveSkin } from '../../src/game/art/skins';
+import { BODY_POSES, EXPRESSIONS, bodyKey, bodySvg, headKey, headLayersSvg, headSvg, skinExpressions } from '../../src/game/art/capyRig';
+import { SKIN_EFFECTS, SKIN_IDS, SKIN_PALETTES, activeSkin, setActiveSkin } from '../../src/game/art/skins';
 import { preloadSkins } from '../../src/game/art/capyTextures';
+import { readRepoText } from './dom/readText';
 
 const sha = (s: string): string => createHash('sha1').update(s).digest('hex').slice(0, 12);
 const attr = (svg: string, part: string, name: string): string[] =>
   [...svg.matchAll(new RegExp(`data-part="${part}"[^>]*?\\s${name}="([^"]+)"`, 'g'))].map(m => m[1]!);
 const LAYERS = ['ears', 'head', 'blush', 'muzzle', 'nose', 'eyes', 'mouth'];
 
-// Hashes captured from the pre-skin capy output (2026-11-10).
+// Hashes captured from the D4-P2 Duolingo vector capy output (2026-11-23).
 const CAPY_HASH: Record<string, string> = {
-  idle: 'ce89a97af9bb', idle_blink: 'd751392c19a9', eat_open: '0a752e762317', eat_chew: 'f5524b38f701', dead: '9ee7c82c0295',
-  happy: 'cc68de905037', alert: '20a3472f8c81', scared: 'add09d82363e', determined: 'da9de24e0822', sleepy: 'da9de24e0822',
-  hurt: '4f1bacc2f7c5', win: '5e8241f3603d',
+  idle: '5c60bffb825e', idle_blink: 'b98d4c7d4005', eat_open: '78f20b3dea3a', eat_chew: '0a13ab913e35', dead: 'ba92d3b30031',
+  happy: '421f5fe2049c', alert: 'fbc58e371118', scared: '76c329dbdab3', determined: '8e78d8773ae5', sleepy: '8e78d8773ae5',
+  hurt: 'cef890c9050d', win: '2733d1af22a8',
 };
 
 describe('ART-003 skins', () => {
@@ -46,10 +47,34 @@ describe('ART-003 skins', () => {
     for (const skin of ['snake', 'ginger', 'pup', 'tuxedo'] as const) expect(SKIN_EFFECTS[skin]).toEqual({ eat: false, trail: false });
   });
 
-  it('ART-003 capy skin svg output is unchanged', () => {
+  it('ART-003 D4-P2-R1 capy skin svg output matches the approved D4 baseline', () => {
     for (const [e, h] of Object.entries(CAPY_HASH)) expect(sha(headSvg('capy', e as never)), `capy ${e}`).toBe(h);
-    expect(sha(bodySvg('capy', 'idle'))).toBe('1223a2eadf0e');
-    expect(sha(bodySvg('capy', 'win'))).toBe('702c632db20e');
+    expect(sha(bodySvg('capy', 'idle'))).toBe('7cd304ed59da');
+    expect(sha(bodySvg('capy', 'win'))).toBe('179480f7e497');
+  });
+
+  it('D4-P2-R1 Duolingo vector rig: dual catchlights, warm outlines, cel layers, signature details and capy leaf tokens', async () => {
+    const tokensCss = await readRepoText('src/game/dom/styles/tokens.css');
+    const greenFace = tokensCss.match(/--d4-green-face:\s*(#[0-9a-f]{6})/i)?.[1]?.toUpperCase();
+    const greenLip = tokensCss.match(/--d4-green-lip:\s*(#[0-9a-f]{6})/i)?.[1]?.toUpperCase();
+    expect(SKIN_PALETTES.capy.leaf?.toUpperCase()).toBe(greenFace);
+    expect(SKIN_PALETTES.capy.leafVein?.toUpperCase()).toBe(greenLip);
+    expect(SKIN_PALETTES.snake.outline).toBe('#2B3A8F');
+    expect(SKIN_PALETTES.ginger.outline).not.toBe('#7A3E12');
+    expect(SKIN_PALETTES.pup.outline).not.toBe('#6B4423');
+    expect(SKIN_PALETTES.tuxedo.outline).not.toBe('#1B1F2A');
+
+    for (const skin of SKIN_IDS) {
+      const idle = headSvg(skin, 'idle');
+      expect(idle.match(/data-part="pupil"/g)?.length, skin).toBe(2);
+      expect(idle.match(/data-part="glint"/g)?.length, skin).toBe(4);
+      expect(idle, skin).toContain('data-part="crown"');
+      expect(idle, skin).toContain('data-part="shade"');
+      expect(idle, skin).toBe(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">${headLayersSvg(skin, 'idle')}</svg>`);
+      expect(idle.includes('data-part="leaf"'), skin).toBe(skin === 'capy');
+    }
+    expect(headSvg('pup', 'idle')).toContain('data-part="ear-inner"');
+    expect(bodySvg('tuxedo', 'idle')).toContain('data-part="blaze"');
   });
 
   it('ART-003 capy has 12 expressions, snake adds only tongue expressions', () => {

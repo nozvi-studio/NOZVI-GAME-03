@@ -6,6 +6,7 @@
 <title>Mango Snake — D4 Duolingo Modern Stylebook</title>
 <link rel="stylesheet" href="../../../../src/game/dom/styles/tokens.css">
 <link rel="stylesheet" href="../../../../src/game/dom/styles/components.css">
+<link rel="stylesheet" href="../../../../src/game/dom/styles/motion.css">
 <style>
   @font-face { font-family: Nunito; font-weight: 700; font-display: swap; src: url(/fonts/nunito-latin-700.woff2) format('woff2'); }
   @font-face { font-family: Nunito; font-weight: 800; font-display: swap; src: url(/fonts/nunito-latin-800.woff2) format('woff2'); }
@@ -22,7 +23,7 @@
   }
   .sb-wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: var(--sp-6); }
   .sb-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-4); }
-  .sb-section { display: grid; gap: var(--sp-4); }
+  .sb-section { display: grid; gap: var(--sp-4); position: relative; }
   .sb-section h2 { margin: 0; font-size: 18px; font-weight: 900; letter-spacing: 0.03em; text-transform: uppercase; color: var(--d4-ink-muted); }
 
   .sb-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--sp-3); }
@@ -35,6 +36,12 @@
   .sb-icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: var(--sp-2); }
   .sb-icon-tile { display: grid; justify-items: center; gap: var(--sp-1); padding: var(--sp-3) var(--sp-2); border-radius: var(--radius-md); background: var(--d4-card); border: 2px solid var(--d4-border); font-size: 11px; font-weight: 800; color: var(--d4-ink-muted); }
   .sb-icon-tile svg { color: var(--d4-ink); }
+
+  .sb-hero-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--sp-4); position: relative; }
+  .sb-hero-card { display: grid; gap: var(--sp-3); justify-items: center; padding: var(--sp-4); border-radius: var(--radius-md); border: 2px solid var(--d4-border); background: var(--d4-bg); }
+  .sb-hero-stage { width: 180px; }
+  .sb-hero-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); width: 100%; }
+  .sb-hero-actions .d4-btn { font-size: 13px; padding: 0 var(--sp-2); }
 
   .sb-phones { display: flex; flex-wrap: wrap; gap: var(--sp-6); align-items: flex-start; }
   .sb-phone-group { display: grid; gap: var(--sp-2); }
@@ -52,7 +59,6 @@
   .sb-phone--640 { width: 360px; height: 640px; }
   .sb-phone--780 { width: 360px; height: 780px; }
 
-  /* Mockup Screen Layout */
   .mk-screen { flex: 1; display: flex; flex-direction: column; padding: var(--sp-3) var(--sp-4) var(--sp-4); gap: var(--sp-3); }
   .mk-header { display: flex; align-items: center; justify-content: space-between; min-height: 48px; gap: var(--sp-2); }
   .mk-header-title { font-size: 20px; font-weight: 900; color: var(--d4-ink); }
@@ -68,28 +74,7 @@
     gap: var(--sp-2);
     position: relative;
   }
-  .mk-halo {
-    width: 148px;
-    height: 148px;
-    border-radius: var(--radius-pill);
-    background: var(--d4-sky-tint);
-    display: grid;
-    place-items: center;
-    border: 2px solid var(--d4-border);
-  }
-  .mk-halo--rare { background: var(--d4-purple-tint); }
-  .mk-placeholder-mascot {
-    width: 92px;
-    height: 92px;
-    border-radius: var(--radius-pill);
-    background: var(--d4-green-face);
-    border: 4px solid var(--d4-green-lip);
-    display: grid;
-    place-items: center;
-    color: var(--d4-card);
-    font-weight: 900;
-    font-size: 13px;
-  }
+  .mk-hero-slot { width: 200px; }
   .mk-identity { text-align: center; display: grid; gap: var(--sp-1); justify-items: center; }
   .mk-identity-row { display: flex; align-items: center; gap: var(--sp-2); }
   .mk-skin-name { font-size: 24px; font-weight: 900; }
@@ -116,7 +101,8 @@
   .mk-tile--selected { border-color: var(--d4-sky-face); background: var(--d4-sky-tint); box-shadow: 0 3px 0 var(--d4-sky-lip); }
   .mk-tile__badge { position: absolute; top: 5px; right: 5px; width: 18px; height: 18px; border-radius: var(--radius-pill); display: grid; place-items: center; background: var(--d4-surface); color: var(--d4-ink-muted); }
   .mk-tile__badge--ok { background: var(--d4-green-face); color: var(--d4-card); }
-  .mk-tile__dot { width: 32px; height: 32px; border-radius: var(--radius-pill); background: var(--d4-surface); border: 2px solid var(--d4-border-strong); display: grid; place-items: center; font-size: 11px; font-weight: 900; }
+  .mk-tile__thumb { width: 38px; height: 38px; display: grid; place-items: center; }
+  .mk-tile__thumb svg { width: 38px; height: 38px; display: block; }
   .mk-tile__foot { font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 3px; color: var(--d4-ink-muted); }
 
   .mk-wordmark { text-align: center; display: grid; gap: 2px; }
@@ -130,13 +116,30 @@
   <header class="sb-header">
     <div>
       <h1 class="d4-title" style="font-size: 36px;">D4 DUOLINGO MODERN</h1>
-      <div style="font-weight: 800; color: var(--d4-ink-muted);">Mango Snake — Phase 1 Visual Stylebook (live tokens.css + components.css + icons.ts)</div>
+      <div style="font-weight: 800; color: var(--d4-ink-muted);">Mango Snake — Visual Stylebook &amp; Live Character Stage (D4-P1 + D4-P2)</div>
     </div>
     <label class="d4-chip" style="gap: var(--sp-3); padding: var(--sp-2) var(--sp-3);">
       <span>Reduced motion</span>
       <button type="button" class="d4-toggle" role="switch" aria-checked="false" data-qa="sb-reduced-motion" aria-label="Toggle reduced motion"></button>
     </label>
   </header>
+
+  <section class="sb-section d4-card" data-qa="sb-hero">
+    <h2>Characters — live hero (Duolingo Vector + 3-Tier Motion)</h2>
+    <div class="sb-hero-grid" id="hero-grid">
+      <div class="sb-hero-card" data-qa="sb-hero-snake"><div class="sb-hero-stage" data-hero-mount="snake"></div><div style="font-weight:900;">Mango Snake</div><div class="sb-hero-actions"><button type="button" class="d4-btn d4-btn--sky" data-qa="sb-hero-snake-poke">Poke</button><button type="button" class="d4-btn d4-btn--green" data-qa="sb-hero-snake-celebrate">Win</button><button type="button" class="d4-btn d4-btn--gold" data-qa="sb-hero-snake-denied">Deny</button><button type="button" class="d4-btn d4-btn--red" data-qa="sb-hero-snake-hurt">Hurt</button></div></div>
+      <div class="sb-hero-card" data-qa="sb-hero-ginger"><div class="sb-hero-stage" data-hero-mount="ginger"></div><div style="font-weight:900;">Ginger</div><div class="sb-hero-actions"><button type="button" class="d4-btn d4-btn--sky" data-qa="sb-hero-ginger-poke">Poke</button><button type="button" class="d4-btn d4-btn--green" data-qa="sb-hero-ginger-celebrate">Win</button><button type="button" class="d4-btn d4-btn--gold" data-qa="sb-hero-ginger-denied">Deny</button><button type="button" class="d4-btn d4-btn--red" data-qa="sb-hero-ginger-hurt">Hurt</button></div></div>
+      <div class="sb-hero-card" data-qa="sb-hero-pup"><div class="sb-hero-stage" data-hero-mount="pup"></div><div style="font-weight:900;">Pup</div><div class="sb-hero-actions"><button type="button" class="d4-btn d4-btn--sky" data-qa="sb-hero-pup-poke">Poke</button><button type="button" class="d4-btn d4-btn--green" data-qa="sb-hero-pup-celebrate">Win</button><button type="button" class="d4-btn d4-btn--gold" data-qa="sb-hero-pup-denied">Deny</button><button type="button" class="d4-btn d4-btn--red" data-qa="sb-hero-pup-hurt">Hurt</button></div></div>
+      <div class="sb-hero-card" data-qa="sb-hero-tuxedo"><div class="sb-hero-stage" data-hero-mount="tuxedo"></div><div style="font-weight:900;">Tuxedo</div><div class="sb-hero-actions"><button type="button" class="d4-btn d4-btn--sky" data-qa="sb-hero-tuxedo-poke">Poke</button><button type="button" class="d4-btn d4-btn--green" data-qa="sb-hero-tuxedo-celebrate">Win</button><button type="button" class="d4-btn d4-btn--gold" data-qa="sb-hero-tuxedo-denied">Deny</button><button type="button" class="d4-btn d4-btn--red" data-qa="sb-hero-tuxedo-hurt">Hurt</button></div></div>
+      <div class="sb-hero-card" data-qa="sb-hero-capy"><div class="sb-hero-stage" data-hero-mount="capy"></div><div style="font-weight:900;">Capybara</div><div class="sb-hero-actions"><button type="button" class="d4-btn d4-btn--sky" data-qa="sb-hero-capy-poke">Poke</button><button type="button" class="d4-btn d4-btn--green" data-qa="sb-hero-capy-celebrate">Win</button><button type="button" class="d4-btn d4-btn--gold" data-qa="sb-hero-capy-denied">Deny</button><button type="button" class="d4-btn d4-btn--red" data-qa="sb-hero-capy-hurt">Hurt</button></div></div>
+    </div>
+    <div class="sb-row">
+      <button type="button" class="d4-btn d4-btn--purple" data-qa="sb-confetti"><span data-icon="star" data-size="18"></span> Burst Confetti</button>
+      <button type="button" class="d4-btn d4-btn--gold" data-qa="sb-countup"><span data-icon="coin" data-size="18"></span> Count Up: <span class="d4-num" id="sb-countup-val">0</span></button>
+      <button type="button" class="d4-btn d4-btn--disabled" data-qa="sb-shake"><span data-icon="lock" data-size="18"></span> Shake Denied</button>
+      <button type="button" class="d4-btn d4-btn--neutral" data-qa="sb-stagger">Replay Stagger</button>
+    </div>
+  </section>
 
   <section class="sb-section d4-card" data-qa="sb-palette">
     <h2>1. Warm 60-30-10 Palette</h2>
@@ -216,7 +219,7 @@
     </div>
     <div class="mk-stage">
       <span class="d4-bubble">Tap me!</span>
-      <div class="mk-halo mk-halo--rare"><div class="mk-placeholder-mascot">CAPY P2</div></div>
+      <div class="mk-hero-slot" data-phone-hero="capy"></div>
     </div>
     <div class="mk-identity">
       <div class="mk-identity-row">
@@ -228,31 +231,31 @@
     <div class="mk-grid">
       <button type="button" class="mk-tile" data-qa="mk-skin-snake">
         <span class="mk-tile__badge mk-tile__badge--ok"><span data-icon="check" data-size="11"></span></span>
-        <span class="mk-tile__dot">SNK</span>
+        <span class="mk-tile__thumb" data-head-thumb="snake"></span>
         <span class="mk-tile__foot">Equipped</span>
       </button>
       <button type="button" class="mk-tile" data-qa="mk-skin-ginger">
         <span class="mk-tile__badge"><span data-icon="lock" data-size="11"></span></span>
-        <span class="mk-tile__dot">GNG</span>
+        <span class="mk-tile__thumb" data-head-thumb="ginger"></span>
         <span class="mk-tile__foot"><span data-icon="coin" data-size="11"></span>300</span>
       </button>
       <button type="button" class="mk-tile" data-qa="mk-skin-pup">
         <span class="mk-tile__badge"><span data-icon="lock" data-size="11"></span></span>
-        <span class="mk-tile__dot">PUP</span>
+        <span class="mk-tile__thumb" data-head-thumb="pup"></span>
         <span class="mk-tile__foot"><span data-icon="coin" data-size="11"></span>300</span>
       </button>
       <button type="button" class="mk-tile" data-qa="mk-skin-tuxedo">
         <span class="mk-tile__badge"><span data-icon="lock" data-size="11"></span></span>
-        <span class="mk-tile__dot">TUX</span>
+        <span class="mk-tile__thumb" data-head-thumb="tuxedo"></span>
         <span class="mk-tile__foot"><span data-icon="coin" data-size="11"></span>300</span>
       </button>
       <button type="button" class="mk-tile mk-tile--selected" data-qa="mk-skin-capy">
         <span class="mk-tile__badge"><span data-icon="lock" data-size="11"></span></span>
-        <span class="mk-tile__dot">CPY</span>
+        <span class="mk-tile__thumb" data-head-thumb="capy"></span>
         <span class="mk-tile__foot"><span data-icon="coin" data-size="11"></span>800</span>
       </button>
       <button type="button" class="mk-tile" disabled data-qa="mk-skin-soon">
-        <span class="mk-tile__dot">?</span>
+        <span class="mk-tile__thumb" style="font-size:20px;font-weight:900;color:var(--d4-ink-muted);">?</span>
         <span class="mk-tile__foot">Soon</span>
       </button>
     </div>
@@ -275,9 +278,9 @@
     </div>
     <div class="mk-stage">
       <span class="d4-bubble">Ready for L10!</span>
-      <div class="sb-row" style="gap: var(--sp-4);">
+      <div class="sb-row" style="gap: var(--sp-2); flex-wrap: nowrap;">
         <span data-icon="mango" data-size="44"></span>
-        <div class="mk-halo"><div class="mk-placeholder-mascot">HERO P2</div></div>
+        <div class="mk-hero-slot" data-phone-hero="snake"></div>
       </div>
     </div>
     <div class="mk-home-footer">
@@ -288,6 +291,11 @@
 </template>
 
 <script type="module">
+  import { headSvg } from '../../../../src/game/art/capyRig.ts';
+  import { SKIN_IDS } from '../../../../src/game/art/skins.ts';
+  import { countUp, shakeDenied, staggerEnter } from '../../../../src/game/dom/animate.ts';
+  import { burstConfetti } from '../../../../src/game/dom/confetti.ts';
+  import { createHeroStage } from '../../../../src/game/dom/heroStage.ts';
   import { ICON_NAMES, icon } from '../../../../src/game/dom/icons.ts';
 
   const SWATCHES = [
@@ -318,6 +326,38 @@
     iconGrid.appendChild(tile);
   }
 
+  const stages = [];
+  for (const skin of SKIN_IDS) {
+    const mount = document.querySelector(`[data-hero-mount="${skin}"]`);
+    const card = document.querySelector(`[data-qa="sb-hero-${skin}"]`);
+    if (!mount || !card) continue;
+    const hero = createHeroStage(mount, { skin });
+    stages.push(hero);
+    for (const kind of ['poke', 'celebrate', 'denied', 'hurt']) {
+      card.querySelector(`[data-qa="sb-hero-${skin}-${kind}"]`)?.addEventListener('click', () => hero.react(kind));
+    }
+    card.addEventListener('pointermove', e => {
+      const r = mount.getBoundingClientRect();
+      hero.lookAt(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
+    });
+    card.addEventListener('pointerleave', () => hero.lookAt(0, 0));
+  }
+
+  const heroGrid = document.getElementById('hero-grid');
+  document.querySelector('[data-qa="sb-confetti"]')?.addEventListener('click', () => {
+    const r = heroGrid.getBoundingClientRect();
+    burstConfetti(heroGrid, r.width / 2, r.height / 2);
+  });
+  document.querySelector('[data-qa="sb-countup"]')?.addEventListener('click', () => {
+    countUp(document.getElementById('sb-countup-val'), 0, 1234, 700);
+  });
+  document.querySelector('[data-qa="sb-shake"]')?.addEventListener('click', e => {
+    shakeDenied(e.currentTarget);
+  });
+  document.querySelector('[data-qa="sb-stagger"]')?.addEventListener('click', () => {
+    staggerEnter(heroGrid);
+  });
+
   function mountPair(id, sizeClass) {
     const pair = document.getElementById(id);
     for (const tplId of ['tpl-characters', 'tpl-home']) {
@@ -329,6 +369,14 @@
   }
   mountPair('pair-640', 'sb-phone--640');
   mountPair('pair-780', 'sb-phone--780');
+
+  for (const slot of document.querySelectorAll('[data-phone-hero]')) {
+    const skin = slot.getAttribute('data-phone-hero');
+    stages.push(createHeroStage(slot, { skin, interactive: false }));
+  }
+  for (const thumb of document.querySelectorAll('[data-head-thumb]')) {
+    thumb.innerHTML = headSvg(thumb.getAttribute('data-head-thumb'), 'idle');
+  }
 
   for (const el of document.querySelectorAll('[data-icon]')) {
     const name = el.getAttribute('data-icon');

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import './dom/styles/tokens.css';
 import './dom/styles/components.css';
+import './dom/styles/motion.css';
 import { installAudioUnlock } from './audio/synth';
 import { startStageSync } from './dom/stageSync';
 import type { LoopHooks } from './dom/uiBridge';
