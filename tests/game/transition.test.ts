@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import json from '../../config/balance.json';
-import { bootHoldMs, cameraPort, createTransition, runEntrance, transitionPlan, type NavKind, type TransitionDeps } from '../../src/game/motion/transition';
+import { bootHoldMs, cameraPort, createTransition, runEntrance, transitionFor, transitionPlan, type NavKind, type TransitionDeps } from '../../src/game/motion/transition';
 import type { MotionTarget } from '../../src/game/motion/motionCore';
 
 const m = json.motion;
@@ -132,5 +132,27 @@ describe('MOT-2 cameraPort (second visit of a menu scene)', () => {
   it('MOT-2-R3 with no camera the port finishes at once instead of hanging with input locked', () => {
     const port = cameraPort(() => undefined, [1, 2, 3]); let went = false;
     port.fadeOut(180, () => { went = true; }); port.fadeIn(180); expect(went).toBe(true);
+  });
+});
+
+describe('META-BG-R2 DOM meta scene transitions', () => {
+  it('META-BG-R2 skips Phaser camera fade on DOM meta shims so MetaBgScene never flashes white', () => {
+    const fadeOut = vi.fn();
+    const fadeIn = vi.fn();
+    const start = vi.fn();
+    const reg = new Map<string, unknown>([['balance', json]]);
+    const fakeScene = {
+      scene: { key: 'Home', start },
+      registry: { get: (k: string) => reg.get(k), set: (k: string, v: unknown) => { reg.set(k, v); } },
+      cameras: { main: { once: vi.fn(), fadeOut, fadeIn } },
+      input: { enabled: true },
+    } as never;
+
+    const tr = transitionFor(fakeScene);
+    tr.goTo('Characters', undefined, 'forward');
+    tr.enter();
+    expect(fadeOut).not.toHaveBeenCalled();
+    expect(fadeIn).not.toHaveBeenCalled();
+    expect(start).toHaveBeenCalledWith('Characters', undefined);
   });
 });

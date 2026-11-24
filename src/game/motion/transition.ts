@@ -73,7 +73,10 @@ export function runEntrance(m: Pick<Motion, 'popIn' | 'slideIn' | 'fadeIn'>, pla
 // ---- Phaser binding ----
 const cache = new WeakMap<object, Transition>();
 const KIND_KEY = 'navKind';
-const cream = toInt(TOKENS.surface.cream);
+// META-BG-R2: DOM meta shims sit transparently over MetaBgScene and own their own DOM entrances;
+// running a Phaser camera fade on them would flash an opaque veil over the live animated backdrop.
+const DOM_META_SCENES = new Set(['Home', 'Characters', 'Settings', 'Results', 'Loadout']);
+const FADE_COLOR = toInt(TOKENS.surface.marshDeep);
 
 export interface FadeCamera { once(event: string, fn: () => void): unknown; fadeOut(ms: number, r: number, g: number, b: number): unknown; fadeIn(ms: number, r: number, g: number, b: number): unknown }
 /**
@@ -93,11 +96,12 @@ export function transitionFor(scene: Phaser.Scene): Transition {
   const hit = cache.get(scene);
   if (hit) return hit;
   const b = scene.registry.get('balance') as Balance | undefined;
-  const rgb = [(cream >> 16) & 255, (cream >> 8) & 255, cream & 255] as const;
+  const rgb = [(FADE_COLOR >> 16) & 255, (FADE_COLOR >> 8) & 255, FADE_COLOR & 255] as const;
+  const isDomMeta = DOM_META_SCENES.has(scene.scene?.key ?? '');
   const tr = createTransition({
     cfg: b?.motion ?? { fadeMs: 0 }, softMs: b?.juice.reduced.softMs ?? 0, reduced: reduceMotion,
     off: !b || isMotionOff(typeof location === 'undefined' ? '' : location.search),
-    camera: b && scene.cameras ? cameraPort(() => scene.cameras?.main, rgb) : null, // never cache the camera object (see cameraPort)
+    camera: b && scene.cameras && !isDomMeta ? cameraPort(() => scene.cameras?.main, rgb) : null, // never cache the camera object (see cameraPort)
     lockInput: () => { if (scene.input) scene.input.enabled = false; },
     start: (key, data) => { scene.scene.start(key, data); },
     navKind: { get: () => scene.registry.get(KIND_KEY) as NavKind | undefined, set: k => { scene.registry.set(KIND_KEY, k); } },

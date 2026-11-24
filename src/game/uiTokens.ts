@@ -1,6 +1,6 @@
 // P3-0-R1 D2 design tokens (UI-MOCKUPS §3, PaletteD2). Pure: no Phaser.
 export const TOKENS = {
-  surface: { cream: '#F8F2E8', card: '#FFFCF6', white: '#FFFFFF', stone: '#E3DCD2' },
+  surface: { marshDeep: '#083D42', card: '#FFFCF6', white: '#FFFFFF', stone: '#E3DCD2' },
   text: { primary: '#5A3B3B', soft: '#8A6A6A', slate: '#3F4D5E' },
   green: { face: '#79D391', deep: '#4A9A63', line: '#3E7A52' },
   accent: { orange: '#F4A157', orangeDeep: '#DB8238', butter: '#F8D468', gold: '#FFC845' },

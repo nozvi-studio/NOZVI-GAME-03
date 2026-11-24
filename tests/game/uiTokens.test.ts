@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
 import { TOKENS, toInt, FONT_UI, FONT_TITLE } from '../../src/game/uiTokens';
 it('P3-0-R1 surviving D2 tokens keep their mockup values (dead ones removed, D3-R1)', () => {
-  expect(TOKENS.surface).toEqual({ cream: '#F8F2E8', card: '#FFFCF6', white: '#FFFFFF', stone: '#E3DCD2' });
+  expect(TOKENS.surface).toEqual({ marshDeep: '#083D42', card: '#FFFCF6', white: '#FFFFFF', stone: '#E3DCD2' });
   expect(TOKENS.text).toEqual({ primary: '#5A3B3B', soft: '#8A6A6A', slate: '#3F4D5E' });
   expect(TOKENS.green).toEqual({ face: '#79D391', deep: '#4A9A63', line: '#3E7A52' });
   expect(TOKENS.accent).toEqual({ orange: '#F4A157', orangeDeep: '#DB8238', butter: '#F8D468', gold: '#FFC845' });
