@@ -94,15 +94,19 @@ export function progressBar(scene: Phaser.Scene, x: number, y: number, wMock: nu
   if (opts?.flat) {
     const f = opts.flat;
     const trackG = scene.add.graphics();
-    trackG.fillStyle(toInt(f.track), 1).fillRoundedRect(0, 0, w, h, h / 2);
-    if (f.border) trackG.lineStyle(ui(1.5), toInt(f.border), 1).strokeRoundedRect(0, 0, w, h, h / 2);
+    trackG.fillStyle(toInt(f.track), 0.72).fillRoundedRect(0, 0, w, h, h / 2);
+    if (f.border) trackG.lineStyle(ui(2.4), toInt(f.border), 1).strokeRoundedRect(0, 0, w, h, h / 2);
     const fillG = scene.add.graphics();
     const g = scene.add.container(x, y, [trackG, fillG, flashG]);
     let flashAt = -1;
     const set = (value: number, max: number): void => {
       const px = barFill(value, max, fw);
       fillG.clear();
-      if (px > 0) fillG.fillStyle(toInt(f.fill), 1).fillRoundedRect(pad, pad, Math.max(fh, px), fh, fh / 2);
+      if (px > 0) {
+        const wFill = Math.max(fh, px);
+        fillG.fillStyle(toInt(f.fill), 1).fillRoundedRect(pad, pad, wFill, fh, fh / 2);
+        fillG.fillStyle(0xffffff, 0.28).fillRoundedRect(pad + fh * 0.2, pad + fh * 0.14, Math.max(4, wFill - fh * 0.4), fh * 0.34, fh / 4);
+      }
     };
     const edge = (now: number): void => {
       if (!cfg || flashAt < 0) return;

@@ -33,9 +33,17 @@ export function hudIconSvg(n: IconName, tone: IconTone = 'ink'): string {
   }
 }
 export const hudIconKey = (n: IconName, tone: IconTone = 'ink'): string => `hud-icon-${n}-${tone}`;
+export const skillArtKey = (id: 'slowmo' | 'tailSnip' | 'shield' | 'mangoRain'): string => `skill-art-${id}`;
+export const BG_AQUA_MARSH_KEY = 'bg-aqua-marsh';
 export const HUD_ICON_PX = 96;
 /** P3b2-R14 rasterise every icon/tone once at Boot (same path as the capy textures). */
 export function preloadHudIcons(load: Phaser.Loader.LoaderPlugin): void {
   for (const [name, tones] of Object.entries(ICON_TONES) as [IconName, readonly IconTone[]][])
     for (const tone of tones) load.svg(hudIconKey(name, tone), svgDataUrl(hudIconSvg(name, tone)), { width: HUD_ICON_PX, height: HUD_ICON_PX });
+  if (typeof load.image === 'function') {
+    load.image(BG_AQUA_MARSH_KEY, '/bg/aqua-marsh.webp');
+    for (const id of ['slowmo', 'tailSnip', 'shield', 'mangoRain'] as const) {
+      load.image(skillArtKey(id), `/skills/${id}.webp`);
+    }
+  }
 }

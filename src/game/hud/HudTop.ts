@@ -17,11 +17,12 @@ import { levelTitleChanged } from './hudMotion';
 const M = { pauseBarW: 7, pauseBarH: 22, pauseBarX: 10, pauseGap: 3, pauseRadius: 3, playHalf: 11, playBack: 8, playTip: 11, disabledAlpha: 0.4 } as const;
 const cen = (r: R): { x: number; y: number } => ({ x: d3(r.x + r.w / 2), y: d3(r.y + r.h / 2) });
 
-function drawFlatPill(g: Phaser.GameObjects.Graphics, w: number, h: number, lip: number, border: number, surface: number, borderColor: number, lipColor: number): void {
+function drawFlatPill(g: Phaser.GameObjects.Graphics, w: number, h: number, lip: number, border: number, surface: number, borderColor: number, lipColor: number, innerLip: number): void {
   const r = h / 2;
   g.clear();
-  g.fillStyle(lipColor, 1).fillRoundedRect(-w / 2, -h / 2 + lip, w, h, r);
-  g.fillStyle(surface, 1).fillRoundedRect(-w / 2, -h / 2, w, h, r);
+  g.fillStyle(lipColor, 0.65).fillRoundedRect(-w / 2, -h / 2 + lip, w, h, r);
+  g.fillStyle(innerLip, 1).fillRoundedRect(-w / 2, -h / 2, w, h, r);
+  g.fillStyle(surface, 1).fillRoundedRect(-w / 2, -h / 2, w, h - lip * 0.6, r);
   g.lineStyle(border, borderColor, 1).strokeRoundedRect(-w / 2, -h / 2, w, h, r);
 }
 
@@ -56,16 +57,17 @@ export class HudTop {
   constructor(private readonly scene: Phaser.Scene, private l: D3HudLayout, onPause: () => void) {
     const d4run = TOKENS.d4run;
     const H = d4run.hud;
-    const surf = toInt(H.surface), bdr = toInt(H.border), lipC = toInt(H.lip), bdrPx = d3(D4_RUN.top.border);
+    const surf = toInt(H.surface), bdr = toInt(H.border), lipC = toInt(H.lip), inLip = toInt(H.innerLip), bdrPx = d3(D4_RUN.top.border);
 
-    // Pause: flat white circle 48px with 4px tactile lip, zero gloss.
+    // Pause: glossy porcelain-white circle 48px with tactile lip matching gameplay.png.
     const pd = d3(l.pause.w), pr = pd / 2, pc = cen(l.pause), plip = d3(D4_RUN.top.pauseLip);
     this.pauseBg = scene.add.graphics();
     const paintPauseBg = (pressed: boolean): void => {
-      const dy = pressed ? plip : 0;
+      const dy = pressed ? plip * 0.6 : 0;
       this.pauseBg.clear();
-      this.pauseBg.fillStyle(lipC, 1).fillCircle(0, plip, pr);
-      this.pauseBg.fillStyle(surf, 1).fillCircle(0, dy, pr);
+      this.pauseBg.fillStyle(lipC, 0.65).fillCircle(0, plip, pr);
+      this.pauseBg.fillStyle(inLip, 1).fillCircle(0, dy, pr);
+      this.pauseBg.fillStyle(surf, 1).fillCircle(0, dy - plip * 0.35, pr * 0.92);
       this.pauseBg.lineStyle(bdrPx, bdr, 1).strokeCircle(0, dy, pr);
     };
     paintPauseBg(false);
@@ -75,23 +77,23 @@ export class HudTop {
     const fb = attachFeedback(scene, vis, 'hudButton', { source: this.pauseButton });
     bindPress(
       this.pauseButton,
-      () => { fb.press(); paintPauseBg(true); this.pauseG.setY(plip); },
+      () => { fb.press(); paintPauseBg(true); this.pauseG.setY(plip * 0.6); },
       () => { fb.release(); paintPauseBg(false); this.pauseG.setY(0); },
       () => fb.fire(onPause),
       true,
     );
 
-    // Level pill: flat white pill with dark ink title, zero stroke, zero pink ribbon.
+    // Level pill: glossy porcelain-white pill matching gameplay.png.
     const lv = l.level, lc = cen(lv), lw = d3(lv.w), lh = d3(lv.h);
     this.levelPill = scene.add.graphics().setPosition(lc.x, lc.y);
-    drawFlatPill(this.levelPill, lw, lh, d3(D4_RUN.top.pillLip), bdrPx, surf, bdr, lipC);
+    drawFlatPill(this.levelPill, lw, lh, d3(D4_RUN.top.pillLip), bdrPx, surf, bdr, lipC, inLip);
     this.level = scene.add.text(lc.x, lc.y, '', {
       fontFamily: FONT_TITLE,
       fontSize: `${d3(D4_RUN.top.pillFont)}px`,
       color: H.ink,
     }).setOrigin(0.5).setName('level');
 
-    // Score pill: flat white pill, right-aligned, tabular width via max digit width.
+    // Score pill: glossy white pill, right-aligned, tabular width via max digit width.
     this.scorePill = scene.add.graphics();
     this.scoreIcon = scene.add.image(0, 0, hudIconKey('star')).setDisplaySize(d3(D3_RUN.score.icon), d3(D3_RUN.score.icon));
     this.score = scene.add.text(0, 0, '8', {
@@ -103,10 +105,10 @@ export class HudTop {
     this.digitW = Math.max(d3(10), this.score.width);
     this.score.setText('');
 
-    // Mango quota bar: flat #FFC800 fill on #E5E2DC track.
+    // Mango quota bar: hollow dark-teal capsule with crisp white border & golden fill (gameplay.png).
     const m = l.mango, ic = cen(m.icon), qc = cen(m.label);
     this.mangoBar = progressBar(scene, d3(m.bar.x), d3(m.bar.y), d3m(m.bar.w), d3m(m.bar.h), H.mango, {
-      flat: { track: H.track, fill: H.mango, border: H.border },
+      flat: { track: H.track, fill: H.mango, border: H.trackBorder },
     });
     this.mangoIcon = scene.add.image(ic.x, ic.y, hudIconKey('mango')).setDisplaySize(d3(m.icon.w), d3(m.icon.h));
     this.quota = scene.add.text(qc.x, qc.y, '', {
@@ -168,7 +170,7 @@ export class HudTop {
     const right = d3(360 - this.l.score.right), x = right - w, cy = d3(this.l.score.y + this.l.score.h / 2);
     if (w !== this.scoreLayoutW) {
       this.scoreLayoutW = w;
-      drawFlatPill(this.scorePill, w, h, d3(D4_RUN.top.pillLip), d3(D4_RUN.top.border), toInt(H.surface), toInt(H.border), toInt(H.lip));
+      drawFlatPill(this.scorePill, w, h, d3(D4_RUN.top.pillLip), d3(D4_RUN.top.border), toInt(H.surface), toInt(H.border), toInt(H.lip), toInt(H.innerLip));
     }
     this.scorePill.setPosition(x + w / 2, cy);
     this.scoreIcon.setPosition(x + pad + ic / 2, cy);

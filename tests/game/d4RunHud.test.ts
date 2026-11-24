@@ -31,11 +31,11 @@ describe('D4-P5-R1 / R2 flat in-run HUD & board frame rules', () => {
     const { hud, badge, energy } = TOKENS.d4run;
     expect(hud.surface).toBe('#FFFFFF');
     expect(hud.mango).toBe('#FFD43B');
-    expect(hud.track).toBe('#E6F7F5');
+    expect(hud.track).toBe('#0A3E44');
     expect(energy.fill).toBe('#00E5FF');
-    expect(energy.track).toBe('#E6F7F5');
+    expect(energy.track).toBe('#0A3E44');
     expect(badge.ready).toBe('#18D2F5');
-    expect(badge.short).toBe('#94A3B8');
+    expect(badge.short).toBe('#D9F1F0');
     expect(badge.ready).not.toBe(TOKENS.danger.text);
     expect(badge.short).not.toBe(TOKENS.danger.text);
     expect(contrastRatio(toInt(badge.text), toInt(badge.ready))).toBeGreaterThanOrEqual(3);

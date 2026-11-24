@@ -79,5 +79,5 @@ it('D4-P5-R1 / D4-P5-R2 Storm cells stay dark and Storm HUD surfaces pass legibi
   expect(contrastRatio(surface, bgBottom)).toBeGreaterThanOrEqual(3);
   expect(contrastRatio(toInt(hud.labelStorm), bgTop)).toBeGreaterThanOrEqual(4.5);
   expect(contrastRatio(toInt(hud.labelStorm), bgBottom)).toBeGreaterThanOrEqual(4.5);
-  expect(contrastRatio(toInt(energy.track), bgBottom)).toBeGreaterThanOrEqual(3);
+  expect(contrastRatio(toInt(energy.trackBorder), bgBottom)).toBeGreaterThanOrEqual(3);
 });

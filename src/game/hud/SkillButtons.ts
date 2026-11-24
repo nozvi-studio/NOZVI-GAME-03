@@ -6,7 +6,7 @@ import { FONT_UI, TOKENS, toInt } from '../uiTokens';
 import { d3 } from '../ui/layout';
 import { drawIcon } from '../ui/icons';
 import { denied, tapBurst } from '../ui/touchFx';
-import { hudIconKey, type IconTone } from './hudIcons';
+import { hudIconKey, skillArtKey, type IconTone } from './hudIcons';
 import { badgeRectForSlot, D3_RUN, D4_RUN, type D3HudLayout, type R } from './d3HudLayout';
 import { badgeTone, skillLook } from './skillLook';
 import type { HudView, SkillState, SkillView } from './hudModel';
@@ -117,17 +117,31 @@ export class SkillButtons {
     if (key === s.key) return;
     s.key = key;
 
-    const faceHex = look.tone === 'skillA' ? d4run.skill.slotA : look.tone === 'skillB' ? d4run.skill.slotB : d4run.skill.off;
-    const lipHex = look.tone === 'skillA' ? d4run.skill.slotALip : look.tone === 'skillB' ? d4run.skill.slotBLip : d4run.skill.offLip;
+    const palette = k && look.tone !== 'off' ? d4run.skill.byId[k.id] : null;
+    const faceHex = palette ? palette.face : d4run.skill.off;
+    const lipHex = palette ? palette.lip : d4run.skill.offLip;
+    const rimHex = palette ? palette.rim : d4run.hud.border;
     const dy = pressed ? lip : 0;
 
     s.body.clear();
     s.body.fillStyle(toInt(lipHex), 1).fillCircle(0, lip, r);
     s.body.fillStyle(toInt(faceHex), 1).fillCircle(0, dy, r);
+    // Subtle top highlight crescent inside the glossy orb (gameplay.png)
+    if (!look.locked) {
+      s.body.fillStyle(0xffffff, palette ? 0.28 : 0.1).fillEllipse(0, dy - r * 0.42, r * 1.15, r * 0.56);
+    }
+    s.body.lineStyle(d3(2.5), toInt(rimHex), 1).strokeCircle(0, dy, r);
 
     const tone: IconTone = look.tone === 'off' ? 'off' : 'on';
     s.icon.setVisible(!look.locked).setY(dy);
-    if (k) s.icon.setTexture(hudIconKey(k.id, tone));
+    if (k) {
+      const artKey = skillArtKey(k.id);
+      if (this.scene.textures?.exists?.(artKey)) {
+        s.icon.setTexture(artKey).setDisplaySize(d3(K.d * 0.78), d3(K.d * 0.78)).setAlpha(look.tone === 'off' ? 0.52 : 1);
+      } else {
+        s.icon.setTexture(hudIconKey(k.id, tone)).setDisplaySize(d3(K.icon), d3(K.icon)).setAlpha(1);
+      }
+    }
     s.lock.clear();
     s.lock.setVisible(look.locked);
     if (look.locked) {
