@@ -41,21 +41,37 @@ export function createUiHost(root: HTMLElement, hooks: LoopHooks, deps: UiHostDe
   let active: ActiveView | null = null;
   let disposed = false;
 
+  const applyScreenState = (enter: boolean): void => {
+    if (enter) {
+      const reduced = getReduced();
+      const live = !reduced && (hooks.setMetaBg?.(true) ?? false);
+      root.classList.toggle('d4-live-bg', live);
+      if (live) {
+        hooks.canvasVisible(true);
+        hooks.wake();
+      } else {
+        if (reduced) hooks.setMetaBg?.(false);
+        hooks.sleep();
+        hooks.canvasVisible(false);
+      }
+      bandLock?.(true);
+    } else {
+      hooks.setMetaBg?.(false);
+      root.classList.remove('d4-live-bg');
+      bandLock?.(false);
+      hooks.canvasVisible(true);
+      hooks.wake();
+    }
+  };
+
   const syncReducedMotion = (): void => {
     root.classList.toggle('reduced-motion', getReduced());
+    if (active?.spec.kind === 'screen') applyScreenState(true);
   };
 
   const applyKind = (kind: MountKind, enter: boolean): void => {
     if (kind === 'screen') {
-      if (enter) {
-        hooks.sleep();
-        hooks.canvasVisible(false);
-        bandLock?.(true);
-      } else {
-        bandLock?.(false);
-        hooks.canvasVisible(true);
-        hooks.wake();
-      }
+      applyScreenState(enter);
     } else {
       hooks.inputEnabled(!enter);
       hooks.keyboardCapture(!enter);

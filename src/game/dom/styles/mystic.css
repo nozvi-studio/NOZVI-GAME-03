@@ -71,6 +71,17 @@ body.d4-mystic-band {
   display: none;
 }
 
+/* META-BG-R6: when live Phaser MetaBgScene is active, let the animated WebGL canvas shine through
+ * and hide the static CSS fireflies to avoid double fireflies. */
+#ui-root.d4-live-bg .d4-screen.d4-mystic {
+  background-color: transparent;
+  background-image: none;
+}
+
+#ui-root.d4-live-bg .d4-mystic-bg {
+  display: none;
+}
+
 .d4-mystic-bg {
   position: absolute;
   inset: 0;

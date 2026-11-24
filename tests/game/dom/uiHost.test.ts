@@ -115,6 +115,38 @@ describe('D4-P1-R6 uiHost', () => {
     expect(onEscape).not.toHaveBeenCalled();
   });
 
+  it('META-BG-R1/R5 live meta background keeps canvas visible & awake and toggles cleanly on reduced motion', () => {
+    const root = document.createElement('div');
+    let reduced = false;
+    const setMetaBg = vi.fn((active: boolean) => active);
+    const hooks: LoopHooks = { ...makeHooks(), setMetaBg };
+    const host = createUiHost(root, hooks, { reduceMotion: () => reduced });
+    const tok = host.mount({ id: 'home', kind: 'screen', render: () => {} });
+
+    expect(setMetaBg).toHaveBeenCalledWith(true);
+    expect(root.classList.contains('d4-live-bg')).toBe(true);
+    expect(hooks.canvasVisible).toHaveBeenLastCalledWith(true);
+    expect(hooks.wake).toHaveBeenCalledTimes(1);
+    expect(hooks.sleep).not.toHaveBeenCalled();
+
+    reduced = true;
+    host.syncReducedMotion();
+    expect(setMetaBg).toHaveBeenLastCalledWith(false);
+    expect(root.classList.contains('d4-live-bg')).toBe(false);
+    expect(hooks.sleep).toHaveBeenCalledTimes(1);
+    expect(hooks.canvasVisible).toHaveBeenLastCalledWith(false);
+
+    reduced = false;
+    host.syncReducedMotion();
+    expect(root.classList.contains('d4-live-bg')).toBe(true);
+    expect(hooks.canvasVisible).toHaveBeenLastCalledWith(true);
+
+    host.close(tok);
+    expect(setMetaBg).toHaveBeenLastCalledWith(false);
+    expect(root.classList.contains('d4-live-bg')).toBe(false);
+    host.dispose();
+  });
+
   it('D4-P1-R6 src/game/dom never imports phaser', () => {
     const entries = Object.entries(domSources);
     expect(entries.length).toBeGreaterThan(0);

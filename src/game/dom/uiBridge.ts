@@ -14,6 +14,8 @@ export interface LoopHooks {
   inputEnabled(on: boolean): void;
   keyboardCapture(on: boolean): void;
   canvasVisible(on: boolean): void;
+  /** META-BG-R1..R5: enable/disable the live Phaser meta background; returns true when live & ready. */
+  setMetaBg?(active: boolean): boolean;
 }
 
 export interface PhaserPort {

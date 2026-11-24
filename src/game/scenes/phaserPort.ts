@@ -17,11 +17,15 @@ import { debugStartLevel, isDebug } from '../flow/debugFlag';
 import { installSummarize } from '../flow/installSummarize';
 import { goTo } from '../motion';
 import { t } from '../text';
+import { META_BG_KEY } from './MetaBgScene';
 import { beginRun } from './ui';
 
 export function createPhaserPort(game: Phaser.Game): PhaserPort {
+  // META-BG-R2 ignore the parallel MetaBg scene when resolving the foreground scene.
   const activeScene = (): Phaser.Scene | undefined =>
-    game.scene.getScenes(true)[0] ?? game.scene.getScene('Home') ?? game.scene.getScene('Boot');
+    game.scene.getScenes(true).find(s => s.scene?.key !== META_BG_KEY)
+      ?? game.scene.getScene('Home')
+      ?? game.scene.getScene('Boot');
 
   // uiHost may sleep the Phaser loop while a DOM screen is up; loader and scene
   // transitions need ticks, so wake it before any Phaser work (else deadlock).

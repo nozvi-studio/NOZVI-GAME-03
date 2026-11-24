@@ -699,3 +699,7 @@ Owner feedback: after Shield broke an obstacle, rubble appeared in the cell ahea
 
 ## 2026-11-23 — D4-P5 in-run Phaser tokens, badge text contrast & finger placement fallback
 - Choice: (1) In-run Phaser colours live in `TOKENS.d4run` (`src/game/uiTokens.ts`), mirroring `tokens.css` because Phaser cannot read CSS custom properties. The board contrast gate (`>= 3:1` across 6 biomes × 5 skins × 11 hazards) beats aesthetics. (2) Semantic skill cost badges (`#1CB0F6` ready, `#AFAFAF` short; never red) use dark ink `#163042` (`>= 5.8:1` on both fills) instead of white (which fails `3:1` on cyan/gray). (3) `hintPlacement` in `d3HudLayout.ts` places the touch swipe-hint finger left of the hint if clear of skill buttons + badges (including horizontal swing), then mirrors right, then falls back above the hint centred in the middle corridor. (4) Quota/energy/hint labels adapt ink (`#4B4B4B` on light biomes 1–5, `#FFFFFF` on Storm biome 6).
+
+## 2026-11-24 - Vendored Rigby2D Phaser runtime for MetaBgScene
+- Vendored `rigby2d-phaser-0.5.1.mjs` (MIT OR Apache-2.0, with license files and `THIRD_PARTY_NOTICES.md`) into `src/game/vendor/rigby2d/` to drive the skeletal wind foliage animation in `MetaBgScene` (`BgLoop`) across all 5 DOM meta screens without adding an npm dependency or a second WebGL context.
+- `MetaBgScene` runs as a single persistent parallel Phaser scene behind `#ui-root` (`#ui-root.d4-live-bg`), sleeps automatically during `GameScene`, and falls back to static `public/bg/aqua-marsh.webp` when Reduce Motion is enabled or WebGL is unavailable.
