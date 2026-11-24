@@ -118,13 +118,14 @@ describe('Mystic Art Direction — Home, Settings & Characters', () => {
     cleanChars();
     expect(document.body.classList.contains('d4-mystic-band')).toBe(false);
 
-    // Results (Game Over)
+    // Results (Game Over — stats-only, no character face, star icon on checkpoint chip)
     bridge.session.startRun(1, 'home');
     bridge.session.quit();
     const cleanResults = resultsScreen(root, { bridge, debug: false, clock }) || (() => {});
     expect(root.querySelector('.d4-results.d4-mystic')).not.toBeNull();
     expect(root.querySelector('[data-qa="results-characters"]')).not.toBeNull();
     expect(root.querySelector('[data-qa="results-settings"]')).not.toBeNull();
+    expect(root.querySelector('.d4-hero')).toBeNull();
     cleanResults();
     expect(document.body.classList.contains('d4-mystic-band')).toBe(false);
 
@@ -142,9 +143,10 @@ describe('Mystic Art Direction — Home, Settings & Characters', () => {
     root.remove();
   });
 
-  it('mystic.css is imported in main.ts and includes containment & reduced-motion guards', async () => {
+  it('mystic.css is imported in main.ts and includes responsive stage scaling, containment & reduced-motion guards', async () => {
     const css = await readRepoText('src/game/dom/styles/mystic.css');
     expect(main).toContain("import './dom/styles/mystic.css'");
+    expect(css).toContain('transform: scale(var(--stage-scale, 1))');
     expect(css).toContain('contain: layout style paint');
     expect(css).toContain('prefers-reduced-motion: reduce');
     expect(css).toContain('.reduced-motion .d4-firefly');

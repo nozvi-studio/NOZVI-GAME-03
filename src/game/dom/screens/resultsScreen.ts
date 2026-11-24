@@ -1,11 +1,9 @@
-// D4-P4-R1 Results DOM screen over resultsView (Aqua Marsh Mystic concept, mascot payoff, odometer, confetti). Pure: no Phaser.
+// D4-P4-R1 Results DOM screen over resultsView (Aqua Marsh Mystic concept, stats-only, odometer, confetti). Pure: no Phaser.
 import { biome } from '../../../core';
-import { activeSkin } from '../../art/skins';
 import { resultsView } from '../../flow/resultsView';
 import { countUp, isReducedMotion, staggerEnter } from '../animate';
 import { systemClock } from '../clock';
 import { burstConfetti } from '../confetti';
-import { createHeroStage } from '../heroStage';
 import { icon } from '../icons';
 import { MOTION } from '../motionTokens';
 import { mountMysticBackdrop } from '../mysticBackdrop';
@@ -13,7 +11,7 @@ import { mysticBoltIcon, mysticButtonIcon, mysticPageTitleSvg, mysticPlayIcon } 
 import type { ScreenRender } from '../uiBridge';
 import { ctaButton, el, roundIconBtn } from './screenParts';
 
-// D4-P4-R1 Results DOM screen over resultsView (no nested boxes, mascot payoff).
+// D4-P4-R1 Results DOM screen over resultsView (stats-focused Mystic layout).
 export const resultsScreen: ScreenRender = (root, ctx) => {
   const { bridge, clock = systemClock } = ctx;
   const { session, synth, t, balance } = bridge;
@@ -24,7 +22,7 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
 
   const screen = el('div', 'd4-screen d4-results d4-backdrop-pattern');
 
-  // Top-right quick buttons (Characters crown + Settings gear, matching Home & game-over.png)
+  // Top-right quick buttons (Characters crown + Settings gear, matching Home)
   const navBar = el('div', 'd4-results-nav');
   const charsBtn = roundIconBtn('characters', 'results-characters', t('home.characters'), () => {
     synth.play('uiTap');
@@ -40,11 +38,11 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
 
   const top = el('div', 'd4-results-top');
 
-  // Mascot reaction + bubble
+  // Outcome bubble (character portrait temporarily removed for clean stats focus)
   const stage = el('section', 'd4-results-stage', { 'data-qa': 'results-stage' });
   const isWin = v?.titleKey === 'results.youWin';
   const isGold = v?.bestChip.gold === true;
-  const bubble = el('div', 'd4-bubble', { 'data-qa': 'results-bubble' });
+  const bubble = el('div', 'd4-bubble d4-results-reason', { 'data-qa': 'results-bubble' });
   if (isGold) {
     bubble.textContent = t('results.d4.newRecord');
   } else if (v) {
@@ -52,17 +50,9 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
   } else {
     bubble.textContent = t('results.gameOver');
   }
-  const heroWrap = el('div', 'd4-results-hero-wrap');
-  const hero = createHeroStage(heroWrap, {
-    skin: activeSkin(),
-    mode: 'portrait',
-    clock,
-    interactive: true,
-  });
-  hero.el.addEventListener('pointerdown', () => synth.play('uiTap'));
-  stage.append(bubble, heroWrap);
+  stage.append(bubble);
 
-  // Outcome Display Title (chunky SVG matching game-over.png)
+  // Outcome Display Title (chunky SVG)
   const titleText = isWin ? t('results.d4.victory') : isGold ? t('results.d4.newBest') : t('results.d4.gameOver');
   const titleTone = isWin ? 'green' : isGold ? 'gold' : 'white';
   const titleEl = el('h1', 'd4-results-title d4-mystic-title-wrap');
@@ -98,12 +88,12 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
     stats.appendChild(col);
   }
 
-  // Rows: checkpoint, carried energy, next checkpoint bar, first-run tip
+  // Rows: checkpoint (star icon, distinct from progress flag below), carried energy, next checkpoint bar, first-run tip
   const rows = el('div', 'd4-results-rows');
   for (const r of v?.rows ?? []) {
     if (r.kind === 'checkpoint') {
       const cp = el('div', 'd4-chip d4-chip--gold', { 'data-qa': 'results-checkpoint' });
-      cp.innerHTML = icon('flag', { size: 15 });
+      cp.innerHTML = icon('star', { size: 15 });
       const cpTxt = el('span');
       cpTxt.textContent = t('results.nextRunAt', { level: r.level });
       cp.appendChild(cpTxt);
@@ -176,10 +166,6 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
   const disposeBackdrop = mountMysticBackdrop(screen);
   root.appendChild(screen);
 
-  // Trigger mascot reaction & score odometer
-  if (isWin || isGold) hero.react('celebrate');
-  else hero.react('hurt');
-
   const targetScore = v?.score ?? 0;
   let confettiTimer: number | null = null;
   const cancelCount = countUp(scoreEl, 0, targetScore, MOTION.countUpMs, clock);
@@ -187,7 +173,7 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
     const fireGold = (): void => {
       synth.play('unlock');
       const r = stage.getBoundingClientRect();
-      confettiDisposers.push(burstConfetti(stage, r.width / 2 || 140, r.height / 2 || 60));
+      confettiDisposers.push(burstConfetti(stage, r.width / 2 || 140, r.height / 2 || 40));
     };
     if (isReducedMotion(screen) || targetScore === 0) fireGold();
     else confettiTimer = clock.setTimeout(fireGold, MOTION.countUpMs);
@@ -207,7 +193,6 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
     cancelCount();
     if (confettiTimer !== null) clock.clearTimeout(confettiTimer);
     document.removeEventListener('keydown', onKeyDown);
-    hero.destroy();
     for (const d of confettiDisposers) d();
     disposeBackdrop();
     screen.remove();
