@@ -94,6 +94,17 @@
     "deadDroopMs": 300, "deadRotDeg": 12, "deadDropPx": 4, "headCellScale": 1.6,
     "tongueMs": 260, "tongueMinGapMs": 2500, "tongueMaxGapMs": 5000 }
     , "hud": { "rejectShakeMs": 200, "rejectShakeAmpPx": 6, "tipFactor": 2, "bannerQueueMax": 4 }
+    , "snakeRig": {
+      "designHeight": 200,
+      "idleMs": 2000, "eatMs": 740, "deadMs": 1350, "pokeMs": 500, "celebrateMs": 670, "deniedMs": 430,
+      "eatProp": {
+        "mouthOffsetY": 54, "mangoOffsetY": 28,
+        "mangoPullStartMs": 60, "mangoFadeStartMs": 100, "mangoEndMs": 140,
+        "mangoWidthFrac": 0.42, "mangoShrinkFrac": 0.72, "mangoRotStartRad": -0.12, "mangoRotSweepRad": 0.25,
+        "burstStartMs": 90, "burstEndMs": 380,
+        "burstWidthFrac": 0.62, "burstScaleMin": 0.45, "burstScaleGain": 0.85, "burstPeakFrac": 0.45
+      }
+    }
   },
   "juice": {
     "bursts": {

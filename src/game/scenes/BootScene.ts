@@ -5,6 +5,7 @@ import { parseBalance, withTerrain } from '../../core';
 import { createSession } from '../../session';
 import { SKIN_IDS, activeSkin, setActiveSkin, type SkinId } from '../art/skins';
 import { ensureSkinTextures, preloadSkins } from '../art/capyTextures';
+import { SnakeRig } from '../art/snakeRig';
 import { preloadHudIcons } from '../hud/hudIcons';
 import { bootView } from '../flow/bootView';
 import { isArtPreview } from '../flow/debugFlag';
@@ -30,7 +31,7 @@ export class BootScene extends Phaser.Scene {
   // ART-001 capy textures are ready before any scene draws.
   preload(): void {
     this.preloaded = isArtPreview(typeof location === 'undefined' ? '' : location.search) ? SKIN_IDS : [activeSkin()];
-    preloadSkins(this.load, this.preloaded); preloadHudIcons(this.load);
+    preloadSkins(this.load, this.preloaded); preloadHudIcons(this.load); SnakeRig.preload(this);
     this.buildView(); // P3b3-R12 logo, hero and progress bar are drawn while assets load
     this.load.on('progress', this.setProgress);
   }
