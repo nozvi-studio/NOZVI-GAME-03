@@ -1,6 +1,9 @@
 // D4-P1-R6 DOM overlay host: token-based mount/unmount, modal state, Escape, reduced-motion, Phaser loop/input hooks. Pure: no Phaser.
+import { RIGGED_SKINS } from '../art/snakeRigModel';
 import { reduceMotion as defaultReduceMotion } from '../render/palette';
 import type { LoopHooks } from './uiBridge';
+
+const LIVE_HERO_CLASSES = RIGGED_SKINS.map(skin => `d4-live-${skin}-hero`);
 
 export type MountKind = 'screen' | 'modal';
 
@@ -41,13 +44,14 @@ export function createUiHost(root: HTMLElement, hooks: LoopHooks, deps: UiHostDe
   let active: ActiveView | null = null;
   let disposed = false;
 
+  // ANIM-CAT-R6 toggle live background and per-skin Rigby2D hero portrait hiding classes (Phaser-free).
   const applyScreenState = (enter: boolean): void => {
     if (enter) {
       const reduced = getReduced();
       const live = !reduced && (hooks.setMetaBg?.(true) ?? false);
-      const liveSnake = live && (hooks.isSnakeRigReady?.() ?? false);
+      const liveRig = live && (hooks.isSnakeRigReady?.() ?? false);
       root.classList.toggle('d4-live-bg', live);
-      root.classList.toggle('d4-live-snake-hero', liveSnake);
+      for (const cls of LIVE_HERO_CLASSES) root.classList.toggle(cls, liveRig);
       if (live) {
         hooks.canvasVisible(true);
         hooks.wake();
@@ -59,7 +63,7 @@ export function createUiHost(root: HTMLElement, hooks: LoopHooks, deps: UiHostDe
       bandLock?.(true);
     } else {
       hooks.setMetaBg?.(false);
-      root.classList.remove('d4-live-bg', 'd4-live-snake-hero');
+      root.classList.remove('d4-live-bg', ...LIVE_HERO_CLASSES);
       bandLock?.(false);
       hooks.canvasVisible(true);
       hooks.wake();

@@ -105,6 +105,16 @@
         "mangoWidthFrac": 0.42, "mangoShrinkFrac": 0.72, "mangoRotStartRad": -0.12, "mangoRotSweepRad": 0.25,
         "burstStartMs": 90, "burstEndMs": 380,
         "burstWidthFrac": 0.62, "burstScaleMin": 0.45, "burstScaleGain": 0.85, "burstPeakFrac": 0.45
+      },
+      "skins": {
+        "ginger": {
+          "idleMs": 3200, "eatMs": 900, "deadMs": 1400, "pokeMs": 500, "celebrateMs": 670, "deniedMs": 520,
+          "eatProp": { "mouthOffsetY": 64, "mangoWidthFrac": 0.40, "burstWidthFrac": 0.60 }
+        },
+        "tuxedo": {
+          "idleMs": 4200, "eatMs": 1200, "deadMs": 1800, "pokeMs": 800, "celebrateMs": 1050, "deniedMs": 800,
+          "eatProp": { "mouthOffsetY": 56, "mangoWidthFrac": 0.40, "burstWidthFrac": 0.60 }
+        }
       }
     }
   },

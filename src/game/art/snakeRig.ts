@@ -4,24 +4,30 @@ import type { SimSnapshot } from '../../core';
 import { snakeHeadPoint } from '../render/snake';
 import type { RigbyGameObject } from '../vendor/rigby2d/rigby2d-phaser-0.5.1.mjs';
 import {
+  RIGGED_SKINS,
+  SKIN_RIG_REGISTRY,
   createSnakeRigState,
   evalEatProps,
   headingRotationRad,
   playSnakeRig,
+  resolveSkinRigConfig,
   rigWorldPoint,
+  skinRigEntry,
   stepSnakeRig,
+  type RiggedSkinId,
   type SnakeRigAnim,
   type SnakeRigConfig,
   type SnakeRigState,
 } from './snakeRigModel';
+import type { SkinId } from './skins';
 
-export const SNAKE_RIG_KEY = 'rig/snake';
+export const SNAKE_RIG_KEY = SKIN_RIG_REGISTRY.snake.key;
 export const SNAKE_MANGO_KEY = 'item/mango';
 export const SNAKE_BURST_KEY = 'item/eat_burst';
 
 export const SNAKE_RIG_URLS = {
-  skeleton: 'rigs/snake/snake.json',
-  atlas: 'rigs/snake/snake.atlas',
+  skeleton: SKIN_RIG_REGISTRY.snake.skeleton,
+  atlas: SKIN_RIG_REGISTRY.snake.atlas,
   mango: 'items/mango.png',
   burst: 'items/eat_burst.png',
 } as const;
@@ -37,9 +43,11 @@ interface RigbyFactory {
 }
 
 export class SnakeRig {
+  readonly skin: RiggedSkinId;
   readonly rig: RigbyGameObject;
   readonly mango: Phaser.GameObjects.Image | null;
   readonly burst: Phaser.GameObjects.Image | null;
+  private readonly cfg: SnakeRigConfig;
   private state: SnakeRigState;
   private visible = true;
   private alpha = 1;
@@ -48,17 +56,24 @@ export class SnakeRig {
     return typeof Phaser.WEBGL === 'number' && scene.game?.renderer?.type === Phaser.WEBGL;
   }
 
-  static isLoaded(scene: Phaser.Scene): boolean {
+  /** ANIM-CAT-R4 true when the given rigged skin's skeleton is cached in Rigby2D. */
+  static isLoaded(scene: Phaser.Scene, skin: SkinId = 'snake'): boolean {
+    const entry = skinRigEntry(skin);
+    if (!entry) return false;
     const cache = scene.cache?.custom?.[RIGBY_CACHE_KEY] as { get?: (k: string) => unknown } | undefined;
-    return Boolean(cache?.get?.(SNAKE_RIG_KEY));
+    return Boolean(cache?.get?.(entry.key));
   }
 
+  /** ANIM-CAT-R4 preload all registered Rigby2D skin rigs plus shared mango/eat_burst props on WebGL. */
   static preload(scene: Phaser.Scene): boolean {
     if (!SnakeRig.isWebGL(scene)) return false;
     const loader = scene.load as unknown as RigbyLoader | undefined;
     if (typeof loader?.rigby !== 'function') return false;
-    if (!SnakeRig.isLoaded(scene)) {
-      loader.rigby(SNAKE_RIG_KEY, SNAKE_RIG_URLS.skeleton, SNAKE_RIG_URLS.atlas);
+    for (const skin of RIGGED_SKINS) {
+      if (!SnakeRig.isLoaded(scene, skin)) {
+        const entry = SKIN_RIG_REGISTRY[skin];
+        loader.rigby(entry.key, entry.skeleton, entry.atlas);
+      }
     }
     if (scene.textures && !scene.textures.exists(SNAKE_MANGO_KEY)) {
       scene.load.image(SNAKE_MANGO_KEY, SNAKE_RIG_URLS.mango);
@@ -69,33 +84,39 @@ export class SnakeRig {
     return true;
   }
 
+  /** ANIM-CAT-R4 create a board-space Rigby2D head for a rigged skin (defaults to snake). */
   static create(
     scene: Phaser.Scene,
     board: Phaser.GameObjects.Container,
     afterLayer: Phaser.GameObjects.GameObject,
     cfg: SnakeRigConfig,
     headCellScale: number,
+    skin: RiggedSkinId = 'snake',
   ): SnakeRig {
-    return new SnakeRig(scene, board, afterLayer, cfg, headCellScale);
+    return new SnakeRig(scene, board, afterLayer, cfg, headCellScale, skin);
   }
 
-  /** ANIM-SNAKE-R9 create a standalone overlay rig (no board container or gameplay eat props) for meta screens. */
-  static createOverlay(scene: Phaser.Scene, cfg: SnakeRigConfig): SnakeRig {
-    return new SnakeRig(scene, null, null, cfg, 1);
+  /** ANIM-SNAKE-R9 / ANIM-CAT-R4 create a standalone overlay rig (no board container or gameplay eat props) for meta/death screens. */
+  static createOverlay(scene: Phaser.Scene, cfg: SnakeRigConfig, skin: RiggedSkinId = 'snake'): SnakeRig {
+    return new SnakeRig(scene, null, null, cfg, 1, skin);
   }
 
   private constructor(
     scene: Phaser.Scene,
     board: Phaser.GameObjects.Container | null,
     afterLayer: Phaser.GameObjects.GameObject | null,
-    private readonly cfg: SnakeRigConfig,
+    cfg: SnakeRigConfig,
     private readonly headCellScale: number,
+    skin: RiggedSkinId,
   ) {
+    this.skin = skin;
+    this.cfg = resolveSkinRigConfig(cfg, skin);
     const factory = scene.add as unknown as RigbyFactory;
     if (typeof factory?.rigby !== 'function') {
       throw new Error('RigbyPlugin is not registered on scene');
     }
-    this.rig = factory.rigby(0, 0, SNAKE_RIG_KEY, 'idle', true).setName(board ? 'snake-rig-head' : 'snake-rig-meta');
+    const key = SKIN_RIG_REGISTRY[skin].key;
+    this.rig = factory.rigby(0, 0, key, 'idle', true).setName(board ? `${skin}-rig-head` : `${skin}-rig-meta`);
     this.rig.timeScale = 0;
 
     if (board && afterLayer) {

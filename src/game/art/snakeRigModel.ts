@@ -6,6 +6,49 @@ export const SNAKE_RIG_ANIMS = ['idle', 'eat', 'dead', 'poke', 'celebrate', 'den
 export type SnakeRigAnim = (typeof SNAKE_RIG_ANIMS)[number];
 export type SnakeRigConfig = Balance['ui']['snakeRig'];
 
+/** ANIM-CAT-R1 skins backed by an animated Rigby2D head rig. */
+export const RIGGED_SKINS = ['snake', 'ginger', 'tuxedo'] as const;
+export type RiggedSkinId = (typeof RIGGED_SKINS)[number];
+
+export interface SkinRigEntry {
+  readonly skin: RiggedSkinId;
+  readonly key: string;
+  readonly skeleton: string;
+  readonly atlas: string;
+}
+
+/** ANIM-CAT-R1 per-skin Rigby2D cache keys and asset URLs. */
+export const SKIN_RIG_REGISTRY: Record<RiggedSkinId, SkinRigEntry> = {
+  snake: { skin: 'snake', key: 'rig/snake', skeleton: 'rigs/snake/snake.json', atlas: 'rigs/snake/snake.atlas' },
+  ginger: { skin: 'ginger', key: 'rig/ginger', skeleton: 'rigs/ginger/ginger.json', atlas: 'rigs/ginger/ginger.atlas' },
+  tuxedo: { skin: 'tuxedo', key: 'rig/tuxedo', skeleton: 'rigs/tuxedo/tuxedo.json', atlas: 'rigs/tuxedo/tuxedo.atlas' },
+};
+
+/** ANIM-CAT-R1 true when a skin has a registered Rigby2D rig. */
+export function isRiggedSkin(skin: SkinId): skin is RiggedSkinId {
+  return (RIGGED_SKINS as readonly string[]).includes(skin);
+}
+
+/** ANIM-CAT-R1 look up the Rigby2D asset entry for a skin, or null for static skins. */
+export function skinRigEntry(skin: SkinId): SkinRigEntry | null {
+  return isRiggedSkin(skin) ? SKIN_RIG_REGISTRY[skin] : null;
+}
+
+/** ANIM-CAT-R2 resolve per-skin rig tuning by merging balance.ui.snakeRig defaults with optional skin overrides. */
+export function resolveSkinRigConfig(cfg: SnakeRigConfig, skin: SkinId): SnakeRigConfig {
+  if (skin === 'ginger' || skin === 'tuxedo') {
+    const ov = cfg.skins?.[skin];
+    if (ov) {
+      return {
+        ...cfg,
+        ...ov,
+        eatProp: ov.eatProp ? { ...cfg.eatProp, ...ov.eatProp } : cfg.eatProp,
+      };
+    }
+  }
+  return cfg;
+}
+
 export interface SnakeRigState {
   readonly anim: SnakeRigAnim;
   readonly timeMs: number;
@@ -173,10 +216,13 @@ export function rigWorldPoint(
   };
 }
 
-/** ANIM-SNAKE-R7 Rigby2D snake head is active only on WebGL, with Reduce Motion off, for the snake skin, when loaded. */
-export function shouldUseSnakeRig(input: SnakeRigFallbackInput): boolean {
-  return input.isWebGL && !input.reduced && input.skin === 'snake' && input.rigLoaded;
+/** ANIM-SNAKE-R7 / ANIM-CAT-R3 Rigby2D head is active only on WebGL, with Reduce Motion off, for a registered rigged skin, when loaded. */
+export function shouldUseSkinRig(input: SnakeRigFallbackInput): boolean {
+  return input.isWebGL && !input.reduced && isRiggedSkin(input.skin) && input.rigLoaded;
 }
+
+/** Backward-compatible alias for shouldUseSkinRig. */
+export const shouldUseSnakeRig = shouldUseSkinRig;
 
 export interface DomRectLike {
   readonly left: number;

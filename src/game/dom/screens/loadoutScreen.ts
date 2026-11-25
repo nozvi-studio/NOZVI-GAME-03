@@ -1,4 +1,5 @@
 // D4-P4-R3 Loadout DOM screen over loadoutView/loadoutEdit (Aqua Marsh Mystic 2x2 skill cards + orb slots). Pure: no Phaser.
+import { isRiggedSkin } from '../../art/snakeRigModel';
 import type { SkillId } from '../../../core';
 import { activeSkin } from '../../art/skins';
 import { initEdit, tapCard, tapSlot, type LoadoutEditState } from '../../flow/loadoutEdit';
@@ -49,9 +50,10 @@ export const loadoutScreen: ScreenRender = (root, ctx) => {
   titleEl.appendChild(titleSr);
   // ANIM-SNAKE-R11 compact idle snake hero slot in Loadout header right slot when snake skin is active.
   let hero: HeroStage | null = null;
-  if (activeSkin() === 'snake') {
+  const heroSkin = activeSkin(); // ANIM-CAT-R6 any rigged skin (snake, ginger, tuxedo)
+  if (isRiggedSkin(heroSkin)) {
     const heroWrap = el('div', 'd4-loadout-hero-wrap');
-    hero = createHeroStage(heroWrap, { skin: 'snake', mode: 'portrait', interactive: false, clock });
+    hero = createHeroStage(heroWrap, { skin: heroSkin, mode: 'portrait', interactive: false, clock });
     header.append(backBtn, titleEl, heroWrap);
   } else {
     header.append(backBtn, titleEl, el('span', 'd4-loadout-spacer'));
@@ -77,7 +79,7 @@ export const loadoutScreen: ScreenRender = (root, ctx) => {
   root.appendChild(screen);
   if (hero) {
     const h = hero;
-    bridge.metaHero?.setSlot({ skin: 'snake', readRect: () => h.el.getBoundingClientRect() });
+    bridge.metaHero?.setSlot({ skin: heroSkin, readRect: () => h.el.getBoundingClientRect() });
   }
 
   const render = (): void => {

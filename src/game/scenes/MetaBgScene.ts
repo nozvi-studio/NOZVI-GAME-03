@@ -3,7 +3,15 @@
 import Phaser from 'phaser';
 import type { Balance } from '../../core';
 import { SnakeRig } from '../art/snakeRig';
-import { metaHeroPlacement, shouldUseSnakeRig, type SnakeRigConfig } from '../art/snakeRigModel';
+import {
+  RIGGED_SKINS,
+  isRiggedSkin,
+  metaHeroPlacement,
+  resolveSkinRigConfig,
+  shouldUseSkinRig,
+  type RiggedSkinId,
+  type SnakeRigConfig,
+} from '../art/snakeRigModel';
 import { BgLoop } from '../bg/bgLoop';
 import { coverCamera } from '../bg/coverFit';
 import type { MetaHeroAnim, MetaHeroSlot } from '../dom/uiBridge';
@@ -22,7 +30,8 @@ const FALLBACK_BG_HEX = '#043c44';
 export class MetaBgScene extends Phaser.Scene {
   private bgLoop: BgLoop | null = null;
   private heroCam: Phaser.Cameras.Scene2D.Camera | null = null;
-  private snakeRig: SnakeRig | null = null;
+  private skinRigs = new Map<RiggedSkinId, SnakeRig>();
+  private activeRig: SnakeRig | null = null;
   private rigCfg: SnakeRigConfig | null = null;
   private maxFrameDeltaMs = 100;
   private heroSlot: MetaHeroSlot | null = null;
@@ -68,47 +77,56 @@ export class MetaBgScene extends Phaser.Scene {
     }
   }
 
-  /** ANIM-SNAKE-R9 bind or clear the active DOM hero slot for the meta snake rig. */
+  /** ANIM-SNAKE-R9 / ANIM-CAT-R5 bind or clear the active DOM hero slot for the meta Rigby2D rig. */
   setHeroSlot(slot: MetaHeroSlot | null): boolean {
     const prevSkin = this.heroSlot?.skin ?? null;
     this.heroSlot = slot;
-    if (!this.snakeRig || !this.rigCfg || !slot) {
-      this.snakeRig?.setVisible(false);
+    if (this.skinRigs.size === 0 || !this.rigCfg || !slot) {
+      this.hideAllRigs();
       return false;
     }
-    if (!this.canShowSnake(slot)) {
-      this.snakeRig.setVisible(false);
+    if (!this.canShowRig(slot)) {
+      this.hideAllRigs();
       return false;
     }
+    const rig = isRiggedSkin(slot.skin) ? this.skinRigs.get(slot.skin) ?? null : null;
+    if (!rig) {
+      this.hideAllRigs();
+      return false;
+    }
+    if (this.activeRig && this.activeRig !== rig) {
+      this.activeRig.setVisible(false);
+    }
+    this.activeRig = rig;
     if (slot.initialAnim) {
-      this.snakeRig.play(slot.initialAnim, { loop: slot.loop });
-    } else if (prevSkin !== 'snake') {
-      this.snakeRig.play('idle');
+      rig.play(slot.initialAnim, { loop: slot.loop });
+    } else if (prevSkin !== slot.skin) {
+      rig.play('idle');
     }
     this.syncHeroTransform(0);
     return true;
   }
 
-  /** ANIM-SNAKE-R9 trigger a meta animation clip (poke / celebrate / denied / idle) on the active snake rig. */
+  /** ANIM-SNAKE-R9 / ANIM-CAT-R5 trigger a meta animation clip (poke / celebrate / denied / idle) on the active rig. */
   playHeroAnim(anim: MetaHeroAnim, opts?: { loop?: boolean }): void {
-    if (!this.snakeRig || !this.heroSlot || !this.canShowSnake(this.heroSlot)) return;
-    this.snakeRig.play(anim, opts);
+    if (!this.activeRig || !this.heroSlot || !this.canShowRig(this.heroSlot)) return;
+    this.activeRig.play(anim, opts);
   }
 
-  /** ANIM-SNAKE-R9 current snake rig clip name (used by tests and QA). */
+  /** ANIM-SNAKE-R9 current active rig clip name (used by tests and QA). */
   currentHeroAnim(): string | null {
-    return this.snakeRig?.currentAnim ?? null;
+    return this.activeRig?.currentAnim ?? this.skinRigs.values().next().value?.currentAnim ?? null;
   }
 
-  /** ANIM-SNAKE-R9 true when the meta snake rig is loaded and eligible on this renderer. */
+  /** ANIM-SNAKE-R9 / ANIM-CAT-R5 true when at least one meta skin rig is loaded and eligible on this renderer. */
   isSnakeRigReady(): boolean {
-    return Boolean(this.snakeRig && this.rigCfg && SnakeRig.isWebGL(this) && SnakeRig.isLoaded(this));
+    return this.skinRigs.size > 0 && Boolean(this.rigCfg && SnakeRig.isWebGL(this));
   }
 
   update(_time: number, delta: number): void {
-    if (!this.snakeRig || !this.rigCfg || !this.heroSlot) return;
-    if (!this.canShowSnake(this.heroSlot)) {
-      this.snakeRig.setVisible(false);
+    if (!this.activeRig || !this.rigCfg || !this.heroSlot) return;
+    if (!this.canShowRig(this.heroSlot)) {
+      this.activeRig.setVisible(false);
       return;
     }
     const dt = Number.isFinite(delta) ? Math.min(Math.max(0, delta), this.maxFrameDeltaMs) : 0;
@@ -118,40 +136,51 @@ export class MetaBgScene extends Phaser.Scene {
   private initSnakeHeroOverlay(): void {
     const balance = this.registry?.get('balance') as Balance | undefined;
     const cfg = balance?.ui?.snakeRig;
-    if (!cfg || !SnakeRig.isWebGL(this) || !SnakeRig.isLoaded(this)) return;
+    if (!cfg || !SnakeRig.isWebGL(this)) return;
+    const loadedSkins = RIGGED_SKINS.filter(skin => SnakeRig.isLoaded(this, skin));
+    if (loadedSkins.length === 0) return;
     this.rigCfg = cfg;
     this.maxFrameDeltaMs = balance.flow.maxFrameDeltaMs;
     const cam = this.cameras.main;
     this.heroCam = this.cameras.add(0, 0, cam.width, cam.height);
     if (this.bgLoop) this.heroCam.ignore(this.bgLoop.objects as Phaser.GameObjects.GameObject[]);
-    this.snakeRig = SnakeRig.createOverlay(this, cfg);
-    this.snakeRig.setVisible(false);
-    cam.ignore(this.snakeRig.rig as unknown as Phaser.GameObjects.GameObject);
+    for (const skin of loadedSkins) {
+      const rig = SnakeRig.createOverlay(this, cfg, skin);
+      rig.setVisible(false);
+      cam.ignore(rig.rig as unknown as Phaser.GameObjects.GameObject);
+      this.skinRigs.set(skin, rig);
+    }
     this.registry.set('metaSnakeRigReady', true);
     if (this.heroSlot) this.setHeroSlot(this.heroSlot);
   }
 
-  private canShowSnake(slot: MetaHeroSlot): boolean {
-    return shouldUseSnakeRig({
+  private hideAllRigs(): void {
+    for (const rig of this.skinRigs.values()) rig.setVisible(false);
+    this.activeRig = null;
+  }
+
+  private canShowRig(slot: MetaHeroSlot): boolean {
+    return shouldUseSkinRig({
       isWebGL: SnakeRig.isWebGL(this),
       reduced: reduceMotion(),
       skin: slot.skin,
-      rigLoaded: SnakeRig.isLoaded(this),
+      rigLoaded: SnakeRig.isLoaded(this, slot.skin),
     });
   }
 
   private syncHeroTransform(dtMs: number): void {
-    if (!this.snakeRig || !this.rigCfg || !this.heroSlot || !this.cameras?.main) return;
+    if (!this.activeRig || !this.rigCfg || !this.heroSlot || !this.cameras?.main) return;
     const cam = this.cameras.main;
     const canvasRect = this.game?.canvas?.getBoundingClientRect?.();
     const slotRect = this.heroSlot.readRect();
-    const place = metaHeroPlacement(slotRect, canvasRect, cam.width, cam.height, this.rigCfg);
+    const cfg = resolveSkinRigConfig(this.rigCfg, this.heroSlot.skin);
+    const place = metaHeroPlacement(slotRect, canvasRect, cam.width, cam.height, cfg);
     if (!place.visible) {
-      this.snakeRig.setVisible(false);
+      this.activeRig.setVisible(false);
       return;
     }
-    this.snakeRig.setVisible(true);
-    this.snakeRig.updateOverlay(dtMs, place.x, place.feetY, place.scale);
+    this.activeRig.setVisible(true);
+    this.activeRig.updateOverlay(dtMs, place.x, place.feetY, place.scale);
   }
 
   private fitCamera = (): void => {
@@ -161,7 +190,7 @@ export class MetaBgScene extends Phaser.Scene {
     cam.setZoom(fit.zoom);
     cam.centerOn(fit.centerX, fit.centerY);
     this.heroCam?.setSize(cam.width, cam.height);
-    if (this.heroSlot && this.snakeRig) this.syncHeroTransform(0);
+    if (this.heroSlot && this.activeRig) this.syncHeroTransform(0);
   };
 
   private onLoadError = (): void => {
@@ -170,8 +199,9 @@ export class MetaBgScene extends Phaser.Scene {
 
   private onShutdown = (): void => {
     this.scale.off(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
-    this.snakeRig?.destroy();
-    this.snakeRig = null;
+    for (const rig of this.skinRigs.values()) rig.destroy();
+    this.skinRigs.clear();
+    this.activeRig = null;
     this.heroCam = null;
     this.bgLoop = null;
   };

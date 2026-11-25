@@ -25,6 +25,22 @@ export interface MotionD3Balance {
   hintLoopMs: number; hintTravelPx: number; flashMs: number;
 }
 
+export interface RigEatPropBalance {
+  mouthOffsetY: number; mangoOffsetY: number;
+  mangoPullStartMs: number; mangoFadeStartMs: number; mangoEndMs: number;
+  mangoWidthFrac: number; mangoShrinkFrac: number; mangoRotStartRad: number; mangoRotSweepRad: number;
+  burstStartMs: number; burstEndMs: number;
+  burstWidthFrac: number; burstScaleMin: number; burstScaleGain: number; burstPeakFrac: number;
+}
+
+/** ANIM-CAT-R2 per-skin Rigby2D timing and eat-prop overrides. */
+export interface SkinRigOverride {
+  designHeight?: number;
+  metaHeadFrac?: number; metaFeetFrac?: number;
+  idleMs?: number; eatMs?: number; deadMs?: number; pokeMs?: number; celebrateMs?: number; deniedMs?: number;
+  eatProp?: Partial<RigEatPropBalance>;
+}
+
 /** MOT-0 motion tokens (all tuned by feel; see docs/superpowers/specs/2026-11-10-motion-0-foundation-design.md section 4). */
 export interface MotionBalance {
   tapDownMs: number; tapUpMs: number; pressScale: number; releaseOvershoot: number; hoverScale: number; reducedPressAlpha: number;
@@ -108,20 +124,15 @@ export interface Balance {
       deadDroopMs: number; deadRotDeg: number; deadDropPx: number; headCellScale: number;
       tongueMs: number; tongueMinGapMs: number; tongueMaxGapMs: number };
     hud: { rejectShakeMs: number; rejectShakeAmpPx: number; tipFactor: number; bannerQueueMax: number };
-    /** ANIM-SNAKE-R1 Rigby2D snake-head timings and eat-prop sync numbers. */
+    /** ANIM-SNAKE-R1 / ANIM-CAT-R2 Rigby2D rigged-head timings, eat-prop sync, and per-skin overrides. */
     snakeRig: {
       designHeight: number;
       metaHeadFrac: number; metaFeetFrac: number;
       /** ANIM-SNAKE-R13 Phaser dim drawn under the live DeathCard hero (replaces the DOM frost). */
       deathDimColor: number; deathDimAlpha: number;
       idleMs: number; eatMs: number; deadMs: number; pokeMs: number; celebrateMs: number; deniedMs: number;
-      eatProp: {
-        mouthOffsetY: number; mangoOffsetY: number;
-        mangoPullStartMs: number; mangoFadeStartMs: number; mangoEndMs: number;
-        mangoWidthFrac: number; mangoShrinkFrac: number; mangoRotStartRad: number; mangoRotSweepRad: number;
-        burstStartMs: number; burstEndMs: number;
-        burstWidthFrac: number; burstScaleMin: number; burstScaleGain: number; burstPeakFrac: number;
-      };
+      eatProp: RigEatPropBalance;
+      skins: Record<'ginger' | 'tuxedo', SkinRigOverride>;
     };
   };
   juice: {
@@ -203,6 +214,33 @@ const groundTiles: Spec = { ...timed, tries: 'int+', maxActive: 'int+', mirrorCh
   },
 };
 
+const RIG_EAT_PROP_SPEC: Spec = {
+  mouthOffsetY: 'num0', mangoOffsetY: 'num0',
+  mangoPullStartMs: 'int0', mangoFadeStartMs: 'int0', mangoEndMs: 'int+',
+  mangoWidthFrac: 'prob', mangoShrinkFrac: 'prob', mangoRotStartRad: 'num', mangoRotSweepRad: 'num',
+  burstStartMs: 'int0', burstEndMs: 'int+',
+  burstWidthFrac: 'prob', burstScaleMin: 'num+', burstScaleGain: 'num0', burstPeakFrac: 'prob',
+};
+const RIG_SKIN_OVERRIDE_SPEC: Spec = {
+  designHeight: 'num+',
+  metaHeadFrac: 'prob', metaFeetFrac: 'prob',
+  idleMs: 'int+', eatMs: 'int+', deadMs: 'int+', pokeMs: 'int+', celebrateMs: 'int+', deniedMs: 'int+',
+};
+const optionalFields = (spec: Spec): Check => (v, path) => {
+  if (!isObj(v)) fail(path, 'must be an object');
+  for (const [k, val] of Object.entries(v)) {
+    if (k === 'eatProp') {
+      if (!isObj(val)) fail(`${path}.eatProp`, 'must be an object');
+      for (const [ek, ev] of Object.entries(val)) {
+        if (!Object.hasOwn(RIG_EAT_PROP_SPEC, ek)) fail(`${path}.eatProp.${ek}`, 'unknown field');
+        check(ev, RIG_EAT_PROP_SPEC[ek]!, `${path}.eatProp.${ek}`);
+      }
+      continue;
+    }
+    if (!Object.hasOwn(spec, k)) fail(`${path}.${k}`, 'unknown field');
+    check(val, spec[k]!, `${path}.${k}`);
+  }
+};
 const burst = { count: 'int0', speed: 'num+', lifeMs: 'int+' } as const;
 const SPEC: Spec = {
   board: { cols: 'int+', rows: 'int+' },
@@ -282,13 +320,8 @@ const SPEC: Spec = {
       metaHeadFrac: 'prob', metaFeetFrac: 'prob',
       deathDimColor: 'int0', deathDimAlpha: 'prob',
       idleMs: 'int+', eatMs: 'int+', deadMs: 'int+', pokeMs: 'int+', celebrateMs: 'int+', deniedMs: 'int+',
-      eatProp: {
-        mouthOffsetY: 'num0', mangoOffsetY: 'num0',
-        mangoPullStartMs: 'int0', mangoFadeStartMs: 'int0', mangoEndMs: 'int+',
-        mangoWidthFrac: 'prob', mangoShrinkFrac: 'prob', mangoRotStartRad: 'num', mangoRotSweepRad: 'num',
-        burstStartMs: 'int0', burstEndMs: 'int+',
-        burstWidthFrac: 'prob', burstScaleMin: 'num+', burstScaleGain: 'num0', burstPeakFrac: 'prob',
-      },
+      eatProp: RIG_EAT_PROP_SPEC,
+      skins: recordOf(['ginger', 'tuxedo'], optionalFields(RIG_SKIN_OVERRIDE_SPEC)),
     },
   },
   juice: {
@@ -444,14 +477,21 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (b.energy.orbBlinkMs >= b.energy.orbLifeMs) fail('energy.orbBlinkMs', 'must be < orbLifeMs');
   if (b.ui.capy.blinkMaxGapMs < b.ui.capy.blinkMinGapMs) fail('ui.capy.blinkMaxGapMs', 'must be >= blinkMinGapMs');
   if (b.ui.capy.tongueMaxGapMs < b.ui.capy.tongueMinGapMs) fail('ui.capy.tongueMaxGapMs', 'must be >= tongueMinGapMs');
-  // ANIM-SNAKE-R1 Rigby2D snake-head eat-prop window ordering.
-  const sr = b.ui.snakeRig, ep = sr.eatProp;
-  if (ep.mangoPullStartMs >= ep.mangoEndMs) fail('ui.snakeRig.eatProp.mangoPullStartMs', 'must be < mangoEndMs');
-  if (ep.mangoFadeStartMs >= ep.mangoEndMs) fail('ui.snakeRig.eatProp.mangoFadeStartMs', 'must be < mangoEndMs');
-  if (ep.mangoEndMs > sr.eatMs) fail('ui.snakeRig.eatProp.mangoEndMs', 'must be <= eatMs');
-  if (ep.burstStartMs >= ep.burstEndMs) fail('ui.snakeRig.eatProp.burstStartMs', 'must be < burstEndMs');
-  if (ep.burstEndMs > sr.eatMs) fail('ui.snakeRig.eatProp.burstEndMs', 'must be <= eatMs');
-  if (ep.burstPeakFrac <= 0 || ep.burstPeakFrac >= 1) fail('ui.snakeRig.eatProp.burstPeakFrac', 'must be in (0, 1)');
+  // ANIM-SNAKE-R1 / ANIM-CAT-R2 Rigby2D eat-prop window ordering for base rig and per-skin overrides.
+  const checkEatPropWindow = (eatMs: number, ep: RigEatPropBalance, prefix: string): void => {
+    if (ep.mangoPullStartMs >= ep.mangoEndMs) fail(`${prefix}.mangoPullStartMs`, 'must be < mangoEndMs');
+    if (ep.mangoFadeStartMs >= ep.mangoEndMs) fail(`${prefix}.mangoFadeStartMs`, 'must be < mangoEndMs');
+    if (ep.mangoEndMs > eatMs) fail(`${prefix}.mangoEndMs`, 'must be <= eatMs');
+    if (ep.burstStartMs >= ep.burstEndMs) fail(`${prefix}.burstStartMs`, 'must be < burstEndMs');
+    if (ep.burstEndMs > eatMs) fail(`${prefix}.burstEndMs`, 'must be <= eatMs');
+    if (ep.burstPeakFrac <= 0 || ep.burstPeakFrac >= 1) fail(`${prefix}.burstPeakFrac`, 'must be in (0, 1)');
+  };
+  const sr = b.ui.snakeRig;
+  checkEatPropWindow(sr.eatMs, sr.eatProp, 'ui.snakeRig.eatProp');
+  for (const skin of ['ginger', 'tuxedo'] as const) {
+    const ov = sr.skins[skin];
+    checkEatPropWindow(ov.eatMs ?? sr.eatMs, { ...sr.eatProp, ...ov.eatProp }, `ui.snakeRig.skins.${skin}.eatProp`);
+  }
   // MOT-0 motion token cross-field rules (spec section 4).
   const mo = b.motion;
   if (mo.pressScale >= 1) fail('motion.pressScale', 'must be < 1');

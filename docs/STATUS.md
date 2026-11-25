@@ -1,6 +1,6 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-25 **Milestone:** Rigby2D snake hero. **Branch stack:** `version/v0.3` <- `feat/d4-art-direction-reskin` (13 commits, unmerged) <- `feat/snake-rigby-head` (`9843631`, ANIM-SNAKE-R1..R7, committed) <- `feat/snake-rigby-meta` (`c5c2208`, ANIM-SNAKE-R8..R12) <- `feat/snake-rigby-death` (ANIM-SNAKE-R13). **Version branches:** `version/v0.3` (P3/P4a), `version/v0.2` (P2 exit).
+**Updated:** 2026-11-25 **Milestone:** Rigby2D heroes (snake + cats). **Branch stack:** `version/v0.3` <- `feat/d4-art-direction-reskin` (now contains snake head/meta/death, Game Over GAMEOVER-R1..R5, cat rigs ANIM-CAT-R1..R6; unmerged, awaiting owner playtest). **Version branches:** `version/v0.3` (P3/P4a), `version/v0.2` (P2 exit).
 
 ## Now (in progress)
 - [x] **Dead hero on DeathCard (`feat/snake-rigby-death`, from `feat/snake-rigby-meta`):** Rigby2D `dead` clip centered above the Run Over card, static portrait fallback (`ANIM-SNAKE-R13`). Unit tests + typecheck pass; visual Chrome QA pending (`npm install`).
@@ -34,6 +34,7 @@
 - `git checkout` / `git commit` / `npm install` require `BypassSandbox: true` on Windows due to `.git/` lock & npm cache permissions.
 
 ## Last session summary
+- 2026-11-25 (c): Cat rigs `ginger` + `tuxedo` integrated (ANIM-CAT-R1..R6) on `feat/cat-rigby` by agy (Codex unavailable: `gpt-6-sol`/`gpt-6.1-sol` not supported on the ChatGPT account), verified + Loadout/Results hero generalized by lead, merged --no-ff into `feat/d4-art-direction-reskin`. `pup`/`capy` have no rig yet. Not yet seen in a browser (npm install pending).
 - 2026-11-25 (b): Game Over overlay GAMEOVER-R1..R5 (title + dark dim + centered hero + side-by-side "Play again" (mango-orange, quick restart) / "Continue" (ad placeholder, 5 s countdown -> "Result"); no auto-advance). Committed with ANIM-SNAKE-R8..R13 on `feat/snake-rigby-meta`, merged --no-ff into `feat/snake-rigby-head`. Full suite: only `fullTable` timed out (10 s) under load; passes alone. Next: 2 cat animations on `feat/snake-rigby-head` stack.
 - 2026-11-25 (2): committed ANIM-SNAKE-R8..R12 (`c5c2208`) on `feat/snake-rigby-meta`; branched `feat/snake-rigby-death` and implemented ANIM-SNAKE-R13.
 - 2026-11-25: Status review only (no code). Confirmed branch stack above; `node_modules/.bin` still missing (owner `npm install` needed); GitNexus index refreshed. Untracked `docs/design/mystic/challenge/` is not yet documented.

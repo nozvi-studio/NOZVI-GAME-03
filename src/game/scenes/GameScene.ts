@@ -3,7 +3,7 @@ import type { Balance, SimEvent, SimSnapshot, Step } from '../../core';
 import type { Session } from '../../session';
 import { CapyHead } from '../art/capyHead';
 import { SnakeRig } from '../art/snakeRig';
-import { shouldUseSnakeRig } from '../art/snakeRigModel';
+import { isRiggedSkin, shouldUseSkinRig } from '../art/snakeRigModel';
 import { activeSkin, SKIN_EFFECTS } from '../art/skins';
 import { BOARD, cellPx } from '../layout';
 import { clockStep, createClock } from '../flow/clock';
@@ -267,17 +267,22 @@ export class GameScene extends Phaser.Scene {
     this.bg = screenBackground(this, biome, true);
   }
 
-  // ANIM-SNAKE-R7 switch between Rigby2D snake head and CapyHead fallback based on WebGL, Reduce Motion, skin, and asset readiness.
+  // ANIM-SNAKE-R7 / ANIM-CAT-R5 switch between Rigby2D head (snake/ginger/tuxedo) and CapyHead fallback based on WebGL, Reduce Motion, skin, and asset readiness.
   private syncHeadMode(): void {
-    const wantRig = shouldUseSnakeRig({
+    const skin = activeSkin();
+    const wantRig = shouldUseSkinRig({
       isWebGL: SnakeRig.isWebGL(this),
       reduced: this.reduced,
-      skin: activeSkin(),
-      rigLoaded: SnakeRig.isLoaded(this),
+      skin,
+      rigLoaded: SnakeRig.isLoaded(this, skin),
     });
-    if (wantRig && !this.snakeRig) {
+    if (wantRig && this.snakeRig && this.snakeRig.skin !== skin) {
+      this.snakeRig.destroy();
+      this.snakeRig = null;
+    }
+    if (wantRig && !this.snakeRig && isRiggedSkin(skin)) {
       try {
-        this.snakeRig = SnakeRig.create(this, this.board, this.layers.snake, this.balance.ui.snakeRig, this.balance.ui.capy.headCellScale);
+        this.snakeRig = SnakeRig.create(this, this.board, this.layers.snake, this.balance.ui.snakeRig, this.balance.ui.capy.headCellScale, skin);
       } catch {
         this.snakeRig = null;
       }

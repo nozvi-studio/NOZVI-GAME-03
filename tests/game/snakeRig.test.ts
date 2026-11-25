@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSim, type SimSnapshot } from '../../src/core';
-import { setActiveSkin } from '../../src/game/art/skins';
+import { setActiveSkin, type SkinId } from '../../src/game/art/skins';
 import { SNAKE_BURST_KEY, SNAKE_MANGO_KEY, SNAKE_RIG_KEY, SnakeRig } from '../../src/game/art/snakeRig';
+import { RIGGED_SKINS, SKIN_RIG_REGISTRY } from '../../src/game/art/snakeRigModel';
 import { setDisplaySettings } from '../../src/game/render/palette';
+import { BootScene } from '../../src/game/scenes/BootScene';
 import { GameScene } from '../../src/game/scenes/GameScene';
 import { defaultSettings } from '../../src/meta';
 import { loadBalance } from '../support/balance';
@@ -56,7 +58,7 @@ const fakeSnap = (balance: ReturnType<typeof loadBalance>, dx: -1 | 0 | 1, dy: -
   dir: { x: dx, y: dy },
 });
 
-function makeGameHarness(opts: { webgl?: boolean; rigLoaded?: boolean; reduced?: boolean; skin?: 'snake' | 'capy' } = {}) {
+function makeGameHarness(opts: { webgl?: boolean; rigLoaded?: boolean | readonly string[]; reduced?: boolean; skin?: SkinId } = {}) {
   const { webgl = true, rigLoaded = true, reduced = false, skin = 'snake' } = opts;
   setActiveSkin(skin);
   setDisplaySettings({ ...defaultSettings(), reducedMotion: reduced });
@@ -69,9 +71,11 @@ function makeGameHarness(opts: { webgl?: boolean; rigLoaded?: boolean; reduced?:
   const h = sceneHarness();
   const events = new Signals();
   const rigObjs: FakeRigObject[] = [];
-  const loadCalls: { kind: string; key: string }[] = [];
-  const loadedKeys = new Set<string>(rigLoaded ? [SNAKE_RIG_KEY] : []);
-  const textureKeys = new Set<string>(rigLoaded ? [SNAKE_MANGO_KEY, SNAKE_BURST_KEY] : []);
+  const loadCalls: { kind: string; key: string; skeleton?: string; atlas?: string }[] = [];
+  const loadedKeys = new Set<string>(
+    Array.isArray(rigLoaded) ? rigLoaded : rigLoaded ? RIGGED_SKINS.map(s => SKIN_RIG_REGISTRY[s].key) : [],
+  );
+  const textureKeys = new Set<string>(loadedKeys.size > 0 ? [SNAKE_MANGO_KEY, SNAKE_BURST_KEY] : []);
 
   const game = new GameScene();
   const balance = loadBalance();
@@ -108,7 +112,7 @@ function makeGameHarness(opts: { webgl?: boolean; rigLoaded?: boolean; reduced?:
       },
     },
     load: {
-      rigby: (key: string) => { loadCalls.push({ kind: 'rigby', key }); },
+      rigby: (key: string, skeleton?: string, atlas?: string) => { loadCalls.push({ kind: 'rigby', key, skeleton, atlas }); },
       image: (key: string) => { loadCalls.push({ kind: 'image', key }); },
     },
     cache: {
@@ -134,11 +138,13 @@ function makeGameHarness(opts: { webgl?: boolean; rigLoaded?: boolean; reduced?:
 }
 
 describe('ANIM-SNAKE SnakeRig Phaser wrapper & GameScene wiring', () => {
-  it('ANIM-SNAKE-R1 preload queues rig + mango + burst on WebGL and skips on Canvas', () => {
+  it('ANIM-SNAKE-R1 / ANIM-CAT-R4 preload queues all 3 rigs + mango + burst on WebGL and skips on Canvas', () => {
     const webgl = makeGameHarness({ webgl: true, rigLoaded: false });
     expect(SnakeRig.preload(webgl.game)).toBe(true);
     expect(webgl.loadCalls).toEqual([
-      { kind: 'rigby', key: SNAKE_RIG_KEY },
+      { kind: 'rigby', key: SNAKE_RIG_KEY, skeleton: 'rigs/snake/snake.json', atlas: 'rigs/snake/snake.atlas' },
+      { kind: 'rigby', key: 'rig/ginger', skeleton: 'rigs/ginger/ginger.json', atlas: 'rigs/ginger/ginger.atlas' },
+      { kind: 'rigby', key: 'rig/tuxedo', skeleton: 'rigs/tuxedo/tuxedo.json', atlas: 'rigs/tuxedo/tuxedo.atlas' },
       { kind: 'image', key: SNAKE_MANGO_KEY },
       { kind: 'image', key: SNAKE_BURST_KEY },
     ]);
@@ -146,6 +152,63 @@ describe('ANIM-SNAKE SnakeRig Phaser wrapper & GameScene wiring', () => {
     const canvas = makeGameHarness({ webgl: false, rigLoaded: false });
     expect(SnakeRig.preload(canvas.game)).toBe(false);
     expect(canvas.loadCalls).toEqual([]);
+  });
+
+  it('ANIM-CAT-R4 BootScene.preload queues all 3 rigged skins on WebGL', () => {
+    const boot = new BootScene();
+    const rigbyCalls: { key: string; skeleton: string; atlas: string }[] = [];
+    const h = sceneHarness();
+    Object.assign(boot, h.scene, {
+      load: {
+        on: vi.fn(),
+        off: vi.fn(),
+        image: vi.fn(),
+        svg: vi.fn(),
+        rigby: (key: string, skeleton: string, atlas: string) => { rigbyCalls.push({ key, skeleton, atlas }); },
+      },
+      cache: { custom: { rigby2d: { get: () => undefined } } },
+      textures: { exists: () => false, createCanvas: h.scene.textures.createCanvas },
+      cameras: { main: { setBackgroundColor: vi.fn() } },
+      game: { renderer: { type: 2 } },
+    });
+    boot.preload();
+    expect(rigbyCalls).toEqual([
+      { key: 'rig/snake', skeleton: 'rigs/snake/snake.json', atlas: 'rigs/snake/snake.atlas' },
+      { key: 'rig/ginger', skeleton: 'rigs/ginger/ginger.json', atlas: 'rigs/ginger/ginger.atlas' },
+      { key: 'rig/tuxedo', skeleton: 'rigs/tuxedo/tuxedo.json', atlas: 'rigs/tuxedo/tuxedo.atlas' },
+    ]);
+  });
+
+  it('ANIM-CAT-R5 GameScene activates ginger and tuxedo rigs with per-skin durations and keeps pup/capy on CapyHead', () => {
+    for (const [skin, expectedEatMs, expectedDeadSec] of [['ginger', 900, 1.4], ['tuxedo', 1200, 1.8]] as const) {
+      const { game, h, rigObjs, balance } = makeGameHarness({ webgl: true, rigLoaded: true, reduced: false, skin });
+      game.create();
+      expect(rigObjs).toHaveLength(1);
+      const rig = rigObjs[0]!;
+      expect(rig.visible).toBe(true);
+      expect(h.find('capy-head').visible).toBe(false);
+
+      const draw = (game as unknown as { draw(s: SimSnapshot, t: number, dt: number): void }).draw.bind(game);
+      const handleEvents = (game as unknown as { handleEvents(e: unknown[], s: SimSnapshot, t: number): void }).handleEvents.bind(game);
+      const snap = fakeSnap(balance, 1, 0);
+
+      handleEvents([{ type: 'ate' }], snap, 1000);
+      expect(rig.played.at(-1)).toEqual({ name: 'eat', loop: false, mix: 0 });
+      draw(snap, 1000 + expectedEatMs - 50, expectedEatMs - 50);
+      expect(rig.played.at(-1)?.name).toBe('eat');
+      draw(snap, 1000 + expectedEatMs, 50);
+      expect(rig.played.at(-1)).toEqual({ name: 'idle', loop: true, mix: 0 });
+
+      handleEvents([{ type: 'died' }], snap, 2000);
+      draw(snap, 5000, 3000);
+      expect(rig.played.at(-1)?.name).toBe('dead');
+      expect(rig.state.tracks[0]?.time).toBeCloseTo(expectedDeadSec);
+    }
+
+    const pup = makeGameHarness({ webgl: true, rigLoaded: true, skin: 'pup' });
+    pup.game.create();
+    expect(pup.rigObjs).toHaveLength(0);
+    expect(pup.h.find('capy-head').visible).toBe(true);
   });
 
   it('ANIM-SNAKE-R6/R7 GameScene activates SnakeRig for snake skin on WebGL, hides CapyHead, follows heading, and triggers eat/dead', () => {

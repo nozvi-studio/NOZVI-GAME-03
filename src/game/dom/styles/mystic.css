@@ -82,9 +82,11 @@ body.d4-mystic-band {
   display: none;
 }
 
-/* ANIM-SNAKE-R10: hide the DOM snake portrait image while the aligned Phaser Rigby2D snake rig is active,
+/* ANIM-SNAKE-R10 / ANIM-CAT-R6: hide the DOM portrait image while the aligned Phaser Rigby2D rig is active,
  * keeping the clickable hero box and ground shadow intact. */
-#ui-root.d4-live-bg.d4-live-snake-hero .d4-hero[data-qa="hero-snake"] .d4-hero-img {
+#ui-root.d4-live-bg.d4-live-snake-hero .d4-hero[data-qa="hero-snake"] .d4-hero-img,
+#ui-root.d4-live-bg.d4-live-ginger-hero .d4-hero[data-qa="hero-ginger"] .d4-hero-img,
+#ui-root.d4-live-bg.d4-live-tuxedo-hero .d4-hero[data-qa="hero-tuxedo"] .d4-hero-img {
   opacity: 0;
 }
 
