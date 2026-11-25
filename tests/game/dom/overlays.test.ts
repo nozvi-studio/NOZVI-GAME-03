@@ -80,31 +80,46 @@ describe('D4-P4-R4 DOM overlays & overlays.css', () => {
     expect(layer.innerHTML).toBe('');
   });
 
-  it('D4-P4-R4 deathCard respects skipLockMs before allowing click/Enter/Space and fires once', () => {
+  const mountDeath = (lockMs = 300) => {
     const root = document.createElement('div');
     document.body.appendChild(root);
     const clock = new FakeClock();
-    const onContinue = vi.fn();
+    const onChoice = vi.fn();
+    const cleanup = renderDeathCard(root, { lockMs, continueMs: 5000, onChoice }, clock);
+    const q = (qa: string) => root.querySelector<HTMLElement>(`[data-qa="${qa}"]`)!;
+    return { root, clock, onChoice, cleanup, q };
+  };
 
-    const cleanup = renderDeathCard(root, { text: 'Bonked the wall!' }, 300, onContinue, clock);
-    const scrimEl = root.querySelector<HTMLElement>('[data-qa="death-scrim"]')!;
-    expect(root.querySelector('[data-qa="death-line"]')?.textContent).toBe('Bonked the wall!');
-    expect(scrimEl.classList.contains('is-locked')).toBe(true);
+  it('GAMEOVER-R1..R3 layout: GAME OVER title, hero slot, Play again + Continue with a 5 s countdown', () => {
+    const { q, cleanup, root } = mountDeath();
+    expect(q('death-title').textContent).toBe('GAME OVER');
+    expect(root.querySelector('[data-qa="death-line"]')).toBeNull();
+    expect(q('death-hero')).not.toBeNull();
+    expect(q('death-again').textContent).toBe('Play again');
+    expect(q('death-continue').dataset.mode).toBe('continue');
+    expect(q('death-count').textContent).toBe('5');
+    cleanup(); root.remove();
+  });
 
-    // Early click and key are ignored
-    scrimEl.click();
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
-    expect(onContinue).not.toHaveBeenCalled();
-
-    // After lockMs, click fires exactly once
+  it('GAMEOVER-R3/R4 countdown ticks; Continue is a placeholder; at 0 it becomes Result', () => {
+    const { q, clock, onChoice, cleanup, root } = mountDeath();
     clock.advance(300);
-    expect(scrimEl.classList.contains('is-locked')).toBe(false);
-    scrimEl.click();
-    scrimEl.click();
-    expect(onContinue).toHaveBeenCalledTimes(1);
+    q('death-continue').click(); expect(onChoice).not.toHaveBeenCalled();
+    clock.advance(1000); expect(q('death-count').textContent).toBe('4');
+    clock.advance(4000);
+    expect(q('death-continue').dataset.mode).toBe('results');
+    expect(q('death-continue').textContent).toBe('Result');
+    q('death-continue').click(); q('death-continue').click();
+    expect(onChoice).toHaveBeenCalledTimes(1); expect(onChoice).toHaveBeenCalledWith('results');
+    cleanup(); expect(clock.pending()).toBe(0); root.remove();
+  });
 
-    cleanup();
-    expect(clock.pending()).toBe(0);
-    root.remove();
+  it('GAMEOVER-R5 Play again is locked for lockMs, then fires once with again', () => {
+    const { q, clock, onChoice, cleanup, root } = mountDeath();
+    q('death-again').click(); expect(onChoice).not.toHaveBeenCalled();
+    clock.advance(300);
+    q('death-again').click(); q('death-again').click();
+    expect(onChoice).toHaveBeenCalledTimes(1); expect(onChoice).toHaveBeenCalledWith('again');
+    cleanup(); expect(clock.pending()).toBe(0); root.remove();
   });
 });

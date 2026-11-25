@@ -112,6 +112,8 @@ export interface Balance {
     snakeRig: {
       designHeight: number;
       metaHeadFrac: number; metaFeetFrac: number;
+      /** ANIM-SNAKE-R13 Phaser dim drawn under the live DeathCard hero (replaces the DOM frost). */
+      deathDimColor: number; deathDimAlpha: number;
       idleMs: number; eatMs: number; deadMs: number; pokeMs: number; celebrateMs: number; deniedMs: number;
       eatProp: {
         mouthOffsetY: number; mangoOffsetY: number;
@@ -131,7 +133,7 @@ export interface Balance {
     biome: { sweepAlpha: number; sweepMs: number };
     checkpoint: { flagMs: number };
     banner: { inMs: number; slidePx: number; scaleFrom: number };
-    death: { shakePx: number; shakeMs: number; flashAlpha: number; flashMs: number; cardInMs: number; totalMs: number; skipLockMs: number };
+    death: { shakePx: number; shakeMs: number; flashAlpha: number; flashMs: number; cardInMs: number; totalMs: number; skipLockMs: number; continueMs: number };
     haptics: { eatMs: number; orbMs: number; castMs: number; level: number[]; biomeMs: number; checkpointMs: number; deathMs: number };
     reduced: { flashAlphaMax: number; softMs: number; deathTotalMs: number };
     perf: { maxParticles: number; maxFloats: number; maxSparks: number };
@@ -278,6 +280,7 @@ const SPEC: Spec = {
     snakeRig: {
       designHeight: 'num+',
       metaHeadFrac: 'prob', metaFeetFrac: 'prob',
+      deathDimColor: 'int0', deathDimAlpha: 'prob',
       idleMs: 'int+', eatMs: 'int+', deadMs: 'int+', pokeMs: 'int+', celebrateMs: 'int+', deniedMs: 'int+',
       eatProp: {
         mouthOffsetY: 'num0', mangoOffsetY: 'num0',
@@ -295,7 +298,7 @@ const SPEC: Spec = {
     skill: { flashAlpha: 'prob', flashMs: 'int+', iconPopScale: 'num+', iconRingScale: 'num+', iconPopMs: 'int+', tintAlpha: 'prob', tintFadeMs: 'int+' },
     level: { glowAlpha: 'prob', glowMs: 'int+', popMs: 'int+' }, biome: { sweepAlpha: 'prob', sweepMs: 'int+' },
     checkpoint: { flagMs: 'int+' }, banner: { inMs: 'int+', slidePx: 'num0', scaleFrom: 'prob' },
-    death: { shakePx: 'num0', shakeMs: 'int0', flashAlpha: 'prob', flashMs: 'int+', cardInMs: 'int0', totalMs: 'int+', skipLockMs: 'int0' },
+    death: { shakePx: 'num0', shakeMs: 'int0', flashAlpha: 'prob', flashMs: 'int+', cardInMs: 'int0', totalMs: 'int+', skipLockMs: 'int0', continueMs: 'int+' },
     haptics: { eatMs: 'int+', orbMs: 'int+', castMs: 'int+', level: 'ints', biomeMs: 'int+', checkpointMs: 'int+', deathMs: 'int+' },
     reduced: { flashAlphaMax: 'prob', softMs: 'int+', deathTotalMs: 'int+' },
     perf: { maxParticles: 'int+', maxFloats: 'int+', maxSparks: 'int+' },

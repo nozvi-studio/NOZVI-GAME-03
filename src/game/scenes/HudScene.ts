@@ -7,6 +7,9 @@ import { isDebug } from '../flow/debugFlag';
 import { homeView } from '../flow/homeModel';
 import { flowPause, flowResume, flowTogglePause, type FlowEffect } from '../flow/runFlow';
 import { SETTINGS_CLOSED } from '../flow/settingsView';
+import { SnakeRig } from '../art/snakeRig';
+import { metaHeroPlacement, shouldUseSnakeRig } from '../art/snakeRigModel';
+import { activeSkin } from '../art/skins';
 import { BannerLayer } from '../hud/BannerLayer';
 import { levelUpBanners, skillPills, skillTip } from '../hud/banners';
 import { CountdownOverlay } from '../hud/CountdownOverlay';
@@ -23,7 +26,7 @@ import { DeathCard } from '../juice/DeathCard';
 import { deathSeed } from '../juice/deathLine';
 import { colorOf } from '../juice/colors';
 import { landedCells } from '../juice/derived';
-import { JuicePlayer } from '../juice/JuicePlayer';
+import { JuicePlayer, type DeathCardView, type DeathExit } from '../juice/JuicePlayer';
 import { ScreenFx } from '../juice/ScreenFx';
 import type { HudTarget, JuiceInput } from '../juice/types';
 import { acceptSkillInput, skillSlotForKey } from '../input/skillKeys';
@@ -36,10 +39,13 @@ import { d3, d3Height, d3m } from '../ui/layout';
 import { incomingBanner, t } from '../text';
 import { MOTION } from '../dom/motionTokens';
 import type { UiBridge } from '../dom/uiBridge';
+import type { StageRect } from '../dom/stageSync';
 import type { GameScene } from './GameScene';
 import { bridgeOf } from './phaserPort';
 
 type HudHint = ReturnType<typeof homeView>['hint'];
+/** Render order only: the DeathCard dim and rig sit above every HUD object. */
+const DEATH_HERO_DEPTH = 10_000;
 
 // P3b-2 / D4-P4-R4: wiring only. Models in src/game/hud/*, views draw them; this scene owns events, sounds, haptics, flow and session calls.
 export class HudScene extends Phaser.Scene {
@@ -49,6 +55,7 @@ export class HudScene extends Phaser.Scene {
   private pad!: ReturnType<typeof createDpad>; private dpadOn = false; private touch = false;
   private heading = ''; private hint: HudHint = null; private cpCount = 0; private bestLevelAtStart = 0; private orbTipShown = false; private leaving = false; private juice!: JuicePlayer;
   private haptics = true; private startBanner: string[] = []; private shrunkTo: number | null = null; private overTimer?: Phaser.Time.TimerEvent; private goTimer?: Phaser.Time.TimerEvent;
+  private deathRig: SnakeRig | null = null; private deathDim: Phaser.GameObjects.Rectangle | null = null; private deathSlot: (() => StageRect) | null = null;
   private debugKey: { c: Phaser.GameObjects.Container } | null = null; private debugNext: { c: Phaser.GameObjects.Container } | null = null;
 
   constructor() { super('Hud'); }
@@ -78,7 +85,7 @@ export class HudScene extends Phaser.Scene {
       settings: () => this.session.save().settings, reduced: reduceMotion,
       headCell: () => { const s = this.gameScene.snapshot(); const h = s?.snake[0]; return h ? { x: h.x, y: h.y } : null; }, // MOT-3-R8
       seed: () => { const s = this.gameScene.snapshot(); return s ? deathSeed(s.score, s.level, s.timeMs) : 0; },
-      makeCard: () => this.makeDeathCard(), later: (ms, fn) => this.time.delayedCall(ms, fn), onDone: () => this.leave() });
+      makeCard: () => this.makeDeathCard(), later: (ms, fn) => this.time.delayedCall(ms, fn), onDone: exit => this.leave(exit) });
     this.count = new CountdownOverlay(this);
     this.pause = new PauseOverlay(this, {
       onResume: () => { this.applySettings(); this.gameScene.apply(flowResume(this.gameScene.flow, this.balance)); },
@@ -108,7 +115,7 @@ export class HudScene extends Phaser.Scene {
       this.gameScene.events.off('run-over', over); this.gameScene.events.off('toggle-sound', toggle);
       this.game.events.off(SETTINGS_CLOSED, reread);
       keys?.off('keydown', onKey); window.removeEventListener('blur', pause); document.removeEventListener('visibilitychange', hidden);
-      this.overTimer?.remove(); this.goTimer?.remove(); this.juice.destroy(); this.banners.hide(); this.bridge?.overlays.hideAll();
+      this.overTimer?.remove(); this.goTimer?.remove(); this.juice.destroy(); this.banners.hide(); this.clearDeathHero(); this.bridge?.overlays.hideAll();
     });
     this.refresh(); this.showRunStart();
     enter(this, [], {}); // MOT-2-R11 camera fade-in, same as Game; also re-arms goTo on this reused scene instance
@@ -135,29 +142,72 @@ export class HudScene extends Phaser.Scene {
     return s !== null && s !== undefined;
   }
 
-  private makeDeathCard(): { show(line: string): void; armSkip(onSkip: () => void): void; destroy(): void } {
+  /** ANIM-SNAKE-R13 centered Rigby2D dead clip under the DeathCard: Phaser dim + unzoomed rig aligned to the DOM hero slot. */
+  private showDeathHero(readRect: () => StageRect): void {
+    this.clearDeathHero();
+    const cfg = this.balance.ui.snakeRig;
+    const cam = this.cameras.main;
+    try {
+      this.deathDim = this.add.rectangle(0, 0, cam.width, cam.height, cfg.deathDimColor, cfg.deathDimAlpha)
+        .setOrigin(0).setScrollFactor(0).setDepth(DEATH_HERO_DEPTH);
+      this.deathRig = SnakeRig.createOverlay(this, cfg);
+      (this.deathRig.rig as unknown as { setDepth?(d: number): unknown }).setDepth?.(DEATH_HERO_DEPTH + 1);
+      this.deathRig.setVisible(false);
+      this.deathRig.play('dead');
+    } catch {
+      this.clearDeathHero();
+      return;
+    }
+    this.deathSlot = readRect;
+    this.syncDeathHero(0, 0);
+    this.events.on(Phaser.Scenes.Events.UPDATE, this.syncDeathHero, this);
+  }
+
+  private syncDeathHero(_time: number, delta: number): void {
+    if (!this.deathRig || !this.deathSlot) return;
+    const cam = this.cameras.main;
+    const dt = Number.isFinite(delta) ? Math.min(Math.max(0, delta), this.balance.flow.maxFrameDeltaMs) : 0;
+    const place = metaHeroPlacement(this.deathSlot(), this.game.canvas?.getBoundingClientRect?.(), cam.width, cam.height, this.balance.ui.snakeRig);
+    if (!place.visible) { this.deathRig.setVisible(false); return; }
+    this.deathRig.setVisible(true);
+    this.deathRig.updateOverlay(dt, place.x, place.feetY, place.scale);
+  }
+
+  private clearDeathHero(): void {
+    this.events.off(Phaser.Scenes.Events.UPDATE, this.syncDeathHero, this);
+    this.deathRig?.destroy(); this.deathRig = null;
+    this.deathDim?.destroy(); this.deathDim = null;
+    this.deathSlot = null;
+  }
+
+  private makeDeathCard(): DeathCardView {
     if (!this.bridge) return new DeathCard(this, this.balance, reduceMotion());
     const bridge = this.bridge;
-    const lockMs = this.balance.juice.death.skipLockMs;
-    let skipFn: (() => void) | null = null;
-    let pendingSkip = false;
+    const { skipLockMs: lockMs, continueMs } = this.balance.juice.death;
+    const scene = this;
+    let skipFn: ((exit?: DeathExit) => void) | null = null;
+    let pending: DeathExit | null = null;
     return {
-      show(line: string): void {
-        bridge.overlays.deathCard({ text: line }, lockMs, () => {
-          if (skipFn) skipFn();
-          else pendingSkip = true;
-        });
+      show(): void { // GAMEOVER-R1..R5: the humorous death line is no longer shown
+        const skin = activeSkin();
+        const live = shouldUseSnakeRig({ isWebGL: SnakeRig.isWebGL(scene), reduced: reduceMotion(), skin, rigLoaded: SnakeRig.isLoaded(scene) });
+        bridge.overlays.deathCard({ lockMs, continueMs, onChoice: c => {
+          if (skipFn) skipFn(c);
+          else pending = c;
+        } }, { skin, live, onSlot: live ? readRect => scene.showDeathHero(readRect) : undefined });
       },
-      armSkip(onSkip: () => void): void {
+      armSkip(onSkip: (exit?: DeathExit) => void): void {
         skipFn = onSkip;
-        if (pendingSkip) {
-          pendingSkip = false;
-          onSkip();
+        if (pending) {
+          const c = pending;
+          pending = null;
+          onSkip(c);
         }
       },
       destroy(): void {
         skipFn = null;
-        pendingSkip = false;
+        pending = null;
+        scene.clearDeathHero();
         bridge.overlays.hideAll();
       },
     };
@@ -301,9 +351,11 @@ export class HudScene extends Phaser.Scene {
     else this.count.hide();
     this.juice.runOver(s.outcome?.won ?? false); // P3a-R7 the death sequence was started by the `died` event; a win waits the same total
   }
-  private leave(): void {
+  private leave(exit: DeathExit = 'results'): void {
     if (this.leaving) return;
-    this.leaving = true; goTo(this, 'Results', undefined, 'quit', { before: () => this.scene.stop('Game') }); // MOT-2-R12
+    // GAMEOVER-R5 quick restart goes through Results with `again`, which restarts at once via the proven playAgain path.
+    const data = exit === 'again' ? { again: true } : undefined;
+    this.leaving = true; goTo(this, 'Results', data, 'quit', { before: () => this.scene.stop('Game') }); // MOT-2-R12
   }
   private toResults(delayMs: number): void {
     if (this.leaving) return;

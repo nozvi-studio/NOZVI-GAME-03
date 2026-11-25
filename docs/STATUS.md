@@ -1,8 +1,9 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-25 **Milestone:** Rigby2D snake hero. **Branch stack:** `version/v0.3` <- `feat/d4-art-direction-reskin` (13 commits, unmerged) <- `feat/snake-rigby-head` (`9843631`, ANIM-SNAKE-R1..R7, committed) <- `feat/snake-rigby-meta` (same tip + uncommitted ANIM-SNAKE-R8..R12: 20 files + 2 new tests). **Version branches:** `version/v0.3` (P3/P4a), `version/v0.2` (P2 exit).
+**Updated:** 2026-11-25 **Milestone:** Rigby2D snake hero. **Branch stack:** `version/v0.3` <- `feat/d4-art-direction-reskin` (13 commits, unmerged) <- `feat/snake-rigby-head` (`9843631`, ANIM-SNAKE-R1..R7, committed) <- `feat/snake-rigby-meta` (`c5c2208`, ANIM-SNAKE-R8..R12) <- `feat/snake-rigby-death` (ANIM-SNAKE-R13). **Version branches:** `version/v0.3` (P3/P4a), `version/v0.2` (P2 exit).
 
 ## Now (in progress)
+- [x] **Dead hero on DeathCard (`feat/snake-rigby-death`, from `feat/snake-rigby-meta`):** Rigby2D `dead` clip centered above the Run Over card, static portrait fallback (`ANIM-SNAKE-R13`). Unit tests + typecheck pass; visual Chrome QA pending (`npm install`).
 - [x] **Rigby2D snake head in gameplay (`feat/snake-rigby-head`, committed `9843631`):** animated head idle/eat/dead with static fallback (ANIM-SNAKE-R1..R7). Not merged into `feat/d4-art-direction-reskin` yet; `feat/snake-rigby-meta` builds on it.
 - [x] **Rigby2D Snake Hero on DOM Meta Screens (`feat/snake-rigby-meta`, uncommitted):**
   - Added unzoomed `heroCam` overlay in `MetaBgScene` reusing `SnakeRig.createOverlay()` / `snakeRigModel` (`metaHeroPlacement`, `balance.ui.snakeRig.metaHeadFrac`/`metaFeetFrac`) aligned to DOM hero rects (`Home`, `Characters`, `Results` new best, `Loadout`) for the `snake` skin (`idle`, `poke`, `celebrate`, `denied`), driven via `MetaHeroPort` in `uiBridge`/`bridge`/`phaserPort` with zero Phaser imports in `src/game/dom/`.
@@ -33,5 +34,7 @@
 - `git checkout` / `git commit` / `npm install` require `BypassSandbox: true` on Windows due to `.git/` lock & npm cache permissions.
 
 ## Last session summary
+- 2026-11-25 (b): Game Over overlay GAMEOVER-R1..R5 (title + dark dim + centered hero + side-by-side "Play again" (mango-orange, quick restart) / "Continue" (ad placeholder, 5 s countdown -> "Result"); no auto-advance). Committed with ANIM-SNAKE-R8..R13 on `feat/snake-rigby-meta`, merged --no-ff into `feat/snake-rigby-head`. Full suite: only `fullTable` timed out (10 s) under load; passes alone. Next: 2 cat animations on `feat/snake-rigby-head` stack.
+- 2026-11-25 (2): committed ANIM-SNAKE-R8..R12 (`c5c2208`) on `feat/snake-rigby-meta`; branched `feat/snake-rigby-death` and implemented ANIM-SNAKE-R13.
 - 2026-11-25: Status review only (no code). Confirmed branch stack above; `node_modules/.bin` still missing (owner `npm install` needed); GitNexus index refreshed. Untracked `docs/design/mystic/challenge/` is not yet documented.
 - 2026-11-24: Implemented Rigby2D snake head on DOM meta screens (`ANIM-SNAKE-R8..R12`) on `feat/snake-rigby-meta` (uncommitted): extended `snakeRigModel`/`SnakeRig` with `metaHeroPlacement` + `createOverlay`/`updateOverlay`, added unzoomed `heroCam` overlay in `MetaBgScene`, wired `MetaHeroPort` through `uiBridge`/`bridge`/`phaserPort`/`uiHost`/`main`, bound `Home`/`Characters`/`Results`/`Loadout`, updated `CODEMAP`/`CHANGELOG`/`DECISIONS`, and verified `tsc --noEmit` + full Vitest suite (2035 passed). `vite build` and headless Chrome QA are blocked on missing `node_modules/.bin` and `@rolldown/binding-win32-x64-msvc/package.json` (needs owner `npm install`).

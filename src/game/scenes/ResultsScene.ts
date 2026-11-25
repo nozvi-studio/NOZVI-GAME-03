@@ -6,10 +6,11 @@ import { bridgeOf } from './phaserPort';
 export class ResultsScene extends Phaser.Scene {
   constructor() { super('Results'); }
 
-  create(): void {
+  create(data?: { again?: boolean }): void {
     if (this.cameras?.main) enter(this, [], {});
     const bridge = bridgeOf(this);
     if (!bridge) return;
+    if (data?.again) { bridge.playAgain(); return; } // GAMEOVER-R5 quick restart from the Game Over overlay
     const token = bridge.open('results');
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => { bridge.close(token); });
   }

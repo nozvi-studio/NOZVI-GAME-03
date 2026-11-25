@@ -6,7 +6,7 @@ const b = loadBalance(), j = b.juice;
 function make(over: Partial<JuiceDeps> = {}, reduced = false) {
   const timers: { ms: number; at: number; fn: () => void; removed: boolean }[] = [];
   let now = 0; // cumulative clock: later(ms) fires at now + ms, like Phaser's time.delayedCall
-  const log = { play: [] as string[], buzz: [] as unknown[], board: [] as string[], screen: [] as string[], card: [] as string[], done: 0, skip: null as null | (() => void) };
+  const log = { play: [] as string[], buzz: [] as unknown[], board: [] as string[], screen: [] as string[], card: [] as string[], done: 0, skip: null as null | ((exit?: 'again' | 'results') => void) };
   const deps: JuiceDeps = {
     balance: b, synth: { play: n => { log.play.push(n); }, buzz: p => { log.buzz.push(p); } },
     board: { playBoardFx: l => log.board.push(...l.map(v => v.kind)) }, screen: { play: v => { log.screen.push(v.kind); } },
@@ -42,12 +42,12 @@ describe('P3a player', () => {
     const m = make(); m.p.handleBatch([{ type: 'levelUp', level: 3, biome: 0, biomeChanged: false } as never, { type: 'checkpointUnlocked', level: 3 }]);
     expect(m.log.buzz).toEqual([j.haptics.checkpointMs]); expect(m.log.play).toEqual(['level', 'checkpoint']);
   });
-  it('P3a-R7 death: card at cardInMs, Results at totalMs, within 1.5 s', () => {
+  it('P3a-R7 death: card at cardInMs, then waits for a tap (no auto-advance to Results)', () => {
     const m = make(); m.p.handle({ type: 'died', cause: 'fence', x: 1, y: 1 });
     expect(m.log.play).toEqual(['die']); expect(m.log.board).toContain('shake'); expect(m.log.screen).toEqual(['deathFlash']);
-    expect(m.timers.map(t => t.ms).sort((a, c) => a - c)).toEqual([j.death.cardInMs, j.death.totalMs]);
-    m.run(j.death.cardInMs); expect(m.log.card.length).toBe(1); expect(m.log.card[0]).toMatch(/\S/);
-    m.run(j.death.totalMs); expect(m.log.done).toBe(1); expect(j.death.totalMs).toBeLessThanOrEqual(1500);
+    expect(m.timers.map(t => t.ms)).toEqual([j.death.cardInMs]);
+    m.run(j.death.cardInMs); expect(m.log.card.length).toBe(1);
+    m.advance(60_000); expect(m.log.done).toBe(0);
   });
   it('P3a-R7 skip arms exactly at cardInMs + skipLockMs (normal and reduced)', () => {
     for (const reduced of [false, true]) {
@@ -68,9 +68,17 @@ describe('P3a player', () => {
     m.log.skip?.(); m.log.skip?.(); expect(m.log.done).toBe(1);
     m.run(j.death.totalMs); expect(m.log.done).toBe(1);
   });
-  it('P3a-R8 reduced motion: no shake, no card timing change beyond the reduced total', () => {
+  it('GAMEOVER-R5 the chosen exit (again / results) reaches onDone once', () => {
+    for (const exit of ['again', 'results'] as const) {
+      const exits: string[] = [];
+      const m = make({ onDone: e => { exits.push(e); } }); m.p.handle({ type: 'died', cause: 'wall', x: 0, y: 0 });
+      m.advance(j.death.cardInMs + j.death.skipLockMs);
+      m.log.skip?.(exit); m.log.skip?.(exit); expect(exits).toEqual([exit]);
+    }
+  });
+  it('P3a-R8 reduced motion: no shake, card still waits for a tap', () => {
     const m = make({}, true); m.p.handle({ type: 'died', cause: 'wall', x: 0, y: 0 });
-    expect(m.log.board).not.toContain('shake'); expect(m.timers.map(t => t.ms)).toContain(j.reduced.deathTotalMs);
+    expect(m.log.board).not.toContain('shake'); m.advance(60_000); expect(m.log.done).toBe(0);
   });
   it('a win (no death) goes to Results after the total time without a card', () => {
     const m = make(); m.p.runOver(true); expect(m.timers.map(t => t.ms)).toEqual([j.death.totalMs]);
