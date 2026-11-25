@@ -90,6 +90,14 @@ body.d4-mystic-band {
   opacity: 0;
 }
 
+/* ANIM-CAT-R7: the Phaser canvas sits below every DOM layer, so the Characters halo would paint a pale wash
+ * over the live rig (a webp portrait sits above it instead). Hide the halo while a rig is live. */
+#ui-root.d4-live-bg.d4-live-snake-hero .d4-chars-halo,
+#ui-root.d4-live-bg.d4-live-ginger-hero .d4-chars-halo,
+#ui-root.d4-live-bg.d4-live-tuxedo-hero .d4-chars-halo {
+  opacity: 0;
+}
+
 .d4-mystic-bg {
   position: absolute;
   inset: 0;
