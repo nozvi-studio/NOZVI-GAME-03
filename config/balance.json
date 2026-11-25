@@ -97,6 +97,7 @@
     , "snakeRig": {
       "designHeight": 200,
       "metaHeadFrac": 0.84, "metaFeetFrac": 0.92,
+      "deathDimColor": 1317155, "deathDimAlpha": 0.35,
       "idleMs": 2000, "eatMs": 740, "deadMs": 1350, "pokeMs": 500, "celebrateMs": 670, "deniedMs": 430,
       "eatProp": {
         "mouthOffsetY": 54, "mangoOffsetY": 28,

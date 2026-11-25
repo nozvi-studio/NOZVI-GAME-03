@@ -71,7 +71,7 @@ export function createUiBridge(deps: UiBridgeDeps): UiBridge {
       if (!layer) return;
       renderCountdown(layer, n, card);
     },
-    deathCard(line, lockMs, onContinue): void {
+    deathCard(line, lockMs, onContinue, hero): void {
       deathToken = deps.host.mount({
         id: 'death',
         kind: 'modal',
@@ -81,7 +81,7 @@ export function createUiBridge(deps: UiBridgeDeps): UiBridge {
             deathToken = null;
           }
           onContinue();
-        }, deps.clock),
+        }, deps.clock, hero),
       });
     },
     hideAll(): void {

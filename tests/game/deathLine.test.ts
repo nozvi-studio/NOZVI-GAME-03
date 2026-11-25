@@ -24,5 +24,5 @@ describe('P3a-R10 death lines', () => {
     expect(deathSeed(12, 4, 5000)).toBe(deathSeed(12, 4, 5000));
     expect(deathSeed(12, 4, 5000)).not.toBe(deathSeed(13, 4, 5000));
   });
-  it('the card title is keyed text', () => { expect(t('death.title')).toBe('RUN OVER'); });
+  it('the card title is keyed text', () => { expect(t('death.title')).toBe('GAME OVER'); });
 });

@@ -83,7 +83,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'skill.reject.noTarget': 'Too short to snip',
   'tip.orb.first': 'Energy orb! Fuel for skills',
   'death.snipWall': CAUSE_TEXT.snipWall,
-  'death.title': 'RUN OVER',
+  'death.title': 'GAME OVER',
   'banner.new.coconut': 'Rolling coconuts! Watch the lanes', // OQ-B6 provisional
   'banner.new.gate': 'Gates open and close', // OQ-B6 provisional
   'banner.new.spike': 'Spikes pop up on the beat', // OQ-B6 provisional

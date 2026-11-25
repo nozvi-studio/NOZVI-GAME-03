@@ -88,7 +88,8 @@ describe('D4-P4-R4 DOM overlays & overlays.css', () => {
 
     const cleanup = renderDeathCard(root, { text: 'Bonked the wall!' }, 300, onContinue, clock);
     const scrimEl = root.querySelector<HTMLElement>('[data-qa="death-scrim"]')!;
-    expect(root.querySelector('[data-qa="death-line"]')?.textContent).toBe('Bonked the wall!');
+    expect(root.querySelector('[data-qa="death-line"]')).toBeNull();
+    expect(root.querySelector('[data-qa="death-title"]')?.textContent).toBe('GAME OVER');
     expect(scrimEl.classList.contains('is-locked')).toBe(true);
 
     // Early click and key are ignored

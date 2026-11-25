@@ -112,6 +112,8 @@ export interface Balance {
     snakeRig: {
       designHeight: number;
       metaHeadFrac: number; metaFeetFrac: number;
+      /** ANIM-SNAKE-R13 Phaser dim drawn under the live DeathCard hero (replaces the DOM frost). */
+      deathDimColor: number; deathDimAlpha: number;
       idleMs: number; eatMs: number; deadMs: number; pokeMs: number; celebrateMs: number; deniedMs: number;
       eatProp: {
         mouthOffsetY: number; mangoOffsetY: number;
@@ -278,6 +280,7 @@ const SPEC: Spec = {
     snakeRig: {
       designHeight: 'num+',
       metaHeadFrac: 'prob', metaFeetFrac: 'prob',
+      deathDimColor: 'int0', deathDimAlpha: 'prob',
       idleMs: 'int+', eatMs: 'int+', deadMs: 'int+', pokeMs: 'int+', celebrateMs: 'int+', deniedMs: 'int+',
       eatProp: {
         mouthOffsetY: 'num0', mangoOffsetY: 'num0',

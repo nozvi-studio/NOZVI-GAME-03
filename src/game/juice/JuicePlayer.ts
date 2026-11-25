@@ -69,7 +69,7 @@ export class JuicePlayer {
       this.card = this.d.makeCard(); this.card.show(line);
       this.timers.push(this.d.later(tl.skipLockMs, () => this.card?.armSkip(() => this.finish())));
     }));
-    this.timers.push(this.d.later(tl.totalMs, () => this.finish()));
+    // Owner 2026-11-25: no auto-advance; the Game Over card waits for a tap.
   }
   private finish(): void {
     if (this.done) return;

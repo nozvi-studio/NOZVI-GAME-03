@@ -159,6 +159,35 @@
 /* DeathCard Overlay */
 .d4-death-scrim {
   cursor: pointer;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+/* ANIM-SNAKE-R13 centered dead hero above the card; the live rig is drawn by Phaser under a transparent scrim. */
+.d4-death-scrim.is-live-hero {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.d4-death-hero {
+  width: 160px;
+  height: 160px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.d4-death-hero-img {
+  max-width: 100%;
+  max-height: 100%;
+  filter: grayscale(0.35);
+}
+
+.d4-death-hero.is-live img {
+  opacity: 0;
 }
 
 .d4-death-scrim.is-locked {
