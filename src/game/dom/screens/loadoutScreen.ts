@@ -1,8 +1,10 @@
 // D4-P4-R3 Loadout DOM screen over loadoutView/loadoutEdit (Aqua Marsh Mystic 2x2 skill cards + orb slots). Pure: no Phaser.
 import type { SkillId } from '../../../core';
+import { activeSkin } from '../../art/skins';
 import { initEdit, tapCard, tapSlot, type LoadoutEditState } from '../../flow/loadoutEdit';
 import { loadoutView } from '../../flow/loadoutView';
 import { isReducedMotion, shakeDenied, staggerEnter } from '../animate';
+import { createHeroStage, type HeroStage } from '../heroStage';
 import { icon } from '../icons';
 import { mountMysticBackdrop } from '../mysticBackdrop';
 import { mysticButtonIcon, mysticPageTitleSvg, mysticPlayIcon } from '../mysticIcons';
@@ -45,7 +47,15 @@ export const loadoutScreen: ScreenRender = (root, ctx) => {
   const titleSr = el('span', 'd4-sr-only', { 'data-qa': 'loadout-title' });
   titleEl.innerHTML = mysticPageTitleSvg('LOADOUT');
   titleEl.appendChild(titleSr);
-  header.append(backBtn, titleEl, el('span', 'd4-loadout-spacer'));
+  // ANIM-SNAKE-R11 compact idle snake hero slot in Loadout header right slot when snake skin is active.
+  let hero: HeroStage | null = null;
+  if (activeSkin() === 'snake') {
+    const heroWrap = el('div', 'd4-loadout-hero-wrap');
+    hero = createHeroStage(heroWrap, { skin: 'snake', mode: 'portrait', interactive: false, clock });
+    header.append(backBtn, titleEl, heroWrap);
+  } else {
+    header.append(backBtn, titleEl, el('span', 'd4-loadout-spacer'));
+  }
 
   const slotsRow = el('div', 'd4-loadout-slots');
   const grid = el('div', 'd4-loadout-grid');
@@ -65,6 +75,10 @@ export const loadoutScreen: ScreenRender = (root, ctx) => {
   screen.append(header, slotsRow, grid, footer);
   const disposeBackdrop = mountMysticBackdrop(screen);
   root.appendChild(screen);
+  if (hero) {
+    const h = hero;
+    bridge.metaHero?.setSlot({ skin: 'snake', readRect: () => h.el.getBoundingClientRect() });
+  }
 
   const render = (): void => {
     const view = loadoutView(edit, balance, { level: startLevel, carried: session.homeModel().carriedEnergy });
@@ -155,6 +169,10 @@ export const loadoutScreen: ScreenRender = (root, ctx) => {
 
   return () => {
     cancelStagger();
+    if (hero) {
+      bridge.metaHero?.setSlot(null);
+      hero.destroy();
+    }
     disposeBackdrop();
     screen.remove();
   };

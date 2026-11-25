@@ -22,6 +22,7 @@ export class CapyHead {
   }
 
   setAlpha(a: number): void { this.image.setAlpha(a); } // MEC-019-R7 invulnerable blink; nothing else sets this image's alpha
+  setVisible(v: boolean): void { this.image.setVisible(v); } // ANIM-SNAKE-R7 hidden when Rigby2D snake head is active
 
   eat(now: number): void { this.state = capyEat(this.state, now); }
   die(now: number): void { this.state = capyDie(this.state, now); }

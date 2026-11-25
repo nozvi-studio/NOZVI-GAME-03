@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import type { Balance, SimEvent, SimSnapshot, Step } from '../../core';
 import type { Session } from '../../session';
 import { CapyHead } from '../art/capyHead';
+import { SnakeRig } from '../art/snakeRig';
+import { shouldUseSnakeRig } from '../art/snakeRigModel';
 import { activeSkin, SKIN_EFFECTS } from '../art/skins';
 import { BOARD, cellPx } from '../layout';
 import { clockStep, createClock } from '../flow/clock';
@@ -59,9 +61,16 @@ export class GameScene extends Phaser.Scene {
   private skinFx!: SkinFxState;
   private steer!: SteerFx; private readonly headPt = { x: 0, y: 0 }; private readonly tailPt = { x: 0, y: 0 };
   private capy!: CapyHead;
+  private snakeRig: SnakeRig | null = null;
+  private useSnakeRig = false;
   private bg?: Phaser.GameObjects.Image;
 
   constructor() { super('Game'); }
+
+  // ANIM-SNAKE-R1 idempotent preload guard if GameScene starts without BootScene preload.
+  preload(): void {
+    SnakeRig.preload(this);
+  }
 
   // GDD-13 scene owns presentation, frame time and input; core owns all rules.
   create(): void {
@@ -96,6 +105,8 @@ export class GameScene extends Phaser.Scene {
     const onSteer = (d: { dx: Step; dy: Step }): void => this.steer.chevron(d.dx, d.dy, this.time.now); // D3-R25
     this.events.on('steer', onSteer);
     this.capy = new CapyHead(this, this.board, this.layers.snake, this.balance.ui.capy, cellPx(this.balance), this.reduced, this.time.now);
+    this.snakeRig = null; this.useSnakeRig = false;
+    this.syncHeadMode();
     this.flow = createFlow();
     // P1 scene flow: the session run already exists (Home/Loadout/Results); Game opens on the P0 countdown.
     this.apply(flowStart(this.flow, this.balance));
@@ -108,6 +119,7 @@ export class GameScene extends Phaser.Scene {
     this.game.events.on(Phaser.Core.Events.HIDDEN, hidden);
     const recolor = (): void => {
       this.palette = currentPalette(); this.reduced = reduceMotion(); this.effects.setReduced(this.reduced); this.steer.setReduced(this.reduced);
+      this.syncHeadMode();
       this.skinFx = createSkinFx(this.balance.juice.skinFx, SKIN_EFFECTS[activeSkin()], this.reduced); // MEC-011-R24
       this.lookStale = true; // texture rebuilt on the next draw
       drawBoardFrame(this.border.clear(), this.look, BOARD.size, cellPx(this.balance));
@@ -121,6 +133,7 @@ export class GameScene extends Phaser.Scene {
       this.events.off('steer', onSteer);
       this.effects.reset();
       this.beats.clear();
+      this.snakeRig?.destroy(); this.snakeRig = null; this.useSnakeRig = false;
       this.board.clearMask(true);
     });
     enter(this, [], {}); // MOT-2-R11 camera fade-in; the P0 countdown is untouched
@@ -133,7 +146,9 @@ export class GameScene extends Phaser.Scene {
     this.effects.reset();
     this.skinFx = createSkinFx(this.balance.juice.skinFx, SKIN_EFFECTS[activeSkin()], this.reduced);
     this.steer.reset();
+    this.syncHeadMode();
     this.capy.reset(this.time.now);
+    this.snakeRig?.reset();
     this.clock = createClock();
     this.tweens.killTweensOf(this.board);
     this.board.setPosition(BOARD.x, BOARD.y);
@@ -192,20 +207,20 @@ export class GameScene extends Phaser.Scene {
       this.events.emit('run-over', snapshot);
     }
     this.effects.update(dt);
-    this.draw(snapshot, time);
+    this.draw(snapshot, time, dt);
   }
 
   private handleEvents(events: SimEvent[], snapshot: SimSnapshot, time: number): void {
     for (const event of events) {
       switch (event.type) {
         case 'ate': {
-          this.capy.eat(this.time.now); this.mangoBornAt = this.time.now; this.effects.clearSparkles();
+          this.capy.eat(this.time.now); this.snakeRig?.play('eat'); this.mangoBornAt = this.time.now; this.effects.clearSparkles();
           const h = snapshot.snake[0];
           if (h) skinFxEat(this.skinFx, time, { x: h.x + 0.5, y: h.y + 0.5 }, Math.random); // MEC-011-R22 presentation RNG only
           break;
         }
         case 'rotted': this.mangoBornAt = this.time.now; this.effects.clearSparkles(); break;
-        case 'died': this.capy.die(this.time.now); break;
+        case 'died': this.capy.die(this.time.now); this.snakeRig?.play('dead'); break;
       }
     }
   }
@@ -252,7 +267,27 @@ export class GameScene extends Phaser.Scene {
     this.bg = screenBackground(this, biome, true);
   }
 
-  private draw(snapshot: SimSnapshot, time: number): void {
+  // ANIM-SNAKE-R7 switch between Rigby2D snake head and CapyHead fallback based on WebGL, Reduce Motion, skin, and asset readiness.
+  private syncHeadMode(): void {
+    const wantRig = shouldUseSnakeRig({
+      isWebGL: SnakeRig.isWebGL(this),
+      reduced: this.reduced,
+      skin: activeSkin(),
+      rigLoaded: SnakeRig.isLoaded(this),
+    });
+    if (wantRig && !this.snakeRig) {
+      try {
+        this.snakeRig = SnakeRig.create(this, this.board, this.layers.snake, this.balance.ui.snakeRig, this.balance.ui.capy.headCellScale);
+      } catch {
+        this.snakeRig = null;
+      }
+    }
+    this.useSnakeRig = wantRig && this.snakeRig !== null;
+    this.snakeRig?.setVisible(this.useSnakeRig);
+    this.capy.setVisible(!this.useSnakeRig);
+  }
+
+  private draw(snapshot: SimSnapshot, time: number, dtMs: number): void {
     this.boardClip.setPosition(this.board.x, this.board.y);
     this.border.setPosition(this.board.x, this.board.y);
     if (this.lookStale || snapshot.biome !== this.look.biome) {
@@ -280,8 +315,14 @@ export class GameScene extends Phaser.Scene {
     drawSnake(this.layers.snake, snapshot, cell, this.look, Math.max(this.effects.gulp, this.effects.pop), this.balance.ui.capy.headCellScale, false,
       this.effects.turnBulge * (this.balance.juice.events.turnBodyBulge - 1));
     const blink = invulnAlpha(snapshot.invuln, time, this.reduced, this.balance.ui); // MEC-019-R7
-    this.layers.snake.setAlpha(blink); this.capy.setAlpha(blink);
-    this.capy.update(snapshot, time, cell, this.effects.turnDeg);
+    this.layers.snake.setAlpha(blink);
+    if (this.useSnakeRig && this.snakeRig) {
+      this.snakeRig.setAlpha(blink);
+      this.snakeRig.update(snapshot, dtMs, cell, this.effects.turnDeg, this.flow.status === 'paused');
+    } else {
+      this.capy.setAlpha(blink);
+      this.capy.update(snapshot, time, cell, this.effects.turnDeg);
+    }
     drawSkillOverlay(this.layers.overlay, snapshot, cell, BOARD.size);
     drawIceArrow(this.layers.overlay, snapshot, cell, this.look);
     this.effects.draw(this.layers.effects, p);

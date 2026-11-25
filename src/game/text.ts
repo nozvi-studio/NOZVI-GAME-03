@@ -83,7 +83,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'skill.reject.noTarget': 'Too short to snip',
   'tip.orb.first': 'Energy orb! Fuel for skills',
   'death.snipWall': CAUSE_TEXT.snipWall,
-  'death.title': 'RUN OVER',
+  'death.title': 'GAME OVER',
   'banner.new.coconut': 'Rolling coconuts! Watch the lanes', // OQ-B6 provisional
   'banner.new.gate': 'Gates open and close', // OQ-B6 provisional
   'banner.new.spike': 'Spikes pop up on the beat', // OQ-B6 provisional
@@ -142,6 +142,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'results.d4.victory': 'VICTORY!', 'results.d4.newBest': 'NEW BEST!', 'results.d4.gameOver': 'GAME OVER',
   'results.d4.newRecord': 'New record!', 'results.skills': 'Skills',
   'countdown.go': 'GO!', 'death.tapContinue': 'Tap to continue',
+  'death.again': 'Play again', 'death.continue': 'Continue', 'death.results': 'Result', // GAMEOVER-R3..R5
   'logo.mango': 'MANGO', 'logo.snake': 'SNAKE', 'home.prev': '◀', 'home.next': '▶',
   'boot.loading': 'Loading… {n}%',
   // P3b-2 HUD and overlay strings (provisional, owner-question batch)

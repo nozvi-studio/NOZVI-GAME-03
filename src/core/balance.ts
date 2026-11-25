@@ -108,6 +108,21 @@ export interface Balance {
       deadDroopMs: number; deadRotDeg: number; deadDropPx: number; headCellScale: number;
       tongueMs: number; tongueMinGapMs: number; tongueMaxGapMs: number };
     hud: { rejectShakeMs: number; rejectShakeAmpPx: number; tipFactor: number; bannerQueueMax: number };
+    /** ANIM-SNAKE-R1 Rigby2D snake-head timings and eat-prop sync numbers. */
+    snakeRig: {
+      designHeight: number;
+      metaHeadFrac: number; metaFeetFrac: number;
+      /** ANIM-SNAKE-R13 Phaser dim drawn under the live DeathCard hero (replaces the DOM frost). */
+      deathDimColor: number; deathDimAlpha: number;
+      idleMs: number; eatMs: number; deadMs: number; pokeMs: number; celebrateMs: number; deniedMs: number;
+      eatProp: {
+        mouthOffsetY: number; mangoOffsetY: number;
+        mangoPullStartMs: number; mangoFadeStartMs: number; mangoEndMs: number;
+        mangoWidthFrac: number; mangoShrinkFrac: number; mangoRotStartRad: number; mangoRotSweepRad: number;
+        burstStartMs: number; burstEndMs: number;
+        burstWidthFrac: number; burstScaleMin: number; burstScaleGain: number; burstPeakFrac: number;
+      };
+    };
   };
   juice: {
     bursts: Record<'eat' | 'golden' | 'rot' | 'dust' | 'death', { count: number; speed: number; lifeMs: number }>;
@@ -118,7 +133,7 @@ export interface Balance {
     biome: { sweepAlpha: number; sweepMs: number };
     checkpoint: { flagMs: number };
     banner: { inMs: number; slidePx: number; scaleFrom: number };
-    death: { shakePx: number; shakeMs: number; flashAlpha: number; flashMs: number; cardInMs: number; totalMs: number; skipLockMs: number };
+    death: { shakePx: number; shakeMs: number; flashAlpha: number; flashMs: number; cardInMs: number; totalMs: number; skipLockMs: number; continueMs: number };
     haptics: { eatMs: number; orbMs: number; castMs: number; level: number[]; biomeMs: number; checkpointMs: number; deathMs: number };
     reduced: { flashAlphaMax: number; softMs: number; deathTotalMs: number };
     perf: { maxParticles: number; maxFloats: number; maxSparks: number };
@@ -145,7 +160,7 @@ const ROCK_KEYS: readonly RockShapeKey[] = ['single', 'lineH', 'lineV', 'corner'
 const FENCE_SHAPE_KEYS: readonly FenceShapeKey[] = ['L', 'T', 'Z', 'F', 'U', 'plus'];
 const FENCE_KINDS: readonly FenceKind[] = ['line', ...FENCE_SHAPE_KEYS];
 
-type Rule = 'int+' | 'int0' | 'num+' | 'prob' | 'pair' | 'pairs' | 'pairs0' | 'ints' | 'quad' | 'bool' | 'num0';
+type Rule = 'int+' | 'int0' | 'num+' | 'prob' | 'pair' | 'pairs' | 'pairs0' | 'ints' | 'quad' | 'bool' | 'num0' | 'num';
 type Check = Rule | Spec | ((v: unknown, path: string) => void);
 interface Spec { [key: string]: Check }
 
@@ -156,6 +171,7 @@ const isPair = (v: unknown): boolean => Array.isArray(v) && v.length === 2 && v.
 
 const RULES: Record<Rule, [(v: unknown) => boolean, string]> = {
   bool: [v => typeof v === 'boolean', 'must be a boolean'],
+  num: [v => typeof v === 'number' && Number.isFinite(v), 'must be a finite number'],
   num0: [v => typeof v === 'number' && Number.isFinite(v) && v >= 0, 'must be a non-negative finite number'],
   'int+': [v => isInt(v) && v > 0, 'must be a positive integer'],
   'int0': [v => isInt(v) && v >= 0, 'must be a non-negative integer'],
@@ -261,6 +277,19 @@ const SPEC: Spec = {
       deadDroopMs: 'int+', deadRotDeg: 'num0', deadDropPx: 'num0', headCellScale: 'num+',
       tongueMs: 'int+', tongueMinGapMs: 'int+', tongueMaxGapMs: 'int+' },
     hud: { rejectShakeMs: 'int+', rejectShakeAmpPx: 'num+', tipFactor: 'int+', bannerQueueMax: 'int+' },
+    snakeRig: {
+      designHeight: 'num+',
+      metaHeadFrac: 'prob', metaFeetFrac: 'prob',
+      deathDimColor: 'int0', deathDimAlpha: 'prob',
+      idleMs: 'int+', eatMs: 'int+', deadMs: 'int+', pokeMs: 'int+', celebrateMs: 'int+', deniedMs: 'int+',
+      eatProp: {
+        mouthOffsetY: 'num0', mangoOffsetY: 'num0',
+        mangoPullStartMs: 'int0', mangoFadeStartMs: 'int0', mangoEndMs: 'int+',
+        mangoWidthFrac: 'prob', mangoShrinkFrac: 'prob', mangoRotStartRad: 'num', mangoRotSweepRad: 'num',
+        burstStartMs: 'int0', burstEndMs: 'int+',
+        burstWidthFrac: 'prob', burstScaleMin: 'num+', burstScaleGain: 'num0', burstPeakFrac: 'prob',
+      },
+    },
   },
   juice: {
     bursts: { eat: burst, golden: burst, rot: burst, dust: burst, death: burst },
@@ -269,7 +298,7 @@ const SPEC: Spec = {
     skill: { flashAlpha: 'prob', flashMs: 'int+', iconPopScale: 'num+', iconRingScale: 'num+', iconPopMs: 'int+', tintAlpha: 'prob', tintFadeMs: 'int+' },
     level: { glowAlpha: 'prob', glowMs: 'int+', popMs: 'int+' }, biome: { sweepAlpha: 'prob', sweepMs: 'int+' },
     checkpoint: { flagMs: 'int+' }, banner: { inMs: 'int+', slidePx: 'num0', scaleFrom: 'prob' },
-    death: { shakePx: 'num0', shakeMs: 'int0', flashAlpha: 'prob', flashMs: 'int+', cardInMs: 'int0', totalMs: 'int+', skipLockMs: 'int0' },
+    death: { shakePx: 'num0', shakeMs: 'int0', flashAlpha: 'prob', flashMs: 'int+', cardInMs: 'int0', totalMs: 'int+', skipLockMs: 'int0', continueMs: 'int+' },
     haptics: { eatMs: 'int+', orbMs: 'int+', castMs: 'int+', level: 'ints', biomeMs: 'int+', checkpointMs: 'int+', deathMs: 'int+' },
     reduced: { flashAlphaMax: 'prob', softMs: 'int+', deathTotalMs: 'int+' },
     perf: { maxParticles: 'int+', maxFloats: 'int+', maxSparks: 'int+' },
@@ -415,6 +444,14 @@ export function parseBalance(json: unknown, capFamilies: readonly HazardFamily[]
   if (b.energy.orbBlinkMs >= b.energy.orbLifeMs) fail('energy.orbBlinkMs', 'must be < orbLifeMs');
   if (b.ui.capy.blinkMaxGapMs < b.ui.capy.blinkMinGapMs) fail('ui.capy.blinkMaxGapMs', 'must be >= blinkMinGapMs');
   if (b.ui.capy.tongueMaxGapMs < b.ui.capy.tongueMinGapMs) fail('ui.capy.tongueMaxGapMs', 'must be >= tongueMinGapMs');
+  // ANIM-SNAKE-R1 Rigby2D snake-head eat-prop window ordering.
+  const sr = b.ui.snakeRig, ep = sr.eatProp;
+  if (ep.mangoPullStartMs >= ep.mangoEndMs) fail('ui.snakeRig.eatProp.mangoPullStartMs', 'must be < mangoEndMs');
+  if (ep.mangoFadeStartMs >= ep.mangoEndMs) fail('ui.snakeRig.eatProp.mangoFadeStartMs', 'must be < mangoEndMs');
+  if (ep.mangoEndMs > sr.eatMs) fail('ui.snakeRig.eatProp.mangoEndMs', 'must be <= eatMs');
+  if (ep.burstStartMs >= ep.burstEndMs) fail('ui.snakeRig.eatProp.burstStartMs', 'must be < burstEndMs');
+  if (ep.burstEndMs > sr.eatMs) fail('ui.snakeRig.eatProp.burstEndMs', 'must be <= eatMs');
+  if (ep.burstPeakFrac <= 0 || ep.burstPeakFrac >= 1) fail('ui.snakeRig.eatProp.burstPeakFrac', 'must be in (0, 1)');
   // MOT-0 motion token cross-field rules (spec section 4).
   const mo = b.motion;
   if (mo.pressScale >= 1) fail('motion.pressScale', 'must be < 1');
