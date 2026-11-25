@@ -8,7 +8,7 @@ import { homeView } from '../flow/homeModel';
 import { flowPause, flowResume, flowTogglePause, type FlowEffect } from '../flow/runFlow';
 import { SETTINGS_CLOSED } from '../flow/settingsView';
 import { SnakeRig } from '../art/snakeRig';
-import { metaHeroPlacement, shouldUseSnakeRig } from '../art/snakeRigModel';
+import { isRiggedSkin, metaHeroPlacement, resolveSkinRigConfig, shouldUseSkinRig, type RiggedSkinId } from '../art/snakeRigModel';
 import { activeSkin } from '../art/skins';
 import { BannerLayer } from '../hud/BannerLayer';
 import { levelUpBanners, skillPills, skillTip } from '../hud/banners';
@@ -55,7 +55,7 @@ export class HudScene extends Phaser.Scene {
   private pad!: ReturnType<typeof createDpad>; private dpadOn = false; private touch = false;
   private heading = ''; private hint: HudHint = null; private cpCount = 0; private bestLevelAtStart = 0; private orbTipShown = false; private leaving = false; private juice!: JuicePlayer;
   private haptics = true; private startBanner: string[] = []; private shrunkTo: number | null = null; private overTimer?: Phaser.Time.TimerEvent; private goTimer?: Phaser.Time.TimerEvent;
-  private deathRig: SnakeRig | null = null; private deathDim: Phaser.GameObjects.Rectangle | null = null; private deathSlot: (() => StageRect) | null = null;
+  private deathRig: SnakeRig | null = null; private deathSkin: RiggedSkinId = 'snake'; private deathDim: Phaser.GameObjects.Rectangle | null = null; private deathSlot: (() => StageRect) | null = null;
   private debugKey: { c: Phaser.GameObjects.Container } | null = null; private debugNext: { c: Phaser.GameObjects.Container } | null = null;
 
   constructor() { super('Hud'); }
@@ -142,15 +142,15 @@ export class HudScene extends Phaser.Scene {
     return s !== null && s !== undefined;
   }
 
-  /** ANIM-SNAKE-R13 centered Rigby2D dead clip under the DeathCard: Phaser dim + unzoomed rig aligned to the DOM hero slot. */
-  private showDeathHero(readRect: () => StageRect): void {
+  /** ANIM-SNAKE-R13 / ANIM-CAT-R5 centered Rigby2D dead clip under the DeathCard: Phaser dim + unzoomed rig aligned to the DOM hero slot. */
+  private showDeathHero(readRect: () => StageRect, skin: RiggedSkinId): void {
     this.clearDeathHero();
-    const cfg = this.balance.ui.snakeRig;
+    const cfg = resolveSkinRigConfig(this.balance.ui.snakeRig, skin);
     const cam = this.cameras.main;
     try {
       this.deathDim = this.add.rectangle(0, 0, cam.width, cam.height, cfg.deathDimColor, cfg.deathDimAlpha)
         .setOrigin(0).setScrollFactor(0).setDepth(DEATH_HERO_DEPTH);
-      this.deathRig = SnakeRig.createOverlay(this, cfg);
+      this.deathRig = SnakeRig.createOverlay(this, cfg, skin);
       (this.deathRig.rig as unknown as { setDepth?(d: number): unknown }).setDepth?.(DEATH_HERO_DEPTH + 1);
       this.deathRig.setVisible(false);
       this.deathRig.play('dead');
@@ -158,6 +158,7 @@ export class HudScene extends Phaser.Scene {
       this.clearDeathHero();
       return;
     }
+    this.deathSkin = skin;
     this.deathSlot = readRect;
     this.syncDeathHero(0, 0);
     this.events.on(Phaser.Scenes.Events.UPDATE, this.syncDeathHero, this);
@@ -167,7 +168,8 @@ export class HudScene extends Phaser.Scene {
     if (!this.deathRig || !this.deathSlot) return;
     const cam = this.cameras.main;
     const dt = Number.isFinite(delta) ? Math.min(Math.max(0, delta), this.balance.flow.maxFrameDeltaMs) : 0;
-    const place = metaHeroPlacement(this.deathSlot(), this.game.canvas?.getBoundingClientRect?.(), cam.width, cam.height, this.balance.ui.snakeRig);
+    const cfg = resolveSkinRigConfig(this.balance.ui.snakeRig, this.deathSkin);
+    const place = metaHeroPlacement(this.deathSlot(), this.game.canvas?.getBoundingClientRect?.(), cam.width, cam.height, cfg);
     if (!place.visible) { this.deathRig.setVisible(false); return; }
     this.deathRig.setVisible(true);
     this.deathRig.updateOverlay(dt, place.x, place.feetY, place.scale);
@@ -190,11 +192,11 @@ export class HudScene extends Phaser.Scene {
     return {
       show(): void { // GAMEOVER-R1..R5: the humorous death line is no longer shown
         const skin = activeSkin();
-        const live = shouldUseSnakeRig({ isWebGL: SnakeRig.isWebGL(scene), reduced: reduceMotion(), skin, rigLoaded: SnakeRig.isLoaded(scene) });
+        const live = shouldUseSkinRig({ isWebGL: SnakeRig.isWebGL(scene), reduced: reduceMotion(), skin, rigLoaded: SnakeRig.isLoaded(scene, skin) });
         bridge.overlays.deathCard({ lockMs, continueMs, onChoice: c => {
           if (skipFn) skipFn(c);
           else pending = c;
-        } }, { skin, live, onSlot: live ? readRect => scene.showDeathHero(readRect) : undefined });
+        } }, { skin, live, onSlot: live && isRiggedSkin(skin) ? readRect => scene.showDeathHero(readRect, skin) : undefined });
       },
       armSkip(onSkip: (exit?: DeathExit) => void): void {
         skipFn = onSkip;

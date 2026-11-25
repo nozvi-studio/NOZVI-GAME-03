@@ -1,13 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import {
+  RIGGED_SKINS,
+  SKIN_RIG_REGISTRY,
   SNAKE_RIG_ANIMS,
   animDurationMs,
   createSnakeRigState,
   evalEatProps,
   headingRotationRad,
+  isRiggedSkin,
   playSnakeRig,
+  resolveSkinRigConfig,
   rigWorldPoint,
+  shouldUseSkinRig,
   shouldUseSnakeRig,
+  skinRigEntry,
   stepSnakeRig,
 } from '../../src/game/art/snakeRigModel';
 import { loadBalance } from '../support/balance';
@@ -164,12 +170,73 @@ describe('ANIM-SNAKE balance config and state machine', () => {
     }
   });
 
-  it('ANIM-SNAKE-R7 fallback activates Rigby2D only for snake skin on WebGL without Reduce Motion when loaded', () => {
+  it('ANIM-SNAKE-R7 fallback activates Rigby2D only for rigged skins on WebGL without Reduce Motion when loaded', () => {
     expect(shouldUseSnakeRig({ isWebGL: true, reduced: false, skin: 'snake', rigLoaded: true })).toBe(true);
     expect(shouldUseSnakeRig({ isWebGL: false, reduced: false, skin: 'snake', rigLoaded: true })).toBe(false);
     expect(shouldUseSnakeRig({ isWebGL: true, reduced: true, skin: 'snake', rigLoaded: true })).toBe(false);
     expect(shouldUseSnakeRig({ isWebGL: true, reduced: false, skin: 'capy', rigLoaded: true })).toBe(false);
-    expect(shouldUseSnakeRig({ isWebGL: true, reduced: false, skin: 'ginger', rigLoaded: true })).toBe(false);
+    expect(shouldUseSnakeRig({ isWebGL: true, reduced: false, skin: 'pup', rigLoaded: true })).toBe(false);
     expect(shouldUseSnakeRig({ isWebGL: true, reduced: false, skin: 'snake', rigLoaded: false })).toBe(false);
+  });
+
+  it('ANIM-CAT-R1 registry lists snake, ginger, and tuxedo with rig/<skin> keys and rigs/<skin> URLs', () => {
+    expect(RIGGED_SKINS).toEqual(['snake', 'ginger', 'tuxedo']);
+    for (const skin of ['snake', 'ginger', 'tuxedo'] as const) {
+      expect(isRiggedSkin(skin)).toBe(true);
+      expect(SKIN_RIG_REGISTRY[skin]).toEqual({
+        skin,
+        key: `rig/${skin}`,
+        skeleton: `rigs/${skin}/${skin}.json`,
+        atlas: `rigs/${skin}/${skin}.atlas`,
+      });
+      expect(skinRigEntry(skin)).toEqual(SKIN_RIG_REGISTRY[skin]);
+    }
+    expect(isRiggedSkin('pup')).toBe(false);
+    expect(isRiggedSkin('capy')).toBe(false);
+    expect(skinRigEntry('pup')).toBeNull();
+    expect(skinRigEntry('capy')).toBeNull();
+  });
+
+  it('ANIM-CAT-R2 resolveSkinRigConfig merges per-skin durations and eatProp overrides from balance and validates overrides', () => {
+    const gingerCfg = resolveSkinRigConfig(cfg, 'ginger');
+    expect(animDurationMs('idle', gingerCfg)).toBe(3200);
+    expect(animDurationMs('eat', gingerCfg)).toBe(900);
+    expect(animDurationMs('dead', gingerCfg)).toBe(1400);
+    expect(animDurationMs('poke', gingerCfg)).toBe(500);
+    expect(animDurationMs('celebrate', gingerCfg)).toBe(670);
+    expect(animDurationMs('denied', gingerCfg)).toBe(520);
+    expect(gingerCfg.eatProp.mouthOffsetY).toBe(64);
+    expect(gingerCfg.eatProp.mangoWidthFrac).toBeCloseTo(0.40);
+    expect(gingerCfg.eatProp.burstWidthFrac).toBeCloseTo(0.60);
+    expect(gingerCfg.eatProp.mangoOffsetY).toBe(cfg.eatProp.mangoOffsetY);
+
+    const tuxedoCfg = resolveSkinRigConfig(cfg, 'tuxedo');
+    expect(animDurationMs('idle', tuxedoCfg)).toBe(4200);
+    expect(animDurationMs('eat', tuxedoCfg)).toBe(1200);
+    expect(animDurationMs('dead', tuxedoCfg)).toBe(1800);
+    expect(animDurationMs('poke', tuxedoCfg)).toBe(800);
+    expect(animDurationMs('celebrate', tuxedoCfg)).toBe(1050);
+    expect(animDurationMs('denied', tuxedoCfg)).toBe(800);
+    expect(tuxedoCfg.eatProp.mouthOffsetY).toBe(56);
+    expect(tuxedoCfg.eatProp.mangoWidthFrac).toBeCloseTo(0.40);
+    expect(tuxedoCfg.eatProp.burstWidthFrac).toBeCloseTo(0.60);
+
+    const snakeCfg = resolveSkinRigConfig(cfg, 'snake');
+    expect(snakeCfg.idleMs).toBe(cfg.idleMs);
+    expect(snakeCfg.eatProp.mouthOffsetY).toBe(54);
+
+    expect(() => loadBalance(j => { j.ui.snakeRig.skins.ginger.eatMs = 0; })).toThrow(/ginger\.eatMs/);
+    expect(() => loadBalance(j => { j.ui.snakeRig.skins.tuxedo.eatMs = 100; })).toThrow(/tuxedo.*(mangoEndMs|burstEndMs)/);
+  });
+
+  it('ANIM-CAT-R3 shouldUseSkinRig enables ginger and tuxedo when loaded, and rejects pup, capy, reduced motion, and non-WebGL', () => {
+    for (const skin of ['snake', 'ginger', 'tuxedo'] as const) {
+      expect(shouldUseSkinRig({ isWebGL: true, reduced: false, skin, rigLoaded: true })).toBe(true);
+      expect(shouldUseSkinRig({ isWebGL: false, reduced: false, skin, rigLoaded: true })).toBe(false);
+      expect(shouldUseSkinRig({ isWebGL: true, reduced: true, skin, rigLoaded: true })).toBe(false);
+      expect(shouldUseSkinRig({ isWebGL: true, reduced: false, skin, rigLoaded: false })).toBe(false);
+    }
+    expect(shouldUseSkinRig({ isWebGL: true, reduced: false, skin: 'pup', rigLoaded: true })).toBe(false);
+    expect(shouldUseSkinRig({ isWebGL: true, reduced: false, skin: 'capy', rigLoaded: true })).toBe(false);
   });
 });

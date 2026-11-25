@@ -154,7 +154,7 @@ describe('ANIM-SNAKE-R10..R12 DOM meta screen bindings & fallback', () => {
     root.remove();
   });
 
-  it('ANIM-SNAKE-R11 Loadout mounts idle snake hero slot for snake skin only', () => {
+  it('ANIM-SNAKE-R11 ANIM-CAT-R6 Loadout mounts the idle hero slot for rigged skins only (snake, ginger; not pup)', () => {
     const root = document.createElement('div');
     document.body.appendChild(root);
     const { metaHero, setSlot } = makeMetaHeroSpy();
@@ -170,9 +170,16 @@ describe('ANIM-SNAKE-R10..R12 DOM meta screen bindings & fallback', () => {
     setActiveSkin('ginger');
     setSlot.mockClear();
     const cleanGinger = loadoutScreen(root, { bridge, debug: false, clock, params: { level: 5 } }) || (() => {});
+    expect(root.querySelector('.d4-loadout-hero-wrap [data-qa="hero-ginger"]')).not.toBeNull();
+    expect(setSlot).toHaveBeenLastCalledWith(expect.objectContaining({ skin: 'ginger' }));
+    cleanGinger();
+
+    setActiveSkin('pup');
+    setSlot.mockClear();
+    const cleanPup = loadoutScreen(root, { bridge, debug: false, clock, params: { level: 5 } }) || (() => {});
     expect(root.querySelector('.d4-loadout-hero-wrap')).toBeNull();
     expect(setSlot).not.toHaveBeenCalled();
-    cleanGinger();
+    cleanPup();
     root.remove();
   });
 
@@ -212,5 +219,52 @@ describe('ANIM-SNAKE-R10..R12 DOM meta screen bindings & fallback', () => {
 
     const css = await readRepoText('src/game/dom/styles/mystic.css');
     expect(css).toContain('#ui-root.d4-live-bg.d4-live-snake-hero .d4-hero[data-qa="hero-snake"] .d4-hero-img');
+  });
+
+  it('ANIM-CAT-R6 uiHost toggles live hero classes for ginger and tuxedo and mystic.css hides their DOM portraits only', async () => {
+    const root = document.createElement('div');
+    let reduced = false;
+    let ready = true;
+    const hooks: LoopHooks = {
+      sleep: vi.fn(),
+      wake: vi.fn(),
+      inputEnabled: vi.fn(),
+      keyboardCapture: vi.fn(),
+      canvasVisible: vi.fn(),
+      setMetaBg: active => active,
+      isSnakeRigReady: () => ready,
+    };
+    const host = createUiHost(root, hooks, { reduceMotion: () => reduced });
+    const tok = host.mount({ id: 'home', kind: 'screen', render: () => {} });
+    expect(root.classList.contains('d4-live-snake-hero')).toBe(true);
+    expect(root.classList.contains('d4-live-ginger-hero')).toBe(true);
+    expect(root.classList.contains('d4-live-tuxedo-hero')).toBe(true);
+
+    reduced = true;
+    host.syncReducedMotion();
+    expect(root.classList.contains('d4-live-ginger-hero')).toBe(false);
+    expect(root.classList.contains('d4-live-tuxedo-hero')).toBe(false);
+
+    reduced = false;
+    ready = false;
+    host.syncReducedMotion();
+    expect(root.classList.contains('d4-live-ginger-hero')).toBe(false);
+    expect(root.classList.contains('d4-live-tuxedo-hero')).toBe(false);
+
+    ready = true;
+    host.syncReducedMotion();
+    expect(root.classList.contains('d4-live-ginger-hero')).toBe(true);
+    expect(root.classList.contains('d4-live-tuxedo-hero')).toBe(true);
+
+    host.close(tok);
+    expect(root.classList.contains('d4-live-ginger-hero')).toBe(false);
+    expect(root.classList.contains('d4-live-tuxedo-hero')).toBe(false);
+    host.dispose();
+
+    const css = await readRepoText('src/game/dom/styles/mystic.css');
+    expect(css).toContain('#ui-root.d4-live-bg.d4-live-ginger-hero .d4-hero[data-qa="hero-ginger"] .d4-hero-img');
+    expect(css).toContain('#ui-root.d4-live-bg.d4-live-tuxedo-hero .d4-hero[data-qa="hero-tuxedo"] .d4-hero-img');
+    expect(css).not.toContain('hero-pup');
+    expect(css).not.toContain('hero-capy');
   });
 });

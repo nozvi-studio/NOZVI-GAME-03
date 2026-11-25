@@ -1,4 +1,5 @@
 // D4-P4-R1 Results DOM screen over resultsView (Aqua Marsh Mystic concept, stats-only, odometer, confetti). Pure: no Phaser.
+import { isRiggedSkin } from '../../art/snakeRigModel';
 import { biome } from '../../../core';
 import { activeSkin } from '../../art/skins';
 import { resultsView } from '../../flow/resultsView';
@@ -54,9 +55,10 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
   }
   stage.append(bubble);
   let hero: HeroStage | null = null;
-  if (isGold && activeSkin() === 'snake') {
+  const heroSkin = activeSkin(); // ANIM-CAT-R6 any rigged skin (snake, ginger, tuxedo)
+  if (isGold && isRiggedSkin(heroSkin)) {
     const heroWrap = el('div', 'd4-results-hero-wrap');
-    hero = createHeroStage(heroWrap, { skin: 'snake', mode: 'portrait', interactive: false, clock });
+    hero = createHeroStage(heroWrap, { skin: heroSkin, mode: 'portrait', interactive: false, clock });
     stage.append(heroWrap);
   }
 
@@ -176,7 +178,7 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
   // ANIM-SNAKE-R11 sync new-best snake hero slot to MetaBgScene and play celebrate on gold reveal.
   if (hero) {
     const h = hero;
-    bridge.metaHero?.setSlot({ skin: 'snake', readRect: () => h.el.getBoundingClientRect() });
+    bridge.metaHero?.setSlot({ skin: heroSkin, readRect: () => h.el.getBoundingClientRect() });
   }
 
   const targetScore = v?.score ?? 0;

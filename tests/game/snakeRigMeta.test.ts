@@ -48,7 +48,7 @@ class FakeRigObject extends DrawObject {
   boneWorld() { return null; }
 }
 
-function makeMetaBgHarness(opts: { webgl?: boolean; rigLoaded?: boolean; reduced?: boolean } = {}) {
+function makeMetaBgHarness(opts: { webgl?: boolean; rigLoaded?: boolean | readonly string[]; reduced?: boolean } = {}) {
   const { webgl = true, rigLoaded = true, reduced = false } = opts;
   setDisplaySettings({ ...defaultSettings(), reducedMotion: reduced });
   vi.stubGlobal('window', {
@@ -99,7 +99,7 @@ function makeMetaBgHarness(opts: { webgl?: boolean; rigLoaded?: boolean; reduced
     },
   };
 
-  const loadedKeys = new Set<string>(rigLoaded ? [SNAKE_RIG_KEY] : []);
+  const loadedKeys = new Set<string>(Array.isArray(rigLoaded) ? rigLoaded : rigLoaded ? [SNAKE_RIG_KEY] : []);
   Object.assign(scene, {
     load: {
       on: vi.fn(),
@@ -259,5 +259,48 @@ describe('ANIM-SNAKE-R8..R10 meta snake rig placement, MetaBgScene overlay, and 
     // Re-emitting META_BG_READY_EVENT replays pendingSlot cleanly
     gameEvents.emit(META_BG_READY_EVENT);
     expect(port.metaHero?.isLive()).toBe(true);
+  });
+
+  it('ANIM-CAT-R5 MetaBgScene switches between snake, ginger, and tuxedo rigs with per-skin durations and hides for pup/capy', () => {
+    const { scene, rigObjs } = makeMetaBgHarness({ rigLoaded: ['rig/snake', 'rig/ginger', 'rig/tuxedo'] });
+    scene.create();
+    // BgLoop rig + 3 rigged skin overlays
+    expect(rigObjs).toHaveLength(4);
+    const [, snakeObj, gingerObj, tuxedoObj] = rigObjs;
+    const slotRect = { left: 190, top: 220, width: 180, height: 180 };
+
+    const stepMs = (total: number): void => {
+      for (let left = total; left > 0; left -= 50) scene.update(0, Math.min(50, left));
+    };
+
+    // Switch to ginger -> only ginger rig visible, denied duration is 520ms
+    expect(scene.setHeroSlot({ skin: 'ginger', readRect: () => slotRect })).toBe(true);
+    expect(gingerObj!.visible).toBe(true);
+    expect(snakeObj!.visible).toBe(false);
+    expect(tuxedoObj!.visible).toBe(false);
+    scene.playHeroAnim('denied');
+    expect(scene.currentHeroAnim()).toBe('denied');
+    stepMs(460);
+    expect(scene.currentHeroAnim()).toBe('denied');
+    stepMs(70);
+    expect(scene.currentHeroAnim()).toBe('idle');
+
+    // Switch to tuxedo -> only tuxedo rig visible, poke duration is 800ms
+    expect(scene.setHeroSlot({ skin: 'tuxedo', readRect: () => slotRect })).toBe(true);
+    expect(tuxedoObj!.visible).toBe(true);
+    expect(gingerObj!.visible).toBe(false);
+    expect(snakeObj!.visible).toBe(false);
+    scene.playHeroAnim('poke');
+    expect(scene.currentHeroAnim()).toBe('poke');
+    stepMs(600);
+    expect(scene.currentHeroAnim()).toBe('poke');
+    stepMs(220);
+    expect(scene.currentHeroAnim()).toBe('idle');
+
+    // Switch to pup -> all hidden
+    expect(scene.setHeroSlot({ skin: 'pup', readRect: () => slotRect })).toBe(false);
+    expect(tuxedoObj!.visible).toBe(false);
+    expect(gingerObj!.visible).toBe(false);
+    expect(snakeObj!.visible).toBe(false);
   });
 });
