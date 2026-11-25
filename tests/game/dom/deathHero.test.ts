@@ -5,17 +5,17 @@ import { skinPortraitUrl } from '../../../src/game/dom/heroStage';
 import { FakeClock } from './fakeClock';
 import { readRepoText } from './readText';
 
-const mount = (hero?: Parameters<typeof renderDeathCard>[5]) => {
+const mount = (hero?: Parameters<typeof renderDeathCard>[3]) => {
   const root = document.createElement('div');
   document.body.appendChild(root);
-  const cleanup = renderDeathCard(root, { text: 'Oops' }, 0, vi.fn(), new FakeClock(), hero);
+  const cleanup = renderDeathCard(root, { lockMs: 0, continueMs: 5000, onChoice: vi.fn() }, new FakeClock(), hero);
   return { root, cleanup };
 };
 
 describe('ANIM-SNAKE-R13 DeathCard centered dead hero', () => {
-  it('ANIM-SNAKE-R13 no hero option keeps the plain frosted card', () => {
+  it('ANIM-SNAKE-R13 no hero option keeps the plain frosted backdrop with an empty slot', () => {
     const { root, cleanup } = mount();
-    expect(root.querySelector('[data-qa="death-hero"]')).toBeNull();
+    expect(root.querySelector<HTMLElement>('[data-qa="death-hero"]')!.querySelector('img')).toBeNull();
     expect(root.querySelector('.d4-death-scrim')!.classList.contains('is-live-hero')).toBe(false);
     cleanup();
   });
@@ -28,7 +28,8 @@ describe('ANIM-SNAKE-R13 DeathCard centered dead hero', () => {
     expect(slot.dataset.skin).toBe('capy');
     expect(slot.classList.contains('is-live')).toBe(false);
     expect(slot.querySelector('img')!.getAttribute('src')).toBe(skinPortraitUrl('capy'));
-    expect(slot.nextElementSibling?.getAttribute('data-qa')).toBe('death-sheet');
+    expect(slot.previousElementSibling?.getAttribute('data-qa')).toBe('death-title');
+    expect(slot.nextElementSibling?.getAttribute('data-qa')).toBe('death-actions');
     expect(root.querySelector('.d4-death-scrim')!.classList.contains('is-live-hero')).toBe(false);
     expect(onSlot).not.toHaveBeenCalled();
     cleanup();

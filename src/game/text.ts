@@ -142,6 +142,7 @@ const KEYED: Readonly<Record<string, string>> = {
   'results.d4.victory': 'VICTORY!', 'results.d4.newBest': 'NEW BEST!', 'results.d4.gameOver': 'GAME OVER',
   'results.d4.newRecord': 'New record!', 'results.skills': 'Skills',
   'countdown.go': 'GO!', 'death.tapContinue': 'Tap to continue',
+  'death.again': 'Play again', 'death.continue': 'Continue', 'death.results': 'Result', // GAMEOVER-R3..R5
   'logo.mango': 'MANGO', 'logo.snake': 'SNAKE', 'home.prev': '◀', 'home.next': '▶',
   'boot.loading': 'Loading… {n}%',
   // P3b-2 HUD and overlay strings (provisional, owner-question batch)

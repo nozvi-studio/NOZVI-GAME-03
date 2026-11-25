@@ -6,7 +6,7 @@ const b = loadBalance(), j = b.juice;
 function make(over: Partial<JuiceDeps> = {}, reduced = false) {
   const timers: { ms: number; at: number; fn: () => void; removed: boolean }[] = [];
   let now = 0; // cumulative clock: later(ms) fires at now + ms, like Phaser's time.delayedCall
-  const log = { play: [] as string[], buzz: [] as unknown[], board: [] as string[], screen: [] as string[], card: [] as string[], done: 0, skip: null as null | (() => void) };
+  const log = { play: [] as string[], buzz: [] as unknown[], board: [] as string[], screen: [] as string[], card: [] as string[], done: 0, skip: null as null | ((exit?: 'again' | 'results') => void) };
   const deps: JuiceDeps = {
     balance: b, synth: { play: n => { log.play.push(n); }, buzz: p => { log.buzz.push(p); } },
     board: { playBoardFx: l => log.board.push(...l.map(v => v.kind)) }, screen: { play: v => { log.screen.push(v.kind); } },
@@ -67,6 +67,14 @@ describe('P3a player', () => {
     m.advance(j.death.cardInMs + j.death.skipLockMs); // lock timer arms the skip
     m.log.skip?.(); m.log.skip?.(); expect(m.log.done).toBe(1);
     m.run(j.death.totalMs); expect(m.log.done).toBe(1);
+  });
+  it('GAMEOVER-R5 the chosen exit (again / results) reaches onDone once', () => {
+    for (const exit of ['again', 'results'] as const) {
+      const exits: string[] = [];
+      const m = make({ onDone: e => { exits.push(e); } }); m.p.handle({ type: 'died', cause: 'wall', x: 0, y: 0 });
+      m.advance(j.death.cardInMs + j.death.skipLockMs);
+      m.log.skip?.(exit); m.log.skip?.(exit); expect(exits).toEqual([exit]);
+    }
   });
   it('P3a-R8 reduced motion: no shake, card still waits for a tap', () => {
     const m = make({}, true); m.p.handle({ type: 'died', cause: 'wall', x: 0, y: 0 });

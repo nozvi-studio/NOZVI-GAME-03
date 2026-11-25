@@ -97,7 +97,7 @@
     , "snakeRig": {
       "designHeight": 200,
       "metaHeadFrac": 0.84, "metaFeetFrac": 0.92,
-      "deathDimColor": 1317155, "deathDimAlpha": 0.35,
+      "deathDimColor": 1317155, "deathDimAlpha": 0.8,
       "idleMs": 2000, "eatMs": 740, "deadMs": 1350, "pokeMs": 500, "celebrateMs": 670, "deniedMs": 430,
       "eatProp": {
         "mouthOffsetY": 54, "mangoOffsetY": 28,
@@ -122,7 +122,7 @@
     "biome": { "sweepAlpha": 0.35, "sweepMs": 700 },
     "checkpoint": { "flagMs": 600 },
     "banner": { "inMs": 220, "slidePx": 24, "scaleFrom": 0.9 },
-    "death": { "shakePx": 6, "shakeMs": 400, "flashAlpha": 0.6, "flashMs": 600, "cardInMs": 300, "totalMs": 1400, "skipLockMs": 250 },
+    "death": { "shakePx": 6, "shakeMs": 400, "flashAlpha": 0.6, "flashMs": 600, "cardInMs": 300, "totalMs": 1400, "skipLockMs": 250, "continueMs": 5000 },
     "haptics": { "eatMs": 12, "orbMs": 8, "castMs": 20, "level": [15, 40, 15], "biomeMs": 30, "checkpointMs": 40, "deathMs": 90 },
     "reduced": { "flashAlphaMax": 0.2, "softMs": 400, "deathTotalMs": 1000 },
     "perf": { "maxParticles": 300, "maxFloats": 6, "maxSparks": 12 },

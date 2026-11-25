@@ -5,7 +5,7 @@ import type { SkinId } from '../art/skins';
 import type { Synth } from '../audio/synth';
 import type { PauseView } from '../hud/overlayModel';
 import type { MotionClock } from './clock';
-import type { DeathHero } from './overlays/deathCardOverlay';
+import type { DeathCardOptions, DeathHero } from './overlays/deathCardOverlay';
 import type { StageRect } from './stageSync';
 
 export type ScreenId = 'home' | 'characters' | 'loadout' | 'results' | 'settings';
@@ -57,7 +57,8 @@ export interface OverlayPort {
   showPause(v: PauseView, h: PauseHandlers): void;
   hidePause(): void;
   countdown(n: number | 'go' | null, card: { title: string; subtitle: string } | null): void;
-  deathCard(line: { text: string }, lockMs: number, onContinue: () => void, hero?: DeathHero): void;
+  /** GAMEOVER-R1..R5 Game Over overlay. */
+  deathCard(opts: DeathCardOptions, hero?: DeathHero): void;
   hideAll(): void;
 }
 

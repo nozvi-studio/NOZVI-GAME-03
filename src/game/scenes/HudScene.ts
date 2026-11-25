@@ -26,7 +26,7 @@ import { DeathCard } from '../juice/DeathCard';
 import { deathSeed } from '../juice/deathLine';
 import { colorOf } from '../juice/colors';
 import { landedCells } from '../juice/derived';
-import { JuicePlayer } from '../juice/JuicePlayer';
+import { JuicePlayer, type DeathCardView, type DeathExit } from '../juice/JuicePlayer';
 import { ScreenFx } from '../juice/ScreenFx';
 import type { HudTarget, JuiceInput } from '../juice/types';
 import { acceptSkillInput, skillSlotForKey } from '../input/skillKeys';
@@ -85,7 +85,7 @@ export class HudScene extends Phaser.Scene {
       settings: () => this.session.save().settings, reduced: reduceMotion,
       headCell: () => { const s = this.gameScene.snapshot(); const h = s?.snake[0]; return h ? { x: h.x, y: h.y } : null; }, // MOT-3-R8
       seed: () => { const s = this.gameScene.snapshot(); return s ? deathSeed(s.score, s.level, s.timeMs) : 0; },
-      makeCard: () => this.makeDeathCard(), later: (ms, fn) => this.time.delayedCall(ms, fn), onDone: () => this.leave() });
+      makeCard: () => this.makeDeathCard(), later: (ms, fn) => this.time.delayedCall(ms, fn), onDone: exit => this.leave(exit) });
     this.count = new CountdownOverlay(this);
     this.pause = new PauseOverlay(this, {
       onResume: () => { this.applySettings(); this.gameScene.apply(flowResume(this.gameScene.flow, this.balance)); },
@@ -180,32 +180,33 @@ export class HudScene extends Phaser.Scene {
     this.deathSlot = null;
   }
 
-  private makeDeathCard(): { show(line: string): void; armSkip(onSkip: () => void): void; destroy(): void } {
+  private makeDeathCard(): DeathCardView {
     if (!this.bridge) return new DeathCard(this, this.balance, reduceMotion());
     const bridge = this.bridge;
-    const lockMs = this.balance.juice.death.skipLockMs;
+    const { skipLockMs: lockMs, continueMs } = this.balance.juice.death;
     const scene = this;
-    let skipFn: (() => void) | null = null;
-    let pendingSkip = false;
+    let skipFn: ((exit?: DeathExit) => void) | null = null;
+    let pending: DeathExit | null = null;
     return {
-      show(line: string): void {
+      show(): void { // GAMEOVER-R1..R5: the humorous death line is no longer shown
         const skin = activeSkin();
         const live = shouldUseSnakeRig({ isWebGL: SnakeRig.isWebGL(scene), reduced: reduceMotion(), skin, rigLoaded: SnakeRig.isLoaded(scene) });
-        bridge.overlays.deathCard({ text: line }, lockMs, () => {
-          if (skipFn) skipFn();
-          else pendingSkip = true;
-        }, { skin, live, onSlot: live ? readRect => scene.showDeathHero(readRect) : undefined });
+        bridge.overlays.deathCard({ lockMs, continueMs, onChoice: c => {
+          if (skipFn) skipFn(c);
+          else pending = c;
+        } }, { skin, live, onSlot: live ? readRect => scene.showDeathHero(readRect) : undefined });
       },
-      armSkip(onSkip: () => void): void {
+      armSkip(onSkip: (exit?: DeathExit) => void): void {
         skipFn = onSkip;
-        if (pendingSkip) {
-          pendingSkip = false;
-          onSkip();
+        if (pending) {
+          const c = pending;
+          pending = null;
+          onSkip(c);
         }
       },
       destroy(): void {
         skipFn = null;
-        pendingSkip = false;
+        pending = null;
         scene.clearDeathHero();
         bridge.overlays.hideAll();
       },
@@ -350,9 +351,11 @@ export class HudScene extends Phaser.Scene {
     else this.count.hide();
     this.juice.runOver(s.outcome?.won ?? false); // P3a-R7 the death sequence was started by the `died` event; a win waits the same total
   }
-  private leave(): void {
+  private leave(exit: DeathExit = 'results'): void {
     if (this.leaving) return;
-    this.leaving = true; goTo(this, 'Results', undefined, 'quit', { before: () => this.scene.stop('Game') }); // MOT-2-R12
+    // GAMEOVER-R5 quick restart goes through Results with `again`, which restarts at once via the proven playAgain path.
+    const data = exit === 'again' ? { again: true } : undefined;
+    this.leaving = true; goTo(this, 'Results', data, 'quit', { before: () => this.scene.stop('Game') }); // MOT-2-R12
   }
   private toResults(delayMs: number): void {
     if (this.leaving) return;

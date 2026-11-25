@@ -7,7 +7,9 @@ import type { BoardVisual, JuiceInput, Pt, ScreenVisual } from './types';
 
 export interface BoardFxSink { playBoardFx(list: readonly BoardVisual[]): void }
 export interface ScreenSink { play(v: ScreenVisual): void }
-export interface DeathCardView { show(line: string): void; armSkip(onSkip: () => void): void; destroy(): void }
+/** GAMEOVER-R5 'again' = quick restart, 'results' (default) = Results screen. */
+export type DeathExit = 'again' | 'results';
+export interface DeathCardView { show(line: string): void; armSkip(onSkip: (exit?: DeathExit) => void): void; destroy(): void }
 export interface JuiceDeps {
   balance: Balance; synth: Pick<Synth, 'play' | 'buzz'>;
   board: BoardFxSink; screen: ScreenSink;
@@ -18,7 +20,7 @@ export interface JuiceDeps {
   seed: () => number;
   makeCard: () => DeathCardView;
   later: (ms: number, fn: () => void) => { remove(): void };
-  onDone: () => void;
+  onDone: (exit: DeathExit) => void;
 }
 
 export class JuicePlayer {
@@ -67,13 +69,13 @@ export class JuicePlayer {
     const line = pickDeathLine(cause, this.d.seed());
     this.timers.push(this.d.later(tl.cardInMs, () => {
       this.card = this.d.makeCard(); this.card.show(line);
-      this.timers.push(this.d.later(tl.skipLockMs, () => this.card?.armSkip(() => this.finish())));
+      this.timers.push(this.d.later(tl.skipLockMs, () => this.card?.armSkip(exit => this.finish(exit))));
     }));
     // Owner 2026-11-25: no auto-advance; the Game Over card waits for a tap.
   }
-  private finish(): void {
+  private finish(exit: DeathExit = 'results'): void {
     if (this.done) return;
-    this.destroy(); this.d.onDone();
+    this.destroy(); this.d.onDone(exit);
   }
   destroy(): void {
     this.done = true;

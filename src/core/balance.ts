@@ -133,7 +133,7 @@ export interface Balance {
     biome: { sweepAlpha: number; sweepMs: number };
     checkpoint: { flagMs: number };
     banner: { inMs: number; slidePx: number; scaleFrom: number };
-    death: { shakePx: number; shakeMs: number; flashAlpha: number; flashMs: number; cardInMs: number; totalMs: number; skipLockMs: number };
+    death: { shakePx: number; shakeMs: number; flashAlpha: number; flashMs: number; cardInMs: number; totalMs: number; skipLockMs: number; continueMs: number };
     haptics: { eatMs: number; orbMs: number; castMs: number; level: number[]; biomeMs: number; checkpointMs: number; deathMs: number };
     reduced: { flashAlphaMax: number; softMs: number; deathTotalMs: number };
     perf: { maxParticles: number; maxFloats: number; maxSparks: number };
@@ -298,7 +298,7 @@ const SPEC: Spec = {
     skill: { flashAlpha: 'prob', flashMs: 'int+', iconPopScale: 'num+', iconRingScale: 'num+', iconPopMs: 'int+', tintAlpha: 'prob', tintFadeMs: 'int+' },
     level: { glowAlpha: 'prob', glowMs: 'int+', popMs: 'int+' }, biome: { sweepAlpha: 'prob', sweepMs: 'int+' },
     checkpoint: { flagMs: 'int+' }, banner: { inMs: 'int+', slidePx: 'num0', scaleFrom: 'prob' },
-    death: { shakePx: 'num0', shakeMs: 'int0', flashAlpha: 'prob', flashMs: 'int+', cardInMs: 'int0', totalMs: 'int+', skipLockMs: 'int0' },
+    death: { shakePx: 'num0', shakeMs: 'int0', flashAlpha: 'prob', flashMs: 'int+', cardInMs: 'int0', totalMs: 'int+', skipLockMs: 'int0', continueMs: 'int+' },
     haptics: { eatMs: 'int+', orbMs: 'int+', castMs: 'int+', level: 'ints', biomeMs: 'int+', checkpointMs: 'int+', deathMs: 'int+' },
     reduced: { flashAlphaMax: 'prob', softMs: 'int+', deathTotalMs: 'int+' },
     perf: { maxParticles: 'int+', maxFloats: 'int+', maxSparks: 'int+' },
