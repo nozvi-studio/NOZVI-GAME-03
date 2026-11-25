@@ -92,8 +92,13 @@ export function createHomeScreen(deps: HomeScreenDeps = {}): ScreenRender {
     const heroSection = el('section', 'd4-home-hero');
     const stageRow = el('div', 'd4-home-stage-row');
     const heroWrap = el('div', 'd4-home-hero-wrap');
-    const hero = createHeroStage(heroWrap, { skin: activeSkin(), mode: 'portrait', clock });
-    hero.el.addEventListener('pointerdown', () => synth.play('uiTap'));
+    const skin = activeSkin();
+    const hero = createHeroStage(heroWrap, { skin, mode: 'portrait', clock });
+    // ANIM-SNAKE-R11 sync Home hero slot to MetaBgScene snake rig (idle loop, tap -> poke).
+    hero.el.addEventListener('pointerdown', () => {
+      synth.play('uiTap');
+      bridge.metaHero?.play('poke');
+    });
     stageRow.append(heroWrap);
     heroSection.append(stageRow);
 
@@ -115,6 +120,7 @@ export function createHomeScreen(deps: HomeScreenDeps = {}): ScreenRender {
     screen.append(top, wordmark, heroSection, actions);
     const disposeBackdrop = mountMysticBackdrop(screen);
     root.appendChild(screen);
+    bridge.metaHero?.setSlot({ skin, readRect: () => hero.el.getBoundingClientRect() });
 
     // Enter / Space starts a run only when focus is not on a button (prevents double-fire)
     const onKeyDown = (e: KeyboardEvent): void => {
@@ -131,6 +137,7 @@ export function createHomeScreen(deps: HomeScreenDeps = {}): ScreenRender {
       cancelStagger();
       document.removeEventListener('keydown', onKeyDown);
       fallbackBox?.remove();
+      bridge.metaHero?.setSlot(null);
       hero.destroy();
       disposeBackdrop();
       screen.remove();

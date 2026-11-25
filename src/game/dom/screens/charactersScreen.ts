@@ -71,7 +71,14 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
   const heroWrap = el('div', 'd4-chars-hero-wrap');
   stage.append(halo, heroWrap);
   const hero = createHeroStage(heroWrap, { skin: preview, mode: 'portrait', clock });
-  hero.el.addEventListener('pointerdown', () => synth.play('uiTap'));
+  // ANIM-SNAKE-R11 sync Characters hero slot to MetaBgScene snake rig (idle / poke / celebrate / denied).
+  const syncMetaHero = (): void => {
+    bridge.metaHero?.setSlot({ skin: preview, readRect: () => hero.el.getBoundingClientRect() });
+  };
+  hero.el.addEventListener('pointerdown', () => {
+    synth.play('uiTap');
+    bridge.metaHero?.play('poke');
+  });
 
   // Identity Block (clean name + rarity only, no perk subtitle)
   const identity = el('div', 'd4-chars-identity');
@@ -103,6 +110,7 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
       preview = id;
       synth.play('uiTap');
       hero.setSkin(id);
+      syncMetaHero();
       if (!isReducedMotion(screen)) {
         heroWrap.classList.remove('is-swap');
         void heroWrap.offsetWidth;
@@ -144,6 +152,7 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
         setActiveSkin(v.preview);
         synth.play('unlock');
         hero.react('celebrate');
+        bridge.metaHero?.play('celebrate');
         const r = stage.getBoundingClientRect();
         confettiDisposers.push(burstConfetti(stage, r.width / 2 || 160, r.height / 2 || 100));
         render();
@@ -162,6 +171,7 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
       synth.play('nope');
       if (actionBtn) shakeDenied(actionBtn, clock);
       hero.react('denied');
+      bridge.metaHero?.play('denied');
     }
   };
 
@@ -210,11 +220,13 @@ export const charactersScreen: ScreenRender = (root, ctx) => {
   };
 
   render();
+  syncMetaHero();
   const cancelStagger = staggerEnter(screen, { clock });
 
   return () => {
     cancelStagger();
     coins.cancel();
+    bridge.metaHero?.setSlot(null);
     hero.destroy();
     for (const d of confettiDisposers) d();
     disposeBackdrop();

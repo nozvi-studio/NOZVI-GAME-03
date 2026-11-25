@@ -92,6 +92,7 @@ new Phaser.Game({
           }
           return false;
         },
+        isSnakeRigReady: () => Boolean(game.registry.get('metaSnakeRigReady')),
       };
       startStageSync({
         root,

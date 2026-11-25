@@ -36,9 +36,9 @@ export class DeathCard implements DeathCardView {
     this.scene.tweens.add({ targets: this.root, alpha: 1, scale: 1, duration: mo.inMs, ease: mo.slidePx === 0 ? 'Linear' : 'Back.easeOut' });
   }
   /** Tap anywhere skips to Results; the zone covers the whole HUD scene. */
-  armSkip(onSkip: () => void): void {
+  armSkip(onSkip: (exit?: 'again' | 'results') => void): void {
     this.zone = this.scene.add.zone(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT).setDepth(M.zoneDepth).setInteractive();
-    this.zone.once('pointerdown', onSkip);
+    this.zone.once('pointerdown', () => onSkip('results'));
   }
   destroy(): void {
     if (this.root) this.scene.tweens.killTweensOf(this.root);

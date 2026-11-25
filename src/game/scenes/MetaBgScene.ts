@@ -1,7 +1,13 @@
-// META-BG-R1..R5 persistent parallel Phaser scene rendering the animated Aqua Marsh BgLoop behind DOM meta screens.
+// META-BG-R1..R5 & ANIM-SNAKE-R9 persistent parallel Phaser scene rendering the animated Aqua Marsh BgLoop
+// behind DOM meta screens plus the unzoomed Rigby2D snake hero overlay aligned to DOM hero slots.
 import Phaser from 'phaser';
+import type { Balance } from '../../core';
+import { SnakeRig } from '../art/snakeRig';
+import { metaHeroPlacement, shouldUseSnakeRig, type SnakeRigConfig } from '../art/snakeRigModel';
 import { BgLoop } from '../bg/bgLoop';
 import { coverCamera } from '../bg/coverFit';
+import type { MetaHeroAnim, MetaHeroSlot } from '../dom/uiBridge';
+import { reduceMotion } from '../render/palette';
 
 export const META_BG_KEY = 'MetaBg';
 export const META_BG_READY_EVENT = 'meta-bg-ready';
@@ -15,6 +21,11 @@ const FALLBACK_BG_HEX = '#043c44';
 
 export class MetaBgScene extends Phaser.Scene {
   private bgLoop: BgLoop | null = null;
+  private heroCam: Phaser.Cameras.Scene2D.Camera | null = null;
+  private snakeRig: SnakeRig | null = null;
+  private rigCfg: SnakeRigConfig | null = null;
+  private maxFrameDeltaMs = 100;
+  private heroSlot: MetaHeroSlot | null = null;
   private failed = false;
 
   constructor() {
@@ -31,6 +42,7 @@ export class MetaBgScene extends Phaser.Scene {
     if (!BgLoop.preload(this, ASSET_KEY, SKELETON_URL, ATLAS_URL)) {
       this.failed = true;
     }
+    SnakeRig.preload(this);
   }
 
   create(): void {
@@ -43,6 +55,7 @@ export class MetaBgScene extends Phaser.Scene {
     try {
       this.cameras.main.setBackgroundColor(FALLBACK_BG_HEX);
       this.bgLoop = BgLoop.create(this, ASSET_KEY).setWind(DEFAULT_WIND);
+      this.initSnakeHeroOverlay();
       this.fitCamera();
       this.scene.sendToBack();
       this.scale.on(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
@@ -55,12 +68,100 @@ export class MetaBgScene extends Phaser.Scene {
     }
   }
 
+  /** ANIM-SNAKE-R9 bind or clear the active DOM hero slot for the meta snake rig. */
+  setHeroSlot(slot: MetaHeroSlot | null): boolean {
+    const prevSkin = this.heroSlot?.skin ?? null;
+    this.heroSlot = slot;
+    if (!this.snakeRig || !this.rigCfg || !slot) {
+      this.snakeRig?.setVisible(false);
+      return false;
+    }
+    if (!this.canShowSnake(slot)) {
+      this.snakeRig.setVisible(false);
+      return false;
+    }
+    if (slot.initialAnim) {
+      this.snakeRig.play(slot.initialAnim, { loop: slot.loop });
+    } else if (prevSkin !== 'snake') {
+      this.snakeRig.play('idle');
+    }
+    this.syncHeroTransform(0);
+    return true;
+  }
+
+  /** ANIM-SNAKE-R9 trigger a meta animation clip (poke / celebrate / denied / idle) on the active snake rig. */
+  playHeroAnim(anim: MetaHeroAnim, opts?: { loop?: boolean }): void {
+    if (!this.snakeRig || !this.heroSlot || !this.canShowSnake(this.heroSlot)) return;
+    this.snakeRig.play(anim, opts);
+  }
+
+  /** ANIM-SNAKE-R9 current snake rig clip name (used by tests and QA). */
+  currentHeroAnim(): string | null {
+    return this.snakeRig?.currentAnim ?? null;
+  }
+
+  /** ANIM-SNAKE-R9 true when the meta snake rig is loaded and eligible on this renderer. */
+  isSnakeRigReady(): boolean {
+    return Boolean(this.snakeRig && this.rigCfg && SnakeRig.isWebGL(this) && SnakeRig.isLoaded(this));
+  }
+
+  update(_time: number, delta: number): void {
+    if (!this.snakeRig || !this.rigCfg || !this.heroSlot) return;
+    if (!this.canShowSnake(this.heroSlot)) {
+      this.snakeRig.setVisible(false);
+      return;
+    }
+    const dt = Number.isFinite(delta) ? Math.min(Math.max(0, delta), this.maxFrameDeltaMs) : 0;
+    this.syncHeroTransform(dt);
+  }
+
+  private initSnakeHeroOverlay(): void {
+    const balance = this.registry?.get('balance') as Balance | undefined;
+    const cfg = balance?.ui?.snakeRig;
+    if (!cfg || !SnakeRig.isWebGL(this) || !SnakeRig.isLoaded(this)) return;
+    this.rigCfg = cfg;
+    this.maxFrameDeltaMs = balance.flow.maxFrameDeltaMs;
+    const cam = this.cameras.main;
+    this.heroCam = this.cameras.add(0, 0, cam.width, cam.height);
+    if (this.bgLoop) this.heroCam.ignore(this.bgLoop.objects as Phaser.GameObjects.GameObject[]);
+    this.snakeRig = SnakeRig.createOverlay(this, cfg);
+    this.snakeRig.setVisible(false);
+    cam.ignore(this.snakeRig.rig as unknown as Phaser.GameObjects.GameObject);
+    this.registry.set('metaSnakeRigReady', true);
+    if (this.heroSlot) this.setHeroSlot(this.heroSlot);
+  }
+
+  private canShowSnake(slot: MetaHeroSlot): boolean {
+    return shouldUseSnakeRig({
+      isWebGL: SnakeRig.isWebGL(this),
+      reduced: reduceMotion(),
+      skin: slot.skin,
+      rigLoaded: SnakeRig.isLoaded(this),
+    });
+  }
+
+  private syncHeroTransform(dtMs: number): void {
+    if (!this.snakeRig || !this.rigCfg || !this.heroSlot || !this.cameras?.main) return;
+    const cam = this.cameras.main;
+    const canvasRect = this.game?.canvas?.getBoundingClientRect?.();
+    const slotRect = this.heroSlot.readRect();
+    const place = metaHeroPlacement(slotRect, canvasRect, cam.width, cam.height, this.rigCfg);
+    if (!place.visible) {
+      this.snakeRig.setVisible(false);
+      return;
+    }
+    this.snakeRig.setVisible(true);
+    this.snakeRig.updateOverlay(dtMs, place.x, place.feetY, place.scale);
+  }
+
   private fitCamera = (): void => {
     if (!this.bgLoop || !this.cameras?.main) return;
     const cam = this.cameras.main;
     const fit = coverCamera(cam.width, cam.height, this.bgLoop.width, this.bgLoop.height);
     cam.setZoom(fit.zoom);
     cam.centerOn(fit.centerX, fit.centerY);
+    this.heroCam?.setSize(cam.width, cam.height);
+    if (this.heroSlot && this.snakeRig) this.syncHeroTransform(0);
   };
 
   private onLoadError = (): void => {
@@ -69,6 +170,9 @@ export class MetaBgScene extends Phaser.Scene {
 
   private onShutdown = (): void => {
     this.scale.off(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
+    this.snakeRig?.destroy();
+    this.snakeRig = null;
+    this.heroCam = null;
     this.bgLoop = null;
   };
 }

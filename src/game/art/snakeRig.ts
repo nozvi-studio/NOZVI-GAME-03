@@ -79,10 +79,15 @@ export class SnakeRig {
     return new SnakeRig(scene, board, afterLayer, cfg, headCellScale);
   }
 
+  /** ANIM-SNAKE-R9 create a standalone overlay rig (no board container or gameplay eat props) for meta screens. */
+  static createOverlay(scene: Phaser.Scene, cfg: SnakeRigConfig): SnakeRig {
+    return new SnakeRig(scene, null, null, cfg, 1);
+  }
+
   private constructor(
     scene: Phaser.Scene,
-    board: Phaser.GameObjects.Container,
-    afterLayer: Phaser.GameObjects.GameObject,
+    board: Phaser.GameObjects.Container | null,
+    afterLayer: Phaser.GameObjects.GameObject | null,
     private readonly cfg: SnakeRigConfig,
     private readonly headCellScale: number,
   ) {
@@ -90,20 +95,25 @@ export class SnakeRig {
     if (typeof factory?.rigby !== 'function') {
       throw new Error('RigbyPlugin is not registered on scene');
     }
-    this.rig = factory.rigby(0, 0, SNAKE_RIG_KEY, 'idle', true).setName('snake-rig-head');
+    this.rig = factory.rigby(0, 0, SNAKE_RIG_KEY, 'idle', true).setName(board ? 'snake-rig-head' : 'snake-rig-meta');
     this.rig.timeScale = 0;
 
-    this.mango = scene.textures?.exists(SNAKE_MANGO_KEY)
-      ? scene.add.image(0, 0, SNAKE_MANGO_KEY).setVisible(false).setName('snake-rig-mango')
-      : null;
-    this.burst = scene.textures?.exists(SNAKE_BURST_KEY)
-      ? scene.add.image(0, 0, SNAKE_BURST_KEY).setVisible(false).setName('snake-rig-burst')
-      : null;
+    if (board && afterLayer) {
+      this.mango = scene.textures?.exists(SNAKE_MANGO_KEY)
+        ? scene.add.image(0, 0, SNAKE_MANGO_KEY).setVisible(false).setName('snake-rig-mango')
+        : null;
+      this.burst = scene.textures?.exists(SNAKE_BURST_KEY)
+        ? scene.add.image(0, 0, SNAKE_BURST_KEY).setVisible(false).setName('snake-rig-burst')
+        : null;
 
-    let idx = board.getIndex(afterLayer) + 1;
-    board.addAt(this.rig as unknown as Phaser.GameObjects.GameObject, idx++);
-    if (this.mango) board.addAt(this.mango, idx++);
-    if (this.burst) board.addAt(this.burst, idx++);
+      let idx = board.getIndex(afterLayer) + 1;
+      board.addAt(this.rig as unknown as Phaser.GameObjects.GameObject, idx++);
+      if (this.mango) board.addAt(this.mango, idx++);
+      if (this.burst) board.addAt(this.burst, idx++);
+    } else {
+      this.mango = null;
+      this.burst = null;
+    }
 
     this.state = createSnakeRigState();
     this.applyRigTime();
@@ -186,6 +196,21 @@ export class SnakeRig {
         this.burst.setVisible(false);
       }
     }
+  }
+
+  /** ANIM-SNAKE-R9 step and position the standalone meta-screen overlay rig in game coordinates. */
+  updateOverlay(dtMs: number, x: number, feetY: number, scale: number, paused = false): void {
+    if (!this.visible) return;
+    if (!paused) {
+      const { state, switched } = stepSnakeRig(this.state, dtMs, this.cfg);
+      this.state = state;
+      if (switched) {
+        this.rig.play(state.anim, state.loop, 0);
+        this.rig.timeScale = 0;
+      }
+    }
+    this.applyRigTime();
+    this.rig.setPosition(x, feetY).setScale(scale).setRotation(0);
   }
 
   destroy(): void {

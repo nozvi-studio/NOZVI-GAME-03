@@ -71,17 +71,17 @@ export function createUiBridge(deps: UiBridgeDeps): UiBridge {
       if (!layer) return;
       renderCountdown(layer, n, card);
     },
-    deathCard(line, lockMs, onContinue): void {
+    deathCard(opts, hero): void {
       deathToken = deps.host.mount({
         id: 'death',
         kind: 'modal',
-        render: el => renderDeathCard(el, line, lockMs, () => {
+        render: el => renderDeathCard(el, { ...opts, onChoice: c => {
           if (deathToken) {
             deps.host.close(deathToken);
             deathToken = null;
           }
-          onContinue();
-        }, deps.clock),
+          opts.onChoice(c);
+        } }, deps.clock, hero),
       });
     },
     hideAll(): void {
@@ -101,6 +101,7 @@ export function createUiBridge(deps: UiBridgeDeps): UiBridge {
     synth: deps.synth,
     t: deps.t,
     overlays,
+    metaHero: deps.port.metaHero,
     open(id: ScreenId, params?: Record<string, unknown>): symbol {
       const render = deps.screens[id];
       if (!render) throw new Error(`no screen: ${id}`);

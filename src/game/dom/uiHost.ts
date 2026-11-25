@@ -45,7 +45,9 @@ export function createUiHost(root: HTMLElement, hooks: LoopHooks, deps: UiHostDe
     if (enter) {
       const reduced = getReduced();
       const live = !reduced && (hooks.setMetaBg?.(true) ?? false);
+      const liveSnake = live && (hooks.isSnakeRigReady?.() ?? false);
       root.classList.toggle('d4-live-bg', live);
+      root.classList.toggle('d4-live-snake-hero', liveSnake);
       if (live) {
         hooks.canvasVisible(true);
         hooks.wake();
@@ -57,7 +59,7 @@ export function createUiHost(root: HTMLElement, hooks: LoopHooks, deps: UiHostDe
       bandLock?.(true);
     } else {
       hooks.setMetaBg?.(false);
-      root.classList.remove('d4-live-bg');
+      root.classList.remove('d4-live-bg', 'd4-live-snake-hero');
       bandLock?.(false);
       hooks.canvasVisible(true);
       hooks.wake();

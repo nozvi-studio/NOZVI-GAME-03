@@ -82,6 +82,12 @@ body.d4-mystic-band {
   display: none;
 }
 
+/* ANIM-SNAKE-R10: hide the DOM snake portrait image while the aligned Phaser Rigby2D snake rig is active,
+ * keeping the clickable hero box and ground shadow intact. */
+#ui-root.d4-live-bg.d4-live-snake-hero .d4-hero[data-qa="hero-snake"] .d4-hero-img {
+  opacity: 0;
+}
+
 .d4-mystic-bg {
   position: absolute;
   inset: 0;
@@ -938,6 +944,11 @@ body.d4-mystic-band {
   width: min(230px, 100%);
 }
 
+.d4-loadout.d4-mystic .d4-loadout-hero-wrap {
+  width: 52px;
+  justify-self: end;
+}
+
 .d4-loadout.d4-mystic .d4-loadout-slots {
   gap: 28px;
   padding: 6px 0 4px;
@@ -1249,4 +1260,13 @@ body.d4-mystic-band {
 
 .d4-death-line {
   color: var(--ui-text-dark);
+}
+
+/* GAMEOVER-R5 Play again: same glossy CTA as Home Play, mango-orange tone to tell it apart from Continue. */
+.d4-mystic .d4-cta.is-green.d4-death-btn.is-again {
+  --cta-primary-top: #FFC23D;
+  --cta-primary-bg: #FF9F1A;
+  --cta-primary-shadow: #C46A00;
+  --cta-primary-outline: #6B3600;
+  background: linear-gradient(180deg, var(--cta-primary-top) 0%, #FFB12B 38%, var(--cta-primary-bg) 78%, #F08C00 100%);
 }

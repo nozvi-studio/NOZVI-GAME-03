@@ -221,13 +221,13 @@ describe('P1 HUD flow, audio and session wiring', () => {
     expect(h.find('level').text).toBe('Level 1');
     h.session.frame(1); h.hud.update(0); expect(h.find('energy').text).toBe('10'); // slow-mo cast spent 40
   });
-  it('P1 death opens Results after the death delay; hidden pauses; shutdown removes listeners', () => {
+  it('P1 death shows the Game Over card and waits for a tap; hidden pauses; shutdown removes listeners', () => {
     const h = setup(); h.play();
     h.document.hidden = true; h.doc.emit('visibilitychange'); expect(h.game.flow.status).toBe('paused');
     h.game.events.emit('sim-events', [{ type: 'died', cause: 'wall', x: 1, y: 1 }]);
     h.game.events.emit('run-over', h.session.snapshot());
-    expect(h.delayed.map(d => d.delay)).toEqual([b.juice.death.cardInMs, b.juice.death.totalMs]);
-    h.flush(); expect(h.started).toEqual(['Results']);
+    expect(h.delayed.map(d => d.delay)).toEqual([b.juice.death.cardInMs]);
+    h.flush(); expect(h.started).toEqual([]); // owner 2026-11-25: no auto-advance
     h.hud.events.emit('shutdown'); h.game.apply(flowStart(h.game.flow, b));
     h.browser.emit('blur'); expect(h.game.flow.status).toBe('countdown');
     sound.play.mockClear(); h.game.events.emit('sim-events', [{ type: 'landed', hazardType: 'rock' }]);

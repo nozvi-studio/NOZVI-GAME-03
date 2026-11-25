@@ -5,8 +5,27 @@ import type { SkinId } from '../art/skins';
 import type { Synth } from '../audio/synth';
 import type { PauseView } from '../hud/overlayModel';
 import type { MotionClock } from './clock';
+import type { DeathCardOptions, DeathHero } from './overlays/deathCardOverlay';
+import type { StageRect } from './stageSync';
 
 export type ScreenId = 'home' | 'characters' | 'loadout' | 'results' | 'settings';
+
+/** ANIM-SNAKE-R10 meta-screen snake rig animation clips driven from DOM events. */
+export type MetaHeroAnim = 'idle' | 'poke' | 'celebrate' | 'denied';
+
+export interface MetaHeroSlot {
+  readonly skin: SkinId;
+  readonly readRect: () => StageRect;
+  readonly initialAnim?: MetaHeroAnim;
+  readonly loop?: boolean;
+}
+
+/** ANIM-SNAKE-R10 Phaser-free port for syncing a DOM hero slot to the MetaBgScene Rigby2D snake rig. */
+export interface MetaHeroPort {
+  setSlot(slot: MetaHeroSlot | null): boolean;
+  play(anim: MetaHeroAnim, opts?: { loop?: boolean }): void;
+  isLive(): boolean;
+}
 
 export interface LoopHooks {
   sleep(): void;
@@ -16,12 +35,15 @@ export interface LoopHooks {
   canvasVisible(on: boolean): void;
   /** META-BG-R1..R5: enable/disable the live Phaser meta background; returns true when live & ready. */
   setMetaBg?(active: boolean): boolean;
+  /** ANIM-SNAKE-R10/R12: true when the Rigby2D snake hero is loaded and eligible on the Phaser renderer. */
+  isSnakeRigReady?(): boolean;
 }
 
 export interface PhaserPort {
   ensureSkins(skins: readonly SkinId[], done: () => void): void;
   startScene(key: 'Game' | 'Settings' | 'Home' | 'Characters' | 'Results' | 'Loadout', data?: Record<string, unknown>): void;
   emit?(event: string): void;
+  metaHero?: MetaHeroPort;
 }
 
 export interface PauseHandlers {
@@ -35,7 +57,8 @@ export interface OverlayPort {
   showPause(v: PauseView, h: PauseHandlers): void;
   hidePause(): void;
   countdown(n: number | 'go' | null, card: { title: string; subtitle: string } | null): void;
-  deathCard(line: { text: string }, lockMs: number, onContinue: () => void): void;
+  /** GAMEOVER-R1..R5 Game Over overlay. */
+  deathCard(opts: DeathCardOptions, hero?: DeathHero): void;
   hideAll(): void;
 }
 
@@ -54,6 +77,7 @@ export interface UiBridge {
   synth: Synth;
   t: (key: string, vars?: Record<string, string | number>) => string;
   overlays: OverlayPort;
+  metaHero?: MetaHeroPort;
   open(id: ScreenId, params?: Record<string, unknown>): symbol;
   close(token: symbol): boolean;
   startRun(level?: number, debugRun?: boolean, source?: 'home' | 'results'): void;
