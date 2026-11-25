@@ -221,6 +221,13 @@ describe('ANIM-SNAKE-R10..R12 DOM meta screen bindings & fallback', () => {
     expect(css).toContain('#ui-root.d4-live-bg.d4-live-snake-hero .d4-hero[data-qa="hero-snake"] .d4-hero-img');
   });
 
+  it('ANIM-CAT-R7 Characters halo is hidden while a live rig is shown (DOM halo would wash out the Phaser rig drawn below it)', async () => {
+    const css = await readRepoText('src/game/dom/styles/mystic.css');
+    for (const skin of ['snake', 'ginger', 'tuxedo']) {
+      expect(css).toContain(`#ui-root.d4-live-bg.d4-live-${skin}-hero .d4-chars-halo`);
+    }
+  });
+
   it('ANIM-CAT-R6 uiHost toggles live hero classes for ginger and tuxedo and mystic.css hides their DOM portraits only', async () => {
     const root = document.createElement('div');
     let reduced = false;

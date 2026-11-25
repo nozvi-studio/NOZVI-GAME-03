@@ -2,6 +2,7 @@
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: SemVer (0.x until first public release).
 
 ## [Unreleased]
+- fix(ui): hide the Characters halo while a Rigby2D rig is live; the DOM halo painted a pale wash over the Phaser rig drawn below it (ANIM-CAT-R7).
 - feat(art,ui): Rigby2D animated heads for the cat skins `ginger` and `tuxedo` (idle/eat/dead on the board, poke/celebrate/denied on meta screens, dead on Game Over), via a per-skin rig registry (`RIGGED_SKINS`, `public/rigs/{ginger,tuxedo}/` from the animation lab) and per-skin durations in `balance.ui.snakeRig`; Loadout and Results new-best show the hero for any rigged skin; `pup`/`capy` keep the static fallback (ANIM-CAT-R1..R6).
 - feat(ui): Game Over overlay (GAMEOVER-R1..R5): "GAME OVER" title on top, dark backdrop, hero centered, bottom buttons "Play again" (mango-orange, quick restart via Results `again`) and "Continue" (ad placeholder, no revive yet) with a `juice.death.continueMs` 5 s countdown that turns it into "Result"; no auto-advance, humorous death line removed (owner 2026-11-25).
 - feat(art,ui): show the snake's Rigby2D `dead` clip centered above the DOM DeathCard (`HudScene` overlay rig aligned to the `death-hero` slot, Phaser dim `balance.ui.snakeRig.deathDimColor`/`deathDimAlpha` replaces the DOM frost so the rig stays sharp); static skin portrait in the same slot on Reduce Motion, non-WebGL or non-snake skins (`ANIM-SNAKE-R13`).
