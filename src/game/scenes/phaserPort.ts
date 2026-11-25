@@ -11,13 +11,13 @@ import { createHomeScreen } from '../dom/screens/homeScreen';
 import { loadoutScreen } from '../dom/screens/loadoutScreen';
 import { resultsScreen } from '../dom/screens/resultsScreen';
 import { settingsScreen } from '../dom/screens/settingsScreen';
-import type { PhaserPort, UiBridge } from '../dom/uiBridge';
+import type { MetaHeroAnim, MetaHeroPort, MetaHeroSlot, PhaserPort, UiBridge } from '../dom/uiBridge';
 import type { UiHost } from '../dom/uiHost';
 import { debugStartLevel, isDebug } from '../flow/debugFlag';
 import { installSummarize } from '../flow/installSummarize';
 import { goTo } from '../motion';
 import { t } from '../text';
-import { META_BG_KEY } from './MetaBgScene';
+import { META_BG_KEY, META_BG_READY_EVENT, type MetaBgScene } from './MetaBgScene';
 import { beginRun } from './ui';
 
 export function createPhaserPort(game: Phaser.Game): PhaserPort {
@@ -30,6 +30,29 @@ export function createPhaserPort(game: Phaser.Game): PhaserPort {
   // uiHost may sleep the Phaser loop while a DOM screen is up; loader and scene
   // transitions need ticks, so wake it before any Phaser work (else deadlock).
   const wake = (): void => { (game as { loop?: { wake?: () => void } }).loop?.wake?.(); };
+
+  // ANIM-SNAKE-R10 forward DOM hero slot rects and reactions to MetaBgScene's Rigby2D snake rig.
+  let pendingSlot: MetaHeroSlot | null = null;
+  const metaBgOf = (): MetaBgScene | null => {
+    const sc = game.scene.getScene(META_BG_KEY) as MetaBgScene | null | undefined;
+    return sc && typeof sc.setHeroSlot === 'function' ? sc : null;
+  };
+  game.events?.on?.(META_BG_READY_EVENT, () => {
+    if (pendingSlot) metaBgOf()?.setHeroSlot(pendingSlot);
+  });
+
+  const metaHero: MetaHeroPort = {
+    setSlot(slot: MetaHeroSlot | null): boolean {
+      pendingSlot = slot;
+      return metaBgOf()?.setHeroSlot(slot) ?? false;
+    },
+    play(anim: MetaHeroAnim, opts?: { loop?: boolean }): void {
+      metaBgOf()?.playHeroAnim(anim, opts);
+    },
+    isLive(): boolean {
+      return metaBgOf()?.isSnakeRigReady() ?? false;
+    },
+  };
 
   return {
     ensureSkins(skins: readonly SkinId[], done: () => void): void {
@@ -52,6 +75,7 @@ export function createPhaserPort(game: Phaser.Game): PhaserPort {
     emit(event: string): void {
       game.events.emit(event);
     },
+    metaHero,
   };
 }
 

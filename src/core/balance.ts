@@ -111,6 +111,7 @@ export interface Balance {
     /** ANIM-SNAKE-R1 Rigby2D snake-head timings and eat-prop sync numbers. */
     snakeRig: {
       designHeight: number;
+      metaHeadFrac: number; metaFeetFrac: number;
       idleMs: number; eatMs: number; deadMs: number; pokeMs: number; celebrateMs: number; deniedMs: number;
       eatProp: {
         mouthOffsetY: number; mangoOffsetY: number;
@@ -276,6 +277,7 @@ const SPEC: Spec = {
     hud: { rejectShakeMs: 'int+', rejectShakeAmpPx: 'num+', tipFactor: 'int+', bannerQueueMax: 'int+' },
     snakeRig: {
       designHeight: 'num+',
+      metaHeadFrac: 'prob', metaFeetFrac: 'prob',
       idleMs: 'int+', eatMs: 'int+', deadMs: 'int+', pokeMs: 'int+', celebrateMs: 'int+', deniedMs: 'int+',
       eatProp: {
         mouthOffsetY: 'num0', mangoOffsetY: 'num0',

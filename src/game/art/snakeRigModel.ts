@@ -177,3 +177,53 @@ export function rigWorldPoint(
 export function shouldUseSnakeRig(input: SnakeRigFallbackInput): boolean {
   return input.isWebGL && !input.reduced && input.skin === 'snake' && input.rigLoaded;
 }
+
+export interface DomRectLike {
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+export interface MetaHeroPlacement {
+  readonly x: number;
+  readonly feetY: number;
+  readonly scale: number;
+  readonly visible: boolean;
+}
+
+const HIDDEN_PLACEMENT: MetaHeroPlacement = { x: 0, feetY: 0, scale: 0, visible: false };
+
+/**
+ * ANIM-SNAKE-R8 map a DOM hero slot's bounding rect (in viewport CSS px) into Phaser game coordinates
+ * for an unzoomed overlay camera covering [0..gameW, 0..gameH], returning the rig feet origin and scale.
+ */
+export function metaHeroPlacement(
+  slotRect: DomRectLike | null | undefined,
+  canvasRect: DomRectLike | null | undefined,
+  gameW: number,
+  gameH: number,
+  cfg: SnakeRigConfig,
+): MetaHeroPlacement {
+  if (!slotRect || !canvasRect) return HIDDEN_PLACEMENT;
+  if (
+    slotRect.width <= 0 || slotRect.height <= 0 ||
+    canvasRect.width <= 0 || canvasRect.height <= 0 ||
+    gameW <= 0 || gameH <= 0 || cfg.designHeight <= 0
+  ) {
+    return HIDDEN_PLACEMENT;
+  }
+  const scaleX = gameW / canvasRect.width;
+  const scaleY = gameH / canvasRect.height;
+  const slotW = slotRect.width * scaleX;
+  const slotH = slotRect.height * scaleY;
+  const x = (slotRect.left + slotRect.width * 0.5 - canvasRect.left) * scaleX;
+  const feetY = (slotRect.top - canvasRect.top) * scaleY + slotH * cfg.metaFeetFrac;
+  const headPx = Math.min(slotW, slotH) * cfg.metaHeadFrac;
+  return {
+    x,
+    feetY,
+    scale: headPx / cfg.designHeight,
+    visible: true,
+  };
+}

@@ -152,6 +152,17 @@ export class BgLoop {
     return this.entry ? this.entry.time % this.fx.loopDuration : 0;
   }
 
+  /** ANIM-SNAKE-R9 display objects owned by BgLoop, so MetaBgScene's unzoomed hero camera can ignore them. */
+  get objects(): readonly Phaser.GameObjects.GameObject[] {
+    return [
+      this.bg,
+      this.glow,
+      this.skeleton as unknown as Phaser.GameObjects.GameObject,
+      this.sparkle,
+      ...this.fireflies.map((i) => i.sp),
+    ];
+  }
+
   setVisibleParts({ foliage, fireflies, glow }: { foliage?: boolean; fireflies?: boolean; glow?: boolean } = {}): void {
     if (foliage !== undefined) this.skeleton.setVisible(foliage);
     if (fireflies !== undefined) this.fireflies.forEach((i) => i.sp.setVisible(fireflies));

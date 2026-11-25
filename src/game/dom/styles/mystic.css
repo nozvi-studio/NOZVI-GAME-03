@@ -82,6 +82,12 @@ body.d4-mystic-band {
   display: none;
 }
 
+/* ANIM-SNAKE-R10: hide the DOM snake portrait image while the aligned Phaser Rigby2D snake rig is active,
+ * keeping the clickable hero box and ground shadow intact. */
+#ui-root.d4-live-bg.d4-live-snake-hero .d4-hero[data-qa="hero-snake"] .d4-hero-img {
+  opacity: 0;
+}
+
 .d4-mystic-bg {
   position: absolute;
   inset: 0;
@@ -936,6 +942,11 @@ body.d4-mystic-band {
 
 .d4-loadout.d4-mystic .d4-loadout-title .d4-mystic-title-svg {
   width: min(230px, 100%);
+}
+
+.d4-loadout.d4-mystic .d4-loadout-hero-wrap {
+  width: 52px;
+  justify-self: end;
 }
 
 .d4-loadout.d4-mystic .d4-loadout-slots {

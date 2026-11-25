@@ -1,8 +1,14 @@
 # STATUS - project memory
 
-**Updated:** 2026-11-24 **Milestone:** Mystic Aqua Marsh visual reskin + live Rigby2D animated meta background implemented on `feat/d4-art-direction-reskin` (stacked on `feat/d4-p5-ingame-harmonization`); **NOT merged** (`version/v0.3` untouched). **Version branches:** `version/v0.3` (P3/P4a), `version/v0.2` (P2 exit).
+**Updated:** 2026-11-25 **Milestone:** Rigby2D snake hero. **Branch stack:** `version/v0.3` <- `feat/d4-art-direction-reskin` (13 commits, unmerged) <- `feat/snake-rigby-head` (`9843631`, ANIM-SNAKE-R1..R7, committed) <- `feat/snake-rigby-meta` (same tip + uncommitted ANIM-SNAKE-R8..R12: 20 files + 2 new tests). **Version branches:** `version/v0.3` (P3/P4a), `version/v0.2` (P2 exit).
 
 ## Now (in progress)
+- [x] **Rigby2D snake head in gameplay (`feat/snake-rigby-head`, committed `9843631`):** animated head idle/eat/dead with static fallback (ANIM-SNAKE-R1..R7). Not merged into `feat/d4-art-direction-reskin` yet; `feat/snake-rigby-meta` builds on it.
+- [x] **Rigby2D Snake Hero on DOM Meta Screens (`feat/snake-rigby-meta`, uncommitted):**
+  - Added unzoomed `heroCam` overlay in `MetaBgScene` reusing `SnakeRig.createOverlay()` / `snakeRigModel` (`metaHeroPlacement`, `balance.ui.snakeRig.metaHeadFrac`/`metaFeetFrac`) aligned to DOM hero rects (`Home`, `Characters`, `Results` new best, `Loadout`) for the `snake` skin (`idle`, `poke`, `celebrate`, `denied`), driven via `MetaHeroPort` in `uiBridge`/`bridge`/`phaserPort` with zero Phaser imports in `src/game/dom/`.
+  - Hides only `.d4-hero[data-qa="hero-snake"] .d4-hero-img` when `#ui-root.d4-live-bg.d4-live-snake-hero` is active; falls back cleanly to DOM portrait on Reduce Motion, non-WebGL, or non-`snake` skins; sleeps automatically during `GameScene`.
+  - Verified `npm run typecheck` (0 errors) and full Vitest suite (`253 passed | 1 skipped`, `2035 passed`).
+- [ ] **Blocked on `vite build` & headless Chrome QA (`feat/snake-rigby-meta`):** `node_modules/.bin` and `node_modules/@rolldown/binding-win32-x64-msvc/package.json` are missing in the workspace (last modified externally at 23:52), blocking `vite build` / `vite` dev server until `npm install` is run by the owner.
 - [x] **Mystic Aqua Marsh Reskin + Animated `MetaBgScene` (`feat/d4-art-direction-reskin`):**
   - Reskinned all 5 DOM meta screens (`Home`, `Settings`, `Characters`, `Results`, `Loadout`), in-game overlays (`Countdown`, `Pause`, `DeathCard`), and 6-biome Phaser gameplay board/HUD (`Aqua Marsh`, `Berry Jelly`, `Mint Frost`, `Sunny Pop`, `Indigo Plaza`, `Cosmic Fruit`).
   - Integrated Rigby2D animated Aqua Marsh background (`MetaBgScene`, `BgLoop`, `coverFit`, vendored `src/game/vendor/rigby2d/rigby2d-phaser-0.5.1.mjs`, `public/bg/marsh-loop/`) running continuously across all 5 DOM meta screens, sleeping during `GameScene`, and falling back to static `aqua-marsh.webp` on Reduce Motion or non-WebGL (`META-BG-R1..R7`).
@@ -27,4 +33,5 @@
 - `git checkout` / `git commit` / `npm install` require `BypassSandbox: true` on Windows due to `.git/` lock & npm cache permissions.
 
 ## Last session summary
-- 2026-11-24: Integrated Rigby2D animated Aqua Marsh background (`MetaBgScene`, `src/game/bg/bgLoop.ts`, `coverFit.ts`, `src/game/vendor/rigby2d/`, `public/bg/marsh-loop/`) across all 5 DOM meta screens on `feat/d4-art-direction-reskin` with live Reduce Motion / non-WebGL fallback and automatic sleep during `GameScene`. Verified with full Vitest suite, `tsc --noEmit`, `vite build`, and headless Chrome QA (`tmp/qa/meta-bg/`).
+- 2026-11-25: Status review only (no code). Confirmed branch stack above; `node_modules/.bin` still missing (owner `npm install` needed); GitNexus index refreshed. Untracked `docs/design/mystic/challenge/` is not yet documented.
+- 2026-11-24: Implemented Rigby2D snake head on DOM meta screens (`ANIM-SNAKE-R8..R12`) on `feat/snake-rigby-meta` (uncommitted): extended `snakeRigModel`/`SnakeRig` with `metaHeroPlacement` + `createOverlay`/`updateOverlay`, added unzoomed `heroCam` overlay in `MetaBgScene`, wired `MetaHeroPort` through `uiBridge`/`bridge`/`phaserPort`/`uiHost`/`main`, bound `Home`/`Characters`/`Results`/`Loadout`, updated `CODEMAP`/`CHANGELOG`/`DECISIONS`, and verified `tsc --noEmit` + full Vitest suite (2035 passed). `vite build` and headless Chrome QA are blocked on missing `node_modules/.bin` and `@rolldown/binding-win32-x64-msvc/package.json` (needs owner `npm install`).

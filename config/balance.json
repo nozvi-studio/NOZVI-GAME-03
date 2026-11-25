@@ -96,6 +96,7 @@
     , "hud": { "rejectShakeMs": 200, "rejectShakeAmpPx": 6, "tipFactor": 2, "bannerQueueMax": 4 }
     , "snakeRig": {
       "designHeight": 200,
+      "metaHeadFrac": 0.84, "metaFeetFrac": 0.92,
       "idleMs": 2000, "eatMs": 740, "deadMs": 1350, "pokeMs": 500, "celebrateMs": 670, "deniedMs": 430,
       "eatProp": {
         "mouthOffsetY": 54, "mangoOffsetY": 28,

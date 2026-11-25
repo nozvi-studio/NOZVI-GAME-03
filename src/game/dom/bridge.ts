@@ -101,6 +101,7 @@ export function createUiBridge(deps: UiBridgeDeps): UiBridge {
     synth: deps.synth,
     t: deps.t,
     overlays,
+    metaHero: deps.port.metaHero,
     open(id: ScreenId, params?: Record<string, unknown>): symbol {
       const render = deps.screens[id];
       if (!render) throw new Error(`no screen: ${id}`);

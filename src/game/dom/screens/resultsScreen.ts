@@ -1,9 +1,11 @@
 // D4-P4-R1 Results DOM screen over resultsView (Aqua Marsh Mystic concept, stats-only, odometer, confetti). Pure: no Phaser.
 import { biome } from '../../../core';
+import { activeSkin } from '../../art/skins';
 import { resultsView } from '../../flow/resultsView';
 import { countUp, isReducedMotion, staggerEnter } from '../animate';
 import { systemClock } from '../clock';
 import { burstConfetti } from '../confetti';
+import { createHeroStage, type HeroStage } from '../heroStage';
 import { icon } from '../icons';
 import { MOTION } from '../motionTokens';
 import { mountMysticBackdrop } from '../mysticBackdrop';
@@ -38,7 +40,7 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
 
   const top = el('div', 'd4-results-top');
 
-  // Outcome bubble (character portrait temporarily removed for clean stats focus)
+  // Outcome bubble (+ compact celebrating snake hero slot on new best when snake skin is active)
   const stage = el('section', 'd4-results-stage', { 'data-qa': 'results-stage' });
   const isWin = v?.titleKey === 'results.youWin';
   const isGold = v?.bestChip.gold === true;
@@ -51,6 +53,12 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
     bubble.textContent = t('results.gameOver');
   }
   stage.append(bubble);
+  let hero: HeroStage | null = null;
+  if (isGold && activeSkin() === 'snake') {
+    const heroWrap = el('div', 'd4-results-hero-wrap');
+    hero = createHeroStage(heroWrap, { skin: 'snake', mode: 'portrait', interactive: false, clock });
+    stage.append(heroWrap);
+  }
 
   // Outcome Display Title (chunky SVG)
   const titleText = isWin ? t('results.d4.victory') : isGold ? t('results.d4.newBest') : t('results.d4.gameOver');
@@ -165,6 +173,11 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
   screen.append(navBar, top, stats, rows, footer);
   const disposeBackdrop = mountMysticBackdrop(screen);
   root.appendChild(screen);
+  // ANIM-SNAKE-R11 sync new-best snake hero slot to MetaBgScene and play celebrate on gold reveal.
+  if (hero) {
+    const h = hero;
+    bridge.metaHero?.setSlot({ skin: 'snake', readRect: () => h.el.getBoundingClientRect() });
+  }
 
   const targetScore = v?.score ?? 0;
   let confettiTimer: number | null = null;
@@ -172,6 +185,8 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
   if (isGold) {
     const fireGold = (): void => {
       synth.play('unlock');
+      hero?.react('celebrate');
+      bridge.metaHero?.play('celebrate');
       const r = stage.getBoundingClientRect();
       confettiDisposers.push(burstConfetti(stage, r.width / 2 || 140, r.height / 2 || 40));
     };
@@ -193,6 +208,10 @@ export const resultsScreen: ScreenRender = (root, ctx) => {
     cancelCount();
     if (confettiTimer !== null) clock.clearTimeout(confettiTimer);
     document.removeEventListener('keydown', onKeyDown);
+    if (hero) {
+      bridge.metaHero?.setSlot(null);
+      hero.destroy();
+    }
     for (const d of confettiDisposers) d();
     disposeBackdrop();
     screen.remove();
